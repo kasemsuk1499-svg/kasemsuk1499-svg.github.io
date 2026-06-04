@@ -1531,7 +1531,7 @@
 
 
     /* SITE LOGO / โลโก้เว็บ */
-    /* 🟨 จุดแก้โลโก้เว็บ 1: ขนาด/กรอบ/ตำแหน่งโลโก้มุมซ้าย แก้ CSS ชุดนี้ได้ */
+    /* 🟨 จุดแก้โลโก้เว็บ 1: ระบบโลโก้แบบใส่รูปขนาดเดิมซ้ำได้ตลอด */
     .site-brand {
       display: flex;
       align-items: center;
@@ -1539,33 +1539,68 @@
       min-width: 0;
     }
     .site-logo-box {
-      width: var(--site-logo-width, 280px);
-      max-width: min(74vw, 360px);
-      min-height: var(--site-logo-min-height, 72px);
+      width: min(var(--site-logo-width, 320px), 78vw);
+      height: var(--site-logo-height, 96px);
+      min-height: var(--site-logo-min-height, 76px);
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      border-radius: 1.25rem;
+      justify-content: center;
+      padding: var(--site-logo-padding, 6px);
+      border-radius: var(--site-logo-radius, 22px);
       overflow: hidden;
+      position: relative;
+      isolation: isolate;
+      background:
+        linear-gradient(145deg, rgba(15,23,42,.62), rgba(2,6,23,.34)),
+        radial-gradient(circle at 22% 0%, rgba(103,232,249,.20), transparent 55%),
+        radial-gradient(circle at 85% 100%, rgba(167,139,250,.18), transparent 55%);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow:
+        0 14px 34px rgba(0,0,0,.38),
+        0 0 0 1px rgba(255,255,255,.06),
+        inset 0 0 18px rgba(255,255,255,.05);
+    }
+    .site-logo-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(120deg, transparent 0 38%, rgba(255,255,255,.12) 50%, transparent 64%);
+      transform: translateX(-120%) skewX(-18deg);
+      animation: siteLogoSoftShine 4.8s ease-in-out infinite;
+      z-index: 2;
     }
     .site-logo-img {
       width: 100%;
-      max-height: var(--site-logo-height, 82px);
-      object-fit: contain;
-      object-position: left center;
+      height: 100%;
+      object-fit: var(--site-logo-fit, cover);
+      object-position: var(--site-logo-position, center center);
       display: block;
-      filter: drop-shadow(0 10px 22px rgba(0,0,0,.45));
+      border-radius: calc(var(--site-logo-radius, 22px) - 7px);
+      background: rgba(2,6,23,.45);
+      filter: saturate(1.10) contrast(1.04) drop-shadow(0 10px 22px rgba(0,0,0,.42));
     }
     .site-logo-fallback {
-      font-size: clamp(1.9rem, 5vw, 3.2rem);
+      font-size: clamp(1.65rem, 4.7vw, 3rem);
       font-weight: 1000;
       line-height: .95;
       letter-spacing: -.04em;
+      text-shadow: 0 8px 22px rgba(0,0,0,.42);
+    }
+    @keyframes siteLogoSoftShine {
+      0%, 58% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+      68% { opacity: 1; }
+      86%, 100% { transform: translateX(120%) skewX(-18deg); opacity: 0; }
     }
     @media (max-width: 768px) {
       .site-brand { align-items: flex-start; }
-      .site-logo-box { --site-logo-width: 230px; --site-logo-min-height: 58px; }
-      .site-logo-img { --site-logo-height: 66px; }
+      .site-logo-box {
+        --site-logo-width: 258px;
+        --site-logo-height: 78px;
+        --site-logo-min-height: 68px;
+        --site-logo-padding: 5px;
+        --site-logo-radius: 18px;
+      }
     }
 
     /* CARD REVEAL SCROLL AXIS FIX / ล็อกการเลื่อนตอนกดดูการ์ดให้ขึ้นลงอย่างเดียว */
@@ -1612,6 +1647,254 @@
 
 
     button, input, select { outline: none; }
+
+
+    /* WEBSITE THEME CONFIG CSS / ระบบเปลี่ยนธีมเว็บจากจุดเดียว */
+    /* 🟨 จุดแก้ธีม A: ค่าจริงถูกส่งมาจาก WEBSITE_THEME_CONFIG ใน JavaScript */
+    :root {
+      --theme-page-bg: radial-gradient(circle at top, #26345f 0%, #111827 45%, #020617 100%);
+      --theme-bg-image: none;
+      --theme-bg-image-opacity: .34;
+      --theme-bg-image-blur: 0px;
+      --theme-bg-image-scale: 1.04;
+      --theme-bg-dim: rgba(2, 6, 23, .58);
+      --theme-window-bg: rgba(15, 23, 42, .80);
+      --theme-window-bg-strong: rgba(2, 6, 23, .88);
+      --theme-window-border: rgba(255, 255, 255, .12);
+      --theme-window-glow: rgba(0, 0, 0, .35);
+      --theme-main-text: #ffffff;
+      --theme-muted-text: #cbd5e1;
+      --theme-title-text: #ffffff;
+      --theme-input-bg: rgba(2, 6, 23, .62);
+      --theme-input-border: rgba(255, 255, 255, .16);
+      --theme-input-text: #ffffff;
+      --theme-input-placeholder: rgba(203, 213, 225, .62);
+      --theme-button-bg: #22d3ee;
+      --theme-button-bg-hover: #67e8f9;
+      --theme-button-text: #020617;
+      --theme-button-secondary-bg: rgba(51, 65, 85, .92);
+      --theme-button-secondary-hover: rgba(71, 85, 105, .96);
+      --theme-button-secondary-text: #ffffff;
+      --theme-danger-bg: #ef4444;
+      --theme-danger-hover: #f87171;
+      --theme-success-bg: #22c55e;
+      --theme-success-hover: #4ade80;
+      --theme-radius: 18px;
+    }
+
+    body.theme-custom {
+      position: relative;
+      isolation: isolate;
+      color: var(--theme-main-text) !important;
+      background: var(--theme-page-bg) !important;
+      overflow-x: hidden;
+    }
+    body.theme-custom::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background-image: var(--theme-bg-image);
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      opacity: var(--theme-bg-image-opacity);
+      filter: blur(var(--theme-bg-image-blur));
+      transform: scale(var(--theme-bg-image-scale));
+      will-change: transform, filter, opacity;
+    }
+    body.theme-custom::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background: var(--theme-bg-dim);
+    }
+
+    body.theme-custom .glass,
+    body.theme-custom .game-announcement-panel,
+    body.theme-custom .online-friend-reveal-panel,
+    body.theme-custom .luxury-card-reveal-meta,
+    body.theme-custom .classic-card-reveal-meta,
+    body.theme-custom .modal-panel,
+    body.theme-custom [class*="bg-slate-900"],
+    body.theme-custom [class*="bg-slate-800"] {
+      background: var(--theme-window-bg) !important;
+      border-color: var(--theme-window-border) !important;
+      box-shadow: 0 20px 60px var(--theme-window-glow) !important;
+      border-radius: var(--theme-radius);
+    }
+
+    body.theme-custom input,
+    body.theme-custom select,
+    body.theme-custom textarea {
+      background: var(--theme-input-bg) !important;
+      border-color: var(--theme-input-border) !important;
+      color: var(--theme-input-text) !important;
+      caret-color: var(--theme-input-text) !important;
+    }
+    body.theme-custom input::placeholder,
+    body.theme-custom textarea::placeholder {
+      color: var(--theme-input-placeholder) !important;
+    }
+
+    body.theme-custom h1,
+    body.theme-custom h2,
+    body.theme-custom h3,
+    body.theme-custom .font-black,
+    body.theme-custom .font-extrabold {
+      color: var(--theme-title-text);
+    }
+    body.theme-custom .text-slate-100,
+    body.theme-custom .text-slate-200,
+    body.theme-custom .text-white {
+      color: var(--theme-main-text) !important;
+    }
+    body.theme-custom .text-slate-300,
+    body.theme-custom .text-slate-400,
+    body.theme-custom .text-white\/70,
+    body.theme-custom .text-white\/80 {
+      color: var(--theme-muted-text) !important;
+    }
+
+    /* ปุ่มหลัก: ครอบคลุมปุ่มสีฟ้า/น้ำเงิน/ม่วงที่ใช้ในหน้าเว็บ */
+    body.theme-custom button.bg-cyan-400,
+    body.theme-custom button.bg-cyan-500,
+    body.theme-custom button.bg-blue-500,
+    body.theme-custom button.bg-blue-600,
+    body.theme-custom button.bg-indigo-500,
+    body.theme-custom button.bg-violet-500,
+    body.theme-custom .theme-primary-button {
+      background: var(--theme-button-bg) !important;
+      color: var(--theme-button-text) !important;
+    }
+    body.theme-custom button.bg-cyan-400:hover,
+    body.theme-custom button.bg-cyan-500:hover,
+    body.theme-custom button.bg-blue-500:hover,
+    body.theme-custom button.bg-blue-600:hover,
+    body.theme-custom button.bg-indigo-500:hover,
+    body.theme-custom button.bg-violet-500:hover,
+    body.theme-custom .theme-primary-button:hover {
+      background: var(--theme-button-bg-hover) !important;
+    }
+
+    /* ปุ่มรอง: ปุ่มเทา/เข้ม เช่น ปิด กลับ ยกเลิก */
+    body.theme-custom button.bg-slate-600,
+    body.theme-custom button.bg-slate-700,
+    body.theme-custom button.bg-slate-800,
+    body.theme-custom button.bg-white\/10,
+    body.theme-custom .theme-secondary-button {
+      background: var(--theme-button-secondary-bg) !important;
+      color: var(--theme-button-secondary-text) !important;
+    }
+    body.theme-custom button.bg-slate-600:hover,
+    body.theme-custom button.bg-slate-700:hover,
+    body.theme-custom button.bg-slate-800:hover,
+    body.theme-custom button.bg-white\/10:hover,
+    body.theme-custom .theme-secondary-button:hover {
+      background: var(--theme-button-secondary-hover) !important;
+    }
+
+    /* ปุ่มแดง/เขียว */
+    body.theme-custom button.bg-red-500,
+    body.theme-custom button.bg-red-600 {
+      background: var(--theme-danger-bg) !important;
+      color: #fff !important;
+    }
+    body.theme-custom button.bg-red-500:hover,
+    body.theme-custom button.bg-red-600:hover {
+      background: var(--theme-danger-hover) !important;
+    }
+    body.theme-custom button.bg-emerald-500,
+    body.theme-custom button.bg-green-500,
+    body.theme-custom button.bg-green-600 {
+      background: var(--theme-success-bg) !important;
+      color: #02130a !important;
+    }
+    body.theme-custom button.bg-emerald-500:hover,
+    body.theme-custom button.bg-green-500:hover,
+    body.theme-custom button.bg-green-600:hover {
+      background: var(--theme-success-hover) !important;
+    }
+
+    body.theme-custom .site-logo-box {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.03)),
+        var(--theme-window-bg) !important;
+      border-color: var(--theme-window-border) !important;
+    }
+
+
+    /* ANIME CARD COLLECTION LOGO THEME / ปรับโทนสีทั้งเว็บให้เข้ากับโลโก้เกม */
+    body.theme-custom .glass,
+    body.theme-custom section.glass,
+    body.theme-custom header .glass {
+      border: 1px solid rgba(103, 232, 249, .22) !important;
+      box-shadow:
+        0 18px 50px rgba(0,0,0,.42),
+        0 0 26px rgba(34,211,238,.10),
+        inset 0 0 18px rgba(255,255,255,.035) !important;
+    }
+    body.theme-custom .site-logo-box {
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.10),
+        0 0 24px rgba(34,211,238,.24),
+        0 0 42px rgba(168,85,247,.16),
+        inset 0 0 18px rgba(255,255,255,.06) !important;
+    }
+    body.theme-custom .text-cyan-200,
+    body.theme-custom .text-cyan-300,
+    body.theme-custom .text-sky-300 {
+      color: #67e8f9 !important;
+      text-shadow: 0 0 12px rgba(34,211,238,.25);
+    }
+    body.theme-custom .text-fuchsia-300,
+    body.theme-custom .text-purple-300,
+    body.theme-custom .text-violet-300 {
+      color: #d8b4fe !important;
+      text-shadow: 0 0 12px rgba(168,85,247,.25);
+    }
+    body.theme-custom .text-amber-300,
+    body.theme-custom .text-yellow-300 {
+      color: #fde68a !important;
+      text-shadow: 0 0 12px rgba(251,191,36,.22);
+    }
+    body.theme-custom .text-emerald-300,
+    body.theme-custom .text-green-300 {
+      color: #5eead4 !important;
+      text-shadow: 0 0 12px rgba(20,184,166,.20);
+    }
+    body.theme-custom button.bg-amber-400,
+    body.theme-custom button.bg-amber-500,
+    body.theme-custom button.bg-yellow-400,
+    body.theme-custom button.bg-fuchsia-500,
+    body.theme-custom button.bg-purple-500,
+    body.theme-custom button.bg-pink-500 {
+      background: var(--theme-button-bg) !important;
+      color: var(--theme-button-text) !important;
+      box-shadow: 0 0 18px rgba(34,211,238,.14), inset 0 0 12px rgba(255,255,255,.16) !important;
+    }
+    body.theme-custom button {
+      transition: transform .18s ease, filter .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    body.theme-custom button:hover {
+      filter: brightness(1.08) saturate(1.08);
+      box-shadow: 0 0 20px rgba(103,232,249,.16), inset 0 0 12px rgba(255,255,255,.14);
+    }
+    body.theme-custom input:focus,
+    body.theme-custom select:focus,
+    body.theme-custom textarea:focus {
+      border-color: rgba(103,232,249,.55) !important;
+      box-shadow: 0 0 0 1px rgba(103,232,249,.26), 0 0 18px rgba(34,211,238,.12) !important;
+    }
+    body.theme-custom .rounded-3xl,
+    body.theme-custom .rounded-2xl,
+    body.theme-custom .rounded-xl {
+      border-color: rgba(103,232,249,.16);
+    }
+
   </style>
 </head>
 <body>
@@ -2001,15 +2284,79 @@
     // 1) อัปโหลดรูปไว้บน GitHub / Discord / imgbb / Firebase Storage หรือที่ฝากรูปอื่น
     // 2) คัดลอกลิงก์รูปมาใส่ใน logoUrl
     // 3) ถ้าไม่ใส่ logoUrl ระบบจะแสดง fallbackTitle เป็นตัวหนังสือแทน
-    // แนะนำไฟล์โลโก้: PNG พื้นหลังโปร่งใส ขนาดประมาณ 600x180 หรือ 900x260
+    // แนะนำไฟล์โลโก้: ใช้ภาพแนวเดียวกับตัวอย่างนี้ได้เลย ระบบจะครอป/จัดกลางให้พอดีอัตโนมัติ
+
+
+    // ======================================================================
+    // 🟨 จุดแก้ 0.5: ธีมสีทั้งเว็บ + รูปพื้นหลังเว็บ
+    // ======================================================================
+    // วิธีใช้แบบง่าย:
+    // - อยากเปลี่ยนสีเว็บ แก้ค่าสีด้านล่างนี้ได้เลย
+    // - อยากใส่รูปพื้นหลัง ให้ใส่ URL ที่ backgroundImageUrl
+    // - ถ้าภาพพื้นหลังแยงตา ให้เพิ่ม backgroundBlurPx หรือ backgroundDarkOverlay
+    // - ถ้าไม่อยากใช้รูปพื้นหลัง ให้เว้น backgroundImageUrl เป็น ""
+    const WEBSITE_THEME_CONFIG = {
+      enabled: true,
+
+      // พื้นหลังเว็บหลักโทนเดียวกับโลโก้เกม: ดำ / น้ำเงิน / ม่วง / ฟ้าไซเบอร์ / ทอง
+      pageBackground: "radial-gradient(circle at 12% 0%, rgba(103,232,249,.34) 0%, transparent 29%), radial-gradient(circle at 88% 6%, rgba(217,70,239,.28) 0%, transparent 30%), radial-gradient(circle at 50% 100%, rgba(251,191,36,.16) 0%, transparent 34%), linear-gradient(135deg, #020617 0%, #07111f 34%, #11103a 67%, #020617 100%)",
+
+      // 🟨 ใส่รูปพื้นหลังเว็บตรงนี้ เช่น "https://example.com/bg.jpg"
+      backgroundImageUrl: "https://tenor.com/lIInTBxrbk7.gif",
+      backgroundImageOpacity: 0.28,      // 0 = มองไม่เห็นรูป, 1 = ชัดสุด
+      backgroundBlurPx: 4,              // ยิ่งมากยิ่งเบลอ แนะนำ 2-8
+      backgroundScale: 1.06,            // กันขอบเบลอแตก แนะนำ 1.03-1.10
+      backgroundDarkOverlay: "linear-gradient(180deg, rgba(2,6,23,.46), rgba(2,6,23,.74))", // ชั้นทับมืดเพื่อให้อ่านง่าย
+
+      // สีหน้าต่าง/กล่อง UI
+      windowBackground: "linear-gradient(145deg, rgba(7, 17, 31, .88), rgba(24, 15, 55, .78))",
+      windowBackgroundStrong: "linear-gradient(145deg, rgba(2, 6, 23, .94), rgba(19, 12, 43, .90))",
+      windowBorder: "rgba(103, 232, 249, .24)",
+      windowShadow: "rgba(14, 165, 233, .18)",
+      windowRadiusPx: 22,
+
+      // สีข้อความ
+      mainTextColor: "#f8fbff",
+      titleTextColor: "#e0faff",
+      mutedTextColor: "#b6c6e7",
+
+      // ช่องใส่ข้อความ / select / textarea
+      inputBackground: "rgba(2, 6, 23, .72)",
+      inputBorder: "rgba(103, 232, 249, .26)",
+      inputTextColor: "#f8fbff",
+      inputPlaceholderColor: "rgba(182, 198, 231, .62)",
+
+      // ปุ่มหลัก เช่น ปุ่มเข้าเกม / ยืนยัน / เปิดกาชา
+      primaryButtonBackground: "linear-gradient(135deg, #22d3ee 0%, #a855f7 56%, #fbbf24 100%)",
+      primaryButtonHover: "linear-gradient(135deg, #67e8f9 0%, #c084fc 52%, #fde68a 100%)",
+      primaryButtonText: "#020617",
+
+      // ปุ่มรอง เช่น ปุ่มกลับ / ปิด / ยกเลิก
+      secondaryButtonBackground: "linear-gradient(135deg, rgba(15, 23, 42, .96), rgba(49, 24, 86, .84))",
+      secondaryButtonHover: "linear-gradient(135deg, rgba(30, 41, 59, .98), rgba(88, 28, 135, .90))",
+      secondaryButtonText: "#eef8ff",
+
+      // ปุ่มสถานะพิเศษ
+      dangerButtonBackground: "linear-gradient(135deg, #be123c, #ef4444)",
+      dangerButtonHover: "linear-gradient(135deg, #e11d48, #fb7185)",
+      successButtonBackground: "linear-gradient(135deg, #14b8a6, #22d3ee)",
+      successButtonHover: "linear-gradient(135deg, #2dd4bf, #67e8f9)"
+    };
+
     const SITE_HEADER_CONFIG = {
       logoUrl: "https://i.pinimg.com/736x/ce/78/96/ce7896432da77556f4d9f7485e836f1d.jpg", // 🟨 ใส่ URL รูปโลโก้ตรงนี้ เช่น "https://example.com/my-logo.png"
-      logoAlt: "Gacha Card Collection Logo",
-      fallbackTitle: "Gacha Card Collection",
+      logoAlt: "Anime Card Collection Logo",
+      fallbackTitle: "Anime Card Collection",
       subtitle: "Ver 1.0.1 COLLAB JuJutsu Kaisen",
       hintText: "koyun", // 🟨 ถ้าอยากให้มีข้อความเล็กใต้หัวเว็บ ให้ใส่ข้อความตรงนี้
-      logoWidthPx: 280,
-      logoHeightPx: 82
+
+      // 🟨 จุดแก้ขนาดโลโก้: อนาคตถ้าใช้ภาพสัดส่วนเดียวกัน แก้แค่ logoUrl ก็พอ
+      logoWidthPx: 320,
+      logoHeightPx: 96,
+      logoFit: "cover",        // cover = เต็มกรอบสวย / contain = เห็นภาพครบไม่ครอป
+      logoPosition: "center center",
+      logoPaddingPx: 6,
+      logoRadiusPx: 22
     };
 
     /*
@@ -6773,6 +7120,47 @@ function closeCardModal() {
       console.groupEnd();
     }
 
+
+
+    function applyWebsiteTheme() {
+      if (typeof WEBSITE_THEME_CONFIG === "undefined" || !WEBSITE_THEME_CONFIG.enabled) return;
+      const root = document.documentElement;
+      const cfg = WEBSITE_THEME_CONFIG;
+      document.body.classList.add("theme-custom");
+
+      const setVar = (name, value) => {
+        if (value !== undefined && value !== null && value !== "") root.style.setProperty(name, String(value));
+      };
+      setVar("--theme-page-bg", cfg.pageBackground);
+      root.style.setProperty("--theme-bg-image", cfg.backgroundImageUrl && cfg.backgroundImageUrl.trim() ? `url("${cfg.backgroundImageUrl.trim()}")` : "none");
+      setVar("--theme-bg-image-opacity", cfg.backgroundImageOpacity);
+      setVar("--theme-bg-image-blur", (cfg.backgroundBlurPx ?? 0) + "px");
+      setVar("--theme-bg-image-scale", cfg.backgroundScale ?? 1.04);
+      setVar("--theme-bg-dim", cfg.backgroundDarkOverlay);
+      setVar("--theme-window-bg", cfg.windowBackground);
+      setVar("--theme-window-bg-strong", cfg.windowBackgroundStrong);
+      setVar("--theme-window-border", cfg.windowBorder);
+      setVar("--theme-window-glow", cfg.windowShadow);
+      setVar("--theme-main-text", cfg.mainTextColor);
+      setVar("--theme-muted-text", cfg.mutedTextColor);
+      setVar("--theme-title-text", cfg.titleTextColor);
+      setVar("--theme-input-bg", cfg.inputBackground);
+      setVar("--theme-input-border", cfg.inputBorder);
+      setVar("--theme-input-text", cfg.inputTextColor);
+      setVar("--theme-input-placeholder", cfg.inputPlaceholderColor);
+      setVar("--theme-button-bg", cfg.primaryButtonBackground);
+      setVar("--theme-button-bg-hover", cfg.primaryButtonHover);
+      setVar("--theme-button-text", cfg.primaryButtonText);
+      setVar("--theme-button-secondary-bg", cfg.secondaryButtonBackground);
+      setVar("--theme-button-secondary-hover", cfg.secondaryButtonHover);
+      setVar("--theme-button-secondary-text", cfg.secondaryButtonText);
+      setVar("--theme-danger-bg", cfg.dangerButtonBackground);
+      setVar("--theme-danger-hover", cfg.dangerButtonHover);
+      setVar("--theme-success-bg", cfg.successButtonBackground);
+      setVar("--theme-success-hover", cfg.successButtonHover);
+      setVar("--theme-radius", (cfg.windowRadiusPx || 18) + "px");
+    }
+
     function renderSiteHeader() {
       const logoBox = document.getElementById("siteLogoBox");
       const logoImg = document.getElementById("siteLogoImage");
@@ -6781,11 +7169,15 @@ function closeCardModal() {
       const hint = document.getElementById("siteHeaderHintText");
 
       if (logoBox) {
-        logoBox.style.setProperty("--site-logo-width", (SITE_HEADER_CONFIG.logoWidthPx || 280) + "px");
-        logoBox.style.setProperty("--site-logo-min-height", Math.max(56, (SITE_HEADER_CONFIG.logoHeightPx || 82) - 10) + "px");
+        logoBox.style.setProperty("--site-logo-width", (SITE_HEADER_CONFIG.logoWidthPx || 320) + "px");
+        logoBox.style.setProperty("--site-logo-height", (SITE_HEADER_CONFIG.logoHeightPx || 96) + "px");
+        logoBox.style.setProperty("--site-logo-min-height", Math.max(58, (SITE_HEADER_CONFIG.logoHeightPx || 96) - 20) + "px");
+        logoBox.style.setProperty("--site-logo-padding", (SITE_HEADER_CONFIG.logoPaddingPx ?? 6) + "px");
+        logoBox.style.setProperty("--site-logo-radius", (SITE_HEADER_CONFIG.logoRadiusPx || 22) + "px");
       }
       if (logoImg) {
-        logoImg.style.setProperty("--site-logo-height", (SITE_HEADER_CONFIG.logoHeightPx || 82) + "px");
+        logoImg.style.setProperty("--site-logo-fit", SITE_HEADER_CONFIG.logoFit || "cover");
+        logoImg.style.setProperty("--site-logo-position", SITE_HEADER_CONFIG.logoPosition || "center center");
         logoImg.alt = SITE_HEADER_CONFIG.logoAlt || "Game Logo";
         if (SITE_HEADER_CONFIG.logoUrl && SITE_HEADER_CONFIG.logoUrl.trim()) {
           logoImg.onerror = function() {
@@ -6819,6 +7211,7 @@ function closeCardModal() {
     });
 
     if (GAME_CONFIG.runDeveloperTests) runDeveloperTests();
+    applyWebsiteTheme();
     renderSiteHeader();
     renderAll();
     openGameAnnouncement();
