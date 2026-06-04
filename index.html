@@ -2087,12 +2087,19 @@
         description: "ตู้เพิ่มโอกาส EX และเพิ่มน้ำหนัก ",
         image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzlpczh3dXU5OWs5aDI5bGdrM2VhazNicWRubmx3bHA2ZHhkeXYweSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RMw1DhEAwx5ZK/giphy.gif",
         images: [
-          "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdG15aG1yd2VtcjRhcHF4eTB2aDliZm50aTk0ZmNpOXVoaXBiaWFsaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/85ZqBuB8RhFgi6Yp4c/giphy.gif", "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDFudmRhemdpM2t4OGxybnh6cGtkY3VmNWt0MmMxMW9haGdmbnhubyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UhwiXeVJewXUaXgWRy/giphy.gif", "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGVpcWtjbHQzODJndG9wbGNsbzF6bHU2MndzanI3dXBkbmNvazQ0ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oLREIsYjAGKR0D2Qlp/giphy.gif", "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMW5yMTJrMm5wNWVpc3V2MjNmaG9xZnc0cWp1b2N0NDdqcXBicXVtbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tnVg7YjP7GUFxu2ynz/giphy.gif"
+          "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdG15aG1yd2VtcjRhcHF4eTB2aDliZm50aTk0ZmNpOXVoaXBiaWFsaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/85ZqBuB8RhFgi6Yp4c/giphy.gif", "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDFudmRhemdpM2t4OGxybnh6cGtkY3VmNWt0MmMxMW9haGdmbnhubyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UhwiXeVJewXUaXgWRy/giphy.gif", "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanVwc2huZzJxMWF1djFsMzdka2F5M3A2a3djdW1obTMxdjhpOTd1cSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oLREIsYjAGKR0D2Qlp/giphy.gif", "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG5xcnQzaTZ2ZHg3eWkzdHEzb3N6ODdxdzFna3VkeWt2bXlyMzVsMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tnVg7YjP7GUFxu2ynz/giphy.gif"
         ],
         singlePullCost: 150000,
         tenPullCost: 1500000,
         rateOverrides: { N: 42, R: 28, SR: 18, SSR: 8, UR: 3.2, LR: 0.8, EX: 0.7, SC: 0.003 },
-        rateUpCards: { 38: 5, 39: 5, 40: 5, 41: 5 }
+        rateUpCards: { 38: 5, 39: 5, 40: 5, 41: 5 },
+        guarantee: {
+          enabled: true,
+          every: 1000,
+          rarityRates: { EX: 100 },
+          cardRates: { 38: 25, 39: 25, 40: 25, 41: 25 },
+          resetWhenPullRarities: ["EX"]
+        }
       },
       {
         id: "standard",
@@ -2135,7 +2142,7 @@
       { id: 1000, name: "Great Magician", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanNhNjVhdzBpenNkYzF0Ym1remp0a2gwOGxwdTZ3eTJqOTczMXJ6ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LrD6vVo630JiYOhrTU/giphy.gif" },
       { id: 38, name: "EX Frieren", rarity: "EX", element: "Awaken Ligth", power: 28000, incomePerSec: 2400, upgradeDustBase: 7000, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDNzc2lnb3ZwY3RmcHZtMTYwaGUwN2VmcWpnb3dmMGpvNG85ZXpqdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/85ZqBuB8RhFgi6Yp4c/giphy.gif" },
       { id: 39, name: "EX Fern", rarity: "EX", element: "Awaken Ligth", power: 27500, incomePerSec: 2350, upgradeDustBase: 6900, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWtkbXV2eWhsM3BlNmJjcG12Z3Fsb2U3YWV5amRoczkyYjhxZzVqaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UhwiXeVJewXUaXgWRy/giphy.gif" },
-      { id: 40, name: "EX Stark", rarity: "EX", element: "Awaken Fire", power: 27200, incomePerSec: 2320, upgradeDustBase: 6800, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "hhttps://giphy.com/gifs/oLREIsYjAGKR0D2Qlp" },
+      { id: 40, name: "EX Stark", rarity: "EX", element: "Awaken Fire", power: 27200, incomePerSec: 2320, upgradeDustBase: 6800, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanVwc2huZzJxMWF1djFsMzdka2F5M3A2a3djdW1obTMxdjhpOTd1cSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oLREIsYjAGKR0D2Qlp/giphy.gif" },
       { id: 41, name: "EX Himmel", rarity: "EX", element: "Awaken Ligth", power: 18000, incomePerSec: 2400, upgradeDustBase: 7000, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzV1dmx1MzA2YTRxdmI5djFtZTA4ZjJiZTkydHc4MG9tbGF3c29qMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tnVg7YjP7GUFxu2ynz/giphy.gif" },
       { id: 44, name: "Hana Kurusu", rarity: "LR", element: "Angle", power: 14000, incomePerSec: 1400, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/n1d8qcbSic0AAAAd/jujutsu-kaisen-hana-kurusu.gif" },
       { id: 45, name: "Riko Amanai", rarity: "LR", element: "Star", power: 14000, incomePerSec: 1400, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/2FUpnW6BAr8AAAAC/riko-amanai.gif" },
