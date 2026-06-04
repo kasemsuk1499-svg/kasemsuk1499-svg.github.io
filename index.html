@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
-  <style>
+    <style>
     body {
       min-height: 100vh;
       color: white;
@@ -917,15 +916,153 @@
       .card-reveal-resource-pill { font-size: 10px; padding: .36rem .58rem; }
     }
 
+
+    /* GAME UPDATE ANNOUNCEMENT / ป้ายประกาศตอนเข้าเกม */
+    /* 🟨 จุดแก้ป้ายประกาศ: ถ้าอยากปรับขนาด/สี/ความเรียบง่าย แก้ CSS ชุดนี้ได้ */
+    .game-announcement-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 160;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, .70);
+      backdrop-filter: blur(8px);
+    }
+    .game-announcement-screen.active { display: flex; }
+    .game-announcement-panel {
+      width: min(94vw, 720px);
+      max-height: 92vh;
+      overflow: hidden;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(15,23,42,.96);
+      box-shadow: 0 24px 80px rgba(0,0,0,.55);
+      animation: pop .22s ease-out;
+    }
+    .game-announcement-image-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: rgba(2,6,23,.78);
+      overflow: hidden;
+    }
+    .game-announcement-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .game-announcement-empty {
+      min-height: 230px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: rgba(226,232,240,.72);
+      padding: 2rem;
+    }
+    .game-announcement-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2.45rem;
+      height: 2.45rem;
+      border-radius: 999px;
+      background: rgba(0,0,0,.52);
+      color: white;
+      font-size: 1.7rem;
+      font-weight: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .game-announcement-nav:hover { background: rgba(0,0,0,.75); }
+    .game-announcement-nav.prev { left: .65rem; }
+    .game-announcement-nav.next { right: .65rem; }
+    .game-announcement-dots {
+      position: absolute;
+      left: 50%;
+      bottom: .65rem;
+      transform: translateX(-50%);
+      display: flex;
+      gap: .4rem;
+    }
+    .game-announcement-dot {
+      width: .45rem;
+      height: .45rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,.38);
+    }
+    .game-announcement-dot.active {
+      width: 1.1rem;
+      background: rgba(255,255,255,.92);
+    }
+    @media (max-width: 640px) {
+      .game-announcement-panel { border-radius: 1.15rem; }
+      .game-announcement-image-wrap { aspect-ratio: 4 / 5; }
+    }
+
+
+    /* SITE LOGO / โลโก้เว็บ */
+    /* 🟨 จุดแก้โลโก้เว็บ 1: ขนาด/กรอบ/ตำแหน่งโลโก้มุมซ้าย แก้ CSS ชุดนี้ได้ */
+    .site-brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+    }
+    .site-logo-box {
+      width: var(--site-logo-width, 280px);
+      max-width: min(74vw, 360px);
+      min-height: var(--site-logo-min-height, 72px);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      border-radius: 1.25rem;
+      overflow: hidden;
+    }
+    .site-logo-img {
+      width: 100%;
+      max-height: var(--site-logo-height, 82px);
+      object-fit: contain;
+      object-position: left center;
+      display: block;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,.45));
+    }
+    .site-logo-fallback {
+      font-size: clamp(1.9rem, 5vw, 3.2rem);
+      font-weight: 1000;
+      line-height: .95;
+      letter-spacing: -.04em;
+    }
+    @media (max-width: 768px) {
+      .site-brand { align-items: flex-start; }
+      .site-logo-box { --site-logo-width: 230px; --site-logo-min-height: 58px; }
+      .site-logo-img { --site-logo-height: 66px; }
+    }
+
     button, input, select { outline: none; }
   </style>
 </head>
 <body>
   <div class="w-full min-h-screen mx-auto p-3 md:p-5 xl:p-6">
     <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-      <div>
-        <h1 class="text-3xl md:text-5xl font-black tracking-tight">Gacha Card Collection</h1>
-        <p class="text-slate-300 mt-2">ล็อกอินด้วยไอดีเกม เซฟกลาง Firebase ทุกเครื่อง ทุก Browser ผ่าน GitHub Pages</p>
+      <!--
+        🟨 จุดแก้โลโก้เว็บ 2:
+        - โลโก้มุมซ้ายไม่ได้แก้ตรง HTML นี้โดยตรง ให้ไปแก้ URL ที่ SITE_HEADER_CONFIG.logoUrl ในโซน JavaScript
+        - ถ้าไม่ใส่ logoUrl ระบบจะแสดงชื่อเว็บแบบตัวหนังสือสำรองแทน
+      -->
+      <div class="site-brand">
+        <div id="siteLogoBox" class="site-logo-box">
+          <img id="siteLogoImage" class="site-logo-img hidden" alt="Game Logo" />
+          <h1 id="siteLogoFallback" class="site-logo-fallback">Gacha Card Collection</h1>
+        </div>
+      </div>
+      <div class="min-w-0 flex-1">
+        <p id="siteSubtitleText" class="text-slate-300 mt-2 md:mt-0">ล็อกอินด้วยไอดีเกม เซฟกลาง Firebase ทุกเครื่อง ทุก Browser ผ่าน GitHub Pages</p>
+        <p id="siteHeaderHintText" class="text-xs text-cyan-200/85 mt-1 hidden"></p>
       </div>
       <div class="glass rounded-2xl px-5 py-4 flex gap-5 text-center">
         <div>
@@ -977,46 +1114,42 @@
     <section class="glass rounded-3xl p-5 mb-6">
       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-black mb-2">Online Room แบบไม่ใช้ Firebase</h2>
+          <h2 class="text-2xl font-black mb-2">Real-time Online Lobby ผ่าน Firebase</h2>
           <p class="text-sm text-slate-300 max-w-3xl">
-            ทดลองเล่นกับเพื่อนด้วยชื่อเล่น + รหัสห้อง ผ่าน Peer-to-Peer/WebRTC ไม่ต้องตั้งค่า Firebase หรือ Gmail
-            เหมาะสำหรับโชว์สถานะผู้เล่นและทดสอบระบบเพื่อนก่อนทำเซิร์ฟเวอร์จริง
+             เมื่อผู้เล่นล็อกอินสำเร็จ ระบบจะพาเข้าล็อบบี้กลางอัตโนมัติและแสดงรายชื่อทุกคนที่ออนไลน์อยู่
+            ระบบเทรด การส่งทรัพยากร ส่งการ์ดซ้ำ และโชว์การ์ดเพื่อนยังใช้หน้าตาเดิมทั้งหมด
           </p>
         </div>
         <div id="onlineConnectionBadge" class="rounded-2xl bg-slate-900/70 border border-white/10 px-4 py-3 text-sm text-cyan-200 font-black">Offline</div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mt-4 items-end">
+      <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3 mt-4 items-end">
         <div>
           <label class="text-sm text-slate-300">ชื่อเล่นออนไลน์</label>
-          <input id="onlineNickname" placeholder="เช่น Alice" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-3" />
+          <input id="onlineNickname" placeholder="ถ้าเว้นว่างจะใช้ชื่อไอดีที่ล็อกอิน" oninput="scheduleOnlineBroadcast()" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-3" />
         </div>
-        <button onclick="createOnlineRoom()" class="rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black py-3">สร้างห้อง</button>
-        <div>
-          <label class="text-sm text-slate-300">รหัสห้องเพื่อน</label>
-          <input id="onlineRoomInput" placeholder="เช่น GACHA-ABC123" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-3 uppercase" />
-        </div>
-        <button onclick="joinOnlineRoom()" class="rounded-xl bg-fuchsia-500 hover:bg-fuchsia-400 text-white font-black py-3">เข้าห้อง</button>
-        <button onclick="leaveOnlineRoom()" class="rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-black py-3">ออกห้อง</button>
+        <button onclick="enterGlobalOnlineLobby(true)" class="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-3">เข้าล็อบบี้ / อัปเดตสถานะ</button>
+        <button onclick="leaveOnlineRoom()" class="rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-black px-5 py-3">ออกจากออนไลน์</button>
       </div>
 
       <div class="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
         <div class="rounded-2xl bg-slate-950/45 border border-white/10 p-4">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
             <div>
-              <div class="text-xs text-slate-400">Room Code</div>
-              <div id="onlineRoomCodeText" class="text-2xl font-black text-yellow-300 select-all">-</div>
+              <div class="text-xs text-slate-400">Online Lobby</div>
+              <div id="onlineRoomCodeText" class="text-2xl font-black text-yellow-300 select-all">GLOBAL</div>
+              <div class="text-xs text-slate-400 mt-1">ใครล็อกอินด้วยเว็บเดียวกันและ Firebase เดียวกัน จะขึ้นในรายชื่อนี้อัตโนมัติ</div>
             </div>
             <div class="flex gap-2">
-              <button onclick="copyOnlineRoomCode()" class="rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2">คัดลอกรหัส</button>
-              <button onclick="broadcastMyOnlineState(true)" class="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2">อัปเดตสถานะ</button>
+              <button onclick="openGameAnnouncement()" class="rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black px-4 py-2">เปิดประกาศอัปเดต</button>
+              <button onclick="broadcastMyOnlineState(true)" class="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2">รีเฟรชออนไลน์</button>
             </div>
           </div>
           <div id="onlinePlayersGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
         </div>
 
         <div class="rounded-2xl bg-slate-950/45 border border-white/10 p-4">
-          <h3 class="font-black mb-2">ข้อความในห้อง</h3>
+          <h3 class="font-black mb-2">ข้อความออนไลน์</h3>
           <div id="onlineChatLog" class="h-36 overflow-y-auto rounded-xl bg-black/25 border border-white/10 p-2 text-sm text-slate-200 mb-2"></div>
           <div class="flex gap-2">
             <input id="onlineChatInput" onkeydown="if(event.key==='Enter') sendOnlineChat()" placeholder="พิมพ์ข้อความ..." class="flex-1 rounded-xl bg-slate-900 border border-white/10 px-3 py-2" />
@@ -1029,7 +1162,7 @@
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 mb-3">
           <div>
             <h3 class="text-xl font-black">โอนของให้เพื่อน</h3>
-            <p class="text-xs text-slate-400">ส่งคำขอโอนให้เพื่อนกดยอมรับก่อน ระบบจะหักของจากผู้ส่งเมื่อยืนยันสำเร็จเท่านั้น</p>
+            <p class="text-xs text-slate-400">เลือกเพื่อนจากรายชื่อออนไลน์กลาง แล้วส่งคำขอโอนให้เพื่อนกดยอมรับก่อน ระบบจะหักของจากผู้ส่งเมื่อยืนยันสำเร็จเท่านั้น</p>
           </div>
           <div class="text-xs text-amber-200 font-black">ส่งการ์ดได้เฉพาะ Copies ส่วนเกิน / ใบหลักไม่ถูกส่ง</div>
         </div>
@@ -1091,10 +1224,9 @@
       </div>
 
       <p class="text-xs text-slate-400 mt-3">
-        หมายเหตุ: โหมดนี้ไม่ใช่เซิร์ฟเวอร์ถาวร ถ้าโฮสต์ปิดหน้า ห้องจะหายไป และบางเครือข่ายอาจบล็อกการเชื่อมต่อ WebRTC ได้
+        หมายเหตุ: ระบบนี้ใช้ Firebase Realtime Database เป็นล็อบบี้กลาง ถ้าออกจากหน้าเว็บหรือ logout รายชื่อจะถูกลบออกอัตโนมัติด้วย onDisconnect
       </p>
     </section>
-
     <main class="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5">
       <section class="glass rounded-3xl p-5">
         <h2 class="text-2xl font-black mb-3">ตู้กาชา</h2>
@@ -1260,6 +1392,30 @@
     </div>
   </div>
 
+
+  <div id="gameAnnouncementScreen" class="game-announcement-screen" onclick="closeGameAnnouncement()">
+    <div class="game-announcement-panel" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/10">
+        <div>
+          <div id="gameAnnouncementTitle" class="text-xl md:text-2xl font-black">ประกาศอัปเดต</div>
+          <div id="gameAnnouncementSubtitle" class="text-xs md:text-sm text-slate-300 mt-1"></div>
+        </div>
+        <button type="button" onclick="closeGameAnnouncement()" class="shrink-0 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 font-black">×</button>
+      </div>
+      <div id="gameAnnouncementImageWrap" class="game-announcement-image-wrap">
+        <div id="gameAnnouncementEmpty" class="game-announcement-empty">ยังไม่ได้ใส่รูปประกาศ<br>ให้เพิ่ม URL รูปใน ANNOUNCEMENT_CONFIG.images</div>
+        <img id="gameAnnouncementImage" class="game-announcement-image hidden" alt="game announcement" />
+        <button type="button" id="gameAnnouncementPrev" onclick="prevGameAnnouncement(event)" class="game-announcement-nav prev">‹</button>
+        <button type="button" id="gameAnnouncementNext" onclick="nextGameAnnouncement(event)" class="game-announcement-nav next">›</button>
+        <div id="gameAnnouncementDots" class="game-announcement-dots"></div>
+      </div>
+      <div class="px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div id="gameAnnouncementBody" class="text-sm text-slate-300 leading-6"></div>
+        <button id="gameAnnouncementCloseButton" type="button" onclick="closeGameAnnouncement()" class="rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black px-5 py-3">เข้าเกม</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 hidden rounded-2xl glass px-5 py-3 font-bold"></div>
 
   <script>
@@ -1268,6 +1424,41 @@
     🟨🟨🟨 DEVELOPER EDIT ZONE / โซนที่ผู้พัฒนาแก้ใน Notepad ได้ 🟨🟨🟨
     ======================================================================
     ค้นหาใน Notepad: DEVELOPER EDIT ZONE หรือ 🟨 จุดแก้
+    */
+
+    // ======================================================================
+    // 🟨 จุดแก้ 0: โลโก้เว็บมุมซ้าย
+    // ======================================================================
+    // วิธีเปลี่ยนโลโก้:
+    // 1) อัปโหลดรูปไว้บน GitHub / Discord / imgbb / Firebase Storage หรือที่ฝากรูปอื่น
+    // 2) คัดลอกลิงก์รูปมาใส่ใน logoUrl
+    // 3) ถ้าไม่ใส่ logoUrl ระบบจะแสดง fallbackTitle เป็นตัวหนังสือแทน
+    // แนะนำไฟล์โลโก้: PNG พื้นหลังโปร่งใส ขนาดประมาณ 600x180 หรือ 900x260
+    const SITE_HEADER_CONFIG = {
+      logoUrl: "https://chatgpt.com/backend-api/estuary/content?id=file_000000007ca871f88a9cfc403c095f65&ts=494600&p=fsns&cid=1&sig=b1328f2c57e6c8d6007e04865f90f0da4a627ed76e688f7ef71ce7382b20cbc4&v=0", // 🟨 ใส่ URL รูปโลโก้ตรงนี้ เช่น "https://example.com/my-logo.png"
+      logoAlt: "Gacha Card Collection Logo",
+      fallbackTitle: "Gacha Card Collection",
+      subtitle: "ver. 1.3.1",
+      hintText: "", // 🟨 ถ้าอยากให้มีข้อความเล็กใต้หัวเว็บ ให้ใส่ข้อความตรงนี้
+      logoWidthPx: 280,
+      logoHeightPx: 82
+    };
+
+    /*
+    ======================================================================
+    🟨 คำอธิบายจุดต่างๆบนหน้าเว็บ / เก็บไว้ในโค้ดเท่านั้น
+    ======================================================================
+    - โลโก้มุมซ้าย: เปลี่ยนรูปเว็บได้ที่ SITE_HEADER_CONFIG.logoUrl
+      ถ้าเว้นว่างไว้ ระบบจะแสดง fallbackTitle เป็นตัวหนังสือแทน
+    - ทรัพยากรด้านขวาบน: Gems / Dust / PiceCrad / Owned คือค่าหลักของผู้เล่น
+      ค่าเริ่มต้นแก้ได้ใน GAME_CONFIG
+    - ระบบไอดีเกม / Cloud Save: ส่วนสมัครสมาชิกและล็อกอิน เซฟข้อมูลด้วย Firebase
+    - Online Lobby: ระบบ Real-time ผ่าน Firebase Realtime Database แบบไม่ต้องสร้างห้อง ล็อกอินแล้วขึ้นชื่อทันที ใช้เทรดของและโชว์การ์ดเพื่อนได้
+    - ตู้กาชา: แก้รายชื่อตู้ รูปแบนเนอร์ เรท และ Rate Up ได้ใน GACHA_BANNERS
+    - ประกาศเข้าเกม: แก้รูปและข้อความป้ายประกาศได้ที่ ANNOUNCEMENT_CONFIG
+    - ร้านเทรดการ์ด: แก้สินค้า Stock และไอเทมแลกเปลี่ยนได้ใน TRADE_ITEM_SHOP / TRADE_SHOP_STOCK_CONFIG
+    - คอลเล็กชั่น: จุดแสดงการ์ดทั้งหมดของผู้เล่น ใช้ตัวกรองระดับและช่องค้นหาเพื่อหาใบที่ต้องการ
+    ======================================================================
     */
 
     // ======================================================================
@@ -1329,13 +1520,19 @@
       appId: "1:1014868346199:web:cf9c02eddd9c99504daa12"
     };
 
-    // แนะนำ Rules ใน Realtime Database เพื่อให้แต่ละไอดีอ่าน/เขียนได้เฉพาะเซฟตัวเอง:
+    // แนะนำ Rules ใน Realtime Database: users จำกัดเฉพาะเจ้าของไอดี ส่วน onlineRooms เป็นล็อบบี้กลางให้ผู้เล่นที่ล็อกอินอ่าน/เขียนได้
     // {
     //   "rules": {
     //     "users": {
     //       "$uid": {
     //         ".read": "auth != null && auth.uid === $uid",
     //         ".write": "auth != null && auth.uid === $uid"
+    //       }
+    //     },
+    //     "onlineRooms": {
+    //       "$room": {
+    //         ".read": "auth != null",
+    //         ".write": "auth != null"
     //       }
     //     }
     //   }
@@ -1404,6 +1601,28 @@
       },
       fallbackResourceReward: { gems: 200000, dust: 40000, piceCrad: 20, text: "โบนัสทรัพยากรรายวัน" },
       showRewardPreview: true
+    };
+
+
+    // ======================================================================
+    // 🟨 จุดแก้ 1.1: ป้ายประกาศอัปเดตตอนเข้าเกม
+    // ======================================================================
+    // วิธีใช้:
+    // - enabled: true = เปิดให้ป้ายประกาศเด้งตอนเข้าเกม / false = ปิด
+    // - title/subtitle/body: แก้ข้อความบนป้ายประกาศ
+    // - images: ใส่ URL รูปประกาศได้หลายรูป ระบบจะมีปุ่มเลื่อนซ้าย/ขวาให้เอง
+    // - ถ้าอยากให้รูปเต็มสวย แนะนำสัดส่วน 16:9 เช่น 1280x720 หรือ 1920x1080
+    const ANNOUNCEMENT_CONFIG = {
+      enabled: true,
+      title: "ประกาศอัปเดตเกม",
+      subtitle: "ข่าวสาร / กิจกรรม / แพตช์ใหม่",
+      body: "ยินดีต้อนรับกลับเข้าเกม ANIME CARD COLLECTION (HAKARI IS COMING...)",
+      buttonText: "START",
+      images: ["https://tenor.com/th/view/jjk-hikari-gif-1408129775731152385"
+        // ใส่ URL รูปประกาศตรงนี้ เช่น:
+        // "https://example.com/update-banner-1.png",
+        // "https://example.com/update-banner-2.png"
+      ]
     };
 
 
@@ -1963,7 +2182,14 @@
           set: dbMod.set,
           get: dbMod.get,
           child: dbMod.child,
-          update: dbMod.update
+          update: dbMod.update,
+          remove: dbMod.remove,
+          push: dbMod.push,
+          onValue: dbMod.onValue,
+          onChildAdded: dbMod.onChildAdded,
+          off: dbMod.off,
+          onDisconnect: dbMod.onDisconnect,
+          serverTimestamp: dbMod.serverTimestamp
         };
 
         cloudApp = cloudModules.getApps().length ? cloudModules.getApps()[0] : cloudModules.initializeApp(FIREBASE_CONFIG);
@@ -2244,6 +2470,8 @@
           localStorage.setItem(ACTIVE_USER_KEY, activeUser);
           document.getElementById("pullResult").innerHTML = "";
           renderAll();
+          activateGlobalOnlineForCurrentUser();
+          openGameAnnouncement();
           setCloudStatus("Cloud Save: สมัครไอดีเกมและสร้างเซฟกลางสำเร็จ", "ok");
           showToast("สมัครไอดีเกมบนฐานข้อมูลกลางสำเร็จ");
           return;
@@ -2285,6 +2513,7 @@
       state = accounts[username].save;
       document.getElementById("pullResult").innerHTML = "";
       renderAll();
+      openGameAnnouncement();
       showToast("สมัครสมาชิกแบบ local สำเร็จ");
     }
 
@@ -2323,6 +2552,8 @@
           localStorage.setItem(ACTIVE_USER_KEY, activeUser);
           document.getElementById("pullResult").innerHTML = "";
           renderAll();
+          activateGlobalOnlineForCurrentUser();
+          openGameAnnouncement();
           setCloudStatus("Cloud Save: โหลดเซฟจากฐานข้อมูลกลางสำเร็จ", "ok");
           showToast("ล็อกอินไอดีเกมและโหลดเซฟกลางสำเร็จ");
           return;
@@ -2369,10 +2600,12 @@
       state = loadUserSave(activeUser);
       document.getElementById("pullResult").innerHTML = "";
       renderAll();
+      openGameAnnouncement();
     }
 
     async function logout() {
       stopAutoGacha();
+      await closeOnlinePeer();
       await flushCloudSave();
       if (cloudReady && cloudAuth) {
         try { await cloudModules.signOut(cloudAuth); } catch (error) { console.warn("Firebase signOut error:", error); }
@@ -4821,10 +5054,101 @@ function closeCardModal() {
       }, 1800);
     }
 
+
     // ======================================================================
-    // 🟦 Online Room แบบไม่ใช้ Firebase: Peer-to-Peer ผ่าน PeerJS/WebRTC
+    // 🟦 GAME ANNOUNCEMENT MODAL / ป้ายประกาศตอนเข้าเกม
     // ======================================================================
-    const ONLINE_ROOM_PREFIX = "GACHA-";
+    let gameAnnouncementIndex = 0;
+
+    function getAnnouncementImages() {
+      return ((ANNOUNCEMENT_CONFIG && ANNOUNCEMENT_CONFIG.images) || [])
+        .map(function(url) { return String(url || "").trim(); })
+        .filter(Boolean);
+    }
+
+    function renderGameAnnouncement() {
+      const cfg = ANNOUNCEMENT_CONFIG || {};
+      const images = getAnnouncementImages();
+      const title = document.getElementById("gameAnnouncementTitle");
+      const subtitle = document.getElementById("gameAnnouncementSubtitle");
+      const body = document.getElementById("gameAnnouncementBody");
+      const closeButton = document.getElementById("gameAnnouncementCloseButton");
+      const img = document.getElementById("gameAnnouncementImage");
+      const empty = document.getElementById("gameAnnouncementEmpty");
+      const prev = document.getElementById("gameAnnouncementPrev");
+      const next = document.getElementById("gameAnnouncementNext");
+      const dots = document.getElementById("gameAnnouncementDots");
+
+      if (title) title.textContent = cfg.title || "ประกาศอัปเดต";
+      if (subtitle) subtitle.textContent = cfg.subtitle || "";
+      if (body) body.textContent = cfg.body || "";
+      if (closeButton) closeButton.textContent = cfg.buttonText || "เข้าเกม";
+
+      if (images.length) {
+        gameAnnouncementIndex = Math.max(0, Math.min(gameAnnouncementIndex, images.length - 1));
+        if (img) {
+          img.src = images[gameAnnouncementIndex];
+          img.classList.remove("hidden");
+        }
+        if (empty) empty.classList.add("hidden");
+      } else {
+        if (img) {
+          img.removeAttribute("src");
+          img.classList.add("hidden");
+        }
+        if (empty) empty.classList.remove("hidden");
+      }
+
+      const showNav = images.length > 1;
+      if (prev) prev.style.display = showNav ? "flex" : "none";
+      if (next) next.style.display = showNav ? "flex" : "none";
+      if (dots) {
+        dots.innerHTML = images.map(function(_, index) {
+          return '<button type="button" onclick="setGameAnnouncementSlide(' + index + ', event)" class="game-announcement-dot ' + (index === gameAnnouncementIndex ? 'active' : '') + '"></button>';
+        }).join("");
+      }
+    }
+
+    function openGameAnnouncement() {
+      if (!ANNOUNCEMENT_CONFIG || ANNOUNCEMENT_CONFIG.enabled === false) return;
+      renderGameAnnouncement();
+      const screen = document.getElementById("gameAnnouncementScreen");
+      if (!screen) return;
+      screen.classList.add("active");
+    }
+
+    function closeGameAnnouncement() {
+      const screen = document.getElementById("gameAnnouncementScreen");
+      if (!screen) return;
+      screen.classList.remove("active");
+    }
+
+    function setGameAnnouncementSlide(index, event) {
+      if (event) event.stopPropagation();
+      const images = getAnnouncementImages();
+      if (!images.length) return;
+      gameAnnouncementIndex = ((Number(index) || 0) + images.length) % images.length;
+      renderGameAnnouncement();
+    }
+
+    function nextGameAnnouncement(event) {
+      if (event) event.stopPropagation();
+      setGameAnnouncementSlide(gameAnnouncementIndex + 1);
+    }
+
+    function prevGameAnnouncement(event) {
+      if (event) event.stopPropagation();
+      setGameAnnouncementSlide(gameAnnouncementIndex - 1);
+    }
+
+    // ======================================================================
+    // 🟦 Real-time Online Lobby ผ่าน Firebase: ล็อกอินแล้วขึ้นชื่อทันที ไม่ต้องสร้างห้อง
+    // ======================================================================
+    const ONLINE_ROOM_PREFIX = "GACHA-"; // เหลือไว้เพื่อรองรับโค้ดเก่า แต่ระบบใหม่ใช้ ONLINE_GLOBAL_ROOM_CODE
+    const ONLINE_ROOM_ROOT = "onlineRooms";
+    const ONLINE_GLOBAL_ROOM_CODE = "GLOBAL_LOBBY"; // 🟨 จุดแก้ชื่อห้องกลาง: เปลี่ยนได้ถ้าอยากแยกเซิร์ฟเวอร์/ซีซั่น
+    let onlineSessionId = "SESS-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+    let onlineMyId = "";
     let onlinePeer = null;
     let onlineIsHost = false;
     let onlineRoomCode = "";
@@ -4908,7 +5232,7 @@ function closeCardModal() {
     function getMyOnlineSnapshot() {
       const showcaseCards = getShowcaseCardSnapshots();
       return {
-        peerId: onlinePeer && onlinePeer.id ? onlinePeer.id : "local",
+        peerId: getMyPeerId() || "local",
         nickname: getOnlineNickname(),
         user: activeUser || "ยังไม่ได้ล็อกอินเกม",
         gems: Math.floor((state && state.gems) || 0),
@@ -5077,7 +5401,7 @@ function closeCardModal() {
 
     function renderOnlineRoom() {
       const roomText = document.getElementById("onlineRoomCodeText");
-      if (roomText) roomText.textContent = onlineRoomCode || "-";
+      if (roomText) roomText.textContent = onlineRoomCode ? "GLOBAL ONLINE" : "ยังไม่ได้ออนไลน์";
 
       const grid = document.getElementById("onlinePlayersGrid");
       if (!grid) return;
@@ -5085,7 +5409,7 @@ function closeCardModal() {
         return String(a.nickname).localeCompare(String(b.nickname));
       });
       if (!players.length) {
-        grid.innerHTML = "<div class='text-sm text-slate-400'>ยังไม่มีผู้เล่นในห้อง</div>";
+        grid.innerHTML = "<div class='text-sm text-slate-400'>ยังไม่มีผู้เล่นออนไลน์</div>";
         renderOnlineTransferPanel();
         return;
       }
@@ -5096,7 +5420,7 @@ function closeCardModal() {
           "<div class='flex items-start justify-between gap-2'>" +
             "<div><div class='text-lg font-black text-cyan-200'>" + escapeHTML(player.nickname) + "</div>" +
             "<div class='text-xs text-slate-400'>" + escapeHTML(player.user || "") + " • " + escapeHTML(player.updatedAt || "") + "</div></div>" +
-            "<div class='text-xs rounded-full bg-white/10 px-2 py-1'>" + escapeHTML(player.peerId === (onlinePeer && onlinePeer.id) ? "คุณ" : "เพื่อน") + "</div>" +
+            "<div class='text-xs rounded-full bg-white/10 px-2 py-1'>" + escapeHTML(player.peerId === getMyPeerId() ? "คุณ" : "เพื่อน") + "</div>" +
           "</div>" +
           "<div class='grid grid-cols-2 gap-2 mt-3 text-sm'>" +
             "<div><span class='text-slate-400'>Gems</span><br><b class='text-yellow-300'>" + Number(player.gems || 0).toLocaleString() + "</b></div>" +
@@ -5160,7 +5484,7 @@ function closeCardModal() {
 
 
     function getMyPeerId() {
-      return onlinePeer && onlinePeer.id ? onlinePeer.id : "";
+      return onlineMyId || "";
     }
 
     function getOnlinePeerOptionsHTML() {
@@ -5168,7 +5492,7 @@ function closeCardModal() {
       const peers = Object.values(onlinePlayers).filter(function(player) {
         return player && player.peerId && player.peerId !== myPeerId;
       });
-      if (!peers.length) return "<option value=''>ยังไม่มีเพื่อนในห้อง</option>";
+      if (!peers.length) return "<option value=''>ยังไม่มีเพื่อนออนไลน์</option>";
       return peers.map(function(player) {
         return "<option value='" + escapeHTML(player.peerId) + "'>" + escapeHTML(player.nickname || player.peerId) + "</option>";
       }).join("");
@@ -5261,8 +5585,8 @@ function closeCardModal() {
     }
 
     function validateOnlineTransferTarget(targetPeerId) {
-      if (!onlinePeer || !onlinePeer.id) {
-        showToast("ต้องสร้างหรือเข้าห้องก่อนโอนของ");
+      if (!onlineRoomCode || !getMyPeerId()) {
+        showToast("ต้องเข้าออนไลน์ก่อนโอนของ");
         return false;
       }
       if (!targetPeerId || targetPeerId === getMyPeerId()) {
@@ -5348,29 +5672,49 @@ function closeCardModal() {
       showToast("ส่งคำขอโอนการ์ดซ้ำแล้ว");
     }
 
-    function sendOnlineDirectMessage(targetPeerId, message) {
-      if (!message || !targetPeerId) return false;
-      message.toPeerId = targetPeerId;
-      message.fromPeerId = getMyPeerId();
-      if (targetPeerId === getMyPeerId()) {
-        handleOnlineMessage(message, null);
-        return true;
-      }
-      if (onlineIsHost) {
-        const conn = onlineConnections[targetPeerId];
-        if (conn && conn.open) {
-          conn.send(message);
-          return true;
-        }
-        showToast("ส่งไม่สำเร็จ เพื่อนอาจหลุดจากห้อง");
+    function getOnlineRoomRef(path) {
+      const suffix = path ? ("/" + String(path).replace(/^\/+/, "")) : "";
+      return cloudModules.ref(cloudDb, ONLINE_ROOM_ROOT + "/" + onlineRoomCode + suffix);
+    }
+
+    function getOnlineMessageRef() {
+      return getOnlineRoomRef("messages");
+    }
+
+    function getMyPeerId() {
+      return onlineMyId || "";
+    }
+
+    async function ensureRealtimeOnlineReady() {
+      if (!requireLogin()) return false;
+      const ok = await initCloudServices();
+      if (!ok || !cloudReady || !cloudDb || !activeCloudUid) {
+        showToast("ต้องเปิด Firebase และล็อกอินก่อนใช้ Real-time Online");
+        setOnlineStatus("Firebase ยังไม่พร้อม", "bad");
         return false;
       }
-      if (onlineHostConn && onlineHostConn.open) {
-        onlineHostConn.send(message);
-        return true;
+      onlineMyId = activeCloudUid;
+      return true;
+    }
+
+    function sendOnlineDirectMessage(targetPeerId, message) {
+      if (!message || !targetPeerId) return false;
+      if (!onlineRoomCode || !getMyPeerId()) {
+        showToast("ต้องล็อกอินและเข้าล็อบบี้ออนไลน์ก่อนส่งข้อความ");
+        return false;
       }
-      showToast("ยังไม่เชื่อมต่อกับห้อง");
-      return false;
+      const payload = Object.assign({}, message, {
+        toPeerId: targetPeerId,
+        fromPeerId: getMyPeerId(),
+        fromName: getOnlineNickname(),
+        createdAtMs: Date.now(),
+        sessionId: onlineSessionId
+      });
+      cloudModules.push(getOnlineMessageRef(), payload).catch(function(error) {
+        console.error("Send online message error:", error);
+        showToast("ส่งข้อมูลออนไลน์ไม่สำเร็จ");
+      });
+      return true;
     }
 
     function acceptTransferOffer(offerId) {
@@ -5420,7 +5764,7 @@ function closeCardModal() {
     }
 
     function receiveTransferOffer(offer) {
-      if (!offer) return;
+      if (!offer) return false;
       updateIncomeBank();
       if (offer.kind === "resource") {
         const resource = offer.resource;
@@ -5448,7 +5792,7 @@ function closeCardModal() {
       return false;
     }
 
-    function handleTransferMessage(message, conn) {
+    function handleTransferMessage(message) {
       if (!message || !message.type) return false;
       if (message.type === "TRANSFER_OFFER") {
         const offer = message.offer || {};
@@ -5491,7 +5835,6 @@ function closeCardModal() {
         return true;
       }
       if (message.type === "TRANSFER_FAILED") {
-        const offer = message.offer || {};
         addTransferLog("โอนไม่สำเร็จ: " + (message.reason || "ไม่ทราบสาเหตุ"));
         showToast("โอนไม่สำเร็จ: " + (message.reason || "ไม่ทราบสาเหตุ"));
         return true;
@@ -5499,210 +5842,179 @@ function closeCardModal() {
       return false;
     }
 
-    function closeOnlinePeer() {
+    async function closeOnlinePeer() {
       try {
-        Object.values(onlineConnections).forEach(function(conn) { if (conn && conn.close) conn.close(); });
-        if (onlineHostConn && onlineHostConn.close) onlineHostConn.close();
-        if (onlinePeer && !onlinePeer.destroyed) onlinePeer.destroy();
+        if (onlinePlayersUnsubscribe) onlinePlayersUnsubscribe();
+        if (onlineMessagesUnsubscribe) onlineMessagesUnsubscribe();
+        onlinePlayersUnsubscribe = null;
+        onlineMessagesUnsubscribe = null;
+        if (onlineRoomCode && getMyPeerId() && cloudReady && cloudDb && cloudModules.remove) {
+          await cloudModules.remove(getOnlineRoomRef("players/" + getMyPeerId())).catch(function(){});
+        }
       } catch (error) {}
       onlinePeer = null;
       onlineHostConn = null;
       onlineConnections = {};
       onlinePlayers = {};
       onlineTransferInbox = {};
+      onlineProcessedMessageIds = {};
       renderOnlineTransferPanel();
       onlineIsHost = false;
       onlineRoomCode = "";
+      onlineMyId = "";
       renderOnlineRoom();
     }
 
-    function setupHostConnection(conn) {
-      onlineConnections[conn.peer] = conn;
-      conn.on("open", function() {
-        conn.send({ type: "ROOM_STATE", players: onlinePlayers });
-        addOnlineChatLine("ระบบ", "ผู้เล่น " + conn.peer + " เข้าห้อง");
-      });
-      conn.on("data", function(message) {
-        handleOnlineMessage(message, conn);
-      });
-      conn.on("close", function() {
-        delete onlineConnections[conn.peer];
-        delete onlinePlayers[conn.peer];
-        broadcastRoomState();
+    function setupRealtimeOnlineListeners() {
+      if (!onlineRoomCode || !getMyPeerId()) return;
+      if (onlinePlayersUnsubscribe) onlinePlayersUnsubscribe();
+      if (onlineMessagesUnsubscribe) onlineMessagesUnsubscribe();
+
+      const playersRef = getOnlineRoomRef("players");
+      onlinePlayersUnsubscribe = cloudModules.onValue(playersRef, function(snapshot) {
+        onlinePlayers = snapshot.exists() ? (snapshot.val() || {}) : {};
         renderOnlineRoom();
+      }, function(error) {
+        console.error("Online players listener error:", error);
+        setOnlineStatus("อ่านผู้เล่นไม่สำเร็จ", "bad");
+      });
+
+      const messagesRef = getOnlineMessageRef();
+      onlineMessagesUnsubscribe = cloudModules.onChildAdded(messagesRef, function(snapshot) {
+        if (!snapshot.exists()) return;
+        const key = snapshot.key;
+        if (onlineProcessedMessageIds[key]) return;
+        onlineProcessedMessageIds[key] = true;
+        const message = snapshot.val() || {};
+        message.__messageKey = key;
+        handleOnlineMessage(message);
+      }, function(error) {
+        console.error("Online messages listener error:", error);
       });
     }
 
-    function setupClientConnection(conn) {
-      onlineHostConn = conn;
-      conn.on("open", function() {
-        setOnlineStatus("เชื่อมต่อห้องแล้ว", "ok");
-        conn.send({ type: "HELLO", player: getMyOnlineSnapshot() });
-        broadcastMyOnlineState(true);
-        addOnlineChatLine("ระบบ", "เข้าห้องสำเร็จ");
-      });
-      conn.on("data", function(message) {
-        handleOnlineMessage(message, conn);
-      });
-      conn.on("close", function() {
-        setOnlineStatus("หลุดจากห้อง", "bad");
-        addOnlineChatLine("ระบบ", "การเชื่อมต่อห้องถูกปิด");
-      });
-    }
-
-    function handleOnlineMessage(message, conn) {
+    function handleOnlineMessage(message) {
       if (!message || !message.type) return;
-      if (!message.fromPeerId && conn && conn.peer) message.fromPeerId = conn.peer;
-      if (message.toPeerId && message.toPeerId !== getMyPeerId()) {
-        if (onlineIsHost) {
-          const targetConn = onlineConnections[message.toPeerId];
-          if (targetConn && targetConn.open) targetConn.send(message);
-        }
-        return;
-      }
-      if (handleTransferMessage(message, conn)) return;
-      if (message.type === "HELLO" || message.type === "STATE") {
-        const player = message.player || {};
-        if (!player.peerId && conn && conn.peer) player.peerId = conn.peer;
-        onlinePlayers[player.peerId || (conn && conn.peer) || "unknown"] = player;
-        if (onlineIsHost) broadcastRoomState();
-        renderOnlineRoom();
-      }
-      if (message.type === "ROOM_STATE") {
-        onlinePlayers = message.players || {};
-        renderOnlineRoom();
-      }
+      if (message.toPeerId && message.toPeerId !== getMyPeerId()) return;
+      if (handleTransferMessage(message)) return;
       if (message.type === "CHAT") {
-        addOnlineChatLine(message.nickname || "Guest", message.text || "");
-        if (onlineIsHost) broadcastToClients(message, conn && conn.peer);
+        addOnlineChatLine(message.nickname || message.fromName || "Guest", message.text || "");
       }
     }
 
-    function broadcastToClients(message, exceptPeerId) {
-      Object.keys(onlineConnections).forEach(function(peerId) {
-        if (peerId === exceptPeerId) return;
-        const conn = onlineConnections[peerId];
-        if (conn && conn.open) conn.send(message);
-      });
+    async function writeMyOnlinePlayerSnapshot() {
+      if (!onlineRoomCode || !getMyPeerId() || !cloudReady) return;
+      const snapshot = getMyOnlineSnapshot();
+      snapshot.updatedAtMs = Date.now();
+      await cloudModules.set(getOnlineRoomRef("players/" + getMyPeerId()), snapshot);
+      if (cloudModules.onDisconnect) {
+        try { cloudModules.onDisconnect(getOnlineRoomRef("players/" + getMyPeerId())).remove(); } catch (error) {}
+      }
+    }
+
+    function broadcastToClients() {
+      // ระบบใหม่ไม่ต้อง broadcast เอง เพราะ Firebase sync แบบ real-time ให้ทุกเครื่องแล้ว
     }
 
     function broadcastRoomState() {
-      if (!onlineIsHost) return;
-      onlinePlayers[onlinePeer.id] = getMyOnlineSnapshot();
-      broadcastToClients({ type: "ROOM_STATE", players: onlinePlayers });
-      renderOnlineRoom();
+      broadcastMyOnlineState(false);
     }
 
     function broadcastMyOnlineState(showNotice) {
-      if (!onlinePeer || !onlinePeer.id) {
-        if (showNotice) showToast("ยังไม่ได้สร้างหรือเข้าห้องออนไลน์");
+      if (!onlineRoomCode || !getMyPeerId()) {
+        if (showNotice) showToast("ยังไม่ได้ออนไลน์");
         return;
       }
-      const snapshot = getMyOnlineSnapshot();
-      onlinePlayers[snapshot.peerId] = snapshot;
-      if (onlineIsHost) {
-        broadcastRoomState();
-      } else if (onlineHostConn && onlineHostConn.open) {
-        onlineHostConn.send({ type: "STATE", player: snapshot });
-      }
-      renderOnlineRoom();
-      if (showNotice) showToast("อัปเดตสถานะออนไลน์แล้ว");
+      writeMyOnlinePlayerSnapshot().then(function() {
+        if (showNotice) showToast("อัปเดตสถานะออนไลน์แบบ Real-time แล้ว");
+      }).catch(function(error) {
+        console.error("Online state update error:", error);
+        if (showNotice) showToast("อัปเดตสถานะออนไลน์ไม่สำเร็จ");
+      });
     }
 
     function scheduleOnlineBroadcast() {
-      if (!onlinePeer || !onlinePeer.id) return;
+      if (!onlineRoomCode || !getMyPeerId()) return;
       clearTimeout(onlineBroadcastTimer);
       onlineBroadcastTimer = setTimeout(function() {
         broadcastMyOnlineState(false);
-      }, 1200);
+      }, 900);
     }
 
-    function createOnlineRoom() {
-      if (typeof Peer === "undefined") {
-        showToast("โหลด PeerJS ไม่สำเร็จ กรุณาเชื่อมอินเทอร์เน็ตแล้วเปิดใหม่");
-        return;
-      }
-      closeOnlinePeer();
-      onlineIsHost = true;
-      onlineRoomCode = makeOnlineRoomCode();
-      setOnlineStatus("กำลังสร้างห้อง...", "warn");
-      onlinePeer = new Peer(onlineRoomCode, { debug: 1 });
-      onlinePeer.on("open", function(id) {
-        onlineRoomCode = id;
-        onlinePlayers[id] = getMyOnlineSnapshot();
-        setOnlineStatus("เป็นโฮสต์ห้อง", "ok");
-        renderOnlineRoom();
-        showToast("สร้างห้องแล้ว ส่งรหัสให้เพื่อนได้เลย");
-      });
-      onlinePeer.on("connection", setupHostConnection);
-      onlinePeer.on("error", function(error) {
-        setOnlineStatus("สร้างห้องไม่สำเร็จ", "bad");
-        showToast("Online error: " + (error && error.type ? error.type : "unknown"));
-      });
-    }
-
-    function joinOnlineRoom() {
-      if (typeof Peer === "undefined") {
-        showToast("โหลด PeerJS ไม่สำเร็จ กรุณาเชื่อมอินเทอร์เน็ตแล้วเปิดใหม่");
-        return;
-      }
-      const input = document.getElementById("onlineRoomInput");
-      const roomCode = input ? input.value.trim().toUpperCase() : "";
-      if (!roomCode) {
-        showToast("กรุณาใส่รหัสห้องก่อน");
-        return;
-      }
-      closeOnlinePeer();
+    async function enterGlobalOnlineLobby(showNotice) {
+      const ready = await ensureRealtimeOnlineReady();
+      if (!ready) return;
+      const previousRoom = onlineRoomCode;
+      onlineRoomCode = ONLINE_GLOBAL_ROOM_CODE;
       onlineIsHost = false;
-      onlineRoomCode = roomCode;
-      setOnlineStatus("กำลังเข้าห้อง...", "warn");
-      onlinePeer = new Peer(undefined, { debug: 1 });
-      onlinePeer.on("open", function() {
-        const conn = onlinePeer.connect(roomCode, { reliable: true });
-        setupClientConnection(conn);
+      onlineMyId = activeCloudUid;
+      setOnlineStatus("กำลังเชื่อมล็อบบี้กลาง...", "warn");
+      try {
+        if (previousRoom && previousRoom !== onlineRoomCode) await closeOnlinePeer();
+        onlineRoomCode = ONLINE_GLOBAL_ROOM_CODE;
+        onlineMyId = activeCloudUid;
+        await cloudModules.update(getOnlineRoomRef("meta"), {
+          roomCode: ONLINE_GLOBAL_ROOM_CODE,
+          mode: "firebase-global-lobby",
+          updatedAtMs: Date.now(),
+          note: "ล็อบบี้กลางแบบไม่ต้องสร้างห้อง"
+        });
+        await writeMyOnlinePlayerSnapshot();
+        setupRealtimeOnlineListeners();
+        setOnlineStatus("Online Lobby พร้อม", "ok");
+        addOnlineChatLine("ระบบ", "เชื่อมต่อออนไลน์กลางสำเร็จ");
         renderOnlineRoom();
-      });
-      onlinePeer.on("error", function(error) {
-        setOnlineStatus("เข้าห้องไม่สำเร็จ", "bad");
-        showToast("Online error: " + (error && error.type ? error.type : "unknown"));
-      });
+        if (showNotice) showToast("ออนไลน์แล้ว รายชื่อของคุณจะแสดงให้เพื่อนเห็นทันที");
+      } catch (error) {
+        console.error("Enter global online lobby error:", error);
+        setOnlineStatus("ออนไลน์ไม่สำเร็จ", "bad");
+        if (showNotice) showToast("ออนไลน์ไม่สำเร็จ: " + (error && error.message ? error.message : "Firebase error"));
+      }
     }
 
-    function leaveOnlineRoom() {
-      closeOnlinePeer();
+    function activateGlobalOnlineForCurrentUser() {
+      if (!activeUser || !activeCloudUid) return;
+      enterGlobalOnlineLobby(false);
+    }
+
+    async function createOnlineRoom() {
+      return enterGlobalOnlineLobby(true);
+    }
+
+    async function joinOnlineRoom() {
+      return enterGlobalOnlineLobby(true);
+    }
+
+    async function leaveOnlineRoom() {
+      await closeOnlinePeer();
       setOnlineStatus("Offline", "idle");
-      addOnlineChatLine("ระบบ", "ออกจากห้องแล้ว");
-      showToast("ออกจากห้องออนไลน์แล้ว");
+      addOnlineChatLine("ระบบ", "ออกจากออนไลน์แล้ว");
+      showToast("ออกจากออนไลน์แล้ว");
     }
 
     function copyOnlineRoomCode() {
-      if (!onlineRoomCode) {
-        showToast("ยังไม่มีรหัสห้อง");
-        return;
-      }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(onlineRoomCode).then(function() {
-          showToast("คัดลอกรหัสห้องแล้ว");
-        }).catch(function() {
-          showToast("คัดลอกไม่ได้ ให้ลากคลุมรหัสแทน");
-        });
-      } else {
-        showToast("ให้ลากคลุมรหัสแล้วกด Ctrl+C");
-      }
+      showToast("ระบบใหม่ไม่ต้องใช้รหัสห้องแล้ว แค่ล็อกอินก็ขึ้นออนไลน์ทันที");
     }
 
     function sendOnlineChat() {
       const input = document.getElementById("onlineChatInput");
       const text = input ? input.value.trim() : "";
       if (!text) return;
-      if (!onlinePeer || !onlinePeer.id) {
-        showToast("ต้องสร้างหรือเข้าห้องก่อนส่งข้อความ");
+      if (!onlineRoomCode || !getMyPeerId()) {
+        showToast("ต้องล็อกอินและเข้าล็อบบี้ออนไลน์ก่อนส่งข้อความ");
         return;
       }
-      const message = { type: "CHAT", nickname: getOnlineNickname(), text: text };
-      addOnlineChatLine(message.nickname, text);
-      if (onlineIsHost) broadcastToClients(message);
-      else if (onlineHostConn && onlineHostConn.open) onlineHostConn.send(message);
+      cloudModules.push(getOnlineMessageRef(), {
+        type: "CHAT",
+        nickname: getOnlineNickname(),
+        text: text,
+        fromPeerId: getMyPeerId(),
+        createdAtMs: Date.now(),
+        sessionId: onlineSessionId
+      }).catch(function(error) {
+        console.error("Chat send error:", error);
+        showToast("ส่งข้อความไม่สำเร็จ");
+      });
       if (input) input.value = "";
     }
 
@@ -5769,16 +6081,61 @@ function closeCardModal() {
       console.groupEnd();
     }
 
+    function renderSiteHeader() {
+      const logoBox = document.getElementById("siteLogoBox");
+      const logoImg = document.getElementById("siteLogoImage");
+      const fallback = document.getElementById("siteLogoFallback");
+      const subtitle = document.getElementById("siteSubtitleText");
+      const hint = document.getElementById("siteHeaderHintText");
+
+      if (logoBox) {
+        logoBox.style.setProperty("--site-logo-width", (SITE_HEADER_CONFIG.logoWidthPx || 280) + "px");
+        logoBox.style.setProperty("--site-logo-min-height", Math.max(56, (SITE_HEADER_CONFIG.logoHeightPx || 82) - 10) + "px");
+      }
+      if (logoImg) {
+        logoImg.style.setProperty("--site-logo-height", (SITE_HEADER_CONFIG.logoHeightPx || 82) + "px");
+        logoImg.alt = SITE_HEADER_CONFIG.logoAlt || "Game Logo";
+        if (SITE_HEADER_CONFIG.logoUrl && SITE_HEADER_CONFIG.logoUrl.trim()) {
+          logoImg.onerror = function() {
+            logoImg.classList.add("hidden");
+            if (fallback) fallback.classList.remove("hidden");
+          };
+          logoImg.onload = function() {
+            logoImg.classList.remove("hidden");
+            if (fallback) fallback.classList.add("hidden");
+          };
+          logoImg.src = SITE_HEADER_CONFIG.logoUrl.trim();
+        } else {
+          logoImg.removeAttribute("src");
+          logoImg.classList.add("hidden");
+          if (fallback) fallback.classList.remove("hidden");
+        }
+      }
+      if (fallback) fallback.textContent = SITE_HEADER_CONFIG.fallbackTitle || "Gacha Card Collection";
+      if (subtitle) subtitle.textContent = SITE_HEADER_CONFIG.subtitle || "";
+      if (hint) {
+        hint.textContent = SITE_HEADER_CONFIG.hintText || "";
+        hint.classList.toggle("hidden", !SITE_HEADER_CONFIG.hintText);
+      }
+    }
+
     document.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") closeCardModal();
+      if (event.key === "Escape") {
+        closeGameAnnouncement();
+        closeCardModal();
+      }
     });
 
     if (GAME_CONFIG.runDeveloperTests) runDeveloperTests();
+    renderSiteHeader();
     renderAll();
+    openGameAnnouncement();
+    setTimeout(openGameAnnouncement, 250);
     initCloudServices();
     setInterval(renderIncomeOnly, 1000);
     window.addEventListener("beforeunload", function() {
       stopBannerSlideshow();
+      try { closeOnlinePeer(); } catch (error) {}
       flushCloudSave();
     });
   </script>
