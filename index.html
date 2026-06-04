@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
     body {
       min-height: 100vh;
@@ -817,6 +817,446 @@
       100% { background-position: 46px 46px, -44px 58px, center; }
     }
 
+
+
+    /* EX FULL ART REVEAL / แสดงการ์ดระดับ EX เป็นฟูลอาร์ตเต็มภาพดั้งเดิม */
+    /* 🟨 จุดแก้ EX Full Art: ใช้เฉพาะตอนกดแสดงการ์ดระดับ EX เท่านั้น */
+    .ex-full-art-reveal .luxury-card-reveal-wrap {
+      width: min(96vw, 520px);
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap > button,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div {
+      min-height: min(82vh, 720px) !important;
+      background: radial-gradient(circle at center, rgba(15,23,42,.95), rgba(0,0,0,.98)) !important;
+      overflow: hidden;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap button > div:first-child,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:first-child {
+      height: min(82vh, 720px) !important;
+      flex: 1 1 auto;
+      background: radial-gradient(circle at center, rgba(15,23,42,.75), rgba(0,0,0,.98)) !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap .card-art-crop,
+    .ex-full-art-reveal .luxury-card-reveal-wrap .friend-reveal-image {
+      object-fit: contain !important;
+      object-position: center center !important;
+      transform: none !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: rgba(0,0,0,.88);
+      filter: saturate(1.1) contrast(1.03);
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap button > div:last-child,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:last-child {
+      display: none !important;
+    }
+    .ex-full-art-reveal .classic-card-reveal-meta,
+    .ex-full-art-reveal .luxury-card-reveal-meta,
+    .ex-full-art-reveal .luxury-card-reveal-actions {
+      width: min(96vw, 520px);
+    }
+    @media (max-height: 760px) {
+      .ex-full-art-reveal .luxury-card-reveal-wrap > button,
+      .ex-full-art-reveal .luxury-card-reveal-wrap > div,
+      .ex-full-art-reveal .luxury-card-reveal-wrap button > div:first-child,
+      .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:first-child {
+        min-height: 520px !important;
+        height: 520px !important;
+      }
+    }
+    @media (max-height: 620px) {
+      .ex-full-art-reveal .luxury-card-reveal-wrap > button,
+      .ex-full-art-reveal .luxury-card-reveal-wrap > div,
+      .ex-full-art-reveal .luxury-card-reveal-wrap button > div:first-child,
+      .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:first-child {
+        min-height: 430px !important;
+        height: 430px !important;
+      }
+    }
+
+
+
+    /* EX VANGUARD FULL ART / เฉพาะ EX: ตัดพื้นหลัง UI ออกแล้วโชว์อาร์ตเต็มใบแบบการ์ดแวนการ์ด */
+    /* 🟨 จุดแก้ EX Vanguard 1:
+       - --ex-vanguard-fit: cover = ภาพเต็มกรอบการ์ดแบบพอดีใบ อาจครอปขอบนิดหน่อย
+       - ถ้าอยากเห็นภาพครบ 100% เปลี่ยน cover เป็น contain ได้ */
+    .online-friend-reveal-screen.ex-vanguard-art-screen.active {
+      background: radial-gradient(circle at 50% 42%, rgba(103,232,249,.10), rgba(2,6,23,.34) 38%, rgba(0,0,0,.72) 100%) !important;
+      backdrop-filter: blur(3px) !important;
+    }
+    .online-friend-reveal-screen.ex-vanguard-art-screen .online-friend-reveal-panel {
+      width: min(98vw, 500px) !important;
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+    .online-friend-reveal-screen.ex-vanguard-art-screen .online-friend-reveal-panel::before {
+      display: none !important;
+    }
+    .ex-full-art-reveal {
+      --ex-vanguard-fit: cover;
+      --ex-vanguard-position: center center;
+      --ex-vanguard-radius: 1.15rem;
+      padding: .25rem 0 .65rem !important;
+      background: transparent !important;
+    }
+    .ex-full-art-reveal .reveal-rarity-aura {
+      inset: -18% !important;
+      opacity: .44 !important;
+      filter: blur(32px) saturate(1.65) !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap {
+      width: min(86vw, 420px) !important;
+      aspect-ratio: 63 / 88 !important;
+      margin: 0 auto !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap > button,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div {
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      aspect-ratio: 63 / 88 !important;
+      position: relative !important;
+      display: block !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+      border-radius: var(--ex-vanguard-radius) !important;
+      background: transparent !important;
+      border: 1px solid rgba(255,255,255,.30) !important;
+      box-shadow:
+        0 22px 70px rgba(0,0,0,.66),
+        0 0 0 1px rgba(255,255,255,.10),
+        0 0 28px rgba(103,232,249,.32),
+        0 0 52px rgba(167,139,250,.22) !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap button > div:first-child,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:first-child {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      border-radius: inherit !important;
+      background: transparent !important;
+      overflow: hidden !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap .card-art-crop,
+    .ex-full-art-reveal .luxury-card-reveal-wrap .card-art-crop-thumb,
+    .ex-full-art-reveal .luxury-card-reveal-wrap .friend-reveal-image {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: var(--ex-vanguard-fit) !important;
+      object-position: var(--ex-vanguard-position) !important;
+      transform: scale(1.01) !important;
+      background: transparent !important;
+      filter: saturate(1.12) contrast(1.05) brightness(1.02);
+    }
+    /* ซ่อนป้าย Lv / ปลุก / ดาว / ป้ายระดับ / DUP ที่บังอาร์ต เฉพาะ EX ตอนกดแสดง */
+    .ex-full-art-reveal .luxury-card-reveal-wrap button > div:first-child > .absolute.left-2.bottom-2,
+    .ex-full-art-reveal .luxury-card-reveal-wrap button > div:first-child > .absolute.inset-x-0.top-0,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:first-child > .absolute.left-2.bottom-2,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:first-child > .absolute.inset-x-0.top-0 {
+      display: none !important;
+    }
+    /* ซ่อนกล่องข้อมูลล่างที่เป็นพื้นหลังของการ์ด ให้เหลืออาร์ตเต็มใบ */
+    .ex-full-art-reveal .luxury-card-reveal-wrap button > div:last-child,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:last-child {
+      display: none !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-meta {
+      margin-top: .55rem !important;
+      background: rgba(2,6,23,.48) !important;
+      border-color: rgba(255,255,255,.12) !important;
+      backdrop-filter: blur(8px) !important;
+    }
+    @media (max-height: 700px) {
+      .ex-full-art-reveal .luxury-card-reveal-wrap { width: min(78vw, 350px) !important; }
+      .ex-full-art-reveal .luxury-card-reveal-meta,
+      .ex-full-art-reveal .luxury-card-reveal-actions { margin-top: .4rem !important; padding: .5rem !important; }
+    }
+
+
+    /* EX VANGUARD DETAIL UI OUTSIDE CARD / เฉพาะ EX: ย้ายกล่องรายละเอียดและปุ่มให้อยู่นอกขอบการ์ด ไม่โดนตัดแหว่ง */
+    /* 🟨 จุดแก้ EX Vanguard 2:
+       - กล่องรายละเอียด/ปุ่มเป็น sibling ของการ์ด จึงต้องเปิด overflow ของ panel ชั้นนอก
+       - อาร์ตยังคงโดนครอปเฉพาะในกรอบการ์ดด้วย overflow hidden ของตัวการ์ดเท่านั้น */
+    .online-friend-reveal-screen.ex-vanguard-art-screen {
+      overflow-y: auto !important;
+      align-items: flex-start !important;
+      padding-top: max(.85rem, env(safe-area-inset-top)) !important;
+      padding-bottom: max(1.25rem, env(safe-area-inset-bottom)) !important;
+    }
+    .online-friend-reveal-screen.ex-vanguard-art-screen .online-friend-reveal-panel,
+    .online-friend-reveal-screen.ex-vanguard-art-screen .online-friend-reveal-card,
+    .online-friend-reveal-screen.ex-vanguard-art-screen .ex-full-art-reveal {
+      overflow: visible !important;
+      max-height: none !important;
+    }
+    .ex-full-art-reveal {
+      padding: .25rem 0 1.1rem !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap {
+      margin-bottom: .85rem !important;
+      z-index: 12 !important;
+    }
+    .ex-full-art-reveal .classic-card-reveal-meta,
+    .ex-full-art-reveal .luxury-card-reveal-meta,
+    .ex-full-art-reveal .luxury-card-reveal-actions {
+      position: relative !important;
+      z-index: 40 !important;
+      width: min(94vw, 460px) !important;
+      max-width: 460px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      overflow: visible !important;
+      box-sizing: border-box !important;
+      border-radius: 1.15rem !important;
+      transform: none !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-meta {
+      margin-top: .2rem !important;
+      padding: .75rem .85rem !important;
+      line-height: 1.45 !important;
+      background:
+        linear-gradient(145deg, rgba(2,6,23,.84), rgba(15,23,42,.62)),
+        radial-gradient(circle at 50% 0%, rgba(103,232,249,.18), transparent 58%) !important;
+      border: 1px solid rgba(103,232,249,.22) !important;
+      box-shadow:
+        0 12px 34px rgba(0,0,0,.42),
+        0 0 20px rgba(103,232,249,.14),
+        inset 0 0 16px rgba(255,255,255,.05) !important;
+      backdrop-filter: blur(12px) !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-actions {
+      margin-top: .55rem !important;
+      padding: .55rem !important;
+      background: rgba(2,6,23,.46) !important;
+      border: 1px solid rgba(255,255,255,.12) !important;
+      backdrop-filter: blur(10px) !important;
+      box-shadow: 0 10px 28px rgba(0,0,0,.30) !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-actions button {
+      min-height: 42px !important;
+      line-height: 1.15 !important;
+      white-space: normal !important;
+      overflow: visible !important;
+      padding-left: .45rem !important;
+      padding-right: .45rem !important;
+    }
+    .ex-full-art-reveal .next-upgrade-resource-box {
+      overflow: visible !important;
+    }
+    .ex-full-art-reveal .next-upgrade-resource-row {
+      overflow-wrap: anywhere !important;
+      word-break: break-word !important;
+    }
+    @media (max-width: 520px) {
+      .ex-full-art-reveal .luxury-card-reveal-wrap {
+        width: min(82vw, 380px) !important;
+      }
+      .ex-full-art-reveal .luxury-card-reveal-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .45rem !important;
+      }
+      .ex-full-art-reveal .luxury-card-reveal-meta {
+        font-size: 11px !important;
+      }
+    }
+    @media (max-height: 720px) {
+      .online-friend-reveal-screen.ex-vanguard-art-screen {
+        align-items: flex-start !important;
+      }
+      .ex-full-art-reveal .luxury-card-reveal-wrap {
+        width: min(72vw, 330px) !important;
+      }
+      .ex-full-art-reveal .luxury-card-reveal-meta,
+      .ex-full-art-reveal .luxury-card-reveal-actions {
+        width: min(92vw, 420px) !important;
+      }
+    }
+
+
+    /* EX RESTORE + CROP OVERLAY / คืนการแสดง EX แบบเดิม และครอปเอฟเฟกต์ไม่ให้ล้นออกนอกใบการ์ด */
+    /* ใช้เฉพาะ EX เท่านั้น: ซ่อนออร่าชั้นนอกที่เป็น sibling นอกกรอบการ์ด แล้วให้เหลือเอฟเฟกต์ที่อยู่บนตัวการ์ดซึ่งถูก overflow hidden ครอบไว้ */
+    .ex-full-art-reveal > .reveal-rarity-aura {
+      display: none !important;
+    }
+    .ex-full-art-reveal.luxury-full-max-reveal::before {
+      display: none !important;
+    }
+    .ex-full-art-reveal .luxury-card-reveal-wrap > button,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div,
+    .ex-full-art-reveal .luxury-card-reveal-wrap button > div:first-child,
+    .ex-full-art-reveal .luxury-card-reveal-wrap > div > div:first-child {
+      overflow: hidden !important;
+      contain: paint;
+    }
+    .ex-full-art-reveal .effect-ex-transcendent,
+    .ex-full-art-reveal .luxury-full-max-card,
+    .ex-full-art-reveal .prismatic-awaken-max,
+    .ex-full-art-reveal .awaken-max-effect-wrap {
+      overflow: hidden !important;
+    }
+
+
+
+
+    /* ALL RARITY OVERLAY CROP / ครอปโอเวอร์เลย์เอฟเฟกต์ทุกระดับให้อยู่เฉพาะในใบการ์ด */
+    /* ไม่เปลี่ยนภาพ/สเกลภาพการ์ด: แค่บังคับเอฟเฟกต์ที่เป็น overlay และ pseudo-element ไม่ให้ล้นออกนอกกรอบใบการ์ด */
+    .online-friend-reveal-card > .reveal-rarity-aura,
+    .online-friend-reveal-card.luxury-full-max-reveal::before {
+      display: none !important;
+    }
+    .online-friend-reveal-card .classic-card-reveal-wrap > button,
+    .online-friend-reveal-card .classic-card-reveal-wrap > div,
+    .online-friend-reveal-card .luxury-card-reveal-wrap > button,
+    .online-friend-reveal-card .luxury-card-reveal-wrap > div {
+      overflow: hidden !important;
+      contain: paint;
+    }
+    .online-friend-reveal-card .classic-card-reveal-wrap button > div:first-child,
+    .online-friend-reveal-card .classic-card-reveal-wrap > div > div:first-child,
+    .online-friend-reveal-card .luxury-card-reveal-wrap button > div:first-child,
+    .online-friend-reveal-card .luxury-card-reveal-wrap > div > div:first-child,
+    .online-friend-reveal-card .limited-jjk-card,
+    .online-friend-reveal-card .effect-jjk-sorcery-blue,
+    .online-friend-reveal-card .effect-jjk-holo-purple,
+    .online-friend-reveal-card .effect-jjk-curse-red,
+    .online-friend-reveal-card .effect-sc-ultimate,
+    .online-friend-reveal-card .effect-ex-transcendent,
+    .online-friend-reveal-card .prismatic-awaken-max,
+    .online-friend-reveal-card .awaken-max-effect-wrap,
+    .online-friend-reveal-card .luxury-full-max-card {
+      overflow: hidden !important;
+      contain: paint;
+    }
+    .online-friend-reveal-card .limited-jjk-card::before,
+    .online-friend-reveal-card .limited-jjk-card::after,
+    .online-friend-reveal-card .effect-jjk-sorcery-blue::before,
+    .online-friend-reveal-card .effect-jjk-sorcery-blue::after,
+    .online-friend-reveal-card .effect-jjk-holo-purple::before,
+    .online-friend-reveal-card .effect-jjk-holo-purple::after,
+    .online-friend-reveal-card .effect-jjk-curse-red::before,
+    .online-friend-reveal-card .effect-jjk-curse-red::after,
+    .online-friend-reveal-card .effect-sc-ultimate::before,
+    .online-friend-reveal-card .effect-sc-ultimate::after,
+    .online-friend-reveal-card .effect-ex-transcendent::before,
+    .online-friend-reveal-card .effect-ex-transcendent::after,
+    .online-friend-reveal-card .luxury-full-max-card::before,
+    .online-friend-reveal-card .luxury-full-max-card::after {
+      border-radius: inherit !important;
+    }
+    .online-friend-reveal-card .prismatic-awaken-overlay,
+    .online-friend-reveal-card .awaken-max-edge-overlay,
+    .online-friend-reveal-card .luxury-full-max-card-overlay {
+      inset: 0 !important;
+      border-radius: inherit !important;
+      overflow: hidden !important;
+      contain: paint;
+    }
+    /* thumbnail/collection card ก็ครอปเอฟเฟกต์ให้อยู่ในกรอบรูปเหมือนกัน */
+    .limited-jjk-card,
+    .effect-jjk-sorcery-blue,
+    .effect-jjk-holo-purple,
+    .effect-jjk-curse-red,
+    .effect-sc-ultimate,
+    .effect-ex-transcendent,
+    .prismatic-awaken-max,
+    .awaken-max-effect-wrap,
+    .luxury-full-max-card {
+      overflow: hidden;
+    }
+
+
+    /* NORMAL RARITY DETAIL UI LIKE EX / ระดับอื่นนอกจาก EX: ปรับเฉพาะกล่องรายละเอียดให้อ่านครบเหมือน EX โดยไม่แตะการแสดงภาพการ์ด */
+    .online-friend-reveal-screen.readable-card-detail-screen {
+      overflow-y: auto !important;
+      align-items: flex-start !important;
+      padding-top: max(.85rem, env(safe-area-inset-top)) !important;
+      padding-bottom: max(1.25rem, env(safe-area-inset-bottom)) !important;
+    }
+    .online-friend-reveal-screen.readable-card-detail-screen .online-friend-reveal-panel,
+    .online-friend-reveal-screen.readable-card-detail-screen .online-friend-reveal-card,
+    .online-friend-reveal-screen.readable-card-detail-screen .normal-readable-detail-reveal {
+      overflow: visible !important;
+      max-height: none !important;
+    }
+    .normal-readable-detail-reveal {
+      padding-bottom: 1.1rem !important;
+    }
+    .normal-readable-detail-reveal .classic-card-reveal-meta,
+    .normal-readable-detail-reveal .luxury-card-reveal-meta,
+    .normal-readable-detail-reveal .luxury-card-reveal-actions {
+      position: relative !important;
+      z-index: 40 !important;
+      width: min(94vw, 460px) !important;
+      max-width: 460px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      overflow: visible !important;
+      box-sizing: border-box !important;
+      border-radius: 1.15rem !important;
+      transform: none !important;
+    }
+    .normal-readable-detail-reveal .luxury-card-reveal-meta {
+      margin-top: .55rem !important;
+      padding: .75rem .85rem !important;
+      line-height: 1.45 !important;
+      background:
+        linear-gradient(145deg, rgba(2,6,23,.84), rgba(15,23,42,.62)),
+        radial-gradient(circle at 50% 0%, rgba(103,232,249,.18), transparent 58%) !important;
+      border: 1px solid rgba(103,232,249,.22) !important;
+      box-shadow:
+        0 12px 34px rgba(0,0,0,.42),
+        0 0 20px rgba(103,232,249,.14),
+        inset 0 0 16px rgba(255,255,255,.05) !important;
+      backdrop-filter: blur(12px) !important;
+      text-align: center !important;
+    }
+    .normal-readable-detail-reveal .luxury-card-reveal-actions {
+      margin-top: .65rem !important;
+      padding: .55rem !important;
+      background: rgba(2,6,23,.46) !important;
+      border: 1px solid rgba(255,255,255,.12) !important;
+      backdrop-filter: blur(10px) !important;
+      box-shadow: 0 10px 28px rgba(0,0,0,.30) !important;
+    }
+    .normal-readable-detail-reveal .luxury-card-reveal-actions button {
+      min-height: 42px !important;
+      line-height: 1.15 !important;
+      white-space: normal !important;
+      overflow: visible !important;
+      padding-left: .45rem !important;
+      padding-right: .45rem !important;
+    }
+    .normal-readable-detail-reveal .next-upgrade-resource-box {
+      overflow: visible !important;
+    }
+    .normal-readable-detail-reveal .next-upgrade-resource-row {
+      overflow-wrap: anywhere !important;
+      word-break: break-word !important;
+    }
+    @media (max-width: 520px) {
+      .normal-readable-detail-reveal .luxury-card-reveal-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .45rem !important;
+      }
+      .normal-readable-detail-reveal .luxury-card-reveal-meta {
+        font-size: 11px !important;
+      }
+    }
+    @media (max-height: 720px) {
+      .online-friend-reveal-screen.readable-card-detail-screen {
+        align-items: flex-start !important;
+      }
+      .normal-readable-detail-reveal .luxury-card-reveal-meta,
+      .normal-readable-detail-reveal .luxury-card-reveal-actions {
+        width: min(92vw, 420px) !important;
+      }
+    }
+
+
     /* SC ULTIMATE MULTICOLOR / สีระดับ SC แบบหลายเฉด */
     /* 🟨 จุดเปลี่ยนสี SC 1: เปลี่ยนสีพื้นการ์ดระดับ SC ที่ .sc-ultimate-gradient */
     .sc-ultimate-gradient {
@@ -1127,6 +1567,49 @@
       .site-logo-box { --site-logo-width: 230px; --site-logo-min-height: 58px; }
       .site-logo-img { --site-logo-height: 66px; }
     }
+
+    /* CARD REVEAL SCROLL AXIS FIX / ล็อกการเลื่อนตอนกดดูการ์ดให้ขึ้นลงอย่างเดียว */
+    /* กันเอฟเฟกต์หมุนด้านหลังของ panel ขยายพื้นที่ scroll จนลากการ์ดได้รอบทิศ */
+    html, body {
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    .online-friend-reveal-screen,
+    .online-friend-reveal-screen.readable-card-detail-screen,
+    .online-friend-reveal-screen.ex-vanguard-art-screen {
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      max-width: 100vw !important;
+    }
+    .online-friend-reveal-screen .online-friend-reveal-panel {
+      max-width: calc(100vw - 1rem) !important;
+      touch-action: pan-y;
+    }
+    /* ตัวนี้คือเอฟเฟกต์หมุนใหญ่ของ gacha panel ที่อยู่หลังการ์ด ถ้า panel เปิด overflow visible จะทำให้เกิดพื้นที่ลากซ้ายขวา */
+    .online-friend-reveal-screen .online-friend-reveal-panel::before {
+      display: none !important;
+    }
+    .online-friend-reveal-screen .online-friend-reveal-card {
+      max-width: 100% !important;
+      touch-action: pan-y;
+    }
+    .online-friend-reveal-screen .classic-card-reveal-wrap,
+    .online-friend-reveal-screen .luxury-card-reveal-wrap,
+    .online-friend-reveal-screen .classic-card-reveal-meta,
+    .online-friend-reveal-screen .luxury-card-reveal-meta,
+    .online-friend-reveal-screen .luxury-card-reveal-actions {
+      max-width: calc(100vw - 1.25rem) !important;
+    }
+    /* อนุญาตให้รายละเอียดล้นในแนวตั้งได้ แต่ห้ามล้นแนวนอน */
+    .normal-readable-detail-reveal,
+    .ex-full-art-reveal,
+    .luxury-card-reveal {
+      max-width: 100% !important;
+      overflow-x: clip !important;
+    }
+
 
     button, input, select { outline: none; }
   </style>
@@ -1552,6 +2035,26 @@
     // 🎚️ BALANCE PATCH 2026-05-30
     // แนวบาลานซ์: เงินเริ่มต้นพอเปิดตู้มาตรฐานได้หลายครั้ง แต่ตู้ Limited/Legend ต้องอาศัยรายวัน + Showcase
     // 10-pull ทุกตู้ลด 10%, Daily เท่ากับ 6 single มาตรฐาน, ค่าอัปเกรดโตช้าลงเพื่อไม่ให้ตันเร็วเกินไป
+
+    // ✅ Safe localStorage helper / ป้องกันหน้าเว็บค้างเมื่อ Browser บล็อก localStorage
+    const SAFE_LOCAL_STORAGE = (function() {
+      const memoryStore = {};
+      const fallback = {
+        getItem: function(key) { return Object.prototype.hasOwnProperty.call(memoryStore, key) ? memoryStore[key] : null; },
+        setItem: function(key, value) { memoryStore[key] = String(value); },
+        removeItem: function(key) { delete memoryStore[key]; }
+      };
+      try {
+        const storage = window.localStorage;
+        const testKey = "__gacha_storage_test__";
+        storage.setItem(testKey, "1");
+        storage.removeItem(testKey);
+        return storage;
+      } catch (error) {
+        console.warn("localStorage ถูกบล็อก จึงใช้หน่วยความจำชั่วคราวแทน", error);
+        return fallback;
+      }
+    })();
 
     const GAME_CONFIG = {
       accountKey: "simple_gacha_accounts_v5_stable",
@@ -2401,9 +2904,9 @@
       saveAccounts(accounts);
     }
 
-    let activeUser = localStorage.getItem(ACTIVE_USER_KEY) || "";
+    let activeUser = SAFE_LOCAL_STORAGE.getItem(ACTIVE_USER_KEY) || "";
     let state = activeUser ? loadUserSave(activeUser) : defaultState();
-    let activeBannerId = localStorage.getItem(ACTIVE_BANNER_KEY) || (GACHA_BANNERS[0] ? GACHA_BANNERS[0].id : "standard");
+    let activeBannerId = SAFE_LOCAL_STORAGE.getItem(ACTIVE_BANNER_KEY) || (GACHA_BANNERS[0] ? GACHA_BANNERS[0].id : "standard");
     let bannerSlideTimer = null;
     let bannerSlideIndex = 0;
     let bannerSlideActiveLayer = "A";
@@ -2412,8 +2915,8 @@
     let autoGachaTimer = null;
     let autoGachaRunning = false;
     let collectionPage = 1;
-    let activeMainTab = localStorage.getItem("simple_gacha_active_main_tab_v1") || "collection";
-    let activeTradeSubTab = localStorage.getItem("simple_gacha_active_trade_sub_tab_v1") || "duplicate";
+    let activeMainTab = SAFE_LOCAL_STORAGE.getItem("simple_gacha_active_main_tab_v1") || "collection";
+    let activeTradeSubTab = SAFE_LOCAL_STORAGE.getItem("simple_gacha_active_trade_sub_tab_v1") || "duplicate";
     let tradeDuplicatePage = 1;
     let tradeShopPage = 1;
     let gachaRevealBusy = false;
@@ -2468,7 +2971,7 @@
 
     function loadAccounts() {
       try {
-        const raw = JSON.parse(localStorage.getItem(ACCOUNT_KEY)) || {};
+        const raw = JSON.parse(SAFE_LOCAL_STORAGE.getItem(ACCOUNT_KEY)) || {};
         const normalized = {};
         let changed = false;
         Object.keys(raw).forEach(function(name) {
@@ -2483,7 +2986,7 @@
     }
 
     function saveAccounts(accounts) {
-      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts));
+      SAFE_LOCAL_STORAGE.setItem(ACCOUNT_KEY, JSON.stringify(accounts));
     }
 
     function loadUserSave(username) {
@@ -2501,7 +3004,7 @@
       if (activeCloudUid) account.cloudUid = activeCloudUid;
       accounts[activeUser] = account;
       saveAccounts(accounts);
-      localStorage.setItem(ACTIVE_USER_KEY, activeUser);
+      SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
       scheduleCloudSave();
       scheduleOnlineBroadcast();
     }
@@ -2597,7 +3100,7 @@
           });
 
           mirrorCloudAccountToLocal(username, activeCloudUid, state);
-          localStorage.setItem(ACTIVE_USER_KEY, activeUser);
+          SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
           document.getElementById("pullResult").innerHTML = "";
           renderAll();
           activateGlobalOnlineForCurrentUser();
@@ -2639,7 +3142,7 @@
 
       activeUser = username;
       activeCloudUid = "";
-      localStorage.setItem(ACTIVE_USER_KEY, activeUser);
+      SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
       state = accounts[username].save;
       document.getElementById("pullResult").innerHTML = "";
       renderAll();
@@ -2679,7 +3182,7 @@
           }
 
           mirrorCloudAccountToLocal(username, activeCloudUid, state);
-          localStorage.setItem(ACTIVE_USER_KEY, activeUser);
+          SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
           document.getElementById("pullResult").innerHTML = "";
           renderAll();
           activateGlobalOnlineForCurrentUser();
@@ -2726,7 +3229,7 @@
 
       activeUser = username;
       activeCloudUid = account.cloudUid || "";
-      localStorage.setItem(ACTIVE_USER_KEY, activeUser);
+      SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
       state = loadUserSave(activeUser);
       document.getElementById("pullResult").innerHTML = "";
       renderAll();
@@ -2742,7 +3245,7 @@
       }
       activeUser = "";
       activeCloudUid = "";
-      localStorage.removeItem(ACTIVE_USER_KEY);
+      SAFE_LOCAL_STORAGE.removeItem(ACTIVE_USER_KEY);
       state = defaultState();
       document.getElementById("pullResult").innerHTML = "";
       const passwordInput = document.getElementById("loginPassword");
@@ -3472,7 +3975,7 @@ function nextBannerImage() {
     function changeBanner() {
       const select = document.getElementById("bannerSelect");
       activeBannerId = select.value;
-      localStorage.setItem(ACTIVE_BANNER_KEY, activeBannerId);
+      SAFE_LOCAL_STORAGE.setItem(ACTIVE_BANNER_KEY, activeBannerId);
       stopBannerSlideshow();
       bannerSlideInitialized = false;
       bannerSlideActiveBannerId = "";
@@ -4106,7 +4609,7 @@ function nextBannerImage() {
 
     function setMainTab(tabName) {
       activeMainTab = tabName === "trade" ? "trade" : "collection";
-      localStorage.setItem("simple_gacha_active_main_tab_v1", activeMainTab);
+      SAFE_LOCAL_STORAGE.setItem("simple_gacha_active_main_tab_v1", activeMainTab);
       renderMainTabs();
     }
 
@@ -4555,7 +5058,7 @@ function nextBannerImage() {
 
     function setTradeSubTab(tab) {
       activeTradeSubTab = tab === "stock" ? "stock" : "duplicate";
-      localStorage.setItem("simple_gacha_active_trade_sub_tab_v1", activeTradeSubTab);
+      SAFE_LOCAL_STORAGE.setItem("simple_gacha_active_trade_sub_tab_v1", activeTradeSubTab);
       renderTradeShop();
     }
 
@@ -5031,7 +5534,47 @@ function nextBannerImage() {
         return;
       }
       content.innerHTML = contentHTML;
+      if (String(contentHTML || "").includes("ex-full-art-reveal")) {
+        screen.classList.add("ex-vanguard-art-screen");
+      } else {
+        screen.classList.remove("ex-vanguard-art-screen");
+      }
+      if (String(contentHTML || "").includes("normal-readable-detail-reveal")) {
+        screen.classList.add("readable-card-detail-screen");
+      } else {
+        screen.classList.remove("readable-card-detail-screen");
+      }
       screen.classList.add("active");
+    }
+
+    function getAwakenBonusDetailHTML(cardId, currentRank, maxRank, options) {
+      options = options || {};
+      const card = getCardById(cardId);
+      const powerBonusPerRank = getAwakenPowerBonusPerRank(cardId);
+      const incomeBonusPerRank = getAwakenIncomeBonusPerRank(cardId);
+      const rank = Math.max(0, Number(currentRank || 0));
+      const max = Math.max(0, Number(maxRank || getCardAwakenMax(cardId) || 0));
+      const currentPowerPercent = powerBonusPerRank * rank * 100;
+      const currentIncomePercent = incomeBonusPerRank * rank * 100;
+      const fullPowerPercent = powerBonusPerRank * max * 100;
+      const fullIncomePercent = incomeBonusPerRank * max * 100;
+      const perPowerPercent = powerBonusPerRank * 100;
+      const perIncomePercent = incomeBonusPerRank * 100;
+      const basePower = card ? Number(card.power || 0) : 0;
+      const baseIncome = card ? Number(card.incomePerSec || 0) : 0;
+      const compact = !!options.compact;
+      return '<div class="next-upgrade-resource-box awaken-bonus-detail-box">' +
+        '<div class="next-upgrade-resource-row">' +
+          '<b class="text-cyan-200">ค่าสถานะพื้นฐาน</b><br>' +
+          'Power <b>' + basePower.toLocaleString() + '</b> • รายได้ <b>+' + baseIncome.toFixed(1) + '</b> Gem/s' +
+        '</div>' +
+        '<div class="next-upgrade-resource-row">' +
+          '<b class="text-fuchsia-200">โบนัสปลุกพลัง</b><br>' +
+          'ต่อ 1 ขั้น: Power <b>+' + perPowerPercent.toFixed(0) + '%</b> • รายได้ <b>+' + perIncomePercent.toFixed(0) + '%</b><br>' +
+          (compact ? '' : 'ตอนนี้: Power <b>+' + currentPowerPercent.toFixed(0) + '%</b> • รายได้ <b>+' + currentIncomePercent.toFixed(0) + '%</b><br>') +
+          'ปลุกเต็ม ' + max + ' ขั้น: Power <b>+' + fullPowerPercent.toFixed(0) + '%</b> • รายได้ <b>+' + fullIncomePercent.toFixed(0) + '%</b>' +
+        '</div>' +
+      '</div>';
     }
 
     function makeLocalCardRevealHTML(card, options) {
@@ -5048,6 +5591,8 @@ function nextBannerImage() {
       const incomeValue = getCardIncome(card);
       const rarityLabel = getRarityLabel(card.rarity);
       const rarityTone = getRarityTone(card.rarity);
+      // EX ต้องคงการแสดงผลแบบ Vanguard Full Art เหมือนเดิมทุกจุด รวมถึงในร้านเทรด
+      const isEXFullArtReveal = String(card.rarity || "").toUpperCase() === "EX";
       const isLuxuryFullMax = !!(data && isCardLuxuryFullMax(card.id));
       const statusFullText = data ? (isLuxuryFullMax ? "เลเวลเต็ม + ปลุกเต็ม" : (level >= GAME_CONFIG.maxCardLevel ? "เลเวลเต็ม" : (isAwakenMaxed(card.id) ? "ปลุกเต็ม" : "ยังไม่เต็ม"))) : "Preview";
       let actionButtons = "";
@@ -5065,6 +5610,7 @@ function nextBannerImage() {
           '<div class="classic-card-reveal-meta luxury-card-reveal-meta rounded-2xl bg-black/45 border border-white/10 p-3 text-xs text-slate-200 text-center">' +
             '<b class="text-fuchsia-200">ร้านเทรด</b> • ราคา <b>' + price.toLocaleString() + '</b> PiceCrad • Stock ' + left + '/' + stock + '<br>' +
             '<span class="text-slate-300">' + escapeHTML(rarityLabel) + (rarityTone ? ' • ' + escapeHTML(rarityTone) : '') + ' • ดาวระดับ ' + getRarityStarCount(card.rarity) + '★ • Awaken สูงสุด ' + duplicateMaxRank + ' ขั้น • ใช้รวม ' + getTotalAwakenDuplicateCost(card.id) + ' ใบซ้ำ</span>' +
+            getAwakenBonusDetailHTML(card.id, 0, duplicateMaxRank, { compact: true }) +
           '</div>';
       } else if (data) {
         const availableDuplicates = getAvailableDuplicateCopies(card.id);
@@ -5094,6 +5640,7 @@ function nextBannerImage() {
             'Lv.<b>' + level + '</b>/' + GAME_CONFIG.maxCardLevel + ' • Power <b>' + Number(powerValue || 0).toLocaleString() + '</b> • Income <b>+' + Number(incomeValue || 0).toFixed(1) + '</b><br>' +
             '<div class="flex justify-center mt-1 mb-1">' + awakenStarsHTML(card.id, { large: true }) + '</div>' +
             'ปลุกพลัง <b>' + duplicateRank + '/' + duplicateMaxRank + '</b> • ซ้ำใช้ได้ <b>' + availableDuplicates + '</b> • ' + getAwakenCostSummaryText(card.id) + ' • <b class="text-yellow-200">' + statusFullText + '</b>' +
+            getAwakenBonusDetailHTML(card.id, duplicateRank, duplicateMaxRank) +
             getNextCardResourceHTML(card.id) +
             (isLuxuryFullMax ? '<div class="luxury-full-max-status">✦ LUXURY FULL MAX ✦</div>' : '') +
           '</div>';
@@ -5101,10 +5648,11 @@ function nextBannerImage() {
         metaHTML =
           '<div class="classic-card-reveal-meta luxury-card-reveal-meta rounded-2xl bg-black/45 border border-white/10 p-3 text-xs text-slate-200 text-center">' +
             'Power <b>' + Number(card.power || 0).toLocaleString() + '</b> • Income <b>+' + Number(card.incomePerSec || 0).toFixed(1) + '</b> Gem/s' +
+            getAwakenBonusDetailHTML(card.id, 0, duplicateMaxRank, { compact: true }) +
           '</div>';
       }
 
-      return '<div class="online-friend-reveal-card luxury-card-reveal py-4 ' + (isLuxuryFullMax ? 'luxury-full-max-reveal' : '') + '">' +
+      return '<div class="online-friend-reveal-card luxury-card-reveal py-4 ' + (isLuxuryFullMax ? 'luxury-full-max-reveal ' : '') + (isEXFullArtReveal ? 'ex-full-art-reveal' : 'normal-readable-detail-reveal') + '">' +
         '<div class="reveal-rarity-aura bg-gradient-to-br ' + info.color + '"></div>' +
         '<div class="classic-card-reveal-wrap luxury-card-reveal-wrap">' + cardHTML(card, true, false, count, false) + '</div>' +
         actionButtons +
@@ -5461,6 +6009,7 @@ function closeCardModal() {
 
     function friendClassicCardHTML(item, player) {
       const info = rarityInfo[item.rarity] || Object.values(rarityInfo)[0];
+      const isEXFullArtReveal = String(item.rarity || "").toUpperCase() === "EX";
       const rarityLabel = item.rarityLabel || getRarityLabel(item.rarity);
       const rarityTone = item.rarityTone || getRarityTone(item.rarity);
       const rarityEffectClass = item.rarityEffectClass || getRarityEffectClass(item.rarity);
@@ -5484,7 +6033,7 @@ function closeCardModal() {
       const friendAwakenStarsLarge = onlineFriendAwakenStarsHTML(item, { large: true });
       const fullText = item.awakenFull || item.levelFull ? (item.awakenFull && item.levelFull ? "เลเวลเต็ม + ปลุกเต็ม" : item.awakenFull ? "ปลุกเต็ม" : "เลเวลเต็ม") : "ยังไม่เต็ม";
 
-      return '<div class="online-friend-reveal-card luxury-card-reveal py-4">' +
+      return '<div class="online-friend-reveal-card luxury-card-reveal py-4 ' + (isEXFullArtReveal ? 'ex-full-art-reveal' : '') + '">' +
         '<div class="reveal-rarity-aura bg-gradient-to-br ' + (item.rarityColor || info.color) + '"></div>' +
         '<div class="classic-card-reveal-wrap luxury-card-reveal-wrap">' +
           '<div class="text-left w-full rounded-2xl bg-slate-950/60 shadow-xl border border-white/20 overflow-hidden min-h-[420px] flex flex-col">' +
@@ -5531,7 +6080,13 @@ function closeCardModal() {
         return;
       }
 
-      content.innerHTML = friendClassicCardHTML(item, player);
+      const friendRevealHTML = friendClassicCardHTML(item, player);
+      content.innerHTML = friendRevealHTML;
+      if (String(friendRevealHTML || "").includes("ex-full-art-reveal")) {
+        screen.classList.add("ex-vanguard-art-screen");
+      } else {
+        screen.classList.remove("ex-vanguard-art-screen");
+      }
       screen.classList.add("active");
     }
 
@@ -5578,12 +6133,13 @@ function closeCardModal() {
         }
         const awakenText = "ปลุก " + Number(item.awakenRank || 0) + "/" + Number(item.awakenMax || 0);
         const friendAwakenStars = onlineFriendAwakenStarsHTML(item, { compact: true });
-        const fullText = item.awakenFull && item.levelFull ? " FULL MAX" : item.awakenFull ? " AWAKEN MAX" : item.levelFull ? " LEVEL MAX" : "";
+        // ✅ ช่อง Showcase ของเพื่อนก่อนกดแสดงการ์ด: ไม่ใส่ป้าย FULL MAX / AWAKEN MAX / LEVEL MAX ทับรูปการ์ด
+        // เอฟเฟกต์ขอบ/ออร่ายังอยู่ได้ แต่ไม่มีข้อความสถานะแมกซ์บังภาพ thumbnail
         const maxClass = awakenMaxEffectClass(item.rarity, !!item.awakenFull);
         const maxStyle = awakenMaxInlineStyle(item.rarity, !!item.awakenFull);
         const rarityEffectClass = item.rarityEffectClass || getRarityEffectClass(item.rarity);
         const limitedClass = item.limitedJJK || isLimitedJJKRarity(item.rarity) ? "limited-jjk-card" : "";
-        const overlay = onlineCardMaxOverlayHTML(item, true);
+        const overlay = "";
         const image = item.image ? "<div class='relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-gradient-to-br " + escapeAttr(item.rarityColor || (rarityInfo[item.rarity] || Object.values(rarityInfo)[0]).color) + " " + (item.raritySpecial ? "shine" : "") + " " + escapeAttr(limitedClass) + " " + escapeAttr(rarityEffectClass) + " " + maxClass + "' style='" + escapeAttr(maxStyle) + "'><img src='" + escapeAttr(item.image) + "' class='absolute inset-0 card-art-crop-thumb' alt='' />" + overlay + "</div>" :
           "<div class='relative w-14 h-14 rounded-xl bg-white/10 border border-white/10 shrink-0 flex items-center justify-center font-black " + maxClass + "' style='" + escapeAttr(maxStyle) + "'>" + escapeHTML(String(item.name || "?").charAt(0)) + overlay + "</div>";
         const peerId = escapeAttr(player.peerId || "");
@@ -5595,7 +6151,7 @@ function closeCardModal() {
             (friendAwakenStars ? "<div class='mt-1'>" + friendAwakenStars + "</div>" : "") +
             "<div class='flex flex-wrap gap-1 mt-1'>" +
               "<span class='rounded-full bg-cyan-400/15 border border-cyan-300/20 text-cyan-200 px-2 py-0.5 font-black'>Lv." + Number(item.level || 1) + "</span>" +
-              "<span class='rounded-full bg-fuchsia-400/15 border border-fuchsia-300/20 text-fuchsia-200 px-2 py-0.5 font-black'>" + escapeHTML(awakenText + fullText) + "</span>" +
+              "<span class='rounded-full bg-fuchsia-400/15 border border-fuchsia-300/20 text-fuchsia-200 px-2 py-0.5 font-black'>" + escapeHTML(awakenText) + "</span>" +
               "<span class='rounded-full bg-emerald-400/15 border border-emerald-300/20 text-emerald-200 px-2 py-0.5 font-black'>+" + Number(item.income || 0).toFixed(1) + " Gem/s</span>" +
             "</div>" +
             "<div class='text-[10px] text-slate-500 mt-1'>กดเพื่อดูการ์ดใบนี้</div>" +
