@@ -1116,7 +1116,7 @@
         <div>
           <h2 class="text-2xl font-black mb-2">Real-time Online Lobby ผ่าน Firebase</h2>
           <p class="text-sm text-slate-300 max-w-3xl">
-             เมื่อผู้เล่นล็อกอินสำเร็จ ระบบจะพาเข้าล็อบบี้กลางอัตโนมัติและแสดงรายชื่อทุกคนที่ออนไลน์อยู่
+            ไม่ต้องสร้างห้องแล้ว: เมื่อผู้เล่นล็อกอินสำเร็จ ระบบจะพาเข้าล็อบบี้กลางอัตโนมัติและแสดงรายชื่อทุกคนที่ออนไลน์อยู่
             ระบบเทรด การส่งทรัพยากร ส่งการ์ดซ้ำ และโชว์การ์ดเพื่อนยังใช้หน้าตาเดิมทั้งหมด
           </p>
         </div>
@@ -1435,10 +1435,10 @@
     // 3) ถ้าไม่ใส่ logoUrl ระบบจะแสดง fallbackTitle เป็นตัวหนังสือแทน
     // แนะนำไฟล์โลโก้: PNG พื้นหลังโปร่งใส ขนาดประมาณ 600x180 หรือ 900x260
     const SITE_HEADER_CONFIG = {
-      logoUrl: "https://chatgpt.com/backend-api/estuary/content?id=file_000000007ca871f88a9cfc403c095f65&ts=494600&p=fsns&cid=1&sig=b1328f2c57e6c8d6007e04865f90f0da4a627ed76e688f7ef71ce7382b20cbc4&v=0", // 🟨 ใส่ URL รูปโลโก้ตรงนี้ เช่น "https://example.com/my-logo.png"
+      logoUrl: "", // 🟨 ใส่ URL รูปโลโก้ตรงนี้ เช่น "https://example.com/my-logo.png"
       logoAlt: "Gacha Card Collection Logo",
       fallbackTitle: "Gacha Card Collection",
-      subtitle: "ver. 1.3.1",
+      subtitle: "ล็อกอินด้วยไอดีเกม เซฟกลาง Firebase ทุกเครื่อง ทุก Browser ผ่าน GitHub Pages",
       hintText: "", // 🟨 ถ้าอยากให้มีข้อความเล็กใต้หัวเว็บ ให้ใส่ข้อความตรงนี้
       logoWidthPx: 280,
       logoHeightPx: 82
@@ -1616,9 +1616,9 @@
       enabled: true,
       title: "ประกาศอัปเดตเกม",
       subtitle: "ข่าวสาร / กิจกรรม / แพตช์ใหม่",
-      body: "ยินดีต้อนรับกลับเข้าเกม ANIME CARD COLLECTION (HAKARI IS COMING...)",
-      buttonText: "START",
-      images: ["https://tenor.com/th/view/jjk-hikari-gif-1408129775731152385"
+      body: "ยินดีต้อนรับกลับเข้าเกม คุณสามารถเปลี่ยนรูปและข้อความประกาศได้จาก ANNOUNCEMENT_CONFIG ตรงนี้เลย",
+      buttonText: "เข้าเกม",
+      images: [
         // ใส่ URL รูปประกาศตรงนี้ เช่น:
         // "https://example.com/update-banner-1.png",
         // "https://example.com/update-banner-2.png"
@@ -5156,6 +5156,11 @@ function closeCardModal() {
     let onlineConnections = {};
     let onlinePlayers = {};
     let onlineBroadcastTimer = null;
+    // ✅ Firebase listener cleanup handles / ตัวแปรยกเลิกตัวฟัง Firebase
+    // ต้องประกาศไว้ก่อนใช้งาน ไม่อย่างนั้นจะขึ้น onlinePlayersUnsubscribe is not defined
+    let onlinePlayersUnsubscribe = null;
+    let onlineMessagesUnsubscribe = null;
+    let onlineProcessedMessageIds = {};
     let onlineTransferInbox = {};
     let onlineTransferLog = [];
 
