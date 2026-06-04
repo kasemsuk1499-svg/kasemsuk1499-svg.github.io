@@ -966,7 +966,8 @@
         <div id="currentUserText">ยังไม่ได้ล็อกอิน</div>
         <div>ไอดีที่เคยสร้าง: <span id="userListText" class="text-cyan-200">-</span></div>
       </div>
-      <p class="mt-2 text-xs text-amber-200">หมายเหตุ: รหัสผ่านนี้ใช้แยกเซฟในเครื่อง/browser นี้เท่านั้น ถ้าอยากให้หลายเครื่องใช้ไอดีเดียวกันจริง ต้องมีฐานข้อมูลกลางหรือเซิร์ฟเวอร์</p>
+      <div id="cloudStatusText" class="mt-2 text-xs font-black text-amber-200">Cloud Save: กำลังตรวจสอบ Firebase...</div>
+      <p class="mt-2 text-xs text-slate-300">เมื่อใส่ Firebase config แล้ว ระบบสมัคร/ล็อกอินนี้จะใช้ฐานข้อมูลกลางเดียวกันทุกเครื่อง ทุก browser ผ่าน GitHub Pages ได้ทันที</p>
     </section>
 
     <section class="glass rounded-3xl p-5 mb-6">
@@ -1302,7 +1303,26 @@
       autoGachaDelayMs: 2000,
       autoGachaPullAmount: 5,
       bannerSlideDelayMs: 10000,
-      runDeveloperTests: true
+      runDeveloperTests: true,
+
+      // 🟦 Cloud Save: true = พยายามใช้ Firebase เป็นฐานข้อมูลกลาง, false = ใช้ localStorage อย่างเดียว
+      cloudSaveEnabled: true
+    };
+
+    // ======================================================================
+    // 🟦 จุดแก้ FIREBASE: ใส่ config จาก Firebase Console ตรงนี้ก่อนอัปขึ้น GitHub Pages
+    // ไปที่ Firebase Console > Project settings > Your apps > Web app แล้วคัดลอก firebaseConfig มาแทนค่า PLACEHOLDER
+    // ต้องเปิด Authentication > Sign-in method > Email/Password
+    // และสร้าง Realtime Database แล้วคัดลอก databaseURL มาใส่ด้วย
+    // ======================================================================
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCr3wjsWr8Op2I8QovVe7fUppthhHfyVa0",
+      authDomain: "gacha-7a14f.firebaseapp.com",
+      databaseURL: "https://gacha-7a14f-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "gacha-7a14f",
+      storageBucket: "1014868346199",
+      messagingSenderId: "G-GQ93VEN6NM",
+      appId: "1:1014868346199:web:cf9c02eddd9c99504daa12"
     };
 
     // ======================================================================
@@ -1854,6 +1874,158 @@
     const tradeItemShop = TRADE_ITEM_SHOP;
     const cards = CARD_DATABASE;
 
+    // ======================================================================
+    // 🟦 CLOUD SAVE CORE / ระบบฐานข้อมูลกลาง Firebase
+    // ======================================================================
+    let cloudReady = false;
+    let cloudInitPromise = null;
+    let cloudApp = null;
+    let cloudAuth = null;
+    let cloudDb = null;
+    let cloudModules = null;
+    let activeCloudUid = "";
+    let cloudSaveTimer = null;
+    let cloudSaveBusy = false;
+    let pendingCloudSave = false;
+
+    function isFirebaseConfigured() {
+      if (!GAME_CONFIG.cloudSaveEnabled) return false;
+      if (!FIREBASE_CONFIG || !FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.projectId || !FIREBASE_CONFIG.appId) return false;
+      return !String(FIREBASE_CONFIG.apiKey).includes("PASTE_")
+        && !String(FIREBASE_CONFIG.projectId).includes("PASTE_")
+        && !String(FIREBASE_CONFIG.appId).includes("PASTE_")
+        && String(FIREBASE_CONFIG.databaseURL || "").startsWith("https://")
+        && !String(FIREBASE_CONFIG.databaseURL || "").includes("PASTE_");
+    }
+
+    function setCloudStatus(message, tone) {
+      const el = document.getElementById("cloudStatusText");
+      if (!el) return;
+      const color = tone === "ok" ? "text-emerald-300" : tone === "warn" ? "text-amber-200" : tone === "bad" ? "text-rose-300" : "text-slate-300";
+      el.className = "mt-2 text-xs font-black " + color;
+      el.textContent = message;
+    }
+
+    function usernameToFirebaseEmail(username) {
+      const encoded = btoa(unescape(encodeURIComponent(String(username || "").trim())))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/g, "");
+      return "gacha_" + encoded.toLowerCase() + "@gacha.local";
+    }
+
+    async function initCloudServices() {
+      if (!isFirebaseConfigured()) {
+        setCloudStatus("Cloud Save: ยังไม่ได้ใส่ Firebase config — ตอนนี้ใช้ localStorage สำรอง", "warn");
+        return false;
+      }
+      if (cloudReady) return true;
+      if (cloudInitPromise) return cloudInitPromise;
+
+      cloudInitPromise = Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js")
+      ]).then(function(mods) {
+        const appMod = mods[0];
+        const authMod = mods[1];
+        const dbMod = mods[2];
+
+        cloudModules = {
+          initializeApp: appMod.initializeApp,
+          getApps: appMod.getApps,
+          getAuth: authMod.getAuth,
+          createUserWithEmailAndPassword: authMod.createUserWithEmailAndPassword,
+          signInWithEmailAndPassword: authMod.signInWithEmailAndPassword,
+          signOut: authMod.signOut,
+          onAuthStateChanged: authMod.onAuthStateChanged,
+          getDatabase: dbMod.getDatabase,
+          ref: dbMod.ref,
+          set: dbMod.set,
+          get: dbMod.get,
+          child: dbMod.child,
+          update: dbMod.update
+        };
+
+        cloudApp = cloudModules.getApps().length ? cloudModules.getApps()[0] : cloudModules.initializeApp(FIREBASE_CONFIG);
+        cloudAuth = cloudModules.getAuth(cloudApp);
+        cloudDb = cloudModules.getDatabase(cloudApp);
+        cloudReady = true;
+        setCloudStatus("Cloud Save: พร้อมเชื่อม Firebase แล้ว", "ok");
+        return true;
+      }).catch(function(error) {
+        console.error("Firebase init error:", error);
+        setCloudStatus("Cloud Save: เชื่อม Firebase ไม่สำเร็จ — ใช้ localStorage สำรอง (" + (error && error.message ? error.message : "error") + ")", "bad");
+        return false;
+      });
+
+      return cloudInitPromise;
+    }
+
+    function getCloudUserRoot(uid) {
+      return cloudModules.ref(cloudDb, "users/" + uid);
+    }
+
+    async function loadCloudAccount(uid) {
+      if (!uid || !cloudReady) return null;
+      const snap = await cloudModules.get(getCloudUserRoot(uid));
+      return snap.exists() ? snap.val() : null;
+    }
+
+    async function saveCloudAccount(uid, username, saveData, extra) {
+      if (!uid || !cloudReady) return;
+      const payload = Object.assign({
+        username: username,
+        save: saveData,
+        updatedAt: Date.now(),
+        updatedAtText: new Date().toLocaleString()
+      }, extra || {});
+      await cloudModules.update(getCloudUserRoot(uid), payload);
+    }
+
+    function scheduleCloudSave() {
+      if (!cloudReady || !activeCloudUid || !activeUser) return;
+      pendingCloudSave = true;
+      if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(flushCloudSave, 900);
+    }
+
+    async function flushCloudSave() {
+      if (!cloudReady || !activeCloudUid || !activeUser || !pendingCloudSave) return;
+      if (cloudSaveBusy) {
+        scheduleCloudSave();
+        return;
+      }
+      cloudSaveBusy = true;
+      pendingCloudSave = false;
+      try {
+        await saveCloudAccount(activeCloudUid, activeUser, state);
+        setCloudStatus("Cloud Save: บันทึกเซฟล่าสุดขึ้นฐานข้อมูลกลางแล้ว", "ok");
+      } catch (error) {
+        pendingCloudSave = true;
+        console.error("Cloud save error:", error);
+        setCloudStatus("Cloud Save: บันทึกขึ้น Firebase ไม่สำเร็จ — เก็บ localStorage สำรองไว้ก่อน", "bad");
+      } finally {
+        cloudSaveBusy = false;
+      }
+    }
+
+    function mirrorCloudAccountToLocal(username, uid, saveData) {
+      const accounts = loadAccounts();
+      const old = accounts[username] ? normalizeAccountEntry(accounts[username]) : null;
+      accounts[username] = Object.assign({}, old || {}, {
+        __accountVersion: 2,
+        passwordHash: (old && old.passwordHash) || "FIREBASE_AUTH",
+        passwordSalt: (old && old.passwordSalt) || "FIREBASE_AUTH",
+        needsPasswordSetup: false,
+        cloudUid: uid || (old && old.cloudUid) || "",
+        createdAt: (old && old.createdAt) || new Date().toLocaleString(),
+        lastPlayedAt: new Date().toLocaleString(),
+        save: saveData || defaultState()
+      });
+      saveAccounts(accounts);
+    }
+
     let activeUser = localStorage.getItem(ACTIVE_USER_KEY) || "";
     let state = activeUser ? loadUserSave(activeUser) : defaultState();
     let activeBannerId = localStorage.getItem(ACTIVE_BANNER_KEY) || (GACHA_BANNERS[0] ? GACHA_BANNERS[0].id : "standard");
@@ -1951,9 +2123,11 @@
       const account = normalizeAccountEntry(accounts[activeUser]);
       account.save = state;
       account.lastPlayedAt = new Date().toLocaleString();
+      if (activeCloudUid) account.cloudUid = activeCloudUid;
       accounts[activeUser] = account;
       saveAccounts(accounts);
       localStorage.setItem(ACTIVE_USER_KEY, activeUser);
+      scheduleCloudSave();
       scheduleOnlineBroadcast();
     }
 
@@ -1977,7 +2151,7 @@
 
     function validatePassword(password) {
       if (!password) return "กรุณาใส่รหัสผ่านก่อน";
-      if (password.length < 4) return "รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร";
+      if (password.length < 6) return "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
       if (password.length > 64) return "รหัสผ่านต้องไม่เกิน 64 ตัวอักษร";
       return "";
     }
@@ -2029,6 +2203,46 @@
       const passwordError = validatePassword(password);
       if (passwordError) return showToast(passwordError);
 
+      stopAutoGacha();
+      const cloudAvailable = await initCloudServices();
+
+      // ถ้าใส่ Firebase config แล้ว: สมัครใน Firebase Auth + สร้างเซฟกลางใน Realtime Database
+      if (cloudAvailable) {
+        try {
+          const email = usernameToFirebaseEmail(username);
+          const credential = await cloudModules.createUserWithEmailAndPassword(cloudAuth, email, password);
+          activeUser = username;
+          activeCloudUid = credential.user.uid;
+          state = defaultState();
+
+          await saveCloudAccount(activeCloudUid, username, state, {
+            authEmail: email,
+            createdAt: Date.now(),
+            createdAtText: new Date().toLocaleString()
+          });
+
+          mirrorCloudAccountToLocal(username, activeCloudUid, state);
+          localStorage.setItem(ACTIVE_USER_KEY, activeUser);
+          document.getElementById("pullResult").innerHTML = "";
+          renderAll();
+          setCloudStatus("Cloud Save: สมัครสมาชิกและสร้างเซฟกลางสำเร็จ", "ok");
+          showToast("สมัครสมาชิกบนฐานข้อมูลกลางสำเร็จ");
+          return;
+        } catch (error) {
+          console.error("Firebase register error:", error);
+          const code = error && error.code ? error.code : "";
+          if (code === "auth/email-already-in-use") {
+            showToast("ไอดีนี้มีอยู่แล้ว ให้กดล็อกอินแทน");
+          } else if (code === "auth/weak-password") {
+            showToast("รหัสผ่านอ่อนเกินไป กรุณาใช้ 6 ตัวอักษรขึ้นไปสำหรับ Firebase");
+          } else {
+            showToast("สมัคร Firebase ไม่สำเร็จ: " + (error && error.message ? error.message : "error"));
+          }
+          return;
+        }
+      }
+
+      // โหมดสำรอง: localStorage
       const accounts = loadAccounts();
       if (accounts[username]) {
         showToast("ไอดีนี้มีอยู่แล้ว ให้กดล็อกอินแทน");
@@ -2047,11 +2261,12 @@
       saveAccounts(accounts);
 
       activeUser = username;
+      activeCloudUid = "";
       localStorage.setItem(ACTIVE_USER_KEY, activeUser);
       state = accounts[username].save;
       document.getElementById("pullResult").innerHTML = "";
       renderAll();
-      showToast("สมัครสมาชิกและล็อกอินสำเร็จ");
+      showToast("สมัครสมาชิกแบบ local สำเร็จ");
     }
 
     async function login() {
@@ -2062,6 +2277,49 @@
       const passwordError = validatePassword(password);
       if (passwordError) return showToast(passwordError);
 
+      stopAutoGacha();
+      const cloudAvailable = await initCloudServices();
+
+      // ถ้าใส่ Firebase config แล้ว: ล็อกอินด้วย Firebase และโหลดเซฟกลาง
+      if (cloudAvailable) {
+        try {
+          const email = usernameToFirebaseEmail(username);
+          const credential = await cloudModules.signInWithEmailAndPassword(cloudAuth, email, password);
+          activeUser = username;
+          activeCloudUid = credential.user.uid;
+
+          const cloudAccount = await loadCloudAccount(activeCloudUid);
+          if (cloudAccount && cloudAccount.save) {
+            state = cloudAccount.save;
+          } else {
+            state = defaultState();
+            await saveCloudAccount(activeCloudUid, username, state, {
+              authEmail: email,
+              createdAt: Date.now(),
+              createdAtText: new Date().toLocaleString()
+            });
+          }
+
+          mirrorCloudAccountToLocal(username, activeCloudUid, state);
+          localStorage.setItem(ACTIVE_USER_KEY, activeUser);
+          document.getElementById("pullResult").innerHTML = "";
+          renderAll();
+          setCloudStatus("Cloud Save: โหลดเซฟจากฐานข้อมูลกลางสำเร็จ", "ok");
+          showToast("ล็อกอินฐานข้อมูลกลางสำเร็จ");
+          return;
+        } catch (error) {
+          console.error("Firebase login error:", error);
+          const code = error && error.code ? error.code : "";
+          if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
+            showToast("ไอดีหรือรหัสผ่านไม่ถูกต้อง / ยังไม่ได้สมัครสมาชิก");
+          } else {
+            showToast("ล็อกอิน Firebase ไม่สำเร็จ: " + (error && error.message ? error.message : "error"));
+          }
+          return;
+        }
+      }
+
+      // โหมดสำรอง: localStorage
       const accounts = loadAccounts();
       const account = accounts[username] ? normalizeAccountEntry(accounts[username]) : null;
       if (!account) {
@@ -2070,7 +2328,7 @@
       }
 
       // ถ้าเป็นไอดีเก่าที่เคยสร้างก่อนมีระบบรหัสผ่าน ให้รหัสที่กรอกครั้งนี้เป็นรหัสใหม่ของไอดีนั้น
-      if (account.needsPasswordSetup || !account.passwordHash || !account.passwordSalt) {
+      if (account.needsPasswordSetup || !account.passwordHash || !account.passwordSalt || account.passwordHash === "FIREBASE_AUTH") {
         account.passwordSalt = makePasswordSalt();
         account.passwordHash = await hashPassword(password, account.passwordSalt);
         account.needsPasswordSetup = false;
@@ -2087,15 +2345,21 @@
       }
 
       activeUser = username;
+      activeCloudUid = account.cloudUid || "";
       localStorage.setItem(ACTIVE_USER_KEY, activeUser);
       state = loadUserSave(activeUser);
       document.getElementById("pullResult").innerHTML = "";
       renderAll();
     }
 
-    function logout() {
+    async function logout() {
       stopAutoGacha();
+      await flushCloudSave();
+      if (cloudReady && cloudAuth) {
+        try { await cloudModules.signOut(cloudAuth); } catch (error) { console.warn("Firebase signOut error:", error); }
+      }
       activeUser = "";
+      activeCloudUid = "";
       localStorage.removeItem(ACTIVE_USER_KEY);
       state = defaultState();
       document.getElementById("pullResult").innerHTML = "";
@@ -3643,7 +3907,9 @@ function nextBannerImage() {
     function renderTop() {
       const accounts = loadAccounts();
       const names = Object.keys(accounts);
-      document.getElementById("currentUserText").textContent = activeUser ? "กำลังเล่นไอดี: " + activeUser + " 🔐" : "ยังไม่ได้ล็อกอิน";
+      document.getElementById("currentUserText").textContent = activeUser
+        ? "กำลังเล่นไอดี: " + activeUser + (activeCloudUid ? " ☁️ Cloud" : " 🔐 Local")
+        : "ยังไม่ได้ล็อกอิน";
       document.getElementById("userListText").textContent = names.length ? names.map(function(name) {
         const account = normalizeAccountEntry(accounts[name]);
         return name + (account.needsPasswordSetup ? " (ต้องตั้งรหัส)" : "");
@@ -5490,8 +5756,12 @@ function closeCardModal() {
 
     if (GAME_CONFIG.runDeveloperTests) runDeveloperTests();
     renderAll();
+    initCloudServices();
     setInterval(renderIncomeOnly, 1000);
-    window.addEventListener("beforeunload", stopBannerSlideshow);
+    window.addEventListener("beforeunload", function() {
+      stopBannerSlideshow();
+      flushCloudSave();
+    });
   </script>
 </body>
 </html>
