@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gacha Card Collection</title>
+  <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
   <style>
@@ -925,7 +925,7 @@
     <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       <div>
         <h1 class="text-3xl md:text-5xl font-black tracking-tight">Gacha Card Collection</h1>
-        <p class="text-slate-300 mt-2">ล็อกอิน เซฟแยกไอดี หลายตู้กาชา Auto Gacha Showcase Gem/s และอัปเกรดการ์ด</p>
+        <p class="text-slate-300 mt-2">ล็อกอินด้วยไอดีเกม เซฟกลาง Firebase ทุกเครื่อง ทุก Browser ผ่าน GitHub Pages</p>
       </div>
       <div class="glass rounded-2xl px-5 py-4 flex gap-5 text-center">
         <div>
@@ -948,10 +948,10 @@
     </header>
 
     <section class="glass rounded-3xl p-5 mb-6">
-      <h2 class="text-2xl font-black mb-3">ระบบล็อกอิน</h2>
+      <h2 class="text-2xl font-black mb-3">ระบบไอดีเกม / Cloud Save กลาง</h2>
       <div class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
         <div class="md:col-span-2">
-          <label class="text-sm text-slate-300">Username / ID ผู้เล่น</label>
+          <label class="text-sm text-slate-300">Username / ID ผู้เล่น (ใช้สมัครในเกม)</label>
           <input id="loginName" value="player01" autocomplete="username" placeholder="เช่น player01" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-3" />
         </div>
         <div class="md:col-span-2">
@@ -964,10 +964,14 @@
       </div>
       <div class="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm text-slate-300">
         <div id="currentUserText">ยังไม่ได้ล็อกอิน</div>
-        <div>ไอดีที่เคยสร้าง: <span id="userListText" class="text-cyan-200">-</span></div>
+        <div>ไอดีที่เคยใช้ในเครื่องนี้: <span id="userListText" class="text-cyan-200">-</span></div>
       </div>
       <div id="cloudStatusText" class="mt-2 text-xs font-black text-amber-200">Cloud Save: กำลังตรวจสอบ Firebase...</div>
-      <p class="mt-2 text-xs text-slate-300">เมื่อใส่ Firebase config แล้ว ระบบสมัคร/ล็อกอินนี้จะใช้ฐานข้อมูลกลางเดียวกันทุกเครื่อง ทุก browser ผ่าน GitHub Pages ได้ทันที</p>
+      <div class="mt-3 rounded-2xl bg-cyan-500/10 border border-cyan-300/20 p-3 text-xs text-slate-200 leading-6">
+        <div class="font-black text-cyan-200">พร้อมใช้กับ GitHub Pages</div>
+        <div>ผู้เล่นเครื่องอื่นเปิดลิงก์เว็บเดียวกัน แล้วกดสมัครด้วย Username + Password ได้เลย ระบบจะสร้างบัญชี Firebase Auth เบื้องหลังและเซฟข้อมูลไว้ที่ฐานข้อมูลกลางเดียวกัน</div>
+        <div class="text-amber-200 font-black mt-1">ต้องเปิด Firebase Authentication แบบ Email/Password และ Realtime Database ก่อนใช้งานจริง</div>
+      </div>
     </section>
 
     <section class="glass rounded-3xl p-5 mb-6">
@@ -1320,10 +1324,22 @@
       authDomain: "gacha-7a14f.firebaseapp.com",
       databaseURL: "https://gacha-7a14f-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "gacha-7a14f",
-      storageBucket: "1014868346199",
-      messagingSenderId: "G-GQ93VEN6NM",
+      storageBucket: "gacha-7a14f.firebasestorage.app",
+      messagingSenderId: "1014868346199",
       appId: "1:1014868346199:web:cf9c02eddd9c99504daa12"
     };
+
+    // แนะนำ Rules ใน Realtime Database เพื่อให้แต่ละไอดีอ่าน/เขียนได้เฉพาะเซฟตัวเอง:
+    // {
+    //   "rules": {
+    //     "users": {
+    //       "$uid": {
+    //         ".read": "auth != null && auth.uid === $uid",
+    //         ".write": "auth != null && auth.uid === $uid"
+    //       }
+    //     }
+    //   }
+    // }
 
     // ======================================================================
     // 🟨 จุดแก้ 1.4.5: ระบบการันตีตู้กาชา / ตั้งระดับและเรทการันตีรายใบ
@@ -1906,12 +1922,16 @@
       el.textContent = message;
     }
 
+    // แปลง Username เป็นอีเมลภายในสำหรับ Firebase Auth
+    // ผู้เล่นไม่เห็นอีเมลนี้ เว็บใช้แค่ Username + Password ในเกมเท่านั้น
+    // ใช้ hex ของ UTF-8 เพื่อรองรับภาษาไทย/อักษรพิเศษโดยไม่เสี่ยงชนจากการ lower-case base64
     function usernameToFirebaseEmail(username) {
-      const encoded = btoa(unescape(encodeURIComponent(String(username || "").trim())))
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/g, "");
-      return "gacha_" + encoded.toLowerCase() + "@gacha.local";
+      const cleanName = String(username || "").trim();
+      const bytes = new TextEncoder().encode(cleanName);
+      const hex = Array.from(bytes).map(function(byte) {
+        return byte.toString(16).padStart(2, "0");
+      }).join("");
+      return "gacha_" + hex + "@gacha.local";
     }
 
     async function initCloudServices() {
@@ -1951,7 +1971,7 @@
         cloudAuth = cloudModules.getAuth(cloudApp);
         cloudDb = cloudModules.getDatabase(cloudApp);
         cloudReady = true;
-        setCloudStatus("Cloud Save: พร้อมเชื่อม Firebase แล้ว", "ok");
+        setCloudStatus("Cloud Save: พร้อมใช้ฐานข้อมูลกลาง Firebase แล้ว", "ok");
         return true;
       }).catch(function(error) {
         console.error("Firebase init error:", error);
@@ -2225,8 +2245,8 @@
           localStorage.setItem(ACTIVE_USER_KEY, activeUser);
           document.getElementById("pullResult").innerHTML = "";
           renderAll();
-          setCloudStatus("Cloud Save: สมัครสมาชิกและสร้างเซฟกลางสำเร็จ", "ok");
-          showToast("สมัครสมาชิกบนฐานข้อมูลกลางสำเร็จ");
+          setCloudStatus("Cloud Save: สมัครไอดีเกมและสร้างเซฟกลางสำเร็จ", "ok");
+          showToast("สมัครไอดีเกมบนฐานข้อมูลกลางสำเร็จ");
           return;
         } catch (error) {
           console.error("Firebase register error:", error);
@@ -2236,7 +2256,7 @@
           } else if (code === "auth/weak-password") {
             showToast("รหัสผ่านอ่อนเกินไป กรุณาใช้ 6 ตัวอักษรขึ้นไปสำหรับ Firebase");
           } else {
-            showToast("สมัคร Firebase ไม่สำเร็จ: " + (error && error.message ? error.message : "error"));
+            showToast("สมัครฐานข้อมูลกลางไม่สำเร็จ: " + (error && error.message ? error.message : "error"));
           }
           return;
         }
@@ -2305,7 +2325,7 @@
           document.getElementById("pullResult").innerHTML = "";
           renderAll();
           setCloudStatus("Cloud Save: โหลดเซฟจากฐานข้อมูลกลางสำเร็จ", "ok");
-          showToast("ล็อกอินฐานข้อมูลกลางสำเร็จ");
+          showToast("ล็อกอินไอดีเกมและโหลดเซฟกลางสำเร็จ");
           return;
         } catch (error) {
           console.error("Firebase login error:", error);
@@ -2313,7 +2333,7 @@
           if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
             showToast("ไอดีหรือรหัสผ่านไม่ถูกต้อง / ยังไม่ได้สมัครสมาชิก");
           } else {
-            showToast("ล็อกอิน Firebase ไม่สำเร็จ: " + (error && error.message ? error.message : "error"));
+            showToast("ล็อกอินฐานข้อมูลกลางไม่สำเร็จ: " + (error && error.message ? error.message : "error"));
           }
           return;
         }
