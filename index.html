@@ -2074,6 +2074,60 @@
       border-color: rgba(103,232,249,.16);
     }
 
+  
+    /* PERFORMANCE PATCH / ลดแล็คโดยยังคงหน้าตาเดิมไว้ */
+    #collectionGrid, #duplicateTradeList, #tradeShopList {
+      content-visibility: auto;
+      contain-intrinsic-size: 900px;
+    }
+    #collectionGrid > *, #duplicateTradeList > *, #tradeShopList > * {
+      content-visibility: auto;
+      contain-intrinsic-size: 260px;
+    }
+    .card-art-crop, .card-art-crop-thumb, .friend-reveal-image {
+      backface-visibility: hidden;
+    }
+    html.performance-lite *,
+    html.performance-lite *::before,
+    html.performance-lite *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.12s !important;
+      scroll-behavior: auto !important;
+    }
+    html.performance-lite .shine::after,
+    html.performance-lite .effect-ex-transcendent::before,
+    html.performance-lite .effect-ex-transcendent::after,
+    html.performance-lite .effect-sc-ultimate::before,
+    html.performance-lite .effect-sc-ultimate::after,
+    html.performance-lite .prismatic-awaken-overlay,
+    html.performance-lite .awaken-max-edge-overlay,
+    html.performance-lite .luxury-full-max-card::before,
+    html.performance-lite .luxury-full-max-card::after,
+    html.performance-lite .luxury-full-max-card-overlay,
+    html.performance-lite .normal-rarity-color-reveal::before,
+    html.performance-lite .normal-rarity-color-reveal::after,
+    html.performance-lite .normal-rarity-reveal-aura,
+    html.performance-lite .reveal-rarity-aura {
+      display: none !important;
+    }
+    @media (prefers-reduced-motion: reduce), (max-width: 768px) {
+      .shine::after,
+      .effect-ex-transcendent::before,
+      .effect-ex-transcendent::after,
+      .effect-sc-ultimate::before,
+      .effect-sc-ultimate::after,
+      .prismatic-awaken-overlay,
+      .luxury-full-max-card::before,
+      .luxury-full-max-card::after,
+      .normal-rarity-color-reveal::before,
+      .normal-rarity-color-reveal::after,
+      .normal-rarity-reveal-aura {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2593,7 +2647,7 @@
       tenPullCost: 450000,
       dailyGems: 300000,
       showcaseSlots: 5,
-      collectionCardsPerPage: 20,
+      collectionCardsPerPage: 16, // ลดจำนวนการ์ดต่อหน้าเล็กน้อย ช่วยให้มือถือ/เครื่องช้าลื่นขึ้น
       tradeDuplicateItemsPerPage: 6,
       tradeShopItemsPerPage: 6,
       tradeStockMonthlyReset: true, // true = รี Stock ร้านเทรดอัตโนมัติทุกเดือน
@@ -2612,10 +2666,23 @@
       autoGachaDelayMs: 2000,
       autoGachaPullAmount: 5,
       bannerSlideDelayMs: 10000,
-      runDeveloperTests: true,
+      runDeveloperTests: false, // ปิด developer tests ตอนเล่นจริง เพื่อลดงานตอนโหลดหน้าเว็บ
 
       // 🟦 Cloud Save: true = พยายามใช้ Firebase เป็นฐานข้อมูลกลาง, false = ใช้ localStorage อย่างเดียว
       cloudSaveEnabled: true
+    };
+
+    // ==============================
+    // 🟩 PERFORMANCE CONFIG / จุดปรับลดแล็คของเกม
+    // ==============================
+    const PERFORMANCE_CONFIG = {
+      // บันทึกเซฟแบบหน่วง ไม่เขียน localStorage/Firebase ถี่เกินไป
+      localSaveDebounceMs: 1200,
+      incomeAutoSaveMs: 15000,
+
+      // ลดเอฟเฟกต์หนักอัตโนมัติบนมือถือ/จอเล็ก หรือเมื่อผู้ใช้ตั้ง reduced motion
+      autoLiteEffectsOnMobile: true,
+      mobileMaxWidth: 768
     };
 
     // ======================================================================
@@ -2736,7 +2803,7 @@
       subtitle: "ข่าวสาร / กิจกรรม / แพตช์ใหม่",
       body: ".",
       buttonText: "START",
-      images: ["https://i.pinimg.com/736x/f3/c9/cf/f3c9cf4bb4dce297f0820daa097cbaa5.jpg", "https://i.pinimg.com/736x/74/ed/66/74ed66a59831ca8554a17d802ab39f1e.jpg"
+      images: ["https://i.pinimg.com/736x/f3/c9/cf/f3c9cf4bb4dce297f0820daa097cbaa5.jpg", "https://i.pinimg.com/736x/74/ed/66/74ed66a59831ca8554a17d802ab39f1e.jpg", "https://i.pinimg.com/736x/8a/ef/b8/8aefb8bda287bb49b4cdb355f922baaf.jpg", "https://i.pinimg.com/736x/ac/96/b9/ac96b90762f516452583bf1c711740fe.jpg", "https://i.pinimg.com/736x/0d/3e/e3/0d3ee35a63933cfb22e2d7793e431bf4.jpg", "https://i.pinimg.com/736x/21/60/3c/21603cf286b7bdd27c6cd7736dd7b60a.jpg", "https://i.pinimg.com/736x/63/ea/ee/63eaeeac28862207c7d714f0d6b0de13.jpg", "https://i.pinimg.com/736x/71/39/45/7139450d8501141793db139bb69d371c.jpg"
       ]
     };
 
@@ -3523,18 +3590,42 @@
       return account ? normalizeAccountEntry(account).save : defaultState();
     }
 
-    function save() {
+    function save(immediate) {
       if (!activeUser) return;
-      const accounts = loadAccounts();
-      const account = normalizeAccountEntry(accounts[activeUser]);
-      account.save = state;
-      account.lastPlayedAt = new Date().toLocaleString();
-      if (activeCloudUid) account.cloudUid = activeCloudUid;
-      accounts[activeUser] = account;
-      saveAccounts(accounts);
-      SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
-      scheduleCloudSave();
-      scheduleOnlineBroadcast();
+
+      const forceNow = immediate === true || (immediate && immediate.immediate === true);
+      const debounceMs = Math.max(0, Number(PERFORMANCE_CONFIG.localSaveDebounceMs || 0));
+
+      function writeSaveNow() {
+        window.__gachaPendingLocalSave = false;
+        if (window.__gachaLocalSaveTimer) {
+          clearTimeout(window.__gachaLocalSaveTimer);
+          window.__gachaLocalSaveTimer = null;
+        }
+        const accounts = loadAccounts();
+        const account = normalizeAccountEntry(accounts[activeUser]);
+        account.save = state;
+        account.lastPlayedAt = new Date().toLocaleString();
+        if (activeCloudUid) account.cloudUid = activeCloudUid;
+        accounts[activeUser] = account;
+        saveAccounts(accounts);
+        SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
+        scheduleCloudSave();
+        scheduleOnlineBroadcast();
+      }
+
+      if (forceNow || debounceMs <= 0) {
+        writeSaveNow();
+        return;
+      }
+
+      window.__gachaPendingLocalSave = true;
+      if (window.__gachaLocalSaveTimer) clearTimeout(window.__gachaLocalSaveTimer);
+      window.__gachaLocalSaveTimer = setTimeout(writeSaveNow, debounceMs);
+    }
+
+    function flushLocalSaveNow() {
+      if (window.__gachaPendingLocalSave) save(true);
     }
 
     function getLoginUsername() {
@@ -3799,16 +3890,21 @@
         .replaceAll("'", "&#039;");
     }
 
+    const CARD_BY_ID = {};
+    cards.forEach(function(card) {
+      CARD_BY_ID[String(card.id)] = card;
+    });
+    const BANNER_BY_ID = {};
+    GACHA_BANNERS.forEach(function(banner) {
+      BANNER_BY_ID[String(banner.id)] = banner;
+    });
+
     function getCardById(cardId) {
-      return cards.find(function(card) {
-        return Number(card.id) === Number(cardId);
-      });
+      return CARD_BY_ID[String(cardId)] || null;
     }
 
     function getActiveBanner() {
-      return GACHA_BANNERS.find(function(banner) {
-        return banner.id === activeBannerId;
-      }) || GACHA_BANNERS[0];
+      return BANNER_BY_ID[String(activeBannerId)] || GACHA_BANNERS[0];
     }
 
     function getRarityLabel(rarity) {
@@ -6082,7 +6178,7 @@ function nextBannerImage() {
       if (!card.image) {
         return '<div class="' + positionClass + ' flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
       }
-      return '<img src="' + escapeHTML(card.image) + '" class="' + positionClass + ' card-art-crop" alt="' + escapeHTML(card.name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'' + escapeHTML('<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>') + '\');" />';
+      return '<img src="' + escapeHTML(card.image) + '" loading="lazy" decoding="async" class="' + positionClass + ' card-art-crop" alt="' + escapeHTML(card.name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'' + escapeHTML('<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>') + '\');" />';
     }
 
     function makeModalImagePart(card, textSizeClass) {
@@ -6090,7 +6186,7 @@ function nextBannerImage() {
       if (!card.image) {
         return '<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
       }
-      return '<img src="' + escapeHTML(card.image) + '" class="absolute inset-0 card-art-crop z-0" alt="' + escapeHTML(card.name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'' + escapeHTML('<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>') + '\');" />';
+      return '<img src="' + escapeHTML(card.image) + '" loading="eager" decoding="async" class="absolute inset-0 card-art-crop z-0" alt="' + escapeHTML(card.name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'' + escapeHTML('<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>') + '\');" />';
     }
 
 
@@ -6359,11 +6455,23 @@ function closeCardModal() {
     function renderIncomeOnly() {
       if (!activeUser) return;
       updateIncomeBank();
-      document.getElementById("gemsText").textContent = Math.floor(state.gems).toLocaleString();
-      document.getElementById("incomeText").textContent = "+" + getTotalIncomePerSec().toFixed(1) + " Gem/s";
-      document.getElementById("incomeBankText").textContent = Math.floor(state.incomeBank).toLocaleString();
-      document.getElementById("showcaseSlotText").textContent = state.showcase.length + "/" + GAME_CONFIG.showcaseSlots;
-      save();
+
+      const gemsText = document.getElementById("gemsText");
+      const incomeText = document.getElementById("incomeText");
+      const incomeBankText = document.getElementById("incomeBankText");
+      const showcaseSlotText = document.getElementById("showcaseSlotText");
+
+      if (gemsText) gemsText.textContent = Math.floor(state.gems).toLocaleString();
+      if (incomeText) incomeText.textContent = "+" + getTotalIncomePerSec().toFixed(1) + " Gem/s";
+      if (incomeBankText) incomeBankText.textContent = Math.floor(state.incomeBank).toLocaleString();
+      if (showcaseSlotText) showcaseSlotText.textContent = state.showcase.length + "/" + GAME_CONFIG.showcaseSlots;
+
+      const now = Date.now();
+      const interval = Math.max(5000, Number(PERFORMANCE_CONFIG.incomeAutoSaveMs || 15000));
+      if (!window.__gachaLastIncomeAutoSaveAt || now - window.__gachaLastIncomeAutoSaveAt >= interval) {
+        window.__gachaLastIncomeAutoSaveAt = now;
+        save();
+      }
     }
 
     function showToast(text) {
@@ -7514,6 +7622,17 @@ function closeCardModal() {
       }
     });
 
+    function initPerformanceMode() {
+      try {
+        const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const mobileLite = PERFORMANCE_CONFIG.autoLiteEffectsOnMobile !== false && window.innerWidth <= Number(PERFORMANCE_CONFIG.mobileMaxWidth || 768);
+        document.documentElement.classList.toggle("performance-lite", !!(reduceMotion || mobileLite));
+      } catch (error) {}
+    }
+
+    initPerformanceMode();
+    window.addEventListener("resize", initPerformanceMode);
+
     if (GAME_CONFIG.runDeveloperTests) runDeveloperTests();
     applyWebsiteTheme();
     renderSiteHeader();
@@ -7524,6 +7643,7 @@ function closeCardModal() {
     setInterval(renderIncomeOnly, 1000);
     window.addEventListener("beforeunload", function() {
       stopBannerSlideshow();
+      flushLocalSaveNow();
       try { closeOnlinePeer(); } catch (error) {}
       flushCloudSave();
     });
