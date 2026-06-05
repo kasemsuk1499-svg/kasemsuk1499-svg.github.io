@@ -2665,11 +2665,11 @@
     const DEFAULT_GACHA_GUARANTEE_CONFIG = {
       // ปิดค่าเริ่มต้นไว้ก่อน เพื่อไม่ให้ตู้ที่ไม่ได้ตั้ง guarantee เองแอบการันตีระดับสูง
       // ถ้าอยากให้ตู้ไหนมีการันตี ให้ใส่ guarantee: { enabled: true, ... } ใน GACHA_BANNERS ของตู้นั้นโดยตรง
-      enabled: false,
-      every: 0,
-      rarityRates: { UR: 100 },
+      enabled: true,
+      every: 2000,
+      rarityRates: { LR: 95, EX: 4, SC:1 },
       cardRates: {},
-      resetWhenPullRarities: []
+      resetWhenPullRarities: [LR, EX, SC]
     };
 
     // ======================================================================
@@ -2791,7 +2791,7 @@
         name: "ตั๋วอีเวนท์สุ่มระดับ JJK x5 ใบเดียวกัน",
         description: "มีโอกาศลุ้นตัวระดับ JJK ทุกตัว",
         copies: 5,
-        rarityRates: { JJKS: 10, JJKB: 50, JJKC: 50 },
+        rarityRates: { JJKS: 10, JJKB: 45, JJKC: 45 },
         allowedRarities: [ "JJKB", "JJKS", "JJKC" ],
         allowedCardIds: null,
         useCurrentBannerRateUp: true,
@@ -2994,10 +2994,10 @@
     // stock = จำนวนที่ซื้อได้ทั้งหมดต่อไอดีผู้เล่น
     // enabled = true เปิดขาย / false ปิดขาย
     const TRADE_CARD_SHOP = [
-      { id: "38", cardId: 38, pricePiceCrad: 2800, stock: 12, enabled: true },
-      { id: "39", cardId: 39, pricePiceCrad: 2800, stock: 12, enabled: true },
-      { id: "40", cardId: 40, pricePiceCrad: 2800, stock: 12, enabled: true },
-      { id: "41", cardId: 41, pricePiceCrad: 2800, stock: 12, enabled: true },      
+      { id: "38", cardId: 38, pricePiceCrad: 100, stock: 12, enabled: true },
+      { id: "39", cardId: 39, pricePiceCrad: 100, stock: 12, enabled: true },
+      { id: "40", cardId: 40, pricePiceCrad: 100, stock: 12, enabled: true },
+      { id: "41", cardId: 41, pricePiceCrad: 100, stock: 12, enabled: true },      
       { id: "1033", cardId: 1033, pricePiceCrad: 1000, stock: 999, enabled: true },
       { id: "1034", cardId: 1034, pricePiceCrad: 1000, stock: 999, enabled: true },
       { id: "1023", cardId: 1023, pricePiceCrad: 1500, stock: 999, enabled: true },
@@ -3060,7 +3060,7 @@
         ],
         singlePullCost: 250000,
         tenPullCost: 2250000,
-        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 7, UR: 1.5, LR: 0.12, EX: 0, JJKB: 0.18, JJKS: 0.07, JJKC: 0.18, SC: 0 },
+        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 7, UR: 2.4, LR: 2.12, EX: 0.05, JJKB: 0.18, JJKS: 0.07, JJKC: 0.18, SC: 0 },
         rateUpCards: { 44: 10, 45: 10, 43: 15, 42: 15},
         // 🟨 จุดแก้การันตีตู้: เปลี่ยนระดับและเรทการันตีรายใบของตู้นี้ได้ตรงนี้
         guarantee: {
@@ -3081,7 +3081,7 @@
         ],
         singlePullCost: 230000,
         tenPullCost: 2150000,
-        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 7, UR: 1.5, LR: 0.12, EX: 0, JJKB: 1, JJKS: 0.02, JJKC: 0.08, SC: 0 },
+        rateOverrides: { N: 42, R: 28, SR: 17.24, SSR: 7, UR: 2.4, LR: 2.12, EX: 0.01, JJKB: 1, JJKS: 0.05, JJKC: 0.18, SC: 0 },
         rateUpCards: { 1021: 2, 1022: 2, 1023: 2 },
         guarantee: {
           enabled: true,
@@ -3102,7 +3102,7 @@
         ],
         singlePullCost: 230000,
         tenPullCost: 2150000,
-        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 7, UR: 1.5, LR: 0.12, EX: 0, JJKB: 0.08, JJKS: 0.02, JJKC: 1, SC: 0 },
+        rateOverrides: { N: 42, R: 28, SR: 17.24, SSR: 7, UR: 2.4, LR: 2.12, EX: 0.01, JJKB: 0.18, JJKS: 0.05, JJKC: 1, SC: 0 },
         rateUpCards: { 1008: 3, 1002: 3 },
         guarantee: {
           enabled: true,
@@ -3122,7 +3122,7 @@
         ],
         singlePullCost: 150000,
         tenPullCost: 1500000,
-        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 8, UR: 3.2, LR: 0.8, EX: 0.7, SC: 0.003 },
+        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 7, UR: 3.1, LR: 1.727, EX: 0.15, SC: 0.005 },
         rateUpCards: { 38: 5, 39: 5, 40: 5, 41: 5 },
         guarantee: {
           enabled: true,
@@ -3142,7 +3142,7 @@
         ],
         singlePullCost: 50000,
         tenPullCost: 450000,
-        rateOverrides: { N: 52, R: 30, SR: 13, SSR: 4, UR: 0.9, LR: 0.08, EX: 0.015, SC: 0.0005 },
+        rateOverrides: { N: 52, R: 30, SR: 13, SSR: 4, UR: 0.9, LR: 0.08, EX: 0.015, SC: 0.005 },
         rateUpCards: {}
       },
       {
@@ -3155,7 +3155,7 @@
         ],
         singlePullCost: 100000,
         tenPullCost: 900000,
-        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 8, UR: 2.2, LR: 0.35, EX: 0.02, SC: 0.001 },
+        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 8, UR: 2.125, LR: 1.85, EX: 0.02, SC: 0.005 },
         rateUpCards: { 1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 6: 5, 7: 5, 8: 5, 9: 5, 10: 5 }
       }
     ];
