@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="gacha-app-build" content="2026-06-05-realtime-bg-v1" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -2786,6 +2787,17 @@
       bannerSlideDelayMs: 10000,
       runDeveloperTests: false, // ปิด developer tests ตอนเล่นจริง เพื่อลดงานตอนโหลดหน้าเว็บ
 
+      // 🟧 Real-time GitHub Pages Update / เช็กไฟล์บน GitHub Pages แล้วรีโหลดให้ผู้เล่นอัตโนมัติ
+      // เวลาอัปเดตโค้ดขึ้น GitHub ให้เปลี่ยนเลข build นี้ด้วย ผู้เล่นที่เปิดเกมค้างไว้จะดึงเวอร์ชันใหม่เอง
+      appBuildId: "2026-06-05-realtime-bg-v1",
+      githubAutoUpdateEnabled: true,
+      githubAutoUpdateCheckMs: 15000,
+      githubAutoUpdateMode: "reload", // "reload" = รีโหลดอัตโนมัติ, "notify" = แจ้งเตือนให้กดเอง
+
+      // 🟨 Background Auto Gacha / ชดเชยรอบกาชาเมื่อเปลี่ยนแท็บหรือเบราว์เซอร์หน่วง timer
+      autoGachaCatchUpEnabled: true,
+      autoGachaMaxCatchUpRounds: 60, // กันเครื่องค้าง ถ้าทิ้งแท็บไว้นานมาก จะชดเชยสูงสุดครั้งละกี่รอบ
+
       // 🟦 Cloud Save: true = พยายามใช้ Firebase เป็นฐานข้อมูลกลาง, false = ใช้ localStorage อย่างเดียว
       cloudSaveEnabled: true
     };
@@ -3602,6 +3614,10 @@
     let bannerSlideActiveBannerId = "";
     let autoGachaTimer = null;
     let autoGachaRunning = false;
+    let autoGachaLastRunAt = 0;
+    let autoGachaTickBusy = false;
+    let githubAutoUpdateTimer = null;
+    let githubAutoUpdatePending = false;
     let collectionPage = 1;
     let activeMainTab = SAFE_LOCAL_STORAGE.getItem("simple_gacha_active_main_tab_v1") || "collection";
     let activeTradeSubTab = SAFE_LOCAL_STORAGE.getItem("simple_gacha_active_trade_sub_tab_v1") || "duplicate";
@@ -4350,7 +4366,11 @@ function nextBannerImage() {
 
       save();
       renderAll();
-      await renderPullResultAnimated(results);
+      if (options.skipAnimation || (options.fromAuto && document.hidden)) {
+        renderPullResult(results);
+      } else {
+        await renderPullResultAnimated(results);
+      }
       return true;
     }
 
@@ -4363,17 +4383,59 @@ function nextBannerImage() {
       if (!requireLogin()) return;
       if (autoGachaRunning) return;
       autoGachaRunning = true;
+      autoGachaLastRunAt = Date.now();
       renderAutoStatus();
-      showToast("เริ่ม Auto Gacha แล้ว");
+      showToast("เริ่ม Auto Gacha แล้ว - เปลี่ยนแท็บได้ ระบบจะชดเชยเวลาให้");
+
+      const delayMs = Math.max(250, Number(GAME_CONFIG.autoGachaDelayMs || 2000));
+      const tickMs = Math.max(250, Math.min(1000, Math.floor(delayMs / 2)));
       autoGachaTimer = setInterval(function() {
-        pull(GAME_CONFIG.autoGachaPullAmount, { fromAuto: true });
-      }, GAME_CONFIG.autoGachaDelayMs);
+        processAutoGachaTick(false);
+      }, tickMs);
+    }
+
+    async function processAutoGachaTick(force) {
+      if (!autoGachaRunning || autoGachaTickBusy) return;
+      if (!activeUser || !state) {
+        stopAutoGacha();
+        return;
+      }
+
+      const delayMs = Math.max(250, Number(GAME_CONFIG.autoGachaDelayMs || 2000));
+      const now = Date.now();
+      if (!autoGachaLastRunAt) autoGachaLastRunAt = now;
+
+      let dueRounds = force ? 1 : Math.floor((now - autoGachaLastRunAt) / delayMs);
+      if (dueRounds <= 0) return;
+
+      const maxCatchUp = Math.max(1, Math.floor(Number(GAME_CONFIG.autoGachaMaxCatchUpRounds) || 60));
+      dueRounds = GAME_CONFIG.autoGachaCatchUpEnabled === false ? 1 : Math.min(dueRounds, maxCatchUp);
+
+      autoGachaTickBusy = true;
+      try {
+        for (let i = 0; i < dueRounds; i++) {
+          if (!autoGachaRunning) break;
+          const skipAnimation = document.hidden || dueRounds > 1;
+          const ok = await pull(GAME_CONFIG.autoGachaPullAmount, { fromAuto: true, skipAnimation: skipAnimation });
+          if (!ok) break;
+          autoGachaLastRunAt += delayMs;
+        }
+
+        // ถ้าเปิดแท็บทิ้งไว้นานมาก ให้ขยับฐานเวลาเข้าปัจจุบันเพื่อกันรันรอบค้างสะสมไม่จบ
+        if (Date.now() - autoGachaLastRunAt > delayMs * maxCatchUp) {
+          autoGachaLastRunAt = Date.now();
+        }
+      } finally {
+        autoGachaTickBusy = false;
+        renderAutoStatus();
+      }
     }
 
     function stopAutoGacha() {
       if (autoGachaTimer) clearInterval(autoGachaTimer);
       autoGachaTimer = null;
       autoGachaRunning = false;
+      autoGachaLastRunAt = 0;
       renderAutoStatus();
     }
 
@@ -6539,7 +6601,8 @@ function closeCardModal() {
         button.innerHTML = "หยุด Auto<br><span class='text-xs'>กำลังสุ่ม " + autoAmount + " ใบ</span>";
         button.className = "rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-black py-3 transition";
         const banner = getActiveBanner();
-        text.textContent = "Auto Gacha: เปิด / " + autoDetail + " / ตู้ " + (banner ? banner.name : "-");
+        const bgText = document.hidden ? " / โหมดพื้นหลัง: ชดเชยเวลาจริง" : " / โหมดปกติ";
+        text.textContent = "Auto Gacha: เปิด / " + autoDetail + " / ตู้ " + (banner ? banner.name : "-") + bgText;
       } else {
         button.innerHTML = "เริ่ม Auto<br><span class='text-xs'>" + autoDetail + "</span>";
         button.className = "rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-3 transition";
@@ -7769,6 +7832,75 @@ function closeCardModal() {
       }
     });
 
+
+    // ==============================
+    // 🟧 REAL-TIME GITHUB PAGES UPDATE / อัปเดตหน้าเว็บอัตโนมัติหลัง push ขึ้น GitHub
+    // ==============================
+    function getCurrentAppBuildId() {
+      const meta = document.querySelector('meta[name="gacha-app-build"]');
+      return String((GAME_CONFIG && GAME_CONFIG.appBuildId) || (meta && meta.getAttribute("content")) || "").trim();
+    }
+
+    function extractBuildIdFromHtml(html) {
+      const metaMatch = String(html || "").match(/<meta\s+name=["']gacha-app-build["']\s+content=["']([^"']+)["']/i);
+      if (metaMatch && metaMatch[1]) return metaMatch[1].trim();
+      const configMatch = String(html || "").match(/appBuildId\s*:\s*["']([^"']+)["']/i);
+      return configMatch && configMatch[1] ? configMatch[1].trim() : "";
+    }
+
+    function getCleanPageUrlForUpdateCheck() {
+      const url = new URL(window.location.href);
+      url.hash = "";
+      url.searchParams.set("gacha_update_check", String(Date.now()));
+      return url.toString();
+    }
+
+    async function checkGithubPageUpdate() {
+      if (!GAME_CONFIG.githubAutoUpdateEnabled) return;
+      if (githubAutoUpdatePending) return;
+      if (!/^https?:$/i.test(window.location.protocol)) return;
+
+      try {
+        const response = await fetch(getCleanPageUrlForUpdateCheck(), {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" }
+        });
+        if (!response || !response.ok) return;
+        const html = await response.text();
+        const remoteBuildId = extractBuildIdFromHtml(html);
+        const currentBuildId = getCurrentAppBuildId();
+
+        if (remoteBuildId && currentBuildId && remoteBuildId !== currentBuildId) {
+          githubAutoUpdatePending = true;
+          showToast("พบเวอร์ชันใหม่จาก GitHub กำลังบันทึกเซฟและอัปเดตหน้าเว็บ...");
+          try { save(true); flushLocalSaveNow(); await flushCloudSave(); } catch (error) {}
+
+          const doReload = function() {
+            window.location.reload();
+          };
+
+          if (GAME_CONFIG.githubAutoUpdateMode === "notify") {
+            const ok = window.confirm("มีอัปเดตใหม่จาก GitHub ต้องการรีโหลดหน้าเว็บตอนนี้ไหม?");
+            if (ok) doReload();
+            else githubAutoUpdatePending = false;
+          } else {
+            setTimeout(doReload, gachaRevealBusy ? 2500 : 900);
+          }
+        }
+      } catch (error) {
+        // เงียบไว้เพื่อไม่รบกวนผู้เล่น ถ้าเน็ตหลุด/Pages ยัง deploy ไม่เสร็จ รอบถัดไปจะเช็กใหม่
+      }
+    }
+
+    function initGithubAutoUpdateChecker() {
+      if (!GAME_CONFIG.githubAutoUpdateEnabled) return;
+      if (!/^https?:$/i.test(window.location.protocol)) return;
+      if (githubAutoUpdateTimer) clearInterval(githubAutoUpdateTimer);
+      const checkMs = Math.max(5000, Number(GAME_CONFIG.githubAutoUpdateCheckMs || 15000));
+      githubAutoUpdateTimer = setInterval(checkGithubPageUpdate, checkMs);
+      setTimeout(checkGithubPageUpdate, 2500);
+    }
+
     function initPerformanceMode() {
       try {
         const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -7787,9 +7919,24 @@ function closeCardModal() {
     openGameAnnouncement();
     setTimeout(openGameAnnouncement, 250);
     initCloudServices();
+    initGithubAutoUpdateChecker();
     setInterval(renderIncomeOnly, 1000);
+    document.addEventListener("visibilitychange", function() {
+      if (!document.hidden) {
+        processAutoGachaTick(false);
+        checkGithubPageUpdate();
+      } else {
+        processAutoGachaTick(false);
+      }
+      renderAutoStatus();
+    });
+    window.addEventListener("focus", function() {
+      processAutoGachaTick(false);
+      checkGithubPageUpdate();
+    });
     window.addEventListener("beforeunload", function() {
       stopBannerSlideshow();
+      if (githubAutoUpdateTimer) clearInterval(githubAutoUpdateTimer);
       flushLocalSaveNow();
       try { closeOnlinePeer(); } catch (error) {}
       flushCloudSave();
