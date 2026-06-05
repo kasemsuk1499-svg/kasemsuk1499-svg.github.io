@@ -1740,6 +1740,60 @@
       color: var(--theme-input-placeholder) !important;
     }
 
+
+    /* DROPDOWN TEXT CONTRAST FIX / แก้ตัวหนังสือในดรอปดาวที่โดนธีมบราวเซอร์กลืน */
+    /*
+      ปัญหา: option ใน <select> บางเบราว์เซอร์ใช้สีตามธีมเครื่องเอง ทำให้ตัวหนังสือมองไม่เห็น
+      วิธีแก้: บังคับสี option ให้ตัดกับธีมของเบราว์เซอร์โดยตรง
+      - Browser ธีมมืด: พื้น option สว่าง + ตัวหนังสือเข้ม
+      - Browser ธีมสว่าง: พื้น option เข้ม + ตัวหนังสือสว่าง
+    */
+    select,
+    select option,
+    select optgroup {
+      color-scheme: light dark;
+    }
+
+    body.theme-custom select option,
+    body.theme-custom select optgroup,
+    select option,
+    select optgroup {
+      background-color: #020617 !important;
+      color: #f8fafc !important;
+    }
+
+    body.theme-custom select option:checked,
+    select option:checked {
+      background-color: #67e8f9 !important;
+      color: #020617 !important;
+      font-weight: 900;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body.theme-custom select option,
+      body.theme-custom select optgroup,
+      select option,
+      select optgroup {
+        background-color: #f8fafc !important;
+        color: #020617 !important;
+      }
+
+      body.theme-custom select option:checked,
+      select option:checked {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+      }
+    }
+
+    /* ทำให้ช่อง select ที่ยังไม่กดเปิดอ่านชัดเสมอ */
+    body.theme-custom select,
+    select.bg-slate-900,
+    select.bg-slate-800 {
+      color: var(--theme-input-text, #f8fafc) !important;
+      background-color: rgba(2, 6, 23, .88) !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,.65);
+    }
+
     body.theme-custom h1,
     body.theme-custom h2,
     body.theme-custom h3,
@@ -2484,11 +2538,13 @@
     // - resetWhenPullRarities: ถ้าสุ่มปกติได้ระดับในรายการนี้ก่อนครบ pity จะรีตัวนับ
     // หมายเหตุ: ถ้า cardRates มีการ์ดหลายระดับ ระบบจะกรองให้ตรงกับระดับที่ถูกเลือกก่อน
     const DEFAULT_GACHA_GUARANTEE_CONFIG = {
-      enabled: true,
-      every: 200,
-      rarityRates: { LR: 93, EX: 3, SC: 1 },
+      // ปิดค่าเริ่มต้นไว้ก่อน เพื่อไม่ให้ตู้ที่ไม่ได้ตั้ง guarantee เองแอบการันตีระดับสูง
+      // ถ้าอยากให้ตู้ไหนมีการันตี ให้ใส่ guarantee: { enabled: true, ... } ใน GACHA_BANNERS ของตู้นั้นโดยตรง
+      enabled: false,
+      every: 0,
+      rarityRates: { UR: 100 },
       cardRates: {},
-      resetWhenPullRarities: ["SC", "EX", "LR"]
+      resetWhenPullRarities: []
     };
 
     // ======================================================================
@@ -2961,7 +3017,7 @@
         ],
         singlePullCost: 50000,
         tenPullCost: 450000,
-        rateOverrides: { N: 52, R: 30, SR: 13, SSR: 4, UR: 0.9, LR: 0.1, EX: 0.03, SC: 0.001 },
+        rateOverrides: { N: 52, R: 30, SR: 13, SSR: 4, UR: 0.9, LR: 0.08, EX: 0.015, SC: 0.0005 },
         rateUpCards: {}
       },
       {
@@ -2974,7 +3030,7 @@
         ],
         singlePullCost: 100000,
         tenPullCost: 900000,
-        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 8, UR: 3.2, LR: 0.8, EX: 0.027, SC: 0.003 },
+        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 8, UR: 2.2, LR: 0.35, EX: 0.02, SC: 0.001 },
         rateUpCards: { 1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 6: 5, 7: 5, 8: 5, 9: 5, 10: 5 }
       }
     ];
@@ -4900,6 +4956,88 @@ function nextBannerImage() {
       showToast("ซื้อ " + card.name + " สำเร็จ");
     }
 
+    // ======================================================================
+    // 🟨 PERFORMANCE PATCH: ลดความแล็คตอนอัพเลเวลการ์ด
+    // แนวคิด: อัพการ์ด 1 ใบ ไม่ควร renderAll() ทั้งหน้า เพราะจะวาดคอลเล็กชั่น/ร้าน/ออนไลน์ใหม่ทั้งหมด
+    // จึงอัปเดตเฉพาะตัวเลขด้านบน + หน้าต่างการ์ดที่เปิดอยู่ และหน่วง save ไว้รวมกันเวลาคลิกอัพรัวๆ
+    // ======================================================================
+    let fastUpgradeSaveTimer = null;
+    let fastUpgradeRenderTimer = null;
+
+    function saveAfterFastUpgrade() {
+      if (!activeUser) return;
+      if (fastUpgradeSaveTimer) clearTimeout(fastUpgradeSaveTimer);
+      fastUpgradeSaveTimer = setTimeout(function() {
+        fastUpgradeSaveTimer = null;
+        save();
+      }, 260);
+    }
+
+    function flushFastUpgradeSave() {
+      if (fastUpgradeSaveTimer) {
+        clearTimeout(fastUpgradeSaveTimer);
+        fastUpgradeSaveTimer = null;
+        save();
+      }
+    }
+
+    window.addEventListener("beforeunload", flushFastUpgradeSave);
+
+    function renderTopFastNumbers() {
+      const ownedCount = Object.keys(state.owned || {}).length;
+      const gemsText = document.getElementById("gemsText");
+      const dustText = document.getElementById("dustText");
+      const piceText = document.getElementById("piceCradText");
+      const tradePiceText = document.getElementById("tradePiceCradText");
+      const ownedText = document.getElementById("ownedText");
+      const collectionPercent = document.getElementById("collectionPercent");
+      const incomeText = document.getElementById("incomeText");
+      const incomeBankText = document.getElementById("incomeBankText");
+      const showcaseSlotText = document.getElementById("showcaseSlotText");
+
+      if (gemsText) gemsText.textContent = Math.floor(state.gems || 0).toLocaleString();
+      if (dustText) dustText.textContent = Math.floor(state.dust || 0).toLocaleString();
+      if (piceText) piceText.textContent = Math.floor(state.piceCrad || 0).toLocaleString();
+      if (tradePiceText) tradePiceText.textContent = Math.floor(state.piceCrad || 0).toLocaleString();
+      if (ownedText) ownedText.textContent = ownedCount + "/" + cards.length;
+      if (collectionPercent) collectionPercent.textContent = Math.floor((ownedCount / Math.max(cards.length, 1)) * 100) + "% Complete";
+      if (incomeText) incomeText.textContent = "+" + getTotalIncomePerSec().toFixed(1) + " Gem/s";
+      if (incomeBankText) incomeBankText.textContent = Math.floor(state.incomeBank || 0).toLocaleString();
+      if (showcaseSlotText) showcaseSlotText.textContent = state.showcase.length + "/" + GAME_CONFIG.showcaseSlots;
+
+      const hud = document.getElementById("cardRevealResourceHUD");
+      if (hud && typeof showCardRevealResourceHUD === "function") showCardRevealResourceHUD();
+    }
+
+    function refreshOpenOwnedCardReveal(cardId) {
+      const card = getCardById(cardId);
+      const content = document.getElementById("onlineFriendCardRevealContent");
+      const screen = document.getElementById("onlineFriendCardRevealScreen");
+      if (!card || !content || !screen || !screen.classList.contains("active")) return false;
+
+      content.innerHTML = makeLocalCardRevealHTML(card, { mode: "owned" });
+
+      if (String(card.rarity || "").toUpperCase() === "EX") {
+        screen.classList.add("ex-vanguard-art-screen");
+        screen.classList.remove("readable-card-detail-screen");
+      } else {
+        screen.classList.add("readable-card-detail-screen");
+        screen.classList.remove("ex-vanguard-art-screen");
+      }
+      return true;
+    }
+
+    function scheduleLightFullRenderAfterUpgrade() {
+      // อัปเดตการ์ดในคอลเล็กชั่นด้านหลังแบบหน่วงไว้ ไม่บล็อกจังหวะกดอัพเลเวล
+      if (fastUpgradeRenderTimer) clearTimeout(fastUpgradeRenderTimer);
+      fastUpgradeRenderTimer = setTimeout(function() {
+        fastUpgradeRenderTimer = null;
+        renderShowcase();
+        renderCollection();
+        renderAutoStatus();
+      }, 520);
+    }
+
     function getUpgradeCost(cardId) {
       const card = getCardById(cardId);
       const data = getOwnedCardData(cardId);
@@ -4938,10 +5076,22 @@ function nextBannerImage() {
       updateIncomeBank();
       state[currency] -= cost;
       data.level += 1;
+
       const reachedLuxuryFullMax = Number(data.level || 1) >= GAME_CONFIG.maxCardLevel && isAwakenMaxed(cardId);
-      save();
-      renderAll();
-      openCardModal(cardId);
+
+      // PERFORMANCE PATCH:
+      // เดิม: save(); renderAll(); openCardModal(cardId);
+      // ปัญหา: renderAll() วาดทั้งเว็บใหม่ทุกครั้ง ทำให้กดอัพเลเวลแล้วกระตุก/แล็ค โดยเฉพาะตอนมีการ์ดเยอะ
+      // ใหม่: save แบบ debounce + อัปเดตเฉพาะ HUD/หน้าต่างการ์ด แล้วค่อย render ส่วนด้านหลังแบบหน่วง
+      saveAfterFastUpgrade();
+      renderTopFastNumbers();
+
+      if (!refreshOpenOwnedCardReveal(cardId)) {
+        openCardModal(cardId);
+      }
+
+      scheduleLightFullRenderAfterUpgrade();
+
       showToast(reachedLuxuryFullMax ? "เลเวลเต็ม + อเวกเต็ม! ปลดล็อก Luxury Full Max Effect" : "อัปเกรดเป็น Lv." + data.level + " ด้วย " + currencyLabel);
     }
 
@@ -6028,6 +6178,7 @@ function nextBannerImage() {
 
 
 function closeCardModal() {
+      flushFastUpgradeSave();
       hideCardRevealResourceHUD();
       const modal = document.getElementById("cardModal");
       if (modal) {
