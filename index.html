@@ -736,6 +736,166 @@
 
 
 
+
+
+    /* CARD ASSIST SYSTEM / ระบบผู้ช่วยการ์ด */
+    /* ผู้ช่วย 1 การ์ดใส่ได้สูงสุด 4 ใบ ใช้เพิ่ม Power/Income ให้การ์ดที่อยู่ใน Showcase */
+    .card-assist-box {
+      margin-top: 8px;
+      border-radius: 1rem;
+      padding: 10px;
+      background: linear-gradient(145deg, rgba(15,23,42,.70), rgba(2,6,23,.54));
+      border: 1px solid rgba(125,211,252,.20);
+      box-shadow: inset 0 0 16px rgba(255,255,255,.04);
+      text-align: left;
+    }
+    .card-assist-slot {
+      border-radius: .85rem;
+      padding: 8px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .card-assist-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: rgba(34,211,238,.13);
+      color: #bae6fd;
+      border: 1px solid rgba(34,211,238,.22);
+      font-weight: 900;
+      font-size: 10px;
+    }
+    .card-assist-select {
+      width: 100%;
+      min-width: 0;
+      border-radius: .75rem;
+      padding: 7px 9px;
+      background: #020617;
+      color: #f8fafc;
+      border: 1px solid rgba(255,255,255,.16);
+      outline: none;
+    }
+    .card-assist-select option { background: #020617; color: #f8fafc; }
+
+    /* CARD ASSIST PREVIEW IMAGES / รูปตัวอย่างผู้ช่วยที่ใส่อยู่ */
+    /* ใช้ทั้ง Showcase ของเรา, Showcase ของเพื่อน, และหน้ากดโชว์การ์ดเพื่อน */
+    .card-assist-preview-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+    }
+    .card-assist-preview-strip.showcase-side {
+      position: absolute;
+      right: 8px;
+      top: 56px;
+      z-index: 18;
+      width: 42px;
+      flex-direction: column;
+      pointer-events: none;
+    }
+    .card-assist-preview-strip.friend-list {
+      margin-top: 6px;
+    }
+    .card-assist-preview-strip.friend-reveal {
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .card-assist-preview-title {
+      width: 100%;
+      font-size: 9px;
+      line-height: 1;
+      font-weight: 1000;
+      color: #bae6fd;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0,0,0,.85);
+    }
+    .card-assist-preview-thumb {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border-radius: .72rem;
+      overflow: hidden;
+      border: 1px solid rgba(125,211,252,.42);
+      background: rgba(2,6,23,.78);
+      box-shadow: 0 6px 18px rgba(0,0,0,.38), inset 0 0 10px rgba(255,255,255,.08);
+      flex: 0 0 auto;
+    }
+    .card-assist-preview-strip.friend-list .card-assist-preview-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: .55rem;
+    }
+    .card-assist-preview-strip.friend-reveal .card-assist-preview-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: .9rem;
+    }
+    .card-assist-preview-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 18%;
+      display: block;
+    }
+    .card-assist-preview-empty {
+      width: 36px;
+      height: 36px;
+      border-radius: .72rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15,23,42,.72);
+      border: 1px dashed rgba(255,255,255,.20);
+      color: rgba(226,232,240,.55);
+      font-size: 12px;
+      font-weight: 1000;
+      flex: 0 0 auto;
+    }
+    .card-assist-preview-badge {
+      position: absolute;
+      right: 1px;
+      bottom: 1px;
+      min-width: 13px;
+      height: 13px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 3px;
+      background: rgba(34,211,238,.94);
+      color: #020617;
+      font-size: 8px;
+      line-height: 1;
+      font-weight: 1000;
+      border: 1px solid rgba(255,255,255,.70);
+    }
+    .card-assist-slot-filled {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+    }
+    .card-assist-slot-thumb {
+      width: 44px;
+      height: 56px;
+      border-radius: .85rem;
+      overflow: hidden;
+      border: 1px solid rgba(125,211,252,.32);
+      background: rgba(2,6,23,.72);
+    }
+    .card-assist-slot-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 18%;
+      display: block;
+    }
+
+
+
     /* FRIEND SHOWCASE MAX STATUS BANNER / แบนเนอร์สถานะแม็กก่อนกดแสดงการ์ดเพื่อน */
     /* ใช้ดูภาพรวมในช่อง Showcase ว่าใบไหน Lv.MAX / Awaken MAX / FULL MAX แล้ว โดยไม่ทับรูปการ์ด */
     .friend-showcase-max-banner {
@@ -2802,6 +2962,55 @@
       cloudSaveEnabled: true
     };
 
+    // ======================================================================
+    // 🟦 ระบบผู้ช่วยการ์ด / Card Assist System
+    // ======================================================================
+    // แนวคิด: การ์ดหลักที่อยู่ใน Showcase สามารถใส่ผู้ช่วยได้สูงสุด 4 ใบ
+    // ผู้ช่วยแต่ละใบให้โบนัสต่างกันได้ และ 1 ใบใส่ได้มากกว่า 1 ค่า
+    //
+    // วิธีเขียนโบนัสให้การ์ดแต่ละใบ:
+    // 1) ใส่ตาม ID การ์ดใน ASSIST_CARD_BONUS_CONFIG.byCardId
+    //    ตัวอย่าง:
+    //    38: {
+    //      label: "EX Frieren Support",
+    //      bonuses: [
+    //        { stat: "power", type: "percent", value: 12 },      // Power +12%
+    //        { stat: "income", type: "flat", value: 150 }        // Income +150 Gem/s
+    //      ]
+    //    }
+    //
+    // 2) ถ้าไม่กำหนดรายใบ ระบบจะใช้โบนัสตามระดับใน byRarity
+    //    stat ที่ใช้ได้ตอนนี้: "power" และ "income"
+    //    type ที่ใช้ได้: "flat" = บวกเป็นจำนวน, "percent" = บวกเป็นเปอร์เซ็นต์
+    const CARD_ASSIST_CONFIG = {
+      enabled: true,
+      maxAssistPerCard: 4,
+      activeOnlyWhenTargetInShowcase: true, // true = โบนัสทำงานเฉพาะการ์ดหลักที่ใส่ Showcase
+      saveKey: "assistants"
+    };
+
+    const ASSIST_CARD_BONUS_CONFIG = {
+      byCardId: {
+        // 🟨 ตัวอย่างแก้รายใบ: เอา // หน้าเลข ID ออก แล้วเปลี่ยนเป็น ID การ์ดที่ต้องการ
+        // 38: { label: "EX Frieren Support", bonuses: [ { stat: "power", type: "percent", value: 12 }, { stat: "income", type: "flat", value: 150 } ] },
+        // 7:  { label: "Infinity Support", bonuses: [ { stat: "power", type: "flat", value: 1200 }, { stat: "income", type: "percent", value: 8 } ] }
+      },
+      byRarity: {
+        N:    { label: "Basic Assist", bonuses: [ { stat: "power", type: "flat", value: 100 } ] },
+        R:    { label: "Rare Assist", bonuses: [ { stat: "power", type: "flat", value: 250 }, { stat: "income", type: "flat", value: 2 } ] },
+        SR:   { label: "Super Assist", bonuses: [ { stat: "power", type: "percent", value: 3 }, { stat: "income", type: "flat", value: 8 } ] },
+        SSR:  { label: "SSR Assist", bonuses: [ { stat: "power", type: "percent", value: 5 }, { stat: "income", type: "percent", value: 3 } ] },
+        UR:   { label: "UR Assist", bonuses: [ { stat: "power", type: "percent", value: 8 }, { stat: "income", type: "percent", value: 5 } ] },
+        LR:   { label: "Legend Assist", bonuses: [ { stat: "power", type: "percent", value: 10 }, { stat: "income", type: "percent", value: 8 } ] },
+        JJKB: { label: "JJK Blue Assist", bonuses: [ { stat: "power", type: "percent", value: 9 }, { stat: "income", type: "percent", value: 7 } ] },
+        JJKS: { label: "JJK Special Assist", bonuses: [ { stat: "power", type: "percent", value: 11 }, { stat: "income", type: "percent", value: 9 } ] },
+        JJKC: { label: "JJK Curse Assist", bonuses: [ { stat: "power", type: "percent", value: 10 }, { stat: "income", type: "flat", value: 80 } ] },
+        EX:   { label: "EX Assist", bonuses: [ { stat: "power", type: "percent", value: 14 }, { stat: "income", type: "percent", value: 12 } ] },
+        SC:   { label: "SC Assist", bonuses: [ { stat: "power", type: "percent", value: 18 }, { stat: "income", type: "percent", value: 15 } ] }
+      },
+      defaultBonus: { label: "Assist", bonuses: [ { stat: "power", type: "flat", value: 50 } ] }
+    };
+
     // ==============================
     // 🟩 PERFORMANCE CONFIG / จุดปรับลดแล็คของเกม
     // ==============================
@@ -3122,7 +3331,7 @@
         SR: 500,
         SSR: 100,
         UR: 90,
-        LR: 20,
+        LR: 50,
         EX: 12,
         JJKB: 20,
         JJKS: 15,
@@ -3441,6 +3650,26 @@
     const tradeItemShop = TRADE_ITEM_SHOP;
     const cards = CARD_DATABASE;
 
+    // แก้ระบบแลกการ์ดซ้ำระดับ JJK/JJKS ให้ทนกับข้อมูลเก่าและชื่อระดับที่อาจถูกบันทึกต่างกัน
+    // ถ้าเพิ่มระดับใหม่ในอนาคต ให้เพิ่มใน DUPLICATE_TRADE_RULES ตามชื่อ rarity ปกติ ระบบนี้จะหา rule ให้อัตโนมัติ
+    const DUPLICATE_TRADE_RARITY_ALIASES = {
+      JJK: "JJKS",
+      LIMITED_JJK: "JJKS",
+      LIMITED_JJK_PURPLE: "JJKS",
+      LIMITED_JJK_BLUE: "JJKB",
+      LIMITED_JJK_RED: "JJKC"
+    };
+
+    function normalizeDuplicateTradeRarity(rarity) {
+      const key = String(rarity || "").trim();
+      return DUPLICATE_TRADE_RARITY_ALIASES[key] || key;
+    }
+
+    function getDuplicateTradeRuleByRarity(rarity) {
+      const key = normalizeDuplicateTradeRarity(rarity);
+      return duplicateTradeRules[key] || duplicateTradeRules[rarity] || null;
+    }
+
     // ======================================================================
     // 🟦 CLOUD SAVE CORE / ระบบฐานข้อมูลกลาง Firebase
     // ======================================================================
@@ -3639,6 +3868,7 @@
         incomeBank: 0,
         lastIncomeAt: Date.now(),
         showcase: [],
+        assistants: {},
         owned: {},
         lastDaily: "",
         lastDailyRewardDate: "",
@@ -4776,6 +5006,7 @@ function nextBannerImage() {
       if (typeof state.incomeBank !== "number") state.incomeBank = 0;
       if (typeof state.lastIncomeAt !== "number") state.lastIncomeAt = Date.now();
       if (!Array.isArray(state.showcase)) state.showcase = [];
+      if (!state.assistants || typeof state.assistants !== "object" || Array.isArray(state.assistants)) state.assistants = {};
       if (!state.owned) state.owned = {};
       if (typeof state.lastDailyRewardDate !== "string") state.lastDailyRewardDate = state.lastDaily || "";
       if (!Array.isArray(state.dailyRewardHistory)) state.dailyRewardHistory = [];
@@ -4785,6 +5016,22 @@ function nextBannerImage() {
           return state.owned[String(id)] && getCardById(id);
         })
         .slice(0, GAME_CONFIG.showcaseSlots);
+
+      Object.keys(state.assistants).forEach(function(targetId) {
+        const targetKey = String(targetId);
+        if (!state.owned[targetKey] || !getCardById(targetKey)) {
+          delete state.assistants[targetKey];
+          return;
+        }
+        const maxAssist = Math.max(0, Number(CARD_ASSIST_CONFIG.maxAssistPerCard || 4));
+        state.assistants[targetKey] = (Array.isArray(state.assistants[targetKey]) ? state.assistants[targetKey] : [])
+          .map(function(id) { return Number(id); })
+          .filter(function(id, index, arr) {
+            return id !== Number(targetId) && !!state.owned[String(id)] && !!getCardById(id) && arr.indexOf(id) === index;
+          })
+          .slice(0, maxAssist);
+        if (!state.assistants[targetKey].length) delete state.assistants[targetKey];
+      });
 
       Object.keys(state.owned).forEach(function(id) {
         if (!state.owned[id].level) state.owned[id].level = 1;
@@ -4982,16 +5229,290 @@ function nextBannerImage() {
       showToast(reachedLuxuryFullMax ? "เลเวลเต็ม + อเวกเต็ม! ปลดล็อก Luxury Full Max Effect" : (reachedMaxAwaken ? "ปลุกพลังเต็มแล้ว! ปลดล็อก Prismatic Overlay" : "ใช้การ์ดซ้ำเพิ่ม ปลุกพลัง +" + data.duplicateRank));
     }
 
+    function getAssistBonusConfig(card) {
+      if (!card) return ASSIST_CARD_BONUS_CONFIG.defaultBonus;
+      const byId = ASSIST_CARD_BONUS_CONFIG.byCardId || {};
+      const byRarity = ASSIST_CARD_BONUS_CONFIG.byRarity || {};
+      return byId[String(card.id)] || byId[card.id] || byRarity[String(card.rarity || "").toUpperCase()] || ASSIST_CARD_BONUS_CONFIG.defaultBonus;
+    }
+
+    function getAssistBonusList(card) {
+      const cfg = getAssistBonusConfig(card) || {};
+      return Array.isArray(cfg.bonuses) ? cfg.bonuses.filter(function(bonus) {
+        return bonus && (bonus.stat === "power" || bonus.stat === "income") && (bonus.type === "flat" || bonus.type === "percent") && Number.isFinite(Number(bonus.value));
+      }) : [];
+    }
+
+    function formatAssistBonus(bonus) {
+      const statName = bonus.stat === "income" ? "Income" : "Power";
+      const value = Number(bonus.value || 0);
+      return statName + " +" + (bonus.type === "percent" ? value.toLocaleString() + "%" : value.toLocaleString());
+    }
+
+    function getAssistCardLabel(card) {
+      const cfg = getAssistBonusConfig(card) || {};
+      return cfg.label || "Assist";
+    }
+
+    function getCardAssistantIds(targetCardId) {
+      ensureStateFields();
+      const key = String(targetCardId);
+      const list = Array.isArray(state.assistants && state.assistants[key]) ? state.assistants[key] : [];
+      const maxAssist = Math.max(0, Number(CARD_ASSIST_CONFIG.maxAssistPerCard || 4));
+      return list.map(function(id) { return Number(id); }).filter(function(id) {
+        return id !== Number(targetCardId) && !!state.owned[String(id)] && !!getCardById(id);
+      }).slice(0, maxAssist);
+    }
+
+    function getCardAssistPreviewItems(targetCardId) {
+      return getCardAssistantIds(targetCardId).map(function(assistId) {
+        const card = getCardById(assistId);
+        if (!card) return null;
+        return {
+          id: card.id,
+          name: card.name,
+          rarity: card.rarity,
+          rarityLabel: getRarityLabel(card.rarity),
+          rarityColor: (rarityInfo[card.rarity] || Object.values(rarityInfo)[0]).color,
+          raritySpecial: !!(rarityInfo[card.rarity] || {}).special,
+          rarityEffectClass: getRarityEffectClass(card.rarity),
+          limitedJJK: isLimitedJJKRarity(card.rarity),
+          image: card.image || "",
+          icon: card.icon || String(card.name || "?").charAt(0),
+          assistLabel: getAssistCardLabel(card),
+          bonusText: getAssistBonusList(card).map(formatAssistBonus).join(" • ")
+        };
+      }).filter(Boolean);
+    }
+
+    function assistPreviewThumbHTML(item, index, mode) {
+      if (!item) return "";
+      const info = rarityInfo[item.rarity] || Object.values(rarityInfo)[0];
+      const limitedClass = item.limitedJJK || isLimitedJJKRarity(item.rarity) ? "limited-jjk-card" : "";
+      const rarityEffectClass = item.rarityEffectClass || getRarityEffectClass(item.rarity);
+      const specialClass = item.raritySpecial || (info && info.special) ? "shine" : "";
+      const safeName = escapeHTML(item.name || "Assist");
+      const safeIcon = escapeHTML(item.icon || String(item.name || "?").charAt(0));
+      const title = safeName + " • " + escapeHTML(item.rarityLabel || item.rarity || "-") + (item.bonusText ? " • " + escapeHTML(item.bonusText) : "");
+      const imageHTML = item.image
+        ? '<img src="' + escapeAttr(item.image) + '" alt="' + safeName + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'<div class=&quot;absolute inset-0 flex items-center justify-center text-xs font-black bg-white/10&quot;>' + safeIcon + '</div>\');" />'
+        : '<div class="absolute inset-0 flex items-center justify-center text-xs font-black bg-white/10">' + safeIcon + '</div>';
+      return '<div class="card-assist-preview-thumb bg-gradient-to-br ' + escapeAttr(item.rarityColor || info.color || "from-slate-700 to-slate-950") + ' ' + escapeAttr(specialClass) + ' ' + escapeAttr(limitedClass) + ' ' + escapeAttr(rarityEffectClass) + '" title="' + escapeAttr(title) + '">' +
+        imageHTML +
+        '<span class="card-assist-preview-badge">' + (Number(index || 0) + 1) + '</span>' +
+      '</div>';
+    }
+
+    function assistPreviewStripHTML(items, options) {
+      options = options || {};
+      items = Array.isArray(items) ? items.filter(Boolean) : [];
+      const maxAssist = Math.max(1, Number(CARD_ASSIST_CONFIG.maxAssistPerCard || 4));
+      const mode = options.mode || "showcase";
+      if (!items.length && !options.showEmpty) return "";
+      let classes = "card-assist-preview-strip ";
+      if (mode === "friend-list") classes += "friend-list";
+      else if (mode === "friend-reveal") classes += "friend-reveal";
+      else classes += "showcase-side";
+      let html = '<div class="' + classes + '" title="ผู้ช่วยที่ใส่อยู่">';
+      if (options.label !== false) html += '<div class="card-assist-preview-title">ผู้ช่วย</div>';
+      for (let i = 0; i < Math.min(items.length, maxAssist); i++) {
+        html += assistPreviewThumbHTML(items[i], i, mode);
+      }
+      if (options.showEmpty) {
+        for (let i = items.length; i < maxAssist; i++) html += '<div class="card-assist-preview-empty">+</div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function getCardAssistPreviewHTML(targetCardId, options) {
+      return assistPreviewStripHTML(getCardAssistPreviewItems(targetCardId), options || {});
+    }
+
+    function isCardAssistActive(targetCardId) {
+      if (!CARD_ASSIST_CONFIG.enabled) return false;
+      if (!CARD_ASSIST_CONFIG.activeOnlyWhenTargetInShowcase) return true;
+      return Array.isArray(state.showcase) && state.showcase.includes(Number(targetCardId));
+    }
+
+    function getAssistBonusTotals(targetCardId) {
+      const totals = { powerFlat: 0, powerPercent: 0, incomeFlat: 0, incomePercent: 0, active: isCardAssistActive(targetCardId), count: 0 };
+      getCardAssistantIds(targetCardId).forEach(function(assistId) {
+        const assistCard = getCardById(assistId);
+        if (!assistCard) return;
+        totals.count += 1;
+        getAssistBonusList(assistCard).forEach(function(bonus) {
+          const value = Number(bonus.value || 0);
+          if (bonus.stat === "power" && bonus.type === "flat") totals.powerFlat += value;
+          if (bonus.stat === "power" && bonus.type === "percent") totals.powerPercent += value;
+          if (bonus.stat === "income" && bonus.type === "flat") totals.incomeFlat += value;
+          if (bonus.stat === "income" && bonus.type === "percent") totals.incomePercent += value;
+        });
+      });
+      return totals;
+    }
+
+    function applyAssistBonusToValue(baseValue, targetCardId, stat) {
+      const totals = getAssistBonusTotals(targetCardId);
+      const base = Number(baseValue || 0);
+      if (!totals.active) return base;
+      if (stat === "income") return (base * (1 + totals.incomePercent / 100)) + totals.incomeFlat;
+      return (base * (1 + totals.powerPercent / 100)) + totals.powerFlat;
+    }
+
+    function getOwnedAssistCandidates(targetCardId) {
+      return Object.keys(state.owned || {}).map(function(id) { return getCardById(id); })
+        .filter(function(card) { return card && Number(card.id) !== Number(targetCardId); })
+        .sort(function(a, b) {
+          const ai = rarityInfo[a.rarity] || {};
+          const bi = rarityInfo[b.rarity] || {};
+          return (Number(bi.order || 0) - Number(ai.order || 0)) || String(a.name).localeCompare(String(b.name));
+        });
+    }
+
+    function equipAssistantCard(targetCardId, assistCardId) {
+      if (!requireLogin()) return;
+      ensureStateFields();
+      targetCardId = Number(targetCardId);
+      assistCardId = Number(assistCardId);
+      if (!state.owned[String(targetCardId)] || !getCardById(targetCardId)) {
+        showToast("ยังไม่ได้รับการ์ดหลักใบนี้");
+        return;
+      }
+      if (!state.showcase.includes(targetCardId)) {
+        showToast("ต้องใส่การ์ดหลักไว้ใน Showcase ก่อน ผู้ช่วยจึงจะทำงาน");
+        return;
+      }
+      if (!assistCardId || !state.owned[String(assistCardId)] || !getCardById(assistCardId)) {
+        showToast("เลือกการ์ดผู้ช่วยก่อน");
+        return;
+      }
+      if (assistCardId === targetCardId) {
+        showToast("ใช้การ์ดใบเดียวกันเป็นผู้ช่วยตัวเองไม่ได้");
+        return;
+      }
+      const key = String(targetCardId);
+      const maxAssist = Math.max(0, Number(CARD_ASSIST_CONFIG.maxAssistPerCard || 4));
+      const list = getCardAssistantIds(targetCardId);
+      if (list.includes(assistCardId)) {
+        showToast("ผู้ช่วยใบนี้ใส่อยู่แล้ว");
+        return;
+      }
+      if (list.length >= maxAssist) {
+        showToast("ช่องผู้ช่วยเต็มแล้ว สูงสุด " + maxAssist + " ใบ");
+        return;
+      }
+      updateIncomeBank();
+      list.push(assistCardId);
+      state.assistants[key] = list;
+      save();
+      renderAll();
+      openCardModal(targetCardId);
+      showToast("ใส่ผู้ช่วยแล้ว");
+    }
+
+    function unequipAssistantCard(targetCardId, slotIndex) {
+      if (!requireLogin()) return;
+      ensureStateFields();
+      targetCardId = Number(targetCardId);
+      const key = String(targetCardId);
+      const list = getCardAssistantIds(targetCardId);
+      const index = Number(slotIndex || 0);
+      if (index < 0 || index >= list.length) return;
+      updateIncomeBank();
+      list.splice(index, 1);
+      if (list.length) state.assistants[key] = list;
+      else delete state.assistants[key];
+      save();
+      renderAll();
+      openCardModal(targetCardId);
+      showToast("ถอดผู้ช่วยแล้ว");
+    }
+
+    function equipAssistantFromSelect(targetCardId, slotIndex) {
+      const select = document.getElementById("assistSelect_" + targetCardId + "_" + slotIndex);
+      if (!select) return;
+      equipAssistantCard(targetCardId, Number(select.value || 0));
+    }
+
+    function getAssistSummaryText(targetCardId) {
+      const totals = getAssistBonusTotals(targetCardId);
+      const parts = [];
+      if (totals.powerFlat) parts.push("Power +" + totals.powerFlat.toLocaleString());
+      if (totals.powerPercent) parts.push("Power +" + totals.powerPercent.toLocaleString() + "%");
+      if (totals.incomeFlat) parts.push("Income +" + totals.incomeFlat.toLocaleString());
+      if (totals.incomePercent) parts.push("Income +" + totals.incomePercent.toLocaleString() + "%");
+      return parts.length ? parts.join(" • ") : "ยังไม่มีโบนัสผู้ช่วย";
+    }
+
+    function getCardAssistHTML(targetCardId) {
+      const targetCard = getCardById(targetCardId);
+      if (!targetCard || !state.owned[String(targetCardId)]) return "";
+      const maxAssist = Math.max(1, Number(CARD_ASSIST_CONFIG.maxAssistPerCard || 4));
+      const assistantIds = getCardAssistantIds(targetCardId);
+      const active = isCardAssistActive(targetCardId);
+      const candidates = getOwnedAssistCandidates(targetCardId).filter(function(card) { return !assistantIds.includes(Number(card.id)); });
+      let html = '<div class="card-assist-box">' +
+        '<div class="flex items-center justify-between gap-2 mb-2">' +
+          '<b class="text-cyan-200">ผู้ช่วยการ์ด</b>' +
+          '<span class="card-assist-chip">' + assistantIds.length + '/' + maxAssist + ' ใบ</span>' +
+        '</div>' +
+        '<div class="text-[11px] text-slate-300 mb-2">โบนัสทำงานเมื่อการ์ดหลักอยู่ใน Showcase • ' + escapeHTML(getAssistSummaryText(targetCardId)) + (active ? '' : ' • <b class="text-amber-200">ยังไม่ทำงาน</b>') + '</div>' +
+        '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">';
+
+      for (let i = 0; i < maxAssist; i++) {
+        const assistId = assistantIds[i];
+        const assistCard = getCardById(assistId);
+        html += '<div class="card-assist-slot">';
+        if (assistCard) {
+          const bonusText = getAssistBonusList(assistCard).map(formatAssistBonus).join(' • ');
+          html += '<div class="card-assist-slot-filled">' +
+            '<div class="card-assist-slot-thumb bg-gradient-to-br ' + escapeAttr((rarityInfo[assistCard.rarity] || Object.values(rarityInfo)[0]).color) + '">' +
+              (assistCard.image ? '<img src="' + escapeAttr(assistCard.image) + '" alt="' + escapeAttr(assistCard.name) + '" />' : '<div class="w-full h-full flex items-center justify-center font-black bg-white/10">' + escapeHTML(String(assistCard.name || "?").charAt(0)) + '</div>') +
+            '</div>' +
+            '<div class="min-w-0">' +
+              '<div class="font-black text-xs text-white truncate">ช่อง ' + (i + 1) + ': ' + escapeHTML(assistCard.name) + '</div>' +
+              '<div class="text-[10px] text-cyan-100 mt-1">' + escapeHTML(getRarityLabel(assistCard.rarity)) + ' • ' + escapeHTML(getAssistCardLabel(assistCard)) + '</div>' +
+              '<div class="text-[10px] text-slate-300 mt-1">' + escapeHTML(bonusText || '-') + '</div>' +
+              '<button onclick="unequipAssistantCard(' + targetCardId + ',' + i + ')" class="mt-2 rounded-lg bg-rose-500 hover:bg-rose-400 text-white font-black px-3 py-1 text-[10px]">ถอดผู้ช่วย</button>' +
+            '</div>' +
+          '</div>';
+        } else {
+          const selectId = 'assistSelect_' + targetCardId + '_' + i;
+          html += '<div class="font-black text-xs text-slate-200 mb-1">ช่อง ' + (i + 1) + ': ว่าง</div>';
+          if (!state.showcase.includes(Number(targetCardId))) {
+            html += '<div class="text-[10px] text-amber-200">ใส่การ์ดหลักใน Showcase ก่อนถึงจะเลือกผู้ช่วยได้</div>';
+          } else if (!candidates.length) {
+            html += '<div class="text-[10px] text-slate-400">ยังไม่มีการ์ดอื่นให้เลือกเป็นผู้ช่วย</div>';
+          } else {
+            html += '<select id="' + selectId + '" class="card-assist-select text-[11px]">' +
+              '<option value="">เลือกผู้ช่วย</option>' +
+              candidates.map(function(card) {
+                const bonusText = getAssistBonusList(card).map(formatAssistBonus).join(' / ');
+                return '<option value="' + card.id + '">' + escapeHTML(getRarityLabel(card.rarity) + ' • ' + card.name + ' • ' + bonusText) + '</option>';
+              }).join('') +
+            '</select>' +
+            '<button onclick="equipAssistantFromSelect(' + targetCardId + ',' + i + ')" class="mt-2 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black px-3 py-1 text-[10px]">ใส่ผู้ช่วย</button>';
+          }
+        }
+        html += '</div>';
+      }
+      html += '</div></div>';
+      return html;
+    }
+
     function getCardPower(card) {
       const data = state.owned[String(card.id)];
       const level = data ? data.level : 1;
-      return Math.floor(card.power * (1 + (level - 1) * GAME_CONFIG.powerGrowthPerLevel) * getDuplicatePowerMultiplier(card.id));
+      const basePower = card.power * (1 + (level - 1) * GAME_CONFIG.powerGrowthPerLevel) * getDuplicatePowerMultiplier(card.id);
+      return Math.floor(applyAssistBonusToValue(basePower, card.id, "power"));
     }
 
     function getCardIncome(card) {
       const data = state.owned[String(card.id)];
       const level = data ? data.level : 1;
-      return Number(card.incomePerSec || 0) * (1 + (level - 1) * GAME_CONFIG.incomeGrowthPerLevel) * getDuplicateIncomeMultiplier(card.id);
+      const baseIncome = Number(card.incomePerSec || 0) * (1 + (level - 1) * GAME_CONFIG.incomeGrowthPerLevel) * getDuplicateIncomeMultiplier(card.id);
+      return applyAssistBonusToValue(baseIncome, card.id, "income");
     }
 
     function getTotalIncomePerSec() {
@@ -5168,9 +5689,10 @@ function nextBannerImage() {
     function getDuplicateTradeCardItems() {
       if (!activeUser) return [];
       return cards.filter(function(card) {
-        return state.owned[String(card.id)] && duplicateTradeRules[card.rarity] && getAvailableDuplicateCopies(card.id) > 0;
+        const rule = getDuplicateTradeRuleByRarity(card.rarity);
+        return state.owned[String(card.id)] && rule && getAvailableDuplicateCopies(card.id) > 0;
       }).sort(function(a, b) {
-        const rarityCompare = String(a.rarity).localeCompare(String(b.rarity));
+        const rarityCompare = getRaritySortRank(a.rarity) - getRaritySortRank(b.rarity);
         if (rarityCompare !== 0) return rarityCompare;
         return String(a.name).localeCompare(String(b.name));
       });
@@ -5191,7 +5713,7 @@ function nextBannerImage() {
         showToast("ไม่พบการ์ดใบนี้");
         return;
       }
-      const rule = duplicateTradeRules[card.rarity];
+      const rule = getDuplicateTradeRuleByRarity(card.rarity);
       if (!rule) {
         showToast("ยังไม่มีสูตรเทรดระดับนี้");
         return;
@@ -5229,7 +5751,7 @@ function nextBannerImage() {
         showToast("ไม่พบการ์ดใบนี้");
         return;
       }
-      const rule = duplicateTradeRules[card.rarity];
+      const rule = getDuplicateTradeRuleByRarity(card.rarity);
       if (!rule) {
         showToast("ยังไม่มีสูตรเทรดระดับนี้");
         return;
@@ -5978,7 +6500,7 @@ function nextBannerImage() {
         duplicateList.innerHTML = '<div class="rounded-2xl bg-slate-900/70 border border-white/10 p-4 text-sm text-slate-300 sm:col-span-2 lg:col-span-3">ยังไม่มีการ์ดซ้ำที่แลกได้ ระบบจะไม่ใช้ใบหลักของการ์ด</div>';
       } else {
         duplicateList.innerHTML = duplicatePageItems.map(function(card) {
-          const rule = duplicateTradeRules[card.rarity];
+          const rule = getDuplicateTradeRuleByRarity(card.rarity);
           const available = getAvailableDuplicateCopies(card.id);
           const needed = Number(rule.duplicateNeeded || 1);
           const canTrade = activeUser && available >= needed;
@@ -6168,9 +6690,10 @@ function nextBannerImage() {
           const data = getOwnedCardData(card.id);
           html += '<div class="relative group">' +
             '<button onclick="openCardModal(' + card.id + ')" class="w-full">' + cardHTML(card, true, false, data.count, false) + '</button>' +
+            getCardAssistPreviewHTML(card.id, { mode: "showcase", label: true }) +
             '<button onclick="openCardModal(' + card.id + ')" class="absolute top-3 right-3 rounded-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-[10px] font-black px-2 py-1 shadow-lg z-20">แก้ไข</button>' +
             '<button onclick="openCardModal(' + card.id + ')" class="absolute bottom-3 left-3 right-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-center text-[10px] font-black py-1 z-20">' +
-              'Lv.' + data.level + ' • +' + getCardIncome(card).toFixed(1) + ' Gem/s • แก้ไข' +
+              'Lv.' + data.level + ' • +' + getCardIncome(card).toFixed(1) + ' Gem/s • ผู้ช่วย ' + getCardAssistantIds(card.id).length + '/' + CARD_ASSIST_CONFIG.maxAssistPerCard + ' • แก้ไข' +
             '</button>' +
           '</div>';
         } else {
@@ -6537,6 +7060,7 @@ function nextBannerImage() {
             'ปลุกพลัง <b>' + duplicateRank + '/' + duplicateMaxRank + '</b> • ซ้ำใช้ได้ <b>' + availableDuplicates + '</b> • ' + getAwakenCostSummaryText(card.id) + ' • <b class="text-yellow-200">' + statusFullText + '</b>' +
             getAwakenBonusDetailHTML(card.id, duplicateRank, duplicateMaxRank) +
             getNextCardResourceHTML(card.id) +
+            getCardAssistHTML(card.id) +
             (isLuxuryFullMax ? '<div class="luxury-full-max-status">✦ LUXURY FULL MAX ✦</div>' : '') +
           '</div>';
       } else {
@@ -6785,6 +7309,9 @@ function closeCardModal() {
             maxLevel: Number(GAME_CONFIG.maxCardLevel || 150),
             power: 0,
             income: 0,
+            assistCount: 0,
+            assistSummary: "ยังไม่มีโบนัสผู้ช่วย",
+            assistants: [],
             image: ""
           };
         }
@@ -6811,6 +7338,9 @@ function closeCardModal() {
           awakenFull: isAwakenMaxed(card.id),
           power: getCardPower(card),
           income: getCardIncome(card),
+          assistCount: getCardAssistantIds(card.id).length,
+          assistSummary: getAssistSummaryText(card.id),
+          assistants: getCardAssistPreviewItems(card.id),
           image: card.image || ""
         };
       });
@@ -6947,13 +7477,18 @@ function closeCardModal() {
         '<span class="rounded-full ' + (item.awakenFull ? 'bg-fuchsia-300 text-slate-950 border-fuchsia-100' : 'bg-slate-800/70 text-slate-300 border-white/10') + ' border px-2 py-0.5 font-black">Awaken MAX ' + (item.awakenFull ? '✓' : '×') + '</span>' +
         (item.levelFull && item.awakenFull ? '<span class="rounded-full bg-yellow-200 text-slate-950 border border-yellow-50 px-2 py-0.5 font-black shadow-lg">FULL MAX</span>' : '') +
       '</div>';
+      const friendAssistItems = Array.isArray(item.assistants) ? item.assistants : [];
+      const friendAssistRevealHTML = assistPreviewStripHTML(friendAssistItems, { mode: "friend-reveal", label: true });
+      const friendAssistSummaryHTML = friendAssistItems.length
+        ? '<div class="mt-2 text-[11px] text-cyan-100"><b>ผู้ช่วย:</b> ' + friendAssistItems.map(function(assist) { return escapeHTML(assist.name || "Assist"); }).join(' • ') + '</div>'
+        : '<div class="mt-2 text-[11px] text-slate-400">ผู้ช่วย: ยังไม่ได้ใส่</div>';
 
       return '<div class="online-friend-reveal-card luxury-card-reveal py-4 ' + (isEXFullArtReveal ? 'ex-full-art-reveal' : 'normal-readable-detail-reveal normal-rarity-color-reveal') + '"' + (normalRevealStyle ? ' style="' + normalRevealStyle + '"' : '') + '>' +
         '<div class="reveal-rarity-aura normal-rarity-reveal-aura bg-gradient-to-br ' + (item.rarityColor || info.color) + '"></div>' +
         '<div class="classic-card-reveal-wrap luxury-card-reveal-wrap">' +
           '<div class="text-left w-full rounded-2xl bg-slate-950/60 shadow-xl border border-white/20 overflow-hidden min-h-[420px] flex flex-col">' +
             '<div class="relative h-72 bg-gradient-to-br ' + (item.rarityColor || info.color) + ' ' + (special ? 'shine' : '') + ' ' + limitedClass + ' ' + rarityEffectClass + ' ' + maxClass + ' overflow-hidden" style="' + maxStyle + '">' +
-              imagePart + maxOverlay +
+              imagePart + maxOverlay + friendAssistRevealHTML +
               '<div class="absolute left-2 bottom-2 z-10 flex flex-col items-start gap-1">' +
                 '<span class="rounded-full bg-black/65 border border-white/15 px-2 py-1 text-[10px] font-black text-cyan-200 shadow-lg">Lv.' + level + '</span>' +
                 '<span class="rounded-full bg-black/65 border border-white/15 px-2 py-1 text-[10px] font-black text-fuchsia-200 shadow-lg">ปลุก ' + awakenRank + '/' + awakenMax + '</span>' +
@@ -6976,6 +7511,7 @@ function closeCardModal() {
           (friendAwakenStars ? '<div class="flex justify-center mt-1 mb-1">' + friendAwakenStars + '</div>' : '') +
           'ปลุกพลัง <b>' + awakenRank + '/' + awakenMax + '</b> • <b class="text-yellow-200">' + fullText + '</b>' +
           friendMaxStatusPills +
+          friendAssistSummaryHTML +
         '</div>' +
       '</div>';
     }
@@ -7107,6 +7643,7 @@ function closeCardModal() {
         const rarityEffectClass = item.rarityEffectClass || getRarityEffectClass(item.rarity);
         const limitedClass = item.limitedJJK || isLimitedJJKRarity(item.rarity) ? "limited-jjk-card" : "";
         const overlay = friendCornerMaxStatus;
+        const friendAssistListHTML = assistPreviewStripHTML(Array.isArray(item.assistants) ? item.assistants : [], { mode: "friend-list", label: false });
         const image = item.image ? "<div class='relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-gradient-to-br " + escapeAttr(item.rarityColor || (rarityInfo[item.rarity] || Object.values(rarityInfo)[0]).color) + " " + (item.raritySpecial ? "shine" : "") + " " + escapeAttr(limitedClass) + " " + escapeAttr(rarityEffectClass) + " " + maxClass + "' style='" + escapeAttr(maxStyle) + "'><img src='" + escapeAttr(item.image) + "' class='absolute inset-0 card-art-crop-thumb' alt='' />" + overlay + "</div>" :
           "<div class='relative w-14 h-14 rounded-xl bg-white/10 border border-white/10 shrink-0 flex items-center justify-center font-black " + maxClass + "' style='" + escapeAttr(maxStyle) + "'>" + escapeHTML(String(item.name || "?").charAt(0)) + overlay + "</div>";
         const peerId = escapeAttr(player.peerId || "");
@@ -7123,6 +7660,7 @@ function closeCardModal() {
               "<span class='rounded-full bg-fuchsia-400/15 border border-fuchsia-300/20 text-fuchsia-200 px-2 py-0.5 font-black'>" + escapeHTML(awakenText) + "</span>" +
               "<span class='rounded-full bg-emerald-400/15 border border-emerald-300/20 text-emerald-200 px-2 py-0.5 font-black'>+" + Number(item.income || 0).toFixed(1) + " Gem/s</span>" +
             "</div>" +
+            friendAssistListHTML +
             "<div class='text-[10px] text-slate-500 mt-1'>กดเพื่อดูการ์ดใบนี้</div>" +
           "</div>" +
         "</button>";
