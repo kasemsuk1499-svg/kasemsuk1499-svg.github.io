@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="gacha-app-build" content="2026-06-05-realtime-bg-v1" />
+  <meta name="gacha-app-build" content="2026-06-05-card-media-video-optimized-v1" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -430,6 +430,33 @@
       object-fit: cover !important;
       object-position: center 18% !important;
       background: rgba(2,6,23,.40);
+    }
+
+    /* CARD MEDIA OPTIMIZER / รองรับรูป + คลิปในการ์ด และลดแล็คจากไฟล์เคลื่อนไหว */
+    /*
+      วิธีใช้ใน CARD_DATABASE:
+      - ใช้รูปปกติ: image: "assets/cards/luffy.webp" หรือ URL รูปภาพ
+      - ใช้คลิปเบา: video: "assets/cards/luffy.mp4", poster: "assets/cards/luffy.webp"
+      - แนะนำบน GitHub: เก็บไฟล์ไว้ในโฟลเดอร์ assets/cards/ แล้วใช้ path แบบ assets/cards/ชื่อไฟล์.webp/mp4
+      - ถ้าใช้ video ระบบจะ preload เฉพาะ metadata/none และเล่นเฉพาะตอนการ์ดอยู่บนหน้าจอ เพื่อลดแล็ค
+      - GIF ใช้ได้ แต่ถ้าแปลงเป็น MP4/WebM + poster จะลื่นและเบากว่า GIF มาก
+    */
+    .card-media-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover !important;
+      object-position: center 18% !important;
+      background: rgba(2,6,23,.40);
+      pointer-events: none;
+      display: block;
+    }
+    .card-media-video.card-art-crop,
+    .card-media-video.card-art-crop-thumb {
+      object-fit: cover !important;
+      object-position: center 18% !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .card-media-video { animation: none !important; }
     }
     .classic-card-reveal-meta {
       width: min(88vw, 390px);
@@ -2949,7 +2976,7 @@
 
       // 🟧 Real-time GitHub Pages Update / เช็กไฟล์บน GitHub Pages แล้วรีโหลดให้ผู้เล่นอัตโนมัติ
       // เวลาอัปเดตโค้ดขึ้น GitHub ให้เปลี่ยนเลข build นี้ด้วย ผู้เล่นที่เปิดเกมค้างไว้จะดึงเวอร์ชันใหม่เอง
-      appBuildId: "2026-06-05-realtime-bg-v1",
+      appBuildId: "2026-06-05-card-media-video-optimized-v1",
       githubAutoUpdateEnabled: true,
       githubAutoUpdateCheckMs: 15000,
       githubAutoUpdateMode: "reload", // "reload" = รีโหลดอัตโนมัติ, "notify" = แจ้งเตือนให้กดเอง
@@ -3548,6 +3575,16 @@
     // ถ้าไม่ใส่ upgradeDustBase หรือ upgradeDustGrowth จะใช้ค่ากลางจาก GAME_CONFIG
     // การ์ดซ้ำจะใช้เพิ่ม ปลุกพลัง ได้จากหน้าการ์ด โดยกิน Copies ส่วนเกิน 1 ใบต่อ 1 Rank
     // ======================================================================
+    // ======================================================================
+    // 🟨 จุดแก้ 4.5: รูป/คลิปการ์ดสำหรับลง GitHub
+    // ======================================================================
+    // ใช้ได้ทั้งรูปที่หามาเองและคลิปที่หามาเอง โดยแก้ในข้อมูลการ์ดแต่ละใบ:
+    // 1) รูปภาพ: image: "assets/cards/ชื่อไฟล์.webp" หรือ image: "https://.../รูป.png"
+    // 2) คลิป:  video: "assets/cards/ชื่อไฟล์.mp4", poster: "assets/cards/รูปปก.webp"
+    // 3) ถ้าใส่ทั้ง video และ image ระบบจะใช้ video ก่อน และใช้ image/poster เป็นภาพปกสำรอง
+    // 4) แนะนำให้ใช้ .webp/.jpg สำหรับรูป และ .mp4/.webm สำหรับคลิป จะเบากว่า GIF มาก
+    // 5) ถ้าไฟล์อยู่ใน GitHub repo เดียวกับ index.html ให้สร้างโฟลเดอร์ assets/cards/ แล้วอัปโหลดไฟล์ไว้ตรงนั้น
+
     const CARD_DATABASE = [
       { id: 000, name: "DEV.", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3czMDgzZ3R1a2ZlcTFuMWU0a25mbjI3dGU2ZXlyMGtqNjY4c3ZqNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/896prY7gpeT4qneb5i/giphy.gif" },
       { id: 999, name: "CREATOR", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXVoNXl5MmFwaDlid215MHdnYXBrcWJ3cW50bDN5MWExYmRrZ3R6OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/U7aHTeKJYr0FHPQALd/giphy.gif" },
@@ -5322,6 +5359,9 @@ function nextBannerImage() {
           rarityEffectClass: getRarityEffectClass(card.rarity),
           limitedJJK: isLimitedJJKRarity(card.rarity),
           image: card.image || "",
+          video: card.video || "",
+          poster: card.poster || card.image || "",
+          mediaType: card.video ? "video" : (card.mediaType || "image"),
           icon: card.icon || String(card.name || "?").charAt(0),
           assistLabel: getAssistCardLabel(card),
           bonusText: getAssistBonusList(card).map(formatAssistBonus).join(" • ")
@@ -5338,9 +5378,13 @@ function nextBannerImage() {
       const safeName = escapeHTML(item.name || "Assist");
       const safeIcon = escapeHTML(item.icon || String(item.name || "?").charAt(0));
       const title = safeName + " • " + escapeHTML(item.rarityLabel || item.rarity || "-") + (item.bonusText ? " • " + escapeHTML(item.bonusText) : "");
-      const imageHTML = item.image
-        ? '<img src="' + escapeAttr(item.image) + '" alt="' + safeName + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'<div class=&quot;absolute inset-0 flex items-center justify-center text-xs font-black bg-white/10&quot;>' + safeIcon + '</div>\');" />'
-        : '<div class="absolute inset-0 flex items-center justify-center text-xs font-black bg-white/10">' + safeIcon + '</div>';
+      const imageHTML = makeCardMediaHTML(item, {
+        hidden: false,
+        textSizeClass: "text-xs",
+        positionClass: "absolute inset-0",
+        extraClass: "card-art-crop-thumb",
+        eager: false
+      });
       return '<div class="card-assist-preview-thumb bg-gradient-to-br ' + escapeAttr(item.rarityColor || info.color || "from-slate-700 to-slate-950") + ' ' + escapeAttr(specialClass) + ' ' + escapeAttr(limitedClass) + ' ' + escapeAttr(rarityEffectClass) + '" title="' + escapeAttr(title) + '">' +
         imageHTML +
         '<span class="card-assist-preview-badge">' + (Number(index || 0) + 1) + '</span>' +
@@ -6578,7 +6622,7 @@ function nextBannerImage() {
           const awakenMax = getCardAwakenMax(card.id);
           const nextAwakenCost = awakenRank >= awakenMax ? '-' : getDuplicateAwakenCost(card.id);
           const awakenText = awakenRank >= awakenMax ? 'อเวกเต็มแล้ว' : 'อเวก ' + awakenRank + ' / ' + awakenMax + ' • ' + getAwakenCostSummaryText(card.id);
-          const imageHTML = card.image ? '<img src="' + escapeHTML(card.image) + '" class="w-16 h-20 rounded-xl card-art-crop-thumb border border-white/10 bg-black/30" />' : '<div class="w-16 h-20 rounded-xl bg-slate-800 border border-white/10 flex items-center justify-center text-xs text-slate-500">No Img</div>';
+          const imageHTML = '<div class="relative w-16 h-20 rounded-xl overflow-hidden border border-white/10 bg-black/30">' + makeCardMediaHTML(card, { hidden: false, textSizeClass: "text-xs", positionClass: "absolute inset-0", extraClass: "card-art-crop-thumb", eager: false }) + '</div>';
           return '<div class="rounded-2xl bg-slate-900/70 border border-white/10 p-3">' +
             '<div class="flex gap-3 mb-2">' +
               imageHTML +
@@ -6892,7 +6936,7 @@ function nextBannerImage() {
       const rarityTone = getRarityTone(card.rarity);
       const rarityEffectClass = !hidden ? getRarityEffectClass(card.rarity) : "";
       const limitedClass = !hidden && isLimitedJJKRarity(card.rarity) ? "limited-jjk-card" : "";
-      const imageText = card.image && revealed ? '<div class="text-[10px] opacity-75 mt-1">Image Card</div>' : '';
+      const imageText = getCardMediaUrl(card) && revealed ? '<div class="text-[10px] opacity-75 mt-1">Media Card</div>' : '';
       const duplicateRankText = '';
       const showcaseText = revealed && state.showcase.includes(card.id) ? '<div class="text-[10px] text-emerald-200 font-black mt-1">อยู่ใน Showcase</div>' : '';
       const clickText = clickable && revealed ? '<div class="text-[10px] opacity-80 mt-2">กดเพื่อดู/ใส่/ถอด Showcase</div>' : '';
@@ -6917,26 +6961,109 @@ function nextBannerImage() {
       '</button>';
     }
 
-    function makeImagePart(card, hidden, textSizeClass, positionClass) {
+    function getCardMediaUrl(cardOrItem) {
+      if (!cardOrItem) return "";
+      return String(cardOrItem.video || cardOrItem.media || cardOrItem.image || "").trim();
+    }
+
+    function getCardPosterUrl(cardOrItem) {
+      if (!cardOrItem) return "";
+      return String(cardOrItem.poster || cardOrItem.imagePoster || cardOrItem.thumbnail || cardOrItem.image || "").trim();
+    }
+
+    function isCardVideoMedia(cardOrItem, url) {
+      if (!cardOrItem && !url) return false;
+      const type = String((cardOrItem && (cardOrItem.mediaType || cardOrItem.type)) || "").toLowerCase();
+      const src = String(url || getCardMediaUrl(cardOrItem) || "").split("?")[0].toLowerCase();
+      return type === "video" || !!(cardOrItem && cardOrItem.video) || /\.(mp4|webm|ogg|mov|m4v)$/.test(src);
+    }
+
+    function fallbackMediaHTML(safeIcon, textSizeClass) {
+      return '<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
+    }
+
+    function makeCardMediaHTML(cardOrItem, options) {
+      options = options || {};
+      const hidden = !!options.hidden;
+      const textSizeClass = options.textSizeClass || "text-5xl";
+      const positionClass = options.positionClass || "absolute inset-0";
+      const extraClass = options.extraClass || "card-art-crop";
+      const eager = !!options.eager;
+      const name = cardOrItem && cardOrItem.name ? String(cardOrItem.name) : "Card";
+      const safeIcon = escapeHTML((cardOrItem && cardOrItem.icon) || name.charAt(0) || "?");
       if (hidden) {
         return '<div class="' + positionClass + ' flex items-center justify-center ' + textSizeClass + ' font-black bg-black/20">?</div>';
       }
-      const safeIcon = escapeHTML(card.icon || card.name.charAt(0));
-      if (!card.image) {
-        return '<div class="' + positionClass + ' flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
+      const mediaUrl = getCardMediaUrl(cardOrItem);
+      if (!mediaUrl) return '<div class="' + positionClass + ' flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
+      const fallback = escapeAttr(fallbackMediaHTML(safeIcon, textSizeClass));
+      if (isCardVideoMedia(cardOrItem, mediaUrl)) {
+        const poster = getCardPosterUrl(cardOrItem);
+        return '<video src="' + escapeAttr(mediaUrl) + '" ' + (poster ? 'poster="' + escapeAttr(poster) + '" ' : '') + 'muted loop playsinline preload="' + (eager ? 'metadata' : 'none') + '" data-card-video="1" class="' + escapeAttr(positionClass + ' ' + extraClass + ' card-media-video z-0') + '" aria-label="' + escapeAttr(name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'" + fallback + "\');"></video>';
       }
-      return '<img src="' + escapeHTML(card.image) + '" loading="lazy" decoding="async" class="' + positionClass + ' card-art-crop" alt="' + escapeHTML(card.name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'' + escapeHTML('<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>') + '\');" />';
+      return '<img src="' + escapeAttr(mediaUrl) + '" loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async" class="' + escapeAttr(positionClass + ' ' + extraClass) + '" alt="' + escapeAttr(name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'" + fallback + "\');" />';
+    }
+
+    function makeImagePart(card, hidden, textSizeClass, positionClass) {
+      return makeCardMediaHTML(card, { hidden: hidden, textSizeClass: textSizeClass, positionClass: positionClass, extraClass: "card-art-crop", eager: false });
     }
 
     function makeModalImagePart(card, textSizeClass) {
-      const safeIcon = escapeHTML(card.icon || card.name.charAt(0));
-      if (!card.image) {
-        return '<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
-      }
-      return '<img src="' + escapeHTML(card.image) + '" loading="eager" decoding="async" class="absolute inset-0 card-art-crop z-0" alt="' + escapeHTML(card.name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'' + escapeHTML('<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>') + '\');" />';
+      return makeCardMediaHTML(card, { hidden: false, textSizeClass: textSizeClass, positionClass: "absolute inset-0", extraClass: "card-art-crop z-0", eager: true });
     }
 
 
+
+    function refreshCardMediaVideos(root) {
+      root = root || document;
+      const videos = root.querySelectorAll ? root.querySelectorAll("video[data-card-video]") : [];
+      videos.forEach(function(video) {
+        if (window.__cardVideoObserver) {
+          window.__cardVideoObserver.observe(video);
+        } else {
+          video.pause();
+        }
+      });
+    }
+
+    function setupCardMediaVideoOptimizer() {
+      if (window.__cardVideoOptimizerReady) return;
+      window.__cardVideoOptimizerReady = true;
+      if ("IntersectionObserver" in window) {
+        window.__cardVideoObserver = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            const video = entry.target;
+            if (!video) return;
+            if (entry.isIntersecting && entry.intersectionRatio > 0.25 && document.visibilityState === "visible") {
+              const playPromise = video.play();
+              if (playPromise && playPromise.catch) playPromise.catch(function(){});
+            } else {
+              video.pause();
+            }
+          });
+        }, { threshold: [0, .25, .5, 1] });
+      }
+      refreshCardMediaVideos(document);
+      const mutationObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          mutation.addedNodes && mutation.addedNodes.forEach(function(node) {
+            if (node && node.nodeType === 1) refreshCardMediaVideos(node);
+          });
+        });
+      });
+      mutationObserver.observe(document.body, { childList: true, subtree: true });
+      document.addEventListener("visibilitychange", function() {
+        document.querySelectorAll("video[data-card-video]").forEach(function(video) {
+          if (document.visibilityState !== "visible") video.pause();
+        });
+      });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupCardMediaVideoOptimizer);
+    } else {
+      setupCardMediaVideoOptimizer();
+    }
 
     function getCardRevealResourceHUDHTML() {
       if (!activeUser || !state) return "";
@@ -7408,7 +7535,10 @@ function closeCardModal() {
           assistCount: getCardAssistantIds(card.id).length,
           assistSummary: getAssistSummaryText(card.id),
           assistants: getCardAssistPreviewItems(card.id),
-          image: card.image || ""
+          image: card.image || "",
+          video: card.video || "",
+          poster: card.poster || card.image || "",
+          mediaType: card.video ? "video" : (card.mediaType || "image")
         };
       });
     }
@@ -7455,12 +7585,7 @@ function closeCardModal() {
     }
 
     function makeOnlineCardImagePart(item, textSizeClass) {
-      const name = item && item.name ? String(item.name) : "?";
-      const safeIcon = escapeHTML(name.charAt(0));
-      if (!item || !item.image) {
-        return '<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
-      }
-      return '<img src="' + escapeAttr(item.image) + '" class="absolute inset-0 card-art-crop z-0" alt="' + escapeAttr(name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'<div class=&quot;absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10&quot;>' + safeIcon + '</div>\');" />';
+      return makeCardMediaHTML(item, { hidden: false, textSizeClass: textSizeClass, positionClass: "absolute inset-0", extraClass: "card-art-crop z-0", eager: true });
     }
 
     function closeOnlineFriendCardReveal() {
