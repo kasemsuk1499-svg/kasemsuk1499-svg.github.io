@@ -5033,6 +5033,24 @@ function nextBannerImage() {
         if (!state.assistants[targetKey].length) delete state.assistants[targetKey];
       });
 
+      // กันข้อมูลเก่าชนกัน: ผู้ช่วยห้ามซ้ำข้ามการ์ดหลัก และห้ามอยู่ใน Showcase/ช่องทำรายได้
+      const usedAssistantIds = new Set();
+      const showcaseIds = new Set((state.showcase || []).map(function(id) { return Number(id); }));
+      Object.keys(state.assistants).sort(function(a, b) { return Number(a) - Number(b); }).forEach(function(targetId) {
+        const targetKey = String(targetId);
+        const maxAssist = Math.max(0, Number(CARD_ASSIST_CONFIG.maxAssistPerCard || 4));
+        state.assistants[targetKey] = (Array.isArray(state.assistants[targetKey]) ? state.assistants[targetKey] : [])
+          .map(function(id) { return Number(id); })
+          .filter(function(id) {
+            if (showcaseIds.has(id)) return false;
+            if (usedAssistantIds.has(id)) return false;
+            usedAssistantIds.add(id);
+            return true;
+          })
+          .slice(0, maxAssist);
+        if (!state.assistants[targetKey].length) delete state.assistants[targetKey];
+      });
+
       Object.keys(state.owned).forEach(function(id) {
         if (!state.owned[id].level) state.owned[id].level = 1;
         if (!state.owned[id].count) state.owned[id].count = 1;
@@ -5264,6 +5282,32 @@ function nextBannerImage() {
       }).slice(0, maxAssist);
     }
 
+    // ล็อกการ์ดผู้ช่วย: การ์ด 1 ใบเป็นผู้ช่วยได้แค่ 1 จุด และห้ามอยู่ใน Showcase/ช่องทำรายได้พร้อมกัน
+    function getAssistantOwnerTargetId(assistCardId) {
+      ensureStateFields();
+      const assistId = Number(assistCardId);
+      if (!assistId) return 0;
+      const assistants = state.assistants || {};
+      const targetKeys = Object.keys(assistants);
+      for (let i = 0; i < targetKeys.length; i++) {
+        const targetId = Number(targetKeys[i]);
+        const list = Array.isArray(assistants[targetKeys[i]]) ? assistants[targetKeys[i]].map(Number) : [];
+        if (list.includes(assistId)) return targetId;
+      }
+      return 0;
+    }
+
+    function isCardUsedAsAssistant(cardId) {
+      return !!getAssistantOwnerTargetId(cardId);
+    }
+
+    function getCardAssistLockText(cardId) {
+      const ownerId = getAssistantOwnerTargetId(cardId);
+      if (!ownerId) return "";
+      const ownerCard = getCardById(ownerId);
+      return ownerCard ? ("กำลังเป็นผู้ช่วยของ " + ownerCard.name) : "กำลังเป็นผู้ช่วยของการ์ดหลักอื่น";
+    }
+
     function getCardAssistPreviewItems(targetCardId) {
       return getCardAssistantIds(targetCardId).map(function(assistId) {
         const card = getCardById(assistId);
@@ -5361,8 +5405,16 @@ function nextBannerImage() {
     }
 
     function getOwnedAssistCandidates(targetCardId) {
+      ensureStateFields();
+      const targetId = Number(targetCardId);
       return Object.keys(state.owned || {}).map(function(id) { return getCardById(id); })
-        .filter(function(card) { return card && Number(card.id) !== Number(targetCardId); })
+        .filter(function(card) {
+          if (!card || Number(card.id) === targetId) return false;
+          // ห้ามใช้การ์ดที่อยู่ใน Showcase/ช่องทำรายได้ เป็นผู้ช่วย
+          if (Array.isArray(state.showcase) && state.showcase.includes(Number(card.id))) return false;
+          // ห้ามใช้การ์ดที่เป็นผู้ช่วยของการ์ดหลักอื่นอยู่แล้ว
+          return !isCardUsedAsAssistant(card.id);
+        })
         .sort(function(a, b) {
           const ai = rarityInfo[a.rarity] || {};
           const bi = rarityInfo[b.rarity] || {};
@@ -5389,6 +5441,16 @@ function nextBannerImage() {
       }
       if (assistCardId === targetCardId) {
         showToast("ใช้การ์ดใบเดียวกันเป็นผู้ช่วยตัวเองไม่ได้");
+        return;
+      }
+      if (Array.isArray(state.showcase) && state.showcase.includes(assistCardId)) {
+        showToast("การ์ดใบนี้อยู่ใน Showcase/ช่องทำรายได้ ต้องถอดออกก่อนถึงจะใช้เป็นผู้ช่วยได้");
+        return;
+      }
+      const ownerTargetId = getAssistantOwnerTargetId(assistCardId);
+      if (ownerTargetId && ownerTargetId !== targetCardId) {
+        const ownerCard = getCardById(ownerTargetId);
+        showToast("การ์ดใบนี้เป็นผู้ช่วยของ " + (ownerCard ? ownerCard.name : "การ์ดหลักอื่น") + " อยู่ ต้องถอดออกก่อน");
         return;
       }
       const key = String(targetCardId);
@@ -5457,7 +5519,7 @@ function nextBannerImage() {
           '<b class="text-cyan-200">ผู้ช่วยการ์ด</b>' +
           '<span class="card-assist-chip">' + assistantIds.length + '/' + maxAssist + ' ใบ</span>' +
         '</div>' +
-        '<div class="text-[11px] text-slate-300 mb-2">โบนัสทำงานเมื่อการ์ดหลักอยู่ใน Showcase • ' + escapeHTML(getAssistSummaryText(targetCardId)) + (active ? '' : ' • <b class="text-amber-200">ยังไม่ทำงาน</b>') + '</div>' +
+        '<div class="text-[11px] text-slate-300 mb-2">โบนัสทำงานเมื่อการ์ดหลักอยู่ใน Showcase • ผู้ช่วย 1 ใบล็อกใช้ได้กับการ์ดหลักเดียว และห้ามอยู่ใน Showcase/ช่องทำรายได้พร้อมกัน • ' + escapeHTML(getAssistSummaryText(targetCardId)) + (active ? '' : ' • <b class="text-amber-200">ยังไม่ทำงาน</b>') + '</div>' +
         '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">';
 
       for (let i = 0; i < maxAssist; i++) {
@@ -5528,6 +5590,11 @@ function nextBannerImage() {
       const key = String(cardId);
       if (!state.owned[key]) {
         showToast("ยังไม่ได้รับการ์ดใบนี้");
+        return;
+      }
+      const assistLockText = getCardAssistLockText(cardId);
+      if (assistLockText) {
+        showToast(assistLockText + " ต้องถอดออกก่อนถึงจะใส่ Showcase/ช่องทำรายได้ได้");
         return;
       }
       if (state.showcase.includes(cardId)) {
