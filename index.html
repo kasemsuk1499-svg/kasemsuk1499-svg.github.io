@@ -3180,10 +3180,6 @@
     // stock = จำนวนที่ซื้อได้ทั้งหมดต่อไอดีผู้เล่น
     // enabled = true เปิดขาย / false ปิดขาย
     const TRADE_CARD_SHOP = [
-      { id: "38", cardId: 38, pricePiceCrad: 100, stock: 12, enabled: true },
-      { id: "39", cardId: 39, pricePiceCrad: 100, stock: 12, enabled: true },
-      { id: "40", cardId: 40, pricePiceCrad: 100, stock: 12, enabled: true },
-      { id: "41", cardId: 41, pricePiceCrad: 100, stock: 12, enabled: true },      
       { id: "1033", cardId: 1033, pricePiceCrad: 1000, stock: 999, enabled: true },
       { id: "1034", cardId: 1034, pricePiceCrad: 1000, stock: 999, enabled: true },
       { id: "1023", cardId: 1023, pricePiceCrad: 1500, stock: 999, enabled: true },
@@ -3217,8 +3213,6 @@
       { id: "1006", cardId: 1006, pricePiceCrad: 900, stock: 999, enabled: true }, 
       { id: "1007", cardId: 1007, pricePiceCrad: 900, stock: 999, enabled: true },
       { id: "1008", cardId: 1008, pricePiceCrad: 900, stock: 999, enabled: true }, 
-      { id: "1033", cardId: 1033, pricePiceCrad: 1000, stock: 999, enabled: true },
-      { id: "1034", cardId: 1034, pricePiceCrad: 1000, stock: 999, enabled: true },
       { id: "44", cardId: 44, pricePiceCrad: 500, stock: 500, enabled: true },
       { id: "45", cardId: 45, pricePiceCrad: 500, stock: 500, enabled: true },
       { id: "43", cardId: 43, pricePiceCrad: 200, stock: 500, enabled: true },
@@ -3296,26 +3290,6 @@
           rarityRates: { JJKS: 100 },
           cardRates: { 1002: 2, 1008: 2 },
           resetWhenPullRarities: ["JJKS"]
-        }
-      },
-      {
-        id: "EX",
-        name: "EX RATE UP (Limited Time)",
-        description: "ตู้เพิ่มโอกาส EX และเพิ่มน้ำหนัก ",
-        image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzlpczh3dXU5OWs5aDI5bGdrM2VhazNicWRubmx3bHA2ZHhkeXYweSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RMw1DhEAwx5ZK/giphy.gif",
-        images: [
-          "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdG15aG1yd2VtcjRhcHF4eTB2aDliZm50aTk0ZmNpOXVoaXBiaWFsaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/85ZqBuB8RhFgi6Yp4c/giphy.gif", "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDFudmRhemdpM2t4OGxybnh6cGtkY3VmNWt0MmMxMW9haGdmbnhubyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UhwiXeVJewXUaXgWRy/giphy.gif", "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanVwc2huZzJxMWF1djFsMzdka2F5M3A2a3djdW1obTMxdjhpOTd1cSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oLREIsYjAGKR0D2Qlp/giphy.gif", "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG5xcnQzaTZ2ZHg3eWkzdHEzb3N6ODdxdzFna3VkeWt2bXlyMzVsMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tnVg7YjP7GUFxu2ynz/giphy.gif"
-        ],
-        singlePullCost: 150000,
-        tenPullCost: 1500000,
-        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 7, UR: 3.1, LR: 1.727, EX: 0.15, SC: 0.005 },
-        rateUpCards: { 38: 5, 39: 5, 40: 5, 41: 5 },
-        guarantee: {
-          enabled: true,
-          every: 1000,
-          rarityRates: { EX: 100 },
-          cardRates: { 38: 25, 39: 25, 40: 25, 41: 25 },
-          resetWhenPullRarities: ["EX"]
         }
       },
       {
