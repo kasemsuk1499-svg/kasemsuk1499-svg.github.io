@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="gacha-app-build" content="2026-06-06-local-media-friend-assist-fixed-v1" />
+  <meta name="gacha-app-build" content="2026-06-06-local-media-friend-assist-id0-fixed-v2" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -2976,7 +2976,7 @@
 
       // 🟧 Real-time GitHub Pages Update / เช็กไฟล์บน GitHub Pages แล้วรีโหลดให้ผู้เล่นอัตโนมัติ
       // เวลาอัปเดตโค้ดขึ้น GitHub ให้เปลี่ยนเลข build นี้ด้วย ผู้เล่นที่เปิดเกมค้างไว้จะดึงเวอร์ชันใหม่เอง
-      appBuildId: "2026-06-06-local-media-friend-assist-fixed-v1",
+      appBuildId: "2026-06-06-local-media-friend-assist-id0-fixed-v2",
       githubAutoUpdateEnabled: true,
       githubAutoUpdateCheckMs: 15000,
       githubAutoUpdateMode: "reload", // "reload" = รีโหลดอัตโนมัติ, "notify" = แจ้งเตือนให้กดเอง
@@ -5322,27 +5322,37 @@ function nextBannerImage() {
     }
 
     // ล็อกการ์ดผู้ช่วย: การ์ด 1 ใบเป็นผู้ช่วยได้แค่ 1 จุด และห้ามอยู่ใน Showcase/ช่องทำรายได้พร้อมกัน
+    // แก้สำคัญ: รองรับการ์ด ID 0 / 000 ด้วย เพราะ JavaScript มอง 000 เป็นเลข 0
+    // ของเดิมใช้ !assistId / !ownerId ทำให้การ์ด ID 0 ถูกเข้าใจผิดว่า "ไม่ได้เลือก"
+    function normalizeAssistCardIdValue(value) {
+      if (value === null || value === undefined) return null;
+      const raw = String(value).trim();
+      if (raw === "") return null;
+      const id = Number(raw);
+      return Number.isFinite(id) ? id : null;
+    }
+
     function getAssistantOwnerTargetId(assistCardId) {
       ensureStateFields();
-      const assistId = Number(assistCardId);
-      if (!assistId) return 0;
+      const assistId = normalizeAssistCardIdValue(assistCardId);
+      if (assistId === null) return null;
       const assistants = state.assistants || {};
       const targetKeys = Object.keys(assistants);
       for (let i = 0; i < targetKeys.length; i++) {
-        const targetId = Number(targetKeys[i]);
+        const targetId = normalizeAssistCardIdValue(targetKeys[i]);
         const list = Array.isArray(assistants[targetKeys[i]]) ? assistants[targetKeys[i]].map(Number) : [];
         if (list.includes(assistId)) return targetId;
       }
-      return 0;
+      return null;
     }
 
     function isCardUsedAsAssistant(cardId) {
-      return !!getAssistantOwnerTargetId(cardId);
+      return getAssistantOwnerTargetId(cardId) !== null;
     }
 
     function getCardAssistLockText(cardId) {
       const ownerId = getAssistantOwnerTargetId(cardId);
-      if (!ownerId) return "";
+      if (ownerId === null) return "";
       const ownerCard = getCardById(ownerId);
       return ownerCard ? ("กำลังเป็นผู้ช่วยของ " + ownerCard.name) : "กำลังเป็นผู้ช่วยของการ์ดหลักอื่น";
     }
@@ -5471,9 +5481,9 @@ function nextBannerImage() {
     function equipAssistantCard(targetCardId, assistCardId) {
       if (!requireLogin()) return;
       ensureStateFields();
-      targetCardId = Number(targetCardId);
-      assistCardId = Number(assistCardId);
-      if (!state.owned[String(targetCardId)] || !getCardById(targetCardId)) {
+      targetCardId = normalizeAssistCardIdValue(targetCardId);
+      assistCardId = normalizeAssistCardIdValue(assistCardId);
+      if (targetCardId === null || !state.owned[String(targetCardId)] || !getCardById(targetCardId)) {
         showToast("ยังไม่ได้รับการ์ดหลักใบนี้");
         return;
       }
@@ -5481,7 +5491,7 @@ function nextBannerImage() {
         showToast("ต้องใส่การ์ดหลักไว้ใน Showcase ก่อน ผู้ช่วยจึงจะทำงาน");
         return;
       }
-      if (!assistCardId || !state.owned[String(assistCardId)] || !getCardById(assistCardId)) {
+      if (assistCardId === null || !state.owned[String(assistCardId)] || !getCardById(assistCardId)) {
         showToast("เลือกการ์ดผู้ช่วยก่อน");
         return;
       }
@@ -5494,7 +5504,7 @@ function nextBannerImage() {
         return;
       }
       const ownerTargetId = getAssistantOwnerTargetId(assistCardId);
-      if (ownerTargetId && ownerTargetId !== targetCardId) {
+      if (ownerTargetId !== null && ownerTargetId !== targetCardId) {
         const ownerCard = getCardById(ownerTargetId);
         showToast("การ์ดใบนี้เป็นผู้ช่วยของ " + (ownerCard ? ownerCard.name : "การ์ดหลักอื่น") + " อยู่ ต้องถอดออกก่อน");
         return;
@@ -5540,7 +5550,8 @@ function nextBannerImage() {
     function equipAssistantFromSelect(targetCardId, slotIndex) {
       const select = document.getElementById("assistSelect_" + targetCardId + "_" + slotIndex);
       if (!select) return;
-      equipAssistantCard(targetCardId, Number(select.value || 0));
+      // ห้ามใช้ Number(select.value || 0) เพราะ option value="0" ของการ์ด id 000 จะกลายเป็นเหมือนค่าว่าง
+      equipAssistantCard(targetCardId, select.value);
     }
 
     function getAssistSummaryText(targetCardId) {
