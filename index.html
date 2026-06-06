@@ -3118,35 +3118,45 @@
     };
 
     // ======================================================================
-    // 🟨 จุดแก้ 1.5: ภาพและเวลาแอนิเมชั่นตอนเปิดกาชา / กำหนดภาพลุ้น UR-LR ได้เอง
+    // 🟨 จุดแก้ 1.5: จุดแสดงภาพ/วิดีโอลุ้นการ์ด SSR / UR / LR / EX / SX / JJK
     // ======================================================================
-    // วิธีแก้รูป/วิดีโอ: เปลี่ยน URL ใน revealImages ได้เลย หรือใส่รูป/คลิปไว้ใน image/images ของ GACHA_BANNERS
-    // useActiveBannerMedia: true = เอฟเฟคลุ้น SSR/UR/LR/EX/JJK/SC จะดึงรูปหรือวิดีโอจากแบนเนอร์ตู้ที่เลือกอยู่ก่อน
-    // ถ้าแบนเนอร์ตู้นั้นไม่มีรูป/วิดีโอ ระบบจะ fallback ไปใช้ revealImages ด้านล่างแทน
-    // SSR/UR/LR/EX/SC = แยกตามระดับ, SPECIAL = JJK/JJKB/JJKS/JJKC หรือระดับพิเศษที่กำหนดไว้
+    // วิธีใส่ไฟล์จากโฟลเดอร์แบนเนอร์บน GitHub:
+    // 1) อัปโหลดรูปหรือวิดีโอไว้ที่ assets/banners/
+    // 2) ใส่แค่ชื่อไฟล์ เช่น "SSRop.mp4" หรือใส่ path เต็มแบบ "assets/banners/SSRop.mp4" ก็ได้
+    // 3) รองรับไฟล์รูป .webp/.jpg/.png/.gif และวิดีโอ .mp4/.webm/.ogg/.mov/.m4v
+    // 4) useActiveBannerMedia: true = ตอนลุ้น SSR/UR/LR/EX/SX/JJK จะดึงรูป/วิดีโอจากแบนเนอร์ตู้ที่เลือกอยู่ก่อน
+    // 5) ถ้าอยากให้ตู้ใดมีภาพลุ้นเฉพาะระดับ ให้เพิ่ม revealImages ใน GACHA_BANNERS เช่น:
+    //    revealImages: { SSR: "ssr.mp4", UR: "ur.mp4", LR: "lr.mp4", EX: "ex.mp4", SX: "sx.mp4", JJK: "jjk.mp4" }
+    // 6) ถ้าแบนเนอร์ตู้นั้นไม่มี revealImages ระบบจะใช้ภาพ/วิดีโอใน revealImages ด้านล่างแทน
     const GACHA_REVEAL_CONFIG = {
       enabled: true,
-      useActiveBannerMedia: true, // true = ดึงรูป/วิดีโอจาก image/images ของตู้กาชาปัจจุบันมาใช้ตอนลุ้นเปิด
+      useActiveBannerMedia: true, // true = ดึงรูป/วิดีโอจาก image/images/revealImages ของตู้กาชาปัจจุบันมาใช้ตอนลุ้นเปิด
       normalCardDelayMs: 10,      // เวลาหน่วงตอนเปิดการ์ดทั่วไปทีละใบ
-      rareHoldMs: 3000,            // เวลาลุ้นก่อนเฉลยการ์ด SSR ขึ้นไป
+      rareHoldMs: 3000,           // เวลาลุ้นก่อนเฉลยการ์ด SSR ขึ้นไป
       resultGapMs: 10,            // เว้นจังหวะหลังการ์ดแต่ละใบ
       revealImages: {
-        SSR: "assets/banners/SSRop.mp4",
-        UR: "assets/banners/URop.mp4",
-        LR: "assets/banners/LRop.mp4",
-        EX: "assets/banners/LRop.mp4",
-        SC: "assets/banners/JJKop.mp4",
-        SPECIAL: "assets/banners/JJKop.mp4"
+        SSR: "SSRop.mp4",
+        UR: "URop.mp4",
+        LR: "LRop.mp4",
+        EX: "LRop.mp4",
+        SX: "LRop.mp4",
+        SC: "LRop.mp4",
+        JJK: "JJKop.mp4",
+        SPECIAL: "JJKop.mp4",
+        DEFAULT: ""
       },
       revealTexts: {
         SSR: "",
         UR: "",
         LR: "",
         EX: "",
+        SX: "",
         SC: "",
+        JJK: "",
         SPECIAL: ""
       },
-      specialRarities: ["JJKB", "JJKS", "JJKC", "SC"]
+      // ใส่ชื่อระดับที่อยากให้ถือว่าเป็น JJK/SPECIAL ตรงนี้ได้ เช่น JJKS, JJKB, JJKC
+      specialRarities: ["JJKB", "JJKS", "JJKC"]
     };
 
 
@@ -3224,10 +3234,10 @@
           enabled: true,
           holdMs: 3000,
           revealImages: {
-            SSR: "assets/banners/SSRop.mp4",
-            UR: "assets/banners/URop.mp4",
-            LR: "assets/banners/LRop.mp4",
-            EX: "assets/banners/JJKop.mp4"
+            SSR: "SSRop.mp4",
+            UR: "URop.mp4",
+            LR: "LRop.mp4",
+            EX: "JJKop.mp4"
           },
           revealTexts: {
             SSR: "",
@@ -3251,9 +3261,9 @@
           enabled: true,
           holdMs: 3000,
           revealImages: {
-            JJKB: "assets/banners/JJKop.mp4",
-            JJKS: "assets/banners/JJKop.mp4",
-            JJKC: "assets/banners/JJKop.mp4"
+            JJKB: "JJKop.mp4",
+            JJKS: "JJKop.mp4",
+            JJKC: "JJKop.mp4"
           },
           revealTexts: {
             JJKB: "",
@@ -6421,15 +6431,16 @@
     }
 
     function getGachaRevealTier(card) {
-      const rarity = card && card.rarity ? String(card.rarity) : "";
-      // ระดับหลักให้เช็กก่อน special เพื่อให้ EX/SC ใช้รูป/คลิปแยกระดับได้
-      if (rarity === "SC") return "SC";
+      const rarity = card && card.rarity ? String(card.rarity).toUpperCase() : "";
+      // ระดับหลักให้เช็กก่อน special เพื่อให้ SSR/UR/LR/EX/SX ใช้รูป/คลิปแยกระดับได้
+      if (rarity === "SX" || rarity === "SC") return "SX"; // รองรับทั้ง SX และชื่อเก่า SC
       if (rarity === "EX") return "EX";
       if (rarity === "LR") return "LR";
       if (rarity === "UR") return "UR";
       if (rarity === "SSR") return "SSR";
+      if (rarity === "JJK" || /^JJK/.test(rarity)) return "JJK";
       const specialList = (GACHA_REVEAL_CONFIG && GACHA_REVEAL_CONFIG.specialRarities) || [];
-      if (specialList.includes(rarity)) return "SPECIAL";
+      if (specialList.map(function(v) { return String(v).toUpperCase(); }).includes(rarity)) return "JJK";
       return "NORMAL";
     }
 
@@ -6445,12 +6456,33 @@
       gachaRareRevealSkipRequested = true;
     }
 
+    function getRevealTierAliases(tier, rarity) {
+      const t = String(tier || "").toUpperCase();
+      const r = String(rarity || "").toUpperCase();
+      const list = [];
+      [t, r].forEach(function(v) { if (v && !list.includes(v)) list.push(v); });
+      if (t === "SX" || t === "SC" || r === "SX" || r === "SC") ["SX", "SC"].forEach(function(v) { if (!list.includes(v)) list.push(v); });
+      if (t === "JJK" || r === "JJK" || /^JJK/.test(r)) ["JJK", "SPECIAL"].forEach(function(v) { if (!list.includes(v)) list.push(v); });
+      if (!list.includes("DEFAULT")) list.push("DEFAULT");
+      return list;
+    }
+
+    function pickRevealMediaFromMap(map, tier, rarity) {
+      if (!map) return "";
+      const aliases = getRevealTierAliases(tier, rarity);
+      for (let i = 0; i < aliases.length; i++) {
+        if (map[aliases[i]]) return map[aliases[i]];
+      }
+      return "";
+    }
+
     function getActiveBannerRevealMediaUrl(card, tier, cfg) {
+      if (cfg && cfg.useActiveBannerMedia === false) return "";
       const banner = getActiveBanner();
       if (!banner) return "";
       const rarity = card && card.rarity ? String(card.rarity) : String(tier || "");
       const revealMap = banner.revealImages || banner.revealMedia || {};
-      const explicit = revealMap[tier] || revealMap[rarity] || revealMap.DEFAULT || "";
+      const explicit = pickRevealMediaFromMap(revealMap, tier, rarity);
       if (explicit) return resolveLocalAssetPath(explicit, "banner");
 
       const mediaList = getBannerImages(banner);
@@ -6461,7 +6493,9 @@
 
     async function showGachaRareReveal(card, tier, revealConfigOverride) {
       const screen = document.getElementById("gachaRevealRareScreen");
+      const panel = document.getElementById("gachaRevealRarePanel");
       const image = document.getElementById("gachaRevealRareImage");
+      const video = document.getElementById("gachaRevealRareVideo");
       const fallback = document.getElementById("gachaRevealRareFallback");
       const title = document.getElementById("gachaRevealRareTitle");
       const subtitle = document.getElementById("gachaRevealRareSubtitle");
@@ -6471,17 +6505,32 @@
       const imageMap = cfg.revealImages || {};
       const textMap = cfg.revealTexts || {};
       const rarity = card && card.rarity ? String(card.rarity) : String(tier || "");
-      const imageUrl = imageMap[tier] || imageMap[rarity] || imageMap.DEFAULT || "";
-      const label = tier === "SPECIAL" ? getRarityLabel(card.rarity) : (getRarityLabel(tier) || tier);
+      const localMedia = pickRevealMediaFromMap(imageMap, tier, rarity);
+      const bannerMedia = getActiveBannerRevealMediaUrl(card, tier, cfg);
+      const mediaUrl = bannerMedia || (localMedia ? resolveLocalAssetPath(localMedia, "banner") : "");
+      const isVideo = isVideoFileName(mediaUrl);
+      const label = tier === "JJK" || tier === "SPECIAL" ? (getRarityLabel(card.rarity) || "JJK") : (getRarityLabel(tier) || tier);
       gachaRareRevealSkipRequested = false;
 
+      if (panel) panel.setAttribute("data-reveal-tier", String(tier || rarity || "").toUpperCase());
       if (title) title.textContent = label;
-      if (subtitle) subtitle.textContent = textMap[tier] || textMap[rarity] || textMap.DEFAULT || "มีบางอย่างกำลังจะปรากฏ...";
+      if (subtitle) subtitle.textContent = pickRevealMediaFromMap(textMap, tier, rarity) || "มีบางอย่างกำลังจะปรากฏ...";
+
       if (image) {
-        image.style.display = imageUrl ? "block" : "none";
-        image.src = imageUrl || "";
+        image.style.display = mediaUrl && !isVideo ? "block" : "none";
+        image.src = mediaUrl && !isVideo ? mediaUrl : "";
       }
-      if (fallback) fallback.style.display = imageUrl ? "none" : "block";
+      if (video) {
+        try { video.pause(); } catch (e) {}
+        video.style.display = mediaUrl && isVideo ? "block" : "none";
+        video.src = mediaUrl && isVideo ? mediaUrl : "";
+        video.currentTime = 0;
+        if (mediaUrl && isVideo) {
+          const playPromise = video.play();
+          if (playPromise && typeof playPromise.catch === "function") playPromise.catch(function() {});
+        }
+      }
+      if (fallback) fallback.style.display = mediaUrl ? "none" : "block";
       screen.classList.add("active");
 
       const holdMs = Math.max(250, Number(cfg.holdMs || cfg.rareHoldMs || 1200));
@@ -6490,6 +6539,12 @@
         await sleep(60);
       }
       screen.classList.remove("active");
+      if (video) {
+        try { video.pause(); } catch (e) {}
+        video.removeAttribute("src");
+        video.load();
+      }
+      if (image) image.removeAttribute("src");
       gachaRareRevealSkipRequested = false;
       await sleep(120);
     }
@@ -6528,6 +6583,7 @@
         holdMs: Number(cfg.holdMs || GACHA_REVEAL_CONFIG.rareHoldMs || 1200),
         revealImages: {},
         revealTexts: {},
+        useActiveBannerMedia: false,
         specialRarities: (GACHA_REVEAL_CONFIG && GACHA_REVEAL_CONFIG.specialRarities) || []
       };
       base.revealImages = Object.assign({}, cfg.revealImages || {});
