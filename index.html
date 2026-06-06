@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="gacha-app-build" content="2026-06-06-local-github-assets-v1" />
+  <meta name="gacha-app-build" content="2026-06-06-transfer-claim-select-fixed-v1" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -3586,7 +3586,7 @@
     // 5) ถ้าไฟล์อยู่ใน GitHub repo เดียวกับ index.html ให้สร้างโฟลเดอร์ assets/cards/ แล้วอัปโหลดไฟล์ไว้ตรงนั้น
 
     const CARD_DATABASE = [
-      { id: 000, name: "DEV.", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "", video: "" },
+      { id: 000, name: "DEV.", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "0.mp4", video: "0.mp4" },
       { id: 999, name: "CREATOR", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXVoNXl5MmFwaDlid215MHdnYXBrcWJ3cW50bDN5MWExYmRrZ3R6OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/U7aHTeKJYr0FHPQALd/giphy.gif" },
       { id: 1000, name: "Great Magician", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanNhNjVhdzBpenNkYzF0Ym1remp0a2gwOGxwdTZ3eTJqOTczMXJ6ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LrD6vVo630JiYOhrTU/giphy.gif" },
       { id: 38, name: "EX Frieren", rarity: "EX", element: "Awaken Ligth", power: 28000, incomePerSec: 1000, upgradeDustBase: 7000, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDNzc2lnb3ZwY3RmcHZtMTYwaGUwN2VmcWpnb3dmMGpvNG85ZXpqdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/85ZqBuB8RhFgi6Yp4c/giphy.gif" },
@@ -8747,10 +8747,12 @@ function closeCardModal() {
     }
 
     function extractBuildIdFromHtml(html) {
-      const metaMatch = String(html || "").match(/<meta\s+name=["']gacha-app-build["']\s+content=["']([^"']+)["']/i);
-      if (metaMatch && metaMatch[1]) return metaMatch[1].trim();
+      // อ่าน appBuildId จาก GAME_CONFIG ก่อน เพื่อให้ตรงกับ getCurrentAppBuildId()
+      // ป้องกันอาการรีโหลดวนเมื่อ meta gacha-app-build กับ GAME_CONFIG.appBuildId ไม่ตรงกัน
       const configMatch = String(html || "").match(/appBuildId\s*:\s*["']([^"']+)["']/i);
-      return configMatch && configMatch[1] ? configMatch[1].trim() : "";
+      if (configMatch && configMatch[1]) return configMatch[1].trim();
+      const metaMatch = String(html || "").match(/<meta\s+name=["']gacha-app-build["']\s+content=["']([^"']+)["']/i);
+      return metaMatch && metaMatch[1] ? metaMatch[1].trim() : "";
     }
 
     function getCleanPageUrlForUpdateCheck() {
