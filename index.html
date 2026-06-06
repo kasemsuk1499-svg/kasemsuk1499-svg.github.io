@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="gacha-app-build" content="2026-06-06-transfer-claim-select-fixed-v1" />
+  <meta name="gacha-app-build" content="2026-06-06-local-github-assets-v1" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -4311,12 +4311,14 @@
 
     function getBannerImages(banner) {
       if (!banner) return [];
-      if (Array.isArray(banner.images) && banner.images.length) {
-        return banner.images.filter(function(url) {
-          return typeof url === "string" && url.trim();
-        });
-      }
-      return banner.image ? [banner.image] : [];
+      const rawImages = (Array.isArray(banner.images) && banner.images.length) ? banner.images : (banner.image ? [banner.image] : []);
+      return rawImages.filter(function(url) {
+        return typeof url === "string" && url.trim();
+      }).map(function(url) {
+        // ใส่แค่ชื่อไฟล์ เช่น "jjk-banner.webp" ระบบจะหาใน assets/banners/
+        // หรือใส่ path เอง เช่น "assets/banners/jjk-banner.webp"
+        return resolveLocalAssetPath(url, "banner");
+      });
     }
 
     function setBannerImageByIndex(index, direction) {
@@ -6961,14 +6963,78 @@ function nextBannerImage() {
       '</button>';
     }
 
+    // ======================================================================
+    // 🟨 จุดแก้ใหม่: ดึงรูป/วิดีโอจากโฟลเดอร์ใน GitHub แทนการใช้ URL ภายนอก
+    // ======================================================================
+    // วิธีจัดโฟลเดอร์บน GitHub:
+    // index.html
+    // assets/
+    //   cards/          <- รูปการ์ด .webp .png .jpg .gif
+    //   cards/videos/   <- วิดีโอการ์ด .mp4 .webm
+    //   banners/        <- รูปตู้กาชา/ประกาศ
+    //   overlays/       <- overlay ถ้ามีใช้ในอนาคต
+    //
+    // วิธีใส่ใน CARD_DATABASE:
+    // image: "luffy.webp"              -> ระบบจะหา assets/cards/luffy.webp
+    // video: "luffy.mp4"               -> ระบบจะหา assets/cards/videos/luffy.mp4
+    // poster: "luffy.webp"             -> รูปปกวิดีโอจาก assets/cards/luffy.webp
+    // หรือใส่ path เต็มเองก็ได้ เช่น image: "assets/cards/luffy.webp"
+    // URL ภายนอกแบบ https:// ยังใช้ได้เหมือนเดิม เผื่อบางใบยังไม่ได้ย้ายไฟล์
+    const LOCAL_ASSET_CONFIG = {
+      cardImageFolder: "assets/cards/",
+      cardVideoFolder: "assets/cards/videos/",
+      bannerFolder: "assets/banners/",
+      overlayFolder: "assets/overlays/",
+      cacheBuster: "", // ใส่เช่น "v=1.0.2" ถ้า GitHub Pages ยังแคชรูปเก่า
+      preferLocalFilename: true
+    };
+
+    function isFullAssetUrl(value) {
+      const src = String(value || "").trim();
+      return /^(https?:)?\/\//i.test(src) || /^(data:|blob:|mailto:|tel:)/i.test(src);
+    }
+
+    function hasPathPrefix(value) {
+      const src = String(value || "").trim();
+      return src.indexOf("/") >= 0 || src.indexOf("\\") >= 0 || src.indexOf("./") === 0 || src.indexOf("../") === 0 || src.indexOf("#") === 0;
+    }
+
+    function addLocalAssetCacheBuster(src) {
+      const version = String(LOCAL_ASSET_CONFIG.cacheBuster || "").trim();
+      if (!version || isFullAssetUrl(src) || src.indexOf("data:") === 0 || src.indexOf("blob:") === 0) return src;
+      return src + (src.indexOf("?") >= 0 ? "&" : "?") + version.replace(/^\?/, "");
+    }
+
+    function getLocalAssetFolder(kind) {
+      if (kind === "cardVideo") return LOCAL_ASSET_CONFIG.cardVideoFolder;
+      if (kind === "banner") return LOCAL_ASSET_CONFIG.bannerFolder;
+      if (kind === "overlay") return LOCAL_ASSET_CONFIG.overlayFolder;
+      return LOCAL_ASSET_CONFIG.cardImageFolder;
+    }
+
+    function resolveLocalAssetPath(value, kind) {
+      let src = String(value || "").trim();
+      if (!src) return "";
+      src = src.replace(/^\/+/, ""); // GitHub Pages แนะนำให้ใช้ relative path ไม่ขึ้นต้นด้วย /
+      if (isFullAssetUrl(src) || hasPathPrefix(src)) return addLocalAssetCacheBuster(src);
+      const folder = getLocalAssetFolder(kind || "cardImage").replace(/\/+$/, "") + "/";
+      return addLocalAssetCacheBuster(folder + src);
+    }
+
+    function isVideoFileName(value) {
+      return /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(String(value || "").trim());
+    }
+
     function getCardMediaUrl(cardOrItem) {
       if (!cardOrItem) return "";
-      return String(cardOrItem.video || cardOrItem.media || cardOrItem.image || "").trim();
+      const raw = String(cardOrItem.video || cardOrItem.media || cardOrItem.image || "").trim();
+      const kind = (cardOrItem.video || isVideoFileName(raw)) ? "cardVideo" : "cardImage";
+      return resolveLocalAssetPath(raw, kind);
     }
 
     function getCardPosterUrl(cardOrItem) {
       if (!cardOrItem) return "";
-      return String(cardOrItem.poster || cardOrItem.imagePoster || cardOrItem.thumbnail || cardOrItem.image || "").trim();
+      return resolveLocalAssetPath(cardOrItem.poster || cardOrItem.imagePoster || cardOrItem.thumbnail || cardOrItem.image || "", "cardImage");
     }
 
     function isCardVideoMedia(cardOrItem, url) {
