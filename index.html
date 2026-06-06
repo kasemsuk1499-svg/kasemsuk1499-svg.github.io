@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="gacha-app-build" content="2026-06-05-card-media-video-optimized-v1" />
+  <meta name="gacha-app-build" content="2026-06-06-transfer-claim-select-fixed-v1" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -2976,7 +2976,7 @@
 
       // 🟧 Real-time GitHub Pages Update / เช็กไฟล์บน GitHub Pages แล้วรีโหลดให้ผู้เล่นอัตโนมัติ
       // เวลาอัปเดตโค้ดขึ้น GitHub ให้เปลี่ยนเลข build นี้ด้วย ผู้เล่นที่เปิดเกมค้างไว้จะดึงเวอร์ชันใหม่เอง
-      appBuildId: "2026-06-05-card-media-video-optimized-v1",
+      appBuildId: "2026-06-06-transfer-claim-select-fixed-v1",
       githubAutoUpdateEnabled: true,
       githubAutoUpdateCheckMs: 15000,
       githubAutoUpdateMode: "reload", // "reload" = รีโหลดอัตโนมัติ, "notify" = แจ้งเตือนให้กดเอง
@@ -7469,6 +7469,11 @@ function closeCardModal() {
     let onlineProcessedMessageIds = {};
     let onlineTransferInbox = {};
     let onlineTransferLog = [];
+    // ✅ Transfer safety patch / กันรับของซ้ำตอนล็อกอินใหม่ + จำเพื่อนที่เลือกไว้ไม่ให้เด้งกลับคนแรก
+    let onlineProcessedTransferIds = {};
+    let onlineSelectedTransferResourcePeerId = "";
+    let onlineSelectedTransferCardPeerId = "";
+    let onlineSelectedTransferCardId = "";
 
     function getOnlineNickname() {
       const input = document.getElementById("onlineNickname");
@@ -7889,6 +7894,90 @@ function closeCardModal() {
       }).join("");
     }
 
+    function getTransferStorageKey() {
+      const ownerKey = activeCloudUid || activeUser || getMyPeerId() || "guest";
+      return "gacha_transfer_processed_v1_" + String(ownerKey).replace(/[^a-zA-Z0-9_-]/g, "_");
+    }
+
+    function loadProcessedTransferIds() {
+      onlineProcessedTransferIds = {};
+      try {
+        const raw = SAFE_LOCAL_STORAGE.getItem(getTransferStorageKey());
+        const parsed = raw ? JSON.parse(raw) : {};
+        const now = Date.now();
+        Object.keys(parsed || {}).forEach(function(id) {
+          const stamp = Number(parsed[id] || 0);
+          // เก็บประวัติกันซ้ำไว้ 30 วัน เพื่อไม่ให้ Firebase message เก่าทำให้รับซ้ำหลังล็อกอินใหม่
+          if (stamp && now - stamp < 30 * 24 * 60 * 60 * 1000) onlineProcessedTransferIds[id] = stamp;
+        });
+      } catch (error) {
+        onlineProcessedTransferIds = {};
+      }
+    }
+
+    function saveProcessedTransferIds() {
+      try {
+        const ids = Object.keys(onlineProcessedTransferIds || {}).sort(function(a, b) {
+          return Number(onlineProcessedTransferIds[b] || 0) - Number(onlineProcessedTransferIds[a] || 0);
+        }).slice(0, 500);
+        const compact = {};
+        ids.forEach(function(id) { compact[id] = onlineProcessedTransferIds[id]; });
+        onlineProcessedTransferIds = compact;
+        SAFE_LOCAL_STORAGE.setItem(getTransferStorageKey(), JSON.stringify(compact));
+      } catch (error) {}
+    }
+
+    function isTransferOfferAlreadyProcessed(offerId) {
+      return !!(offerId && onlineProcessedTransferIds && onlineProcessedTransferIds[offerId]);
+    }
+
+    function markTransferOfferProcessed(offerId) {
+      if (!offerId) return;
+      onlineProcessedTransferIds[offerId] = Date.now();
+      saveProcessedTransferIds();
+      const baseOfferId = String(offerId).split(":")[0];
+      if (onlineTransferInbox && onlineTransferInbox[baseOfferId]) delete onlineTransferInbox[baseOfferId];
+    }
+
+    function setSelectValueIfAvailable(selectEl, wantedValue) {
+      if (!selectEl || !wantedValue) return false;
+      const hasValue = Array.from(selectEl.options || []).some(function(option) {
+        return option.value === wantedValue;
+      });
+      if (hasValue) {
+        selectEl.value = wantedValue;
+        return true;
+      }
+      return false;
+    }
+
+    function rememberTransferSelectValues() {
+      const resourceTarget = document.getElementById("transferResourceTarget");
+      const cardTarget = document.getElementById("transferCardTarget");
+      const cardSelect = document.getElementById("transferCardId");
+      if (resourceTarget && resourceTarget.value) onlineSelectedTransferResourcePeerId = resourceTarget.value;
+      if (cardTarget && cardTarget.value) onlineSelectedTransferCardPeerId = cardTarget.value;
+      if (cardSelect && cardSelect.value) onlineSelectedTransferCardId = cardSelect.value;
+    }
+
+    function bindTransferSelectMemory() {
+      const resourceTarget = document.getElementById("transferResourceTarget");
+      const cardTarget = document.getElementById("transferCardTarget");
+      const cardSelect = document.getElementById("transferCardId");
+      if (resourceTarget && !resourceTarget.dataset.transferMemoryBound) {
+        resourceTarget.dataset.transferMemoryBound = "1";
+        resourceTarget.addEventListener("change", function() { onlineSelectedTransferResourcePeerId = resourceTarget.value; });
+      }
+      if (cardTarget && !cardTarget.dataset.transferMemoryBound) {
+        cardTarget.dataset.transferMemoryBound = "1";
+        cardTarget.addEventListener("change", function() { onlineSelectedTransferCardPeerId = cardTarget.value; });
+      }
+      if (cardSelect && !cardSelect.dataset.transferMemoryBound) {
+        cardSelect.dataset.transferMemoryBound = "1";
+        cardSelect.addEventListener("change", function() { onlineSelectedTransferCardId = cardSelect.value; });
+      }
+    }
+
     function getTransferDuplicateCardOptionsHTML() {
       const owned = (state && state.owned) || {};
       const items = Object.keys(owned).map(function(cardId) {
@@ -7908,13 +7997,24 @@ function closeCardModal() {
     }
 
     function renderOnlineTransferPanel() {
+      rememberTransferSelectValues();
       const resourceTarget = document.getElementById("transferResourceTarget");
       const cardTarget = document.getElementById("transferCardTarget");
       const cardSelect = document.getElementById("transferCardId");
       const peerOptions = getOnlinePeerOptionsHTML();
-      if (resourceTarget) resourceTarget.innerHTML = peerOptions;
-      if (cardTarget) cardTarget.innerHTML = peerOptions;
-      if (cardSelect) cardSelect.innerHTML = getTransferDuplicateCardOptionsHTML();
+      if (resourceTarget) {
+        resourceTarget.innerHTML = peerOptions;
+        setSelectValueIfAvailable(resourceTarget, onlineSelectedTransferResourcePeerId);
+      }
+      if (cardTarget) {
+        cardTarget.innerHTML = peerOptions;
+        setSelectValueIfAvailable(cardTarget, onlineSelectedTransferCardPeerId);
+      }
+      if (cardSelect) {
+        cardSelect.innerHTML = getTransferDuplicateCardOptionsHTML();
+        setSelectValueIfAvailable(cardSelect, onlineSelectedTransferCardId);
+      }
+      bindTransferSelectMemory();
 
       const inbox = document.getElementById("transferInbox");
       if (inbox) {
@@ -8112,6 +8212,7 @@ function closeCardModal() {
       const offer = onlineTransferInbox[offerId];
       if (!offer) return;
       delete onlineTransferInbox[offerId];
+      markTransferOfferProcessed(offerId + ":offer");
       sendOnlineDirectMessage(offer.fromPeerId, { type: "TRANSFER_ACCEPT", offer: offer });
       addTransferLog("ยอมรับคำขอ " + getTransferOfferText(offer) + " จาก " + (offer.fromName || "เพื่อน"));
       showToast("ยอมรับแล้ว รอผู้ส่งยืนยันของ");
@@ -8122,6 +8223,8 @@ function closeCardModal() {
       const offer = onlineTransferInbox[offerId];
       if (!offer) return;
       delete onlineTransferInbox[offerId];
+      markTransferOfferProcessed(offerId + ":offer");
+      markTransferOfferProcessed(offerId + ":finalize");
       sendOnlineDirectMessage(offer.fromPeerId, { type: "TRANSFER_REJECT", offer: offer });
       addTransferLog("ปฏิเสธคำขอ " + getTransferOfferText(offer));
       renderOnlineTransferPanel();
@@ -8188,6 +8291,8 @@ function closeCardModal() {
       if (message.type === "TRANSFER_OFFER") {
         const offer = message.offer || {};
         if (!offer.id || offer.toPeerId !== getMyPeerId()) return true;
+        if (isTransferOfferAlreadyProcessed(offer.id + ":offer") || isTransferOfferAlreadyProcessed(offer.id + ":finalize")) return true;
+        if (onlineTransferInbox[offer.id]) return true;
         onlineTransferInbox[offer.id] = offer;
         addTransferLog("ได้รับคำขอโอน " + getTransferOfferText(offer) + " จาก " + (offer.fromName || "เพื่อน"));
         showToast("มีคำขอโอนใหม่จาก " + (offer.fromName || "เพื่อน"));
@@ -8212,9 +8317,12 @@ function closeCardModal() {
       if (message.type === "TRANSFER_FINALIZE") {
         const offer = message.offer || {};
         if (!offer.id || offer.toPeerId !== getMyPeerId()) return true;
+        if (isTransferOfferAlreadyProcessed(offer.id + ":finalize")) return true;
         const ok = receiveTransferOffer(offer);
+        if (ok) markTransferOfferProcessed(offer.id + ":finalize");
         addTransferLog(ok ? "รับของสำเร็จ: " + getTransferOfferText(offer) : "รับของไม่สำเร็จ");
         showToast(ok ? "รับของโอนสำเร็จ" : "รับของไม่สำเร็จ");
+        renderOnlineTransferPanel();
         return true;
       }
       if (message.type === "TRANSFER_REJECT") {
@@ -8339,6 +8447,7 @@ function closeCardModal() {
       onlineRoomCode = ONLINE_GLOBAL_ROOM_CODE;
       onlineIsHost = false;
       onlineMyId = activeCloudUid;
+      loadProcessedTransferIds();
       setOnlineStatus("กำลังเชื่อมล็อบบี้กลาง...", "warn");
       try {
         if (previousRoom && previousRoom !== onlineRoomCode) await closeOnlinePeer();
