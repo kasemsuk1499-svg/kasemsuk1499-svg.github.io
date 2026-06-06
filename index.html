@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="gacha-app-build" content="2026-06-06-transfer-claim-select-fixed-v1" />
+  <meta name="gacha-app-build" content="2026-06-06-local-media-friend-assist-fixed-v1" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -2976,7 +2976,7 @@
 
       // 🟧 Real-time GitHub Pages Update / เช็กไฟล์บน GitHub Pages แล้วรีโหลดให้ผู้เล่นอัตโนมัติ
       // เวลาอัปเดตโค้ดขึ้น GitHub ให้เปลี่ยนเลข build นี้ด้วย ผู้เล่นที่เปิดเกมค้างไว้จะดึงเวอร์ชันใหม่เอง
-      appBuildId: "2026-06-06-transfer-claim-select-fixed-v1",
+      appBuildId: "2026-06-06-local-media-friend-assist-fixed-v1",
       githubAutoUpdateEnabled: true,
       githubAutoUpdateCheckMs: 15000,
       githubAutoUpdateMode: "reload", // "reload" = รีโหลดอัตโนมัติ, "notify" = แจ้งเตือนให้กดเอง
@@ -5575,8 +5575,8 @@ function nextBannerImage() {
         if (assistCard) {
           const bonusText = getAssistBonusList(assistCard).map(formatAssistBonus).join(' • ');
           html += '<div class="card-assist-slot-filled">' +
-            '<div class="card-assist-slot-thumb bg-gradient-to-br ' + escapeAttr((rarityInfo[assistCard.rarity] || Object.values(rarityInfo)[0]).color) + '">' +
-              (assistCard.image ? '<img src="' + escapeAttr(assistCard.image) + '" alt="' + escapeAttr(assistCard.name) + '" />' : '<div class="w-full h-full flex items-center justify-center font-black bg-white/10">' + escapeHTML(String(assistCard.name || "?").charAt(0)) + '</div>') +
+            '<div class="card-assist-slot-thumb bg-gradient-to-br ' + escapeAttr((rarityInfo[assistCard.rarity] || Object.values(rarityInfo)[0]).color) + ' relative overflow-hidden">' +
+              makeCardMediaHTML(assistCard, { hidden: false, textSizeClass: "text-lg", positionClass: "absolute inset-0", extraClass: "card-art-crop-thumb", eager: false }) +
             '</div>' +
             '<div class="min-w-0">' +
               '<div class="font-black text-xs text-white truncate">ช่อง ' + (i + 1) + ': ' + escapeHTML(assistCard.name) + '</div>' +
@@ -7027,7 +7027,7 @@ function nextBannerImage() {
 
     function getCardMediaUrl(cardOrItem) {
       if (!cardOrItem) return "";
-      const raw = String(cardOrItem.video || cardOrItem.media || cardOrItem.image || "").trim();
+      const raw = String(cardOrItem.video || cardOrItem.media || cardOrItem.mediaUrl || cardOrItem.image || cardOrItem.src || "").trim();
       const kind = (cardOrItem.video || isVideoFileName(raw)) ? "cardVideo" : "cardImage";
       return resolveLocalAssetPath(raw, kind);
     }
@@ -7722,9 +7722,13 @@ function closeCardModal() {
       const special = item.raritySpecial || info.special;
       const safeName = escapeHTML(item.name || "Unknown");
       const safeIcon = escapeHTML(item.icon || String(item.name || "?").charAt(0));
-      const imagePart = item.image ?
-        '<img src="' + escapeAttr(item.image) + '" class="friend-reveal-image absolute inset-0 card-art-crop" alt="' + safeName + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'<div class=&quot;absolute inset-0 flex items-center justify-center text-5xl font-black bg-white/10&quot;>' + safeIcon + '</div>\');" />' :
-        '<div class="absolute inset-0 flex items-center justify-center text-5xl font-black bg-white/10">' + safeIcon + '</div>';
+      const imagePart = makeCardMediaHTML(item, {
+        hidden: false,
+        textSizeClass: "text-5xl",
+        positionClass: "absolute inset-0",
+        extraClass: "friend-reveal-image card-art-crop",
+        eager: true
+      });
       const ownerText = escapeHTML(player.nickname || "เพื่อน");
       const level = Number(item.level || 1);
       const maxLevel = Number(item.maxLevel || GAME_CONFIG.maxCardLevel || 150);
@@ -7907,8 +7911,10 @@ function closeCardModal() {
         const limitedClass = item.limitedJJK || isLimitedJJKRarity(item.rarity) ? "limited-jjk-card" : "";
         const overlay = friendCornerMaxStatus;
         const friendAssistListHTML = assistPreviewStripHTML(Array.isArray(item.assistants) ? item.assistants : [], { mode: "friend-list", label: false });
-        const image = item.image ? "<div class='relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-gradient-to-br " + escapeAttr(item.rarityColor || (rarityInfo[item.rarity] || Object.values(rarityInfo)[0]).color) + " " + (item.raritySpecial ? "shine" : "") + " " + escapeAttr(limitedClass) + " " + escapeAttr(rarityEffectClass) + " " + maxClass + "' style='" + escapeAttr(maxStyle) + "'><img src='" + escapeAttr(item.image) + "' class='absolute inset-0 card-art-crop-thumb' alt='' />" + overlay + "</div>" :
-          "<div class='relative w-14 h-14 rounded-xl bg-white/10 border border-white/10 shrink-0 flex items-center justify-center font-black " + maxClass + "' style='" + escapeAttr(maxStyle) + "'>" + escapeHTML(String(item.name || "?").charAt(0)) + overlay + "</div>";
+        const image = "<div class='relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-gradient-to-br " + escapeAttr(item.rarityColor || (rarityInfo[item.rarity] || Object.values(rarityInfo)[0]).color) + " " + (item.raritySpecial ? "shine" : "") + " " + escapeAttr(limitedClass) + " " + escapeAttr(rarityEffectClass) + " " + maxClass + "' style='" + escapeAttr(maxStyle) + "'>" +
+          makeCardMediaHTML(item, { hidden: false, textSizeClass: "text-xl", positionClass: "absolute inset-0", extraClass: "card-art-crop-thumb", eager: false }) +
+          overlay +
+        "</div>";
         const peerId = escapeAttr(player.peerId || "");
         return "<button type='button' onclick=\"openOnlinePlayerCardModal('" + peerId + "', " + index + ")\" class='w-full text-left rounded-xl bg-black/25 border border-white/10 p-2 flex gap-2 items-center hover:bg-white/10 hover:border-cyan-300/35 transition' title='กดเพื่อดูการ์ดของเพื่อน'>" +
           image +
