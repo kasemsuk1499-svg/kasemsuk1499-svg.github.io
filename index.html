@@ -44,11 +44,17 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
       opacity: 0;
       transform: translateX(34px) scale(1.02);
       transition: opacity 650ms ease, transform 650ms ease;
       will-change: opacity, transform;
+    }
+    .banner-slide-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: rgba(0,0,0,.35);
     }
     .banner-slide-img.active {
       opacity: 1;
@@ -309,7 +315,8 @@
       animation: gachaRevealSpin 1.55s linear infinite;
       z-index: -1;
     }
-    .gacha-reveal-rare-image {
+    .gacha-reveal-rare-image,
+    .gacha-reveal-rare-video {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -318,6 +325,10 @@
       opacity: .82;
       transform: scale(1.04);
       filter: saturate(1.25) contrast(1.08);
+    }
+    .gacha-reveal-rare-video {
+      display: none;
+      background: rgba(0,0,0,.45);
     }
     .gacha-reveal-rare-fallback {
       position: absolute;
@@ -2623,8 +2634,8 @@
 
         <div class="rounded-2xl p-5 bg-gradient-to-br from-indigo-600/40 to-fuchsia-700/40 border border-white/10 mb-4 overflow-hidden">
           <div id="bannerImageWrap" class="hidden -mx-5 -mt-5 mb-4 h-40 bg-black/30 overflow-hidden relative group">
-            <img id="bannerImageA" class="banner-slide-img active" alt="banner image" />
-            <img id="bannerImageB" class="banner-slide-img" alt="banner image next" />
+            <div id="bannerImageA" class="banner-slide-img active"></div>
+            <div id="bannerImageB" class="banner-slide-img"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 pointer-events-none z-[3]"></div>
             <button onclick="prevBannerImage()" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/45 hover:bg-black/70 text-white font-black opacity-0 group-hover:opacity-100 transition z-[9]">‹</button>
             <button onclick="nextBannerImage()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/45 hover:bg-black/70 text-white font-black opacity-0 group-hover:opacity-100 transition z-[9]">›</button>
@@ -2767,6 +2778,7 @@
     <div id="gachaRevealRarePanel" class="gacha-reveal-rare-panel">
       <div id="gachaRevealRareFallback" class="gacha-reveal-rare-fallback"></div>
       <img id="gachaRevealRareImage" class="gacha-reveal-rare-image" alt="rare reveal" />
+      <video id="gachaRevealRareVideo" class="gacha-reveal-rare-video" muted loop playsinline preload="metadata"></video>
       <div class="gacha-reveal-rare-content">
         <div id="gachaRevealRareTitle" class="gacha-reveal-rare-title">UR</div>
         <div id="gachaRevealRareSubtitle" class="gacha-reveal-rare-subtitle">พลังหายากกำลังจะปรากฏ...</div>
@@ -3108,26 +3120,33 @@
     // ======================================================================
     // 🟨 จุดแก้ 1.5: ภาพและเวลาแอนิเมชั่นตอนเปิดกาชา / กำหนดภาพลุ้น UR-LR ได้เอง
     // ======================================================================
-    // วิธีแก้รูป: เปลี่ยน URL ใน revealImages ได้เลย
-    // UR = แสดงเมื่อได้ UR ขึ้นไป, LR = แสดงเมื่อได้ LR ขึ้นไป, EX = แสดงเมื่อได้ EX, SPECIAL = JJK/SC หรือระดับพิเศษที่กำหนดไว้
+    // วิธีแก้รูป/วิดีโอ: เปลี่ยน URL ใน revealImages ได้เลย หรือใส่รูป/คลิปไว้ใน image/images ของ GACHA_BANNERS
+    // useActiveBannerMedia: true = เอฟเฟคลุ้น SSR/UR/LR/EX/JJK/SC จะดึงรูปหรือวิดีโอจากแบนเนอร์ตู้ที่เลือกอยู่ก่อน
+    // ถ้าแบนเนอร์ตู้นั้นไม่มีรูป/วิดีโอ ระบบจะ fallback ไปใช้ revealImages ด้านล่างแทน
+    // SSR/UR/LR/EX/SC = แยกตามระดับ, SPECIAL = JJK/JJKB/JJKS/JJKC หรือระดับพิเศษที่กำหนดไว้
     const GACHA_REVEAL_CONFIG = {
       enabled: true,
+      useActiveBannerMedia: true, // true = ดึงรูป/วิดีโอจาก image/images ของตู้กาชาปัจจุบันมาใช้ตอนลุ้นเปิด
       normalCardDelayMs: 10,      // เวลาหน่วงตอนเปิดการ์ดทั่วไปทีละใบ
-      rareHoldMs: 3000,            // เวลาลุ้นก่อนเฉลยการ์ด UR ขึ้นไป
+      rareHoldMs: 3000,            // เวลาลุ้นก่อนเฉลยการ์ด SSR ขึ้นไป
       resultGapMs: 10,            // เว้นจังหวะหลังการ์ดแต่ละใบ
       revealImages: {
-        UR: "https://images.steamusercontent.com/ugc/923676156095784602/BD34D0CA76787049F5A740C59C0B433CE6552CEE/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false",
-        LR: "https://images.steamusercontent.com/ugc/923676156095784602/BD34D0CA76787049F5A740C59C0B433CE6552CEE/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false",
-        EX: "https://images.steamusercontent.com/ugc/923676156095784602/BD34D0CA76787049F5A740C59C0B433CE6552CEE/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false",
-        SPECIAL: "https://media1.tenor.com/m/aLuTwJV0cW4AAAAd/yuji-modulo-dismantle.gif"
+        SSR: "assets/banners/SSRop.mp4",
+        UR: "assets/banners/URop.mp4",
+        LR: "assets/banners/LRop.mp4",
+        EX: "assets/banners/LRop.mp4",
+        SC: "assets/banners/JJKop.mp4",
+        SPECIAL: "assets/banners/JJKop.mp4"
       },
       revealTexts: {
-        UR: ".",
-        LR: ".",
-        EX: ".",
-        SPECIAL: "."
+        SSR: "",
+        UR: "",
+        LR: "",
+        EX: "",
+        SC: "",
+        SPECIAL: ""
       },
-      specialRarities: ["JJKB", "JJKS", "JJKC", "EX", "SC"]
+      specialRarities: ["JJKB", "JJKS", "JJKC", "SC"]
     };
 
 
@@ -3205,16 +3224,16 @@
           enabled: true,
           holdMs: 3000,
           revealImages: {
-            SSR: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZms3cTB0dmI2cXBpNWczeGc1czFpcmw3M2dkcmZna3loOHBxMHhpMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h990T1luP7Fi8/giphy.gif",
-            UR: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNm9zYXloeTV2dXB4ejE0dWxwbGl5ZWJ3ZGhxM2VoeGJhdWxldjVuaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qb1eHxhUHLdsc/giphy.gif",
-            LR: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzd5ZmoxZGlpOWN2ZnFoOTFqd240M2YwY2xxZThkOWw2MWxwd3U5biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/nbB1CV1fazlGo/giphy.gif",
-            EX: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzd5ZmoxZGlpOWN2ZnFoOTFqd240M2YwY2xxZThkOWw2MWxwd3U5biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/nbB1CV1fazlGo/giphy.gif"
+            SSR: "assets/banners/SSRop.mp4",
+            UR: "assets/banners/URop.mp4",
+            LR: "assets/banners/LRop.mp4",
+            EX: "assets/banners/JJKop.mp4"
           },
           revealTexts: {
-            SSR: ".",
-            UR: ".",
-            LR: ".",
-            EX: "."
+            SSR: "",
+            UR: "",
+            LR: "",
+            EX: ""
           }
         },
         enabled: true
@@ -3232,14 +3251,14 @@
           enabled: true,
           holdMs: 3000,
           revealImages: {
-            JJKB: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExeWh1cDJwMWU1Mjk0MDdkZ2RrbHFtMDYwa2Fia3RkbWFsejM2MTlmMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tghDqN6iD0YeTEYMlm/giphy.gif",
-            JJKS: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExNG5pYzdldDQ0OWJ0ZThzZzBsMTYxc2pna3p6cW1vdDVodmZ3cXo2eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/XAynxwJuyvhgYMZDHb/giphy.gif",
-            JJKC: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExM25xMGM1bWw1bXhqMXB1eWdqeWd4NHExbXJ5YzRubGs5aHIxZm11aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/c2f879Vun2w9syLZZK/giphy.gif"
+            JJKB: "assets/banners/JJKop.mp4",
+            JJKS: "assets/banners/JJKop.mp4",
+            JJKC: "assets/banners/JJKop.mp4"
           },
           revealTexts: {
-            JJKB: ".",
-            JJKC: ".",
-            JJKS: "."
+            JJKB: "",
+            JJKC: "",
+            JJKS: ""
           }
         },
         enabled: true
@@ -3481,10 +3500,9 @@
         id: "JJK_LIMITED",
         name: "LIMITED JJK COLLAB",
         description: "ตู้คอลแล็ป Jujutsu Kaisen พร้อมระดับ JJK : ผู้ใช้คุณไสย/ระดับพิเศษ/คำสาป",
-        image: "https://media1.tenor.com/m/h7CZbik22-UAAAAd/satoru-satoru-gojo.gif",
+        image: "",
         images: [
-          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExOXV0ZnJ0aHd2emt4cWduN2ptaGsycnB1Y3Rra2VnbXg2Mmd1NGhlYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0wxRYPhdD7n3W7NQ1R/giphy.gif",
-          "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmpoMGt0cXZ2ZjRqdjcybWxldzYzcjc2bm1lbzhsNnZmdWltcGpiMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cmEJN4o1V7GOpSfJ1Y/giphy.gif"
+          "assets/banners/LS1.mp4"
         ],
         singlePullCost: 250000,
         tenPullCost: 2250000,
@@ -3503,9 +3521,9 @@
         id: "JJK_A",
         name: "Innate Technique user RATE UP",
         description: "ตู้คอลแล็ป Jujutsu Kaisen ",
-        image: "https://media1.tenor.com/m/h7CZbik22-UAAAAd/satoru-satoru-gojo.gif",
+        image: "",
         images: [
-          "https://media1.tenor.com/m/aLuTwJV0cW4AAAAd/yuji-modulo-dismantle.gif",       "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExajllaHR0enFpNThmd2RueGp0ZnBsY3Z5azFpNGxscXpkZ2Yyc293ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6D0tp2M0nBVkF0AP7T/giphy.gif", "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHNzNTl4M2liOWwxM3FjdDd1cjJndXg3cjR2MHIzZ2tnbzBxcXR2ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wL9K8kDL5ztNBpSE9L/giphy.gif", "https://media1.tenor.com/m/ZYDQhDIbbjAAAAAd/megumi-fushiguro-ten-shadows.gif" 
+          "assets/banners/LB1.mp4" 
         ],
         singlePullCost: 230000,
         tenPullCost: 2150000,
@@ -3523,10 +3541,9 @@
         id: "JJK_B",
         name: "Cursed user RATE UP",
         description: "ตู้คอลแล็ป Jujutsu Kaisen ",
-        image: "https://media1.tenor.com/m/h7CZbik22-UAAAAd/satoru-satoru-gojo.gif",
+        image: "",
         images: [
-          "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOG1lbXhvaTJ5ZWVqNjh6b2lyb2MzMjcxZTJsMnFzNnZ1ODJoa2NteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cu02dn47u04E2EzurB/giphy.gif",
-          "https://images.steamusercontent.com/ugc/2278324186548756253/24401D0DEA0E6D00A35B208CEF250966F3C920D0/?imw=637&imh=358&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true", "https://media1.tenor.com/m/RFzEDyX-1ScAAAAd/jjk-jjk-s2.gif" 
+          "assets/banners/LC1.mp4" 
         ],
         singlePullCost: 230000,
         tenPullCost: 2150000,
@@ -3544,9 +3561,9 @@
         id: "standard",
         name: "Aether Heroes",
         description: "ตู้มาตรฐาน รวมการ์ดทุกระดับ",
-        image: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3o2YnY4bG8wM2tkYm9jcWV5MXJ2NnZkaDQ3MDhjeTg1MThqM29rZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13cswZEvNJM7ZK/giphy.gif",
+        image: "",
         images: [
-          "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3o2YnY4bG8wM2tkYm9jcWV5MXJ2NnZkaDQ3MDhjeTg1MThqM29rZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13cswZEvNJM7ZK/giphy.gif","https://images.steamusercontent.com/ugc/923676156095784602/BD34D0CA76787049F5A740C59C0B433CE6552CEE/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false"
+          "assets/banners/ST1.mp4"
         ],
         singlePullCost: 50000,
         tenPullCost: 450000,
@@ -3557,9 +3574,9 @@
         id: "legend",
         name: "Legend Rate Up",
         description: "ตู้เพิ่มโอกาส UR/LR/EX และเพิ่มน้ำหนัก ",
-        image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzlpczh3dXU5OWs5aDI5bGdrM2VhazNicWRubmx3bHA2ZHhkeXYweSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RMw1DhEAwx5ZK/giphy.gif",
+        image: "",
         images: [
-          "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzlpczh3dXU5OWs5aDI5bGdrM2VhazNicWRubmx3bHA2ZHhkeXYweSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RMw1DhEAwx5ZK/giphy.gif"
+          "assets/banners/LR1.mp4"
         ],
         singlePullCost: 100000,
         tenPullCost: 900000,
@@ -3593,54 +3610,57 @@
       { id: 39, name: "EX Fern", rarity: "EX", element: "Awaken Ligth", power: 27500, incomePerSec: 1000, upgradeDustBase: 6900, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "39.mp4", video: "39.mp4" },
       { id: 40, name: "EX Stark", rarity: "EX", element: "Awaken Fire", power: 27200, incomePerSec: 1000, upgradeDustBase: 6800, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "40.mp4", video: "40.mp4" },
       { id: 41, name: "EX Himmel", rarity: "EX", element: "Awaken Ligth", power: 28000, incomePerSec: 1000, upgradeDustBase: 7000, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "41.mp4", video: "41.mp4" },
-      { id: 44, name: "Hana Kurusu", rarity: "LR", element: "Angle", power: 14000, incomePerSec: 1400, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/n1d8qcbSic0AAAAd/jujutsu-kaisen-hana-kurusu.gif" },
-      { id: 45, name: "Riko Amanai", rarity: "LR", element: "Star", power: 14000, incomePerSec: 1400, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/2FUpnW6BAr8AAAAC/riko-amanai.gif" },
+      { id: 44, name: "Hana Kurusu", rarity: "LR", element: "Angle", power: 14000, incomePerSec: 1400, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "44.png" },
+      { id: 45, name: "Riko Amanai", rarity: "LR", element: "Star", power: 14000, incomePerSec: 1400, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "45.png" },
       { id: 1, name: "SABER.Artoria", rarity: "LR", element: "Excalibur!", power: 13000, incomePerSec: 1200, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzlpczh3dXU5OWs5aDI5bGdrM2VhazNicWRubmx3bHA2ZHhkeXYweSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RMw1DhEAwx5ZK/giphy.gif" },
       { id: 2, name: "Sung Jinwoo", rarity: "LR", element: "SHADOW Emperor", power: 12000, incomePerSec: 1100, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcG9sZ2VuZThhYmx6dTF6bTI3MmkzM3VxZG43YzVsYWJtY3U3NWNoNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/adG2FlGvDDDTBz6moj/giphy.gif" },
       { id: 3, name: "Frieren", rarity: "LR", element: "ELF Mage", power: 12000, incomePerSec: 1100, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnA2enQ3eW5tc2xwd3dvOGU0NTd2YzNoNHFuZDUydHZzaDBkMjMxMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0bSb4Zvrc4D8bv6c1z/giphy.gif" },
       { id: 4, name: "DEKU", rarity: "LR", element: "OFA", power: 11000, incomePerSec: 1000, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjk1NjJrZWpwcnB0cnduYmludW1kYjJxcHVhcjI5eDQ4eDV1bHZ0YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/loJZCyzWhwbpti076t/giphy.gif" },
       { id: 5, name: "Kirito", rarity: "LR", element: "DuoSword", power: 11000, incomePerSec: 1000, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExazRqOXRsMnJ2d3d5NHlldHJmaWN4eHc4cHd6NzQzNGwyNGRjOGFobiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L0IVExCvYm8Bjs2U0y/giphy.gif" },
       { id: 6, name: "Monkey D. Luffy", rarity: "LR", element: "NIGANIGA", power: 12000, incomePerSec: 1100, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDV6dmY1MzV2Mm1wdXd4dm1jb3FicTV6YmlncnVjbDZtamJtYnBpbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LddvgQyPi9JWnf2m1X/giphy.gif" },
-      { id: 7, name: "Satoru Gojo", rarity: "LR", element: "Infinity", power: 12000, incomePerSec: 1100, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/h7CZbik22-UAAAAd/satoru-satoru-gojo.gif" },
+      { id: 7, name: "Satoru Gojo", rarity: "LR", element: "Infinity", power: 12000, incomePerSec: 1100, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "7.png" },
       { id: 8, name: "CID", rarity: "LR", element: "Atiomic", power: 13000, incomePerSec: 1000, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExd3g0eTFzZnc1NzNpbjB3bWNreW5zZWt2M256N3V3bWYxMmtkZ2R4MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/PzMHYQJnuKbenMrXu9/giphy.gif" },
       { id: 9, name: "Kamado Tanjirou", rarity: "LR", element: "Water", power: 10000, incomePerSec: 900, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTVhMmN6d2JzOGF1cGFvZnN5aTBrYnAyeHBleDF3NXR4dzk3MnR3NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/J6JazAkCVLId91L4yM/giphy.gif" },
       { id: 10, name: "Uzumaki Naruto", rarity: "LR", element: "9Tail", power: 12000, incomePerSec: 1100, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDk1OGVtdHNwNTE5eWhzamFiejUwdHh0OTg4bGw0Z295cXd1YXg0YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/P8s5Gu1IBhQq6xlyam/giphy.gif" },
-      { id: 1033, name: "Kinji Hakari", rarity: "JJKS", element: "Idle Death Gamble", power: 16000, incomePerSec: 1650, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/E4qukggbFgEAAAAC/jjk-hikari.gif" },
-      { id: 1034, name: "Hajime Kashimo", rarity: "JJKS", element: "Mythical Beast Amber", power: 16000, incomePerSec: 1650, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/2tA56I2eTK8AAAAC/jujutsu-kaisen-shinjuku-arc-hajime-kashimo.gif" },
-      { id: 1023, name: "Yuji Itadori", rarity: "JJKS", element: "Strongest ONE", power: 20000, incomePerSec: 1800, upgradeDustBase: 6500, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/aLuTwJV0cW4AAAAd/yuji-modulo-dismantle.gif" },
-      { id: 1021, name: "Hiromi Higuruma", rarity: "JJKS", element: "Judgeman", power: 16000, incomePerSec: 1700, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExajllaHR0enFpNThmd2RueGp0ZnBsY3Z5azFpNGxscXpkZ2Yyc293ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6D0tp2M0nBVkF0AP7T/giphy.gif" },
-      { id: 1022, name: "Fumihiko Takaba", rarity: "JJKS", element: "Comedian", power: 17000, incomePerSec: 1750, upgradeDustBase: 6300, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/Zf7ue-amx24AAAAd/takaba-fumihiko-takaba.gif" },
-      { id: 1001, name: "Satoru Gojo", rarity: "JJKS", element: "INFINITY MAX", power: 15500, incomePerSec: 1650, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjFyYm02ZmtkOHJscWM3ZHJoc21lNGk2eHV2azFheXVmeTVhMzZieSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0wxRYPhdD7n3W7NQ1R/giphy.gif" },
-      { id: 1002, name: "Sukuna", rarity: "JJKS", element: "KING OF CURSE", power: 15500, incomePerSec: 1650, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOG1lbXhvaTJ5ZWVqNjh6b2lyb2MzMjcxZTJsMnFzNnZ1ODJoa2NteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cu02dn47u04E2EzurB/giphy.gif" },
-      { id: 1003, name: "Senin Toji", rarity: "JJKS", element: "Heavenly Restriction", power: 15000, incomePerSec: 1500, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmx3MXRvYnRmeGhjaGxvN2NyZzBud3k3bmF2Nzh1YXMwZXg3ZGlmdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BinD2dxsRQqq0eJFxc/giphy.gif" },
-      { id: 1004, name: "Maki", rarity: "JJKS", element: "Heavenly Restriction MAX", power: 15100, incomePerSec: 1510, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTcyOWhkcTVuaHR3Y2M5ajlzY293M3NlbHRwejE2djF3d3JsNDN3eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Fk1Q0ml3g65PxU1Rl6/giphy.gif" },
-      { id: 1005, name: "Okkotsu Yuta", rarity: "JJKS", element: "COPY CURSE", power: 15100, incomePerSec: 1510, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWM2cHQxZG1ub2o4a3FiNHFkYjF0MTl1OGUxanoybDh2ODJwamtsZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/aEqhXX8g7J2D0QuhxI/giphy.gif" },
-      { id: 1006, name: "Yuki Tsukumo", rarity: "JJKS", element: "Star Rage", power: 15300, incomePerSec: 1530, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ21sbGhxYnNwZzU5OWYzeGJtbGF5OXpsb2QzZmc4Y2NjYWY5NmJlMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ADjPGW5dHGdqwLWnhU/giphy.gif" },
-      { id: 1007, name: "Suguru Geto", rarity: "JJKS", element: "Contro CURSE", power: 15000, incomePerSec: 1500, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmJmanNkNnVicHdlMjNkZnZoYXhweHl4cDZ5NTZ0emd1eXhtcjEzOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FYvgwN5VRhYY9IXozW/giphy.gif" },
-      { id: 1008, name: "Kenjaku", rarity: "JJKS", element: "Brain Transplant", power: 15200, incomePerSec: 1520, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "https://images.steamusercontent.com/ugc/2278324186548756253/24401D0DEA0E6D00A35B208CEF250966F3C920D0/?imw=637&imh=358&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true" },
-      { id: 1009, name: "Yuji Itadori", rarity: "JJKB", element: "HETAKEN!", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://i.pinimg.com/originals/c3/be/c3/c3bec338a7c310c3f49abf3c8b50767f.gif" },
-      { id: 1010, name: "Nobara Kugisaki", rarity: "JJKB", element: "Straw Doll Technique", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHNzNTl4M2liOWwxM3FjdDd1cjJndXg3cjR2MHIzZ2tnbzBxcXR2ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wL9K8kDL5ztNBpSE9L/giphy.gif" },
-      { id: 1011, name: "Megumi Fushiguro", rarity: "JJKB", element: "Ten Shadows Technique", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/ZYDQhDIbbjAAAAAd/megumi-fushiguro-ten-shadows.gif" },
-      { id: 1012, name: "Kento Nanami", rarity: "JJKB", element: "Ratio Technique", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJmcnR2ZjFtc2xuYndlam5kM2ZueThzdzRuaWl5NXllZzU3dWduYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/W8CnfF3x3s0aaFoA8z/giphy.gif" },
-      { id: 1013, name: "Aoi Todo", rarity: "JJKB", element: "Boogie Woogie", power: 14300, incomePerSec: 1430, upgradeDustBase: 5250, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/wbhpiEmCWwoAAAAd/jjk-jjk-s2.gif" },
-      { id: 1014, name: "Momo Nishimiya", rarity: "JJKB", element: "Wind Scythe", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/07wF6OgQRSUAAAAC/jujutsu-kaisen-nishimiya-momo.gif" },
-      { id: 1015, name: "Mai Zenin", rarity: "JJKB", element: "Construction", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExYms1eG5sN2MxZG9maHAzYXRraDVibDI3YzE3Y2tmaHh5MXFuMHQzMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qxLvU5Uv1tc2fQBWGq/giphy.gif" },
-      { id: 1016, name: "Maki Zenin", rarity: "JJKB", element: "Physically Gifted", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/nNRyy4XfspYAAAAC/jjk.gif" },
-      { id: 1017, name: "Kasumi Miwa", rarity: "JJKB", element: "Simple Domain", power: 13900, incomePerSec: 1390, upgradeDustBase: 5100, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/GcGvFNhdG8IAAAAd/jujutsu-kaisen-miwa.gif" },
-      { id: 1018, name: "Kokichi Muta", rarity: "JJKB", element: "Puppet Manipulation", power: 14200, incomePerSec: 1420, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/6Bp_Ef99nJMAAAAd/kokichi-kokichi-muta.gif" },
-      { id: 1019, name: "Mei Mei", rarity: "JJKB", element: "Black Bird Manipulation", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/lnL6QBHFAYYAAAAC/mei-mei-chop.gif" },
-      { id: 1020, name: "Utahime Iori", rarity: "JJKB", element: "Solo Forbidden Area", power: 13500, incomePerSec: 1350, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/YNnbtQwsDhYAAAAC/utahime-utahime-iori.gif" },
-      { id: 1024, name: "Jogo", rarity: "JJKC", element: "Coffin of the Iron Mountain", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/e6A9UvvUAAYAAAAd/jogo-jjk-jogo-vs-sukuna.gif" },
-      { id: 1025, name: "Hanami", rarity: "JJKC", element: "Disaster Plants", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/zS1MyP8swfQAAAAC/hanami.gif" },
-      { id: 1026, name: "Dagon", rarity: "JJKC", element: "Disaster Tides", power: 14200, incomePerSec: 1420, upgradeDustBase: 5250, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/GBLzon7pzn8AAAAC/dagon-jjk.gif" },
-      { id: 1027, name: "Mahito", rarity: "JJKC", element: "Idle Transfiguration", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/HTkz_dAdv8IAAAAC/mahito-curse-pure-cursed-energy-hands.gif" },
-      { id: 1028, name: "Takako Uro", rarity: "JJKC", element: "Sky Manipulation", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/6UJhbSUp6kUAAAAC/uro-takako-uro.gif" },
-      { id: 1029, name: "Ryu Ishigori", rarity: "JJKC", element: "Cursed Energy Discharge", power: 14400, incomePerSec: 1440, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/a3n2_w0wYo0AAAAC/ryu-ryu-ishigori.gif" },
-      { id: 1030, name: "Choso", rarity: "JJKC", element: "Blood Manipulation", power: 14400, incomePerSec: 1440, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/1BZtVPRMvOcAAAAd/choso-jujutsu-kaisen.gif" },
-      { id: 1031, name: "Naoya Zenin", rarity: "JJKC", element: "Projection Sorcery", power: 13900, incomePerSec: 1390, upgradeDustBase: 5100, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/bgc-_Af2WaAAAAAC/naoya-naoya-zenin.gif" },
-      { id: 1032, name: "Uraume", rarity: "JJKC", element: "Ice Formation", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "https://media1.tenor.com/m/RFzEDyX-1ScAAAAd/jjk-jjk-s2.gif" },
-      { id: 43, name: "Kirara Hoshi", rarity: "UR", element: "Star", power: 8700, incomePerSec: 400, upgradeDustBase: 2200, upgradeDustGrowth: 1.1, awakenMax: 9, icon: "", image: "https://media1.tenor.com/m/etFR9fJMSw8AAAAd/jujutsu-kaisen-jjk.gif" },
-      { id: 42, name: "Shoko Ieiri", rarity: "UR", element: "Heal", power: 8700, incomePerSec: 400, upgradeDustBase: 2200, upgradeDustGrowth: 1.1, awakenMax: 9, icon: "", image: "https://media1.tenor.com/m/tLVnaIXie6QAAAAC/jjk-jujutsu-kaisen.gif" },
+      { id: 1033, name: "Kinji Hakari", rarity: "JJKS", element: "Idle Death Gamble", power: 16000, incomePerSec: 1650, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1033.png" },
+      { id: 1034, name: "Hajime Kashimo", rarity: "JJKS", element: "Mythical Beast Amber", power: 16000, incomePerSec: 1650, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1034.png" },
+      { id: 1023, name: "Yuji Itadori", rarity: "JJKS", element: "Strongest ONE", power: 20000, incomePerSec: 1800, upgradeDustBase: 6500, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1023.png" },
+      { id: 1021, name: "Hiromi Higuruma", rarity: "JJKS", element: "Judgeman", power: 16000, incomePerSec: 1700, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1021.png" },
+      { id: 1022, name: "Fumihiko Takaba", rarity: "JJKS", element: "Comedian", power: 17000, incomePerSec: 1750, upgradeDustBase: 6300, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1022.png" },
+      { id: 1001, name: "Satoru Gojo", rarity: "JJKS", element: "INFINITY MAX", power: 15500, incomePerSec: 1650, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1001.png" },
+      { id: 1002, name: "Sukuna", rarity: "JJKS", element: "KING OF CURSE", power: 15500, incomePerSec: 1650, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1002.png" },
+      { id: 1003, name: "Senin Toji", rarity: "JJKS", element: "Heavenly Restriction", power: 15000, incomePerSec: 1500, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1003.png" },
+      { id: 1004, name: "Maki", rarity: "JJKS", element: "Heavenly Restriction MAX", power: 15100, incomePerSec: 1510, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1004.png" },
+      { id: 1005, name: "Okkotsu Yuta", rarity: "JJKS", element: "COPY CURSE", power: 15100, incomePerSec: 1510, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1005.png" },
+      { id: 1006, name: "Yuki Tsukumo", rarity: "JJKS", element: "Star Rage", power: 15300, incomePerSec: 1530, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1006.png" },
+      { id: 1007, name: "Suguru Geto", rarity: "JJKS", element: "Contro CURSE", power: 15000, incomePerSec: 1500, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1007.png" },
+      { id: 1008, name: "Kenjaku", rarity: "JJKS", element: "Brain Transplant", power: 15200, incomePerSec: 1520, upgradeDustBase: 6000, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1008.png" },
+      { id: 1009, name: "Yuji Itadori", rarity: "JJKB", element: "HETAKEN!", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1009.png" },
+      { id: 1010, name: "Nobara Kugisaki", rarity: "JJKB", element: "Straw Doll Technique", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1010.png" },
+      { id: 1011, name: "Megumi Fushiguro", rarity: "JJKB", element: "Ten Shadows Technique", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1011.png" },
+      { id: 1012, name: "Kento Nanami", rarity: "JJKB", element: "Ratio Technique", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1012.png" },
+      { id: 1036, name: "Toge Inumaki", rarity: "JJKB", element: "Cursed Speech", power: 14300, incomePerSec: 1430, upgradeDustBase: 5250, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1036.png" },
+      { id: 1037, name: "Panda", rarity: "JJKB", element: "Panda", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1037.png" },
+      { id: 1013, name: "Aoi Todo", rarity: "JJKB", element: "Boogie Woogie", power: 14300, incomePerSec: 1430, upgradeDustBase: 5250, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1013.png" },
+      { id: 1014, name: "Momo Nishimiya", rarity: "JJKB", element: "Wind Scythe", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1014.png" },
+      { id: 1015, name: "Mai Zenin", rarity: "JJKB", element: "Construction", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1015.png" },
+      { id: 1016, name: "Maki Zenin", rarity: "JJKB", element: "Physically Gifted", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1016.png" },
+      { id: 1017, name: "Kasumi Miwa", rarity: "JJKB", element: "Simple Domain", power: 13900, incomePerSec: 1390, upgradeDustBase: 5100, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1017.png" },
+      { id: 1018, name: "Kokichi Muta", rarity: "JJKB", element: "Puppet Manipulation", power: 14200, incomePerSec: 1420, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1018.png" },
+      { id: 1019, name: "Mei Mei", rarity: "JJKB", element: "Black Bird Manipulation", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1019.png" },
+      { id: 1020, name: "Utahime Iori", rarity: "JJKB", element: "Solo Forbidden Area", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1020.png" },
+      { id: 1035, name: "Sukuna", rarity: "JJKC", element: "Enchain", power: 15000, incomePerSec: 1500, upgradeDustBase: 5400, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1035.png" },
+      { id: 1024, name: "Jogo", rarity: "JJKC", element: "Coffin of the Iron Mountain", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1024.png" },
+      { id: 1025, name: "Hanami", rarity: "JJKC", element: "Disaster Plants", power: 14000, incomePerSec: 1400, upgradeDustBase: 5200, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1025.png" },
+      { id: 1026, name: "Dagon", rarity: "JJKC", element: "Disaster Tides", power: 14200, incomePerSec: 1420, upgradeDustBase: 5250, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1026.png" },
+      { id: 1027, name: "Mahito", rarity: "JJKC", element: "Idle Transfiguration", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1027.png" },
+      { id: 1028, name: "Takako Uro", rarity: "JJKC", element: "Sky Manipulation", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1028.png" },
+      { id: 1029, name: "Ryu Ishigori", rarity: "JJKC", element: "Cursed Energy Discharge", power: 14400, incomePerSec: 1440, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1029.png" },
+      { id: 1030, name: "Choso", rarity: "JJKC", element: "Blood Manipulation", power: 14400, incomePerSec: 1440, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1030.png" },
+      { id: 1031, name: "Naoya Zenin", rarity: "JJKC", element: "Projection Sorcery", power: 13900, incomePerSec: 1390, upgradeDustBase: 5100, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1031.png" },
+      { id: 1032, name: "Uraume", rarity: "JJKC", element: "Ice Formation", power: 14500, incomePerSec: 1450, upgradeDustBase: 5300, upgradeDustGrowth: 1.11, awakenMax: 8, icon: "", image: "1032.png" },
+      { id: 43, name: "Kirara Hoshi", rarity: "UR", element: "Star", power: 8700, incomePerSec: 400, upgradeDustBase: 2200, upgradeDustGrowth: 1.1, awakenMax: 9, icon: "", image: "43.png" },
+      { id: 42, name: "Shoko Ieiri", rarity: "UR", element: "Heal", power: 8700, incomePerSec: 400, upgradeDustBase: 2200, upgradeDustGrowth: 1.1, awakenMax: 9, icon: "", image: "44.png" },
       { id: 37, name: "Yuki Suou", rarity: "UR", element: "Water", power: 8600, incomePerSec: 350, upgradeDustBase: 2200, upgradeDustGrowth: 1.1, awakenMax: 9, icon: "", image: "https://media1.tenor.com/m/PwA7hjm2oVIAAAAd/suou-yuki-roshidere.gif" },
       { id: 11, name: "Goku", rarity: "UR", element: "Light", power: 8500, incomePerSec: 300, upgradeDustBase: 2200, upgradeDustGrowth: 1.1, awakenMax: 9, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjRqbWRjbmVhMjVpanJqbWlvaGJ4MzF0M3oyMno5OTA5Y2Z3cnVtdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Bva8ZKa2Ww72BQKYWl/giphy.gif" },
       { id: 12, name: "Zenitsu", rarity: "UR", element: "Electical", power: 8500, incomePerSec: 250, upgradeDustBase: 2200, upgradeDustGrowth: 1.1, awakenMax: 9, icon: "", image: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG41aGlnb3J3djk5b2JieTl6cHV3N2U4ajVtZmM4dnM4cDI2cDBvdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/WkeXjFoubG449UdbGh/giphy.gif" },
@@ -4315,10 +4335,37 @@
       return rawImages.filter(function(url) {
         return typeof url === "string" && url.trim();
       }).map(function(url) {
-        // ใส่แค่ชื่อไฟล์ เช่น "jjk-banner.webp" ระบบจะหาใน assets/banners/
-        // หรือใส่ path เอง เช่น "assets/banners/jjk-banner.webp"
+        // ใส่แค่ชื่อไฟล์ เช่น "jjk-banner.webp" หรือ "jjk-banner.mp4" ระบบจะหาใน assets/banners/
+        // หรือใส่ path เอง เช่น "assets/banners/jjk-banner.webp" / "assets/banners/jjk-banner.mp4"
         return resolveLocalAssetPath(url, "banner");
       });
+    }
+
+    function setBannerLayerMedia(layer, url) {
+      if (!layer) return;
+      const src = String(url || "").trim();
+      layer.innerHTML = "";
+      if (!src) return;
+
+      const media = document.createElement(isVideoFileName(src) ? "video" : "img");
+      media.className = "banner-slide-media";
+      if (media.tagName === "VIDEO") {
+        media.src = src;
+        media.muted = true;
+        media.loop = true;
+        media.autoplay = true;
+        media.playsInline = true;
+        media.preload = "metadata";
+        media.setAttribute("muted", "");
+        media.setAttribute("playsinline", "");
+        media.play().catch(function() {});
+      } else {
+        media.src = src;
+        media.alt = "banner image";
+        media.loading = "lazy";
+        media.decoding = "async";
+      }
+      layer.appendChild(media);
     }
 
     function setBannerImageByIndex(index, direction) {
@@ -4333,8 +4380,8 @@
 
       if (!images.length) {
         wrap.classList.add("hidden");
-        imgA.removeAttribute("src");
-        imgB.removeAttribute("src");
+        setBannerLayerMedia(imgA, "");
+        setBannerLayerMedia(imgB, "");
         if (counter) counter.textContent = "";
         if (dots) dots.innerHTML = "";
         bannerSlideInitialized = false;
@@ -4356,12 +4403,12 @@
         }).join("");
       }
 
-      // ครั้งแรกให้ใส่รูปทันที ไม่ต้องสไลด์
+      // ครั้งแรกให้ใส่รูป/วิดีโอทันที ไม่ต้องสไลด์
       if (!bannerSlideInitialized || images.length === 1) {
-        imgA.src = images[bannerSlideIndex];
+        setBannerLayerMedia(imgA, images[bannerSlideIndex]);
         imgA.className = "banner-slide-img active";
         imgB.className = "banner-slide-img";
-        imgB.removeAttribute("src");
+        setBannerLayerMedia(imgB, "");
         bannerSlideActiveLayer = "A";
         bannerSlideInitialized = true;
         return;
@@ -4374,7 +4421,7 @@
       const currentImg = bannerSlideActiveLayer === "A" ? imgA : imgB;
       const nextImg = bannerSlideActiveLayer === "A" ? imgB : imgA;
 
-      nextImg.src = images[bannerSlideIndex];
+      setBannerLayerMedia(nextImg, images[bannerSlideIndex]);
 
       currentImg.className = "banner-slide-img active";
       nextImg.className = "banner-slide-img";
@@ -4428,7 +4475,7 @@
       }, Number(GAME_CONFIG.bannerSlideDelayMs || 10000));
     }
 
-function nextBannerImage() {
+    function nextBannerImage() {
       const images = getBannerImages(getActiveBanner());
       if (images.length <= 1) return;
       setBannerImageByIndex(bannerSlideIndex + 1, "next");
@@ -6221,7 +6268,9 @@ function nextBannerImage() {
       if (guaranteeCfg.enabled && guaranteeCfg.every > 0) {
         const progress = getGuaranteeCounter(banner);
         const left = Math.max(0, guaranteeCfg.every - progress);
-        const rarityText = Object.keys(guaranteeCfg.rarityRates || {}).map(function(rarity) {
+        const rarityText = Object.keys(guaranteeCfg.rarityRates || {}).filter(function(rarity) {
+          return Number(guaranteeCfg.rarityRates[rarity] || 0) > 0;
+        }).map(function(rarity) {
           return getRarityLabel(rarity) + " " + guaranteeCfg.rarityRates[rarity] + "%";
         }).join(", ");
         guaranteeText = " | การันตีอีก " + left + "/" + guaranteeCfg.every + " โรล" + (rarityText ? " (" + rarityText + ")" : "");
@@ -6320,7 +6369,10 @@ function nextBannerImage() {
       const rates = getCurrentRates();
       const banner = getActiveBanner();
       const guaranteeCfg = getBannerGuaranteeConfig(banner);
-      const rateHTML = getCollectionRarityOrder().map(function(rarity) {
+      const rateHTML = getCollectionRarityOrder().filter(function(rarity) {
+        const value = rates[rarity] !== undefined ? rates[rarity] : rarityInfo[rarity].rate;
+        return Number(value || 0) > 0;
+      }).map(function(rarity) {
         const value = rates[rarity] !== undefined ? rates[rarity] : rarityInfo[rarity].rate;
         return '<div class="flex items-center justify-between rounded-xl bg-slate-900/70 border border-white/10 px-3 py-2">' +
           '<span class="font-black">' + escapeHTML(getRarityLabel(rarity)) + (getRarityTone(rarity) ? ' <span class="text-[10px] text-slate-400">(' + escapeHTML(getRarityTone(rarity)) + ')</span>' : '') + '</span>' +
@@ -6331,10 +6383,14 @@ function nextBannerImage() {
       let guaranteeHTML = "";
       if (guaranteeCfg.enabled && guaranteeCfg.every > 0) {
         const progress = getGuaranteeCounter(banner);
-        const rarityText = Object.keys(guaranteeCfg.rarityRates || {}).map(function(rarity) {
+        const rarityText = Object.keys(guaranteeCfg.rarityRates || {}).filter(function(rarity) {
+          return Number(guaranteeCfg.rarityRates[rarity] || 0) > 0;
+        }).map(function(rarity) {
           return getRarityLabel(rarity) + " " + guaranteeCfg.rarityRates[rarity] + "%";
         }).join(" / ");
-        const cardText = Object.keys(guaranteeCfg.cardRates || {}).map(function(id) {
+        const cardText = Object.keys(guaranteeCfg.cardRates || {}).filter(function(id) {
+          return Number(guaranteeCfg.cardRates[id] || 0) > 0;
+        }).map(function(id) {
           const card = getCardById(id);
           return (card ? card.name : "ID " + id) + " x" + guaranteeCfg.cardRates[id];
         }).join(", ");
@@ -6363,11 +6419,14 @@ function nextBannerImage() {
 
     function getGachaRevealTier(card) {
       const rarity = card && card.rarity ? String(card.rarity) : "";
-      const specialList = (GACHA_REVEAL_CONFIG && GACHA_REVEAL_CONFIG.specialRarities) || [];
-      if (specialList.includes(rarity)) return "SPECIAL";
+      // ระดับหลักให้เช็กก่อน special เพื่อให้ EX/SC ใช้รูป/คลิปแยกระดับได้
+      if (rarity === "SC") return "SC";
       if (rarity === "EX") return "EX";
       if (rarity === "LR") return "LR";
       if (rarity === "UR") return "UR";
+      if (rarity === "SSR") return "SSR";
+      const specialList = (GACHA_REVEAL_CONFIG && GACHA_REVEAL_CONFIG.specialRarities) || [];
+      if (specialList.includes(rarity)) return "SPECIAL";
       return "NORMAL";
     }
 
@@ -6381,6 +6440,20 @@ function nextBannerImage() {
 
     function skipGachaRareReveal() {
       gachaRareRevealSkipRequested = true;
+    }
+
+    function getActiveBannerRevealMediaUrl(card, tier, cfg) {
+      const banner = getActiveBanner();
+      if (!banner) return "";
+      const rarity = card && card.rarity ? String(card.rarity) : String(tier || "");
+      const revealMap = banner.revealImages || banner.revealMedia || {};
+      const explicit = revealMap[tier] || revealMap[rarity] || revealMap.DEFAULT || "";
+      if (explicit) return resolveLocalAssetPath(explicit, "banner");
+
+      const mediaList = getBannerImages(banner);
+      if (!mediaList.length) return "";
+      const index = ((bannerSlideIndex % mediaList.length) + mediaList.length) % mediaList.length;
+      return mediaList[index] || mediaList[0] || "";
     }
 
     async function showGachaRareReveal(card, tier, revealConfigOverride) {
