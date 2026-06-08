@@ -2853,7 +2853,7 @@
       pageBackground: "radial-gradient(circle at 12% 0%, rgba(103,232,249,.34) 0%, transparent 29%), radial-gradient(circle at 88% 6%, rgba(217,70,239,.28) 0%, transparent 30%), radial-gradient(circle at 50% 100%, rgba(251,191,36,.16) 0%, transparent 34%), linear-gradient(135deg, #020617 0%, #07111f 34%, #11103a 67%, #020617 100%)",
 
       // 🟨 ใส่รูปพื้นหลังเว็บตรงนี้ เช่น "https://example.com/bg.jpg"
-      backgroundImageUrl: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjg3amdna3E2ODFxc2F5ZHJyM2k2NDhnejQ4MzZkcnloanNoMm9rZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ocBtGFDsOjlcp6aItx/giphy.gif",
+      backgroundImageUrl: "LS1.mp4",
       backgroundImageOpacity: 0.28,      // 0 = มองไม่เห็นรูป, 1 = ชัดสุด
       backgroundBlurPx: 4,              // ยิ่งมากยิ่งเบลอ แนะนำ 2-8
       backgroundScale: 1.06,            // กันขอบเบลอแตก แนะนำ 1.03-1.10
@@ -2895,15 +2895,15 @@
     };
 
     const SITE_HEADER_CONFIG = {
-      logoUrl: "https://i.pinimg.com/736x/ce/78/96/ce7896432da77556f4d9f7485e836f1d.jpg", // 🟨 ใส่ URL รูปโลโก้ตรงนี้ เช่น "https://example.com/my-logo.png"
+      logoUrl: "LOGO.png"
       logoAlt: "Anime Card Collection Logo",
       fallbackTitle: "Anime Card Collection",
-      subtitle: "Ver 1.0.1 COLLAB JuJutsu Kaisen",
-      hintText: "koyun", // 🟨 ถ้าอยากให้มีข้อความเล็กใต้หัวเว็บ ให้ใส่ข้อความตรงนี้
+      subtitle: "Ver 1.0.5 COLLAB JuJutsu Kaisen",
+      hintText: "SC RATE UP COMEBACK!!!", // 🟨 ถ้าอยากให้มีข้อความเล็กใต้หัวเว็บ ให้ใส่ข้อความตรงนี้
 
       // 🟨 จุดแก้ขนาดโลโก้: อนาคตถ้าใช้ภาพสัดส่วนเดียวกัน แก้แค่ logoUrl ก็พอ
-      logoWidthPx: 320,
-      logoHeightPx: 96,
+      logoWidthPx: 1672,
+      logoHeightPx: 941,
       logoFit: "cover",        // cover = เต็มกรอบสวย / contain = เห็นภาพครบไม่ครอป
       logoPosition: "center center",
       logoPaddingPx: 6,
@@ -3111,7 +3111,7 @@
       // ปิดค่าเริ่มต้นไว้ก่อน เพื่อไม่ให้ตู้ที่ไม่ได้ตั้ง guarantee เองแอบการันตีระดับสูง
       // ถ้าอยากให้ตู้ไหนมีการันตี ให้ใส่ guarantee: { enabled: true, ... } ใน GACHA_BANNERS ของตู้นั้นโดยตรง
       enabled: true,
-      every: 2000,
+      every: 5000,
       rarityRates: { LR: 95, EX: 4, SC:1 },
       cardRates: {},
       resetWhenPullRarities: [ "LR", "EX", "SC" ]
@@ -3198,7 +3198,7 @@
       subtitle: "ข่าวสาร / กิจกรรม / แพตช์ใหม่",
       body: ".",
       buttonText: "START",
-      images: ["https://i.pinimg.com/736x/f3/c9/cf/f3c9cf4bb4dce297f0820daa097cbaa5.jpg", "https://i.pinimg.com/736x/74/ed/66/74ed66a59831ca8554a17d802ab39f1e.jpg"
+      images: ["EV1.png", "EV2.png","EV3.png","EV4.png", "EV5.png", "EV6.png", "EV7.png", "EV8.png", "EV9.png",   
       ]
     };
 
@@ -3272,14 +3272,37 @@
           }
         },
         enabled: true
+      },
+      {
+        id: "SC_event",
+        name: "ตั๋วอีเวนท์สุ่มระดับ SC x1",
+        description: "มีโอกาศลุ้นตัวระดับ SC ทุกตัว",
+        copies: 1,
+        rarityRates: { SC: 100 },
+        allowedRarities: [ "SC" ],
+        allowedCardIds: null,
+        useCurrentBannerRateUp: true,
+        packRevealConfig: {
+          enabled: true,
+          holdMs: 3000,
+          revealImages: {
+            SC: "SCgacha.mp4"
+          },
+          revealTexts: {
+            SC: ""
+          }
+        },
+        enabled: true
       }
+
     ];
 
     // ร้านเทรดไอเทม: ใช้ PiceCrad ซื้อไอเทมเปิดแพ็ก
     // itemId ต้องตรงกับ id ใน CARD_PACK_ITEMS
     const TRADE_ITEM_SHOP = [
       { id: "shop_ssr_lr_same_5_pack", itemId: "ssr_lr_same_5_pack", pricePiceCrad: 10000, stock: 20, enabled: true },
-      { id: "shop_event_same_5_pack", itemId: "event_same_5_pack", pricePiceCrad: 20000, stock: 100, enabled: true }
+      { id: "shop_event_same_5_pack", itemId: "event_same_5_pack", pricePiceCrad: 20000, stock: 100, enabled: true },
+      { id: "SC_event", itemId: "SC_event", pricePiceCrad: 50000, stock: 1, enabled: true }
     ];
 
 
@@ -3382,8 +3405,8 @@
       useRarityStarsAsAwakenMax: true,
       defaultTotalDuplicateCost: 6, // กรณีมีระดับใหม่แต่ยังไม่ได้ตั้งค่า
       totalDuplicateCostByRarity: {
-        N: 3000,
-        R: 2000,
+        N: 1500,
+        R: 1000,
         SR: 500,
         SSR: 100,
         UR: 90,
@@ -3457,6 +3480,12 @@
     // stock = จำนวนที่ซื้อได้ทั้งหมดต่อไอดีผู้เล่น
     // enabled = true เปิดขาย / false ปิดขาย
     const TRADE_CARD_SHOP = [
+      { id: "1035", cardId: 1023, pricePiceCrad: 5800, stock: 1, enabled: true },
+      { id: "1036", cardId: 1022, pricePiceCrad: 5800, stock: 1, enabled: true },
+      { id: "1037", cardId: 1021, pricePiceCrad: 5700, stock: 1, enabled: true },
+      { id: "1038", cardId: 1035, pricePiceCrad: 1400, stock: 999, enabled: true },
+      { id: "1039", cardId: 1036, pricePiceCrad: 1100, stock: 999, enabled: true },
+      { id: "1040", cardId: 1037, pricePiceCrad: 1100, stock: 999, enabled: true },
       { id: "1035", cardId: 1035, pricePiceCrad: 1000, stock: 999, enabled: true },
       { id: "1036", cardId: 1036, pricePiceCrad: 850, stock: 999, enabled: true },
       { id: "1037", cardId: 1037, pricePiceCrad: 850, stock: 999, enabled: true },
@@ -3519,14 +3548,14 @@
         ],
         singlePullCost: 250000,
         tenPullCost: 2250000,
-        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 7, UR: 2.4, LR: 2.12, EX: 0.05, JJKB: 0.18, JJKS: 0.07, JJKC: 0.18, SC: 0 },
-        rateUpCards: { 44: 10, 45: 10, 43: 15, 42: 15},
+        rateOverrides: { N: 42, R: 28, SR: 18, SSR: 7, UR: 2.4, LR: 2.12, EX: 0.24, JJKB: 0.08, JJKS: 0.07, JJKC: 0.08, SC: 0 },
+        rateUpCards: { 1035: 3, 1036: 3, 1037: 3},
         // 🟨 จุดแก้การันตีตู้: เปลี่ยนระดับและเรทการันตีรายใบของตู้นี้ได้ตรงนี้
         guarantee: {
           enabled: true,
-          every: 1000,
-          rarityRates: { JJKS: 100 },
-          cardRates: { 1001: 2, 1003: 2, 1004: 2, 1005: 2, 1006: 2, 1007: 2 },
+          every: 2000,
+          rarityRates: { JJKS: 80 , EX: 20 },
+          cardRates: { 1035: 2, 1036: 2, 1037: 5 },
           resetWhenPullRarities: ["JJKS"]
         }
       },
@@ -3568,6 +3597,26 @@
           rarityRates: { JJKS: 100 },
           cardRates: { 1002: 2, 1008: 2 },
           resetWhenPullRarities: ["JJKS"]
+        }
+      },
+      {
+        id: "SC_RATE",
+        name: "SC RATE UP!!",
+        description: "เพิ่มโอกาสได้ตัวละครลับ++",
+        image: "",
+        images: [
+          "assets/banners/SCgacha.mp4" 
+        ],
+        singlePullCost: 1000000,
+        tenPullCost: 1000000,
+        rateOverrides: { N: 0, R: 0, SR: 55, SSR: 36, UR: 5.2, LR: 3.155, EX: 0.38, JJKB: 0, JJKS: 0, JJKC: 0, SC: 0.165 },
+        rateUpCards: { 1000: 3, 0: 3, 999: 3, 2000: 2 },
+        guarantee: {
+          enabled: true,
+          every: 10000,
+          rarityRates: { SC: 100 },
+          cardRates: { 1000: 5, 999: 5, 0: 5, 2000: 2 },
+          resetWhenPullRarities: ["SC"]
         }
       },
       {
@@ -3616,9 +3665,13 @@
     // 5) ถ้าไฟล์อยู่ใน GitHub repo เดียวกับ index.html ให้สร้างโฟลเดอร์ assets/cards/ แล้วอัปโหลดไฟล์ไว้ตรงนั้น
 
     const CARD_DATABASE = [
-      { id: 000, name: "DEV.", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "0.mp4", video: "0.mp4" },
-      { id: 999, name: "CREATOR", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXVoNXl5MmFwaDlid215MHdnYXBrcWJ3cW50bDN5MWExYmRrZ3R6OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/U7aHTeKJYr0FHPQALd/giphy.gif" },
-      { id: 1000, name: "Great Magician", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanNhNjVhdzBpenNkYzF0Ym1remp0a2gwOGxwdTZ3eTJqOTczMXJ6ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LrD6vVo630JiYOhrTU/giphy.gif" },
+      { id: 000, name: "DEV.", rarity: "SC", element: "DD", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "0.mp4", video: "0.mp4" },
+      { id: 999, name: "CREATOR", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "999.mp4", video: "999.mp4" },
+      { id: 1000, name: "Great Magician", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "1000.mp4", video: "1000.mp4" },
+      { id: 2000, name: "MAMON", rarity: "SC", element: "Cat", power: 0, incomePerSec: 3600, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "2000.mp4", video: "2000.mp4" },
+      { id: 1035, name: "Satoru Gojo+Yuji Itadori", rarity: "EX", element: "Storngest in Present", power: 28000, incomePerSec: 2500, upgradeDustBase: 7000, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "1035.mp4", video: "1035.mp4" },
+      { id: 1036, name: "Sukuna+Dabura Karaba", rarity: "EX", element: "Awaken Evill", power: 28000, incomePerSec: 2500, upgradeDustBase: 7000, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "1036.mp4", video: "1036.mp4" },
+      { id: 1037, name: "Yuka Okkotsu+Tsurugi Okkotsu", rarity: "EX", element: "Okkotsu Family", power: 27200, incomePerSec: 2200, upgradeDustBase: 6800, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "1037.mp4", video: "1037.mp4" },
       { id: 38, name: "EX Frieren", rarity: "EX", element: "Awaken Ligth", power: 28000, incomePerSec: 1000, upgradeDustBase: 7000, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "38.mp4", video: "38.mp4" },
       { id: 39, name: "EX Fern", rarity: "EX", element: "Awaken Ligth", power: 27500, incomePerSec: 1000, upgradeDustBase: 6900, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "39.mp4", video: "39.mp4" },
       { id: 40, name: "EX Stark", rarity: "EX", element: "Awaken Fire", power: 27200, incomePerSec: 1000, upgradeDustBase: 6800, upgradeDustGrowth: 1.118, awakenMax: 9, icon: "", image: "40.mp4", video: "40.mp4" },
@@ -3635,6 +3688,9 @@
       { id: 8, name: "CID", rarity: "LR", element: "Atiomic", power: 13000, incomePerSec: 1000, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExd3g0eTFzZnc1NzNpbjB3bWNreW5zZWt2M256N3V3bWYxMmtkZ2R4MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/PzMHYQJnuKbenMrXu9/giphy.gif" },
       { id: 9, name: "Kamado Tanjirou", rarity: "LR", element: "Water", power: 10000, incomePerSec: 900, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTVhMmN6d2JzOGF1cGFvZnN5aTBrYnAyeHBleDF3NXR4dzk3MnR3NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/J6JazAkCVLId91L4yM/giphy.gif" },
       { id: 10, name: "Uzumaki Naruto", rarity: "LR", element: "9Tail", power: 12000, incomePerSec: 1100, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDk1OGVtdHNwNTE5eWhzamFiejUwdHh0OTg4bGw0Z295cXd1YXg0YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/P8s5Gu1IBhQq6xlyam/giphy.gif" },
+      { id: 1038, name: "Marulu Val Vol Yelvori", rarity: "JJKS", element: "Chaos", power: 17000, incomePerSec: 1750, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1038.png" },
+      { id: 1039, name: "Yuka Okkotsu", rarity: "JJKS", element: "Ten Shadows Technique", power: 16800, incomePerSec: 1680, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1039.png" },
+      { id: 1040, name: "Tsurugi Okkotsu", rarity: "JJKS", element: "Physically Gifted", power: 16800, incomePerSec: 1680 upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1040.png" },
       { id: 1033, name: "Kinji Hakari", rarity: "JJKS", element: "Idle Death Gamble", power: 16000, incomePerSec: 1650, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1033.png" },
       { id: 1034, name: "Hajime Kashimo", rarity: "JJKS", element: "Mythical Beast Amber", power: 16000, incomePerSec: 1650, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1034.png" },
       { id: 1023, name: "Yuji Itadori", rarity: "JJKS", element: "Strongest ONE", power: 20000, incomePerSec: 1800, upgradeDustBase: 6500, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1023.png" },
