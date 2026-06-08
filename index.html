@@ -1915,11 +1915,13 @@
       background: rgba(2,6,23,.78);
       overflow: hidden;
     }
-    .game-announcement-image {
+    .game-announcement-image,
+    .game-announcement-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+      background: rgba(0,0,0,.45);
     }
     .game-announcement-empty {
       min-height: 230px;
@@ -2012,7 +2014,8 @@
       animation: siteLogoSoftShine 4.8s ease-in-out infinite;
       z-index: 2;
     }
-    .site-logo-img {
+    .site-logo-img,
+    .site-logo-video {
       width: 100%;
       height: 100%;
       object-fit: var(--site-logo-fit, cover);
@@ -2146,6 +2149,22 @@
       transform: scale(var(--theme-bg-image-scale));
       will-change: transform, filter, opacity;
     }
+    .theme-background-video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -3;
+      object-fit: cover;
+      object-position: center center;
+      pointer-events: none;
+      opacity: var(--theme-bg-image-opacity);
+      filter: blur(var(--theme-bg-image-blur));
+      transform: scale(var(--theme-bg-image-scale));
+      display: none;
+    }
+    body.theme-custom.theme-video-bg::before { background-image: none !important; }
+    body.theme-custom.theme-video-bg .theme-background-video { display: block; }
     body.theme-custom::after {
       content: "";
       position: fixed;
@@ -2448,6 +2467,7 @@
   </style>
 </head>
 <body>
+  <video id="themeBackgroundVideo" class="theme-background-video" muted loop autoplay playsinline preload="metadata"></video>
   <div class="w-full min-h-screen mx-auto p-3 md:p-5 xl:p-6">
     <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       <!--
@@ -2458,6 +2478,7 @@
       <div class="site-brand">
         <div id="siteLogoBox" class="site-logo-box">
           <img id="siteLogoImage" class="site-logo-img hidden" alt="Game Logo" />
+          <video id="siteLogoVideo" class="site-logo-video hidden" muted loop autoplay playsinline preload="metadata"></video>
           <h1 id="siteLogoFallback" class="site-logo-fallback">Gacha Card Collection</h1>
         </div>
       </div>
@@ -2807,6 +2828,7 @@
       <div id="gameAnnouncementImageWrap" class="game-announcement-image-wrap">
         <div id="gameAnnouncementEmpty" class="game-announcement-empty">ยังไม่ได้ใส่รูปประกาศ<br>ให้เพิ่ม URL รูปใน ANNOUNCEMENT_CONFIG.images</div>
         <img id="gameAnnouncementImage" class="game-announcement-image hidden" alt="game announcement" />
+        <video id="gameAnnouncementVideo" class="game-announcement-video hidden" muted loop autoplay playsinline preload="metadata"></video>
         <button type="button" id="gameAnnouncementPrev" onclick="prevGameAnnouncement(event)" class="game-announcement-nav prev">‹</button>
         <button type="button" id="gameAnnouncementNext" onclick="nextGameAnnouncement(event)" class="game-announcement-nav next">›</button>
         <div id="gameAnnouncementDots" class="game-announcement-dots"></div>
@@ -2832,10 +2854,11 @@
     // 🟨 จุดแก้ 0: โลโก้เว็บมุมซ้าย
     // ======================================================================
     // วิธีเปลี่ยนโลโก้:
-    // 1) อัปโหลดรูปไว้บน GitHub / Discord / imgbb / Firebase Storage หรือที่ฝากรูปอื่น
-    // 2) คัดลอกลิงก์รูปมาใส่ใน logoUrl
-    // 3) ถ้าไม่ใส่ logoUrl ระบบจะแสดง fallbackTitle เป็นตัวหนังสือแทน
-    // แนะนำไฟล์โลโก้: ใช้ภาพแนวเดียวกับตัวอย่างนี้ได้เลย ระบบจะครอป/จัดกลางให้พอดีอัตโนมัติ
+    // 1) อัปโหลดรูปหรือวิดีโอไว้ที่ assets/banners/
+    // 2) ใส่แค่ชื่อไฟล์ เช่น "LOGO.png" หรือ "LOGO.mp4" ใน SITE_HEADER_CONFIG.logoUrl
+    // 3) ใส่ path เต็มก็ได้ เช่น "assets/banners/LOGO.mp4" หรือใช้ URL เต็มจากภายนอกก็ได้
+    // 4) ถ้าไม่ใส่ logoUrl ระบบจะแสดง fallbackTitle เป็นตัวหนังสือแทน
+    // รองรับรูป .webp/.jpg/.png/.gif และวิดีโอ .mp4/.webm/.ogg/.mov/.m4v
 
 
     // ======================================================================
@@ -2843,16 +2866,17 @@
     // ======================================================================
     // วิธีใช้แบบง่าย:
     // - อยากเปลี่ยนสีเว็บ แก้ค่าสีด้านล่างนี้ได้เลย
-    // - อยากใส่รูปพื้นหลัง ให้ใส่ URL ที่ backgroundImageUrl
-    // - ถ้าภาพพื้นหลังแยงตา ให้เพิ่ม backgroundBlurPx หรือ backgroundDarkOverlay
-    // - ถ้าไม่อยากใช้รูปพื้นหลัง ให้เว้น backgroundImageUrl เป็น ""
+    // - อยากใส่รูป/วิดีโอพื้นหลัง ให้ใส่ชื่อไฟล์หรือ URL ที่ backgroundImageUrl
+    // - ถ้าใส่แค่ชื่อไฟล์ เช่น "LS1.mp4" ระบบจะหาใน assets/banners/ อัตโนมัติ
+    // - ถ้าภาพ/วิดีโอพื้นหลังแยงตา ให้เพิ่ม backgroundBlurPx หรือ backgroundDarkOverlay
+    // - ถ้าไม่อยากใช้พื้นหลังจากไฟล์ ให้เว้น backgroundImageUrl เป็น ""
     const WEBSITE_THEME_CONFIG = {
       enabled: true,
 
       // พื้นหลังเว็บหลักโทนเดียวกับโลโก้เกม: ดำ / น้ำเงิน / ม่วง / ฟ้าไซเบอร์ / ทอง
       pageBackground: "radial-gradient(circle at 12% 0%, rgba(103,232,249,.34) 0%, transparent 29%), radial-gradient(circle at 88% 6%, rgba(217,70,239,.28) 0%, transparent 30%), radial-gradient(circle at 50% 100%, rgba(251,191,36,.16) 0%, transparent 34%), linear-gradient(135deg, #020617 0%, #07111f 34%, #11103a 67%, #020617 100%)",
 
-      // 🟨 ใส่รูปพื้นหลังเว็บตรงนี้ เช่น "https://example.com/bg.jpg"
+      // 🟨 ใส่รูปหรือวิดีโอพื้นหลังเว็บตรงนี้ เช่น "bg.jpg" / "bg.mp4" / URL เต็ม
       backgroundImageUrl: "LS1.mp4",
       backgroundImageOpacity: 0.28,      // 0 = มองไม่เห็นรูป, 1 = ชัดสุด
       backgroundBlurPx: 4,              // ยิ่งมากยิ่งเบลอ แนะนำ 2-8
@@ -2895,13 +2919,13 @@
     };
 
     const SITE_HEADER_CONFIG = {
-      logoUrl: "LOGO.png"
+      logoUrl: "LOGO.png",
       logoAlt: "Anime Card Collection Logo",
       fallbackTitle: "Anime Card Collection",
       subtitle: "Ver 1.0.5 COLLAB JuJutsu Kaisen",
       hintText: "SC RATE UP COMEBACK!!!", // 🟨 ถ้าอยากให้มีข้อความเล็กใต้หัวเว็บ ให้ใส่ข้อความตรงนี้
 
-      // 🟨 จุดแก้ขนาดโลโก้: อนาคตถ้าใช้ภาพสัดส่วนเดียวกัน แก้แค่ logoUrl ก็พอ
+      // 🟨 จุดแก้ขนาดโลโก้: ใช้ได้ทั้งรูปและวิดีโอจาก assets/banners/
       logoWidthPx: 1672,
       logoHeightPx: 941,
       logoFit: "cover",        // cover = เต็มกรอบสวย / contain = เห็นภาพครบไม่ครอป
@@ -3192,6 +3216,9 @@
     // - title/subtitle/body: แก้ข้อความบนป้ายประกาศ
     // - images: ใส่ URL รูปประกาศได้หลายรูป ระบบจะมีปุ่มเลื่อนซ้าย/ขวาให้เอง
     // - ถ้าอยากให้รูปเต็มสวย แนะนำสัดส่วน 16:9 เช่น 1280x720 หรือ 1920x1080
+    // 🟨 ป้ายประกาศรองรับทั้งรูปและวิดีโอจาก assets/banners/
+    // ใส่แค่ชื่อไฟล์ เช่น "EV1.png" หรือ "EV1.mp4" ได้เลย
+    // หรือใส่ path เต็ม/URL เต็มก็ได้
     const ANNOUNCEMENT_CONFIG = {
       enabled: true,
       title: "ประกาศอัปเดตเกม",
@@ -3690,7 +3717,7 @@
       { id: 10, name: "Uzumaki Naruto", rarity: "LR", element: "9Tail", power: 12000, incomePerSec: 1100, upgradeDustBase: 4000, upgradeDustGrowth: 1.105, awakenMax: 8, icon: "", image: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDk1OGVtdHNwNTE5eWhzamFiejUwdHh0OTg4bGw0Z295cXd1YXg0YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/P8s5Gu1IBhQq6xlyam/giphy.gif" },
       { id: 1038, name: "Marulu Val Vol Yelvori", rarity: "JJKS", element: "Chaos", power: 17000, incomePerSec: 1750, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1038.png" },
       { id: 1039, name: "Yuka Okkotsu", rarity: "JJKS", element: "Ten Shadows Technique", power: 16800, incomePerSec: 1680, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1039.png" },
-      { id: 1040, name: "Tsurugi Okkotsu", rarity: "JJKS", element: "Physically Gifted", power: 16800, incomePerSec: 1680 upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1040.png" },
+      { id: 1040, name: "Tsurugi Okkotsu", rarity: "JJKS", element: "Physically Gifted", power: 16800, incomePerSec: 1680, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1040.png" },
       { id: 1033, name: "Kinji Hakari", rarity: "JJKS", element: "Idle Death Gamble", power: 16000, incomePerSec: 1650, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1033.png" },
       { id: 1034, name: "Hajime Kashimo", rarity: "JJKS", element: "Mythical Beast Amber", power: 16000, incomePerSec: 1650, upgradeDustBase: 6200, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1034.png" },
       { id: 1023, name: "Yuji Itadori", rarity: "JJKS", element: "Strongest ONE", power: 20000, incomePerSec: 1800, upgradeDustBase: 6500, upgradeDustGrowth: 1.115, awakenMax: 8, icon: "", image: "1023.png" },
@@ -7632,8 +7659,8 @@ function closeCardModal() {
     let gameAnnouncementIndex = 0;
 
     function getAnnouncementImages() {
-      return ((ANNOUNCEMENT_CONFIG && ANNOUNCEMENT_CONFIG.images) || [])
-        .map(function(url) { return String(url || "").trim(); })
+      return ((ANNOUNCEMENT_CONFIG && (ANNOUNCEMENT_CONFIG.media || ANNOUNCEMENT_CONFIG.images)) || [])
+        .map(function(url) { return resolveLocalAssetPath(String(url || "").trim(), "banner"); })
         .filter(Boolean);
     }
 
@@ -7645,6 +7672,7 @@ function closeCardModal() {
       const body = document.getElementById("gameAnnouncementBody");
       const closeButton = document.getElementById("gameAnnouncementCloseButton");
       const img = document.getElementById("gameAnnouncementImage");
+      const video = document.getElementById("gameAnnouncementVideo");
       const empty = document.getElementById("gameAnnouncementEmpty");
       const prev = document.getElementById("gameAnnouncementPrev");
       const next = document.getElementById("gameAnnouncementNext");
@@ -7657,15 +7685,41 @@ function closeCardModal() {
 
       if (images.length) {
         gameAnnouncementIndex = Math.max(0, Math.min(gameAnnouncementIndex, images.length - 1));
+        const mediaUrl = images[gameAnnouncementIndex];
+        const isVideo = isVideoFileName(mediaUrl);
         if (img) {
-          img.src = images[gameAnnouncementIndex];
-          img.classList.remove("hidden");
+          if (!isVideo) {
+            img.src = mediaUrl;
+            img.classList.remove("hidden");
+          } else {
+            img.removeAttribute("src");
+            img.classList.add("hidden");
+          }
+        }
+        if (video) {
+          if (isVideo) {
+            video.src = mediaUrl;
+            video.classList.remove("hidden");
+            video.load();
+            video.play().catch(function() {});
+          } else {
+            video.pause();
+            video.removeAttribute("src");
+            video.load();
+            video.classList.add("hidden");
+          }
         }
         if (empty) empty.classList.add("hidden");
       } else {
         if (img) {
           img.removeAttribute("src");
           img.classList.add("hidden");
+        }
+        if (video) {
+          video.pause();
+          video.removeAttribute("src");
+          video.load();
+          video.classList.add("hidden");
         }
         if (empty) empty.classList.remove("hidden");
       }
@@ -8864,7 +8918,25 @@ function closeCardModal() {
         if (value !== undefined && value !== null && value !== "") root.style.setProperty(name, String(value));
       };
       setVar("--theme-page-bg", cfg.pageBackground);
-      root.style.setProperty("--theme-bg-image", cfg.backgroundImageUrl && cfg.backgroundImageUrl.trim() ? `url("${cfg.backgroundImageUrl.trim()}")` : "none");
+      const rawBackgroundMedia = cfg.backgroundImageUrl && String(cfg.backgroundImageUrl).trim() ? resolveLocalAssetPath(cfg.backgroundImageUrl, "banner") : "";
+      const backgroundVideo = document.getElementById("themeBackgroundVideo");
+      if (rawBackgroundMedia && isVideoFileName(rawBackgroundMedia)) {
+        document.body.classList.add("theme-video-bg");
+        root.style.setProperty("--theme-bg-image", "none");
+        if (backgroundVideo) {
+          backgroundVideo.src = rawBackgroundMedia;
+          backgroundVideo.load();
+          backgroundVideo.play().catch(function() {});
+        }
+      } else {
+        document.body.classList.remove("theme-video-bg");
+        root.style.setProperty("--theme-bg-image", rawBackgroundMedia ? `url("${rawBackgroundMedia}")` : "none");
+        if (backgroundVideo) {
+          backgroundVideo.pause();
+          backgroundVideo.removeAttribute("src");
+          backgroundVideo.load();
+        }
+      }
       setVar("--theme-bg-image-opacity", cfg.backgroundImageOpacity);
       setVar("--theme-bg-image-blur", (cfg.backgroundBlurPx ?? 0) + "px");
       setVar("--theme-bg-image-scale", cfg.backgroundScale ?? 1.04);
@@ -8896,6 +8968,7 @@ function closeCardModal() {
     function renderSiteHeader() {
       const logoBox = document.getElementById("siteLogoBox");
       const logoImg = document.getElementById("siteLogoImage");
+      const logoVideo = document.getElementById("siteLogoVideo");
       const fallback = document.getElementById("siteLogoFallback");
       const subtitle = document.getElementById("siteSubtitleText");
       const hint = document.getElementById("siteHeaderHintText");
@@ -8907,23 +8980,59 @@ function closeCardModal() {
         logoBox.style.setProperty("--site-logo-padding", (SITE_HEADER_CONFIG.logoPaddingPx ?? 6) + "px");
         logoBox.style.setProperty("--site-logo-radius", (SITE_HEADER_CONFIG.logoRadiusPx || 22) + "px");
       }
-      if (logoImg) {
-        logoImg.style.setProperty("--site-logo-fit", SITE_HEADER_CONFIG.logoFit || "cover");
-        logoImg.style.setProperty("--site-logo-position", SITE_HEADER_CONFIG.logoPosition || "center center");
-        logoImg.alt = SITE_HEADER_CONFIG.logoAlt || "Game Logo";
-        if (SITE_HEADER_CONFIG.logoUrl && SITE_HEADER_CONFIG.logoUrl.trim()) {
-          logoImg.onerror = function() {
+      if (logoImg || logoVideo) {
+        const logoSrc = SITE_HEADER_CONFIG.logoUrl && SITE_HEADER_CONFIG.logoUrl.trim() ? resolveLocalAssetPath(SITE_HEADER_CONFIG.logoUrl, "banner") : "";
+        const logoIsVideo = isVideoFileName(logoSrc);
+        if (logoImg) {
+          logoImg.style.setProperty("--site-logo-fit", SITE_HEADER_CONFIG.logoFit || "cover");
+          logoImg.style.setProperty("--site-logo-position", SITE_HEADER_CONFIG.logoPosition || "center center");
+          logoImg.alt = SITE_HEADER_CONFIG.logoAlt || "Game Logo";
+        }
+        if (logoVideo) {
+          logoVideo.style.setProperty("--site-logo-fit", SITE_HEADER_CONFIG.logoFit || "cover");
+          logoVideo.style.setProperty("--site-logo-position", SITE_HEADER_CONFIG.logoPosition || "center center");
+        }
+        if (logoSrc && logoIsVideo) {
+          if (logoImg) {
+            logoImg.removeAttribute("src");
             logoImg.classList.add("hidden");
-            if (fallback) fallback.classList.remove("hidden");
-          };
-          logoImg.onload = function() {
-            logoImg.classList.remove("hidden");
-            if (fallback) fallback.classList.add("hidden");
-          };
-          logoImg.src = SITE_HEADER_CONFIG.logoUrl.trim();
+          }
+          if (logoVideo) {
+            logoVideo.src = logoSrc;
+            logoVideo.classList.remove("hidden");
+            logoVideo.load();
+            logoVideo.play().catch(function() {});
+          }
+          if (fallback) fallback.classList.add("hidden");
+        } else if (logoSrc) {
+          if (logoVideo) {
+            logoVideo.pause();
+            logoVideo.removeAttribute("src");
+            logoVideo.load();
+            logoVideo.classList.add("hidden");
+          }
+          if (logoImg) {
+            logoImg.onerror = function() {
+              logoImg.classList.add("hidden");
+              if (fallback) fallback.classList.remove("hidden");
+            };
+            logoImg.onload = function() {
+              logoImg.classList.remove("hidden");
+              if (fallback) fallback.classList.add("hidden");
+            };
+            logoImg.src = logoSrc;
+          }
         } else {
-          logoImg.removeAttribute("src");
-          logoImg.classList.add("hidden");
+          if (logoImg) {
+            logoImg.removeAttribute("src");
+            logoImg.classList.add("hidden");
+          }
+          if (logoVideo) {
+            logoVideo.pause();
+            logoVideo.removeAttribute("src");
+            logoVideo.load();
+            logoVideo.classList.add("hidden");
+          }
           if (fallback) fallback.classList.remove("hidden");
         }
       }
