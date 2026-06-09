@@ -2533,6 +2533,63 @@
       </div>
     </section>
 
+    <section id="devPanel" class="glass rounded-3xl p-5 mb-6 hidden border-2 border-rose-400/40 bg-rose-950/20">
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-4">
+        <div>
+          <div class="text-xs font-black text-rose-200 tracking-[.18em]">DEV CONTROL PANEL</div>
+          <h2 class="text-2xl font-black text-rose-100">ไอดี DEV / แจกของทั้งเซิร์ฟ / แก้ฐานข้อมูลผู้เล่น</h2>
+          <p class="text-sm text-slate-300 mt-1">ไอดี DEV/Admin ต้องเป็น UID ที่คุณเพิ่มไว้ใน Firebase devAdmins เท่านั้น จึงจะมีทรัพยากรไร้ขีดจำกัด การ์ดทุกใบ Lv.MAX + Awaken MAX และมี Stock การ์ดจำนวนมากสำหรับทดสอบบาลานซ์/จัดกิจกรรมแจกของ</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="fillDevLogin()" class="rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-black px-4 py-2">ใส่ชื่อ DEV/Admin</button>
+          <button onclick="devActivateSelfMax()" class="rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-black px-4 py-2">เปิดพลัง DEV ให้ไอดีนี้</button>
+          <button onclick="devRefreshCloudPlayers()" class="rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black px-4 py-2">รีเฟรชรายชื่อผู้เล่น</button>
+        </div>
+      </div>
+      <div id="devStatusText" class="rounded-2xl bg-black/25 border border-white/10 p-3 text-xs text-amber-100 mb-4">DEV Panel พร้อมทำงานเฉพาะ UID ที่ถูกตั้งไว้ใน Firebase devAdmins เท่านั้น</div>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div class="rounded-2xl bg-black/25 border border-white/10 p-4">
+          <h3 class="font-black text-cyan-200 mb-3">เลือกผู้เล่น / แก้ทรัพยากร</h3>
+          <label class="text-xs text-slate-400">ผู้เล่นใน Firebase</label>
+          <select id="devPlayerSelect" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2"></select>
+          <div class="grid grid-cols-3 gap-2 mt-3">
+            <div><label class="text-xs text-slate-400">Gems</label><input id="devGiveGems" type="number" min="0" step="1" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2" /></div>
+            <div><label class="text-xs text-slate-400">Dust</label><input id="devGiveDust" type="number" min="0" step="1" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2" /></div>
+            <div><label class="text-xs text-slate-400">PiceCrad</label><input id="devGivePiceCrad" type="number" min="0" step="1" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2" /></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+            <button onclick="devSetResourcesForSelected()" class="rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-2">เซ็ตทรัพยากรผู้เล่นที่เลือก</button>
+            <button onclick="devGiftResourcesToAll()" class="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2">แจกทรัพยากรทั้งเซิร์ฟ</button>
+          </div>
+        </div>
+        <div class="rounded-2xl bg-black/25 border border-white/10 p-4">
+          <h3 class="font-black text-fuchsia-200 mb-3">แจกการ์ด / สต็อกการ์ด</h3>
+          <label class="text-xs text-slate-400">เลือกการ์ด</label>
+          <select id="devCardSelect" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2"></select>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <div><label class="text-xs text-slate-400">จำนวน Copies</label><input id="devGiveCardAmount" type="number" min="1" step="1" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2" /></div>
+            <div><label class="text-xs text-slate-400">Item ID</label><input id="devItemId" placeholder="เช่น pack_ur" class="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2" /></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+            <button onclick="devGiftCardToSelected()" class="rounded-xl bg-fuchsia-500 hover:bg-fuchsia-400 text-white font-black py-2">แจกการ์ดให้ผู้เล่นที่เลือก</button>
+            <button onclick="devGiftCardToAll()" class="rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-black py-2">แจกการ์ดทั้งเซิร์ฟ</button>
+            <button onclick="devGiftItemToSelected()" class="rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black py-2">แจก Item ให้ผู้เล่นที่เลือก</button>
+            <button onclick="devGiftItemToAll()" class="rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black py-2">แจก Item ทั้งเซิร์ฟ</button>
+          </div>
+        </div>
+        <div class="rounded-2xl bg-black/25 border border-white/10 p-4">
+          <h3 class="font-black text-yellow-200 mb-3">บาลานซ์ / Max การ์ด</h3>
+          <p class="text-xs text-slate-300 leading-5 mb-3">ใช้สำหรับทำให้การ์ดที่มีอยู่และการ์ดในอนาคตเป็น Lv.MAX + Awaken MAX เพื่อดูพลังจริงตอนตัน และให้ DEV มี Stock การ์ดจำนวนมากไว้แจกกิจกรรม</p>
+          <div class="grid grid-cols-1 gap-2">
+            <button onclick="devMaxCardsForSelected()" class="rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2">Max การ์ดผู้เล่นที่เลือก</button>
+            <button onclick="devMaxCardsForAll()" class="rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-black py-2">Max การ์ดทั้งเซิร์ฟ</button>
+            <button onclick="devGiveSelfInfiniteStock()" class="rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-black py-2">เติม Stock การ์ด DEV ไร้ขีดจำกัด</button>
+          </div>
+          <div class="text-[11px] text-rose-100/90 mt-3 leading-5">คำเตือน: ปุ่มทั้งเซิร์ฟจะแก้ข้อมูลผู้เล่นทุกคนใน Firebase โปรดใช้เฉพาะกิจกรรมจริงหรือช่วงทดสอบเท่านั้น</div>
+        </div>
+      </div>
+    </section>
+
     <section class="glass rounded-3xl p-5 mb-6">
       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
         <div>
@@ -3023,6 +3080,25 @@
 
       // 🟦 Cloud Save: true = พยายามใช้ Firebase เป็นฐานข้อมูลกลาง, false = ใช้ localStorage อย่างเดียว
       cloudSaveEnabled: true
+    };
+
+    // ======================================================================
+    // 🟥 DEV ID / Admin Tool สำหรับแจกของทั้งเซิร์ฟ + ทดสอบบาลานซ์การ์ด
+    // ======================================================================
+    const DEV_CONFIG = {
+      enabled: true,
+      // ความปลอดภัย: ไม่ให้ชื่อ Username เช่น DEV/admin เป็นสิทธิ์ผู้พัฒนาอีกต่อไป
+      // คนที่จะเป็น DEV/Admin ต้องมี UID อยู่ที่ Firebase Realtime Database path: devAdmins/{uid} = true เท่านั้น
+      firebaseAdminOnly: true,
+      devAdminsPath: "devAdmins",
+      autoSyncSelfFullMax: true,
+      unlimitedResourceValue: 999999999999,
+      unlimitedCardStockCount: 999999,
+      defaultGiveGems: 1000000,
+      defaultGiveDust: 1000000,
+      defaultGivePiceCrad: 100000,
+      defaultGiveCardAmount: 10,
+      cloudAuditPath: "devLogs"
     };
 
     // ======================================================================
@@ -4116,6 +4192,292 @@
       window.__gachaLocalSaveTimer = setTimeout(writeSaveNow, debounceMs);
     }
 
+    // ======================================================================
+    // 🟥 DEV ID FUNCTIONS / ฟังก์ชันผู้พัฒนา
+    // ======================================================================
+    let devCloudPlayersCache = [];
+    let devAdminAuthorized = false;
+    let devAdminCheckedUid = "";
+
+    function isDevAccount(username) {
+      // ไม่เช็กจากชื่อ Username อีกแล้ว เพื่อกันคนสมัครชื่อ DEV/admin แล้วได้สิทธิ์เอง
+      if (!DEV_CONFIG || DEV_CONFIG.enabled === false) return false;
+      if (!activeUser || !activeCloudUid) return false;
+      if (username !== undefined && String(username || "").trim() !== String(activeUser || "").trim()) return false;
+      return devAdminAuthorized === true && devAdminCheckedUid === activeCloudUid;
+    }
+
+    async function refreshDevAdminStatus() {
+      devAdminAuthorized = false;
+      devAdminCheckedUid = activeCloudUid || "";
+      if (!DEV_CONFIG || DEV_CONFIG.enabled === false || !activeCloudUid) {
+        renderDevPanel();
+        return false;
+      }
+      const ok = await initCloudServices();
+      if (!ok || !cloudReady || !cloudModules || !cloudDb) {
+        renderDevPanel();
+        return false;
+      }
+      try {
+        const path = String(DEV_CONFIG.devAdminsPath || "devAdmins") + "/" + activeCloudUid;
+        const snap = await cloudModules.get(cloudModules.ref(cloudDb, path));
+        devAdminAuthorized = snap.exists() && snap.val() === true;
+        devAdminCheckedUid = activeCloudUid;
+        if (devAdminAuthorized) {
+          devSetStatus("DEV/Admin ยืนยันสิทธิ์จาก Firebase devAdmins แล้ว", "ok");
+        }
+      } catch (error) {
+        // ผู้เล่นทั่วไปอาจอ่าน devAdmins ไม่ได้ตาม Rules ถือว่าไม่ใช่ DEV/Admin
+        devAdminAuthorized = false;
+        devAdminCheckedUid = activeCloudUid || "";
+        console.warn("DEV admin check denied/not found:", error);
+      }
+      renderDevPanel();
+      return devAdminAuthorized;
+    }
+
+    function fillDevLogin() {
+      const nameInput = document.getElementById("loginName");
+      const passInput = document.getElementById("loginPassword");
+      if (nameInput) nameInput.value = "DEV";
+      if (passInput && !passInput.value) passInput.value = "dev123456";
+      showToast("ใส่ชื่อ DEV แล้ว แต่สิทธิ์ DEV จะเปิดเฉพาะ UID ที่อยู่ใน Firebase devAdmins เท่านั้น");
+    }
+
+    function devSetStatus(text, tone) {
+      const box = document.getElementById("devStatusText");
+      if (!box) return;
+      const cls = tone === "ok" ? "text-emerald-100 border-emerald-300/25 bg-emerald-500/10" : tone === "bad" ? "text-rose-100 border-rose-300/25 bg-rose-500/10" : "text-amber-100 border-white/10 bg-black/25";
+      box.className = "rounded-2xl border p-3 text-xs mb-4 " + cls;
+      box.textContent = text;
+    }
+
+    function devReadNumber(id, fallback) {
+      const el = document.getElementById(id);
+      const value = el ? Number(el.value || 0) : Number(fallback || 0);
+      return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : Math.max(0, Math.floor(Number(fallback || 0)));
+    }
+
+    function devNormalizeSaveData(saveData) {
+      const base = defaultState();
+      const save = Object.assign(base, isPlainObject(saveData) ? saveData : {});
+      if (!isPlainObject(save.items)) save.items = {};
+      if (!isPlainObject(save.owned)) save.owned = {};
+      if (!Array.isArray(save.showcase)) save.showcase = [];
+      if (!isPlainObject(save.assistants)) save.assistants = {};
+      if (!isPlainObject(save.tradeShopPurchased)) save.tradeShopPurchased = {};
+      if (!isPlainObject(save.tradeItemPurchased)) save.tradeItemPurchased = {};
+      if (!Array.isArray(save.dailyRewardHistory)) save.dailyRewardHistory = [];
+      if (!isPlainObject(save.gachaGuaranteeCounters)) save.gachaGuaranteeCounters = {};
+      ["gems", "dust", "piceCrad", "incomeBank"].forEach(function(key) {
+        const value = Number(save[key] || 0);
+        save[key] = Number.isFinite(value) ? value : 0;
+      });
+      return save;
+    }
+
+    function devApplyResourcesToSave(save, mode, values) {
+      save = devNormalizeSaveData(save);
+      ["gems", "dust", "piceCrad"].forEach(function(key) {
+        const amount = Number(values && values[key] || 0);
+        if (!Number.isFinite(amount) || amount < 0) return;
+        if (mode === "set") save[key] = Math.floor(amount);
+        else save[key] = Math.floor(Number(save[key] || 0) + amount);
+      });
+      return save;
+    }
+
+    function devAddCardToSave(save, cardId, amount, maxCard) {
+      save = devNormalizeSaveData(save);
+      const addAmount = Math.max(1, Math.floor(Number(amount || 1)));
+      const targetCards = String(cardId) === "ALL" ? cards : [getCardById(cardId)].filter(Boolean);
+      targetCards.forEach(function(card) {
+        const key = String(card.id);
+        const current = save.owned[key] || { count: 0, level: 1, duplicateRank: 0 };
+        current.count = Math.max(1, Math.floor(Number(current.count || 0) + addAmount));
+        if (maxCard) {
+          current.count = Math.max(current.count, Number(DEV_CONFIG.unlimitedCardStockCount || 999999));
+          current.level = GAME_CONFIG.maxCardLevel;
+          current.duplicateRank = getCardAwakenMax(card.id);
+        } else {
+          current.level = Math.max(1, Math.floor(Number(current.level || 1)));
+          current.duplicateRank = Math.max(0, Math.floor(Number(current.duplicateRank || 0)));
+        }
+        save.owned[key] = current;
+      });
+      return save;
+    }
+
+    function devMaxAllCardsInSave(save, infiniteStock) {
+      save = devNormalizeSaveData(save);
+      cards.forEach(function(card) {
+        const key = String(card.id);
+        const current = save.owned[key] || { count: 0, level: 1, duplicateRank: 0 };
+        current.count = infiniteStock ? Math.max(Number(current.count || 0), Number(DEV_CONFIG.unlimitedCardStockCount || 999999)) : Math.max(1, Number(current.count || 1));
+        current.level = GAME_CONFIG.maxCardLevel;
+        current.duplicateRank = getCardAwakenMax(card.id);
+        save.owned[key] = current;
+      });
+      return save;
+    }
+
+    function devApplySelfUnlimitedPerks() {
+      if (!activeUser || !isDevAccount()) return;
+      state = devNormalizeSaveData(state);
+      // ห้ามบันทึก __devMode เพื่อใช้เป็นสิทธิ์ เพราะสิทธิ์จริงต้องมาจาก Firebase devAdmins/{uid} เท่านั้น
+      if (state.__devMode) delete state.__devMode;
+      const maxValue = Number(DEV_CONFIG.unlimitedResourceValue || 999999999999);
+      state.gems = Math.max(Number(state.gems || 0), maxValue);
+      state.dust = Math.max(Number(state.dust || 0), maxValue);
+      state.piceCrad = Math.max(Number(state.piceCrad || 0), maxValue);
+      state.incomeBank = Math.max(Number(state.incomeBank || 0), maxValue);
+      if (DEV_CONFIG.autoSyncSelfFullMax !== false) devMaxAllCardsInSave(state, true);
+    }
+
+    function devActivateSelfMax() {
+      if (!requireLogin()) return;
+      if (!isDevAccount(activeUser)) { showToast("ต้องล็อกอินด้วยไอดี DEV/Admin ที่ UID ถูกเพิ่มไว้ใน Firebase devAdmins ก่อน"); return; }
+      devApplySelfUnlimitedPerks();
+      save(true);
+      renderAll();
+      showToast("เปิดพลัง DEV/Admin ให้ไอดีนี้แล้ว");
+    }
+
+    function devGiveSelfInfiniteStock() {
+      if (!requireLogin()) return;
+      if (!isDevAccount()) { showToast("เฉพาะ UID ที่ถูกตั้งใน Firebase devAdmins เท่านั้น"); return; }
+      devMaxAllCardsInSave(state, true);
+      save(true);
+      renderAll();
+      showToast("เติม Stock การ์ด DEV/Admin แบบไร้ขีดจำกัดแล้ว");
+    }
+
+    async function devRequireCloudAdmin() {
+      if (!requireLogin()) return false;
+      const ok = await initCloudServices();
+      if (!ok || !cloudReady) { devSetStatus("Firebase ยังไม่พร้อม จึงแก้ข้อมูลทั้งเซิร์ฟไม่ได้", "bad"); return false; }
+      if (!isDevAccount()) await refreshDevAdminStatus();
+      if (!isDevAccount()) { showToast("เฉพาะ UID ที่ถูกตั้งใน Firebase devAdmins เท่านั้น"); return false; }
+      return true;
+    }
+
+    function devGetSelectedPlayer() {
+      const select = document.getElementById("devPlayerSelect");
+      const uid = select ? select.value : "";
+      return devCloudPlayersCache.find(function(player) { return player.uid === uid; }) || null;
+    }
+
+    async function devRefreshCloudPlayers() {
+      if (!(await devRequireCloudAdmin())) return;
+      try {
+        const snap = await cloudModules.get(cloudModules.ref(cloudDb, "users"));
+        const list = [];
+        if (snap.exists()) {
+          const val = snap.val() || {};
+          Object.keys(val).forEach(function(uid) {
+            const entry = val[uid] || {};
+            list.push({ uid: uid, username: entry.username || uid, data: entry });
+          });
+        }
+        list.sort(function(a, b) { return String(a.username).localeCompare(String(b.username)); });
+        devCloudPlayersCache = list;
+        renderDevPanel();
+        devSetStatus("โหลดผู้เล่นจาก Firebase สำเร็จ: " + list.length + " ไอดี", "ok");
+      } catch (error) {
+        console.error("DEV load players error:", error);
+        devSetStatus("อ่านรายชื่อผู้เล่นไม่ได้: ต้องปรับ Firebase Rules ให้ DEV อ่าน/เขียน users ได้", "bad");
+      }
+    }
+
+    async function devUpdateCloudPlayer(uid, updater, label) {
+      if (!uid || typeof updater !== "function") return false;
+      const rootRef = cloudModules.ref(cloudDb, "users/" + uid);
+      const snap = await cloudModules.get(rootRef);
+      const entry = snap.exists() ? (snap.val() || {}) : {};
+      const saveData = updater(devNormalizeSaveData(entry.save));
+      const payload = { save: saveData, updatedAt: Date.now(), updatedAtText: new Date().toLocaleString(), devLastAction: label || "DEV_UPDATE", devLastActionBy: activeUser || "DEV" };
+      if (!entry.username) payload.username = uid;
+      await cloudModules.update(rootRef, payload);
+      return true;
+    }
+
+    async function devForEachCloudPlayer(updater, label) {
+      if (!(await devRequireCloudAdmin())) return;
+      try {
+        if (!devCloudPlayersCache.length) await devRefreshCloudPlayers();
+        let success = 0;
+        for (const player of devCloudPlayersCache) { await devUpdateCloudPlayer(player.uid, updater, label); success += 1; }
+        await cloudModules.push(cloudModules.ref(cloudDb, String(DEV_CONFIG.cloudAuditPath || "devLogs")), { action: label || "DEV_ACTION", by: activeUser || "DEV", count: success, at: Date.now(), atText: new Date().toLocaleString() }).catch(function(){});
+        devSetStatus("ทำรายการ " + (label || "DEV") + " สำเร็จ " + success + " ไอดี", "ok");
+        showToast("ทำรายการทั้งเซิร์ฟสำเร็จ " + success + " ไอดี");
+        await devRefreshCloudPlayers();
+      } catch (error) {
+        console.error("DEV all players update error:", error);
+        devSetStatus("ทำรายการทั้งเซิร์ฟไม่สำเร็จ: " + (error && error.message ? error.message : "error"), "bad");
+      }
+    }
+
+    async function devUpdateSelectedPlayer(updater, label) {
+      if (!(await devRequireCloudAdmin())) return;
+      const player = devGetSelectedPlayer();
+      if (!player) { showToast("กรุณาเลือกผู้เล่นก่อน"); return; }
+      try {
+        await devUpdateCloudPlayer(player.uid, updater, label);
+        devSetStatus("แก้ข้อมูล " + player.username + " สำเร็จ: " + label, "ok");
+        showToast("แก้ข้อมูล " + player.username + " สำเร็จ");
+        await devRefreshCloudPlayers();
+      } catch (error) {
+        console.error("DEV selected update error:", error);
+        devSetStatus("แก้ข้อมูลผู้เล่นไม่สำเร็จ: " + (error && error.message ? error.message : "error"), "bad");
+      }
+    }
+
+    function devGetResourceInputs() { return { gems: devReadNumber("devGiveGems", DEV_CONFIG.defaultGiveGems), dust: devReadNumber("devGiveDust", DEV_CONFIG.defaultGiveDust), piceCrad: devReadNumber("devGivePiceCrad", DEV_CONFIG.defaultGivePiceCrad) }; }
+    function devGetCardInput() { const select = document.getElementById("devCardSelect"); return select ? select.value : "ALL"; }
+    function devGetItemInputs() { const idInput = document.getElementById("devItemId"); return { itemId: idInput ? idInput.value.trim() : "", amount: devReadNumber("devGiveCardAmount", 1) }; }
+
+    function devSetResourcesForSelected() { const values = devGetResourceInputs(); devUpdateSelectedPlayer(function(save) { return devApplyResourcesToSave(save, "set", values); }, "SET_RESOURCES"); }
+    function devGiftResourcesToAll() { const values = devGetResourceInputs(); if (!confirm("ยืนยันแจกทรัพยากรให้ผู้เล่นทั้งเซิร์ฟ?")) return; devForEachCloudPlayer(function(save) { return devApplyResourcesToSave(save, "add", values); }, "GIFT_RESOURCES_ALL"); }
+    function devGiftCardToSelected() { const cardId = devGetCardInput(); const amount = devReadNumber("devGiveCardAmount", DEV_CONFIG.defaultGiveCardAmount); devUpdateSelectedPlayer(function(save) { return devAddCardToSave(save, cardId, amount, false); }, "GIFT_CARD"); }
+    function devGiftCardToAll() { const cardId = devGetCardInput(); const amount = devReadNumber("devGiveCardAmount", DEV_CONFIG.defaultGiveCardAmount); if (!confirm("ยืนยันแจกการ์ดให้ผู้เล่นทั้งเซิร์ฟ?")) return; devForEachCloudPlayer(function(save) { return devAddCardToSave(save, cardId, amount, false); }, "GIFT_CARD_ALL"); }
+    function devGiftItemToSelected() { const item = devGetItemInputs(); if (!item.itemId) { showToast("กรุณาใส่ Item ID ก่อน"); return; } devUpdateSelectedPlayer(function(save) { save = devNormalizeSaveData(save); save.items[item.itemId] = Math.floor(Number(save.items[item.itemId] || 0) + item.amount); return save; }, "GIFT_ITEM"); }
+    function devGiftItemToAll() { const item = devGetItemInputs(); if (!item.itemId) { showToast("กรุณาใส่ Item ID ก่อน"); return; } if (!confirm("ยืนยันแจก Item ให้ผู้เล่นทั้งเซิร์ฟ?")) return; devForEachCloudPlayer(function(save) { save = devNormalizeSaveData(save); save.items[item.itemId] = Math.floor(Number(save.items[item.itemId] || 0) + item.amount); return save; }, "GIFT_ITEM_ALL"); }
+    function devMaxCardsForSelected() { devUpdateSelectedPlayer(function(save) { return devMaxAllCardsInSave(save, false); }, "MAX_CARDS_SELECTED"); }
+    function devMaxCardsForAll() { if (!confirm("ยืนยันทำการ์ดทุกใบของผู้เล่นทั้งเซิร์ฟเป็น Lv.MAX + Awaken MAX?")) return; devForEachCloudPlayer(function(save) { return devMaxAllCardsInSave(save, false); }, "MAX_CARDS_ALL"); }
+
+    function renderDevPanel() {
+      const panel = document.getElementById("devPanel");
+      if (!panel) return;
+      const canDev = !!(activeUser && isDevAccount());
+      panel.classList.toggle("hidden", !canDev);
+      if (!canDev) return;
+      const gemsInput = document.getElementById("devGiveGems");
+      const dustInput = document.getElementById("devGiveDust");
+      const piceInput = document.getElementById("devGivePiceCrad");
+      const cardAmountInput = document.getElementById("devGiveCardAmount");
+      if (gemsInput && !gemsInput.value) gemsInput.value = DEV_CONFIG.defaultGiveGems;
+      if (dustInput && !dustInput.value) dustInput.value = DEV_CONFIG.defaultGiveDust;
+      if (piceInput && !piceInput.value) piceInput.value = DEV_CONFIG.defaultGivePiceCrad;
+      if (cardAmountInput && !cardAmountInput.value) cardAmountInput.value = DEV_CONFIG.defaultGiveCardAmount;
+      const cardSelect = document.getElementById("devCardSelect");
+      if (cardSelect) {
+        const current = cardSelect.value || "ALL";
+        cardSelect.innerHTML = '<option value="ALL">การ์ดทั้งหมด</option>' + cards.map(function(card) {
+          return '<option value="' + escapeHTML(card.id) + '">#' + escapeHTML(card.id) + ' • ' + escapeHTML(card.rarity) + ' • ' + escapeHTML(card.name) + '</option>';
+        }).join("");
+        cardSelect.value = current === "ALL" || getCardById(current) ? current : "ALL";
+      }
+      const playerSelect = document.getElementById("devPlayerSelect");
+      if (playerSelect) {
+        const currentPlayer = playerSelect.value;
+        playerSelect.innerHTML = devCloudPlayersCache.length ? devCloudPlayersCache.map(function(player) {
+          return '<option value="' + escapeHTML(player.uid) + '">' + escapeHTML(player.username) + ' • ' + escapeHTML(player.uid.slice(0, 8)) + '</option>';
+        }).join("") : '<option value="">ยังไม่ได้โหลดรายชื่อผู้เล่น</option>';
+        if (currentPlayer && devCloudPlayersCache.some(function(player) { return player.uid === currentPlayer; })) playerSelect.value = currentPlayer;
+      }
+    }
+
     function flushLocalSaveNow() {
       if (window.__gachaPendingLocalSave) save(true);
     }
@@ -4213,6 +4575,8 @@
           mirrorCloudAccountToLocal(username, activeCloudUid, state);
           SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
           document.getElementById("pullResult").innerHTML = "";
+          await refreshDevAdminStatus();
+          if (isDevAccount()) devApplySelfUnlimitedPerks();
           renderAll();
           activateGlobalOnlineForCurrentUser();
           openGameAnnouncement();
@@ -4253,6 +4617,8 @@
 
       activeUser = username;
       activeCloudUid = "";
+      devAdminAuthorized = false;
+      devAdminCheckedUid = "";
       SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
       state = accounts[username].save;
       document.getElementById("pullResult").innerHTML = "";
@@ -4295,6 +4661,8 @@
           mirrorCloudAccountToLocal(username, activeCloudUid, state);
           SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
           document.getElementById("pullResult").innerHTML = "";
+          await refreshDevAdminStatus();
+          if (isDevAccount()) devApplySelfUnlimitedPerks();
           renderAll();
           activateGlobalOnlineForCurrentUser();
           openGameAnnouncement();
@@ -4339,7 +4707,9 @@
       }
 
       activeUser = username;
-      activeCloudUid = account.cloudUid || "";
+      activeCloudUid = "";
+      devAdminAuthorized = false;
+      devAdminCheckedUid = "";
       SAFE_LOCAL_STORAGE.setItem(ACTIVE_USER_KEY, activeUser);
       state = loadUserSave(activeUser);
       document.getElementById("pullResult").innerHTML = "";
@@ -4356,6 +4726,8 @@
       }
       activeUser = "";
       activeCloudUid = "";
+      devAdminAuthorized = false;
+      devAdminCheckedUid = "";
       SAFE_LOCAL_STORAGE.removeItem(ACTIVE_USER_KEY);
       state = defaultState();
       document.getElementById("pullResult").innerHTML = "";
@@ -5238,6 +5610,10 @@
         if (!state.owned[id].count) state.owned[id].count = 1;
         if (typeof state.owned[id].duplicateRank !== "number") state.owned[id].duplicateRank = 0;
       });
+
+      if (activeUser && typeof isDevAccount === "function" && isDevAccount() && DEV_CONFIG.autoSyncSelfFullMax !== false) {
+        devApplySelfUnlimitedPerks();
+      }
     }
 
     function updateIncomeBank() {
@@ -6290,6 +6666,7 @@
       renderMainTabs();
       renderAutoStatus();
       renderOnlineTransferPanel();
+      renderDevPanel();
       save();
     }
 
@@ -6439,7 +6816,7 @@
       const accounts = loadAccounts();
       const names = Object.keys(accounts);
       document.getElementById("currentUserText").textContent = activeUser
-        ? "กำลังเล่นไอดี: " + activeUser + (activeCloudUid ? " ☁️ Cloud" : " 🔐 Local")
+        ? "กำลังเล่นไอดี: " + activeUser + (activeCloudUid ? " ☁️ Cloud" : " 🔐 Local") + (isDevAccount() ? " 🟥 DEV" : "")
         : "ยังไม่ได้ล็อกอิน";
       document.getElementById("userListText").textContent = names.length ? names.map(function(name) {
         const account = normalizeAccountEntry(accounts[name]);
@@ -9162,6 +9539,41 @@ function closeCardModal() {
       try { closeOnlinePeer(); } catch (error) {}
       flushCloudSave();
     });
+
+    /*
+    ======================================================================
+    🟥 ตัวอย่าง Firebase Realtime Database Rules สำหรับ DEV Panel
+    ======================================================================
+    1) สมัคร/ล็อกอินด้วยไอดี DEV หรือ Admin ที่คุณสร้างไว้ แล้วดู UID ใน Firebase Authentication
+    2) นำ UID นั้นไปใส่ที่ devAdmins/{UID}: true
+    3) ใช้ rules แนวนี้ เพื่อให้ผู้เล่นอ่าน/เขียนได้เฉพาะเซฟตัวเอง แต่ DEV อ่าน/เขียน users ได้ทั้งเซิร์ฟ
+
+    {
+      "rules": {
+        "devAdmins": {
+          ".read": "auth != null && root.child('devAdmins').child(auth.uid).val() === true",
+          ".write": "auth != null && root.child('devAdmins').child(auth.uid).val() === true"
+        },
+        "users": {
+          ".read": "auth != null && root.child('devAdmins').child(auth.uid).val() === true",
+          ".write": "auth != null && root.child('devAdmins').child(auth.uid).val() === true",
+          "$uid": {
+            ".read": "auth != null && (auth.uid === $uid || root.child('devAdmins').child(auth.uid).val() === true)",
+            ".write": "auth != null && (auth.uid === $uid || root.child('devAdmins').child(auth.uid).val() === true)"
+          }
+        },
+        "onlineRooms": {
+          "$room": { ".read": "auth != null", ".write": "auth != null" }
+        },
+        "devLogs": {
+          ".read": "auth != null && root.child('devAdmins').child(auth.uid).val() === true",
+          ".write": "auth != null && root.child('devAdmins').child(auth.uid).val() === true"
+        }
+      }
+    }
+    ======================================================================
+    */
+
   </script>
 </body>
 </html>
