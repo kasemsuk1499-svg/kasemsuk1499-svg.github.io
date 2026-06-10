@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="gacha-app-build" content="2026-06-06-local-media-friend-assist-id0-fixed-v2" />
+  <meta name="gacha-app-build" content="2026-06-10-performance-lite-v3" />
   <title>Gacha Card Collection - Firebase Cloud Login Ready</title>
   <script defer src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -2464,6 +2464,23 @@
       }
     }
 
+    /* PERFORMANCE LITE EXTRA / ลดงาน GPU-CPU เพิ่มเติม */
+    html.performance-lite .banner-slide-img {
+      transition: none !important;
+      transform: none !important;
+      will-change: auto !important;
+    }
+    html.performance-lite .glass {
+      backdrop-filter: none !important;
+    }
+    html.performance-lite .card-media-video {
+      display: none !important;
+    }
+    html.performance-lite .banner-slide-media,
+    html.performance-lite img {
+      image-rendering: auto;
+    }
+
   </style>
 </head>
 <body>
@@ -3046,9 +3063,9 @@
       tenPullCost: 450000,
       dailyGems: 300000,
       showcaseSlots: 5,
-      collectionCardsPerPage: 18, // ลดจำนวนการ์ดต่อหน้าเล็กน้อย ช่วยให้มือถือ/เครื่องช้าลื่นขึ้น
-      tradeDuplicateItemsPerPage: 6,
-      tradeShopItemsPerPage: 6,
+      collectionCardsPerPage: 12, // PERFORMANCE: ลดจำนวนการ์ดต่อหน้า ช่วยให้มือถือ/เครื่องช้าลื่นขึ้น
+      tradeDuplicateItemsPerPage: 4, // PERFORMANCE: ลดรายการที่วาดพร้อมกัน
+      tradeShopItemsPerPage: 4, // PERFORMANCE: ลดรายการที่วาดพร้อมกัน
       tradeStockMonthlyReset: true, // true = รี Stock ร้านเทรดอัตโนมัติทุกเดือน
       tradeStockResetDay: 1,        // วันที่รี Stock: 1 = วันที่ 1 ของทุกเดือน
       maxCardLevel: 150,
@@ -3064,19 +3081,19 @@
       duplicateIncomeBonusPerRank: 0.12,
       autoGachaDelayMs: 2000,
       autoGachaPullAmount: 5,
-      bannerSlideDelayMs: 10000,
+      bannerSlideDelayMs: 15000, // PERFORMANCE: ลดความถี่สไลด์แบนเนอร์
       runDeveloperTests: false, // ปิด developer tests ตอนเล่นจริง เพื่อลดงานตอนโหลดหน้าเว็บ
 
       // 🟧 Real-time GitHub Pages Update / เช็กไฟล์บน GitHub Pages แล้วรีโหลดให้ผู้เล่นอัตโนมัติ
       // เวลาอัปเดตโค้ดขึ้น GitHub ให้เปลี่ยนเลข build นี้ด้วย ผู้เล่นที่เปิดเกมค้างไว้จะดึงเวอร์ชันใหม่เอง
-      appBuildId: "2026-06-06-local-media-friend-assist-id0-fixed-v2",
+      appBuildId: "2026-06-10-performance-lite-v3",
       githubAutoUpdateEnabled: true,
-      githubAutoUpdateCheckMs: 15000,
+      githubAutoUpdateCheckMs: 60000, // PERFORMANCE: เช็กอัปเดตทุก 60 วิแทน 15 วิ
       githubAutoUpdateMode: "reload", // "reload" = รีโหลดอัตโนมัติ, "notify" = แจ้งเตือนให้กดเอง
 
       // 🟨 Background Auto Gacha / ชดเชยรอบกาชาเมื่อเปลี่ยนแท็บหรือเบราว์เซอร์หน่วง timer
       autoGachaCatchUpEnabled: true,
-      autoGachaMaxCatchUpRounds: 60, // กันเครื่องค้าง ถ้าทิ้งแท็บไว้นานมาก จะชดเชยสูงสุดครั้งละกี่รอบ
+      autoGachaMaxCatchUpRounds: 20, // PERFORMANCE: กันเครื่องค้าง ถ้าทิ้งแท็บไว้นานมาก จะชดเชยสูงสุดครั้งละกี่รอบ
 
       // 🟦 Cloud Save: true = พยายามใช้ Firebase เป็นฐานข้อมูลกลาง, false = ใช้ localStorage อย่างเดียว
       cloudSaveEnabled: true
@@ -3155,12 +3172,17 @@
     // ==============================
     const PERFORMANCE_CONFIG = {
       // บันทึกเซฟแบบหน่วง ไม่เขียน localStorage/Firebase ถี่เกินไป
-      localSaveDebounceMs: 1200,
-      incomeAutoSaveMs: 15000,
+      localSaveDebounceMs: 2500,
+      incomeAutoSaveMs: 30000,
+      incomeRenderIntervalMs: 2000,
 
       // ลดเอฟเฟกต์หนักอัตโนมัติบนมือถือ/จอเล็ก หรือเมื่อผู้ใช้ตั้ง reduced motion
       autoLiteEffectsOnMobile: true,
-      mobileMaxWidth: 768
+      mobileMaxWidth: 768,
+
+      // true = เปิดโหมดลื่นเป็นค่าเริ่มต้น เพื่อลดแล็คจากเอฟเฟกต์/วิดีโอจำนวนมาก
+      forceLiteEffects: true,
+      disableCardVideosInLite: true
     };
 
     // ======================================================================
@@ -7649,6 +7671,15 @@
       return '<div class="absolute inset-0 flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
     }
 
+
+    function isPerformanceLiteMode() {
+      try {
+        return document.documentElement.classList.contains("performance-lite");
+      } catch (error) {
+        return false;
+      }
+    }
+
     function makeCardMediaHTML(cardOrItem, options) {
       options = options || {};
       const hidden = !!options.hidden;
@@ -7685,6 +7716,10 @@
       root = root || document;
       const videos = root.querySelectorAll ? root.querySelectorAll("video[data-card-video]") : [];
       videos.forEach(function(video) {
+        if (PERFORMANCE_CONFIG.disableCardVideosInLite !== false && isPerformanceLiteMode()) {
+          video.pause();
+          return;
+        }
         if (window.__cardVideoObserver) {
           window.__cardVideoObserver.observe(video);
         } else {
@@ -7701,7 +7736,9 @@
           entries.forEach(function(entry) {
             const video = entry.target;
             if (!video) return;
-            if (entry.isIntersecting && entry.intersectionRatio > 0.25 && document.visibilityState === "visible") {
+            if (PERFORMANCE_CONFIG.disableCardVideosInLite !== false && isPerformanceLiteMode()) {
+              video.pause();
+            } else if (entry.isIntersecting && entry.intersectionRatio > 0.25 && document.visibilityState === "visible") {
               const playPromise = video.play();
               if (playPromise && playPromise.catch) playPromise.catch(function(){});
             } else {
@@ -9488,6 +9525,15 @@ function closeCardModal() {
       }
     }
 
+
+    function checkGithubPageUpdateThrottled() {
+      const now = Date.now();
+      const minGap = Math.max(15000, Number(GAME_CONFIG.githubAutoUpdateCheckMs || 60000));
+      if (window.__lastGithubManualCheckAt && now - window.__lastGithubManualCheckAt < minGap) return;
+      window.__lastGithubManualCheckAt = now;
+      checkGithubPageUpdate();
+    }
+
     function initGithubAutoUpdateChecker() {
       if (!GAME_CONFIG.githubAutoUpdateEnabled) return;
       if (!/^https?:$/i.test(window.location.protocol)) return;
@@ -9501,7 +9547,8 @@ function closeCardModal() {
       try {
         const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const mobileLite = PERFORMANCE_CONFIG.autoLiteEffectsOnMobile !== false && window.innerWidth <= Number(PERFORMANCE_CONFIG.mobileMaxWidth || 768);
-        document.documentElement.classList.toggle("performance-lite", !!(reduceMotion || mobileLite));
+        const forceLite = PERFORMANCE_CONFIG.forceLiteEffects !== false;
+        document.documentElement.classList.toggle("performance-lite", !!(forceLite || reduceMotion || mobileLite));
       } catch (error) {}
     }
 
@@ -9516,11 +9563,11 @@ function closeCardModal() {
     setTimeout(openGameAnnouncement, 250);
     initCloudServices();
     initGithubAutoUpdateChecker();
-    setInterval(renderIncomeOnly, 1000);
+    setInterval(renderIncomeOnly, Math.max(1000, Number(PERFORMANCE_CONFIG.incomeRenderIntervalMs || 2000)));
     document.addEventListener("visibilitychange", function() {
       if (!document.hidden) {
         processAutoGachaTick(false);
-        checkGithubPageUpdate();
+        checkGithubPageUpdateThrottled();
       } else {
         processAutoGachaTick(false);
       }
@@ -9528,7 +9575,7 @@ function closeCardModal() {
     });
     window.addEventListener("focus", function() {
       processAutoGachaTick(false);
-      checkGithubPageUpdate();
+      checkGithubPageUpdateThrottled();
     });
     window.addEventListener("beforeunload", function() {
       stopBannerSlideshow();
