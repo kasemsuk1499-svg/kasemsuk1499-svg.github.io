@@ -7534,12 +7534,13 @@
       return html;
     }
 
-    function cardHTML(card, revealed, duplicate, count, clickable) {
+    function cardHTML(card, revealed, duplicate, count, clickable, renderOptions) {
+      renderOptions = renderOptions || {};
       const info = rarityInfo[card.rarity] || Object.values(rarityInfo)[0];
       const hidden = !revealed;
       const special = !!info.special;
       const safeIcon = escapeHTML(card.icon || card.name.charAt(0));
-      const imagePart = makeImagePart(card, hidden, "text-5xl", "absolute inset-0");
+      const imagePart = makeImagePart(card, hidden, "text-5xl", "absolute inset-0", renderOptions);
       const clickAttr = clickable && revealed ? 'onclick="openCardModal(' + card.id + ')" title="กดเพื่อดูรายละเอียดการ์ด"' : "";
       const duplicateText = duplicate ? '<span class="text-[10px] rounded-full bg-amber-300 text-slate-950 px-2 py-1 font-black">DUP</span>' : '';
       const countText = count > 1 ? '<span class="text-[10px] rounded-full bg-white/25 px-2 py-1 font-black">x' + count + '</span>' : '';
@@ -7657,6 +7658,9 @@
       enabled: true,
       usePosterAsMainInLiteMode: true,
       forcePosterAsMainForRarities: ["SC", "EX"],
+      // เมื่อกดแสดงการ์ดเต็ม ให้โหลด video มาแสดงแทน poster
+      useVideoWhenCardRevealOpened: true,
+      revealVideoRarities: ["SC", "EX"],
       fallbackToPosterOnImageError: true,
       fallbackToPosterOnVideoError: true
     };
@@ -7686,6 +7690,19 @@
       if (forced) return true;
       if (CARD_POSTER_SYSTEM_CONFIG.usePosterAsMainInLiteMode && isCardVideoMedia(cardOrItem, mediaUrl) && isPerformanceLiteMode()) return true;
       return false;
+    }
+
+    function shouldUseVideoForReveal(cardOrItem, options) {
+      if (!cardOrItem || !options) return false;
+      if (!cardOrItem.video) return false;
+      if (options.forceVideo === true) return true;
+      if (!options.reveal) return false;
+      if (!CARD_POSTER_SYSTEM_CONFIG || CARD_POSTER_SYSTEM_CONFIG.useVideoWhenCardRevealOpened === false) return false;
+      const rarity = String(cardOrItem.rarity || "").toUpperCase();
+      const list = Array.isArray(CARD_POSTER_SYSTEM_CONFIG.revealVideoRarities)
+        ? CARD_POSTER_SYSTEM_CONFIG.revealVideoRarities.map(function(v) { return String(v).toUpperCase(); })
+        : [];
+      return !list.length || list.includes(rarity);
     }
 
     function posterImageHTML(cardOrItem, posterUrl, name, positionClass, extraClass, eager, safeIcon, textSizeClass) {
@@ -7727,6 +7744,7 @@
       }
       const mediaUrl = getCardMediaUrl(cardOrItem);
       const posterUrl = getCardPosterUrl(cardOrItem);
+      const forceVideoForReveal = shouldUseVideoForReveal(cardOrItem, options);
       if (!mediaUrl && posterUrl) return posterImageHTML(cardOrItem, posterUrl, name, positionClass, extraClass, eager, safeIcon, textSizeClass);
       if (!mediaUrl) return '<div class="' + positionClass + ' flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
       const fallback = escapeAttr(fallbackMediaHTML(safeIcon, textSizeClass));
@@ -7734,7 +7752,7 @@
         ? escapeAttr(posterImageHTML(cardOrItem, posterUrl, name, positionClass, extraClass, eager, safeIcon, textSizeClass))
         : fallback;
 
-      if (shouldUsePosterAsMain(cardOrItem, mediaUrl)) {
+      if (!forceVideoForReveal && shouldUsePosterAsMain(cardOrItem, mediaUrl)) {
         return posterImageHTML(cardOrItem, posterUrl, name, positionClass, extraClass, eager, safeIcon, textSizeClass);
       }
 
@@ -7749,12 +7767,13 @@
       return '<img src="' + escapeAttr(mediaUrl) + '" loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async" class="' + escapeAttr(positionClass + ' ' + extraClass) + '" alt="' + escapeAttr(name) + '" onerror="' + imageErrorAction + '" />';
     }
 
-    function makeImagePart(card, hidden, textSizeClass, positionClass) {
-      return makeCardMediaHTML(card, { hidden: hidden, textSizeClass: textSizeClass, positionClass: positionClass, extraClass: "card-art-crop", eager: false });
+    function makeImagePart(card, hidden, textSizeClass, positionClass, options) {
+      options = options || {};
+      return makeCardMediaHTML(card, { hidden: hidden, textSizeClass: textSizeClass, positionClass: positionClass, extraClass: "card-art-crop", eager: !!options.eager, reveal: !!options.reveal, forceVideo: !!options.forceVideo });
     }
 
     function makeModalImagePart(card, textSizeClass) {
-      return makeCardMediaHTML(card, { hidden: false, textSizeClass: textSizeClass, positionClass: "absolute inset-0", extraClass: "card-art-crop z-0", eager: true });
+      return makeCardMediaHTML(card, { hidden: false, textSizeClass: textSizeClass, positionClass: "absolute inset-0", extraClass: "card-art-crop z-0", eager: true, reveal: true, forceVideo: true });
     }
 
 
@@ -7763,7 +7782,8 @@
       root = root || document;
       const videos = root.querySelectorAll ? root.querySelectorAll("video[data-card-video]") : [];
       videos.forEach(function(video) {
-        if (PERFORMANCE_CONFIG.disableCardVideosInLite !== false && isPerformanceLiteMode()) {
+        const isRevealVideo = video.getAttribute("data-card-reveal-video") === "1";
+        if (!isRevealVideo && PERFORMANCE_CONFIG.disableCardVideosInLite !== false && isPerformanceLiteMode()) {
           video.pause();
           return;
         }
@@ -7783,7 +7803,8 @@
           entries.forEach(function(entry) {
             const video = entry.target;
             if (!video) return;
-            if (PERFORMANCE_CONFIG.disableCardVideosInLite !== false && isPerformanceLiteMode()) {
+            const isRevealVideo = video.getAttribute("data-card-reveal-video") === "1";
+            if (!isRevealVideo && PERFORMANCE_CONFIG.disableCardVideosInLite !== false && isPerformanceLiteMode()) {
               video.pause();
             } else if (entry.isIntersecting && entry.intersectionRatio > 0.25 && document.visibilityState === "visible") {
               const playPromise = video.play();
@@ -8018,7 +8039,7 @@
 
       return '<div class="online-friend-reveal-card luxury-card-reveal py-4 ' + (isLuxuryFullMax ? 'luxury-full-max-reveal ' : '') + (isEXFullArtReveal ? 'ex-full-art-reveal' : 'normal-readable-detail-reveal normal-rarity-color-reveal') + '"' + (normalRevealStyle ? ' style="' + normalRevealStyle + '"' : '') + '>' +
         '<div class="reveal-rarity-aura normal-rarity-reveal-aura bg-gradient-to-br ' + info.color + '"></div>' +
-        '<div class="classic-card-reveal-wrap luxury-card-reveal-wrap">' + cardHTML(card, true, false, count, false) + '</div>' +
+        '<div class="classic-card-reveal-wrap luxury-card-reveal-wrap">' + cardHTML(card, true, false, count, false, { reveal: true, forceVideo: true, eager: true }) + '</div>' +
         actionButtons +
         metaHTML +
       '</div>';
@@ -8439,7 +8460,9 @@ function closeCardModal() {
         textSizeClass: "text-5xl",
         positionClass: "absolute inset-0",
         extraClass: "friend-reveal-image card-art-crop",
-        eager: true
+        eager: true,
+        reveal: true,
+        forceVideo: true
       });
       const ownerText = escapeHTML(player.nickname || "เพื่อน");
       const level = Number(item.level || 1);
