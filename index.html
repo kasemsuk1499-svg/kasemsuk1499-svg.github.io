@@ -6987,7 +6987,8 @@
       const rarity = card && card.rarity ? String(card.rarity) : String(tier || "");
       const localMedia = pickRevealMediaFromMap(imageMap, tier, rarity);
       const bannerMedia = getActiveBannerRevealMediaUrl(card, tier, cfg);
-      const mediaUrl = bannerMedia || (localMedia ? resolveLocalAssetPath(localMedia, "banner") : "");
+      const cardPosterMedia = getCardPosterUrl(card);
+      const mediaUrl = bannerMedia || (localMedia ? resolveLocalAssetPath(localMedia, "banner") : "") || cardPosterMedia;
       const isVideo = isVideoFileName(mediaUrl);
       const label = tier === "JJK" || tier === "SPECIAL" ? (getRarityLabel(card.rarity) || "JJK") : (getRarityLabel(tier) || tier);
       gachaRareRevealSkipRequested = false;
@@ -7648,16 +7649,48 @@
       return /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(String(value || "").trim());
     }
 
+    // CARD POSTER SYSTEM / ระบบ Poster ของการ์ด
+    // - ถ้ามี video ระบบยังรองรับวิดีโอเหมือนเดิม
+    // - ถ้าเปิดโหมดลื่น หรือวิดีโอโหลดไม่ได้ จะใช้ poster/image เป็นรูปแทนทันที
+    // - ระดับ SC/EX จะบังคับใช้ poster เป็นภาพหลัก เพื่อลดปัญหารูปไม่ขึ้นจากไฟล์ .mp4 ที่ยังไม่ได้อัปโหลด
+    const CARD_POSTER_SYSTEM_CONFIG = {
+      enabled: true,
+      usePosterAsMainInLiteMode: true,
+      forcePosterAsMainForRarities: ["SC", "EX"],
+      fallbackToPosterOnImageError: true,
+      fallbackToPosterOnVideoError: true
+    };
+
     function getCardMediaUrl(cardOrItem) {
       if (!cardOrItem) return "";
-      const raw = String(cardOrItem.video || cardOrItem.media || cardOrItem.mediaUrl || cardOrItem.image || cardOrItem.src || "").trim();
+      const raw = String(cardOrItem.video || cardOrItem.media || cardOrItem.mediaUrl || cardOrItem.image || cardOrItem.poster || cardOrItem.src || "").trim();
       const kind = (cardOrItem.video || isVideoFileName(raw)) ? "cardVideo" : "cardImage";
       return resolveLocalAssetPath(raw, kind);
     }
 
     function getCardPosterUrl(cardOrItem) {
       if (!cardOrItem) return "";
-      return resolveLocalAssetPath(cardOrItem.poster || cardOrItem.imagePoster || cardOrItem.thumbnail || cardOrItem.image || "", "cardImage");
+      const rawPoster = String(cardOrItem.poster || cardOrItem.imagePoster || cardOrItem.thumbnail || cardOrItem.image || cardOrItem.src || "").trim();
+      if (!rawPoster) return "";
+      return resolveLocalAssetPath(rawPoster, "cardImage");
+    }
+
+    function shouldUsePosterAsMain(cardOrItem, mediaUrl) {
+      if (!CARD_POSTER_SYSTEM_CONFIG || CARD_POSTER_SYSTEM_CONFIG.enabled === false) return false;
+      if (!cardOrItem) return false;
+      const posterUrl = getCardPosterUrl(cardOrItem);
+      if (!posterUrl) return false;
+      const rarity = String(cardOrItem.rarity || "").toUpperCase();
+      const forced = Array.isArray(CARD_POSTER_SYSTEM_CONFIG.forcePosterAsMainForRarities)
+        && CARD_POSTER_SYSTEM_CONFIG.forcePosterAsMainForRarities.map(function(v) { return String(v).toUpperCase(); }).includes(rarity);
+      if (forced) return true;
+      if (CARD_POSTER_SYSTEM_CONFIG.usePosterAsMainInLiteMode && isCardVideoMedia(cardOrItem, mediaUrl) && isPerformanceLiteMode()) return true;
+      return false;
+    }
+
+    function posterImageHTML(cardOrItem, posterUrl, name, positionClass, extraClass, eager, safeIcon, textSizeClass) {
+      const fallback = escapeAttr(fallbackMediaHTML(safeIcon, textSizeClass));
+      return '<img src="' + escapeAttr(posterUrl) + '" loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async" class="' + escapeAttr(positionClass + ' ' + extraClass) + '" alt="' + escapeAttr(name) + '" data-card-poster="1" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'" + fallback + "\');" />';
     }
 
     function isCardVideoMedia(cardOrItem, url) {
@@ -7693,13 +7726,27 @@
         return '<div class="' + positionClass + ' flex items-center justify-center ' + textSizeClass + ' font-black bg-black/20">?</div>';
       }
       const mediaUrl = getCardMediaUrl(cardOrItem);
+      const posterUrl = getCardPosterUrl(cardOrItem);
+      if (!mediaUrl && posterUrl) return posterImageHTML(cardOrItem, posterUrl, name, positionClass, extraClass, eager, safeIcon, textSizeClass);
       if (!mediaUrl) return '<div class="' + positionClass + ' flex items-center justify-center ' + textSizeClass + ' font-black bg-white/10">' + safeIcon + '</div>';
       const fallback = escapeAttr(fallbackMediaHTML(safeIcon, textSizeClass));
-      if (isCardVideoMedia(cardOrItem, mediaUrl)) {
-        const poster = getCardPosterUrl(cardOrItem);
-        return '<video src="' + escapeAttr(mediaUrl) + '" ' + (poster ? 'poster="' + escapeAttr(poster) + '" ' : '') + 'muted loop playsinline preload="' + (eager ? 'metadata' : 'none') + '" data-card-video="1" class="' + escapeAttr(positionClass + ' ' + extraClass + ' card-media-video z-0') + '" aria-label="' + escapeAttr(name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'" + fallback + "\');"></video>';
+      const posterFallback = posterUrl
+        ? escapeAttr(posterImageHTML(cardOrItem, posterUrl, name, positionClass, extraClass, eager, safeIcon, textSizeClass))
+        : fallback;
+
+      if (shouldUsePosterAsMain(cardOrItem, mediaUrl)) {
+        return posterImageHTML(cardOrItem, posterUrl, name, positionClass, extraClass, eager, safeIcon, textSizeClass);
       }
-      return '<img src="' + escapeAttr(mediaUrl) + '" loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async" class="' + escapeAttr(positionClass + ' ' + extraClass) + '" alt="' + escapeAttr(name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'" + fallback + "\');" />';
+
+      if (isCardVideoMedia(cardOrItem, mediaUrl)) {
+        const videoFallback = (CARD_POSTER_SYSTEM_CONFIG && CARD_POSTER_SYSTEM_CONFIG.fallbackToPosterOnVideoError && posterUrl) ? posterFallback : fallback;
+        return '<video src="' + escapeAttr(mediaUrl) + '" ' + (posterUrl ? 'poster="' + escapeAttr(posterUrl) + '" ' : '') + 'muted loop playsinline preload="' + (eager ? 'metadata' : 'none') + '" data-card-video="1" class="' + escapeAttr(positionClass + ' ' + extraClass + ' card-media-video z-0') + '" aria-label="' + escapeAttr(name) + '" onerror="this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'" + videoFallback + "\');"></video>';
+      }
+
+      const imageErrorAction = (CARD_POSTER_SYSTEM_CONFIG && CARD_POSTER_SYSTEM_CONFIG.fallbackToPosterOnImageError && posterUrl && posterUrl !== mediaUrl)
+        ? "this.onerror=null; this.src=\'" + escapeAttr(posterUrl) + "\';"
+        : "this.style.display=\'none\'; this.parentElement.insertAdjacentHTML(\'beforeend\', \'" + fallback + "\');";
+      return '<img src="' + escapeAttr(mediaUrl) + '" loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async" class="' + escapeAttr(positionClass + ' ' + extraClass) + '" alt="' + escapeAttr(name) + '" onerror="' + imageErrorAction + '" />';
     }
 
     function makeImagePart(card, hidden, textSizeClass, positionClass) {
