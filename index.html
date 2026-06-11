@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-social-failsafe-v2">
+  <meta name="gacha-app-build" content="2026-06-12-gacha-battle-fx-v3">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -423,6 +423,42 @@
       transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
 
+    .game-card::before {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      border-radius: inherit;
+      opacity: var(--fx-opacity, 0);
+      pointer-events: none;
+      background: var(--rarity-fx, none);
+      mix-blend-mode: screen;
+    }
+
+    .rarity-n { --fx-opacity: .07; --rarity-fx: radial-gradient(circle at 25% 18%, rgba(203,213,225,.72), transparent 38%); }
+    .rarity-r { --fx-opacity: .12; --rarity-fx: linear-gradient(135deg, transparent 20%, rgba(96,165,250,.75), transparent 76%); }
+    .rarity-sr { --fx-opacity: .17; --rarity-fx: linear-gradient(115deg, transparent 16%, rgba(167,139,250,.82), transparent 48%); }
+    .rarity-ssr { --fx-opacity: .22; --rarity-fx: linear-gradient(115deg, transparent 12%, rgba(255,209,102,.95), transparent 46%); }
+    .rarity-ur { --fx-opacity: .24; --rarity-fx: radial-gradient(circle at 78% 18%, rgba(244,114,182,.9), transparent 34%); }
+    .rarity-lr { --fx-opacity: .25; --rarity-fx: linear-gradient(135deg, rgba(34,211,238,.68), transparent 34%, rgba(139,92,246,.72)); }
+    .rarity-jjkb { --fx-opacity: .22; --rarity-fx: linear-gradient(155deg, transparent 25%, rgba(59,130,246,.9), transparent 62%); }
+    .rarity-jjkc { --fx-opacity: .24; --rarity-fx: radial-gradient(circle at 25% 20%, rgba(239,68,68,.86), transparent 42%); }
+    .rarity-jjks { --fx-opacity: .25; --rarity-fx: linear-gradient(120deg, rgba(250,204,21,.75), transparent 35%, rgba(249,115,22,.72)); }
+    .rarity-ex { --fx-opacity: .28; --rarity-fx: linear-gradient(115deg, #22d3ee, transparent 28%, #f472b6 53%, transparent 72%, #facc15); }
+    .rarity-sc { --fx-opacity: .3; --rarity-fx: conic-gradient(from 180deg, #22d3ee, #a78bfa, #f472b6, #facc15, #22d3ee); }
+
+    .reveal-panel .rarity-sr::before,
+    .reveal-panel .rarity-ssr::before,
+    .reveal-panel .rarity-ur::before,
+    .reveal-panel .rarity-lr::before,
+    .reveal-panel .rarity-jjkb::before,
+    .reveal-panel .rarity-jjkc::before,
+    .reveal-panel .rarity-jjks::before,
+    .reveal-panel .rarity-ex::before,
+    .reveal-panel .rarity-sc::before {
+      animation: rarity-shimmer 2.6s ease-in-out infinite;
+    }
+
     button.game-card:hover { transform: translateY(-5px); border-color: var(--rarity); box-shadow: 0 18px 34px rgba(0,0,0,.36); }
     .game-card.locked { filter: grayscale(.85); opacity: .48; }
     .card-art {
@@ -565,7 +601,10 @@
       align-items: center;
     }
 
-    .fighter { min-width: 0; }
+    .fighter {
+      min-width: 0;
+      transition: filter .25s ease, transform .25s ease;
+    }
     .fighter.enemy { text-align: right; }
     .fighter-label { color: var(--muted); font-size: .7rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
     .fighter h3 { margin: 7px 0 4px; font-size: clamp(1.5rem, 4vw, 2.7rem); line-height: 1; }
@@ -585,6 +624,91 @@
     .power-meter i { display: block; height: 100%; width: 0; border-radius: inherit; }
     .fighter.player .power-meter i { background: linear-gradient(90deg, var(--cyan), var(--violet)); }
     .fighter.enemy .power-meter i { margin-left: auto; background: linear-gradient(90deg, #f97316, var(--danger)); }
+
+    .battle-model-stack {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      min-height: 184px;
+      margin: 8px 0 14px;
+      perspective: 900px;
+      transform-style: preserve-3d;
+      transform-origin: center bottom;
+    }
+
+    .fighter.player .battle-model-stack { justify-content: flex-start; padding-left: 13%; }
+    .fighter.enemy .battle-model-stack { justify-content: flex-end; padding-right: 12%; }
+    .battle-model-card {
+      --model-tilt: 0deg;
+      --model-lift: 0px;
+      position: relative;
+      width: clamp(72px, 8.5vw, 108px);
+      aspect-ratio: 4 / 5;
+      flex: 0 0 auto;
+      overflow: hidden;
+      margin-left: clamp(-48px, -3.9vw, -28px);
+      border: 2px solid var(--rarity, #94a3b8);
+      border-radius: 13px;
+      padding: 0;
+      color: white;
+      background:
+        radial-gradient(circle at 35% 20%, color-mix(in srgb, var(--rarity) 48%, transparent), transparent 45%),
+        #11162b;
+      box-shadow: 0 15px 28px rgba(0,0,0,.42), 0 0 18px color-mix(in srgb, var(--rarity) 24%, transparent);
+      transform: translateY(var(--model-lift)) rotate(var(--model-tilt));
+      transform-origin: center bottom;
+    }
+
+    .battle-model-card:first-child { margin-left: 0; }
+    button.battle-model-card { cursor: pointer; }
+    button.battle-model-card:hover { z-index: 7; transform: translateY(calc(var(--model-lift) - 9px)) rotate(0deg) scale(1.06); }
+    .battle-model-card img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .battle-model-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(4,7,16,.92), transparent 46%);
+      pointer-events: none;
+    }
+
+    .battle-model-card span {
+      position: absolute;
+      z-index: 2;
+      right: 6px;
+      bottom: 6px;
+      left: 6px;
+      overflow: hidden;
+      font-size: .58rem;
+      font-weight: 1000;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .battle-impact {
+      position: absolute;
+      z-index: 4;
+      top: 18%;
+      bottom: 25%;
+      left: 50%;
+      width: 8px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      background: white;
+      box-shadow: 0 0 22px white, 0 0 60px var(--cyan);
+      transform: translateX(-50%) rotate(24deg) scaleY(.2);
+    }
+
+    .battle-arena.player-strike .fighter.player .battle-model-stack { animation: battle-lunge-right .55s cubic-bezier(.2,.8,.25,1); }
+    .battle-arena.player-strike .fighter.enemy .battle-model-stack { animation: battle-hit-right .55s ease .12s; }
+    .battle-arena.enemy-strike .fighter.enemy .battle-model-stack { animation: battle-lunge-left .55s cubic-bezier(.2,.8,.25,1); }
+    .battle-arena.enemy-strike .fighter.player .battle-model-stack { animation: battle-hit-left .55s ease .12s; }
+    .battle-arena.player-strike .battle-impact { animation: battle-slash-cyan .48s ease .08s; }
+    .battle-arena.enemy-strike .battle-impact { animation: battle-slash-red .48s ease .08s; }
+    .battle-arena.battle-win .fighter.player { filter: drop-shadow(0 0 18px rgba(86,227,159,.72)); transform: translateY(-3px); }
+    .battle-arena.battle-lose .fighter.enemy { filter: drop-shadow(0 0 18px rgba(251,113,133,.72)); transform: translateY(-3px); }
 
     .battle-actions {
       position: relative;
@@ -783,9 +907,22 @@
 
     .reveal-list { display: grid; grid-template-columns: repeat(10, minmax(60px, 1fr)); gap: 8px; margin: 18px 0; }
     .reveal-list .game-card { border-radius: 12px; }
+    .reveal-list .game-card.active {
+      border-color: white;
+      box-shadow: 0 0 0 3px var(--rarity), 0 12px 28px rgba(0,0,0,.42);
+      transform: translateY(-5px);
+    }
     .reveal-list .card-body { display: none; }
     .reveal-list .rarity-badge { top: 5px; left: 5px; padding: 3px 5px; font-size: .54rem; }
     .reveal-list .copy-badge { top: auto; bottom: 5px; right: 5px; padding: 3px 5px; font-size: .52rem; }
+    .reveal-counter { color: var(--gold); font-size: .76rem; font-weight: 1000; }
+    .reveal-controls {
+      display: grid;
+      grid-template-columns: auto minmax(180px, 1fr) auto;
+      gap: 8px;
+      width: min(520px, 100%);
+      margin: 0 auto 8px;
+    }
 
     .toast {
       position: fixed;
@@ -830,6 +967,38 @@
     .boot-error-card p { color: #cbd5e1; line-height: 1.6; }
     .boot-error-card code { display: block; margin-top: 10px; color: #fde68a; overflow-wrap: anywhere; }
     @keyframes reveal-in { from { opacity: 0; transform: rotateY(70deg) scale(.82); } to { opacity: 1; transform: none; } }
+    @keyframes rarity-shimmer {
+      0%, 100% { opacity: calc(var(--fx-opacity) * .65); filter: hue-rotate(0deg); }
+      50% { opacity: var(--fx-opacity); filter: hue-rotate(18deg); }
+    }
+    @keyframes battle-lunge-right {
+      0%, 100% { transform: translateX(0) scale(1); }
+      45% { transform: translateX(28%) scale(1.07); }
+    }
+    @keyframes battle-lunge-left {
+      0%, 100% { transform: translateX(0) scale(1); }
+      45% { transform: translateX(-28%) scale(1.07); }
+    }
+    @keyframes battle-hit-right {
+      0%, 100% { transform: translateX(0); filter: none; }
+      42% { transform: translateX(13px) rotate(2deg); filter: brightness(2); }
+      62% { transform: translateX(-7px) rotate(-1deg); }
+    }
+    @keyframes battle-hit-left {
+      0%, 100% { transform: translateX(0); filter: none; }
+      42% { transform: translateX(-13px) rotate(-2deg); filter: brightness(2); }
+      62% { transform: translateX(7px) rotate(1deg); }
+    }
+    @keyframes battle-slash-cyan {
+      0% { opacity: 0; transform: translateX(-50%) rotate(24deg) scaleY(.2); }
+      40% { opacity: 1; transform: translateX(-50%) rotate(24deg) scaleY(1.1); }
+      100% { opacity: 0; transform: translateX(-50%) rotate(24deg) scaleY(.55); }
+    }
+    @keyframes battle-slash-red {
+      0% { opacity: 0; transform: translateX(-50%) rotate(-24deg) scaleY(.2); box-shadow: 0 0 22px white, 0 0 60px var(--danger); }
+      40% { opacity: 1; transform: translateX(-50%) rotate(-24deg) scaleY(1.1); }
+      100% { opacity: 0; transform: translateX(-50%) rotate(-24deg) scaleY(.55); }
+    }
 
     @media (max-width: 1120px) {
       .card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -870,6 +1039,8 @@
       .battle-layout, .friends-columns { grid-template-columns: 1fr; }
       .battle-sides { gap: 12px; }
       .battle-arena { min-height: 390px; padding: 20px 15px; }
+      .battle-model-stack { min-height: 142px; }
+      .battle-model-card { width: clamp(58px, 17vw, 88px); margin-left: -34px; }
       .friends-toolbar { grid-template-columns: 1fr 1fr; }
       .friends-toolbar .field { grid-column: 1 / -1; }
       .friend-card { grid-template-columns: 1fr; }
@@ -881,6 +1052,8 @@
       .detail-actions .btn { grid-column: auto !important; }
       .bottom-nav { display: grid; }
       .reveal-list { grid-template-columns: repeat(5, minmax(50px, 1fr)); }
+      .reveal-controls { grid-template-columns: 1fr 1fr; }
+      .reveal-controls .reveal-detail-button { grid-column: 1 / -1; grid-row: 1; }
       .toast { bottom: 86px; }
       .auth-panel { padding: 24px 18px; }
       .auth-actions { grid-template-columns: 1fr; }
@@ -1029,9 +1202,11 @@
           </div>
           <div class="battle-layout">
             <div class="battle-arena">
+              <div class="battle-impact" aria-hidden="true"></div>
               <div class="battle-sides">
                 <div class="fighter player">
                   <div class="fighter-label">Your Formation</div>
+                  <div class="battle-model-stack" id="battlePlayerModels"></div>
                   <h3 id="battleTeamName">ทีมโชว์</h3>
                   <div class="fighter-power" id="battlePlayerPower">0</div>
                   <div class="power-breakdown" id="battlePowerBreakdown"></div>
@@ -1039,6 +1214,7 @@
                 </div>
                 <div class="fighter enemy">
                   <div class="fighter-label">Tower Enemy</div>
+                  <div class="battle-model-stack" id="battleEnemyModels"></div>
                   <h3 id="battleEnemyName">ชั้นที่ 1</h3>
                   <div class="fighter-power" id="battleEnemyPower">0</div>
                   <div class="power-breakdown" id="battleEnemyDetail"></div>
@@ -1156,6 +1332,12 @@
       <h2 id="revealTitle">การ์ดใหม่!</h2>
       <p id="revealSubtitle" style="color:var(--muted);margin-bottom:0"></p>
       <div class="reveal-hero" id="revealHero"></div>
+      <div class="reveal-counter" id="revealCounter"></div>
+      <div class="reveal-controls">
+        <button class="btn" data-action="previous-reveal-card" aria-label="การ์ดก่อนหน้า">ก่อนหน้า</button>
+        <button class="btn btn-gold reveal-detail-button" data-action="open-reveal-detail">ดูรายละเอียดการ์ดนี้</button>
+        <button class="btn" data-action="next-reveal-card" aria-label="การ์ดถัดไป">ถัดไป</button>
+      </div>
       <div class="reveal-list" id="revealList"></div>
       <button class="btn btn-primary" data-action="close-reveal">เก็บเข้าคอลเล็กชั่น</button>
     </div>
@@ -2738,6 +2920,10 @@
     let friendProfiles = [];
     let friendsBusy = false;
     let battleResult = null;
+    let battleAnimating = false;
+    let activeRevealResults = [];
+    let activeRevealIndex = 0;
+    let returnToReveal = false;
     let state = loadState();
 
     function defaultState() {
@@ -3259,38 +3445,68 @@
       };
     }
 
-    function runBattle() {
+    function wait(ms) {
+      return new Promise(resolve => window.setTimeout(resolve, ms));
+    }
+
+    async function runBattle() {
       const stats = getBattleStats();
+      if (battleAnimating) return;
       if (!state.team.length) return showToast("ต้องจัดการ์ดเข้าทีมก่อนต่อสู้");
       if (state.battle.energy < 1) return showToast("Energy หมด รอให้ฟื้นก่อน");
 
+      const arena = document.querySelector(".battle-arena");
+      const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const phaseDuration = reducedMotion ? 30 : 560;
+      battleAnimating = true;
       state.battle.energy -= 1;
       const playerRoll = stats.effectivePower * (.90 + Math.random() * .22);
       const enemyRoll = stats.enemyPower * (.90 + Math.random() * .20);
       const won = playerRoll >= enemyRoll;
+      const result = document.getElementById("battleResult");
 
-      if (won) {
-        state.gems += stats.gemReward;
-        state.dust += stats.dustReward;
-        state.battle.wins += 1;
-        state.battle.stage += 1;
-        battleResult = {
-          tone: "win",
-          text: `ชนะชั้น ${stats.stage}! รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust`
-        };
-      } else {
-        const consolation = Math.max(100, Math.floor(stats.dustReward * .1));
-        state.dust += consolation;
-        state.battle.losses += 1;
-        battleResult = {
-          tone: "lose",
-          text: `แพ้ชั้น ${stats.stage} แต่ได้รับ ${formatNumber(consolation)} Dust • เพิ่มเลเวล อเวก หรือเปลี่ยน Support แล้วลองใหม่`
-        };
+      renderBattle();
+      result.textContent = "ทีมของคุณกำลังเปิดฉากโจมตี...";
+      result.className = "battle-result";
+      arena.classList.add("player-strike");
+
+      try {
+        await wait(phaseDuration);
+        arena.classList.remove("player-strike");
+        arena.classList.add("enemy-strike");
+        result.textContent = "ศัตรูกำลังสวนกลับ...";
+        await wait(phaseDuration);
+        arena.classList.remove("enemy-strike");
+        arena.classList.add(won ? "battle-win" : "battle-lose");
+
+        if (won) {
+          state.gems += stats.gemReward;
+          state.dust += stats.dustReward;
+          state.battle.wins += 1;
+          state.battle.stage += 1;
+          battleResult = {
+            tone: "win",
+            text: `ชนะชั้น ${stats.stage}! รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust`
+          };
+        } else {
+          const consolation = Math.max(100, Math.floor(stats.dustReward * .1));
+          state.dust += consolation;
+          state.battle.losses += 1;
+          battleResult = {
+            tone: "lose",
+            text: `แพ้ชั้น ${stats.stage} แต่ได้รับ ${formatNumber(consolation)} Dust • เพิ่มเลเวล อเวก หรือเปลี่ยน Support แล้วลองใหม่`
+          };
+        }
+
+        saveState(true);
+        renderAll();
+        showToast(battleResult.text);
+        await wait(reducedMotion ? 30 : 650);
+      } finally {
+        arena.classList.remove("player-strike", "enemy-strike", "battle-win", "battle-lose");
+        battleAnimating = false;
+        renderBattle();
       }
-
-      saveState(true);
-      renderAll();
-      showToast(battleResult.text);
     }
 
     function sparFriend(friendUid) {
@@ -3633,12 +3849,23 @@
       const count = owned ? owned.count : 0;
       const level = owned ? owned.level : 1;
       const compact = options.compact === true;
+      const displayOnly = options.displayOnly === true;
+      const rarityClass = `rarity-${String(card.rarity || "n").toLowerCase().replace(/[^a-z0-9_-]/g, "")}`;
+      const extraClass = options.extraClass ? ` ${escapeHTML(options.extraClass)}` : "";
+      const action = options.action || "open-card";
+      const actionData = displayOnly
+        ? ""
+        : ` data-action="${escapeHTML(action)}"${options.revealIndex !== undefined ? ` data-reveal-index="${Number(options.revealIndex)}"` : ` data-card-id="${escapeHTML(card.id)}"`}`;
+      const resultLabel = options.resultLabel !== undefined
+        ? `<span class="copy-badge">${escapeHTML(options.resultLabel)}</span>`
+        : owned ? `<span class="copy-badge">x${count}</span>` : "";
+      const tag = displayOnly ? "div" : "button";
       return `
-        <button class="game-card ${owned ? "" : "locked"}" style="--rarity:${rarity.color}" data-action="open-card" data-card-id="${escapeHTML(card.id)}">
+        <${tag} class="game-card ${rarityClass} ${owned ? "" : "locked"}${extraClass}" style="--rarity:${rarity.color}"${actionData}>
           <div class="card-art">
             ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" onerror="this.remove()">` : ""}
             <span class="rarity-badge">${escapeHTML(rarity.label)}</span>
-            ${owned ? `<span class="copy-badge">x${count}</span>` : ""}
+            ${resultLabel}
           </div>
           ${compact ? "" : `
             <div class="card-body">
@@ -3649,8 +3876,43 @@
               </div>
             </div>
           `}
-        </button>
+        </${tag}>
       `;
+    }
+
+    function getBattleEnemyCard(stage) {
+      if (!CARDS.length) return null;
+      const targetOrder = Math.min(10, Math.max(0, Math.floor((stage - 1) / 2)));
+      const candidates = CARDS.filter(card => getRarity(card).order >= targetOrder - 1 && getRarity(card).order <= targetOrder + 2);
+      const pool = candidates.length ? candidates : CARDS;
+      return pool[(stage * 13 + 7) % pool.length];
+    }
+
+    function battleModelHTML(card, index, enemy) {
+      if (!card) return "";
+      const rarity = getRarity(card);
+      const image = getCardImage(card);
+      const count = Math.max(1, enemy ? 1 : state.team.length);
+      const center = (count - 1) / 2;
+      const tilt = enemy ? 3 : (index - center) * 5;
+      const lift = enemy ? 0 : Math.abs(index - center) * 5;
+      const tag = enemy ? "div" : "button";
+      const action = enemy ? "" : ` data-action="open-card" data-card-id="${escapeHTML(card.id)}"`;
+      return `
+        <${tag} class="battle-model-card" style="--rarity:${rarity.color};--model-tilt:${tilt}deg;--model-lift:${lift}px"${action} aria-label="${escapeHTML(card.name)}">
+          ${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+          <span>${escapeHTML(card.name)}</span>
+        </${tag}>
+      `;
+    }
+
+    function renderBattleModels(stats) {
+      const teamCards = state.team.map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
+      const enemyCard = getBattleEnemyCard(stats.stage);
+      document.getElementById("battlePlayerModels").innerHTML = teamCards.length
+        ? teamCards.map((card, index) => battleModelHTML(card, index, false)).join("")
+        : `<div class="empty-state" style="min-height:130px;padding:14px">ยังไม่มีการ์ดในทีม</div>`;
+      document.getElementById("battleEnemyModels").innerHTML = battleModelHTML(enemyCard, 0, true);
     }
 
     function renderBanner() {
@@ -3756,6 +4018,7 @@
         : "ยังไม่ได้เลือกเพื่อน Support";
       const result = document.getElementById("battleResult");
 
+      if (!battleAnimating || !document.getElementById("battlePlayerModels").children.length) renderBattleModels(stats);
       document.getElementById("battlePlayerPower").textContent = formatNumber(stats.effectivePower);
       document.getElementById("battleEnemyPower").textContent = formatNumber(stats.enemyPower);
       document.getElementById("battleEnemyName").textContent = `Tower ชั้น ${stats.stage}`;
@@ -3772,9 +4035,11 @@
       document.getElementById("battleStageText").textContent = stats.stage;
       document.getElementById("battleRecordText").textContent = `${state.battle.wins} / ${state.battle.losses}`;
       document.getElementById("battleSupportText").textContent = supportText;
-      document.getElementById("battleButton").disabled = !state.team.length || state.battle.energy < 1;
-      result.textContent = battleResult ? battleResult.text : "จัดทีมให้พร้อมแล้วท้าทายหอคอย";
-      result.className = `battle-result ${battleResult ? battleResult.tone : ""}`;
+      document.getElementById("battleButton").disabled = battleAnimating || !state.team.length || state.battle.energy < 1;
+      if (!battleAnimating) {
+        result.textContent = battleResult ? battleResult.text : "จัดทีมให้พร้อมแล้วท้าทายหอคอย";
+        result.className = `battle-result ${battleResult ? battleResult.tone : ""}`;
+      }
     }
 
     function renderFriends() {
@@ -3908,6 +4173,8 @@
     }
 
     function openCardModal(cardId) {
+      const modalAlreadyOpen = !document.getElementById("cardModal").classList.contains("hidden");
+      if (!modalAlreadyOpen) returnToReveal = false;
       modalCardId = String(cardId);
       renderCardDetail(modalCardId);
       document.getElementById("cardModal").classList.remove("hidden");
@@ -3917,7 +4184,13 @@
     function closeModal() {
       modalCardId = "";
       document.getElementById("cardModal").classList.add("hidden");
-      document.body.style.overflow = "";
+      if (returnToReveal && activeRevealResults.length) {
+        returnToReveal = false;
+        document.getElementById("revealScreen").classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
     }
 
     function openAuthModal() {
@@ -3932,21 +4205,50 @@
       document.body.style.overflow = "";
     }
 
-    function showReveal(results) {
-      const best = [...results].sort((a, b) => getRarity(b.card).order - getRarity(a.card).order)[0];
-      const rarity = getRarity(best.card);
-      const newCards = results.filter(result => !result.duplicate).length;
+    function renderRevealSelection(index) {
+      if (!activeRevealResults.length) return;
+      activeRevealIndex = (Number(index) + activeRevealResults.length) % activeRevealResults.length;
+      const selected = activeRevealResults[activeRevealIndex];
+      const rarity = getRarity(selected.card);
+      const newCards = activeRevealResults.filter(result => !result.duplicate).length;
       document.getElementById("revealPanel").style.setProperty("--reveal-color", rarity.color);
-      document.getElementById("revealTitle").textContent = best.card.name;
-      document.getElementById("revealSubtitle").textContent = `${rarity.label} • ได้การ์ดใหม่ ${newCards} ใบ • การ์ดซ้ำเปลี่ยนเป็น Dust อัตโนมัติ`;
-      document.getElementById("revealHero").innerHTML = cardHTML(best.card);
-      document.getElementById("revealList").innerHTML = results.map(result => cardHTML(result.card, { compact: true })).join("");
+      document.getElementById("revealTitle").textContent = selected.card.name;
+      document.getElementById("revealSubtitle").textContent = `${rarity.label} • ${selected.duplicate ? "การ์ดซ้ำ รับ Dust แล้ว" : "การ์ดใหม่เข้าคอลเล็กชั่น"} • ใหม่ทั้งหมด ${newCards} ใบ`;
+      document.getElementById("revealCounter").textContent = `ใบที่ ${activeRevealIndex + 1} / ${activeRevealResults.length}`;
+      document.getElementById("revealHero").innerHTML = cardHTML(selected.card, { displayOnly: true });
+      document.getElementById("revealList").innerHTML = activeRevealResults.map((result, resultIndex) => cardHTML(result.card, {
+        compact: true,
+        action: "select-reveal-card",
+        revealIndex: resultIndex,
+        resultLabel: result.duplicate ? "ซ้ำ" : "ใหม่",
+        extraClass: resultIndex === activeRevealIndex ? "active" : ""
+      })).join("");
+    }
+
+    function showReveal(results) {
+      activeRevealResults = results.slice();
+      const bestIndex = activeRevealResults.reduce((best, result, index, items) => (
+        getRarity(result.card).order > getRarity(items[best].card).order ? index : best
+      ), 0);
+      renderRevealSelection(bestIndex);
       document.getElementById("revealScreen").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function openRevealDetail() {
+      const selected = activeRevealResults[activeRevealIndex];
+      if (!selected) return;
+      document.getElementById("revealScreen").classList.add("hidden");
+      modalCardId = String(selected.card.id);
+      returnToReveal = true;
+      renderCardDetail(modalCardId);
+      document.getElementById("cardModal").classList.remove("hidden");
       document.body.style.overflow = "hidden";
     }
 
     function closeReveal() {
       document.getElementById("revealScreen").classList.add("hidden");
+      returnToReveal = false;
       document.body.style.overflow = "";
     }
 
@@ -4019,6 +4321,10 @@
       if (action === "open-auth") openAuthModal();
       if (action === "close-auth") closeAuthModal();
       if (action === "close-reveal") closeReveal();
+      if (action === "select-reveal-card") renderRevealSelection(Number(target.dataset.revealIndex) || 0);
+      if (action === "previous-reveal-card") renderRevealSelection(activeRevealIndex - 1);
+      if (action === "next-reveal-card") renderRevealSelection(activeRevealIndex + 1);
+      if (action === "open-reveal-detail") openRevealDetail();
       if (action === "upgrade") upgradeCard(cardId);
       if (action === "awaken") awakenCard(cardId);
       if (action === "toggle-team") toggleTeam(cardId);
