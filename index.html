@@ -98,3 +98,3335 @@
       width: 52px;
       aspect-ratio: 1;
       border-radius: 16px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: #071019;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--cyan), var(--violet) 58%, var(--gold));
+      box-shadow: 0 0 28px rgba(92, 232, 255, .22);
+    }
+
+    .brand-mark img { width: 100%; height: 100%; object-fit: cover; }
+    .brand-copy { min-width: 0; }
+    .eyebrow {
+      margin: 0 0 3px;
+      color: var(--cyan);
+      font-size: .69rem;
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 0;
+      font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .resource-bar {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .resource {
+      min-width: 100px;
+      padding: 8px 11px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 15px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .resource span {
+      display: block;
+      color: var(--muted);
+      font-size: .67rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+    }
+
+    .resource strong {
+      display: block;
+      margin-top: 1px;
+      font-size: 1rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .resource.gems strong { color: var(--cyan); }
+    .resource.dust strong { color: var(--gold); }
+    .resource.owned strong { color: var(--green); }
+
+    .account-button {
+      min-width: 116px;
+      min-height: 48px;
+      border: 1px solid rgba(92, 232, 255, .24);
+      border-radius: 15px;
+      padding: 7px 12px;
+      color: var(--text);
+      text-align: left;
+      background: rgba(92, 232, 255, .07);
+    }
+
+    .account-button span {
+      display: block;
+      color: var(--cyan);
+      font-size: .62rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .account-button strong {
+      display: block;
+      max-width: 150px;
+      margin-top: 2px;
+      overflow: hidden;
+      font-size: .78rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(310px, .65fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .banner {
+      min-height: 390px;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      background: #11162b;
+    }
+
+    .banner-media {
+      position: absolute;
+      inset: 0;
+      z-index: -3;
+    }
+
+    .banner-media img,
+    .banner-media video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .banner-media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(6,8,18,.96) 0%, rgba(6,8,18,.78) 38%, rgba(6,8,18,.18) 78%),
+        linear-gradient(to top, rgba(6,8,18,.92), transparent 60%);
+    }
+
+    .banner-content {
+      min-height: 390px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: clamp(22px, 4vw, 44px);
+    }
+
+    .season-tag, .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: rgba(5, 8, 18, .68);
+      padding: 7px 11px;
+      font-size: .72rem;
+      font-weight: 900;
+    }
+
+    .season-tag { color: var(--gold); letter-spacing: .1em; }
+    .banner h2 {
+      max-width: 760px;
+      margin: 13px 0 8px;
+      font-size: clamp(2rem, 5vw, 4.2rem);
+      line-height: .92;
+      letter-spacing: -.055em;
+      text-wrap: balance;
+    }
+
+    .banner-description {
+      max-width: 620px;
+      margin-bottom: 18px;
+      color: #c9d3ec;
+      line-height: 1.65;
+    }
+
+    .rates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 20px;
+    }
+
+    .rates .pill { padding: 6px 9px; color: #dbe5ff; }
+    .summon-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .btn {
+      min-height: 46px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 15px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-weight: 900;
+      background: rgba(255,255,255,.07);
+      transition: transform .18s ease, filter .18s ease, border-color .18s ease;
+    }
+
+    .btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
+    .btn-primary {
+      color: #071019;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--cyan), #7dd3fc 38%, var(--violet));
+      box-shadow: 0 12px 34px rgba(92, 232, 255, .18);
+    }
+
+    .btn-gold {
+      color: #211500;
+      border-color: transparent;
+      background: linear-gradient(135deg, #ffe08a, #f59e0b);
+    }
+
+    .btn-danger { color: #ffe8ed; background: rgba(190, 24, 93, .25); }
+    .cost { display: block; font-size: .69rem; opacity: .76; margin-top: 2px; }
+
+    .side-panel {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .side-panel h2 { margin-bottom: 0; font-size: 1.25rem; }
+    .mini-card {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .mini-card p { margin: 6px 0 12px; color: var(--muted); font-size: .86rem; line-height: 1.55; }
+    .mini-card .btn { width: 100%; }
+    .progress-line {
+      height: 7px;
+      margin-top: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+    }
+
+    .progress-line i {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+    }
+
+    .side-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+
+    .side-stat {
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+    }
+
+    .side-stat span { display: block; color: var(--muted); font-size: .69rem; }
+    .side-stat strong { display: block; margin-top: 3px; font-size: 1.12rem; }
+
+    .workspace { padding: 20px; }
+    .workspace-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tab {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 9px 14px;
+      color: var(--muted);
+      font-weight: 900;
+      background: rgba(255,255,255,.035);
+    }
+
+    .tab.active {
+      color: #071019;
+      border-color: transparent;
+      background: var(--cyan);
+    }
+
+    .tools { display: flex; gap: 8px; }
+    .field {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 8px 12px;
+      color: var(--text);
+      background: rgba(5,8,18,.72);
+      outline: none;
+    }
+
+    .field:focus { border-color: rgba(92,232,255,.62); box-shadow: 0 0 0 3px rgba(92,232,255,.08); }
+    .section-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .section-title h2 { margin-bottom: 2px; font-size: 1.35rem; }
+    .section-title p { margin-bottom: 0; color: var(--muted); font-size: .84rem; }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .game-card {
+      --rarity: #94a3b8;
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--rarity) 45%, transparent);
+      border-radius: 18px;
+      color: var(--text);
+      text-align: left;
+      background: linear-gradient(160deg, color-mix(in srgb, var(--rarity) 17%, #11162b), #0b0f1d 62%);
+      box-shadow: 0 10px 30px rgba(0,0,0,.24);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    button.game-card:hover { transform: translateY(-5px); border-color: var(--rarity); box-shadow: 0 18px 34px rgba(0,0,0,.36); }
+    .game-card.locked { filter: grayscale(.85); opacity: .48; }
+    .card-art {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--rarity) 45%, transparent), transparent 44%),
+        #11162b;
+    }
+
+    .card-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .card-art::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(6,8,18,.88), transparent 42%);
+    }
+
+    .art-fallback {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: color-mix(in srgb, var(--rarity) 84%, white);
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 1000;
+      text-shadow: 0 0 26px color-mix(in srgb, var(--rarity) 55%, transparent);
+    }
+
+    .rarity-badge, .copy-badge {
+      position: absolute;
+      z-index: 3;
+      top: 9px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: .64rem;
+      font-weight: 1000;
+      backdrop-filter: blur(8px);
+    }
+
+    .rarity-badge { left: 9px; color: #071019; background: var(--rarity); }
+    .copy-badge { right: 9px; color: white; background: rgba(5,8,18,.72); }
+    .card-body { padding: 11px; }
+    .card-name {
+      min-height: 2.5em;
+      margin: 0 0 7px;
+      font-size: .88rem;
+      line-height: 1.25;
+      font-weight: 900;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      color: var(--muted);
+      font-size: .68rem;
+    }
+
+    .stars { color: var(--gold); letter-spacing: -.08em; white-space: nowrap; }
+    .empty-state {
+      grid-column: 1 / -1;
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      padding: 30px;
+      border: 1px dashed rgba(255,255,255,.15);
+      border-radius: 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .team-slot {
+      min-height: 260px;
+      border: 1px dashed rgba(255,255,255,.16);
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      background: rgba(255,255,255,.025);
+    }
+
+    .income-panel {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) auto;
+      gap: 10px;
+      align-items: stretch;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .income-value { padding: 8px 12px; }
+    .income-value span { display: block; color: var(--muted); font-size: .72rem; }
+    .income-value strong { display: block; margin-top: 3px; font-size: 1.2rem; }
+
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      z-index: 35;
+      left: 12px;
+      right: 12px;
+      bottom: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 7px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(8,11,23,.92);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .bottom-nav button {
+      border: 0;
+      border-radius: 14px;
+      padding: 10px 5px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 900;
+      background: transparent;
+    }
+
+    .bottom-nav button.active { color: #071019; background: var(--cyan); }
+
+    .modal, .reveal {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(3,5,12,.84);
+      backdrop-filter: blur(15px);
+    }
+
+    .modal-panel {
+      width: min(920px, 100%);
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--panel-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .auth-panel { width: min(520px, 100%); padding: 28px; }
+    .auth-panel h2 { margin: 6px 0 8px; font-size: 1.8rem; }
+    .auth-panel > p { color: var(--muted); line-height: 1.6; }
+    .auth-fields { display: grid; gap: 11px; margin: 20px 0 12px; }
+    .auth-fields label { display: grid; gap: 6px; color: var(--muted); font-size: .76rem; font-weight: 800; }
+    .auth-fields .field { width: 100%; }
+    .auth-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .auth-actions .btn:last-child { grid-column: 1 / -1; }
+    .cloud-status {
+      margin-top: 14px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.5;
+      background: rgba(255,255,255,.035);
+    }
+    .cloud-status.ok { color: var(--green); border-color: rgba(86,227,159,.24); }
+    .cloud-status.warn { color: var(--gold); border-color: rgba(255,209,102,.24); }
+    .cloud-status.bad { color: #fda4af; border-color: rgba(251,113,133,.28); }
+
+    .close {
+      position: absolute;
+      z-index: 5;
+      top: 12px;
+      right: 12px;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: white;
+      background: rgba(3,5,12,.76);
+    }
+
+    .detail {
+      display: grid;
+      grid-template-columns: minmax(260px, .8fr) minmax(320px, 1.2fr);
+    }
+
+    .detail-art { min-height: 520px; position: relative; overflow: hidden; background: #11162b; }
+    .detail-art img, .detail-art video { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .detail-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(6,8,18,.84), transparent 42%); }
+    .detail-copy { padding: clamp(24px, 5vw, 44px); }
+    .detail-copy h2 { margin: 9px 0 4px; font-size: clamp(2rem, 5vw, 3.4rem); line-height: .96; letter-spacing: -.045em; }
+    .detail-sub { color: var(--muted); }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin: 22px 0; }
+    .stat { padding: 12px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.035); }
+    .stat span { color: var(--muted); display: block; font-size: .69rem; }
+    .stat strong { display: block; margin-top: 3px; }
+    .detail-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+    .detail-actions .btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .awaken-track { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 18px; }
+    .awaken-star { color: rgba(255,255,255,.22); font-size: 1.3rem; }
+    .awaken-star.on { color: var(--gold); text-shadow: 0 0 12px rgba(255,209,102,.5); }
+
+    .reveal-panel {
+      width: min(980px, 100%);
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      padding: 22px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 28px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--reveal-color, #a78bfa) 24%, transparent), transparent 52%),
+        #090d1d;
+      box-shadow: 0 0 90px color-mix(in srgb, var(--reveal-color, #a78bfa) 18%, transparent);
+    }
+
+    .reveal-panel h2 { margin: 8px 0 4px; font-size: clamp(2rem, 6vw, 4rem); }
+    .reveal-hero {
+      width: min(330px, 82vw);
+      margin: 18px auto;
+      animation: reveal-in .48s cubic-bezier(.2,.9,.25,1.15) both;
+    }
+
+    .reveal-list { display: grid; grid-template-columns: repeat(10, minmax(60px, 1fr)); gap: 8px; margin: 18px 0; }
+    .reveal-list .game-card { border-radius: 12px; }
+    .reveal-list .card-body { display: none; }
+    .reveal-list .rarity-badge { top: 5px; left: 5px; padding: 3px 5px; font-size: .54rem; }
+    .reveal-list .copy-badge { top: auto; bottom: 5px; right: 5px; padding: 3px 5px; font-size: .52rem; }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 18px);
+      max-width: min(520px, calc(100% - 30px));
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      color: white;
+      text-align: center;
+      font-weight: 800;
+      background: rgba(10,14,29,.94);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @keyframes reveal-in { from { opacity: 0; transform: rotateY(70deg) scale(.82); } to { opacity: 1; transform: none; } }
+
+    @media (max-width: 1120px) {
+      .card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .hero-grid { grid-template-columns: 1fr; }
+      .side-panel { display: grid; grid-template-columns: repeat(2, 1fr); }
+      .side-panel > h2 { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell { width: min(100% - 18px, 1500px); padding-top: 9px; }
+      .topbar { top: 5px; padding: 9px; border-radius: 19px; }
+      .brand-mark { width: 44px; border-radius: 13px; }
+      .brand-copy .eyebrow { display: none; }
+      .resource { min-width: 0; padding: 7px 9px; }
+      .resource span { font-size: .58rem; }
+      .resource strong { font-size: .82rem; }
+      .resource.owned { display: none; }
+      .account-button { min-width: 44px; width: 44px; padding: 7px; text-align: center; }
+      .account-button span { display: none; }
+      .account-button strong { font-size: 0; }
+      .account-button strong::after { content: "ID"; font-size: .72rem; }
+      .banner, .banner-content { min-height: 500px; }
+      .banner-media::after { background: linear-gradient(to top, rgba(6,8,18,.98) 4%, rgba(6,8,18,.45) 70%, rgba(6,8,18,.18)); }
+      .banner-content { justify-content: flex-end; padding: 22px; }
+      .banner h2 { font-size: clamp(2.3rem, 13vw, 4rem); }
+      .summon-actions { width: 100%; }
+      .summon-actions .btn { flex: 1; padding-inline: 10px; }
+      .side-panel { grid-template-columns: 1fr; }
+      .side-panel > h2 { grid-column: auto; }
+      .workspace { padding: 14px; }
+      .workspace-head { align-items: stretch; flex-direction: column; }
+      .workspace-head .tabs { display: none; }
+      .tools { display: grid; grid-template-columns: 1fr 110px; }
+      .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+      .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .income-panel { grid-template-columns: repeat(2, 1fr); }
+      .income-panel .btn { grid-column: 1 / -1; }
+      .detail { grid-template-columns: 1fr; }
+      .detail-art { min-height: min(62vh, 540px); }
+      .detail-copy { padding: 24px 18px; }
+      .detail-actions { grid-template-columns: 1fr; }
+      .detail-actions .btn { grid-column: auto !important; }
+      .bottom-nav { display: grid; }
+      .reveal-list { grid-template-columns: repeat(5, minmax(50px, 1fr)); }
+      .toast { bottom: 86px; }
+      .auth-panel { padding: 24px 18px; }
+      .auth-actions { grid-template-columns: 1fr; }
+      .auth-actions .btn:last-child { grid-column: auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; transition-duration: .001ms !important; }
+      .panel { backdrop-filter: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar panel">
+      <div class="brand">
+        <div class="brand-mark" id="brandMark">
+          <img src="assets/banners/LOGO.png" alt="" onerror="this.parentElement.textContent='AC'">
+        </div>
+        <div class="brand-copy">
+          <p class="eyebrow">Collection Protocol</p>
+          <h1>Anime Card Collection</h1>
+        </div>
+      </div>
+      <button class="account-button" data-action="open-auth" aria-label="เปิดระบบบัญชีและ Cloud Save">
+        <span>Account</span>
+        <strong id="accountButtonText">Local Guest</strong>
+      </button>
+      <div class="resource-bar" aria-label="ทรัพยากรผู้เล่น">
+        <div class="resource gems"><span>Gems</span><strong id="gemsText">0</strong></div>
+        <div class="resource dust"><span>Dust</span><strong id="dustText">0</strong></div>
+        <div class="resource owned"><span>Collection</span><strong id="ownedText">0/0</strong></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero-grid">
+        <section class="banner panel" aria-labelledby="bannerTitle">
+          <div class="banner-media" id="bannerMedia"></div>
+          <div class="banner-content">
+            <span class="season-tag">LIVE BANNER</span>
+            <h2 id="bannerTitle">Loading banner...</h2>
+            <p class="banner-description" id="bannerDescription"></p>
+            <div class="rates" id="ratePills"></div>
+            <div class="summon-actions">
+              <button class="btn btn-primary" data-action="pull" data-times="1">
+                เปิด 1 ใบ <span class="cost" id="singleCost">0 Gems</span>
+              </button>
+              <button class="btn btn-gold" data-action="pull" data-times="10">
+                เปิด 10 ใบ <span class="cost" id="tenCost">0 Gems</span>
+              </button>
+              <select class="field" id="bannerSelect" aria-label="เลือกตู้กาชา"></select>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-panel panel">
+          <h2>ศูนย์บัญชาการ</h2>
+          <div class="mini-card">
+            <strong>บัญชีและ Cloud Save</strong>
+            <p id="cloudSummaryText">กำลังตรวจสอบ Firebase ระบบ Local ยังเล่นและเซฟได้ตามปกติ</p>
+            <button class="btn" data-action="open-auth">สมัคร / ล็อกอิน</button>
+          </div>
+          <div class="mini-card">
+            <strong>โบนัสรายวัน</strong>
+            <p id="dailyText">รับ Gems เพื่อเปิดแพ็กเพิ่มได้วันละครั้ง</p>
+            <button class="btn btn-primary" id="dailyButton" data-action="daily">รับโบนัสวันนี้</button>
+          </div>
+          <div class="mini-card">
+            <strong>รายได้จากทีมโชว์</strong>
+            <p>การ์ดในทีมจะสะสม Gems แม้ระหว่างที่ไม่ได้กดเปิดแพ็ก</p>
+            <button class="btn btn-gold" data-action="claim-income">รับ <span id="bankText">0</span> Gems</button>
+          </div>
+          <div class="side-stats">
+            <div class="side-stat"><span>Income / sec</span><strong id="incomeText">0</strong></div>
+            <div class="side-stat"><span>Pity</span><strong id="pityText">0</strong></div>
+            <div class="side-stat"><span>Team</span><strong id="teamText">0/5</strong></div>
+            <div class="side-stat"><span>Last pull</span><strong id="lastRarityText">-</strong></div>
+          </div>
+          <div class="mini-card">
+            <strong>จัดการเซฟ</strong>
+            <p>เซฟอัตโนมัติในเบราว์เซอร์ รองรับการย้ายเครื่องด้วยไฟล์สำรอง</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <button class="btn" data-action="export-save">สำรอง</button>
+              <button class="btn" data-action="import-save">นำเข้า</button>
+            </div>
+            <input class="hidden" type="file" id="importInput" accept="application/json">
+          </div>
+        </aside>
+      </div>
+
+      <section class="workspace panel" id="workspace">
+        <div class="workspace-head">
+          <div class="tabs" aria-label="เมนูหลัก">
+            <button class="tab active" data-tab="summon">เปิดแพ็ก</button>
+            <button class="tab" data-tab="collection">คอลเล็กชั่น</button>
+            <button class="tab" data-tab="team">ทีมโชว์</button>
+          </div>
+          <div class="tools">
+            <input class="field" id="searchInput" type="search" placeholder="ค้นหาการ์ด..." autocomplete="off">
+            <select class="field" id="rarityFilter" aria-label="กรองระดับ"></select>
+          </div>
+        </div>
+
+        <section id="summonView">
+          <div class="section-title">
+            <div><h2>การ์ดที่เปิดล่าสุด</h2><p>เลือกการ์ดเพื่อดูรายละเอียด อัปเกรด หรือเพิ่มเข้าทีม</p></div>
+          </div>
+          <div class="card-grid" id="recentGrid"></div>
+        </section>
+
+        <section id="collectionView" class="hidden">
+          <div class="section-title">
+            <div><h2>คลังการ์ด</h2><p id="collectionText">กำลังโหลดคอลเล็กชั่น...</p></div>
+            <button class="btn btn-danger" data-action="reset-save">เริ่มใหม่</button>
+          </div>
+          <div class="card-grid" id="collectionGrid"></div>
+        </section>
+
+        <section id="teamView" class="hidden">
+          <div class="section-title">
+            <div><h2>ทีมโชว์</h2><p>ใส่ได้สูงสุด 5 ใบ การ์ดทุกใบในทีมสร้างรายได้แบบออฟไลน์</p></div>
+          </div>
+          <div class="team-grid" id="teamGrid"></div>
+          <div class="income-panel">
+            <div class="income-value"><span>รายได้ต่อวินาที</span><strong id="teamIncomeText">0</strong></div>
+            <div class="income-value"><span>กำลังรวม</span><strong id="teamPowerText">0</strong></div>
+            <div class="income-value"><span>Gems ที่สะสม</span><strong id="teamBankText">0</strong></div>
+            <button class="btn btn-gold" data-action="claim-income">รับรายได้</button>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="เมนูมือถือ">
+    <button class="active" data-tab="summon">เปิดแพ็ก</button>
+    <button data-tab="collection">คอลเล็กชั่น</button>
+    <button data-tab="team">ทีมโชว์</button>
+  </nav>
+
+  <div class="modal hidden" id="cardModal" role="dialog" aria-modal="true" aria-label="รายละเอียดการ์ด">
+    <div class="modal-panel">
+      <button class="close" data-action="close-modal" aria-label="ปิด">x</button>
+      <div id="cardDetail"></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="authModal" role="dialog" aria-modal="true" aria-label="บัญชีผู้เล่นและ Cloud Save">
+    <div class="modal-panel auth-panel">
+      <button class="close" data-action="close-auth" aria-label="ปิด">x</button>
+      <p class="eyebrow">Firebase Cloud Save</p>
+      <h2>บัญชีผู้เล่น</h2>
+      <p>สมัครหรือล็อกอินด้วย Username เดิมของเกม เซฟจะซิงก์กับ Firebase และยังเก็บสำรองในเครื่องเสมอ</p>
+      <div class="auth-fields">
+        <label>
+          Username
+          <input class="field" id="authUsername" autocomplete="username" maxlength="24" placeholder="อย่างน้อย 3 ตัวอักษร">
+        </label>
+        <label>
+          Password
+          <input class="field" id="authPassword" type="password" autocomplete="current-password" maxlength="64" placeholder="อย่างน้อย 6 ตัวอักษร">
+        </label>
+      </div>
+      <div class="auth-actions">
+        <button class="btn btn-primary" data-action="register">สมัครและอัปโหลดเซฟนี้</button>
+        <button class="btn btn-gold" data-action="login">ล็อกอินและโหลด Cloud</button>
+        <button class="btn btn-danger" id="logoutButton" data-action="logout" disabled>ออกจากบัญชี</button>
+      </div>
+      <div class="cloud-status warn" id="cloudStatusText">กำลังเชื่อมต่อ Firebase...</div>
+    </div>
+  </div>
+
+  <div class="reveal hidden" id="revealScreen" role="dialog" aria-modal="true" aria-label="ผลการเปิดแพ็ก">
+    <div class="reveal-panel" id="revealPanel">
+      <p class="eyebrow">Summon Result</p>
+      <h2 id="revealTitle">การ์ดใหม่!</h2>
+      <p id="revealSubtitle" style="color:var(--muted);margin-bottom:0"></p>
+      <div class="reveal-hero" id="revealHero"></div>
+      <div class="reveal-list" id="revealList"></div>
+      <button class="btn btn-primary" data-action="close-reveal">เก็บเข้าคอลเล็กชั่น</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <noscript><div style="padding:24px;color:white;background:#7f1d1d">เว็บนี้ต้องเปิด JavaScript จึงจะเล่นได้</div></noscript>
+
+  <script>
+    "use strict";
+
+    const MEMORY_STORAGE = {};
+    const SAFE_STORAGE = (() => {
+      try {
+        const storage = window.localStorage;
+        const key = "__anime_card_storage_test__";
+        storage.setItem(key, "1");
+        storage.removeItem(key);
+        return storage;
+      } catch (_) {
+        return {
+          getItem: key => Object.prototype.hasOwnProperty.call(MEMORY_STORAGE, key) ? MEMORY_STORAGE[key] : null,
+          setItem: (key, value) => { MEMORY_STORAGE[key] = String(value); },
+          removeItem: key => { delete MEMORY_STORAGE[key]; }
+        };
+      }
+    })();
+
+    const SAFE_SESSION = (() => {
+      try {
+        const storage = window.sessionStorage;
+        const key = "__anime_card_session_test__";
+        storage.setItem(key, "1");
+        storage.removeItem(key);
+        return storage;
+      } catch (_) {
+        return SAFE_STORAGE;
+      }
+    })();
+
+    const CONFIG = Object.freeze({
+      saveKey: "anime_card_collection_clean_v1",
+      cloudUsernameKey: "anime_card_cloud_username_v1",
+      oldAccountsKey: "simple_gacha_accounts_v5_stable",
+      oldActiveUserKey: "simple_gacha_active_user_v5_stable",
+      oldBannerKey: "simple_gacha_active_banner_v5_stable",
+      startingGems: 1500000,
+      startingDust: 100000,
+      dailyGems: 300000,
+      maxLevel: 150,
+      teamSlots: 5,
+      powerGrowth: 0.055,
+      incomeGrowth: 0.045
+    });
+
+    const FIREBASE_CONFIG = Object.freeze({
+      apiKey: "AIzaSyCr3wjsWr8Op2I8QovVe7fUppthhHfyVa0",
+      authDomain: "gacha-7a14f.firebaseapp.com",
+      databaseURL: "https://gacha-7a14f-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "gacha-7a14f",
+      storageBucket: "gacha-7a14f.firebasestorage.app",
+      messagingSenderId: "1014868346199",
+      appId: "1:1014868346199:web:cf9c02eddd9c99504daa12"
+    });
+
+    const RARITIES = Object.freeze({
+      N:    { label: "N", color: "#94a3b8", order: 0, stars: 3, dust: 1000, powerBonus: .05, incomeBonus: .06, awakenCost: 1500 },
+      R:    { label: "R", color: "#38bdf8", order: 1, stars: 4, dust: 2500, powerBonus: .06, incomeBonus: .07, awakenCost: 1000 },
+      SR:   { label: "SR", color: "#a78bfa", order: 2, stars: 5, dust: 8000, powerBonus: .08, incomeBonus: .09, awakenCost: 500 },
+      SSR:  { label: "SSR", color: "#fbbf24", order: 3, stars: 6, dust: 30000, powerBonus: .10, incomeBonus: .11, awakenCost: 100 },
+      UR:   { label: "UR", color: "#fb7185", order: 4, stars: 6, dust: 120000, powerBonus: .12, incomeBonus: .14, awakenCost: 90 },
+      LR:   { label: "LR", color: "#22d3ee", order: 5, stars: 8, dust: 250000, powerBonus: .22, incomeBonus: .24, awakenCost: 50 },
+      JJKB: { label: "JJK", color: "#60a5fa", order: 6, stars: 8, dust: 350000, powerBonus: .25, incomeBonus: .28, awakenCost: 20 },
+      JJKC: { label: "JJK", color: "#ef4444", order: 7, stars: 8, dust: 350000, powerBonus: .26, incomeBonus: .27, awakenCost: 20 },
+      JJKS: { label: "JJK+", color: "#fde047", order: 8, stars: 8, dust: 450000, powerBonus: .30, incomeBonus: .32, awakenCost: 15 },
+      EX:   { label: "EX", color: "#e879f9", order: 9, stars: 12, dust: 550000, powerBonus: .38, incomeBonus: .40, awakenCost: 12 },
+      SC:   { label: "SC", color: "#ffffff", order: 10, stars: 10, dust: 750000, powerBonus: .50, incomeBonus: .50, awakenCost: 10 }
+    });
+
+    const BANNERS = [
+  {
+    "id": "JJK_LIMITED",
+    "name": "LIMITED JJK COLLAB",
+    "description": "ตู้คอลแล็ป Jujutsu Kaisen พร้อมระดับ JJK : ผู้ใช้คุณไสย/ระดับพิเศษ/คำสาป",
+    "image": "",
+    "images": [
+      "assets/banners/LS1.mp4"
+    ],
+    "singlePullCost": 250000,
+    "tenPullCost": 2250000,
+    "rateOverrides": {
+      "N": 42,
+      "R": 28,
+      "SR": 18,
+      "SSR": 7,
+      "UR": 2.4,
+      "LR": 2.12,
+      "EX": 0.24,
+      "JJKB": 0.08,
+      "JJKS": 0.07,
+      "JJKC": 0.08,
+      "SC": 0
+    },
+    "rateUpCards": {
+      "1035": 3,
+      "1036": 3,
+      "1037": 3
+    },
+    "guarantee": {
+      "enabled": true,
+      "every": 2000,
+      "rarityRates": {
+        "JJKS": 80,
+        "EX": 20
+      },
+      "cardRates": {
+        "1041": 2,
+        "1042": 2,
+        "1043": 5
+      },
+      "resetWhenPullRarities": [
+        "JJKS"
+      ]
+    }
+  },
+  {
+    "id": "JJK_A",
+    "name": "Innate Technique user RATE UP",
+    "description": "ตู้คอลแล็ป Jujutsu Kaisen ",
+    "image": "",
+    "images": [
+      "assets/banners/LB1.mp4"
+    ],
+    "singlePullCost": 230000,
+    "tenPullCost": 2150000,
+    "rateOverrides": {
+      "N": 42,
+      "R": 28,
+      "SR": 17.24,
+      "SSR": 7,
+      "UR": 2.4,
+      "LR": 2.12,
+      "EX": 0.01,
+      "JJKB": 1,
+      "JJKS": 0.05,
+      "JJKC": 0.18,
+      "SC": 0
+    },
+    "rateUpCards": {
+      "1021": 2,
+      "1022": 2,
+      "1023": 2
+    },
+    "guarantee": {
+      "enabled": true,
+      "every": 1000,
+      "rarityRates": {
+        "JJKS": 100
+      },
+      "cardRates": {
+        "1021": 2,
+        "1022": 2,
+        "1023": 2
+      },
+      "resetWhenPullRarities": [
+        "JJKS"
+      ]
+    }
+  },
+  {
+    "id": "JJK_B",
+    "name": "Cursed user RATE UP",
+    "description": "ตู้คอลแล็ป Jujutsu Kaisen ",
+    "image": "",
+    "images": [
+      "assets/banners/LC1.mp4"
+    ],
+    "singlePullCost": 230000,
+    "tenPullCost": 2150000,
+    "rateOverrides": {
+      "N": 42,
+      "R": 28,
+      "SR": 17.24,
+      "SSR": 7,
+      "UR": 2.4,
+      "LR": 2.12,
+      "EX": 0.01,
+      "JJKB": 0.18,
+      "JJKS": 0.05,
+      "JJKC": 1,
+      "SC": 0
+    },
+    "rateUpCards": {
+      "1002": 3,
+      "1008": 3
+    },
+    "guarantee": {
+      "enabled": true,
+      "every": 1000,
+      "rarityRates": {
+        "JJKS": 100
+      },
+      "cardRates": {
+        "1002": 2,
+        "1008": 2
+      },
+      "resetWhenPullRarities": [
+        "JJKS"
+      ]
+    }
+  },
+  {
+    "id": "SC_RATE",
+    "name": "SC RATE UP!!",
+    "description": "เพิ่มโอกาสได้ตัวละครลับ++",
+    "image": "",
+    "images": [
+      "assets/banners/SCgacha.mp4"
+    ],
+    "singlePullCost": 1000000,
+    "tenPullCost": 10000000,
+    "rateOverrides": {
+      "N": 0,
+      "R": 0,
+      "SR": 55,
+      "SSR": 36,
+      "UR": 5.2,
+      "LR": 3.155,
+      "EX": 0.38,
+      "JJKB": 0,
+      "JJKS": 0,
+      "JJKC": 0,
+      "SC": 0.165
+    },
+    "rateUpCards": {
+      "0": 3,
+      "999": 3,
+      "1000": 3,
+      "2000": 2
+    },
+    "guarantee": {
+      "enabled": true,
+      "every": 10000,
+      "rarityRates": {
+        "SC": 100
+      },
+      "cardRates": {
+        "0": 5,
+        "999": 5,
+        "1000": 5,
+        "2000": 2
+      },
+      "resetWhenPullRarities": [
+        "SC"
+      ]
+    }
+  },
+  {
+    "id": "standard",
+    "name": "Aether Heroes",
+    "description": "ตู้มาตรฐาน รวมการ์ดทุกระดับ",
+    "image": "",
+    "images": [
+      "assets/banners/ST1.mp4"
+    ],
+    "singlePullCost": 50000,
+    "tenPullCost": 450000,
+    "rateOverrides": {
+      "N": 52,
+      "R": 30,
+      "SR": 13,
+      "SSR": 4,
+      "UR": 0.9,
+      "LR": 0.08,
+      "EX": 0.015,
+      "SC": 0.005
+    },
+    "rateUpCards": {}
+  },
+  {
+    "id": "legend",
+    "name": "Legend Rate Up",
+    "description": "ตู้เพิ่มโอกาส UR/LR/EX และเพิ่มน้ำหนัก ",
+    "image": "",
+    "images": [
+      "assets/banners/LR1.mp4"
+    ],
+    "singlePullCost": 100000,
+    "tenPullCost": 900000,
+    "rateOverrides": {
+      "N": 42,
+      "R": 28,
+      "SR": 18,
+      "SSR": 8,
+      "UR": 2.125,
+      "LR": 1.85,
+      "EX": 0.02,
+      "SC": 0.005
+    },
+    "rateUpCards": {
+      "1": 5,
+      "2": 5,
+      "3": 5,
+      "4": 5,
+      "5": 5,
+      "6": 5,
+      "7": 5,
+      "8": 5,
+      "9": 5,
+      "10": 5
+    }
+  }
+];
+    const CARDS = [
+  {
+    "id": 0,
+    "name": "DEV.",
+    "rarity": "SC",
+    "element": "DD",
+    "power": 0,
+    "incomePerSec": 3500,
+    "upgradeDustBase": 8000,
+    "upgradeDustGrowth": 1.12,
+    "awakenMax": 5,
+    "icon": "0.png",
+    "image": "0.png",
+    "poster": "0.png",
+    "video": "0.mp4",
+    "overlay": "overlay.mp4"
+  },
+  {
+    "id": 999,
+    "name": "CREATOR",
+    "rarity": "SC",
+    "element": "∞",
+    "power": 0,
+    "incomePerSec": 3500,
+    "upgradeDustBase": 8000,
+    "upgradeDustGrowth": 1.12,
+    "awakenMax": 5,
+    "icon": "",
+    "image": "999.png",
+    "video": "",
+    "poster": "999.png"
+  },
+  {
+    "id": 1000,
+    "name": "Great Magician",
+    "rarity": "SC",
+    "element": "∞",
+    "power": 0,
+    "incomePerSec": 3500,
+    "upgradeDustBase": 8000,
+    "upgradeDustGrowth": 1.12,
+    "awakenMax": 5,
+    "icon": "",
+    "image": "1000.png",
+    "video": "",
+    "poster": "1000.png"
+  },
+  {
+    "id": 2000,
+    "name": "MAMON",
+    "rarity": "SC",
+    "element": "Cat",
+    "power": 0,
+    "incomePerSec": 3600,
+    "upgradeDustBase": 8000,
+    "upgradeDustGrowth": 1.12,
+    "awakenMax": 5,
+    "icon": "",
+    "image": "2000.png",
+    "video": "",
+    "poster": "2000.png"
+  },
+  {
+    "id": 1041,
+    "name": "Satoru Gojo+Yuji Itadori",
+    "rarity": "EX",
+    "element": "Storngest in Present",
+    "power": 28000,
+    "incomePerSec": 2500,
+    "upgradeDustBase": 7000,
+    "upgradeDustGrowth": 1.118,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "1041.png",
+    "video": "",
+    "poster": "1041.png"
+  },
+  {
+    "id": 1042,
+    "name": "Sukuna+Dabura Karaba",
+    "rarity": "EX",
+    "element": "Awaken Evill",
+    "power": 28000,
+    "incomePerSec": 2500,
+    "upgradeDustBase": 7000,
+    "upgradeDustGrowth": 1.118,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "1042.png",
+    "video": "",
+    "poster": "1042.png"
+  },
+  {
+    "id": 1043,
+    "name": "Yuka Okkotsu+Tsurugi Okkotsu",
+    "rarity": "EX",
+    "element": "Okkotsu Family",
+    "power": 27200,
+    "incomePerSec": 2200,
+    "upgradeDustBase": 6800,
+    "upgradeDustGrowth": 1.118,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "1043.png",
+    "video": "",
+    "poster": "1043.png"
+  },
+  {
+    "id": 38,
+    "name": "EX Frieren",
+    "rarity": "EX",
+    "element": "Awaken Ligth",
+    "power": 28000,
+    "incomePerSec": 1000,
+    "upgradeDustBase": 7000,
+    "upgradeDustGrowth": 1.118,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "38.png",
+    "video": "",
+    "poster": "38.png"
+  },
+  {
+    "id": 39,
+    "name": "EX Fern",
+    "rarity": "EX",
+    "element": "Awaken Ligth",
+    "power": 27500,
+    "incomePerSec": 1000,
+    "upgradeDustBase": 6900,
+    "upgradeDustGrowth": 1.118,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "39.png",
+    "video": "",
+    "poster": "39.png"
+  },
+  {
+    "id": 40,
+    "name": "EX Stark",
+    "rarity": "EX",
+    "element": "Awaken Fire",
+    "power": 27200,
+    "incomePerSec": 1000,
+    "upgradeDustBase": 6800,
+    "upgradeDustGrowth": 1.118,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "40.png",
+    "video": "",
+    "poster": "40.png"
+  },
+  {
+    "id": 41,
+    "name": "EX Himmel",
+    "rarity": "EX",
+    "element": "Awaken Ligth",
+    "power": 28000,
+    "incomePerSec": 1000,
+    "upgradeDustBase": 7000,
+    "upgradeDustGrowth": 1.118,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "41.png",
+    "video": "",
+    "poster": "41.png"
+  },
+  {
+    "id": 44,
+    "name": "Hana Kurusu",
+    "rarity": "LR",
+    "element": "Angle",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "44.png"
+  },
+  {
+    "id": 45,
+    "name": "Riko Amanai",
+    "rarity": "LR",
+    "element": "Star",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "45.png"
+  },
+  {
+    "id": 1,
+    "name": "SABER.Artoria",
+    "rarity": "LR",
+    "element": "Excalibur!",
+    "power": 13000,
+    "incomePerSec": 1200,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1.png"
+  },
+  {
+    "id": 2,
+    "name": "Sung Jinwoo",
+    "rarity": "LR",
+    "element": "SHADOW Emperor",
+    "power": 12000,
+    "incomePerSec": 1100,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "2.png"
+  },
+  {
+    "id": 3,
+    "name": "Frieren",
+    "rarity": "LR",
+    "element": "ELF Mage",
+    "power": 12000,
+    "incomePerSec": 1100,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "3.png"
+  },
+  {
+    "id": 4,
+    "name": "DEKU",
+    "rarity": "LR",
+    "element": "OFA",
+    "power": 11000,
+    "incomePerSec": 1000,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "4.png"
+  },
+  {
+    "id": 5,
+    "name": "Kirito",
+    "rarity": "LR",
+    "element": "DuoSword",
+    "power": 11000,
+    "incomePerSec": 1000,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "5.png"
+  },
+  {
+    "id": 6,
+    "name": "Monkey D. Luffy",
+    "rarity": "LR",
+    "element": "NIGANIGA",
+    "power": 12000,
+    "incomePerSec": 1100,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "6.png"
+  },
+  {
+    "id": 7,
+    "name": "Satoru Gojo",
+    "rarity": "LR",
+    "element": "Infinity",
+    "power": 12000,
+    "incomePerSec": 1100,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "7.png"
+  },
+  {
+    "id": 8,
+    "name": "CID",
+    "rarity": "LR",
+    "element": "Atiomic",
+    "power": 13000,
+    "incomePerSec": 1000,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "8.png"
+  },
+  {
+    "id": 9,
+    "name": "Kamado Tanjirou",
+    "rarity": "LR",
+    "element": "Water",
+    "power": 10000,
+    "incomePerSec": 900,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "9.png"
+  },
+  {
+    "id": 10,
+    "name": "Uzumaki Naruto",
+    "rarity": "LR",
+    "element": "9Tail",
+    "power": 12000,
+    "incomePerSec": 1100,
+    "upgradeDustBase": 4000,
+    "upgradeDustGrowth": 1.105,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "10.png"
+  },
+  {
+    "id": 1038,
+    "name": "Marulu Val Vol Yelvori",
+    "rarity": "JJKS",
+    "element": "Chaos",
+    "power": 17000,
+    "incomePerSec": 1750,
+    "upgradeDustBase": 6200,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1038.png"
+  },
+  {
+    "id": 1039,
+    "name": "Yuka Okkotsu",
+    "rarity": "JJKS",
+    "element": "Ten Shadows Technique",
+    "power": 16800,
+    "incomePerSec": 1680,
+    "upgradeDustBase": 6200,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1039.png"
+  },
+  {
+    "id": 1040,
+    "name": "Tsurugi Okkotsu",
+    "rarity": "JJKS",
+    "element": "Physically Gifted",
+    "power": 16800,
+    "incomePerSec": 1680,
+    "upgradeDustBase": 6200,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1040.png"
+  },
+  {
+    "id": 1033,
+    "name": "Kinji Hakari",
+    "rarity": "JJKS",
+    "element": "Idle Death Gamble",
+    "power": 16000,
+    "incomePerSec": 1650,
+    "upgradeDustBase": 6200,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1033.png"
+  },
+  {
+    "id": 1034,
+    "name": "Hajime Kashimo",
+    "rarity": "JJKS",
+    "element": "Mythical Beast Amber",
+    "power": 16000,
+    "incomePerSec": 1650,
+    "upgradeDustBase": 6200,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1034.png"
+  },
+  {
+    "id": 1023,
+    "name": "Yuji Itadori",
+    "rarity": "JJKS",
+    "element": "Strongest ONE",
+    "power": 20000,
+    "incomePerSec": 1800,
+    "upgradeDustBase": 6500,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1023.png"
+  },
+  {
+    "id": 1021,
+    "name": "Hiromi Higuruma",
+    "rarity": "JJKS",
+    "element": "Judgeman",
+    "power": 16000,
+    "incomePerSec": 1700,
+    "upgradeDustBase": 6200,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1021.png"
+  },
+  {
+    "id": 1022,
+    "name": "Fumihiko Takaba",
+    "rarity": "JJKS",
+    "element": "Comedian",
+    "power": 17000,
+    "incomePerSec": 1750,
+    "upgradeDustBase": 6300,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1022.png"
+  },
+  {
+    "id": 1001,
+    "name": "Satoru Gojo",
+    "rarity": "JJKS",
+    "element": "INFINITY MAX",
+    "power": 15500,
+    "incomePerSec": 1650,
+    "upgradeDustBase": 6000,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1001.png"
+  },
+  {
+    "id": 1002,
+    "name": "Sukuna",
+    "rarity": "JJKS",
+    "element": "KING OF CURSE",
+    "power": 15500,
+    "incomePerSec": 1650,
+    "upgradeDustBase": 6000,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1002.png"
+  },
+  {
+    "id": 1003,
+    "name": "Senin Toji",
+    "rarity": "JJKS",
+    "element": "Heavenly Restriction",
+    "power": 15000,
+    "incomePerSec": 1500,
+    "upgradeDustBase": 6000,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1003.png"
+  },
+  {
+    "id": 1004,
+    "name": "Maki",
+    "rarity": "JJKS",
+    "element": "Heavenly Restriction MAX",
+    "power": 15100,
+    "incomePerSec": 1510,
+    "upgradeDustBase": 6000,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1004.png"
+  },
+  {
+    "id": 1005,
+    "name": "Okkotsu Yuta",
+    "rarity": "JJKS",
+    "element": "COPY CURSE",
+    "power": 15100,
+    "incomePerSec": 1510,
+    "upgradeDustBase": 6000,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1005.png"
+  },
+  {
+    "id": 1006,
+    "name": "Yuki Tsukumo",
+    "rarity": "JJKS",
+    "element": "Star Rage",
+    "power": 15300,
+    "incomePerSec": 1530,
+    "upgradeDustBase": 6000,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1006.png"
+  },
+  {
+    "id": 1007,
+    "name": "Suguru Geto",
+    "rarity": "JJKS",
+    "element": "Contro CURSE",
+    "power": 15000,
+    "incomePerSec": 1500,
+    "upgradeDustBase": 6000,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1007.png"
+  },
+  {
+    "id": 1008,
+    "name": "Kenjaku",
+    "rarity": "JJKS",
+    "element": "Brain Transplant",
+    "power": 15200,
+    "incomePerSec": 1520,
+    "upgradeDustBase": 6000,
+    "upgradeDustGrowth": 1.115,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1008.png"
+  },
+  {
+    "id": 1009,
+    "name": "Yuji Itadori",
+    "rarity": "JJKB",
+    "element": "HETAKEN!",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 5200,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1009.png"
+  },
+  {
+    "id": 1010,
+    "name": "Nobara Kugisaki",
+    "rarity": "JJKB",
+    "element": "Straw Doll Technique",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 5200,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1010.png"
+  },
+  {
+    "id": 1011,
+    "name": "Megumi Fushiguro",
+    "rarity": "JJKB",
+    "element": "Ten Shadows Technique",
+    "power": 14500,
+    "incomePerSec": 1450,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1011.png"
+  },
+  {
+    "id": 1012,
+    "name": "Kento Nanami",
+    "rarity": "JJKB",
+    "element": "Ratio Technique",
+    "power": 14500,
+    "incomePerSec": 1450,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1012.png"
+  },
+  {
+    "id": 1036,
+    "name": "Toge Inumaki",
+    "rarity": "JJKB",
+    "element": "Cursed Speech",
+    "power": 14300,
+    "incomePerSec": 1430,
+    "upgradeDustBase": 5250,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1036.png"
+  },
+  {
+    "id": 1037,
+    "name": "Panda",
+    "rarity": "JJKB",
+    "element": "Panda",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 5200,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1037.png"
+  },
+  {
+    "id": 1013,
+    "name": "Aoi Todo",
+    "rarity": "JJKB",
+    "element": "Boogie Woogie",
+    "power": 14300,
+    "incomePerSec": 1430,
+    "upgradeDustBase": 5250,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1013.png"
+  },
+  {
+    "id": 1014,
+    "name": "Momo Nishimiya",
+    "rarity": "JJKB",
+    "element": "Wind Scythe",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 5200,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1014.png"
+  },
+  {
+    "id": 1015,
+    "name": "Mai Zenin",
+    "rarity": "JJKB",
+    "element": "Construction",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 5200,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1015.png"
+  },
+  {
+    "id": 1016,
+    "name": "Maki Zenin",
+    "rarity": "JJKB",
+    "element": "Physically Gifted",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 5200,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1016.png"
+  },
+  {
+    "id": 1017,
+    "name": "Kasumi Miwa",
+    "rarity": "JJKB",
+    "element": "Simple Domain",
+    "power": 13900,
+    "incomePerSec": 1390,
+    "upgradeDustBase": 5100,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1017.png"
+  },
+  {
+    "id": 1018,
+    "name": "Kokichi Muta",
+    "rarity": "JJKB",
+    "element": "Puppet Manipulation",
+    "power": 14200,
+    "incomePerSec": 1420,
+    "upgradeDustBase": 5200,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1018.png"
+  },
+  {
+    "id": 1019,
+    "name": "Mei Mei",
+    "rarity": "JJKB",
+    "element": "Black Bird Manipulation",
+    "power": 14500,
+    "incomePerSec": 1450,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1019.png"
+  },
+  {
+    "id": 1020,
+    "name": "Utahime Iori",
+    "rarity": "JJKB",
+    "element": "Solo Forbidden Area",
+    "power": 14500,
+    "incomePerSec": 1450,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1020.png"
+  },
+  {
+    "id": 1035,
+    "name": "Sukuna",
+    "rarity": "JJKC",
+    "element": "Enchain",
+    "power": 15000,
+    "incomePerSec": 1500,
+    "upgradeDustBase": 5400,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1035.png"
+  },
+  {
+    "id": 1024,
+    "name": "Jogo",
+    "rarity": "JJKC",
+    "element": "Coffin of the Iron Mountain",
+    "power": 14500,
+    "incomePerSec": 1450,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1024.png"
+  },
+  {
+    "id": 1025,
+    "name": "Hanami",
+    "rarity": "JJKC",
+    "element": "Disaster Plants",
+    "power": 14000,
+    "incomePerSec": 1400,
+    "upgradeDustBase": 5200,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1025.png"
+  },
+  {
+    "id": 1026,
+    "name": "Dagon",
+    "rarity": "JJKC",
+    "element": "Disaster Tides",
+    "power": 14200,
+    "incomePerSec": 1420,
+    "upgradeDustBase": 5250,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1026.png"
+  },
+  {
+    "id": 1027,
+    "name": "Mahito",
+    "rarity": "JJKC",
+    "element": "Idle Transfiguration",
+    "power": 14500,
+    "incomePerSec": 1450,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1027.png"
+  },
+  {
+    "id": 1028,
+    "name": "Takako Uro",
+    "rarity": "JJKC",
+    "element": "Sky Manipulation",
+    "power": 14500,
+    "incomePerSec": 1450,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1028.png"
+  },
+  {
+    "id": 1029,
+    "name": "Ryu Ishigori",
+    "rarity": "JJKC",
+    "element": "Cursed Energy Discharge",
+    "power": 14400,
+    "incomePerSec": 1440,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1029.png"
+  },
+  {
+    "id": 1030,
+    "name": "Choso",
+    "rarity": "JJKC",
+    "element": "Blood Manipulation",
+    "power": 14400,
+    "incomePerSec": 1440,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1030.png"
+  },
+  {
+    "id": 1031,
+    "name": "Naoya Zenin",
+    "rarity": "JJKC",
+    "element": "Projection Sorcery",
+    "power": 13900,
+    "incomePerSec": 1390,
+    "upgradeDustBase": 5100,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1031.png"
+  },
+  {
+    "id": 1032,
+    "name": "Uraume",
+    "rarity": "JJKC",
+    "element": "Ice Formation",
+    "power": 14500,
+    "incomePerSec": 1450,
+    "upgradeDustBase": 5300,
+    "upgradeDustGrowth": 1.11,
+    "awakenMax": 8,
+    "icon": "",
+    "image": "1032.png"
+  },
+  {
+    "id": 43,
+    "name": "Kirara Hoshi",
+    "rarity": "UR",
+    "element": "Star",
+    "power": 8700,
+    "incomePerSec": 400,
+    "upgradeDustBase": 2200,
+    "upgradeDustGrowth": 1.1,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "43.png"
+  },
+  {
+    "id": 42,
+    "name": "Shoko Ieiri",
+    "rarity": "UR",
+    "element": "Heal",
+    "power": 8700,
+    "incomePerSec": 400,
+    "upgradeDustBase": 2200,
+    "upgradeDustGrowth": 1.1,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "42.png"
+  },
+  {
+    "id": 37,
+    "name": "Yuki Suou",
+    "rarity": "UR",
+    "element": "Water",
+    "power": 8600,
+    "incomePerSec": 350,
+    "upgradeDustBase": 2200,
+    "upgradeDustGrowth": 1.1,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "37.png"
+  },
+  {
+    "id": 11,
+    "name": "Goku",
+    "rarity": "UR",
+    "element": "Light",
+    "power": 8500,
+    "incomePerSec": 300,
+    "upgradeDustBase": 2200,
+    "upgradeDustGrowth": 1.1,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "11.png"
+  },
+  {
+    "id": 12,
+    "name": "Zenitsu",
+    "rarity": "UR",
+    "element": "Electical",
+    "power": 8500,
+    "incomePerSec": 250,
+    "upgradeDustBase": 2200,
+    "upgradeDustGrowth": 1.1,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "12.png"
+  },
+  {
+    "id": 13,
+    "name": "Roroa Zoro",
+    "rarity": "UR",
+    "element": "Wind",
+    "power": 9000,
+    "incomePerSec": 300,
+    "upgradeDustBase": 2200,
+    "upgradeDustGrowth": 1.1,
+    "awakenMax": 9,
+    "icon": "",
+    "image": "13.png"
+  },
+  {
+    "id": 36,
+    "name": "Yuki Suou",
+    "rarity": "SSR",
+    "element": "Water",
+    "power": 8100,
+    "incomePerSec": 170,
+    "upgradeDustBase": 1200,
+    "upgradeDustGrowth": 1.095,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "36.png"
+  },
+  {
+    "id": 14,
+    "name": "Saber Alter",
+    "rarity": "SSR",
+    "element": "Dark",
+    "power": 8000,
+    "incomePerSec": 170,
+    "upgradeDustBase": 1200,
+    "upgradeDustGrowth": 1.095,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "14.png"
+  },
+  {
+    "id": 15,
+    "name": "Yuki Asuna",
+    "rarity": "SSR",
+    "element": "Light",
+    "power": 8000,
+    "incomePerSec": 170,
+    "upgradeDustBase": 1200,
+    "upgradeDustGrowth": 1.095,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "15.png"
+  },
+  {
+    "id": 16,
+    "name": "Sinobu",
+    "rarity": "SSR",
+    "element": "Water",
+    "power": 7800,
+    "incomePerSec": 167,
+    "upgradeDustBase": 1200,
+    "upgradeDustGrowth": 1.095,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "16.png"
+  },
+  {
+    "id": 17,
+    "name": "Nami",
+    "rarity": "SSR",
+    "element": "Electical",
+    "power": 7800,
+    "incomePerSec": 167,
+    "upgradeDustBase": 1200,
+    "upgradeDustGrowth": 1.095,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "17.png"
+  },
+  {
+    "id": 18,
+    "name": "Waguri Kaoruko",
+    "rarity": "SSR",
+    "element": "Light",
+    "power": 8000,
+    "incomePerSec": 170,
+    "upgradeDustBase": 1200,
+    "upgradeDustGrowth": 1.095,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "18.png"
+  },
+  {
+    "id": 19,
+    "name": "Aria",
+    "rarity": "SR",
+    "element": "Ice",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/1200x/fe/12/a3/fe12a36a4f8dd44542b357204a7f2a10.jpg"
+  },
+  {
+    "id": 20,
+    "name": "Inosuke",
+    "rarity": "SR",
+    "element": "Beast",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/34/fc/c4/34fcc408f0caaa2812c4c1ae2111aea6.jpg"
+  },
+  {
+    "id": 21,
+    "name": "Uraraka",
+    "rarity": "SR",
+    "element": "Gravity",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/13/1b/19/131b1909ce47764bad895b53f74253f4.jpg"
+  },
+  {
+    "id": 22,
+    "name": "Sakura",
+    "rarity": "SR",
+    "element": "Earth",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/c8/81/8d/c8818d99d2dfa76be8d6a3363ce21d35.jpg"
+  },
+  {
+    "id": 23,
+    "name": "Miku",
+    "rarity": "SR",
+    "element": "Sound",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/02/61/e6/0261e667708ff3c23c293e1b3a0dc942.jpg"
+  },
+  {
+    "id": 24,
+    "name": "Zero Two",
+    "rarity": "SR",
+    "element": "Dark",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/74/c1/5c/74c15c286cc0099eafcd7e60dbaef324.jpg"
+  },
+  {
+    "id": 25,
+    "name": "Vegeta",
+    "rarity": "SR",
+    "element": "Dark",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/54/f6/6a/54f66a1fd083be8524abe73c05ae5962.jpg"
+  },
+  {
+    "id": 26,
+    "name": "Itadori Yuji",
+    "rarity": "SR",
+    "element": "Dark",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/1200x/a9/af/da/a9afdafb6c6900721df61b32700f788b.jpg"
+  },
+  {
+    "id": 27,
+    "name": "Asuka",
+    "rarity": "SR",
+    "element": "Fire",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/1200x/14/68/2e/14682e60dce1430aa2a441eb7fae5fd4.jpg"
+  },
+  {
+    "id": 28,
+    "name": "Stark",
+    "rarity": "SR",
+    "element": "Earth",
+    "power": 7400,
+    "incomePerSec": 60,
+    "upgradeDustBase": 650,
+    "upgradeDustGrowth": 1.09,
+    "awakenMax": 10,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/df/b2/e0/dfb2e062dc9907d15c609c7d7b9740d6.jpg"
+  },
+  {
+    "id": 29,
+    "name": "Monkey D. Luffy",
+    "rarity": "R",
+    "element": "Water",
+    "power": 6500,
+    "incomePerSec": 55,
+    "upgradeDustBase": 350,
+    "upgradeDustGrowth": 1.085,
+    "awakenMax": 13,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/07/43/fa/0743faae3f6872e6fb225ec9117a74c4.jpg"
+  },
+  {
+    "id": 30,
+    "name": "Uzumaki Naruto",
+    "rarity": "R",
+    "element": "Wind",
+    "power": 6500,
+    "incomePerSec": 55,
+    "upgradeDustBase": 350,
+    "upgradeDustGrowth": 1.085,
+    "awakenMax": 13,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/42/16/48/421648a488c7e9b7ada4e21895cc7971.jpg"
+  },
+  {
+    "id": 31,
+    "name": "Goku",
+    "rarity": "R",
+    "element": "Earth",
+    "power": 6500,
+    "incomePerSec": 55,
+    "upgradeDustBase": 350,
+    "upgradeDustGrowth": 1.085,
+    "awakenMax": 13,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/dd/81/ef/dd81efd9ddd5cf6e405ccd63fba590b1.jpg"
+  },
+  {
+    "id": 32,
+    "name": "Ichigo Kurosaki",
+    "rarity": "R",
+    "element": "Soul",
+    "power": 6500,
+    "incomePerSec": 55,
+    "upgradeDustBase": 350,
+    "upgradeDustGrowth": 1.085,
+    "awakenMax": 13,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/b1/c4/f6/b1c4f602188cd7b04326140ec9d91079.jpg"
+  },
+  {
+    "id": 33,
+    "name": "Kobi",
+    "rarity": "N",
+    "element": "None",
+    "power": 5000,
+    "incomePerSec": 45,
+    "upgradeDustBase": 10,
+    "upgradeDustGrowth": 1.0025,
+    "awakenMax": 13,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/5c/30/88/5c3088213a85387044a6e82158dcc457.jpg"
+  },
+  {
+    "id": 34,
+    "name": "Conan",
+    "rarity": "N",
+    "element": "None",
+    "power": 5000,
+    "incomePerSec": 45,
+    "upgradeDustBase": 10,
+    "upgradeDustGrowth": 1.0025,
+    "awakenMax": 13,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg"
+  },
+  {
+    "id": 35,
+    "name": "Sung Jinwoo",
+    "rarity": "N",
+    "element": "None",
+    "power": 1000,
+    "incomePerSec": 35,
+    "upgradeDustBase": 10,
+    "upgradeDustGrowth": 1.0025,
+    "awakenMax": 13,
+    "icon": "",
+    "image": "https://i.pinimg.com/736x/7e/4c/48/7e4c48a5687f37b5af20f31255dc5980.jpg"
+  }
+];
+    const CARD_BY_ID = new Map(CARDS.map(card => [String(card.id), card]));
+    const BANNER_BY_ID = new Map(BANNERS.map(banner => [banner.id, banner]));
+
+    let activeTab = "summon";
+    let modalCardId = "";
+    let toastTimer = 0;
+    let saveTimer = 0;
+    let cloudSaveTimer = 0;
+    let cloudInitPromise = null;
+    let cloudModules = null;
+    let cloudApp = null;
+    let cloudAuth = null;
+    let cloudDb = null;
+    let cloudReady = false;
+    let cloudBusy = false;
+    let activeCloudUid = "";
+    let activeCloudUsername = SAFE_STORAGE.getItem(CONFIG.cloudUsernameKey) || "";
+    let state = loadState();
+
+    function defaultState() {
+      return {
+        version: 1,
+        gems: CONFIG.startingGems,
+        dust: CONFIG.startingDust,
+        incomeBank: 0,
+        lastIncomeAt: Date.now(),
+        lastDaily: "",
+        activeBannerId: BANNERS[0] ? BANNERS[0].id : "",
+        owned: {},
+        team: [],
+        pity: {},
+        recent: [],
+        migratedFromOldSave: false
+      };
+    }
+
+    function safeParse(value, fallback = null) {
+      try { return JSON.parse(value); } catch (_) { return fallback; }
+    }
+
+    function setCloudStatus(message, tone = "warn") {
+      const status = document.getElementById("cloudStatusText");
+      const summary = document.getElementById("cloudSummaryText");
+      if (status) {
+        status.textContent = message;
+        status.className = `cloud-status ${tone}`;
+      }
+      if (summary) summary.textContent = message;
+    }
+
+    function renderAccount() {
+      const label = activeCloudUsername || "Local Guest";
+      const accountText = document.getElementById("accountButtonText");
+      const logoutButton = document.getElementById("logoutButton");
+      if (accountText) accountText.textContent = label;
+      if (logoutButton) logoutButton.disabled = !activeCloudUid;
+    }
+
+    function setAuthBusy(busy) {
+      cloudBusy = busy;
+      document.querySelectorAll('[data-action="register"], [data-action="login"], [data-action="logout"]')
+        .forEach(button => { button.disabled = busy || (button.dataset.action === "logout" && !activeCloudUid); });
+    }
+
+    function usernameToFirebaseEmail(username) {
+      const bytes = new TextEncoder().encode(String(username || "").trim());
+      const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+      return `gacha_${hex}@gacha.local`;
+    }
+
+    function validateCredentials(username, password) {
+      if (username.length < 3 || username.length > 24) return "Username ต้องยาว 3-24 ตัวอักษร";
+      if (/[\\/]/.test(username)) return "Username ห้ามมีเครื่องหมาย \\ หรือ /";
+      if (password.length < 6 || password.length > 64) return "Password ต้องยาว 6-64 ตัวอักษร";
+      return "";
+    }
+
+    function firebaseErrorMessage(error, mode) {
+      const code = String(error && error.code || "");
+      if (code === "auth/email-already-in-use") return "Username นี้มีบัญชีอยู่แล้ว ให้กดล็อกอิน";
+      if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") return "Username หรือ Password ไม่ถูกต้อง";
+      if (code === "auth/weak-password") return "Password ต้องมีอย่างน้อย 6 ตัวอักษร";
+      if (code === "auth/unauthorized-domain") return "โดเมน GitHub Pages นี้ยังไม่ได้เพิ่มใน Firebase Authorized domains";
+      if (code === "auth/configuration-not-found" || code === "auth/operation-not-allowed") return "Firebase Authentication ยังไม่ได้เปิด Email/Password";
+      if (code.includes("permission-denied")) return "Realtime Database Rules ไม่อนุญาตให้อ่านหรือบันทึกเซฟ";
+      return `${mode}ไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตและการตั้งค่า Firebase`;
+    }
+
+    async function initFirebase() {
+      if (cloudReady) return true;
+      if (cloudInitPromise) return cloudInitPromise;
+      if (window.location.protocol === "file:") {
+        setCloudStatus("โหมดไฟล์ตรง: เล่น Local ได้ แต่ Firebase ต้องเปิดผ่าน GitHub Pages หรือ localhost", "warn");
+        return false;
+      }
+
+      setCloudStatus("กำลังเชื่อมต่อ Firebase...", "warn");
+      cloudInitPromise = Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js")
+      ]).then(async ([appModule, authModule, databaseModule]) => {
+        cloudModules = {
+          initializeApp: appModule.initializeApp,
+          getApps: appModule.getApps,
+          getAuth: authModule.getAuth,
+          createUserWithEmailAndPassword: authModule.createUserWithEmailAndPassword,
+          signInWithEmailAndPassword: authModule.signInWithEmailAndPassword,
+          signOut: authModule.signOut,
+          onAuthStateChanged: authModule.onAuthStateChanged,
+          getDatabase: databaseModule.getDatabase,
+          ref: databaseModule.ref,
+          get: databaseModule.get,
+          update: databaseModule.update
+        };
+        cloudApp = cloudModules.getApps().length
+          ? cloudModules.getApps()[0]
+          : cloudModules.initializeApp(FIREBASE_CONFIG);
+        cloudAuth = cloudModules.getAuth(cloudApp);
+        cloudDb = cloudModules.getDatabase(cloudApp);
+        cloudReady = true;
+        setCloudStatus("Firebase พร้อมใช้งาน ล็อกอินเพื่อซิงก์เซฟข้ามเครื่อง", "ok");
+        await restoreCloudSession();
+        return true;
+      }).catch(error => {
+        cloudInitPromise = null;
+        setCloudStatus(firebaseErrorMessage(error, "เชื่อมต่อ Firebase"), "bad");
+        return false;
+      });
+      return cloudInitPromise;
+    }
+
+    function cloudUserRef(uid) {
+      return cloudModules.ref(cloudDb, `users/${uid}`);
+    }
+
+    async function loadCloudAccount(uid) {
+      const snapshot = await cloudModules.get(cloudUserRef(uid));
+      return snapshot.exists() ? snapshot.val() : null;
+    }
+
+    async function writeCloudSave(extra = {}) {
+      if (!cloudReady || !activeCloudUid || !activeCloudUsername) return false;
+      await cloudModules.update(cloudUserRef(activeCloudUid), Object.assign({
+        username: activeCloudUsername,
+        save: state,
+        updatedAt: Date.now(),
+        updatedAtText: new Date().toLocaleString("th-TH")
+      }, extra));
+      return true;
+    }
+
+    function scheduleCloudSave() {
+      if (!cloudReady || !activeCloudUid || cloudBusy) return;
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(async () => {
+        try {
+          await writeCloudSave();
+          setCloudStatus(`Cloud Save ล่าสุด: ${new Date().toLocaleTimeString("th-TH")}`, "ok");
+        } catch (error) {
+          setCloudStatus(firebaseErrorMessage(error, "บันทึก Cloud"), "bad");
+        }
+      }, 900);
+    }
+
+    async function restoreCloudSession() {
+      if (!cloudReady || !cloudAuth) return;
+      const user = await new Promise(resolve => {
+        let unsubscribe = () => {};
+        unsubscribe = cloudModules.onAuthStateChanged(cloudAuth, currentUser => {
+          unsubscribe();
+          resolve(currentUser || null);
+        }, () => resolve(null));
+      });
+      if (!user) {
+        activeCloudUid = "";
+        activeCloudUsername = "";
+        SAFE_STORAGE.removeItem(CONFIG.cloudUsernameKey);
+        renderAccount();
+        return;
+      }
+
+      try {
+        const account = await loadCloudAccount(user.uid);
+        activeCloudUid = user.uid;
+        activeCloudUsername = String(account && account.username || activeCloudUsername || "Player");
+        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, activeCloudUsername);
+        if (account && account.save) {
+          state = normalizeState(account.save);
+          SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
+        }
+        renderAll();
+        setCloudStatus(`เชื่อมต่อ Cloud แล้ว: ${activeCloudUsername}`, "ok");
+      } catch (error) {
+        setCloudStatus(firebaseErrorMessage(error, "โหลด Cloud"), "bad");
+      }
+    }
+
+    function getAuthInputs() {
+      return {
+        username: document.getElementById("authUsername").value.trim(),
+        password: document.getElementById("authPassword").value
+      };
+    }
+
+    async function registerCloudAccount() {
+      if (cloudBusy) return;
+      const { username, password } = getAuthInputs();
+      const validation = validateCredentials(username, password);
+      if (validation) return showToast(validation);
+      setAuthBusy(true);
+      try {
+        if (!await initFirebase()) throw new Error("firebase-unavailable");
+        const credential = await cloudModules.createUserWithEmailAndPassword(
+          cloudAuth,
+          usernameToFirebaseEmail(username),
+          password
+        );
+        activeCloudUid = credential.user.uid;
+        activeCloudUsername = username;
+        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
+        await writeCloudSave({
+          createdAt: Date.now(),
+          createdAtText: new Date().toLocaleString("th-TH")
+        });
+        document.getElementById("authPassword").value = "";
+        renderAccount();
+        setCloudStatus(`สมัครสำเร็จและอัปโหลดเซฟของ ${username} แล้ว`, "ok");
+        showToast("สมัครบัญชีและอัปโหลดเซฟขึ้น Firebase แล้ว");
+      } catch (error) {
+        setCloudStatus(firebaseErrorMessage(error, "สมัครบัญชี"), "bad");
+        showToast(firebaseErrorMessage(error, "สมัครบัญชี"));
+      } finally {
+        setAuthBusy(false);
+      }
+    }
+
+    async function loginCloudAccount() {
+      if (cloudBusy) return;
+      const { username, password } = getAuthInputs();
+      const validation = validateCredentials(username, password);
+      if (validation) return showToast(validation);
+      setAuthBusy(true);
+      try {
+        if (!await initFirebase()) throw new Error("firebase-unavailable");
+        const credential = await cloudModules.signInWithEmailAndPassword(
+          cloudAuth,
+          usernameToFirebaseEmail(username),
+          password
+        );
+        const account = await loadCloudAccount(credential.user.uid);
+        activeCloudUid = credential.user.uid;
+        activeCloudUsername = String(account && account.username || username);
+        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, activeCloudUsername);
+        if (account && account.save) {
+          state = normalizeState(account.save);
+        } else {
+          await writeCloudSave({
+            createdAt: Date.now(),
+            createdAtText: new Date().toLocaleString("th-TH")
+          });
+        }
+        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
+        document.getElementById("authPassword").value = "";
+        renderAll();
+        setCloudStatus(`ล็อกอินแล้ว: ${activeCloudUsername} • โหลด Cloud Save สำเร็จ`, "ok");
+        showToast("ล็อกอินและโหลด Cloud Save สำเร็จ");
+      } catch (error) {
+        setCloudStatus(firebaseErrorMessage(error, "ล็อกอิน"), "bad");
+        showToast(firebaseErrorMessage(error, "ล็อกอิน"));
+      } finally {
+        setAuthBusy(false);
+      }
+    }
+
+    async function logoutCloudAccount() {
+      if (!cloudReady || !cloudAuth || !activeCloudUid) return;
+      setAuthBusy(true);
+      try {
+        await writeCloudSave();
+        await cloudModules.signOut(cloudAuth);
+        activeCloudUid = "";
+        activeCloudUsername = "";
+        SAFE_STORAGE.removeItem(CONFIG.cloudUsernameKey);
+        renderAccount();
+        setCloudStatus("ออกจากบัญชีแล้ว เกมยังเซฟแบบ Local ในเครื่องนี้", "warn");
+        showToast("ออกจากบัญชี Firebase แล้ว");
+      } catch (error) {
+        showToast(firebaseErrorMessage(error, "ออกจากบัญชี"));
+      } finally {
+        setAuthBusy(false);
+      }
+    }
+
+    function loadState() {
+      const stored = safeParse(SAFE_STORAGE.getItem(CONFIG.saveKey));
+      if (stored && typeof stored === "object") return normalizeState(stored);
+
+      const migrated = migrateOldSave();
+      if (migrated) {
+        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(migrated));
+        return migrated;
+      }
+      return defaultState();
+    }
+
+    function migrateOldSave() {
+      const activeUser = SAFE_STORAGE.getItem(CONFIG.oldActiveUserKey);
+      const accounts = safeParse(SAFE_STORAGE.getItem(CONFIG.oldAccountsKey), {});
+      const entry = activeUser && accounts ? accounts[activeUser] : null;
+      const old = entry && entry.save ? entry.save : entry;
+      if (!old || typeof old !== "object") return null;
+
+      const next = defaultState();
+      next.gems = Number(old.gems ?? next.gems);
+      next.dust = Number(old.dust ?? next.dust);
+      next.incomeBank = Number(old.incomeBank ?? 0);
+      next.lastIncomeAt = Number(old.lastIncomeAt ?? Date.now());
+      next.lastDaily = String(old.lastDailyRewardDate || old.lastDaily || "");
+      next.activeBannerId = SAFE_STORAGE.getItem(CONFIG.oldBannerKey) || next.activeBannerId;
+      next.owned = old.owned && typeof old.owned === "object" ? old.owned : {};
+      next.team = Array.isArray(old.showcase) ? old.showcase.map(String) : [];
+      next.pity = old.gachaGuaranteeCounters && typeof old.gachaGuaranteeCounters === "object" ? old.gachaGuaranteeCounters : {};
+      next.migratedFromOldSave = true;
+      return normalizeState(next);
+    }
+
+    function normalizeState(raw) {
+      const next = Object.assign(defaultState(), raw || {});
+      if (Array.isArray(raw && raw.showcase) && !(raw && raw.team)) next.team = raw.showcase;
+      if (raw && raw.lastDailyRewardDate && !raw.lastDaily) next.lastDaily = raw.lastDailyRewardDate;
+      if (raw && raw.gachaGuaranteeCounters && !raw.pity) next.pity = raw.gachaGuaranteeCounters;
+      next.gems = Math.max(0, Number(next.gems) || 0);
+      next.dust = Math.max(0, Number(next.dust) || 0);
+      next.incomeBank = Math.max(0, Number(next.incomeBank) || 0);
+      next.lastIncomeAt = Number(next.lastIncomeAt) || Date.now();
+      next.owned = next.owned && typeof next.owned === "object" ? next.owned : {};
+      Object.keys(next.owned).forEach(id => {
+        const item = next.owned[id] || {};
+        item.count = Math.max(1, Math.floor(Number(item.count) || 1));
+        item.level = Math.min(CONFIG.maxLevel, Math.max(1, Math.floor(Number(item.level) || 1)));
+        item.duplicateRank = Math.max(0, Math.floor(Number(item.duplicateRank) || 0));
+        next.owned[id] = item;
+      });
+      next.team = Array.isArray(next.team)
+        ? [...new Set(next.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.teamSlots)
+        : [];
+      next.pity = next.pity && typeof next.pity === "object" ? next.pity : {};
+      next.recent = Array.isArray(next.recent) ? next.recent.map(String).filter(id => CARD_BY_ID.has(id)).slice(0, 10) : [];
+      if (!BANNER_BY_ID.has(next.activeBannerId)) next.activeBannerId = BANNERS[0] ? BANNERS[0].id : "";
+      return next;
+    }
+
+    function saveState(immediate = false) {
+      clearTimeout(saveTimer);
+      const write = () => {
+        persistLocalState();
+        scheduleCloudSave();
+      };
+      if (immediate) write();
+      else saveTimer = setTimeout(write, 180);
+    }
+
+    function persistLocalState() {
+      SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
+    }
+
+    function formatNumber(value) {
+      const number = Number(value) || 0;
+      if (Math.abs(number) < 1000) return Math.floor(number).toLocaleString("th-TH");
+      return new Intl.NumberFormat("th-TH", { notation: "compact", maximumFractionDigits: 1 }).format(number);
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function resolveAsset(value, type = "card") {
+      const source = String(value || "").trim();
+      if (!source) return "";
+      if (/^(https?:|data:|blob:)/i.test(source) || source.includes("/")) return source;
+      return type === "banner" ? `assets/banners/${source}` : `assets/cards/${source}`;
+    }
+
+    function isVideo(value) {
+      return /\.(mp4|webm|ogg|mov|m4v)(?:[?#].*)?$/i.test(String(value || ""));
+    }
+
+    function getCardImage(card) {
+      return resolveAsset(card.poster || card.image || card.icon, "card");
+    }
+
+    function getOwned(cardId) {
+      return state.owned[String(cardId)] || null;
+    }
+
+    function getRarity(card) {
+      return RARITIES[card.rarity] || RARITIES.N;
+    }
+
+    function getCardPower(card) {
+      const owned = getOwned(card.id);
+      const level = owned ? owned.level : 1;
+      const rank = owned ? owned.duplicateRank : 0;
+      const rarity = getRarity(card);
+      return Number(card.power || 0) * (1 + (level - 1) * CONFIG.powerGrowth) * (1 + rank * rarity.powerBonus);
+    }
+
+    function getCardIncome(card) {
+      const owned = getOwned(card.id);
+      const level = owned ? owned.level : 1;
+      const rank = owned ? owned.duplicateRank : 0;
+      const rarity = getRarity(card);
+      return Number(card.incomePerSec || 0) * (1 + (level - 1) * CONFIG.incomeGrowth) * (1 + rank * rarity.incomeBonus);
+    }
+
+    function getTeamIncome() {
+      return state.team.reduce((sum, id) => {
+        const card = CARD_BY_ID.get(String(id));
+        return sum + (card ? getCardIncome(card) : 0);
+      }, 0);
+    }
+
+    function updateIncome() {
+      const now = Date.now();
+      const seconds = Math.max(0, Math.min((now - state.lastIncomeAt) / 1000, 60 * 60 * 24 * 7));
+      state.incomeBank += getTeamIncome() * seconds;
+      state.lastIncomeAt = now;
+    }
+
+    function weightedKey(map, fallback) {
+      const entries = Object.entries(map || {}).filter(([, weight]) => Number(weight) > 0);
+      const total = entries.reduce((sum, [, weight]) => sum + Number(weight), 0);
+      if (!entries.length || total <= 0) return fallback;
+      let roll = Math.random() * total;
+      for (const [key, weight] of entries) {
+        roll -= Number(weight);
+        if (roll <= 0) return key;
+      }
+      return entries[entries.length - 1][0];
+    }
+
+    function randomCard(rarity, banner, guaranteed = false) {
+      let pool = CARDS.filter(card => card.rarity === rarity);
+      if (!pool.length) pool = CARDS;
+      const guaranteeRates = guaranteed && banner.guarantee ? banner.guarantee.cardRates || {} : {};
+      const hasGuaranteeCards = pool.some(card => Number(guaranteeRates[card.id]) > 0);
+      const weights = {};
+      pool.forEach(card => {
+        weights[String(card.id)] = hasGuaranteeCards
+          ? Number(guaranteeRates[card.id]) || 0
+          : Number((banner.rateUpCards || {})[card.id]) || 1;
+      });
+      const id = weightedKey(weights, String(pool[0].id));
+      return CARD_BY_ID.get(String(id)) || pool[0];
+    }
+
+    function pullCards(times) {
+      const banner = getActiveBanner();
+      const guarantee = banner.guarantee || {};
+      const results = [];
+
+      for (let index = 0; index < times; index += 1) {
+        let pity = Math.max(0, Number(state.pity[banner.id]) || 0) + 1;
+        const guaranteed = guarantee.enabled !== false && Number(guarantee.every) > 0 && pity >= Number(guarantee.every);
+        let rarity = guaranteed
+          ? weightedKey(guarantee.rarityRates || {}, Object.keys(guarantee.rarityRates || {})[0] || "UR")
+          : weightedKey(banner.rateOverrides || {}, "N");
+
+        if (times === 10 && index === 9) {
+          const hasSRPlus = results.some(result => getRarity(result.card).order >= RARITIES.SR.order);
+          if (!hasSRPlus && !guaranteed) {
+            const betterRates = Object.fromEntries(
+              Object.entries(banner.rateOverrides || {}).filter(([key]) => (RARITIES[key] || RARITIES.N).order >= RARITIES.SR.order)
+            );
+            rarity = weightedKey(betterRates, "SR");
+          }
+        }
+
+        const card = randomCard(rarity, banner, guaranteed);
+        const key = String(card.id);
+        const duplicate = Boolean(state.owned[key]);
+
+        if (duplicate) {
+          state.owned[key].count += 1;
+          state.dust += getRarity(card).dust;
+        } else {
+          state.owned[key] = { count: 1, level: 1, duplicateRank: 0 };
+        }
+
+        if (guaranteed || (guarantee.resetWhenPullRarities || []).includes(card.rarity)) pity = 0;
+        state.pity[banner.id] = pity;
+        results.push({ card, duplicate, guaranteed });
+      }
+      return results;
+    }
+
+    function getActiveBanner() {
+      return BANNER_BY_ID.get(state.activeBannerId) || BANNERS[0];
+    }
+
+    function getPullCost(times) {
+      const banner = getActiveBanner();
+      return times === 10 ? Number(banner.tenPullCost || 0) : Number(banner.singlePullCost || 0);
+    }
+
+    function openPack(times) {
+      updateIncome();
+      const cost = getPullCost(times);
+      if (state.gems < cost) return showToast("Gems ไม่พอ รับโบนัสรายวันหรือรายได้จากทีมก่อน");
+
+      state.gems -= cost;
+      const results = pullCards(times);
+      state.recent = results.map(result => String(result.card.id));
+      saveState(true);
+      renderAll();
+      showReveal(results);
+    }
+
+    function getLocalDateKey() {
+      const date = new Date();
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function claimDaily() {
+      const today = getLocalDateKey();
+      if (state.lastDaily === today) return showToast("รับโบนัสของวันนี้แล้ว");
+      state.lastDaily = today;
+      state.gems += CONFIG.dailyGems;
+      saveState(true);
+      renderAll();
+      showToast(`รับ ${formatNumber(CONFIG.dailyGems)} Gems แล้ว`);
+    }
+
+    function claimIncome() {
+      updateIncome();
+      const reward = Math.floor(state.incomeBank);
+      if (reward < 1) return showToast("ยังไม่มีรายได้สะสม");
+      state.gems += reward;
+      state.incomeBank -= reward;
+      saveState(true);
+      renderAll();
+      showToast(`รับ ${formatNumber(reward)} Gems แล้ว`);
+    }
+
+    function getUpgradeCost(card) {
+      const owned = getOwned(card.id);
+      if (!owned) return Infinity;
+      const base = Number(card.upgradeDustBase || 250);
+      const growth = Number(card.upgradeDustGrowth || 1.10);
+      return Math.ceil(base * Math.pow(growth, owned.level - 1));
+    }
+
+    function upgradeCard(cardId) {
+      const card = CARD_BY_ID.get(String(cardId));
+      const owned = card && getOwned(card.id);
+      if (!card || !owned) return;
+      if (owned.level >= CONFIG.maxLevel) return showToast("การ์ดใบนี้เลเวลเต็มแล้ว");
+      const cost = getUpgradeCost(card);
+      if (state.dust < cost) return showToast("Dust ไม่พอ");
+      updateIncome();
+      state.dust -= cost;
+      owned.level += 1;
+      saveState();
+      renderAll();
+      openCardModal(card.id);
+    }
+
+    function getAwakenCost(card) {
+      const owned = getOwned(card.id);
+      const rarity = getRarity(card);
+      const maxRank = rarity.stars;
+      const rank = owned ? Math.min(owned.duplicateRank, maxRank) : 0;
+      const usedBefore = Math.floor(rarity.awakenCost * rank / maxRank);
+      const usedAfter = Math.floor(rarity.awakenCost * Math.min(rank + 1, maxRank) / maxRank);
+      return Math.max(1, usedAfter - usedBefore);
+    }
+
+    function awakenCard(cardId) {
+      const card = CARD_BY_ID.get(String(cardId));
+      const owned = card && getOwned(card.id);
+      if (!card || !owned) return;
+      const rarity = getRarity(card);
+      if (owned.duplicateRank >= rarity.stars) return showToast("ปลุกพลังเต็มแล้ว");
+      const cost = getAwakenCost(card);
+      if (owned.count - 1 < cost) return showToast(`ต้องใช้การ์ดซ้ำ ${cost} ใบ`);
+      updateIncome();
+      owned.count -= cost;
+      owned.duplicateRank += 1;
+      saveState();
+      renderAll();
+      openCardModal(card.id);
+    }
+
+    function toggleTeam(cardId) {
+      const id = String(cardId);
+      if (!state.owned[id]) return;
+      updateIncome();
+      if (state.team.includes(id)) state.team = state.team.filter(item => item !== id);
+      else {
+        if (state.team.length >= CONFIG.teamSlots) return showToast("ทีมเต็มแล้ว เอาการ์ดใบอื่นออกก่อน");
+        state.team.push(id);
+      }
+      saveState();
+      renderAll();
+      openCardModal(id);
+    }
+
+    function cardHTML(card, options = {}) {
+      const owned = getOwned(card.id);
+      const rarity = getRarity(card);
+      const image = getCardImage(card);
+      const count = owned ? owned.count : 0;
+      const level = owned ? owned.level : 1;
+      const fallback = escapeHTML(String(card.name || "?").trim().slice(0, 1).toUpperCase());
+      const compact = options.compact === true;
+      return `
+        <button class="game-card ${owned ? "" : "locked"}" style="--rarity:${rarity.color}" data-action="open-card" data-card-id="${escapeHTML(card.id)}">
+          <div class="card-art">
+            <div class="art-fallback">${fallback}</div>
+            ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" onerror="this.remove()">` : ""}
+            <span class="rarity-badge">${escapeHTML(rarity.label)}</span>
+            ${owned ? `<span class="copy-badge">x${count}</span>` : ""}
+          </div>
+          ${compact ? "" : `
+            <div class="card-body">
+              <h3 class="card-name">${escapeHTML(card.name)}</h3>
+              <div class="card-meta">
+                <span>Lv.${level}</span>
+                <span class="stars">${"★".repeat(Math.min(rarity.stars, 8))}${rarity.stars > 8 ? "+" : ""}</span>
+              </div>
+            </div>
+          `}
+        </button>
+      `;
+    }
+
+    function renderBanner() {
+      const banner = getActiveBanner();
+      if (!banner) return;
+      const media = (banner.images || []).find(Boolean) || banner.image || "";
+      const source = resolveAsset(media, "banner");
+      const mediaHTML = !source ? "" : isVideo(source)
+        ? `<video src="${escapeHTML(source)}" autoplay muted loop playsinline preload="metadata"></video>`
+        : `<img src="${escapeHTML(source)}" alt="" fetchpriority="high">`;
+
+      document.getElementById("bannerMedia").innerHTML = mediaHTML;
+      document.getElementById("bannerTitle").textContent = banner.name;
+      document.getElementById("bannerDescription").textContent = banner.description || "เปิดแพ็กเพื่อสะสมการ์ดและสร้างทีมที่แข็งแกร่งที่สุด";
+      document.getElementById("singleCost").textContent = `${formatNumber(banner.singlePullCost)} Gems`;
+      document.getElementById("tenCost").textContent = `${formatNumber(banner.tenPullCost)} Gems`;
+      document.getElementById("ratePills").innerHTML = Object.entries(banner.rateOverrides || {})
+        .filter(([, rate]) => Number(rate) > 0 && Number(rate) < 10)
+        .sort((a, b) => (RARITIES[b[0]]?.order || 0) - (RARITIES[a[0]]?.order || 0))
+        .slice(0, 6)
+        .map(([rarity, rate]) => `<span class="pill" style="color:${RARITIES[rarity]?.color || "white"}">${escapeHTML(RARITIES[rarity]?.label || rarity)} ${Number(rate)}%</span>`)
+        .join("");
+
+      const select = document.getElementById("bannerSelect");
+      select.innerHTML = BANNERS.map(item => `<option value="${escapeHTML(item.id)}">${escapeHTML(item.name)}</option>`).join("");
+      select.value = banner.id;
+    }
+
+    function renderResources() {
+      updateIncome();
+      const uniqueOwned = Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length;
+      const teamIncome = getTeamIncome();
+      const teamPower = state.team.reduce((sum, id) => {
+        const card = CARD_BY_ID.get(id);
+        return sum + (card ? getCardPower(card) : 0);
+      }, 0);
+      const pity = Number(state.pity[getActiveBanner()?.id] || 0);
+      const todayClaimed = state.lastDaily === getLocalDateKey();
+
+      document.getElementById("gemsText").textContent = formatNumber(state.gems);
+      document.getElementById("dustText").textContent = formatNumber(state.dust);
+      document.getElementById("ownedText").textContent = `${uniqueOwned}/${CARDS.length}`;
+      document.getElementById("bankText").textContent = formatNumber(state.incomeBank);
+      document.getElementById("incomeText").textContent = formatNumber(teamIncome);
+      document.getElementById("pityText").textContent = formatNumber(pity);
+      document.getElementById("teamText").textContent = `${state.team.length}/${CONFIG.teamSlots}`;
+      document.getElementById("lastRarityText").textContent = state.recent[0] ? getRarity(CARD_BY_ID.get(state.recent[0])).label : "-";
+      document.getElementById("teamIncomeText").textContent = `${formatNumber(teamIncome)} Gems/s`;
+      document.getElementById("teamPowerText").textContent = formatNumber(teamPower);
+      document.getElementById("teamBankText").textContent = `${formatNumber(state.incomeBank)} Gems`;
+      document.getElementById("dailyText").textContent = todayClaimed
+        ? "รับโบนัสวันนี้แล้ว กลับมาใหม่หลังเที่ยงคืน"
+        : `รับ ${formatNumber(CONFIG.dailyGems)} Gems ฟรีสำหรับเปิดแพ็ก`;
+      document.getElementById("dailyButton").disabled = todayClaimed;
+      document.getElementById("dailyButton").textContent = todayClaimed ? "รับแล้ววันนี้" : "รับโบนัสวันนี้";
+    }
+
+    function getFilteredCards() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const rarity = document.getElementById("rarityFilter").value;
+      return CARDS
+        .filter(card => !query || `${card.name} ${card.element} ${card.rarity}`.toLowerCase().includes(query))
+        .filter(card => !rarity || card.rarity === rarity)
+        .sort((a, b) => {
+          const ownedDiff = Number(Boolean(getOwned(b.id))) - Number(Boolean(getOwned(a.id)));
+          if (ownedDiff) return ownedDiff;
+          return getRarity(b).order - getRarity(a).order || String(a.name).localeCompare(String(b.name));
+        });
+    }
+
+    function renderRecent() {
+      const grid = document.getElementById("recentGrid");
+      const cards = state.recent.map(id => CARD_BY_ID.get(id)).filter(Boolean);
+      grid.innerHTML = cards.length
+        ? cards.map(card => cardHTML(card)).join("")
+        : `<div class="empty-state">ยังไม่มีผลการเปิดแพ็ก<br>เลือกตู้ด้านบนแล้วเริ่มสะสมการ์ดใบแรกได้เลย</div>`;
+    }
+
+    function renderCollection() {
+      const cards = getFilteredCards();
+      const uniqueOwned = Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length;
+      document.getElementById("collectionText").textContent = `สะสมแล้ว ${uniqueOwned} จาก ${CARDS.length} ใบ (${Math.round(uniqueOwned / Math.max(1, CARDS.length) * 100)}%)`;
+      document.getElementById("collectionGrid").innerHTML = cards.length
+        ? cards.map(card => cardHTML(card)).join("")
+        : `<div class="empty-state">ไม่พบการ์ดที่ตรงกับตัวกรอง</div>`;
+    }
+
+    function renderTeam() {
+      const grid = document.getElementById("teamGrid");
+      const slots = [];
+      for (let index = 0; index < CONFIG.teamSlots; index += 1) {
+        const card = CARD_BY_ID.get(state.team[index]);
+        slots.push(card ? cardHTML(card) : `<div class="team-slot">ช่อง ${index + 1}<br>เลือกการ์ดจากคอลเล็กชั่น</div>`);
+      }
+      grid.innerHTML = slots.join("");
+    }
+
+    function renderFilters() {
+      const select = document.getElementById("rarityFilter");
+      if (select.options.length) return;
+      select.innerHTML = `<option value="">ทุกระดับ</option>` + Object.entries(RARITIES)
+        .sort((a, b) => b[1].order - a[1].order)
+        .map(([key, info]) => `<option value="${key}">${escapeHTML(info.label)} (${key})</option>`)
+        .join("");
+    }
+
+    function renderTabs() {
+      document.querySelectorAll("[data-tab]").forEach(button => button.classList.toggle("active", button.dataset.tab === activeTab));
+      document.getElementById("summonView").classList.toggle("hidden", activeTab !== "summon");
+      document.getElementById("collectionView").classList.toggle("hidden", activeTab !== "collection");
+      document.getElementById("teamView").classList.toggle("hidden", activeTab !== "team");
+      document.getElementById("workspace").scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+
+    function renderAll() {
+      renderFilters();
+      renderBanner();
+      renderResources();
+      renderRecent();
+      renderCollection();
+      renderTeam();
+      renderAccount();
+      if (modalCardId && !document.getElementById("cardModal").classList.contains("hidden")) renderCardDetail(modalCardId);
+    }
+
+    function renderCardDetail(cardId) {
+      const card = CARD_BY_ID.get(String(cardId));
+      if (!card) return;
+      const owned = getOwned(card.id);
+      const rarity = getRarity(card);
+      const image = getCardImage(card);
+      const video = resolveAsset(card.video, "card");
+      const media = video && isVideo(video)
+        ? `<video src="${escapeHTML(video)}" poster="${escapeHTML(image)}" autoplay muted loop playsinline></video>`
+        : image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" onerror="this.remove()">` : "";
+      const level = owned ? owned.level : 1;
+      const rank = owned ? owned.duplicateRank : 0;
+      const availableDuplicates = owned ? Math.max(0, owned.count - 1) : 0;
+      const upgradeCost = owned ? getUpgradeCost(card) : 0;
+      const awakenCost = owned ? getAwakenCost(card) : 0;
+      const inTeam = state.team.includes(String(card.id));
+
+      document.getElementById("cardDetail").innerHTML = `
+        <div class="detail" style="--rarity:${rarity.color}">
+          <div class="detail-art">
+            <div class="art-fallback">${escapeHTML(String(card.name).slice(0, 1))}</div>
+            ${media}
+          </div>
+          <div class="detail-copy">
+            <span class="pill" style="color:${rarity.color}">${escapeHTML(rarity.label)} / ${escapeHTML(card.rarity)}</span>
+            <h2>${escapeHTML(card.name)}</h2>
+            <p class="detail-sub">${escapeHTML(card.element || "Unknown")} ${owned ? `• มี ${owned.count} ใบ` : "• ยังไม่ได้ครอบครอง"}</p>
+            <div class="awaken-track" aria-label="ระดับปลุกพลัง">
+              ${Array.from({ length: rarity.stars }, (_, index) => `<span class="awaken-star ${index < rank ? "on" : ""}">★</span>`).join("")}
+            </div>
+            <div class="stat-grid">
+              <div class="stat"><span>Level</span><strong>${level}/${CONFIG.maxLevel}</strong></div>
+              <div class="stat"><span>Awaken</span><strong>${rank}/${rarity.stars}</strong></div>
+              <div class="stat"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+              <div class="stat"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+            </div>
+            <div class="detail-actions">
+              ${owned ? `
+                <button class="btn btn-primary" data-action="upgrade" data-card-id="${escapeHTML(card.id)}" ${level >= CONFIG.maxLevel ? "disabled" : ""}>
+                  อัปเกรดเลเวล <span class="cost">${level >= CONFIG.maxLevel ? "เลเวลเต็ม" : `${formatNumber(upgradeCost)} Dust`}</span>
+                </button>
+                <button class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= rarity.stars ? "disabled" : ""}>
+                  ปลุกพลัง <span class="cost">${rank >= rarity.stars ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
+                </button>
+                <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์"}</button>
+              ` : `<button class="btn" disabled>เปิดได้จากตู้กาชา</button>`}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openCardModal(cardId) {
+      modalCardId = String(cardId);
+      renderCardDetail(modalCardId);
+      document.getElementById("cardModal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      modalCardId = "";
+      document.getElementById("cardModal").classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function openAuthModal() {
+      document.getElementById("authModal").classList.remove("hidden");
+      if (activeCloudUsername) document.getElementById("authUsername").value = activeCloudUsername;
+      document.body.style.overflow = "hidden";
+      initFirebase();
+    }
+
+    function closeAuthModal() {
+      document.getElementById("authModal").classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function showReveal(results) {
+      const best = [...results].sort((a, b) => getRarity(b.card).order - getRarity(a.card).order)[0];
+      const rarity = getRarity(best.card);
+      const newCards = results.filter(result => !result.duplicate).length;
+      document.getElementById("revealPanel").style.setProperty("--reveal-color", rarity.color);
+      document.getElementById("revealTitle").textContent = best.card.name;
+      document.getElementById("revealSubtitle").textContent = `${rarity.label} • ได้การ์ดใหม่ ${newCards} ใบ • การ์ดซ้ำเปลี่ยนเป็น Dust อัตโนมัติ`;
+      document.getElementById("revealHero").innerHTML = cardHTML(best.card);
+      document.getElementById("revealList").innerHTML = results.map(result => cardHTML(result.card, { compact: true })).join("");
+      document.getElementById("revealScreen").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeReveal() {
+      document.getElementById("revealScreen").classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function exportSave() {
+      updateIncome();
+      saveState(true);
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `anime-card-save-${getLocalDateKey()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importSave(file) {
+      if (!file) return;
+      try {
+        const parsed = JSON.parse(await file.text());
+        state = normalizeState(parsed);
+        saveState(true);
+        renderAll();
+        showToast("นำเข้าเซฟสำเร็จ");
+      } catch (_) {
+        showToast("ไฟล์เซฟไม่ถูกต้อง");
+      }
+    }
+
+    function resetSave() {
+      if (!window.confirm("เริ่มเกมใหม่และลบเซฟในเบราว์เซอร์นี้ใช่ไหม?")) return;
+      state = defaultState();
+      saveState(true);
+      closeModal();
+      closeReveal();
+      renderAll();
+      showToast("เริ่มเกมใหม่แล้ว");
+    }
+
+    document.addEventListener("click", event => {
+      const target = event.target.closest("[data-action], [data-tab]");
+      if (!target) {
+        if (event.target.id === "cardModal") closeModal();
+        if (event.target.id === "authModal") closeAuthModal();
+        return;
+      }
+
+      if (target.dataset.tab) {
+        activeTab = target.dataset.tab;
+        renderTabs();
+        return;
+      }
+
+      const action = target.dataset.action;
+      const cardId = target.dataset.cardId;
+      if (action === "pull") openPack(Number(target.dataset.times) || 1);
+      if (action === "daily") claimDaily();
+      if (action === "claim-income") claimIncome();
+      if (action === "open-card") openCardModal(cardId);
+      if (action === "close-modal") closeModal();
+      if (action === "open-auth") openAuthModal();
+      if (action === "close-auth") closeAuthModal();
+      if (action === "close-reveal") closeReveal();
+      if (action === "upgrade") upgradeCard(cardId);
+      if (action === "awaken") awakenCard(cardId);
+      if (action === "toggle-team") toggleTeam(cardId);
+      if (action === "export-save") exportSave();
+      if (action === "import-save") document.getElementById("importInput").click();
+      if (action === "reset-save") resetSave();
+      if (action === "register") registerCloudAccount();
+      if (action === "login") loginCloudAccount();
+      if (action === "logout") logoutCloudAccount();
+    });
+
+    document.getElementById("bannerSelect").addEventListener("change", event => {
+      updateIncome();
+      state.activeBannerId = event.target.value;
+      saveState();
+      renderAll();
+    });
+
+    document.getElementById("searchInput").addEventListener("input", renderCollection);
+    document.getElementById("rarityFilter").addEventListener("change", renderCollection);
+    document.getElementById("importInput").addEventListener("change", event => {
+      importSave(event.target.files[0]);
+      event.target.value = "";
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Escape") return;
+      if (!document.getElementById("revealScreen").classList.contains("hidden")) closeReveal();
+      else if (!document.getElementById("authModal").classList.contains("hidden")) closeAuthModal();
+      else closeModal();
+    });
+
+    window.addEventListener("beforeunload", () => {
+      updateIncome();
+      persistLocalState();
+      if (cloudReady && activeCloudUid) writeCloudSave().catch(() => {});
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) renderResources();
+      else {
+        updateIncome();
+        persistLocalState();
+        scheduleCloudSave();
+      }
+    });
+
+    renderAll();
+    initFirebase();
+    setInterval(() => {
+      renderResources();
+    }, 1000);
+    setInterval(persistLocalState, 15000);
+    setInterval(scheduleCloudSave, 60000);
+
+    if (state.migratedFromOldSave && !SAFE_SESSION.getItem("clean-save-migration-notice")) {
+      SAFE_SESSION.setItem("clean-save-migration-notice", "1");
+      showToast("ย้ายเซฟจากเวอร์ชันเดิมเรียบร้อยแล้ว");
+    }
+  </script>
+</body>
+</html>
