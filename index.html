@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-gacha-battle-fx-v3-update-notice">
+  <meta name="gacha-app-build" content="2026-06-12-gacha-battle-fx-v4-rarity-buttons-commented">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -381,7 +381,48 @@
       background: var(--cyan);
     }
 
-    .tools { display: flex; gap: 8px; }
+    .tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+    /*
+      เพิ่มโดยอลิซ: แถบปุ่มแยกระดับการ์ดในหน้าคลัง
+      - ใช้คู่กับ select#rarityFilter เดิม เพื่อให้ผู้เล่นกดแยก N/R/SR/... ได้ทันที
+      - ถ้าต้องการเพิ่มระดับใหม่ในอนาคต แก้เพิ่มที่ const RARITIES แล้วปุ่มจะสร้างตามอัตโนมัติ
+    */
+    .rarity-filter-row {
+      flex: 1 1 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .rarity-chip {
+      min-height: 34px;
+      border: 1px solid color-mix(in srgb, var(--rarity, var(--cyan)) 38%, rgba(255,255,255,.10));
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--text);
+      font-size: .72rem;
+      font-weight: 1000;
+      background: rgba(255,255,255,.045);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.025);
+    }
+
+    .rarity-chip span {
+      margin-left: 4px;
+      color: var(--muted);
+      font-size: .64rem;
+      font-weight: 900;
+    }
+
+    .rarity-chip.active {
+      color: #071019;
+      border-color: transparent;
+      background: var(--rarity, var(--cyan));
+      box-shadow: 0 8px 22px color-mix(in srgb, var(--rarity, var(--cyan)) 24%, transparent);
+    }
+
+    .rarity-chip.active span { color: rgba(7,16,25,.72); }
     .field {
       min-height: 42px;
       border: 1px solid var(--line);
@@ -1156,6 +1197,9 @@
       .workspace-head { align-items: stretch; flex-direction: column; }
       .workspace-head .tabs { display: none; }
       .tools { display: grid; grid-template-columns: 1fr 110px; }
+      /* เพิ่มโดยอลิซ: บนมือถือให้ปุ่มระดับการ์ดเลื่อนซ้าย-ขวาได้ ไม่เบียดช่องค้นหา */
+      .rarity-filter-row { grid-column: 1 / -1; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding-bottom: 2px; }
+      .rarity-chip { flex: 0 0 auto; }
       .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
       .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .income-panel { grid-template-columns: repeat(2, 1fr); }
@@ -1295,6 +1339,12 @@
           <div class="tools hidden" id="collectionTools">
             <input class="field" id="searchInput" type="search" placeholder="ค้นหาการ์ด..." autocomplete="off">
             <select class="field" id="rarityFilter" aria-label="กรองระดับ"></select>
+            <!--
+              เพิ่มโดยอลิซ: จุดแสดงปุ่มแยกระดับการ์ด
+              JavaScript จะสร้างปุ่ม “ทั้งหมด / SC / EX / UR / ...” เข้ามาใน div นี้อัตโนมัติ
+              เพื่อให้เวลาเพิ่มระดับใหม่ใน RARITIES ไม่ต้องมานั่งแก้ HTML ซ้ำ
+            -->
+            <div class="rarity-filter-row" id="rarityQuickFilters" aria-label="ปุ่มแยกระดับการ์ด"></div>
           </div>
         </div>
 
@@ -1481,7 +1531,7 @@
       <div class="update-hero">
         <span class="update-version">Patch Notice • 2026.06.12</span>
         <h2>ประกาศอัพเดตใหม่</h2>
-        <p>ยินดีต้อนรับกลับเข้าสู่ Anime Card Collection รอบนี้เพิ่มป้ายประกาศตอนเข้าเกม พร้อมเตรียมพื้นที่แจ้งข่าวแพตช์/กิจกรรมให้ผู้เล่นเห็นชัดทันที</p>
+        <p>ยินดีต้อนรับกลับเข้าสู่ Anime Card Collection รอบนี้เพิ่มป้ายประกาศตอนเข้าเกม และเพิ่มปุ่มแยกระดับการ์ดในคลัง เพื่อค้นหาการ์ดระดับสูงได้ไวขึ้น</p>
       </div>
       <div class="update-body">
         <div class="update-list">
@@ -1492,6 +1542,10 @@
           <div class="update-item">
             <strong>🎮 ดูซ้ำได้ทุกเวลา</strong>
             <p>เพิ่มปุ่ม “ประกาศอัพเดต” ในศูนย์บัญชาการ กดกลับมาอ่านรายละเอียดแพตช์ได้</p>
+          </div>
+          <div class="update-item">
+            <strong>🃏 ปุ่มแยกระดับการ์ด</strong>
+            <p>หน้าคลังมีปุ่มกดแยก N/R/SR/SSR/UR/LR/JJK/EX/SC พร้อมจำนวนที่สะสมแล้ว</p>
           </div>
           <div class="update-item">
             <strong>✅ ไม่แสดงซ้ำเวอร์ชันนี้</strong>
@@ -1602,8 +1656,9 @@
 
 
 
+    // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบปุ่มแยกระดับการ์ด
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-update-notice-v1",
+      version: "2026-06-12-rarity-filter-buttons-v2",
       seenKey: "anime_card_update_notice_seen_v1"
     });
 
@@ -4267,11 +4322,65 @@
 
     function renderFilters() {
       const select = document.getElementById("rarityFilter");
-      if (select.options.length) return;
-      select.innerHTML = `<option value="">ทุกระดับ</option>` + Object.entries(RARITIES)
-        .sort((a, b) => b[1].order - a[1].order)
-        .map(([key, info]) => `<option value="${key}">${escapeHTML(info.label)} (${key})</option>`)
-        .join("");
+      if (!select.options.length) {
+        select.innerHTML = `<option value="">ทุกระดับ</option>` + Object.entries(RARITIES)
+          .sort((a, b) => b[1].order - a[1].order)
+          .map(([key, info]) => `<option value="${key}">${escapeHTML(info.label)} (${key})</option>`)
+          .join("");
+      }
+
+      // เพิ่มโดยอลิซ: หลังสร้างดรอปดาวน์แล้ว ให้สร้าง/อัปเดตปุ่มแยกระดับการ์ดด้วยเสมอ
+      // เหตุผล: จำนวนการ์ดที่สะสมจะเปลี่ยนหลังเปิดแพ็ก จึงต้องอัปเดตตัวเลขบนปุ่มทุกครั้งที่ renderAll() ทำงาน
+      renderRarityQuickFilters();
+    }
+
+    function getRarityProgressText(rarityKey = "") {
+      // เพิ่มโดยอลิซ: คำนวณจำนวนการ์ดที่มีแล้ว/ทั้งหมด แยกตามระดับ
+      // ถ้า rarityKey เป็นค่าว่าง = รวมทุกระดับ ใช้กับปุ่ม “ทั้งหมด”
+      const cards = rarityKey ? CARDS.filter(card => card.rarity === rarityKey) : CARDS;
+      const owned = cards.filter(card => getOwned(card.id)).length;
+      return `${owned}/${cards.length}`;
+    }
+
+    function renderRarityQuickFilters() {
+      const row = document.getElementById("rarityQuickFilters");
+      const select = document.getElementById("rarityFilter");
+      if (!row || !select) return;
+
+      const current = select.value;
+      const buttons = [
+        { key: "", label: "ทั้งหมด", color: "var(--cyan)", progress: getRarityProgressText("") },
+        ...Object.entries(RARITIES)
+          .sort((a, b) => b[1].order - a[1].order)
+          .map(([key, info]) => ({
+            key,
+            label: info.label,
+            color: info.color,
+            progress: getRarityProgressText(key)
+          }))
+      ];
+
+      row.innerHTML = buttons.map(button => `
+        <button
+          type="button"
+          class="rarity-chip ${button.key === current ? "active" : ""}"
+          style="--rarity:${button.color}"
+          data-action="filter-rarity"
+          data-rarity="${escapeHTML(button.key)}"
+          title="แสดงการ์ดระดับ ${escapeHTML(button.label)}">
+          ${escapeHTML(button.label)} <span>${escapeHTML(button.progress)}</span>
+        </button>
+      `).join("");
+    }
+
+    function setActiveRarityFilter(rarityKey = "") {
+      // เพิ่มโดยอลิซ: ฟังก์ชันกลางสำหรับเปลี่ยนระดับที่กำลังกรอง
+      // ใช้ทั้งตอนกดปุ่มระดับ และยังทำงานคู่กับ select#rarityFilter เดิมได้
+      const select = document.getElementById("rarityFilter");
+      if (!select) return;
+      select.value = rarityKey;
+      renderCollection();
+      renderRarityQuickFilters();
     }
 
     function renderTabs() {
@@ -4550,6 +4659,8 @@
       if (action === "remove-friend") removeFriend(friendId);
       if (action === "select-support") selectFriendSupport(friendId);
       if (action === "spar-friend") sparFriend(friendId);
+      // เพิ่มโดยอลิซ: เมื่อกดปุ่มแยกระดับการ์ด ให้ตั้งค่าตัวกรองและรีเฟรชคลังทันที
+      if (action === "filter-rarity") setActiveRarityFilter(event.target.closest("[data-rarity]")?.dataset.rarity || "");
     });
 
     document.getElementById("bannerSelect").addEventListener("change", event => {
@@ -4560,7 +4671,7 @@
     });
 
     document.getElementById("searchInput").addEventListener("input", renderCollection);
-    document.getElementById("rarityFilter").addEventListener("change", renderCollection);
+    document.getElementById("rarityFilter").addEventListener("change", event => setActiveRarityFilter(event.target.value));
     document.getElementById("friendUsernameInput").addEventListener("keydown", event => {
       if (event.key === "Enter") sendFriendRequest();
     });
