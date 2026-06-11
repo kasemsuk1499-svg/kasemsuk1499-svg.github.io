@@ -469,6 +469,142 @@
     @media (prefers-reduced-motion: reduce) {
       .card-media-video { animation: none !important; }
     }
+
+
+    /* LIGHT CUSTOM CARD OVERLAY / โอเวอร์เลย์เบา ๆ สำหรับรูปหรือวิดีโอการ์ด */
+    /*
+      วิธีใช้ใน CARD_DATABASE:
+      - overlay: "holo.webp"                -> ระบบหาไฟล์จาก assets/overlays/holo.webp
+      - overlayVideo: "aura.webm"           -> ระบบหาไฟล์จาก assets/overlays/aura.webm
+      - overlayEffect: "soft-holo"          -> เอฟเฟกต์ CSS เบา ๆ ไม่ต้องใช้ไฟล์เพิ่ม
+      - overlayOpacity: 0.35                -> ความเข้ม 0.05 ถึง 0.85
+      - overlayBlend: "screen"              -> screen / overlay / lighten / soft-light / normal
+      หมายเหตุ: ถ้าใช้วิดีโอ overlay ระบบจะปิดให้อัตโนมัติใน Performance Lite เพื่อกันกระตุกบน GitHub Pages
+    */
+    .card-custom-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      border-radius: inherit;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: var(--card-overlay-opacity, .38);
+      mix-blend-mode: var(--card-overlay-blend, screen);
+      contain: paint;
+    }
+    .card-custom-overlay-media {
+      width: 100%;
+      height: 100%;
+      object-fit: var(--card-overlay-fit, cover);
+      object-position: var(--card-overlay-position, center center);
+      display: block;
+      pointer-events: none;
+      filter: saturate(1.08) contrast(1.04);
+    }
+    .card-custom-overlay-video {
+      background: transparent;
+    }
+    .card-effect-soft-holo,
+    .card-effect-blue-aura,
+    .card-effect-gold-spark,
+    .card-effect-curse-smoke,
+    .card-effect-scanline {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+    .card-effect-soft-holo::before,
+    .card-effect-blue-aura::before,
+    .card-effect-gold-spark::before,
+    .card-effect-curse-smoke::before,
+    .card-effect-scanline::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      border-radius: inherit;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: .34;
+      contain: paint;
+    }
+    .card-effect-soft-holo::before {
+      background:
+        linear-gradient(115deg, transparent 18%, rgba(255,255,255,.22) 33%, transparent 48%, rgba(125,211,252,.14) 62%, transparent 78%),
+        radial-gradient(circle at 18% 22%, rgba(255,255,255,.18), transparent 26%),
+        radial-gradient(circle at 80% 70%, rgba(244,114,182,.14), transparent 34%);
+      background-size: 220% 220%, 100% 100%, 100% 100%;
+      animation: cardSoftHoloMove 4.4s ease-in-out infinite;
+    }
+    .card-effect-blue-aura::before {
+      background:
+        radial-gradient(circle at 22% 26%, rgba(56,189,248,.28), transparent 31%),
+        radial-gradient(circle at 78% 72%, rgba(14,165,233,.22), transparent 34%),
+        repeating-linear-gradient(130deg, transparent 0 13px, rgba(255,255,255,.055) 14px, transparent 21px);
+      animation: cardOverlayPulse 3.2s ease-in-out infinite;
+    }
+    .card-effect-gold-spark::before {
+      background:
+        radial-gradient(circle at 22% 28%, rgba(253,224,71,.24), transparent 26%),
+        radial-gradient(circle at 76% 76%, rgba(251,191,36,.20), transparent 34%),
+        radial-gradient(circle, rgba(255,255,255,.70) 0 1px, transparent 1.8px);
+      background-size: 100% 100%, 100% 100%, 28px 28px;
+      animation: cardSparkMove 3.6s linear infinite;
+    }
+    .card-effect-curse-smoke::before {
+      background:
+        radial-gradient(circle at 20% 30%, rgba(239,68,68,.20), transparent 32%),
+        radial-gradient(circle at 82% 68%, rgba(88,28,135,.18), transparent 36%),
+        linear-gradient(125deg, transparent 16%, rgba(255,255,255,.08), transparent 44%);
+      animation: cardOverlayPulse 2.8s ease-in-out infinite;
+    }
+    .card-effect-scanline::before {
+      background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.00) 0 5px, rgba(255,255,255,.07) 6px, rgba(255,255,255,.00) 10px),
+        linear-gradient(115deg, transparent 26%, rgba(255,255,255,.16), transparent 46%);
+      background-size: 100% 100%, 220% 220%;
+      opacity: .26;
+      animation: cardScanLineMove 4.2s linear infinite;
+    }
+    @keyframes cardSoftHoloMove {
+      0% { background-position: 0% 50%, center, center; opacity: .22; }
+      50% { background-position: 100% 50%, center, center; opacity: .42; }
+      100% { background-position: 0% 50%, center, center; opacity: .22; }
+    }
+    @keyframes cardOverlayPulse {
+      0%, 100% { opacity: .22; filter: brightness(1); }
+      50% { opacity: .42; filter: brightness(1.22); }
+    }
+    @keyframes cardSparkMove {
+      0% { background-position: center, center, 0 0; opacity: .22; }
+      100% { background-position: center, center, 34px 42px; opacity: .38; }
+    }
+    @keyframes cardScanLineMove {
+      0% { background-position: 0 0, 0% 50%; }
+      100% { background-position: 0 32px, 100% 50%; }
+    }
+    html.performance-lite .card-custom-overlay-video {
+      display: none !important;
+    }
+    html.performance-lite .card-effect-soft-holo::before,
+    html.performance-lite .card-effect-blue-aura::before,
+    html.performance-lite .card-effect-gold-spark::before,
+    html.performance-lite .card-effect-curse-smoke::before,
+    html.performance-lite .card-effect-scanline::before {
+      animation: none !important;
+      opacity: .18 !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .card-custom-overlay-video { display: none !important; }
+      .card-effect-soft-holo::before,
+      .card-effect-blue-aura::before,
+      .card-effect-gold-spark::before,
+      .card-effect-curse-smoke::before,
+      .card-effect-scanline::before {
+        animation: none !important;
+      }
+    }
+
     .classic-card-reveal-meta {
       width: min(88vw, 390px);
       margin: .65rem auto 0;
@@ -3788,7 +3924,7 @@
     // 5) ถ้าไฟล์อยู่ใน GitHub repo เดียวกับ index.html ให้สร้างโฟลเดอร์ assets/cards/ แล้วอัปโหลดไฟล์ไว้ตรงนั้น
 
     const CARD_DATABASE = [
-      { id: 000, name: "DEV.", rarity: "SC", element: "DD", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "0.png", image: "0.png", video: "", poster: "0.png" },
+      { id: 000, name: "DEV.", rarity: "SC", element: "DD", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "0.png", image: "0.png",poster: "0.png",video: "0.mp4", overlay: "overlay.mp4" },
       { id: 999, name: "CREATOR", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "999.png", video: "", poster: "999.png" },
       { id: 1000, name: "Great Magician", rarity: "SC", element: "∞", power: 0, incomePerSec: 3500, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "1000.png", video: "", poster: "1000.png" },
       { id: 2000, name: "MAMON", rarity: "SC", element: "Cat", power: 0, incomePerSec: 3600, upgradeDustBase: 8000, upgradeDustGrowth: 1.12, awakenMax: 5, icon: "", image: "2000.png", video: "", poster: "2000.png" },
@@ -5913,6 +6049,14 @@
           video: card.video || "",
           poster: card.poster || card.image || "",
           mediaType: card.video ? "video" : (card.mediaType || "image"),
+          overlay: card.overlay || "",
+          overlayImage: card.overlayImage || "",
+          overlayVideo: card.overlayVideo || "",
+          overlayEffect: card.overlayEffect || card.cardEffect || card.effect || "",
+          overlayOpacity: card.overlayOpacity,
+          overlayBlend: card.overlayBlend,
+          overlayFit: card.overlayFit,
+          overlayPosition: card.overlayPosition,
           icon: card.icon || String(card.name || "?").charAt(0),
           assistLabel: getAssistCardLabel(card),
           bonusText: getAssistBonusList(card).map(formatAssistBonus).join(" • ")
@@ -7541,6 +7685,8 @@
       const special = !!info.special;
       const safeIcon = escapeHTML(card.icon || card.name.charAt(0));
       const imagePart = makeImagePart(card, hidden, "text-5xl", "absolute inset-0", renderOptions);
+      const customOverlay = !hidden ? makeCardCustomOverlayHTML(card, renderOptions) : "";
+      const customEffectClass = !hidden ? getCardOverlayEffectClass(card) : "";
       const clickAttr = clickable && revealed ? 'onclick="openCardModal(' + card.id + ')" title="กดเพื่อดูรายละเอียดการ์ด"' : "";
       const duplicateText = duplicate ? '<span class="text-[10px] rounded-full bg-amber-300 text-slate-950 px-2 py-1 font-black">DUP</span>' : '';
       const countText = count > 1 ? '<span class="text-[10px] rounded-full bg-white/25 px-2 py-1 font-black">x' + count + '</span>' : '';
@@ -7563,14 +7709,15 @@
       const rarityTone = getRarityTone(card.rarity);
       const rarityEffectClass = !hidden ? getRarityEffectClass(card.rarity) : "";
       const limitedClass = !hidden && isLimitedJJKRarity(card.rarity) ? "limited-jjk-card" : "";
-      const imageText = getCardMediaUrl(card) && revealed ? '<div class="text-[10px] opacity-75 mt-1">Media Card</div>' : '';
+      const imageText = getCardMediaUrl(card) && revealed ? '<div class="text-[10px] opacity-75 mt-1">Media Card' + (customOverlay || customEffectClass ? ' • Overlay FX' : '') + '</div>' : (revealed && (customOverlay || customEffectClass) ? '<div class="text-[10px] opacity-75 mt-1">Overlay FX</div>' : '');
       const duplicateRankText = '';
       const showcaseText = revealed && state.showcase.includes(card.id) ? '<div class="text-[10px] text-emerald-200 font-black mt-1">อยู่ใน Showcase</div>' : '';
       const clickText = clickable && revealed ? '<div class="text-[10px] opacity-80 mt-2">กดเพื่อดู/ใส่/ถอด Showcase</div>' : '';
 
       return '<button ' + clickAttr + ' class="text-left w-full pop ' + (hidden ? 'opacity-40 grayscale cursor-not-allowed' : clickable ? 'hover:-translate-y-1 cursor-pointer' : '') + ' transition rounded-2xl bg-slate-950/60 shadow-xl border border-white/20 overflow-hidden min-h-[235px] flex flex-col">' +
-        '<div class="relative h-36 bg-gradient-to-br ' + info.color + ' ' + (special && !hidden ? 'shine' : '') + ' ' + limitedClass + ' ' + rarityEffectClass + ' ' + prismaticClass + ' ' + luxuryFullMaxClass + ' overflow-hidden" style="' + awakenMaxStyle + '">' +
+        '<div class="relative h-36 bg-gradient-to-br ' + info.color + ' ' + (special && !hidden ? 'shine' : '') + ' ' + limitedClass + ' ' + rarityEffectClass + ' ' + customEffectClass + ' ' + prismaticClass + ' ' + luxuryFullMaxClass + ' overflow-hidden" style="' + awakenMaxStyle + '">' +
           imagePart +
+          customOverlay +
           prismaticOverlay +
           luxuryFullMaxOverlay +
           cardStatusBadge +
@@ -7597,12 +7744,16 @@
     //   cards/          <- รูปการ์ด .webp .png .jpg .gif
     //   cards/videos/   <- วิดีโอการ์ด .mp4 .webm
     //   banners/        <- รูปตู้กาชา/ประกาศ
-    //   overlays/       <- overlay ถ้ามีใช้ในอนาคต
+    //   overlays/       <- รูป/วิดีโอ overlay เช่น holo.webp, aura.webm
     //
     // วิธีใส่ใน CARD_DATABASE:
     // image: "luffy.webp"              -> ระบบจะหา assets/cards/luffy.webp
     // video: "luffy.mp4"               -> ระบบจะหา assets/cards/videos/luffy.mp4
     // poster: "luffy.webp"             -> รูปปกวิดีโอจาก assets/cards/luffy.webp
+    // overlay: "holo.webp"             -> ระบบจะหา assets/overlays/holo.webp
+    // overlayVideo: "aura.webm"        -> ระบบจะหา assets/overlays/aura.webm และปิดเองใน Performance Lite
+    // overlayEffect: "soft-holo"       -> soft-holo / blue-aura / gold-spark / curse-smoke / scanline
+    // overlayOpacity: 0.35             -> ปรับความเข้ม overlay แบบเบา ๆ
     // หรือใส่ path เต็มเองก็ได้ เช่น image: "assets/cards/luffy.webp"
     // URL ภายนอกแบบ https:// ยังใช้ได้เหมือนเดิม เผื่อบางใบยังไม่ได้ย้ายไฟล์
     const LOCAL_ASSET_CONFIG = {
@@ -7649,6 +7800,110 @@
     function isVideoFileName(value) {
       return /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(String(value || "").trim());
     }
+
+    // LIGHT CARD OVERLAY SYSTEM / ระบบโอเวอร์เลย์เบาสำหรับการ์ด
+    const CARD_OVERLAY_SYSTEM_CONFIG = {
+      enabled: true,
+      defaultOpacity: 0.34,
+      defaultBlend: "screen",
+      allowVideoOverlayInLiteMode: false,
+      autoEffectWhenOverlayExists: "soft-holo",
+      autoEffectWhenVideoCard: "soft-holo"
+    };
+
+    function clampCardOverlayOpacity(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return CARD_OVERLAY_SYSTEM_CONFIG.defaultOpacity;
+      return Math.max(0.05, Math.min(0.85, n));
+    }
+
+    function normalizeCardOverlayBlend(value) {
+      const raw = String(value || CARD_OVERLAY_SYSTEM_CONFIG.defaultBlend || "screen").toLowerCase().trim();
+      const allow = { screen: true, overlay: true, lighten: true, "soft-light": true, normal: true };
+      return allow[raw] ? raw : "screen";
+    }
+
+    function normalizeCardOverlayFit(value) {
+      const raw = String(value || "cover").toLowerCase().trim();
+      return raw === "contain" ? "contain" : "cover";
+    }
+
+    function normalizeCardOverlayEffectName(value) {
+      const raw = String(value || "").toLowerCase().trim().replace(/_/g, "-").replace(/\s+/g, "-");
+      if (!raw || raw === "none" || raw === "off" || raw === "false") return "";
+      const map = {
+        holo: "soft-holo",
+        prism: "soft-holo",
+        prismatic: "soft-holo",
+        "soft-holo": "soft-holo",
+        soft: "soft-holo",
+        blue: "blue-aura",
+        aura: "blue-aura",
+        "blue-aura": "blue-aura",
+        gold: "gold-spark",
+        spark: "gold-spark",
+        sparkle: "gold-spark",
+        "gold-spark": "gold-spark",
+        red: "curse-smoke",
+        curse: "curse-smoke",
+        smoke: "curse-smoke",
+        "curse-smoke": "curse-smoke",
+        scan: "scanline",
+        scanline: "scanline",
+        line: "scanline"
+      };
+      return map[raw] || "soft-holo";
+    }
+
+    function getCardOverlayEffectClass(cardOrItem) {
+      if (!CARD_OVERLAY_SYSTEM_CONFIG.enabled || !cardOrItem) return "";
+      let effect = normalizeCardOverlayEffectName(cardOrItem.overlayEffect || cardOrItem.cardEffect || cardOrItem.effect);
+      if (!effect && (cardOrItem.overlay || cardOrItem.overlayImage || cardOrItem.overlayUrl || cardOrItem.overlayVideo)) {
+        effect = normalizeCardOverlayEffectName(CARD_OVERLAY_SYSTEM_CONFIG.autoEffectWhenOverlayExists);
+      }
+      if (!effect && cardOrItem.video) {
+        effect = normalizeCardOverlayEffectName(CARD_OVERLAY_SYSTEM_CONFIG.autoEffectWhenVideoCard);
+      }
+      return effect ? "card-effect-" + effect : "";
+    }
+
+    function getCardOverlayImageUrl(cardOrItem) {
+      if (!CARD_OVERLAY_SYSTEM_CONFIG.enabled || !cardOrItem) return "";
+      const raw = String(cardOrItem.overlayImage || cardOrItem.overlayUrl || cardOrItem.overlay || "").trim();
+      if (!raw || isVideoFileName(raw)) return "";
+      return resolveLocalAssetPath(raw, "overlay");
+    }
+
+    function getCardOverlayVideoUrl(cardOrItem) {
+      if (!CARD_OVERLAY_SYSTEM_CONFIG.enabled || !cardOrItem) return "";
+      const raw = String(cardOrItem.overlayVideo || cardOrItem.videoOverlay || (isVideoFileName(cardOrItem.overlay) ? cardOrItem.overlay : "") || "").trim();
+      if (!raw) return "";
+      return resolveLocalAssetPath(raw, "overlay");
+    }
+
+    function makeCardCustomOverlayHTML(cardOrItem, options) {
+      options = options || {};
+      if (!CARD_OVERLAY_SYSTEM_CONFIG.enabled || !cardOrItem || options.hidden) return "";
+      const imageUrl = getCardOverlayImageUrl(cardOrItem);
+      let videoUrl = getCardOverlayVideoUrl(cardOrItem);
+      if (videoUrl && !CARD_OVERLAY_SYSTEM_CONFIG.allowVideoOverlayInLiteMode && isPerformanceLiteMode()) videoUrl = "";
+      if (!imageUrl && !videoUrl) return "";
+      const opacity = clampCardOverlayOpacity(cardOrItem.overlayOpacity !== undefined ? cardOrItem.overlayOpacity : cardOrItem.overlayAlpha);
+      const blend = normalizeCardOverlayBlend(cardOrItem.overlayBlend);
+      const fit = normalizeCardOverlayFit(cardOrItem.overlayFit);
+      const position = String(cardOrItem.overlayPosition || "center center").replace(/["'<>]/g, "").slice(0, 60) || "center center";
+      const style = "--card-overlay-opacity:" + opacity + ";--card-overlay-blend:" + blend + ";--card-overlay-fit:" + fit + ";--card-overlay-position:" + position + ";";
+      const mediaName = escapeAttr((cardOrItem.name || "Card") + " overlay");
+      let mediaHTML = "";
+      if (videoUrl) {
+        const posterUrl = imageUrl || getCardPosterUrl(cardOrItem);
+        mediaHTML = '<video src="' + escapeAttr(videoUrl) + '" ' + (posterUrl ? 'poster="' + escapeAttr(posterUrl) + '" ' : '') + 'muted loop playsinline preload="none" data-card-video="1" data-card-overlay-video="1" class="card-custom-overlay-media card-custom-overlay-video" aria-label="' + mediaName + '" onerror="if(this.parentElement)this.parentElement.remove();"></video>';
+      } else if (imageUrl) {
+        mediaHTML = '<img src="' + escapeAttr(imageUrl) + '" loading="lazy" decoding="async" class="card-custom-overlay-media" alt="" onerror="if(this.parentElement)this.parentElement.remove();" />';
+      }
+      return '<div class="card-custom-overlay" style="' + escapeAttr(style) + '">' + mediaHTML + '</div>';
+    }
+
 
     // CARD POSTER SYSTEM / ระบบ Poster ของการ์ด
     // - ถ้ามี video ระบบยังรองรับวิดีโอเหมือนเดิม
@@ -8447,6 +8702,7 @@ function closeCardModal() {
       const rarityLabel = item.rarityLabel || getRarityLabel(item.rarity);
       const rarityTone = item.rarityTone || getRarityTone(item.rarity);
       const rarityEffectClass = item.rarityEffectClass || getRarityEffectClass(item.rarity);
+      const customEffectClass = getCardOverlayEffectClass(item);
       const rarityLabelClass = item.rarityLabelClass || getRarityLabelClass(item.rarity);
       const limitedClass = item.limitedJJK || isLimitedJJKRarity(item.rarity) ? "limited-jjk-card" : "";
       const isFriendFullMax = !!(item && item.awakenFull && item.levelFull);
@@ -8464,6 +8720,7 @@ function closeCardModal() {
         reveal: true,
         forceVideo: true
       });
+      const customOverlay = makeCardCustomOverlayHTML(item, { hidden: false, reveal: true });
       const ownerText = escapeHTML(player.nickname || "เพื่อน");
       const level = Number(item.level || 1);
       const maxLevel = Number(item.maxLevel || GAME_CONFIG.maxCardLevel || 150);
@@ -8489,8 +8746,8 @@ function closeCardModal() {
         '<div class="reveal-rarity-aura normal-rarity-reveal-aura bg-gradient-to-br ' + (item.rarityColor || info.color) + '"></div>' +
         '<div class="classic-card-reveal-wrap luxury-card-reveal-wrap">' +
           '<div class="text-left w-full rounded-2xl bg-slate-950/60 shadow-xl border border-white/20 overflow-hidden min-h-[420px] flex flex-col">' +
-            '<div class="relative h-72 bg-gradient-to-br ' + (item.rarityColor || info.color) + ' ' + (special ? 'shine' : '') + ' ' + limitedClass + ' ' + rarityEffectClass + ' ' + maxClass + ' overflow-hidden" style="' + maxStyle + '">' +
-              imagePart + maxOverlay + friendAssistRevealHTML +
+            '<div class="relative h-72 bg-gradient-to-br ' + (item.rarityColor || info.color) + ' ' + (special ? 'shine' : '') + ' ' + limitedClass + ' ' + rarityEffectClass + ' ' + customEffectClass + ' ' + maxClass + ' overflow-hidden" style="' + maxStyle + '">' +
+              imagePart + customOverlay + maxOverlay + friendAssistRevealHTML +
               '<div class="absolute left-2 bottom-2 z-10 flex flex-col items-start gap-1">' +
                 '<span class="rounded-full bg-black/65 border border-white/15 px-2 py-1 text-[10px] font-black text-cyan-200 shadow-lg">Lv.' + level + '</span>' +
                 '<span class="rounded-full bg-black/65 border border-white/15 px-2 py-1 text-[10px] font-black text-fuchsia-200 shadow-lg">ปลุก ' + awakenRank + '/' + awakenMax + '</span>' +
@@ -8643,8 +8900,10 @@ function closeCardModal() {
         const maxClass = isFriendFullMax ? "luxury-full-max-card luxury-full-max-mini" : "";
         const maxStyle = "";
         const rarityEffectClass = item.rarityEffectClass || getRarityEffectClass(item.rarity);
+        const customEffectClass = getCardOverlayEffectClass(item);
         const limitedClass = item.limitedJJK || isLimitedJJKRarity(item.rarity) ? "limited-jjk-card" : "";
-        const overlay = friendCornerMaxStatus;
+        const customOverlay = makeCardCustomOverlayHTML(item, { hidden: false });
+        const overlay = customOverlay + friendCornerMaxStatus;
         const friendAssistListHTML = assistPreviewStripHTML(Array.isArray(item.assistants) ? item.assistants : [], { mode: "friend-list", label: false });
         const image = "<div class='relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-gradient-to-br " + escapeAttr(item.rarityColor || (rarityInfo[item.rarity] || Object.values(rarityInfo)[0]).color) + " " + (item.raritySpecial ? "shine" : "") + " " + escapeAttr(limitedClass) + " " + escapeAttr(rarityEffectClass) + " " + maxClass + "' style='" + escapeAttr(maxStyle) + "'>" +
           makeCardMediaHTML(item, { hidden: false, textSizeClass: "text-xl", positionClass: "absolute inset-0", extraClass: "card-art-crop-thumb", eager: false }) +
