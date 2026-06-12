@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-team-element-combo-v1">
+  <meta name="gacha-app-build" content="2026-06-12-multi-element-progress-v3">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -748,6 +748,130 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       background: color-mix(in srgb, var(--element-color) 18%, rgba(5,8,18,.62));
+    }
+
+    /* เพิ่มโดยอลิซ: การ์ด 1 ใบรองรับหลายธาตุ + แถบสถานะพัฒนาการ์ด */
+    .card-element-list {
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .card-element-list .card-element,
+    .card-element-list .element-chip {
+      font-size: .58rem;
+      padding: 3px 6px;
+    }
+
+    .card-upgrade-mini {
+      margin-top: 8px;
+      display: grid;
+      gap: 5px;
+    }
+
+    .card-upgrade-mini-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: #dbe5ff;
+      font-size: .62rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .card-upgrade-mini-row span:last-child { color: var(--gold); font-variant-numeric: tabular-nums; }
+
+    .card-mini-meter {
+      height: 5px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .card-mini-meter i {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--violet), var(--gold));
+    }
+
+    .upgrade-status-panel {
+      margin: 0 0 20px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(92,232,255,.10), transparent 38%),
+        rgba(255,255,255,.035);
+    }
+
+    .upgrade-status-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 9px;
+      font-size: .86rem;
+      font-weight: 1000;
+    }
+
+    .upgrade-status-head strong { color: var(--gold); font-variant-numeric: tabular-nums; }
+
+    .upgrade-progress-track {
+      height: 9px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .upgrade-progress-track i {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--violet), var(--gold));
+    }
+
+    .upgrade-status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .upgrade-status-card {
+      min-height: 76px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 14px;
+      background: rgba(3,5,12,.34);
+    }
+
+    .upgrade-status-card span {
+      display: block;
+      color: var(--muted);
+      font-size: .66rem;
+      font-weight: 900;
+      letter-spacing: .02em;
+    }
+
+    .upgrade-status-card strong {
+      display: block;
+      margin-top: 4px;
+      font-size: .93rem;
+    }
+
+    .upgrade-status-card small {
+      display: block;
+      margin-top: 4px;
+      color: #cbd5e1;
+      font-size: .67rem;
+      line-height: 1.35;
     }
 
     .income-value { padding: 8px 12px; }
@@ -1634,6 +1758,7 @@
       .detail-copy { padding: 24px 18px; }
       .detail-actions { grid-template-columns: 1fr; }
       .detail-actions .btn { grid-column: auto !important; }
+      .upgrade-status-grid { grid-template-columns: 1fr; }
       .bottom-nav { display: grid; }
       .reveal-list { grid-template-columns: repeat(5, minmax(50px, 1fr)); }
       .reveal-controls { grid-template-columns: 1fr 1fr; }
@@ -2156,8 +2281,8 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-balance-element-detail-v2",
-      seenKey: "anime_card_update_notice_seen_v2"
+      version: "2026-06-12-multi-element-progress-v3",
+      seenKey: "anime_card_update_notice_seen_v3"
     });
 
     /*
@@ -2181,9 +2306,9 @@
 
     /*
       โน้ตจุดแก้ไขโดยอลิซ: ตารางธาตุหลักของระบบทีม
-      วิธีใช้งานในข้อมูลการ์ด: ใส่ค่า element เป็นภาษาไทยตรงตัวเท่านั้น เช่น "ไฟ" หรือ "มิติ"
+      วิธีใช้งานในข้อมูลการ์ด: ใส่ค่า element เป็นภาษาไทยตรงตัว เช่น "ไฟ" หรือหลายธาตุแบบ ["ไฟ", "สายฟ้า"] หรือ "ไฟ, สายฟ้า"
       รายชื่อที่ระบบรับ: ดิน, น้ำ, ลม, ไฟ, สายฟ้า, น้ำแข็ง, เหล็ก, พืช, แสง, ความมืด, มิติ, ไร้ธาตุ
-      ถ้าการ์ดเดิมใส่ None / Water / Ice / คำอังกฤษ / คำอื่น ระบบจะถือเป็น "ไร้ธาตุ" เพื่อกันคอมโบผิดพลาด
+      ถ้าการ์ดเดิมใส่ None / Water / Ice / คำอังกฤษ / คำอื่น ระบบจะแปลงเท่าที่รู้จัก ไม่รู้จักจะถือเป็น "ไร้ธาตุ" เพื่อกันคอมโบผิดพลาด
     */
     const THAI_ELEMENTS = Object.freeze(["ดิน", "น้ำ", "ลม", "ไฟ", "สายฟ้า", "น้ำแข็ง", "เหล็ก", "พืช", "แสง", "ความมืด", "มิติ", "ไร้ธาตุ"]);
     const THAI_ELEMENT_SET = new Set(THAI_ELEMENTS);
@@ -3722,7 +3847,7 @@
         .filter(card => RARITIES[card.rarity] && RARITIES[card.rarity].order <= RARITIES.R.order)
         .sort((a, b) => (getRarity(a).order - getRarity(b).order) || Number(a.id) - Number(b.id));
       ["ไฟ", "น้ำ", "ลม", "ดิน", "แสง", "มิติ", "ไร้ธาตุ"].forEach(element => {
-        const card = starterPool.find(item => getCardElement(item) === element && !team.includes(String(item.id)));
+        const card = starterPool.find(item => getCardElements(item).includes(element) && !team.includes(String(item.id)));
         addTeam(card);
       });
       starterPool.forEach(addTeam);
@@ -4367,23 +4492,81 @@
       return Math.max(1, Math.floor(Number(rarity.maxLevel || CONFIG.maxLevel) || CONFIG.maxLevel));
     }
 
+    function normalizeElementName(value) {
+      const raw = String(value !== undefined && value !== null ? value : "").trim();
+      if (!raw) return "ไร้ธาตุ";
+      const aliases = {
+        "None": "ไร้ธาตุ", "none": "ไร้ธาตุ", "NONE": "ไร้ธาตุ", "No Element": "ไร้ธาตุ", "Neutral": "ไร้ธาตุ", "無": "ไร้ธาตุ",
+        "Earth": "ดิน", "earth": "ดิน", "Ground": "ดิน", "ground": "ดิน",
+        "Water": "น้ำ", "water": "น้ำ",
+        "Wind": "ลม", "wind": "ลม", "Air": "ลม", "air": "ลม",
+        "Fire": "ไฟ", "fire": "ไฟ",
+        "Lightning": "สายฟ้า", "lightning": "สายฟ้า", "Thunder": "สายฟ้า", "Electric": "สายฟ้า",
+        "Ice": "น้ำแข็ง", "ice": "น้ำแข็ง",
+        "Metal": "เหล็ก", "metal": "เหล็ก", "Steel": "เหล็ก", "steel": "เหล็ก",
+        "Plant": "พืช", "plant": "พืช", "Nature": "พืช", "nature": "พืช",
+        "Light": "แสง", "light": "แสง",
+        "Dark": "ความมืด", "dark": "ความมืด", "Darkness": "ความมืด", "darkness": "ความมืด",
+        "Dimension": "มิติ", "dimension": "มิติ", "Space": "มิติ", "space": "มิติ"
+      };
+      const mapped = aliases[raw] || aliases[raw.toLowerCase && raw.toLowerCase()] || raw;
+      return THAI_ELEMENT_SET.has(mapped) ? mapped : "ไร้ธาตุ";
+    }
+
+    function splitElementValue(value) {
+      if (Array.isArray(value)) return value.flatMap(item => splitElementValue(item));
+      const raw = String(value !== undefined && value !== null ? value : "").trim();
+      if (!raw) return [];
+      return raw
+        .replace(/[\[\]"']/g, "")
+        .split(/\s*(?:,|，|、|\/|\||\+|&|・|•)\s*/)
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+
+    function normalizeElements(value) {
+      const pieces = splitElementValue(value);
+      const unique = [];
+      pieces.forEach(item => {
+        const safeElement = normalizeElementName(item);
+        if (!unique.includes(safeElement)) unique.push(safeElement);
+      });
+      const nonNeutral = unique.filter(element => element !== "ไร้ธาตุ");
+      return nonNeutral.length ? nonNeutral : ["ไร้ธาตุ"];
+    }
+
     function getElementEmoji(element) {
-      const safeElement = THAI_ELEMENT_SET.has(element) ? element : "ไร้ธาตุ";
+      const safeElement = normalizeElementName(element);
       return ELEMENT_EMOJIS[safeElement] || "▫️";
     }
 
     function elementLabel(element) {
-      const safeElement = THAI_ELEMENT_SET.has(element) ? element : "ไร้ธาตุ";
+      if (Array.isArray(element)) return normalizeElements(element).map(item => elementLabel(item)).join(" + ");
+      const safeElement = normalizeElementName(element);
       return `${getElementEmoji(safeElement)} ${safeElement}`;
     }
 
+    function getCardElements(card) {
+      if (!card) return ["ไร้ธาตุ"];
+      const source = card.elements !== undefined && card.elements !== null ? card.elements : card.element;
+      return normalizeElements(source);
+    }
+
     function getCardElement(card) {
-      const raw = String(card && card.element !== undefined && card.element !== null ? card.element : "").trim();
-      return THAI_ELEMENT_SET.has(raw) ? raw : "ไร้ธาตุ";
+      return getCardElements(card)[0] || "ไร้ธาตุ";
+    }
+
+    function getRawElementText(card) {
+      const source = card && card.elements !== undefined && card.elements !== null ? card.elements : card && card.element;
+      return Array.isArray(source) ? source.map(item => String(item).trim()).filter(Boolean).join(", ") : String(source || "").trim();
+    }
+
+    function cardElementText(card) {
+      return getCardElements(card).map(elementLabel).join(" + ");
     }
 
     function elementStyleVars(element, extraVars = {}) {
-      const safeElement = THAI_ELEMENT_SET.has(element) ? element : "ไร้ธาตุ";
+      const safeElement = normalizeElementName(element);
       const vars = {
         "--element-color": ELEMENT_COLORS[safeElement] || ELEMENT_COLORS["ไร้ธาตุ"],
         ...extraVars
@@ -4393,30 +4576,53 @@
         .join(";");
     }
 
-    function elementChipHTML(element, label = "", count = 0) {
-      const safeElement = THAI_ELEMENT_SET.has(element) ? element : "ไร้ธาตุ";
+    function elementChipHTML(element, label = "", count = 0, className = "element-chip") {
+      const safeElement = normalizeElementName(element);
       const suffix = label || (count > 0 ? `x${count}` : "");
-      return `<span class="element-chip" style="${elementStyleVars(safeElement)}">${escapeHTML(elementLabel(safeElement))}${suffix ? `<small>${escapeHTML(suffix)}</small>` : ""}</span>`;
+      return `<span class="${escapeHTML(className)}" style="${elementStyleVars(safeElement)}">${escapeHTML(elementLabel(safeElement))}${suffix ? `<small>${escapeHTML(suffix)}</small>` : ""}</span>`;
+    }
+
+    function elementChipsHTML(elements, className = "element-chip") {
+      return normalizeElements(elements).map(element => elementChipHTML(element, "", 0, className)).join("");
+    }
+
+    function makeMatchupResult(attacker, defender) {
+      const a = normalizeElementName(attacker);
+      const d = normalizeElementName(defender);
+      if (a === "ไร้ธาตุ" || d === "ไร้ธาตุ" || a === d) {
+        return { modifier: 0, tone: "neutral", label: "ธาตุปกติ", text: `${elementLabel(a)} ปะทะ ${elementLabel(d)}: ไม่มีโบนัสชนะทาง`, attacker: a, defender: d };
+      }
+      if ((ELEMENT_ADVANTAGES[a] || []).includes(d)) {
+        return { modifier: ELEMENT_MATCHUP.advantageRate, tone: "win", label: "ได้เปรียบธาตุ", text: `${elementLabel(a)} ชนะทาง ${elementLabel(d)} (+${Math.round(ELEMENT_MATCHUP.advantageRate * 100)}% Power)`, attacker: a, defender: d };
+      }
+      if ((ELEMENT_ADVANTAGES[d] || []).includes(a)) {
+        return { modifier: ELEMENT_MATCHUP.disadvantageRate, tone: "lose", label: "แพ้ทางธาตุ", text: `${elementLabel(a)} แพ้ทาง ${elementLabel(d)} (${Math.round(ELEMENT_MATCHUP.disadvantageRate * 100)}% Power)`, attacker: a, defender: d };
+      }
+      return { modifier: 0, tone: "neutral", label: "ธาตุเป็นกลาง", text: `${elementLabel(a)} ปะทะ ${elementLabel(d)}: ไม่ชนะหรือแพ้ทาง`, attacker: a, defender: d };
     }
 
     function getElementMatchup(attackerElement, defenderElement) {
-      const attacker = THAI_ELEMENT_SET.has(attackerElement) ? attackerElement : "ไร้ธาตุ";
-      const defender = THAI_ELEMENT_SET.has(defenderElement) ? defenderElement : "ไร้ธาตุ";
-      if (attacker === "ไร้ธาตุ" || defender === "ไร้ธาตุ" || attacker === defender) {
-        return { modifier: 0, tone: "neutral", label: "ธาตุปกติ", text: `${elementLabel(attacker)} ปะทะ ${elementLabel(defender)}: ไม่มีโบนัสชนะทาง` };
+      const attackers = normalizeElements(attackerElement);
+      const defenders = normalizeElements(defenderElement);
+      const results = [];
+      attackers.forEach(attacker => defenders.forEach(defender => results.push(makeMatchupResult(attacker, defender))));
+      const score = result => result.modifier > 0 ? 3 : result.modifier === 0 ? 2 : 1;
+      const best = results.sort((a, b) => score(b) - score(a) || b.modifier - a.modifier)[0]
+        || makeMatchupResult("ไร้ธาตุ", "ไร้ธาตุ");
+      if (attackers.length > 1 || defenders.length > 1) {
+        const attackerText = attackers.map(elementLabel).join(" + ");
+        const defenderText = defenders.map(elementLabel).join(" + ");
+        if (best.modifier === 0) {
+          return { ...best, text: `${attackerText} ปะทะ ${defenderText}: ไม่มีคู่ธาตุที่ได้เปรียบหรือเสียเปรียบ` };
+        }
+        return { ...best, text: `${best.text} • คำนวณจากคู่ที่ส่งผลดีที่สุดใน ${attackerText} vs ${defenderText}` };
       }
-      if ((ELEMENT_ADVANTAGES[attacker] || []).includes(defender)) {
-        return { modifier: ELEMENT_MATCHUP.advantageRate, tone: "win", label: "ได้เปรียบธาตุ", text: `${elementLabel(attacker)} ชนะทาง ${elementLabel(defender)} (+${Math.round(ELEMENT_MATCHUP.advantageRate * 100)}% Power)` };
-      }
-      if ((ELEMENT_ADVANTAGES[defender] || []).includes(attacker)) {
-        return { modifier: ELEMENT_MATCHUP.disadvantageRate, tone: "lose", label: "แพ้ทางธาตุ", text: `${elementLabel(attacker)} แพ้ทาง ${elementLabel(defender)} (${Math.round(ELEMENT_MATCHUP.disadvantageRate * 100)}% Power)` };
-      }
-      return { modifier: 0, tone: "neutral", label: "ธาตุเป็นกลาง", text: `${elementLabel(attacker)} ปะทะ ${elementLabel(defender)}: ไม่ชนะหรือแพ้ทาง` };
+      return best;
     }
 
     function getElementWeaknesses(element) {
-      const safeElement = THAI_ELEMENT_SET.has(element) ? element : "ไร้ธาตุ";
-      return THAI_ELEMENTS.filter(item => (ELEMENT_ADVANTAGES[item] || []).includes(safeElement));
+      const targets = normalizeElements(element);
+      return [...new Set(targets.flatMap(target => THAI_ELEMENTS.filter(item => (ELEMENT_ADVANTAGES[item] || []).includes(target))))];
     }
 
     function getTeamElementSummary(teamIds = state.team) {
@@ -4424,9 +4630,12 @@
       const counts = Object.fromEntries(THAI_ELEMENTS.map(element => [element, 0]));
       const powerByElement = Object.fromEntries(THAI_ELEMENTS.map(element => [element, 0]));
       teamCards.forEach(card => {
-        const element = getCardElement(card);
-        counts[element] = (counts[element] || 0) + 1;
-        powerByElement[element] = (powerByElement[element] || 0) + getCardPower(card);
+        const elements = getCardElements(card);
+        const splitPower = getCardPower(card) / Math.max(1, elements.length);
+        elements.forEach(element => {
+          counts[element] = (counts[element] || 0) + 1;
+          powerByElement[element] = (powerByElement[element] || 0) + splitPower;
+        });
       });
 
       const uniqueElements = THAI_ELEMENTS.filter(element => counts[element] > 0);
@@ -4444,16 +4653,16 @@
       if (sameElement) {
         const amount = counts[sameElement];
         const sameTable = amount >= 5
-          ? { powerRate: 0.35, incomeRate: 0.30, label: "ครบ 5 ใบ" }
+          ? { powerRate: 0.35, incomeRate: 0.30, label: "ครบ 5 แหล่งธาตุ" }
           : amount >= 4
-            ? { powerRate: 0.22, incomeRate: 0.18, label: "4 ใบ" }
+            ? { powerRate: 0.22, incomeRate: 0.18, label: "4 แหล่งธาตุ" }
             : amount >= 3
-              ? { powerRate: 0.12, incomeRate: 0.10, label: "3 ใบ" }
-              : { powerRate: 0.05, incomeRate: 0.05, label: "2 ใบ" };
+              ? { powerRate: 0.12, incomeRate: 0.10, label: "3 แหล่งธาตุ" }
+              : { powerRate: 0.05, incomeRate: 0.05, label: "2 แหล่งธาตุ" };
         addCombo({ key: `same-${sameElement}`, name: `สายธาตุเดียว: ${elementLabel(sameElement)}`, powerRate: sameTable.powerRate, incomeRate: sameTable.incomeRate, note: `มี ${elementLabel(sameElement)} ${sameTable.label}` });
       }
       const pairElements = nonNeutralElements.filter(element => counts[element] >= 2);
-      if (pairElements.length >= 2) addCombo({ key: "pair-sync", name: "คู่ประสานธาตุ", powerRate: 0.08, incomeRate: 0.10, note: `${pairElements.slice(0, 2).map(elementLabel).join(" + ")} อย่างละ 2 ใบขึ้นไป` });
+      if (pairElements.length >= 2) addCombo({ key: "pair-sync", name: "คู่ประสานธาตุ", powerRate: 0.08, incomeRate: 0.10, note: `${pairElements.slice(0, 2).map(elementLabel).join(" + ")} อย่างละ 2 แหล่งธาตุขึ้นไป` });
       ELEMENT_COMBO_RULES.forEach(rule => { if (rule.required.every(element => counts[element] > 0)) addCombo(rule); });
       if (teamCards.length >= 5 && nonNeutralElements.length >= 5) addCombo({ key: "rainbow5", name: "สมดุล 5 ธาตุ", powerRate: 0.10, incomeRate: 0.15, note: "มีธาตุไม่ซ้ำ 5 ธาตุโดยไม่รวมไร้ธาตุ" });
       if (counts["ไร้ธาตุ"] >= 1 && nonNeutralElements.length >= 4) addCombo({ key: "neutral-support", name: "ไร้ธาตุประคองทีม", powerRate: 0.05, incomeRate: 0.22, note: "มีไร้ธาตุ + ธาตุอื่นไม่ซ้ำอย่างน้อย 4 ธาตุ เน้นฟาร์ม Gem" });
@@ -4565,7 +4774,7 @@
         id: String(card.id),
         name: card.name,
         rarity: card.rarity,
-        element: card.element || "",
+        element: getCardElements(card),
         power: Math.floor(getCardPower(card)),
         income: Math.floor(getCardIncome(card)),
         level: Math.floor(Number(owned.level) || 1),
@@ -4674,7 +4883,7 @@
       const supportCapBase = Math.max(0, basePower + formationPower);
       const supportPower = Math.min(rawSupportPower, supportCapBase * CONFIG.friendSupportCapRate);
       const enemyCard = getBattleEnemyCard(stage);
-      const enemyElement = getCardElement(enemyCard);
+      const enemyElement = getCardElements(enemyCard);
       const matchup = getElementMatchup(elementSummary.dominantElement, enemyElement);
       const preElementPower = basePower + formationPower + supportPower;
       const elementPower = preElementPower * matchup.modifier;
@@ -5179,13 +5388,74 @@
       openCardModal(id);
     }
 
+    function getCardProgressStatus(card) {
+      const owned = getOwned(card && card.id);
+      const maxLevel = getCardMaxLevel(card || {});
+      const maxRank = getCardAwakenMax(card || {});
+      const level = owned ? Math.min(maxLevel, Math.max(1, Math.floor(Number(owned.level) || 1))) : 0;
+      const rank = owned ? Math.min(maxRank, Math.max(0, Math.floor(Number(owned.duplicateRank) || 0))) : 0;
+      const count = owned ? Math.max(1, Math.floor(Number(owned.count) || 1)) : 0;
+      const availableDuplicates = owned ? Math.max(0, count - 1) : 0;
+      const levelPercent = owned ? Math.min(100, Math.round(level / Math.max(1, maxLevel) * 100)) : 0;
+      const awakenPercent = maxRank > 0 ? Math.min(100, Math.round(rank / maxRank * 100)) : 100;
+      const overallPercent = owned ? Math.round((levelPercent + awakenPercent) / 2) : 0;
+      const upgradeCost = owned && level < maxLevel ? getUpgradeCost(card) : 0;
+      const awakenCost = owned && rank < maxRank ? getAwakenCost(card) : 0;
+      return { owned, maxLevel, maxRank, level, rank, count, availableDuplicates, levelPercent, awakenPercent, overallPercent, upgradeCost, awakenCost };
+    }
+
+    function cardUpgradeMiniHTML(card) {
+      const status = getCardProgressStatus(card);
+      if (!status.owned) {
+        return `<div class="card-upgrade-mini"><div class="card-upgrade-mini-row"><span>สถานะ</span><span>ยังไม่ปลดล็อก</span></div><div class="card-mini-meter"><i style="width:0%"></i></div></div>`;
+      }
+      return `
+        <div class="card-upgrade-mini" title="สถานะพัฒนาการ์ด">
+          <div class="card-upgrade-mini-row"><span>อัปแล้ว</span><span>${status.overallPercent}%</span></div>
+          <div class="card-mini-meter"><i style="width:${status.overallPercent}%"></i></div>
+          <div class="card-upgrade-mini-row"><span>Awaken ${status.rank}/${status.maxRank}</span><span>ซ้ำ ${status.availableDuplicates}</span></div>
+        </div>
+      `;
+    }
+
+    function upgradeStatusPanelHTML(card, inTeam = false) {
+      const status = getCardProgressStatus(card);
+      if (!status.owned) {
+        return `
+          <div class="upgrade-status-panel">
+            <div class="upgrade-status-head"><span>สถานะพัฒนาการ์ด</span><strong>ยังไม่ได้ครอบครอง</strong></div>
+            <div class="upgrade-progress-track"><i style="width:0%"></i></div>
+            <div class="upgrade-status-grid">
+              <div class="upgrade-status-card"><span>Level</span><strong>0/${status.maxLevel}</strong><small>ต้องเปิดได้ก่อนจึงจะอัปเกรดได้</small></div>
+              <div class="upgrade-status-card"><span>Awaken</span><strong>0/${status.maxRank}</strong><small>ใช้การ์ดซ้ำในการปลุกพลัง</small></div>
+              <div class="upgrade-status-card"><span>สถานะทีม</span><strong>ยังไม่พร้อมใช้งาน</strong><small>เปิดจากตู้กาชาก่อน</small></div>
+            </div>
+          </div>
+        `;
+      }
+      const levelNote = status.level >= status.maxLevel ? "เลเวลเต็มแล้ว" : `เลเวลถัดไปใช้ ${formatNumber(status.upgradeCost)} Dust`;
+      const awakenNote = status.rank >= status.maxRank ? "ปลุกพลังเต็มแล้ว" : `ขั้นถัดไปใช้ซ้ำ ${formatNumber(status.awakenCost)} ใบ • มีซ้ำ ${formatNumber(status.availableDuplicates)} ใบ`;
+      const supportActive = String(state.profile.supportCardId || "") === String(card.id);
+      return `
+        <div class="upgrade-status-panel">
+          <div class="upgrade-status-head"><span>สถานะพัฒนาการ์ด</span><strong>${status.overallPercent}%</strong></div>
+          <div class="upgrade-progress-track"><i style="width:${status.overallPercent}%"></i></div>
+          <div class="upgrade-status-grid">
+            <div class="upgrade-status-card"><span>Level Progress</span><strong>${status.level}/${status.maxLevel} (${status.levelPercent}%)</strong><small>${escapeHTML(levelNote)}</small></div>
+            <div class="upgrade-status-card"><span>Awaken Progress</span><strong>${status.rank}/${status.maxRank} (${status.awakenPercent}%)</strong><small>${escapeHTML(awakenNote)}</small></div>
+            <div class="upgrade-status-card"><span>สถานะใช้งาน</span><strong>${inTeam ? "อยู่ในทีมโชว์" : "ยังไม่ได้ใส่ทีม"}</strong><small>${supportActive ? "ตั้งเป็น Support โปรไฟล์แล้ว" : "ยังไม่ได้ตั้งเป็น Support"}</small></div>
+          </div>
+        </div>
+      `;
+    }
+
     function cardHTML(card, options = {}) {
       const owned = getOwned(card.id);
       const rarity = getRarity(card);
-      const element = getCardElement(card);
+      const elements = getCardElements(card);
       const image = getCardImage(card);
       const count = owned ? owned.count : 0;
-      const level = owned ? owned.level : 1;
+      const status = getCardProgressStatus(card);
       const compact = options.compact === true;
       const displayOnly = options.displayOnly === true;
       const rarityClass = `rarity-${String(card.rarity || "n").toLowerCase().replace(/[^a-z0-9_-]/g, "")}`;
@@ -5209,10 +5479,11 @@
             <div class="card-body">
               <h3 class="card-name">${escapeHTML(card.name)}</h3>
               <div class="card-meta">
-                <span>Lv.${level}</span>
-                <span class="card-element" style="${elementStyleVars(element)}">${escapeHTML(elementLabel(element))}</span>
+                <span>Lv.${status.owned ? status.level : 1}</span>
+                <span class="card-element-list">${elementChipsHTML(elements, "card-element")}</span>
                 <span class="stars">${"★".repeat(Math.min(rarity.stars, 8))}${rarity.stars > 8 ? "+" : ""}</span>
               </div>
+              ${cardUpgradeMiniHTML(card)}
             </div>
           `}
         </${tag}>
@@ -5335,7 +5606,7 @@
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
       const rarity = document.getElementById("rarityFilter").value;
       return CARDS
-        .filter(card => !query || `${card.name} ${card.element} ${getCardElement(card)} ${card.rarity}`.toLowerCase().includes(query))
+        .filter(card => !query || `${card.name} ${getRawElementText(card)} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query))
         .filter(card => !rarity || card.rarity === rarity)
         .sort((a, b) => {
           const ownedDiff = Number(Boolean(getOwned(b.id))) - Number(Boolean(getOwned(a.id)));
@@ -5387,7 +5658,7 @@
           <h3>ธาตุหลักทีม: ${escapeHTML(elementLabel(summary.dominantElement))}</h3>
           <p>โบนัสรวมตอนนี้: Power +${powerPercent}% • Income +${incomePercent}%${summary.powerCapped || summary.incomeCapped ? " • โบนัสถูกจำกัดสูงสุด Power 45% / Income 40%" : ""}</p>
           <div class="element-chip-row">${activeElementChips}</div>
-          <p class="element-mini-note">อ่านค่าเฉพาะข้อความไทยตรงตัว: ${THAI_ELEMENTS.map(element => `${getElementEmoji(element)} ${element}`).map(escapeHTML).join(" / ")}</p>
+          <p class="element-mini-note">รองรับหลายธาตุ เช่น ["ไฟ", "สายฟ้า"] หรือ "ไฟ, สายฟ้า" • รายชื่อที่อ่านได้: ${THAI_ELEMENTS.map(element => `${getElementEmoji(element)} ${element}`).map(escapeHTML).join(" / ")}</p>
         </div>
         <div>
           <h3>คอมโบธาตุที่ทำงาน</h3>
@@ -5601,18 +5872,22 @@
       const media = video && isVideo(video)
         ? `<video src="${escapeHTML(video)}" poster="${escapeHTML(image)}" autoplay muted loop playsinline></video>`
         : image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" onerror="this.remove()">` : "";
-      const level = owned ? owned.level : 1;
-      const rank = owned ? owned.duplicateRank : 0;
-      const element = getCardElement(card);
-      const rawElement = String(card.element || "").trim();
-      const elementDetail = rawElement && rawElement !== element
-        ? `ธาตุที่ใช้ในระบบ: ${elementLabel(element)} • ข้อความเดิม: ${rawElement}`
-        : `ธาตุที่ใช้ในระบบ: ${elementLabel(element)}`;
-      const maxLevel = getCardMaxLevel(card);
-      const maxRank = getCardAwakenMax(card);
-      const availableDuplicates = owned ? Math.max(0, owned.count - 1) : 0;
-      const upgradeCost = owned ? getUpgradeCost(card) : 0;
-      const awakenCost = owned ? getAwakenCost(card) : 0;
+      const status = getCardProgressStatus(card);
+      const level = status.owned ? status.level : 1;
+      const rank = status.rank;
+      const elements = getCardElements(card);
+      const rawElement = getRawElementText(card);
+      const normalizedElementText = cardElementText(card);
+      const normalizedKey = elements.join("|");
+      const rawKey = normalizeElements(rawElement).join("|");
+      const elementDetail = rawElement && rawKey !== normalizedKey
+        ? `ธาตุที่ใช้ในระบบ: ${normalizedElementText} • ข้อความเดิม: ${rawElement}`
+        : `ธาตุที่ใช้ในระบบ: ${normalizedElementText}`;
+      const maxLevel = status.maxLevel;
+      const maxRank = status.maxRank;
+      const availableDuplicates = status.availableDuplicates;
+      const upgradeCost = status.upgradeCost;
+      const awakenCost = status.awakenCost;
       const inTeam = state.team.includes(String(card.id));
 
       document.getElementById("cardDetail").innerHTML = `
@@ -5632,8 +5907,9 @@
               <div class="stat"><span>Awaken</span><strong>${rank}/${maxRank}</strong></div>
               <div class="stat"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
               <div class="stat"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
-              <div class="stat"><span>Element</span><strong>${escapeHTML(elementLabel(element))}</strong></div>
+              <div class="stat"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
             </div>
+            ${upgradeStatusPanelHTML(card, inTeam)}
             <div class="detail-actions">
               ${owned ? `
                 <button class="btn btn-primary" data-action="upgrade" data-card-id="${escapeHTML(card.id)}" ${level >= maxLevel ? "disabled" : ""}>
