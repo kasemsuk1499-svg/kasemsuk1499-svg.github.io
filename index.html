@@ -1330,6 +1330,9 @@
     .awaken-track { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 18px; }
     .awaken-star { color: rgba(255,255,255,.22); font-size: 1.3rem; }
     .awaken-star.on { color: var(--gold); text-shadow: 0 0 12px rgba(255,209,102,.5); }
+    .awaken-track { max-height: 92px; overflow: auto; padding-right: 4px; }
+    .element-chip-row + .element-mini-note { margin-top: 10px !important; }
+
 
     .reveal-panel {
       width: min(980px, 100%);
@@ -2021,17 +2024,17 @@
       <div class="update-hero">
         <span class="update-version">Patch Notice • 2026.06.12</span>
         <h2>ประกาศอัพเดตใหม่</h2>
-        <p>ยินดีต้อนรับกลับเข้าสู่ Anime Card Collection รอบนี้เพิ่มระบบจัดทีมแบบใหม่ มีคอมโบธาตุ โบนัสรายได้/พลัง และธาตุชนะทางใน Battle Tower</p>
+        <p>ยินดีต้อนรับกลับเข้าสู่ Anime Card Collection รอบนี้ปรับบาลานซ์ทรัพยากรเริ่มต้น ซ่อมหน้ารายละเอียดการ์ด และเพิ่มอีโมจิ/คอมโบ/แพ้ทางธาตุในหน้าจัดทีม</p>
       </div>
       <div class="update-body">
         <div class="update-list">
           <div class="update-item">
             <strong>🧩 ระบบคอมโบธาตุทีม</strong>
-            <p>ทีม 5 ใบจะคำนวณธาตุหลัก คอมโบ และโบนัส Power/Income แบบเรียลไทม์ในหน้า Team</p>
+            <p>ทีม 5 ใบจะแสดงธาตุหลัก คอมโบ โบนัส Power/Income พร้อมอีโมจิธาตุแบบเรียลไทม์</p>
           </div>
           <div class="update-item">
             <strong>⚔️ ธาตุชนะ/แพ้ทาง</strong>
-            <p>Battle Tower ใช้ธาตุหลักของทีมปะทะธาตุศัตรู ได้เปรียบ +18% หรือแพ้ทาง -15% Power</p>
+            <p>Battle Tower ใช้ธาตุหลักของทีมปะทะธาตุศัตรู ได้เปรียบ +25% หรือแพ้ทาง -20% Power</p>
           </div>
           <div class="update-item">
             <strong>🔎 ดีเท็กธาตุไทยตรงตัว</strong>
@@ -2123,11 +2126,13 @@
       oldBannerKey: "simple_gacha_active_banner_v5_stable",
       startingGems: 250000,
       startingDust: 300,
+      starterSRSelector: 1,
+      starterTeamSize: 5,
       dailyGems: 250000,
       maxLevel: 100,
       teamSlots: 5,
-      powerGrowth: 0.055,
-      incomeGrowth: 0.045,
+      powerGrowth: 0.015,
+      incomeGrowth: 0.008,
       battleMaxEnergy: 50,
       battleEnergyRegenMs: 9 * 60 * 1000,
       friendSupportRate: 0.10,
@@ -2151,8 +2156,8 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-team-element-combo-v1",
-      seenKey: "anime_card_update_notice_seen_v1"
+      version: "2026-06-12-balance-element-detail-v2",
+      seenKey: "anime_card_update_notice_seen_v2"
     });
 
     /*
@@ -2165,17 +2170,13 @@
       - textColor = สีตัวอักษรบนป้ายแรร์ เพื่อให้อ่านง่ายบน gradient
     */
     const RARITIES = Object.freeze({
-      N:    { label: "N", color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3, dust: 5, powerBonus: .07, incomeBonus: .05, awakenCost: 53 },
-      R:    { label: "R", color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4, dust: 18, powerBonus: .09, incomeBonus: .06, awakenCost: 42 },
-      SR:   { label: "SR", color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5, dust: 70, powerBonus: .12, incomeBonus: .08, awakenCost: 32 },
-      SSR:  { label: "SSR", color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6, dust: 280, powerBonus: .17, incomeBonus: .11, awakenCost: 23 },
-      UR:   { label: "UR", color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7, dust: 1500, powerBonus: .26, incomeBonus: .17, awakenCost: 12 },
-      LR:   { label: "LR", color: "#22d3ee", colors: ["#22d3ee", "#a78bfa", "#facc15"], gradient: "linear-gradient(135deg, #22d3ee, #a78bfa 48%, #facc15)", glow: "#22d3ee", textColor: "#04111a", order: 5, stars: 8, dust: 9000, powerBonus: .38, incomeBonus: .25, awakenCost: 7 },
-      JJKB: { label: "JJK", color: "#60a5fa", colors: ["#93c5fd", "#2563eb", "#111827"], gradient: "linear-gradient(135deg, #93c5fd, #2563eb 55%, #111827)", glow: "#60a5fa", textColor: "#06111f", order: 6, stars: 7, dust: 1600, powerBonus: .26, incomeBonus: .17, awakenCost: 12 },
-      JJKC: { label: "JJK", color: "#ef4444", colors: ["#ef4444", "#7f1d1d", "#000000"], gradient: "linear-gradient(135deg, #ef4444, #7f1d1d 48%, #000000)", glow: "#ef4444", textColor: "#fff1f2", order: 7, stars: 7, dust: 1600, powerBonus: .26, incomeBonus: .17, awakenCost: 12 },
-      JJKS: { label: "JJK+", color: "#fde047", colors: ["#ffffff", "#c0c0c0", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #ffffff, #c0c0c0 30%, #111827 66%, #facc15)", glow: "#fde047", textColor: "#111827", order: 8, stars: 8, dust: 10000, powerBonus: .38, incomeBonus: .25, awakenCost: 7 },
-      EX:   { label: "EX", color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 9, stars: 10, dust: 50000, powerBonus: .65, incomeBonus: .45, awakenCost: 4 },
-      SC:   { label: "SC", color: "#ffffff", colors: ["#ffffff", "#22d3ee", "#a78bfa", "#f472b6", "#facc15"], gradient: "conic-gradient(from 180deg, #ffffff, #22d3ee, #a78bfa, #f472b6, #facc15, #ffffff)", glow: "#ffffff", textColor: "#071019", order: 10, stars: 12, dust: 100000, powerBonus: .90, incomeBonus: .85, awakenCost: 3 }
+      N:   { label: "N",   color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,     basePower: 1000,   baseIncome: 35,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015,  incomePerLevel: .008,  awakenMax: 13, awakenCopies: [1,1,1,2,2,3,3,4,5,6,7,8,10], powerBonus: .07, incomeBonus: .05 },
+      R:   { label: "R",   color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,    basePower: 2600,   baseIncome: 80,    maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016,  incomePerLevel: .0085, awakenMax: 11, awakenCopies: [1,1,2,2,3,3,4,5,6,7,8], powerBonus: .09, incomeBonus: .06 },
+      SR:  { label: "SR",  color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,    basePower: 7000,   baseIncome: 190,   maxLevel: 140, upgradeDustBase: 70,    upgradeDustGrowth: 1.040, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 9,  awakenCopies: [1,1,2,2,3,4,5,6,8], powerBonus: .12, incomeBonus: .08 },
+      SSR: { label: "SSR", color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,   basePower: 20000,  baseIncome: 500,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019,  incomePerLevel: .0095, awakenMax: 7,  awakenCopies: [1,1,2,3,4,5,7], powerBonus: .17, incomeBonus: .11 },
+      UR:  { label: "UR",  color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,  basePower: 65000,  baseIncome: 1500,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021,  incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
+      LR:  { label: "LR",  color: "#22d3ee", colors: ["#22d3ee", "#a78bfa", "#facc15"], gradient: "linear-gradient(135deg, #22d3ee, #a78bfa 48%, #facc15)", glow: "#22d3ee", textColor: "#04111a", order: 5, stars: 8,  dust: 9000,  basePower: 220000, baseIncome: 5200,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024,  incomePerLevel: .0115, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .38, incomeBonus: .25 },
+      EX:  { label: "EX",  color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 6, stars: 10, dust: 50000, basePower: 800000, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028,  incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 }
     });
 
     /*
@@ -2202,32 +2203,48 @@
       "ไร้ธาตุ": "#64748b"
     });
 
+    const ELEMENT_EMOJIS = Object.freeze({
+      "ดิน": "⛰️",
+      "น้ำ": "💧",
+      "ลม": "🌪️",
+      "ไฟ": "🔥",
+      "สายฟ้า": "⚡",
+      "น้ำแข็ง": "❄️",
+      "เหล็ก": "⚙️",
+      "พืช": "🌿",
+      "แสง": "✨",
+      "ความมืด": "🌑",
+      "มิติ": "🌀",
+      "ไร้ธาตุ": "▫️"
+    });
+
     const ELEMENT_ADVANTAGES = Object.freeze({
-      "ดิน": ["สายฟ้า", "เหล็ก"],
-      "น้ำ": ["ไฟ", "ดิน"],
-      "ลม": ["พืช", "ดิน"],
+      "ดิน": ["ไฟ", "สายฟ้า"],
+      "น้ำ": ["ไฟ", "เหล็ก"],
+      "ลม": ["ดิน", "เหล็ก"],
       "ไฟ": ["พืช", "น้ำแข็ง"],
       "สายฟ้า": ["น้ำ", "ลม"],
-      "น้ำแข็ง": ["ลม", "น้ำ"],
-      "เหล็ก": ["น้ำแข็ง", "พืช"],
-      "พืช": ["ดิน", "น้ำ"],
-      "แสง": ["ความมืด", "น้ำแข็ง"],
-      "ความมืด": ["มิติ", "พืช"],
-      "มิติ": ["แสง", "เหล็ก"],
-      "ไร้ธาตุ": []
+      "น้ำแข็ง": ["ลม", "พืช"],
+      "เหล็ก": ["น้ำแข็ง", "สายฟ้า"],
+      "พืช": ["น้ำ", "ดิน"],
+      "แสง": ["ความมืด"],
+      "ความมืด": ["แสง"],
+      "มิติ": ["แสง", "ความมืด"],
+      "ไร้ธาตุ": ["มิติ"]
     });
 
     const ELEMENT_MATCHUP = Object.freeze({
-      advantageRate: 0.18,
-      disadvantageRate: -0.15
+      advantageRate: 0.25,
+      disadvantageRate: -0.20
     });
 //ธาตุสเกล
     const ELEMENT_COMBO_RULES = Object.freeze([
-      { key: "nature4", name: "สี่ฤดูธรรมชาติ", required: ["ดิน", "น้ำ", "ลม", "ไฟ"], powerRate: 0.15, incomeRate: 0.15, note: "มี ดิน+น้ำ+ลม+ไฟ ในทีม" },
-      { key: "stormIce", name: "พายุเหมันต์", required: ["น้ำ", "ลม", "สายฟ้า", "น้ำแข็ง"], powerRate: 0.18, incomeRate: 0.12, note: "มี น้ำ+ลม+สายฟ้า+น้ำแข็ง" },
-      { key: "forge", name: "จักรกลร้อนแรง", required: ["ไฟ", "สายฟ้า", "เหล็ก"], powerRate: 0.12, incomeRate: 0.08, note: "มี ไฟ+สายฟ้า+เหล็ก" },
-      { key: "livingSteel", name: "ป่าเหล็กมีชีวิต", required: ["ดิน", "น้ำ", "เหล็ก", "พืช"], powerRate: 0.16, incomeRate: 0.18, note: "มี ดิน+น้ำ+เหล็ก+พืช" },
-      { key: "lightDark", name: "สุริยันจันทรา", required: ["แสง", "ความมืด"], powerRate: 0.10, incomeRate: 0.10, note: "มี แสง+ความมืด" }
+      { key: "nature4", name: "แกนธรรมชาติ", required: ["ดิน", "น้ำ", "ลม", "ไฟ"], powerRate: 0.12, incomeRate: 0.12, note: "มี ดิน+น้ำ+ลม+ไฟ ในทีม" },
+      { key: "storm", name: "พายุสายฟ้า", required: ["น้ำ", "ลม", "สายฟ้า"], powerRate: 0.18, incomeRate: 0.05, note: "มี น้ำ+ลม+สายฟ้า" },
+      { key: "forge", name: "หลอมเหล็กเพลิง", required: ["ไฟ", "ดิน", "เหล็ก"], powerRate: 0.15, incomeRate: 0.08, note: "มี ไฟ+ดิน+เหล็ก" },
+      { key: "frostWind", name: "เหมันต์วายุ", required: ["น้ำ", "น้ำแข็ง", "ลม"], powerRate: 0.10, incomeRate: 0.15, note: "มี น้ำ+น้ำแข็ง+ลม" },
+      { key: "lifeLight", name: "พรแห่งชีวิต", required: ["พืช", "น้ำ", "แสง"], powerRate: 0.08, incomeRate: 0.18, note: "มี พืช+น้ำ+แสง" },
+      { key: "eclipse", name: "สุริยันจันทราข้ามมิติ", required: ["แสง", "ความมืด", "มิติ"], powerRate: 0.25, incomeRate: 0.10, note: "มี แสง+ความมืด+มิติ" }
     ]);
 
     const BANNERS = [
@@ -2239,20 +2256,16 @@
     "images": [
       "assets/banners/LS1.mp4"
     ],
-    "singlePullCost": 250000,
-    "tenPullCost": 2250000,
+    "singlePullCost": 50000,
+    "tenPullCost": 500000,
     "rateOverrides": {
       "N": 48,
       "R": 25,
       "SR": 13,
       "SSR": 9.1,
-      "UR": 1.85,
-      "LR": 0.83,
-      "EX": 0.2199,
-      "JJKB": 0.44,
-      "JJKS": 0.07,
-      "JJKC": 0.44,
-      "SC": 0.0001
+      "UR": 2.0,
+      "LR": 2.68,
+      "EX": 0.22
     },
     "rateUpCards": {
       "1035": 3,
@@ -2261,10 +2274,11 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 1500,
+      "every": 200,
       "rarityRates": {
-        "JJKS": 80,
-        "EX": 20
+        "UR": 70,
+        "LR": 27,
+        "EX": 3
       },
       "cardRates": {
         "1041": 2,
@@ -2272,7 +2286,8 @@
         "1043": 5
       },
       "resetWhenPullRarities": [
-        "JJKS"
+        "LR",
+        "EX"
       ]
     }
   },
@@ -2291,13 +2306,9 @@
       "R": 25,
       "SR": 13,
       "SSR": 9.1,
-      "UR": 1.85,
-      "LR": 0.83,
-      "EX": 0.2199,
-      "JJKB": 0.95,
-      "JJKS": 0.05,
-      "JJKC": 1,
-      "SC": 0.0001
+      "UR": 2.0,
+      "LR": 2.68,
+      "EX": 0.22
     },
     "rateUpCards": {
       "1021": 2,
@@ -2306,9 +2317,11 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 1500,
+      "every": 200,
       "rarityRates": {
-        "JJKS": 100
+        "UR": 70,
+        "LR": 27,
+        "EX": 3
       },
       "cardRates": {
         "1021": 2,
@@ -2316,7 +2329,8 @@
         "1023": 2
       },
       "resetWhenPullRarities": [
-        "JJKS"
+        "LR",
+        "EX"
       ]
     }
   },
@@ -2335,13 +2349,9 @@
       "R": 25,
       "SR": 13,
       "SSR": 9.1,
-      "UR": 1.85,
-      "LR": 0.83,
-      "EX": 0.2199,
-      "JJKB": 1,
-      "JJKS": 0.05,
-      "JJKC": 0.95,
-      "SC": 0.0001
+      "UR": 2.0,
+      "LR": 2.68,
+      "EX": 0.22
     },
     "rateUpCards": {
       "1002": 3,
@@ -2349,16 +2359,19 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 1500,
+      "every": 200,
       "rarityRates": {
-        "JJKS": 100
+        "UR": 70,
+        "LR": 27,
+        "EX": 3
       },
       "cardRates": {
         "1002": 2,
         "1008": 2
       },
       "resetWhenPullRarities": [
-        "JJKS"
+        "LR",
+        "EX"
       ]
     }
   },
@@ -2378,25 +2391,22 @@
       "SR": 10,
       "SSR": 4,
       "UR": 0.85,
-      "LR": 0.13,
-      "EX": 0.0199,
-      "SC": 0.0001
+      "LR": 0.14,
+      "EX": 0.01
     },
     "rateUpCards": {},
     "guarantee": {
       "enabled": true,
-      "every": 1500,
+      "every": 200,
       "rarityRates": {
         "UR": 80,
         "LR": 19,
-        "EX": 0.99,
-        "SC": 0.01
+        "EX": 1
       },
       "resetWhenPullRarities": [
         "UR",
         "LR",
-        "EX",
-        "SC"
+        "EX"
       ]
     }
   },
@@ -2417,25 +2427,23 @@
       "SSR": 9.1,
       "UR": 1.85,
       "LR": 0.83,
-      "EX": 0.2199,
-      "SC": 0.0001
+      "EX": 0.22
     },
     "rateUpCards": {
-      "1": 5, "2": 5
+      "1": 5,
+      "2": 5
     },
     "guarantee": {
       "enabled": true,
-      "every": 1500,
+      "every": 200,
       "rarityRates": {
         "UR": 72,
         "LR": 25,
-        "EX": 2.94,
-        "SC": 0.06
+        "EX": 3
       },
       "resetWhenPullRarities": [
         "LR",
-        "EX",
-        "SC"
+        "EX"
       ]
     }
   }
@@ -2444,7 +2452,7 @@
   {
     "id": 0,
     "name": "DEV.",
-    "rarity": "SC",
+    "rarity": "EX",
     "element": "ความมืด",
     "power": 5000000,
     "incomePerSec": 30000,
@@ -2460,7 +2468,7 @@
   {
     "id": 999,
     "name": "CREATOR",
-    "rarity": "SC",
+    "rarity": "EX",
     "element": "สายฟ้า",
     "power": 5000000,
     "incomePerSec": 30000,
@@ -2475,7 +2483,7 @@
   {
     "id": 1000,
     "name": "Great Magician",
-    "rarity": "SC",
+    "rarity": "EX",
     "element": "ไร้ธาตุ",
     "power": 5000000,
     "incomePerSec": 30000,
@@ -2490,7 +2498,7 @@
   {
     "id": 2000,
     "name": "MAMON",
-    "rarity": "SC",
+    "rarity": "EX",
     "element": "ไร้ธาตุ",
     "power": 5000000,
     "incomePerSec": 30000,
@@ -2536,7 +2544,10 @@
     "id": 1043,
     "name": "Yuka Okkotsu+Tsurugi Okkotsu",
     "rarity": "EX",
-    "element": ["ไฟ", "ลม"],
+    "element": [
+      "ไฟ",
+      "ลม"
+    ],
     "power": 801000,
     "incomePerSec": 18100,
     "upgradeDustBase": 10100,
@@ -2766,7 +2777,7 @@
   {
     "id": 1038,
     "name": "Marulu Val Vol Yelvori",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "มิติ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2779,7 +2790,7 @@
   {
     "id": 1039,
     "name": "Yuka Okkotsu",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ลม",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2792,7 +2803,7 @@
   {
     "id": 1040,
     "name": "Tsurugi Okkotsu",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ไฟ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2805,9 +2816,9 @@
   {
     "id": 1033,
     "name": "Kinji Hakari",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "สายฟ้า",
-     "power": 221000,
+    "power": 221000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -2818,7 +2829,7 @@
   {
     "id": 1034,
     "name": "Hajime Kashimo",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ลม",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2831,7 +2842,7 @@
   {
     "id": 1023,
     "name": "Yuji Itadori",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ไร้ธาตุ",
     "power": 230000,
     "incomePerSec": 5210,
@@ -2844,7 +2855,7 @@
   {
     "id": 1021,
     "name": "Hiromi Higuruma",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ไฟ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2857,7 +2868,7 @@
   {
     "id": 1022,
     "name": "Fumihiko Takaba",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "น้ำแข็ง",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2870,7 +2881,7 @@
   {
     "id": 1001,
     "name": "Satoru Gojo",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ความมืด",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2883,7 +2894,7 @@
   {
     "id": 1002,
     "name": "Sukuna",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "มิติ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2896,7 +2907,7 @@
   {
     "id": 1003,
     "name": "Senin Toji",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ไร้ธาตุ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2909,7 +2920,7 @@
   {
     "id": 1004,
     "name": "Maki",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ไร้ธาตุ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2922,7 +2933,7 @@
   {
     "id": 1005,
     "name": "Okkotsu Yuta",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ไร้ธาตุ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2935,7 +2946,7 @@
   {
     "id": 1006,
     "name": "Yuki Tsukumo",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ความมืด",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2948,7 +2959,7 @@
   {
     "id": 1007,
     "name": "Suguru Geto",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "มิติ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2961,7 +2972,7 @@
   {
     "id": 1008,
     "name": "Kenjaku",
-    "rarity": "JJKS",
+    "rarity": "LR",
     "element": "ไร้ธาตุ",
     "power": 221000,
     "incomePerSec": 5210,
@@ -2974,7 +2985,7 @@
   {
     "id": 1009,
     "name": "Yuji Itadori",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "แสง",
     "power": 65500,
     "incomePerSec": 1510,
@@ -2987,7 +2998,7 @@
   {
     "id": 1010,
     "name": "Nobara Kugisaki",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "ไฟ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3000,7 +3011,7 @@
   {
     "id": 1011,
     "name": "Megumi Fushiguro",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "ความมืด",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3013,7 +3024,7 @@
   {
     "id": 1012,
     "name": "Kento Nanami",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "เหล็ก",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3026,7 +3037,7 @@
   {
     "id": 1036,
     "name": "Toge Inumaki",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "ไร้ธาตุ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3039,7 +3050,7 @@
   {
     "id": 1037,
     "name": "Panda",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "เหล็ก",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3052,7 +3063,7 @@
   {
     "id": 1013,
     "name": "Aoi Todo",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "มิติ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3065,7 +3076,7 @@
   {
     "id": 1014,
     "name": "Momo Nishimiya",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "ลม",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3078,7 +3089,7 @@
   {
     "id": 1015,
     "name": "Mai Zenin",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "แสง",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3091,7 +3102,7 @@
   {
     "id": 1016,
     "name": "Maki Zenin",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "ความมืด",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3104,7 +3115,7 @@
   {
     "id": 1017,
     "name": "Kasumi Miwa",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "มิติ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3117,7 +3128,7 @@
   {
     "id": 1018,
     "name": "Kokichi Muta",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "ดิน",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3130,7 +3141,7 @@
   {
     "id": 1019,
     "name": "Mei Mei",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "ความมืด",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3143,7 +3154,7 @@
   {
     "id": 1020,
     "name": "Utahime Iori",
-    "rarity": "JJKB",
+    "rarity": "UR",
     "element": "ลม",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3156,7 +3167,7 @@
   {
     "id": 1035,
     "name": "Sukuna",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "เหล็ก",
     "power": 65700,
     "incomePerSec": 1530,
@@ -3169,7 +3180,7 @@
   {
     "id": 1024,
     "name": "Jogo",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "ไฟ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3182,7 +3193,7 @@
   {
     "id": 1025,
     "name": "Hanami",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "พืช",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3195,7 +3206,7 @@
   {
     "id": 1026,
     "name": "Dagon",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "น้ำ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3208,7 +3219,7 @@
   {
     "id": 1027,
     "name": "Mahito",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "ไร้ธาตุ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3221,7 +3232,7 @@
   {
     "id": 1028,
     "name": "Takako Uro",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "มิติ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3234,7 +3245,7 @@
   {
     "id": 1029,
     "name": "Ryu Ishigori",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "แสง",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3247,7 +3258,7 @@
   {
     "id": 1030,
     "name": "Choso",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "น้ำ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3260,7 +3271,7 @@
   {
     "id": 1031,
     "name": "Naoya Zenin",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "มิติ",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3273,7 +3284,7 @@
   {
     "id": 1032,
     "name": "Uraume",
-    "rarity": "JJKC",
+    "rarity": "UR",
     "element": "น้ำแข็ง",
     "power": 65500,
     "incomePerSec": 1510,
@@ -3447,7 +3458,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "19.png"
@@ -3460,7 +3471,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "20.png"
@@ -3473,7 +3484,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "21.png"
@@ -3486,7 +3497,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "22.png"
@@ -3499,7 +3510,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "23.png"
@@ -3512,7 +3523,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "24.png"
@@ -3525,7 +3536,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "25.png"
@@ -3538,7 +3549,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "26.png"
@@ -3551,7 +3562,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "27.png"
@@ -3564,7 +3575,7 @@
     "power": 7000,
     "incomePerSec": 190,
     "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.040,
+    "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
     "image": "28.png"
@@ -3689,17 +3700,51 @@
     let returnToReveal = false;
     let state = loadState();
 
+
+    function makeStarterLoadout() {
+      const owned = {};
+      const team = [];
+      const addOwned = card => {
+        if (!card) return;
+        const id = String(card.id);
+        if (!owned[id]) owned[id] = { count: 1, level: 1, duplicateRank: 0 };
+      };
+      const addTeam = card => {
+        if (!card || team.length >= CONFIG.starterTeamSize) return;
+        const id = String(card.id);
+        if (team.includes(id)) return;
+        addOwned(card);
+        team.push(id);
+      };
+
+      // เลือกทีมเริ่มต้นให้ครบ 5 ช่องจากการ์ดระดับต้นที่มีจริงในไฟล์นี้
+      const starterPool = CARDS
+        .filter(card => RARITIES[card.rarity] && RARITIES[card.rarity].order <= RARITIES.R.order)
+        .sort((a, b) => (getRarity(a).order - getRarity(b).order) || Number(a.id) - Number(b.id));
+      ["ไฟ", "น้ำ", "ลม", "ดิน", "แสง", "มิติ", "ไร้ธาตุ"].forEach(element => {
+        const card = starterPool.find(item => getCardElement(item) === element && !team.includes(String(item.id)));
+        addTeam(card);
+      });
+      starterPool.forEach(addTeam);
+
+      // เพิ่ม SR ฟรี 1 ใบไว้ในคลังเพื่อเป็นตัวหลักต้นเกม แต่ไม่ยัดเข้าทีมอัตโนมัติ
+      const freeSR = CARDS.find(card => card.rarity === "SR") || null;
+      addOwned(freeSR);
+      return { owned, team };
+    }
+
     function defaultState() {
+      const starter = makeStarterLoadout();
       return {
-        version: 1,
+        version: 2,
         gems: CONFIG.startingGems,
         dust: CONFIG.startingDust,
         incomeBank: 0,
         lastIncomeAt: Date.now(),
         lastDaily: "",
         activeBannerId: BANNERS[0] ? BANNERS[0].id : "",
-        owned: {},
-        team: [],
+        owned: starter.owned,
+        team: starter.team,
         pity: {},
         recent: [],
         profile: {
@@ -4236,7 +4281,7 @@
       Object.keys(next.owned).forEach(id => {
         const item = next.owned[id] || {};
         item.count = Math.max(1, Math.floor(Number(item.count) || 1));
-        item.level = Math.min(CONFIG.maxLevel, Math.max(1, Math.floor(Number(item.level) || 1)));
+        item.level = Math.min(getCardMaxLevel(CARD_BY_ID.get(String(id)) || {}), Math.max(1, Math.floor(Number(item.level) || 1)));
         item.duplicateRank = Math.max(0, Math.floor(Number(item.duplicateRank) || 0));
         next.owned[id] = item;
       });
@@ -4309,7 +4354,27 @@
     }
 
     function getRarity(card) {
-      return RARITIES[card.rarity] || RARITIES.N;
+      return RARITIES[card && card.rarity] || RARITIES.N;
+    }
+
+    function getCardAwakenMax(card) {
+      const rarity = getRarity(card || {});
+      return Math.max(0, Math.floor(Number(rarity.awakenMax !== undefined ? rarity.awakenMax : rarity.stars) || 0));
+    }
+
+    function getCardMaxLevel(card) {
+      const rarity = getRarity(card || {});
+      return Math.max(1, Math.floor(Number(rarity.maxLevel || CONFIG.maxLevel) || CONFIG.maxLevel));
+    }
+
+    function getElementEmoji(element) {
+      const safeElement = THAI_ELEMENT_SET.has(element) ? element : "ไร้ธาตุ";
+      return ELEMENT_EMOJIS[safeElement] || "▫️";
+    }
+
+    function elementLabel(element) {
+      const safeElement = THAI_ELEMENT_SET.has(element) ? element : "ไร้ธาตุ";
+      return `${getElementEmoji(safeElement)} ${safeElement}`;
     }
 
     function getCardElement(card) {
@@ -4331,22 +4396,22 @@
     function elementChipHTML(element, label = "", count = 0) {
       const safeElement = THAI_ELEMENT_SET.has(element) ? element : "ไร้ธาตุ";
       const suffix = label || (count > 0 ? `x${count}` : "");
-      return `<span class="element-chip" style="${elementStyleVars(safeElement)}">${escapeHTML(safeElement)}${suffix ? `<small>${escapeHTML(suffix)}</small>` : ""}</span>`;
+      return `<span class="element-chip" style="${elementStyleVars(safeElement)}">${escapeHTML(elementLabel(safeElement))}${suffix ? `<small>${escapeHTML(suffix)}</small>` : ""}</span>`;
     }
 
     function getElementMatchup(attackerElement, defenderElement) {
       const attacker = THAI_ELEMENT_SET.has(attackerElement) ? attackerElement : "ไร้ธาตุ";
       const defender = THAI_ELEMENT_SET.has(defenderElement) ? defenderElement : "ไร้ธาตุ";
       if (attacker === "ไร้ธาตุ" || defender === "ไร้ธาตุ" || attacker === defender) {
-        return { modifier: 0, tone: "neutral", label: "ธาตุปกติ", text: `${attacker} ปะทะ ${defender}: ไม่มีโบนัสชนะทาง` };
+        return { modifier: 0, tone: "neutral", label: "ธาตุปกติ", text: `${elementLabel(attacker)} ปะทะ ${elementLabel(defender)}: ไม่มีโบนัสชนะทาง` };
       }
       if ((ELEMENT_ADVANTAGES[attacker] || []).includes(defender)) {
-        return { modifier: ELEMENT_MATCHUP.advantageRate, tone: "win", label: "ได้เปรียบธาตุ", text: `${attacker} ชนะทาง ${defender} (+${Math.round(ELEMENT_MATCHUP.advantageRate * 100)}% Power)` };
+        return { modifier: ELEMENT_MATCHUP.advantageRate, tone: "win", label: "ได้เปรียบธาตุ", text: `${elementLabel(attacker)} ชนะทาง ${elementLabel(defender)} (+${Math.round(ELEMENT_MATCHUP.advantageRate * 100)}% Power)` };
       }
       if ((ELEMENT_ADVANTAGES[defender] || []).includes(attacker)) {
-        return { modifier: ELEMENT_MATCHUP.disadvantageRate, tone: "lose", label: "แพ้ทางธาตุ", text: `${attacker} แพ้ทาง ${defender} (${Math.round(ELEMENT_MATCHUP.disadvantageRate * 100)}% Power)` };
+        return { modifier: ELEMENT_MATCHUP.disadvantageRate, tone: "lose", label: "แพ้ทางธาตุ", text: `${elementLabel(attacker)} แพ้ทาง ${elementLabel(defender)} (${Math.round(ELEMENT_MATCHUP.disadvantageRate * 100)}% Power)` };
       }
-      return { modifier: 0, tone: "neutral", label: "ธาตุเป็นกลาง", text: `${attacker} ปะทะ ${defender}: ไม่ชนะหรือแพ้ทาง` };
+      return { modifier: 0, tone: "neutral", label: "ธาตุเป็นกลาง", text: `${elementLabel(attacker)} ปะทะ ${elementLabel(defender)}: ไม่ชนะหรือแพ้ทาง` };
     }
 
     function getElementWeaknesses(element) {
@@ -4373,24 +4438,30 @@
 
       const activeCombos = [];
       const addCombo = combo => activeCombos.push(combo);
-      const monoElement = nonNeutralElements
-        .filter(element => counts[element] >= 3)
+      const sameElement = nonNeutralElements
+        .filter(element => counts[element] >= 2)
         .sort((a, b) => counts[b] - counts[a] || powerByElement[b] - powerByElement[a])[0];
-      if (monoElement) {
-        const fullSame = counts[monoElement] >= 5;
-        addCombo({ key: `mono-${monoElement}`, name: fullSame ? `แกนธาตุบริสุทธิ์: ${monoElement}` : `แกนธาตุ: ${monoElement}`, powerRate: fullSame ? 0.25 : 0.12, incomeRate: fullSame ? 0.18 : 0.08, note: fullSame ? `มี ${monoElement} ครบ 5 ใบ` : `มี ${monoElement} อย่างน้อย 3 ใบ` });
+      if (sameElement) {
+        const amount = counts[sameElement];
+        const sameTable = amount >= 5
+          ? { powerRate: 0.35, incomeRate: 0.30, label: "ครบ 5 ใบ" }
+          : amount >= 4
+            ? { powerRate: 0.22, incomeRate: 0.18, label: "4 ใบ" }
+            : amount >= 3
+              ? { powerRate: 0.12, incomeRate: 0.10, label: "3 ใบ" }
+              : { powerRate: 0.05, incomeRate: 0.05, label: "2 ใบ" };
+        addCombo({ key: `same-${sameElement}`, name: `สายธาตุเดียว: ${elementLabel(sameElement)}`, powerRate: sameTable.powerRate, incomeRate: sameTable.incomeRate, note: `มี ${elementLabel(sameElement)} ${sameTable.label}` });
       }
       const pairElements = nonNeutralElements.filter(element => counts[element] >= 2);
-      if (pairElements.length >= 2) addCombo({ key: "pair-sync", name: "คู่ประสานธาตุ", powerRate: 0.08, incomeRate: 0.10, note: `${pairElements.slice(0, 2).join("+")} อย่างละ 2 ใบขึ้นไป` });
+      if (pairElements.length >= 2) addCombo({ key: "pair-sync", name: "คู่ประสานธาตุ", powerRate: 0.08, incomeRate: 0.10, note: `${pairElements.slice(0, 2).map(elementLabel).join(" + ")} อย่างละ 2 ใบขึ้นไป` });
       ELEMENT_COMBO_RULES.forEach(rule => { if (rule.required.every(element => counts[element] > 0)) addCombo(rule); });
-      if (teamCards.length >= 5 && nonNeutralElements.length >= 5) addCombo({ key: "rainbow5", name: "สมดุล 5 ธาตุ", powerRate: 0.20, incomeRate: 0.20, note: "มีธาตุไม่ซ้ำ 5 ธาตุโดยไม่รวมไร้ธาตุ" });
-      if (counts["มิติ"] > 0 && nonNeutralElements.length >= 3) addCombo({ key: "dimension-shift", name: "ข้ามมิติ", powerRate: 0.12, incomeRate: 0.06, note: "มี มิติ + ธาตุอื่นอย่างน้อย 2 ธาตุ" });
-      if (counts["ไร้ธาตุ"] >= 2) addCombo({ key: "neutral-core", name: "ไร้ธาตุเสถียร", powerRate: 0.03, incomeRate: 0.15, note: "มีไร้ธาตุ 2 ใบขึ้นไป เน้นฟาร์ม Gem" });
+      if (teamCards.length >= 5 && nonNeutralElements.length >= 5) addCombo({ key: "rainbow5", name: "สมดุล 5 ธาตุ", powerRate: 0.10, incomeRate: 0.15, note: "มีธาตุไม่ซ้ำ 5 ธาตุโดยไม่รวมไร้ธาตุ" });
+      if (counts["ไร้ธาตุ"] >= 1 && nonNeutralElements.length >= 4) addCombo({ key: "neutral-support", name: "ไร้ธาตุประคองทีม", powerRate: 0.05, incomeRate: 0.22, note: "มีไร้ธาตุ + ธาตุอื่นไม่ซ้ำอย่างน้อย 4 ธาตุ เน้นฟาร์ม Gem" });
 
       const rawPowerRate = activeCombos.reduce((sum, combo) => sum + Number(combo.powerRate || 0), 0);
       const rawIncomeRate = activeCombos.reduce((sum, combo) => sum + Number(combo.incomeRate || 0), 0);
-      const powerRate = Math.min(0.60, rawPowerRate);
-      const incomeRate = Math.min(0.60, rawIncomeRate);
+      const powerRate = Math.min(0.45, rawPowerRate);
+      const incomeRate = Math.min(0.40, rawIncomeRate);
       return { cards: teamCards, counts, uniqueElements, nonNeutralElements, dominantElement, activeCombos, rawPowerRate, rawIncomeRate, powerRate, incomeRate, powerCapped: rawPowerRate > powerRate, incomeCapped: rawIncomeRate > incomeRate };
     }
 
@@ -4434,13 +4505,10 @@
       const owned = getOwned(card.id);
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
-      const element = getCardElement(card);
-      const rawElement = String(card.element || "").trim();
-      const elementDetail = rawElement && rawElement !== element
-        ? `ธาตุที่ใช้ในระบบ: ${element} • ข้อความเดิม: ${rawElement}`
-        : `ธาตุที่ใช้ในระบบ: ${element}`;
       const rarity = getRarity(card);
-      return Number(card.power || 0) * (1 + (level - 1) * CONFIG.powerGrowth) * (1 + rank * rarity.powerBonus);
+      const basePower = Number(card.power || rarity.basePower || 0);
+      const powerPerLevel = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
+      return basePower * (1 + (level - 1) * powerPerLevel) * (1 + rank * Number(rarity.powerBonus || 0));
     }
 
     function getCardIncome(card) {
@@ -4448,7 +4516,9 @@
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
       const rarity = getRarity(card);
-      return Number(card.incomePerSec || 0) * (1 + (level - 1) * CONFIG.incomeGrowth) * (1 + rank * rarity.incomeBonus);
+      const baseIncome = Number(card.incomePerSec || rarity.baseIncome || 0);
+      const incomePerLevel = Number(rarity.incomePerLevel !== undefined ? rarity.incomePerLevel : CONFIG.incomeGrowth);
+      return baseIncome * (1 + (level - 1) * incomePerLevel) * (1 + rank * Number(rarity.incomeBonus || 0));
     }
 
     function getRawTeamIncome() {
@@ -5043,8 +5113,9 @@
     function getUpgradeCost(card) {
       const owned = getOwned(card.id);
       if (!owned) return Infinity;
-      const base = Number(card.upgradeDustBase || 250);
-      const growth = Number(card.upgradeDustGrowth || 1.10);
+      const rarity = getRarity(card);
+      const base = Number(card.upgradeDustBase || rarity.upgradeDustBase || 250);
+      const growth = Number(card.upgradeDustGrowth || rarity.upgradeDustGrowth || 1.10);
       return Math.ceil(base * Math.pow(growth, owned.level - 1));
     }
 
@@ -5052,7 +5123,8 @@
       const card = CARD_BY_ID.get(String(cardId));
       const owned = card && getOwned(card.id);
       if (!card || !owned) return;
-      if (owned.level >= CONFIG.maxLevel) return showToast("การ์ดใบนี้เลเวลเต็มแล้ว");
+      const maxLevel = getCardMaxLevel(card);
+      if (owned.level >= maxLevel) return showToast("การ์ดใบนี้เลเวลเต็มแล้ว");
       const cost = getUpgradeCost(card);
       if (state.dust < cost) return showToast("Dust ไม่พอ");
       updateIncome();
@@ -5066,10 +5138,14 @@
     function getAwakenCost(card) {
       const owned = getOwned(card.id);
       const rarity = getRarity(card);
-      const maxRank = rarity.stars;
+      const maxRank = getCardAwakenMax(card);
       const rank = owned ? Math.min(owned.duplicateRank, maxRank) : 0;
-      const usedBefore = Math.floor(rarity.awakenCost * rank / maxRank);
-      const usedAfter = Math.floor(rarity.awakenCost * Math.min(rank + 1, maxRank) / maxRank);
+      if (Array.isArray(rarity.awakenCopies) && rarity.awakenCopies[rank] !== undefined) {
+        return Math.max(1, Math.floor(Number(rarity.awakenCopies[rank]) || 1));
+      }
+      const totalCost = Number(rarity.awakenCost || maxRank || 1);
+      const usedBefore = Math.floor(totalCost * rank / Math.max(1, maxRank));
+      const usedAfter = Math.floor(totalCost * Math.min(rank + 1, maxRank) / Math.max(1, maxRank));
       return Math.max(1, usedAfter - usedBefore);
     }
 
@@ -5077,8 +5153,8 @@
       const card = CARD_BY_ID.get(String(cardId));
       const owned = card && getOwned(card.id);
       if (!card || !owned) return;
-      const rarity = getRarity(card);
-      if (owned.duplicateRank >= rarity.stars) return showToast("ปลุกพลังเต็มแล้ว");
+      const maxRank = getCardAwakenMax(card);
+      if (owned.duplicateRank >= maxRank) return showToast("ปลุกพลังเต็มแล้ว");
       const cost = getAwakenCost(card);
       if (owned.count - 1 < cost) return showToast(`ต้องใช้การ์ดซ้ำ ${cost} ใบ`);
       updateIncome();
@@ -5134,7 +5210,7 @@
               <h3 class="card-name">${escapeHTML(card.name)}</h3>
               <div class="card-meta">
                 <span>Lv.${level}</span>
-                <span class="card-element" style="${elementStyleVars(element)}">${escapeHTML(element)}</span>
+                <span class="card-element" style="${elementStyleVars(element)}">${escapeHTML(elementLabel(element))}</span>
                 <span class="stars">${"★".repeat(Math.min(rarity.stars, 8))}${rarity.stars > 8 ? "+" : ""}</span>
               </div>
             </div>
@@ -5302,19 +5378,24 @@
             </div>
           `).join("")
         : `<div class="combo-card"><strong>ยังไม่ติดคอมโบ</strong><span>ลองใส่ธาตุซ้ำ 3 ใบ, 2+2 ใบ หรือจัดชุด ดิน/น้ำ/ลม/ไฟ เพื่อเปิดโบนัส</span></div>`;
-      const advantageList = (ELEMENT_ADVANTAGES[summary.dominantElement] || []).join(" / ") || "-";
-      const weaknessList = getElementWeaknesses(summary.dominantElement).join(" / ") || "-";
+      const advantageElements = ELEMENT_ADVANTAGES[summary.dominantElement] || [];
+      const weaknessElements = getElementWeaknesses(summary.dominantElement);
+      const advantageList = advantageElements.length ? advantageElements.map(element => elementChipHTML(element)).join("") : `<span class="element-chip" style="${elementStyleVars("ไร้ธาตุ")}">-</span>`;
+      const weaknessList = weaknessElements.length ? weaknessElements.map(element => elementChipHTML(element)).join("") : `<span class="element-chip" style="${elementStyleVars("ไร้ธาตุ")}">-</span>`;
       panel.innerHTML = `
         <div>
-          <h3>ธาตุหลักทีม: ${escapeHTML(summary.dominantElement)}</h3>
-          <p>โบนัสรวมตอนนี้: Power +${powerPercent}% • Income +${incomePercent}%${summary.powerCapped || summary.incomeCapped ? " • โบนัสถูกจำกัดสูงสุด 60%" : ""}</p>
+          <h3>ธาตุหลักทีม: ${escapeHTML(elementLabel(summary.dominantElement))}</h3>
+          <p>โบนัสรวมตอนนี้: Power +${powerPercent}% • Income +${incomePercent}%${summary.powerCapped || summary.incomeCapped ? " • โบนัสถูกจำกัดสูงสุด Power 45% / Income 40%" : ""}</p>
           <div class="element-chip-row">${activeElementChips}</div>
-          <p class="element-mini-note">อ่านค่าเฉพาะข้อความไทยตรงตัว: ${THAI_ELEMENTS.map(escapeHTML).join(" / ")}</p>
+          <p class="element-mini-note">อ่านค่าเฉพาะข้อความไทยตรงตัว: ${THAI_ELEMENTS.map(element => `${getElementEmoji(element)} ${element}`).map(escapeHTML).join(" / ")}</p>
         </div>
         <div>
-          <h3>คอมโบที่ทำงาน</h3>
+          <h3>คอมโบธาตุที่ทำงาน</h3>
           <div class="combo-list">${comboHTML}</div>
-          <p class="element-mini-note">ธาตุหลักชนะทาง: ${escapeHTML(advantageList)} • แพ้ทาง: ${escapeHTML(weaknessList)}</p>
+          <p class="element-mini-note">ธาตุหลักชนะทาง:</p>
+          <div class="element-chip-row">${advantageList}</div>
+          <p class="element-mini-note">ธาตุหลักแพ้ทาง:</p>
+          <div class="element-chip-row">${weaknessList}</div>
         </div>
       `;
     }
@@ -5348,11 +5429,11 @@
       document.getElementById("battleEnemyPower").textContent = formatNumber(stats.enemyPower);
       document.getElementById("battleEnemyName").textContent = `Tower ชั้น ${stats.stage}`;
       document.getElementById("battlePowerBreakdown").textContent =
-        `พลังการ์ด ${formatNumber(stats.basePower)} • คอมโบธาตุ +${formationPercent}%${stats.support ? ` • Support +${formatNumber(stats.supportPower)}` : ""} • ${stats.dominantElement} vs ${stats.enemyElement} ${elementSign}${elementPercent}%`;
+        `พลังการ์ด ${formatNumber(stats.basePower)} • คอมโบธาตุ +${formationPercent}%${stats.support ? ` • Support +${formatNumber(stats.supportPower)}` : ""} • ${elementLabel(stats.dominantElement)} vs ${elementLabel(stats.enemyElement)} ${elementSign}${elementPercent}%`;
       document.getElementById("battleEnemyDetail").textContent =
-        `ศัตรูธาตุ ${stats.enemyElement} • ${stats.matchup.text}${stats.effectivePower >= stats.enemyPower ? " • พลังทีมได้เปรียบ" : " • ศัตรูยังแข็งแกร่งกว่า"}`;
+        `ศัตรูธาตุ ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}${stats.effectivePower >= stats.enemyPower ? " • พลังทีมได้เปรียบ" : " • ศัตรูยังแข็งแกร่งกว่า"}`;
       const battleElementText = document.getElementById("battleElementText");
-      if (battleElementText) battleElementText.textContent = `${stats.dominantElement} ปะทะ ${stats.enemyElement}: ${stats.matchup.label} (${elementSign}${elementPercent}% Power)`;
+      if (battleElementText) battleElementText.textContent = `${elementLabel(stats.dominantElement)} ปะทะ ${elementLabel(stats.enemyElement)}: ${stats.matchup.label} (${elementSign}${elementPercent}% Power)`;
       document.getElementById("battlePlayerMeter").style.width = `${Math.max(3, stats.effectivePower / maxPower * 100)}%`;
       document.getElementById("battleEnemyMeter").style.width = `${Math.max(3, stats.enemyPower / maxPower * 100)}%`;
       document.getElementById("battleEnergyText").textContent = `${state.battle.energy}/${CONFIG.battleMaxEnergy}`;
@@ -5522,6 +5603,13 @@
         : image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" onerror="this.remove()">` : "";
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
+      const element = getCardElement(card);
+      const rawElement = String(card.element || "").trim();
+      const elementDetail = rawElement && rawElement !== element
+        ? `ธาตุที่ใช้ในระบบ: ${elementLabel(element)} • ข้อความเดิม: ${rawElement}`
+        : `ธาตุที่ใช้ในระบบ: ${elementLabel(element)}`;
+      const maxLevel = getCardMaxLevel(card);
+      const maxRank = getCardAwakenMax(card);
       const availableDuplicates = owned ? Math.max(0, owned.count - 1) : 0;
       const upgradeCost = owned ? getUpgradeCost(card) : 0;
       const awakenCost = owned ? getAwakenCost(card) : 0;
@@ -5537,22 +5625,22 @@
             <h2>${escapeHTML(card.name)}</h2>
             <p class="detail-sub">${escapeHTML(elementDetail)} ${owned ? `• มี ${owned.count} ใบ` : "• ยังไม่ได้ครอบครอง"}</p>
             <div class="awaken-track" aria-label="ระดับปลุกพลัง">
-              ${Array.from({ length: rarity.stars }, (_, index) => `<span class="awaken-star ${index < rank ? "on" : ""}">★</span>`).join("")}
+              ${Array.from({ length: maxRank }, (_, index) => `<span class="awaken-star ${index < rank ? "on" : ""}">★</span>`).join("")}
             </div>
             <div class="stat-grid">
-              <div class="stat"><span>Level</span><strong>${level}/${CONFIG.maxLevel}</strong></div>
-              <div class="stat"><span>Awaken</span><strong>${rank}/${rarity.stars}</strong></div>
+              <div class="stat"><span>Level</span><strong>${level}/${maxLevel}</strong></div>
+              <div class="stat"><span>Awaken</span><strong>${rank}/${maxRank}</strong></div>
               <div class="stat"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
               <div class="stat"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
-              <div class="stat"><span>Element</span><strong>${escapeHTML(element)}</strong></div>
+              <div class="stat"><span>Element</span><strong>${escapeHTML(elementLabel(element))}</strong></div>
             </div>
             <div class="detail-actions">
               ${owned ? `
-                <button class="btn btn-primary" data-action="upgrade" data-card-id="${escapeHTML(card.id)}" ${level >= CONFIG.maxLevel ? "disabled" : ""}>
-                  อัปเกรดเลเวล <span class="cost">${level >= CONFIG.maxLevel ? "เลเวลเต็ม" : `${formatNumber(upgradeCost)} Dust`}</span>
+                <button class="btn btn-primary" data-action="upgrade" data-card-id="${escapeHTML(card.id)}" ${level >= maxLevel ? "disabled" : ""}>
+                  อัปเกรดเลเวล <span class="cost">${level >= maxLevel ? "เลเวลเต็ม" : `${formatNumber(upgradeCost)} Dust`}</span>
                 </button>
-                <button class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= rarity.stars ? "disabled" : ""}>
-                  ปลุกพลัง <span class="cost">${rank >= rarity.stars ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
+                <button class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
+                  ปลุกพลัง <span class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
                 </button>
                 <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์"}</button>
                 <button class="btn btn-gold" data-action="set-support-card" data-card-id="${escapeHTML(card.id)}">${String(state.profile.supportCardId || "") === String(card.id) ? "เป็น Support อยู่" : "ตั้งเป็น Support โปรไฟล์"}</button>
