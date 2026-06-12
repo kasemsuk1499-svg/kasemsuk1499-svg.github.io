@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-tower-rewards-friends-rank-v4">
+  <meta name="gacha-app-build" content="2026-06-12-server-reset-v5">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -2364,6 +2364,14 @@
     });
 
     /*
+      เพิ่มโดยอลิซ: ระบบรีเซ็ตเซฟทั้งเซิร์ฟ
+      - เจ้าของเกมตั้งค่า Firebase Realtime Database: serverMeta/resetVersion เป็นค่าใหม่ เช่น reset-2026-06-12-v1
+      - เมื่อผู้เล่นล็อกอิน/เข้าเกม ระบบจะเทียบ resetVersion แล้วล้างเซฟเก่าให้เป็นค่าเริ่มต้นอัตโนมัติ
+      - เก็บเลขเวอร์ชันล่าสุดไว้ในเครื่อง เพื่อกันผู้เล่นอัปโหลด local save เก่ากลับขึ้น Cloud
+    */
+    const SERVER_RESET_LOCAL_KEY = `${CONFIG.saveKey}:server_reset_version`;
+
+    /*
       เพิ่มโดยอลิซ: ตารางรางวัล Battle Tower
       วิธีปรับตามที่คุณกำหนด:
       - ทุก 5 ชั้น ใช้ normalTicketEvery / normalTicketAmount
@@ -4159,6 +4167,57 @@
       }, 900);
     }
 
+    async function getServerResetVersion() {
+      if (!cloudReady || !cloudModules || !cloudDb) return "";
+      try {
+        const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, "serverMeta/resetVersion"));
+        if (!snapshot.exists()) return "";
+        return String(snapshot.val() || "").trim();
+      } catch (error) {
+        setCloudStatus(firebaseErrorMessage(error, "อ่านคำสั่งรีเซ็ตเซิร์ฟ"), "bad");
+        return "";
+      }
+    }
+
+    async function applyServerResetIfNeeded(account = null, user = null) {
+      const serverResetVersion = await getServerResetVersion();
+      if (!serverResetVersion) return false;
+
+      const accountResetVersion = String(account && account.resetVersion || "").trim();
+      const localResetVersion = String(SAFE_STORAGE.getItem(SERVER_RESET_LOCAL_KEY) || "").trim();
+
+      if (accountResetVersion === serverResetVersion && localResetVersion === serverResetVersion) {
+        return false;
+      }
+
+      const oldProfile = state && state.profile && typeof state.profile === "object" ? state.profile : {};
+      const keepUsername = activeCloudUsername || String(account && account.username || "") || oldProfile.username || (user && user.displayName) || "Player";
+      const keepPhotoURL = sanitizeProfilePhoto(
+        oldProfile.photoURL ||
+        (account && (account.photoURL || (account.profile && account.profile.photoURL))) ||
+        (user && user.photoURL) ||
+        ""
+      );
+      const keepProvider = oldProfile.provider || "firebase";
+
+      state = normalizeState(defaultState());
+      state.profile.username = String(keepUsername || "Player").slice(0, 24);
+      state.profile.photoURL = keepPhotoURL;
+      state.profile.provider = String(keepProvider || "firebase").slice(0, 32);
+      state.profile.updatedAt = Date.now();
+
+      SAFE_STORAGE.setItem(SERVER_RESET_LOCAL_KEY, serverResetVersion);
+      SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
+
+      await writeCloudSave({
+        resetVersion: serverResetVersion,
+        resetAppliedAt: Date.now(),
+        resetAppliedAtText: new Date().toLocaleString("th-TH")
+      });
+
+      return true;
+    }
+
     async function restoreCloudSession() {
       if (!cloudReady || !cloudAuth) return;
       const user = await new Promise(resolve => {
@@ -4183,18 +4242,27 @@
         activeCloudUid = user.uid;
         activeCloudUsername = String(account && account.username || activeCloudUsername || "Player");
         SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, activeCloudUsername);
-        if (account && account.save) {
+
+        const didServerReset = await applyServerResetIfNeeded(account, user);
+        if (!didServerReset && account && account.save) {
           state = normalizeState(account.save);
           SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
         }
+
         state.profile.username = activeCloudUsername;
         state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || (user && user.photoURL) || "");
         state.profile.provider = state.profile.provider || "firebase";
-        await writeCloudSave();
+        await writeCloudSave(didServerReset ? { resetVersion: SAFE_STORAGE.getItem(SERVER_RESET_LOCAL_KEY) || "" } : {});
         renderLoginGate(false);
         renderAll();
         refreshFriends();
-        setCloudStatus(`เชื่อมต่อ Cloud แล้ว: ${activeCloudUsername} • เครื่องนี้จำการล็อกอินไว้แล้ว`, "ok");
+
+        if (didServerReset) {
+          showToast("รีเซ็ตเซฟตามคำสั่งเซิร์ฟแล้ว เริ่มใหม่ทุกคนเรียบร้อย");
+          setCloudStatus(`รีเซ็ตเซฟเซิร์ฟแล้ว: ${activeCloudUsername} • เครื่องนี้เริ่มจากเซฟใหม่`, "ok");
+        } else {
+          setCloudStatus(`เชื่อมต่อ Cloud แล้ว: ${activeCloudUsername} • เครื่องนี้จำการล็อกอินไว้แล้ว`, "ok");
+        }
       } catch (error) {
         setCloudStatus(firebaseErrorMessage(error, "โหลด Cloud"), "bad");
       }
