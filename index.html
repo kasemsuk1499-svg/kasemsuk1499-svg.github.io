@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-user-profile-social-login-v1">
+  <meta name="gacha-app-build" content="2026-06-12-support-login-gate-v2">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -990,6 +990,158 @@
     .friend-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .friend-avatar { width: 42px; height: 42px; border-radius: 14px; color: #071019; font-size: .88rem; }
 
+    /* เพิ่มโดยอลิซ: หน้า Login Gate บังคับล็อกอินก่อนเข้าเกม + จดจำเครื่องผ่าน Firebase Local Persistence */
+    body.auth-locked { overflow: hidden; }
+    body.auth-locked .app-shell,
+    body.auth-locked .bottom-nav {
+      pointer-events: none;
+      user-select: none;
+      filter: blur(10px) saturate(.75);
+      opacity: .18;
+    }
+
+    .login-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(92,232,255,.22), transparent 34rem),
+        radial-gradient(circle at 90% 0%, rgba(167,139,250,.22), transparent 34rem),
+        rgba(3,5,12,.90);
+      backdrop-filter: blur(20px);
+    }
+
+    .login-gate-card {
+      width: min(620px, 100%);
+      overflow: hidden;
+      border: 1px solid rgba(92,232,255,.22);
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(92,232,255,.17), transparent 38%),
+        radial-gradient(circle at 82% 0%, rgba(167,139,250,.16), transparent 40%),
+        var(--panel-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .login-gate-hero {
+      position: relative;
+      padding: clamp(26px, 5vw, 42px);
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.025);
+    }
+
+    .login-gate-hero::after {
+      content: "LOGIN";
+      position: absolute;
+      right: -12px;
+      bottom: -18px;
+      color: rgba(255,255,255,.055);
+      font-size: clamp(4rem, 16vw, 8rem);
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      pointer-events: none;
+    }
+
+    .login-gate-hero h2 {
+      position: relative;
+      margin: 6px 0 10px;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      line-height: .92;
+      letter-spacing: -.055em;
+    }
+
+    .login-gate-hero p {
+      position: relative;
+      max-width: 500px;
+      margin-bottom: 0;
+      color: #cbd5e1;
+      line-height: 1.65;
+    }
+
+    .login-gate-body {
+      display: grid;
+      gap: 12px;
+      padding: clamp(18px, 4vw, 28px);
+    }
+
+    .login-gate-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .login-gate-fields label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 800;
+    }
+
+    .login-gate-actions,
+    .login-gate-social {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .login-gate-note {
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .support-card-box {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-top: 10px;
+      padding: 11px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 18px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .support-card-art {
+      width: 76px;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--rarity, var(--cyan)) 55%, transparent);
+      border-radius: 13px;
+      background:
+        radial-gradient(circle at 35% 20%, color-mix(in srgb, var(--rarity, var(--cyan)) 44%, transparent), transparent 48%),
+        #11162b;
+    }
+
+    .support-card-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 18%;
+    }
+
+    .support-card-title { font-weight: 1000; }
+    .support-card-meta { margin-top: 4px; color: var(--muted); font-size: .76rem; line-height: 1.45; }
+
+    @media (max-width: 760px) {
+      .login-gate-fields,
+      .login-gate-actions,
+      .login-gate-social {
+        grid-template-columns: 1fr;
+      }
+
+      .support-card-box {
+        grid-template-columns: 62px 1fr;
+      }
+
+      .support-card-art { width: 62px; }
+    }
+
     .close {
       position: absolute;
       z-index: 5;
@@ -1336,7 +1488,7 @@
     }
   </style>
 </head>
-<body>
+<body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
     <div class="boot-error-card">
       <h2>เปิดเกมไม่สำเร็จ</h2>
@@ -1345,6 +1497,41 @@
       <button class="btn btn-primary" style="margin-top:16px" onclick="location.reload()">รีโหลดหน้าเกม</button>
     </div>
   </div>
+
+  <!-- เพิ่มโดยอลิซ: บังคับล็อกอินก่อนเข้าเกมจริง -->
+  <div class="login-gate" id="loginGate" role="dialog" aria-modal="true" aria-label="ล็อกอินก่อนเข้าเกม">
+    <div class="login-gate-card">
+      <div class="login-gate-hero">
+        <p class="eyebrow">Anime Card Collection</p>
+        <h2>ล็อกอินก่อนเข้าเกม</h2>
+        <p>ใช้ Gmail / Google, Facebook หรือ Username เดิมได้เลย เครื่องนี้จะจำการล็อกอินไว้ให้อัตโนมัติ จนกว่าจะกดออกจากบัญชี</p>
+      </div>
+      <div class="login-gate-body">
+        <div class="login-gate-social">
+          <button class="btn btn-google" data-action="login-google">เข้าเกมด้วย Gmail / Google</button>
+          <button class="btn btn-facebook" data-action="login-facebook">เข้าเกมด้วย Facebook</button>
+        </div>
+        <div class="auth-divider">หรือใช้ Username</div>
+        <div class="login-gate-fields">
+          <label>
+            Username
+            <input class="field" id="gateUsername" autocomplete="username" maxlength="24" placeholder="ชื่อผู้เล่น / สมัครใหม่">
+          </label>
+          <label>
+            Password
+            <input class="field" id="gatePassword" type="password" autocomplete="current-password" maxlength="64" placeholder="รหัสผ่าน">
+          </label>
+        </div>
+        <div class="login-gate-actions">
+          <button class="btn btn-primary" data-action="register">สมัครและเข้าเกม</button>
+          <button class="btn btn-gold" data-action="login">ล็อกอินเข้าเกม</button>
+        </div>
+        <div class="cloud-status warn" id="gateStatusText">กำลังเชื่อมต่อ Firebase...</div>
+        <div class="login-gate-note">ต้องเพิ่มโดเมน GitHub Pages ใน Firebase Authorized domains ก่อน ระบบล็อกอินถึงจะใช้งานได้</div>
+      </div>
+    </div>
+  </div>
+
   <div class="app-shell">
     <header class="topbar panel">
       <div class="brand">
@@ -1777,7 +1964,7 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบปุ่มแยกระดับการ์ด
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-user-profile-social-login-v1",
+      version: "2026-06-12-support-login-gate-v2",
       seenKey: "anime_card_update_notice_seen_v1"
     });
 
@@ -2922,7 +3109,7 @@
     "upgradeDustGrowth": 1.1,
     "awakenMax": 9,
     "icon": "",
-    "image": "11.jpeg"
+    "image": "11.png"
   },
   {
     "id": 12,
@@ -3295,6 +3482,8 @@
           username: "",
           photoURL: "",
           provider: "local",
+          // เพิ่มโดยอลิซ: การ์ดซัพพอร์ตประจำโปรไฟล์ เลือกได้ 1 ใบเพื่อให้เพื่อนยืมพลัง
+          supportCardId: "",
           createdAt: Date.now(),
           updatedAt: Date.now()
         },
@@ -3316,12 +3505,39 @@
 
     function setCloudStatus(message, tone = "warn") {
       const status = document.getElementById("cloudStatusText");
+      const gateStatus = document.getElementById("gateStatusText");
       const summary = document.getElementById("cloudSummaryText");
-      if (status) {
-        status.textContent = message;
-        status.className = `cloud-status ${tone}`;
-      }
+      [status, gateStatus].filter(Boolean).forEach(item => {
+        item.textContent = message;
+        item.className = `cloud-status ${tone}`;
+      });
       if (summary) summary.textContent = message;
+    }
+
+    function renderLoginGate(forceLocked = null) {
+      const gate = document.getElementById("loginGate");
+      if (!gate) return;
+      const locked = forceLocked === null ? !activeCloudUid : Boolean(forceLocked);
+      gate.classList.toggle("hidden", !locked);
+      document.body.classList.toggle("auth-locked", locked);
+      if (locked) document.body.style.overflow = "hidden";
+      else if (document.querySelectorAll(".modal:not(.hidden), .reveal:not(.hidden)").length === 0) document.body.style.overflow = "";
+    }
+
+    function syncAuthInputsFromGate() {
+      const gateUsername = document.getElementById("gateUsername");
+      const gatePassword = document.getElementById("gatePassword");
+      const authUsername = document.getElementById("authUsername");
+      const authPassword = document.getElementById("authPassword");
+      if (authUsername && gateUsername && gateUsername.value && !authUsername.value) authUsername.value = gateUsername.value;
+      if (authPassword && gatePassword && gatePassword.value && !authPassword.value) authPassword.value = gatePassword.value;
+    }
+
+    function clearPasswordInputs() {
+      ["authPassword", "gatePassword"].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = "";
+      });
     }
 
     function renderAccount() {
@@ -3337,7 +3553,7 @@
 
     function setAuthBusy(busy) {
       cloudBusy = busy;
-      document.querySelectorAll('[data-action="register"], [data-action="login"], [data-action="login-google"], [data-action="login-facebook"], [data-action="logout"], [data-action="save-profile"]')
+      document.querySelectorAll('[data-action="register"], [data-action="login"], [data-action="login-google"], [data-action="login-facebook"], [data-action="logout"], [data-action="save-profile"], [data-action="set-support-card"]')
         .forEach(button => { button.disabled = busy || (button.dataset.action === "logout" && !activeCloudUid); });
     }
 
@@ -3457,6 +3673,8 @@
           signInWithPopup: authModule.signInWithPopup,
           GoogleAuthProvider: authModule.GoogleAuthProvider,
           FacebookAuthProvider: authModule.FacebookAuthProvider,
+          setPersistence: authModule.setPersistence,
+          browserLocalPersistence: authModule.browserLocalPersistence,
           signOut: authModule.signOut,
           onAuthStateChanged: authModule.onAuthStateChanged,
           getDatabase: databaseModule.getDatabase,
@@ -3468,6 +3686,13 @@
           ? cloudModules.getApps()[0]
           : cloudModules.initializeApp(FIREBASE_CONFIG);
         cloudAuth = cloudModules.getAuth(cloudApp);
+        // เพิ่มโดยอลิซ: จำการล็อกอินค้างไว้ในเครื่องนี้แบบ Local Persistence
+        // ผู้เล่นไม่ต้องล็อกอินซ้ำจนกว่าจะกดออกจากบัญชีเอง
+        try {
+          await cloudModules.setPersistence(cloudAuth, cloudModules.browserLocalPersistence);
+        } catch (persistenceError) {
+          console.warn("Firebase persistence fallback:", persistenceError);
+        }
         cloudDb = cloudModules.getDatabase(cloudApp);
         cloudReady = true;
         setCloudStatus("Firebase พร้อมใช้งาน ล็อกอินเพื่อซิงก์เซฟข้ามเครื่อง", "ok");
@@ -3540,6 +3765,8 @@
         activeCloudUsername = "";
         SAFE_STORAGE.removeItem(CONFIG.cloudUsernameKey);
         renderAccount();
+        renderLoginGate(true);
+        setCloudStatus("กรุณาล็อกอินก่อนเข้าเกม ระบบจะจำเครื่องนี้ไว้หลังล็อกอินสำเร็จ", "warn");
         return;
       }
 
@@ -3556,18 +3783,24 @@
         state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || (user && user.photoURL) || "");
         state.profile.provider = state.profile.provider || "firebase";
         await writeCloudSave();
+        renderLoginGate(false);
         renderAll();
         refreshFriends();
-        setCloudStatus(`เชื่อมต่อ Cloud แล้ว: ${activeCloudUsername}`, "ok");
+        setCloudStatus(`เชื่อมต่อ Cloud แล้ว: ${activeCloudUsername} • เครื่องนี้จำการล็อกอินไว้แล้ว`, "ok");
       } catch (error) {
         setCloudStatus(firebaseErrorMessage(error, "โหลด Cloud"), "bad");
       }
     }
 
     function getAuthInputs() {
+      syncAuthInputsFromGate();
+      const authUsername = document.getElementById("authUsername");
+      const authPassword = document.getElementById("authPassword");
+      const gateUsername = document.getElementById("gateUsername");
+      const gatePassword = document.getElementById("gatePassword");
       return {
-        username: document.getElementById("authUsername").value.trim(),
-        password: document.getElementById("authPassword").value
+        username: (authUsername && authUsername.value.trim()) || (gateUsername && gateUsername.value.trim()) || "",
+        password: (authPassword && authPassword.value) || (gatePassword && gatePassword.value) || ""
       };
     }
 
@@ -3594,11 +3827,13 @@
           createdAt: Date.now(),
           createdAtText: new Date().toLocaleString("th-TH")
         });
-        document.getElementById("authPassword").value = "";
+        clearPasswordInputs();
+        renderLoginGate(false);
+        closeAuthModal();
         renderAccount();
         refreshFriends();
-        setCloudStatus(`สมัครสำเร็จและอัปโหลดเซฟของ ${username} แล้ว`, "ok");
-        showToast("สมัครบัญชีและอัปโหลดเซฟขึ้น Firebase แล้ว");
+        setCloudStatus(`สมัครสำเร็จและอัปโหลดเซฟของ ${username} แล้ว • เครื่องนี้จำการล็อกอินไว้แล้ว`, "ok");
+        showToast("สมัครบัญชีและเข้าเกมสำเร็จ");
       } catch (error) {
         setCloudStatus(firebaseErrorMessage(error, "สมัครบัญชี"), "bad");
         showToast(firebaseErrorMessage(error, "สมัครบัญชี"));
@@ -3640,11 +3875,13 @@
           });
         }
         SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
-        document.getElementById("authPassword").value = "";
+        clearPasswordInputs();
+        renderLoginGate(false);
+        closeAuthModal();
         renderAll();
         refreshFriends();
-        setCloudStatus(`ล็อกอินแล้ว: ${activeCloudUsername} • โหลด Cloud Save สำเร็จ`, "ok");
-        showToast("ล็อกอินและโหลด Cloud Save สำเร็จ");
+        setCloudStatus(`ล็อกอินแล้ว: ${activeCloudUsername} • โหลด Cloud Save สำเร็จ • เครื่องนี้จำไว้แล้ว`, "ok");
+        showToast("ล็อกอินและเข้าเกมสำเร็จ");
       } catch (error) {
         setCloudStatus(firebaseErrorMessage(error, "ล็อกอิน"), "bad");
         showToast(firebaseErrorMessage(error, "ล็อกอิน"));
@@ -3666,7 +3903,7 @@
         const credential = await cloudModules.signInWithPopup(cloudAuth, provider);
         const user = credential.user;
         const account = await loadCloudAccount(user.uid);
-        const typedUsername = document.getElementById("authUsername").value.trim();
+        const typedUsername = getAuthInputs().username;
         const username = String(account && account.username || typedUsername || suggestUsernameFromFirebaseUser(user));
         const usernameError = validateUsernameOnly(username);
         if (usernameError) throw new Error(usernameError);
@@ -3688,11 +3925,13 @@
           authProvider: providerName
         });
         SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
-        document.getElementById("authPassword").value = "";
+        clearPasswordInputs();
+        renderLoginGate(false);
+        closeAuthModal();
         renderAll();
         refreshFriends();
-        setCloudStatus(`ล็อกอินด้วย ${providerName === "facebook" ? "Facebook" : "Google/Gmail"} แล้ว: ${activeCloudUsername}`, "ok");
-        showToast("ล็อกอิน Social และโหลดโปรไฟล์สำเร็จ");
+        setCloudStatus(`ล็อกอินด้วย ${providerName === "facebook" ? "Facebook" : "Google/Gmail"} แล้ว: ${activeCloudUsername} • เครื่องนี้จำไว้แล้ว`, "ok");
+        showToast("ล็อกอิน Social และเข้าเกมสำเร็จ");
         openProfileModal();
       } catch (error) {
         const message = error && error.code ? firebaseErrorMessage(error, "ล็อกอิน Social") : String(error && error.message || "ล็อกอิน Social ไม่สำเร็จ");
@@ -3716,8 +3955,9 @@
         friendProfiles = [];
         state.battle.supportUid = "";
         SAFE_STORAGE.removeItem(CONFIG.cloudUsernameKey);
+        renderLoginGate(true);
         renderAll();
-        setCloudStatus("ออกจากบัญชีแล้ว เกมยังเซฟแบบ Local ในเครื่องนี้", "warn");
+        setCloudStatus("ออกจากบัญชีแล้ว ต้องล็อกอินก่อนเข้าเกมอีกครั้ง", "warn");
         showToast("ออกจากบัญชี Firebase แล้ว");
       } catch (error) {
         showToast(firebaseErrorMessage(error, "ออกจากบัญชี"));
@@ -3785,6 +4025,8 @@
       next.profile.username = String(next.profile.username || "").slice(0, 24);
       next.profile.photoURL = sanitizeProfilePhoto(next.profile.photoURL || "");
       next.profile.provider = String(next.profile.provider || "local").slice(0, 32);
+      next.profile.supportCardId = String(next.profile.supportCardId || "");
+      if (next.profile.supportCardId && (!next.owned[next.profile.supportCardId] || !CARD_BY_ID.has(next.profile.supportCardId))) next.profile.supportCardId = "";
       next.profile.updatedAt = Number(next.profile.updatedAt) || Date.now();
       next.battle = Object.assign(defaultState().battle, next.battle || {});
       next.battle.stage = Math.max(1, Math.floor(Number(next.battle.stage) || 1));
@@ -3884,6 +4126,68 @@
       return Math.min(.08, Math.max(0, elements.size - 1) * .02);
     }
 
+    function getProfileSupportCardId() {
+      const id = String(state.profile && state.profile.supportCardId || "");
+      return id && getOwned(id) && CARD_BY_ID.has(id) ? id : "";
+    }
+
+    function makeSupportCardSnapshot(cardId = getProfileSupportCardId()) {
+      const card = CARD_BY_ID.get(String(cardId || ""));
+      if (!card || !getOwned(card.id)) return null;
+      const owned = getOwned(card.id) || {};
+      return {
+        id: String(card.id),
+        name: card.name,
+        rarity: card.rarity,
+        element: card.element || "",
+        power: Math.floor(getCardPower(card)),
+        income: Math.floor(getCardIncome(card)),
+        level: Math.floor(Number(owned.level) || 1),
+        awaken: Math.floor(Number(owned.duplicateRank) || 0),
+        image: getCardImage(card)
+      };
+    }
+
+    function getProfileSupportSnapshot(profile) {
+      return profile && profile.supportCard && profile.supportCard.id ? profile.supportCard : null;
+    }
+
+    function getSupportPowerSource(profile) {
+      const supportCard = getProfileSupportSnapshot(profile);
+      return supportCard ? Number(supportCard.power || 0) : Number(profile && profile.teamPower || 0);
+    }
+
+    function supportCardHTML(supportCard, emptyText = "ยังไม่ได้ตั้งการ์ดซัพพอร์ต") {
+      if (!supportCard) return `<div class="support-card-box"><div class="support-card-art"></div><div><div class="support-card-title">${escapeHTML(emptyText)}</div><div class="support-card-meta">ตั้งได้ 1 ใบจากหน้าโปรไฟล์</div></div></div>`;
+      const rarity = getRarity({ rarity: supportCard.rarity });
+      const img = supportCard.image ? `<img src="${escapeHTML(supportCard.image)}" alt="${escapeHTML(supportCard.name || "Support")}" onerror="this.remove()">` : "";
+      return `
+        <div class="support-card-box" style="--rarity:${rarity.color}">
+          <div class="support-card-art">${img}</div>
+          <div>
+            <div class="support-card-title">${escapeHTML(supportCard.rarity || "?")} • ${escapeHTML(supportCard.name || "Support Card")}</div>
+            <div class="support-card-meta">Power ${formatNumber(supportCard.power || 0)} • Lv.${formatNumber(supportCard.level || 1)} • Awaken ${formatNumber(supportCard.awaken || 0)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function setOwnSupportCard(cardId = "") {
+      const id = String(cardId || "");
+      if (id && (!CARD_BY_ID.has(id) || !getOwned(id))) return showToast("ตั้งซัพพอร์ตได้เฉพาะการ์ดที่มีอยู่ในคลัง");
+      state.profile.supportCardId = id;
+      state.profile.updatedAt = Date.now();
+      saveState(true);
+      try {
+        if (activeCloudUid) await writeCloudSave();
+      } catch (error) {
+        showToast(firebaseErrorMessage(error, "บันทึกการ์ดซัพพอร์ต"));
+      }
+      renderAll();
+      renderProfileDetail();
+      showToast(id ? "ตั้งการ์ดซัพพอร์ตบนโปรไฟล์แล้ว" : "ล้างการ์ดซัพพอร์ตแล้ว");
+    }
+
     function makePublicProfile(updatedAt = Date.now()) {
       const profile = getPlayerProfile();
       return {
@@ -3891,6 +4195,8 @@
         username: profile.username,
         photoURL: profile.photoURL,
         provider: profile.provider,
+        supportCardId: getProfileSupportCardId(),
+        supportCard: makeSupportCardSnapshot(),
         teamPower: Math.floor(getTeamPower()),
         collectionCount: Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length,
         battleStage: Number(state.battle && state.battle.stage || 1),
@@ -3935,7 +4241,9 @@
       const formationRate = getFormationBonusRate();
       const formationPower = basePower * formationRate;
       const support = getSelectedSupportProfile();
-      const rawSupportPower = support ? Number(support.teamPower || 0) * CONFIG.friendSupportRate : 0;
+      const supportCard = getProfileSupportSnapshot(support);
+      const supportSourcePower = support ? getSupportPowerSource(support) : 0;
+      const rawSupportPower = supportSourcePower * CONFIG.friendSupportRate;
       const supportPower = Math.min(rawSupportPower, basePower * CONFIG.friendSupportCapRate);
       const effectivePower = basePower + formationPower + supportPower;
       const enemyPower = Math.floor(10000 * Math.pow(1.22, stage - 1));
@@ -3945,6 +4253,8 @@
         formationRate,
         formationPower,
         support,
+        supportCard,
+        supportSourcePower,
         supportPower,
         effectivePower,
         enemyPower,
@@ -4522,8 +4832,9 @@
       const maxPower = Math.max(1, stats.effectivePower, stats.enemyPower);
       const formationPercent = Math.round(stats.formationRate * 100);
       const supportName = stats.support ? stats.support.username : "";
+      const supportCardName = stats.supportCard ? stats.supportCard.name : "";
       const supportText = stats.support
-        ? `${supportName} เพิ่ม ${formatNumber(stats.supportPower)} Power`
+        ? `${supportName}${supportCardName ? ` • ${supportCardName}` : ""} เพิ่ม ${formatNumber(stats.supportPower)} Power`
         : "ยังไม่ได้เลือกเพื่อน Support";
       const result = document.getElementById("battleResult");
 
@@ -4582,6 +4893,7 @@
           const teamNames = Array.isArray(profile.team) && profile.team.length
             ? profile.team.map(card => card.name).slice(0, 3).join(", ")
             : "ยังไม่ได้จัดทีม";
+          const supportCard = getProfileSupportSnapshot(profile);
           return `
             <div class="friend-card">
               <div class="friend-row">
@@ -4589,7 +4901,7 @@
                 <div>
                   <div class="friend-name">${escapeHTML(profile.username || "Unknown Player")}</div>
                   ${selected ? `<div class="support-badge">ACTIVE SUPPORT</div>` : ""}
-                  <div class="friend-meta">Power ${formatNumber(profile.teamPower || 0)} • Collection ${formatNumber(profile.collectionCount || 0)} • Tower ${formatNumber(profile.battleStage || 1)}<br>${escapeHTML(teamNames)}</div>
+                  <div class="friend-meta">Power ${formatNumber(profile.teamPower || 0)} • Collection ${formatNumber(profile.collectionCount || 0)} • Tower ${formatNumber(profile.battleStage || 1)}<br>Support: ${supportCard ? `${escapeHTML(supportCard.rarity || "?")} • ${escapeHTML(supportCard.name || "Card")} (${formatNumber(supportCard.power || 0)})` : "ยังไม่ได้ตั้ง"}<br>${escapeHTML(teamNames)}</div>
                 </div>
               </div>
               <div class="friend-actions">
@@ -4736,6 +5048,7 @@
                   ปลุกพลัง <span class="cost">${rank >= rarity.stars ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
                 </button>
                 <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์"}</button>
+                <button class="btn btn-gold" data-action="set-support-card" data-card-id="${escapeHTML(card.id)}">${String(state.profile.supportCardId || "") === String(card.id) ? "เป็น Support อยู่" : "ตั้งเป็น Support โปรไฟล์"}</button>
               ` : `<button class="btn" disabled>เปิดได้จากตู้กาชา</button>`}
             </div>
           </div>
@@ -4796,6 +5109,14 @@
       const data = ownProfile ? Object.assign({ uid: activeCloudUid || "local" }, makePublicProfile(Date.now())) : profile;
       const providerLabel = data.provider === "google" ? "Google/Gmail" : data.provider === "facebook" ? "Facebook" : data.provider === "username" ? "Username" : (activeCloudUid ? "Firebase" : "Local");
       const team = Array.isArray(data.team) && data.team.length ? data.team : [];
+      const supportCard = getProfileSupportSnapshot(data);
+      const ownedSupportOptions = Object.keys(state.owned)
+        .filter(id => CARD_BY_ID.has(id))
+        .sort((a, b) => {
+          const cardA = CARD_BY_ID.get(String(a));
+          const cardB = CARD_BY_ID.get(String(b));
+          return getCardPower(cardB) - getCardPower(cardA);
+        });
       document.getElementById("profileDetail").innerHTML = `
         <div class="profile-layout">
           <div class="profile-cover">
@@ -4809,9 +5130,13 @@
               <div class="stat"><span>UID</span><strong>${escapeHTML(String(data.uid || "local").slice(0, 10))}</strong></div>
               <div class="stat"><span>Provider</span><strong>${escapeHTML(providerLabel)}</strong></div>
               <div class="stat"><span>Team Power</span><strong>${formatNumber(data.teamPower || 0)}</strong></div>
-              <div class="stat"><span>Last Update</span><strong>${data.updatedAt ? new Date(Number(data.updatedAt)).toLocaleDateString("th-TH") : "-"}</strong></div>
+              <div class="stat"><span>Support Power</span><strong>${formatNumber(supportCard ? supportCard.power || 0 : 0)}</strong></div>
             </div>
             <div>
+              <strong>การ์ดซัพพอร์ตประจำโปรไฟล์</strong>
+              ${supportCardHTML(supportCard)}
+            </div>
+            <div style="margin-top:16px">
               <strong>ทีมโชว์</strong>
               <div class="profile-team">
                 ${team.length ? team.map(card => `<span class="pill">${escapeHTML(card.rarity || "?")} • ${escapeHTML(card.name || "Card")}</span>`).join("") : `<span class="pill">ยังไม่ได้จัดทีม</span>`}
@@ -4825,14 +5150,24 @@
                 <label>รูปโปรไฟล์ URL
                   <input class="field" id="profilePhotoInput" value="${escapeHTML(data.photoURL || "")}" placeholder="วางลิงก์รูป หรือกดเลือกรูปจากเครื่อง">
                 </label>
+                <label>เลือกการ์ดซัพพอร์ต 1 ใบ
+                  <select class="field" id="profileSupportSelect">
+                    <option value="">ยังไม่ตั้งการ์ดซัพพอร์ต</option>
+                    ${ownedSupportOptions.map(id => {
+                      const card = CARD_BY_ID.get(String(id));
+                      return `<option value="${escapeHTML(id)}" ${String(data.supportCardId || "") === String(id) ? "selected" : ""}>${escapeHTML(card.rarity)} • ${escapeHTML(card.name)} • Power ${formatNumber(getCardPower(card))}</option>`;
+                    }).join("")}
+                  </select>
+                </label>
               </div>
               <div class="profile-actions">
                 <button class="btn btn-primary" data-action="save-profile">บันทึกโปรไฟล์</button>
+                <button class="btn btn-gold" data-action="set-support-card">ตั้งการ์ดซัพพอร์ต</button>
                 <button class="btn" data-action="choose-profile-image">เลือกรูปจากเครื่อง</button>
                 <button class="btn btn-danger" data-action="clear-profile-image">ลบรูป</button>
-                <button class="btn btn-gold" data-action="open-auth">ล็อกอิน / จัดการบัญชี</button>
+                <button class="btn" data-action="open-auth">ล็อกอิน / จัดการบัญชี</button>
               </div>
-              <p class="profile-sub" style="margin-top:12px">หมายเหตุ: รูปจากเครื่องจะถูกเก็บเป็น Data URL ในเซฟ เพื่อให้ใช้บน GitHub Pages ได้โดยไม่ต้องตั้ง Firebase Storage แยก</p>
+              <p class="profile-sub" style="margin-top:12px">หมายเหตุ: การ์ดซัพพอร์ตจะแสดงให้เพื่อนเห็นในหน้าโปรไฟล์และระบบ Friend Support ใช้พลังจากการ์ดใบนี้เป็นหลัก</p>
             ` : ""}
           </div>
         </div>
@@ -4842,9 +5177,11 @@
     async function saveProfileSettings() {
       const usernameInput = document.getElementById("profileUsernameInput");
       const photoInput = document.getElementById("profilePhotoInput");
+      const supportInput = document.getElementById("profileSupportSelect");
       if (!usernameInput || !photoInput) return;
       const username = usernameInput.value.trim();
       const photoURL = sanitizeProfilePhoto(photoInput.value.trim());
+      const supportCardId = supportInput ? String(supportInput.value || "") : getProfileSupportCardId();
       const usernameError = username ? validateUsernameOnly(username) : "Username ต้องยาว 3-24 ตัวอักษร";
       if (usernameError) return showToast(usernameError);
       const oldUsername = activeCloudUsername || (state.profile && state.profile.username) || "";
@@ -4856,8 +5193,10 @@
           activeCloudUsername = username;
           SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
         }
+        if (supportCardId && (!CARD_BY_ID.has(supportCardId) || !getOwned(supportCardId))) return showToast("ตั้งซัพพอร์ตได้เฉพาะการ์ดที่มีอยู่ในคลัง");
         state.profile.username = username;
         state.profile.photoURL = photoURL;
+        state.profile.supportCardId = supportCardId;
         state.profile.provider = state.profile.provider || (activeCloudUid ? "firebase" : "local");
         state.profile.updatedAt = Date.now();
         saveState(true);
@@ -5043,6 +5382,10 @@
       if (action === "save-profile") saveProfileSettings();
       if (action === "choose-profile-image") document.getElementById("profileImageFile").click();
       if (action === "clear-profile-image") { const input = document.getElementById("profilePhotoInput"); if (input) input.value = ""; saveProfileSettings(); }
+      if (action === "set-support-card") {
+        const supportSelect = document.getElementById("profileSupportSelect");
+        setOwnSupportCard(cardId || (supportSelect ? supportSelect.value : ""));
+      }
       if (action === "view-profile") openFriendProfile(friendId);
       if (action === "open-update-notice") openUpdateNotice(true);
       if (action === "close-update-notice") closeUpdateNotice();
@@ -5084,6 +5427,21 @@
     document.getElementById("friendUsernameInput").addEventListener("keydown", event => {
       if (event.key === "Enter") sendFriendRequest();
     });
+    ["gateUsername", "gatePassword", "authUsername", "authPassword"].forEach(id => {
+      const input = document.getElementById(id);
+      if (!input) return;
+      input.addEventListener("keydown", event => {
+        if (event.key !== "Enter") return;
+        if (id === "gateUsername" || id === "authUsername") {
+          const target = id === "gateUsername" ? document.getElementById("gatePassword") : document.getElementById("authPassword");
+          if (target && !target.value) {
+            target.focus();
+            return;
+          }
+        }
+        loginCloudAccount();
+      });
+    });
     document.getElementById("profileImageFile").addEventListener("change", event => {
       setProfileImageFromFile(event.target.files && event.target.files[0]);
       event.target.value = "";
@@ -5120,6 +5478,7 @@
     try {
       renderAll();
       renderTabs();
+      renderLoginGate(true);
       window.__animeCardBooted = true;
       document.getElementById("bootError").classList.add("hidden");
       initFirebase();
