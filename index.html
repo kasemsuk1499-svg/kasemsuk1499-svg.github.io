@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-server-reset-v5">
+  <meta name="gacha-app-build" content="2026-06-12-firebase-fresh-save-v6">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1349,7 +1349,7 @@
     .friend-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .friend-avatar { width: 42px; height: 42px; border-radius: 14px; color: #071019; font-size: .88rem; }
 
-    /* เพิ่มโดยอลิซ: หน้า Login Gate บังคับล็อกอินก่อนเข้าเกม + จดจำเครื่องผ่าน Firebase Local Persistence */
+    /* เพิ่มโดยอลิซ: หน้า Login Gate บังคับล็อกอินก่อนเข้าเกม + Cloud Save Only */
     body.auth-locked { overflow: hidden; }
     body.auth-locked .app-shell,
     body.auth-locked .bottom-nav {
@@ -1871,7 +1871,7 @@
       <div class="login-gate-hero">
         <p class="eyebrow">Anime Card Collection</p>
         <h2>ล็อกอินก่อนเข้าเกม</h2>
-        <p>ใช้ Gmail / Google, Facebook หรือ Username เดิมได้เลย เครื่องนี้จะจำการล็อกอินไว้ให้อัตโนมัติ จนกว่าจะกดออกจากบัญชี</p>
+        <p>ใช้ Gmail / Google, Facebook หรือ Username เดิมได้เลย ระบบจะโหลดเซฟจาก Firebase เท่านั้น และไม่เก็บเซฟเกมไว้ในเครื่อง</p>
       </div>
       <div class="login-gate-body">
         <div class="login-gate-social">
@@ -2310,38 +2310,22 @@
   <script>
     "use strict";
 
+    // แก้โดยอลิซ: Cloud Save Only
+    // ไม่มีการอ่าน/เขียน browser storage หรือ sessionStorage สำหรับเซฟเกมอีกต่อไป
+    // ตัวแปรนี้เป็นหน่วยความจำชั่วคราวในหน้าเว็บเท่านั้น รีเฟรชแล้วหายทันที
     const MEMORY_STORAGE = {};
-    const SAFE_STORAGE = (() => {
-      try {
-        const storage = window.localStorage;
-        const key = "__anime_card_storage_test__";
-        storage.setItem(key, "1");
-        storage.removeItem(key);
-        return storage;
-      } catch (_) {
-        return {
-          getItem: key => Object.prototype.hasOwnProperty.call(MEMORY_STORAGE, key) ? MEMORY_STORAGE[key] : null,
-          setItem: (key, value) => { MEMORY_STORAGE[key] = String(value); },
-          removeItem: key => { delete MEMORY_STORAGE[key]; }
-        };
-      }
-    })();
-
-    const SAFE_SESSION = (() => {
-      try {
-        const storage = window.sessionStorage;
-        const key = "__anime_card_session_test__";
-        storage.setItem(key, "1");
-        storage.removeItem(key);
-        return storage;
-      } catch (_) {
-        return SAFE_STORAGE;
-      }
-    })();
+    const SAFE_STORAGE = {
+      getItem: key => Object.prototype.hasOwnProperty.call(MEMORY_STORAGE, key) ? MEMORY_STORAGE[key] : null,
+      setItem: (key, value) => { MEMORY_STORAGE[key] = String(value); },
+      removeItem: key => { delete MEMORY_STORAGE[key]; }
+    };
+    const SAFE_SESSION = SAFE_STORAGE;
 
     const CONFIG = Object.freeze({
-      saveKey: "anime_card_collection_clean_v1",
-      cloudUsernameKey: "anime_card_cloud_username_v1",
+      saveKey: "anime_card_collection_accs_e2875_fresh_v1",
+      cloudUsernameKey: "anime_card_cloud_username_accs_e2875_fresh_v1",
+      // แก้โดยอลิซ: ปิดการย้ายเซฟเก่าทั้งหมด เซฟผู้เล่นใช้ Firebase เท่านั้น
+      allowOldSaveMigration: false,
       oldAccountsKey: "simple_gacha_accounts_v5_stable",
       oldActiveUserKey: "simple_gacha_active_user_v5_stable",
       oldBannerKey: "simple_gacha_active_banner_v5_stable",
@@ -2367,9 +2351,9 @@
       เพิ่มโดยอลิซ: ระบบรีเซ็ตเซฟทั้งเซิร์ฟ
       - เจ้าของเกมตั้งค่า Firebase Realtime Database: serverMeta/resetVersion เป็นค่าใหม่ เช่น reset-2026-06-12-v1
       - เมื่อผู้เล่นล็อกอิน/เข้าเกม ระบบจะเทียบ resetVersion แล้วล้างเซฟเก่าให้เป็นค่าเริ่มต้นอัตโนมัติ
-      - เก็บเลขเวอร์ชันล่าสุดไว้ในเครื่อง เพื่อกันผู้เล่นอัปโหลด local save เก่ากลับขึ้น Cloud
+      - ไม่เก็บเลขเวอร์ชันไว้ในเครื่องแล้ว ตรวจจาก Firebase users/{uid}/resetVersion เท่านั้น
     */
-    const SERVER_RESET_LOCAL_KEY = `${CONFIG.saveKey}:server_reset_version`;
+    const SERVER_RESET_MEMORY_KEY = `${CONFIG.saveKey}:server_reset_version_memory_only`;
 
     /*
       เพิ่มโดยอลิซ: ตารางรางวัล Battle Tower
@@ -2422,8 +2406,8 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-tower-rewards-friends-rank-v4",
-      seenKey: "anime_card_update_notice_seen_v4"
+      version: "2026-06-12-firebase-fresh-save-v6",
+      seenKey: "anime_card_update_notice_seen_v6"
     });
 
     /*
@@ -3830,7 +3814,7 @@
     let cloudReady = false;
     let cloudBusy = false;
     let activeCloudUid = "";
-    let activeCloudUsername = SAFE_STORAGE.getItem(CONFIG.cloudUsernameKey) || "";
+    let activeCloudUsername = "";
     let activeProfileUid = "";
     let friendRequests = [];
     let friendProfiles = [];
@@ -3840,8 +3824,16 @@
     let activeRevealResults = [];
     let activeRevealIndex = 0;
     let returnToReveal = false;
+
+    // แก้โดยอลิซ: เริ่มจากค่าเริ่มต้นชั่วคราวเสมอ แล้วค่อยโหลด Cloud Save หลังล็อกอิน
+    // ไม่อ่านเซฟจากเครื่องอีกแล้ว เพื่อกันข้อมูลเก่าถูกดึงกลับเข้าระบบ
     let state = loadState();
 
+
+    function purgeLegacyLocalSavesForFreshProject() {
+      // Cloud Only: ไม่แตะข้อมูลเก่าในเครื่อง และไม่อ่านเซฟในเครื่องอีกต่อไป
+      return false;
+    }
 
     function makeStarterLoadout() {
       const owned = {};
@@ -4090,7 +4082,7 @@
           GoogleAuthProvider: authModule.GoogleAuthProvider,
           FacebookAuthProvider: authModule.FacebookAuthProvider,
           setPersistence: authModule.setPersistence,
-          browserLocalPersistence: authModule.browserLocalPersistence,
+          inMemoryPersistence: authModule.inMemoryPersistence,
           signOut: authModule.signOut,
           onAuthStateChanged: authModule.onAuthStateChanged,
           getDatabase: databaseModule.getDatabase,
@@ -4102,12 +4094,12 @@
           ? cloudModules.getApps()[0]
           : cloudModules.initializeApp(FIREBASE_CONFIG);
         cloudAuth = cloudModules.getAuth(cloudApp);
-        // เพิ่มโดยอลิซ: จำการล็อกอินค้างไว้ในเครื่องนี้แบบ Local Persistence
-        // ผู้เล่นไม่ต้องล็อกอินซ้ำจนกว่าจะกดออกจากบัญชีเอง
+        // แก้โดยอลิซ: ใช้ Firebase Auth แบบไม่เก็บสถานะล็อกอินในเครื่อง
+        // รีเฟรชหน้าเว็บแล้วต้องล็อกอินใหม่ แต่จะไม่ลากเซฟเก่าจากเครื่องกลับมาอีก
         try {
-          await cloudModules.setPersistence(cloudAuth, cloudModules.browserLocalPersistence);
+          await cloudModules.setPersistence(cloudAuth, cloudModules.inMemoryPersistence);
         } catch (persistenceError) {
-          console.warn("Firebase persistence fallback:", persistenceError);
+          console.warn("Firebase in-memory persistence fallback:", persistenceError);
         }
         cloudDb = cloudModules.getDatabase(cloudApp);
         cloudReady = true;
@@ -4138,6 +4130,8 @@
       state.profile.username = activeCloudUsername;
       state.profile.photoURL = sanitizeProfilePhoto(state.profile.photoURL || "");
       state.profile.updatedAt = now;
+      const resetVersion = String((extra && extra.resetVersion) || (state && state.serverResetVersion) || "").trim();
+      if (resetVersion) state.serverResetVersion = resetVersion;
       const userPayload = Object.assign({
         username: activeCloudUsername,
         photoURL: state.profile.photoURL || "",
@@ -4145,7 +4139,7 @@
         save: state,
         updatedAt: now,
         updatedAtText: new Date().toLocaleString("th-TH")
-      }, extra);
+      }, resetVersion ? { resetVersion } : {}, extra);
       const updates = {};
       updates[`users/${activeCloudUid}`] = userPayload;
       updates[`publicProfiles/${activeCloudUid}`] = makePublicProfile(now);
@@ -4184,9 +4178,9 @@
       if (!serverResetVersion) return false;
 
       const accountResetVersion = String(account && account.resetVersion || "").trim();
-      const localResetVersion = String(SAFE_STORAGE.getItem(SERVER_RESET_LOCAL_KEY) || "").trim();
 
-      if (accountResetVersion === serverResetVersion && localResetVersion === serverResetVersion) {
+      if (accountResetVersion === serverResetVersion) {
+        if (state && typeof state === "object") state.serverResetVersion = serverResetVersion;
         return false;
       }
 
@@ -4206,8 +4200,7 @@
       state.profile.provider = String(keepProvider || "firebase").slice(0, 32);
       state.profile.updatedAt = Date.now();
 
-      SAFE_STORAGE.setItem(SERVER_RESET_LOCAL_KEY, serverResetVersion);
-      SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
+      state.serverResetVersion = serverResetVersion;
 
       await writeCloudSave({
         resetVersion: serverResetVersion,
@@ -4230,10 +4223,9 @@
       if (!user) {
         activeCloudUid = "";
         activeCloudUsername = "";
-        SAFE_STORAGE.removeItem(CONFIG.cloudUsernameKey);
         renderAccount();
         renderLoginGate(true);
-        setCloudStatus("กรุณาล็อกอินก่อนเข้าเกม ระบบจะจำเครื่องนี้ไว้หลังล็อกอินสำเร็จ", "warn");
+        setCloudStatus("กรุณาล็อกอินก่อนเข้าเกม ระบบจะโหลดและบันทึกเซฟจาก Firebase เท่านั้น", "warn");
         return;
       }
 
@@ -4241,27 +4233,26 @@
         const account = await loadCloudAccount(user.uid);
         activeCloudUid = user.uid;
         activeCloudUsername = String(account && account.username || activeCloudUsername || "Player");
-        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, activeCloudUsername);
 
         const didServerReset = await applyServerResetIfNeeded(account, user);
         if (!didServerReset && account && account.save) {
           state = normalizeState(account.save);
-          SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
+          state.serverResetVersion = String(account && account.resetVersion || "").trim();
         }
 
         state.profile.username = activeCloudUsername;
         state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || (user && user.photoURL) || "");
         state.profile.provider = state.profile.provider || "firebase";
-        await writeCloudSave(didServerReset ? { resetVersion: SAFE_STORAGE.getItem(SERVER_RESET_LOCAL_KEY) || "" } : {});
+        await writeCloudSave(didServerReset ? { resetVersion: state.serverResetVersion || await getServerResetVersion() } : {});
         renderLoginGate(false);
         renderAll();
         refreshFriends();
 
         if (didServerReset) {
           showToast("รีเซ็ตเซฟตามคำสั่งเซิร์ฟแล้ว เริ่มใหม่ทุกคนเรียบร้อย");
-          setCloudStatus(`รีเซ็ตเซฟเซิร์ฟแล้ว: ${activeCloudUsername} • เครื่องนี้เริ่มจากเซฟใหม่`, "ok");
+          setCloudStatus(`รีเซ็ตเซฟเซิร์ฟแล้ว: ${activeCloudUsername} • เริ่มจาก Cloud Save ใหม่`, "ok");
         } else {
-          setCloudStatus(`เชื่อมต่อ Cloud แล้ว: ${activeCloudUsername} • เครื่องนี้จำการล็อกอินไว้แล้ว`, "ok");
+          setCloudStatus(`เชื่อมต่อ Cloud แล้ว: ${activeCloudUsername} • เซฟอยู่บน Firebase เท่านั้น`, "ok");
         }
       } catch (error) {
         setCloudStatus(firebaseErrorMessage(error, "โหลด Cloud"), "bad");
@@ -4295,9 +4286,10 @@
         );
         activeCloudUid = credential.user.uid;
         activeCloudUsername = username;
+        // แก้โดยอลิซ: สมัครบัญชีใหม่ต้องเริ่มเซฟใหม่ ไม่เอา browser storage เก่าขึ้น Cloud
+        state = normalizeState(defaultState());
         state.profile.username = username;
         state.profile.provider = "username";
-        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
         await reserveUsernameForUid(activeCloudUid, username);
         await writeCloudSave({
           createdAt: Date.now(),
@@ -4308,7 +4300,7 @@
         closeAuthModal();
         renderAccount();
         refreshFriends();
-        setCloudStatus(`สมัครสำเร็จและอัปโหลดเซฟของ ${username} แล้ว • เครื่องนี้จำการล็อกอินไว้แล้ว`, "ok");
+        setCloudStatus(`สมัครสำเร็จและอัปโหลดเซฟของ ${username} แล้ว • เซฟอยู่บน Firebase เท่านั้น`, "ok");
         showToast("สมัครบัญชีและเข้าเกมสำเร็จ");
       } catch (error) {
         setCloudStatus(firebaseErrorMessage(error, "สมัครบัญชี"), "bad");
@@ -4334,7 +4326,6 @@
         const account = await loadCloudAccount(credential.user.uid);
         activeCloudUid = credential.user.uid;
         activeCloudUsername = String(account && account.username || username);
-        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, activeCloudUsername);
         if (account && account.save) {
           state = normalizeState(account.save);
           state.profile.username = activeCloudUsername;
@@ -4342,6 +4333,8 @@
           state.profile.provider = state.profile.provider || "username";
           await writeCloudSave();
         } else {
+          // แก้โดยอลิซ: บัญชี Cloud ใหม่ที่ยังไม่มี save ต้องเริ่มใหม่ ไม่ดึงเซฟเก่าในเครื่อง
+          state = normalizeState(defaultState());
           state.profile.username = activeCloudUsername;
           state.profile.provider = "username";
           await reserveUsernameForUid(activeCloudUid, activeCloudUsername);
@@ -4350,13 +4343,12 @@
             createdAtText: new Date().toLocaleString("th-TH")
           });
         }
-        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
         clearPasswordInputs();
         renderLoginGate(false);
         closeAuthModal();
         renderAll();
         refreshFriends();
-        setCloudStatus(`ล็อกอินแล้ว: ${activeCloudUsername} • โหลด Cloud Save สำเร็จ • เครื่องนี้จำไว้แล้ว`, "ok");
+        setCloudStatus(`ล็อกอินแล้ว: ${activeCloudUsername} • โหลด Cloud Save สำเร็จ`, "ok");
         showToast("ล็อกอินและเข้าเกมสำเร็จ");
       } catch (error) {
         setCloudStatus(firebaseErrorMessage(error, "ล็อกอิน"), "bad");
@@ -4386,6 +4378,10 @@
 
         if (account && account.save) {
           state = normalizeState(account.save);
+        } else {
+          // แก้โดยอลิซ: Google/Facebook Login บน Firebase ใหม่ที่ยังไม่มี Cloud Save ต้องเริ่มใหม่
+          // ไม่ใช้ state เดิมจาก browser storage เพราะจะทำให้ข้อมูลเก่าถูกอัปโหลดกลับขึ้น Cloud ทันที
+          state = normalizeState(defaultState());
         }
 
         activeCloudUid = user.uid;
@@ -4393,20 +4389,18 @@
         state.profile.username = username;
         state.profile.provider = providerName;
         state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || user.photoURL || "");
-        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
         await reserveUsernameForUid(activeCloudUid, username, account && account.username);
         await writeCloudSave({
           createdAt: account && account.createdAt || Date.now(),
           createdAtText: account && account.createdAtText || new Date().toLocaleString("th-TH"),
           authProvider: providerName
         });
-        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
         clearPasswordInputs();
         renderLoginGate(false);
         closeAuthModal();
         renderAll();
         refreshFriends();
-        setCloudStatus(`ล็อกอินด้วย ${providerName === "facebook" ? "Facebook" : "Google/Gmail"} แล้ว: ${activeCloudUsername} • เครื่องนี้จำไว้แล้ว`, "ok");
+        setCloudStatus(`ล็อกอินด้วย ${providerName === "facebook" ? "Facebook" : "Google/Gmail"} แล้ว: ${activeCloudUsername} • โหลด Cloud Save สำเร็จ`, "ok");
         showToast("ล็อกอิน Social และเข้าเกมสำเร็จ");
         openProfileModal();
       } catch (error) {
@@ -4430,7 +4424,6 @@
         friendRequests = [];
         friendProfiles = [];
         state.battle.supportUid = "";
-        SAFE_STORAGE.removeItem(CONFIG.cloudUsernameKey);
         renderLoginGate(true);
         renderAll();
         setCloudStatus("ออกจากบัญชีแล้ว ต้องล็อกอินก่อนเข้าเกมอีกครั้ง", "warn");
@@ -4443,36 +4436,13 @@
     }
 
     function loadState() {
-      const stored = safeParse(SAFE_STORAGE.getItem(CONFIG.saveKey));
-      if (stored && typeof stored === "object") return normalizeState(stored);
-
-      const migrated = migrateOldSave();
-      if (migrated) {
-        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(migrated));
-        return migrated;
-      }
+      // Cloud Only: ไม่อ่านเซฟจากเครื่องอีกต่อไป
       return defaultState();
     }
 
     function migrateOldSave() {
-      const activeUser = SAFE_STORAGE.getItem(CONFIG.oldActiveUserKey);
-      const accounts = safeParse(SAFE_STORAGE.getItem(CONFIG.oldAccountsKey), {});
-      const entry = activeUser && accounts ? accounts[activeUser] : null;
-      const old = entry && entry.save ? entry.save : entry;
-      if (!old || typeof old !== "object") return null;
-
-      const next = defaultState();
-      next.gems = Number(old.gems !== undefined && old.gems !== null ? old.gems : next.gems);
-      next.dust = Number(old.dust !== undefined && old.dust !== null ? old.dust : next.dust);
-      next.incomeBank = Number(old.incomeBank !== undefined && old.incomeBank !== null ? old.incomeBank : 0);
-      next.lastIncomeAt = Number(old.lastIncomeAt !== undefined && old.lastIncomeAt !== null ? old.lastIncomeAt : Date.now());
-      next.lastDaily = String(old.lastDailyRewardDate || old.lastDaily || "");
-      next.activeBannerId = SAFE_STORAGE.getItem(CONFIG.oldBannerKey) || next.activeBannerId;
-      next.owned = old.owned && typeof old.owned === "object" ? old.owned : {};
-      next.team = Array.isArray(old.showcase) ? old.showcase.map(String) : [];
-      next.pity = old.gachaGuaranteeCounters && typeof old.gachaGuaranteeCounters === "object" ? old.gachaGuaranteeCounters : {};
-      next.migratedFromOldSave = true;
-      return normalizeState(next);
+      // Cloud Only: ปิดการย้ายเซฟเก่าแบบถาวร
+      return null;
     }
 
     function normalizeState(raw) {
@@ -4527,7 +4497,8 @@
     }
 
     function persistLocalState() {
-      SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
+      // Cloud Only: ไม่บันทึกเซฟลงเครื่อง
+      return false;
     }
 
     function formatNumber(value) {
@@ -6409,8 +6380,7 @@
           if (!await initFirebase()) throw new Error("firebase-unavailable");
           await reserveUsernameForUid(activeCloudUid, username, oldUsername);
           activeCloudUsername = username;
-          SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
-        }
+          }
         if (supportCardId && (!CARD_BY_ID.has(supportCardId) || !getOwned(supportCardId))) return showToast("ตั้งซัพพอร์ตได้เฉพาะการ์ดที่มีอยู่ในคลัง");
         state.profile.username = username;
         state.profile.photoURL = photoURL;
@@ -6712,10 +6682,7 @@
       setInterval(persistLocalState, 15000);
       setInterval(scheduleCloudSave, 60000);
 
-      if (state.migratedFromOldSave && !SAFE_SESSION.getItem("clean-save-migration-notice")) {
-        SAFE_SESSION.setItem("clean-save-migration-notice", "1");
-        showToast("ย้ายเซฟจากเวอร์ชันเดิมเรียบร้อยแล้ว");
-      }
+      // Cloud Only: ไม่มีการย้ายเซฟเก่าจากเครื่อง
       openUpdateNotice();
     } catch (error) {
       window.__showAnimeCardBootError(error && error.message ? error.message : error);
