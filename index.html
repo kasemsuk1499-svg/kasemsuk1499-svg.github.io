@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-gacha-battle-fx-v4-rarity-buttons-commented">
+  <meta name="gacha-app-build" content="2026-06-12-user-profile-social-login-v1">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -891,6 +891,105 @@
     .cloud-status.warn { color: var(--gold); border-color: rgba(255,209,102,.24); }
     .cloud-status.bad { color: #fda4af; border-color: rgba(251,113,133,.28); }
 
+
+    /* เพิ่มโดยอลิซ: ระบบ User/Profile ใหม่ รองรับ Google/Facebook Login + รูปโปรไฟล์ */
+    .account-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .account-avatar,
+    .profile-avatar,
+    .friend-avatar {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.18);
+      color: #071019;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--cyan), var(--violet) 58%, var(--gold));
+      box-shadow: 0 0 24px rgba(92,232,255,.16);
+    }
+
+    .account-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      font-size: .78rem;
+    }
+
+    .account-avatar img,
+    .profile-avatar img,
+    .friend-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .account-name { min-width: 0; }
+    .auth-social { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 12px 0 4px; }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0 4px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .auth-divider::before,
+    .auth-divider::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+    .btn-google { color: #101827; background: linear-gradient(135deg, #fff, #dbeafe); }
+    .btn-facebook { color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+
+    .profile-panel { width: min(980px, 100%); }
+    .profile-layout { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(320px, 1.2fr); }
+    .profile-cover {
+      position: relative;
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 25% 20%, rgba(92,232,255,.24), transparent 34%),
+        radial-gradient(circle at 80% 0%, rgba(167,139,250,.24), transparent 40%),
+        linear-gradient(145deg, #0b1227, #100b24);
+    }
+    .profile-cover::after {
+      content: "PROFILE";
+      position: absolute;
+      right: -12px;
+      bottom: -16px;
+      color: rgba(255,255,255,.055);
+      font-size: clamp(3.6rem, 14vw, 8rem);
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      pointer-events: none;
+    }
+    .profile-avatar {
+      position: relative;
+      z-index: 1;
+      width: min(260px, 62vw);
+      aspect-ratio: 1;
+      border-radius: 32px;
+      font-size: 4rem;
+    }
+    .profile-copy { padding: clamp(24px, 5vw, 42px); }
+    .profile-copy h2 { margin: 8px 0 4px; font-size: clamp(2rem, 5vw, 3.2rem); line-height: .96; letter-spacing: -.045em; }
+    .profile-sub { color: var(--muted); line-height: 1.55; }
+    .profile-form { display: grid; gap: 10px; margin: 18px 0; }
+    .profile-form label { display: grid; gap: 6px; color: var(--muted); font-size: .76rem; font-weight: 800; }
+    .profile-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .profile-team { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .profile-team .pill { color: #dbe5ff; padding: 6px 9px; }
+    .friend-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .friend-avatar { width: 42px; height: 42px; border-radius: 14px; color: #071019; font-size: .88rem; }
+
     .close {
       position: absolute;
       z-index: 5;
@@ -1181,10 +1280,13 @@
       .resource span { font-size: .58rem; }
       .resource strong { font-size: .82rem; }
       .resource.owned { display: none; }
-      .account-button { min-width: 44px; width: 44px; padding: 7px; text-align: center; }
-      .account-button span { display: none; }
-      .account-button strong { font-size: 0; }
-      .account-button strong::after { content: "ID"; font-size: .72rem; }
+      .account-button { min-width: 48px; width: 48px; padding: 7px; justify-content: center; text-align: center; }
+      .account-button .account-name { display: none; }
+      .account-avatar { width: 32px; height: 32px; border-radius: 11px; }
+      .auth-social { grid-template-columns: 1fr; }
+      .profile-layout { grid-template-columns: 1fr; }
+      .profile-cover { min-height: 300px; }
+      .profile-avatar { width: min(220px, 58vw); }
       .banner, .banner-content { min-height: 500px; }
       .banner-media::after { background: linear-gradient(to top, rgba(6,8,18,.98) 4%, rgba(6,8,18,.45) 70%, rgba(6,8,18,.18)); }
       .banner-content { justify-content: flex-end; padding: 22px; }
@@ -1254,9 +1356,12 @@
           <h1>Anime Card Collection</h1>
         </div>
       </div>
-      <button class="account-button" data-action="open-auth" aria-label="เปิดระบบบัญชีและ Cloud Save">
-        <span>Account</span>
-        <strong id="accountButtonText">Local Guest</strong>
+      <button class="account-button" data-action="open-profile" aria-label="เปิดหน้าโปรไฟล์ผู้เล่น">
+        <span class="account-avatar" id="accountAvatar">G</span>
+        <span class="account-name">
+          <span>Profile</span>
+          <strong id="accountButtonText">Local Guest</strong>
+        </span>
       </button>
       <div class="resource-bar" aria-label="ทรัพยากรผู้เล่น">
         <div class="resource gems"><span>Gems</span><strong id="gemsText">0</strong></div>
@@ -1291,7 +1396,7 @@
           <div class="mini-card">
             <strong>บัญชีและ Cloud Save</strong>
             <p id="cloudSummaryText">กำลังตรวจสอบ Firebase ระบบ Local ยังเล่นและเซฟได้ตามปกติ</p>
-            <button class="btn" data-action="open-auth">สมัคร / ล็อกอิน</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-primary" data-action="open-profile">โปรไฟล์</button><button class="btn" data-action="open-auth">ล็อกอิน</button></div>
           </div>
           <div class="mini-card">
             <strong>โบนัสรายวัน</strong>
@@ -1486,23 +1591,36 @@
       <button class="close" data-action="close-auth" aria-label="ปิด">x</button>
       <p class="eyebrow">Firebase Cloud Save</p>
       <h2>บัญชีผู้เล่น</h2>
-      <p>สมัครหรือล็อกอินด้วย Username เดิมของเกม เซฟจะซิงก์กับ Firebase และยังเก็บสำรองในเครื่องเสมอ</p>
+      <p>ล็อกอินด้วย Google/Gmail หรือ Facebook ได้ทันที และตั้ง Username สำหรับชื่อในเกม / ระบบเพื่อน / หน้าโปรไฟล์ เซฟจะซิงก์กับ Firebase และยังเก็บสำรองในเครื่องเสมอ</p>
       <div class="auth-fields">
         <label>
-          Username
-          <input class="field" id="authUsername" autocomplete="username" maxlength="24" placeholder="อย่างน้อย 3 ตัวอักษร">
+          Username ในเกม
+          <input class="field" id="authUsername" autocomplete="username" maxlength="24" placeholder="ใช้ตอนสมัครใหม่ หรือครั้งแรกที่ล็อกอิน Social">
         </label>
         <label>
-          Password
-          <input class="field" id="authPassword" type="password" autocomplete="current-password" maxlength="64" placeholder="อย่างน้อย 6 ตัวอักษร">
+          Password สำหรับบัญชีแบบ Username เดิม
+          <input class="field" id="authPassword" type="password" autocomplete="current-password" maxlength="64" placeholder="ใช้เฉพาะสมัคร/ล็อกอินแบบเดิม">
         </label>
       </div>
+      <div class="auth-social">
+        <button class="btn btn-google" data-action="login-google">ล็อกอิน Gmail / Google</button>
+        <button class="btn btn-facebook" data-action="login-facebook">ล็อกอิน Facebook</button>
+      </div>
+      <div class="auth-divider">หรือใช้บัญชีแบบเดิม</div>
       <div class="auth-actions">
-        <button class="btn btn-primary" data-action="register">สมัครและอัปโหลดเซฟนี้</button>
-        <button class="btn btn-gold" data-action="login">ล็อกอินและโหลด Cloud</button>
+        <button class="btn btn-primary" data-action="register">สมัครด้วย Username</button>
+        <button class="btn btn-gold" data-action="login">ล็อกอิน Username</button>
         <button class="btn btn-danger" id="logoutButton" data-action="logout" disabled>ออกจากบัญชี</button>
       </div>
       <div class="cloud-status warn" id="cloudStatusText">กำลังเชื่อมต่อ Firebase...</div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="profileModal" role="dialog" aria-modal="true" aria-label="หน้าโปรไฟล์ผู้เล่น">
+    <div class="modal-panel profile-panel">
+      <button class="close" data-action="close-profile" aria-label="ปิด">x</button>
+      <div id="profileDetail"></div>
+      <input class="hidden" type="file" id="profileImageFile" accept="image/*">
     </div>
   </div>
 
@@ -1544,8 +1662,8 @@
             <p>เพิ่มปุ่ม “ประกาศอัพเดต” ในศูนย์บัญชาการ กดกลับมาอ่านรายละเอียดแพตช์ได้</p>
           </div>
           <div class="update-item">
-            <strong>🃏 ปุ่มแยกระดับการ์ด</strong>
-            <p>หน้าคลังมีปุ่มกดแยก N/R/SR/SSR/UR/LR/JJK/EX/SC พร้อมจำนวนที่สะสมแล้ว</p>
+            <strong>👤 ระบบ User/Profile ใหม่</strong>
+            <p>เพิ่มล็อกอิน Google/Gmail, Facebook, ตั้ง Username, รูปโปรไฟล์ และหน้าโปรไฟล์ผู้เล่น</p>
           </div>
           <div class="update-item">
             <strong>✅ ไม่แสดงซ้ำเวอร์ชันนี้</strong>
@@ -1641,7 +1759,8 @@
       battleMaxEnergy: 10,
       battleEnergyRegenMs: 15 * 60 * 1000,
       friendSupportRate: 0.10,
-      friendSupportCapRate: 0.25
+      friendSupportCapRate: 0.25,
+      profilePhotoMaxBytes: 420 * 1024
     });
 
     const FIREBASE_CONFIG = Object.freeze({
@@ -1658,7 +1777,7 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบปุ่มแยกระดับการ์ด
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-rarity-filter-buttons-v2",
+      version: "2026-06-12-user-profile-social-login-v1",
       seenKey: "anime_card_update_notice_seen_v1"
     });
 
@@ -3148,6 +3267,7 @@
     let cloudBusy = false;
     let activeCloudUid = "";
     let activeCloudUsername = SAFE_STORAGE.getItem(CONFIG.cloudUsernameKey) || "";
+    let activeProfileUid = "";
     let friendRequests = [];
     let friendProfiles = [];
     let friendsBusy = false;
@@ -3171,6 +3291,13 @@
         team: [],
         pity: {},
         recent: [],
+        profile: {
+          username: "",
+          photoURL: "",
+          provider: "local",
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        },
         battle: {
           stage: 1,
           energy: CONFIG.battleMaxEnergy,
@@ -3198,16 +3325,19 @@
     }
 
     function renderAccount() {
-      const label = activeCloudUsername || "Local Guest";
+      const profile = getPlayerProfile();
+      const label = profile.username || "Local Guest";
       const accountText = document.getElementById("accountButtonText");
+      const accountAvatar = document.getElementById("accountAvatar");
       const logoutButton = document.getElementById("logoutButton");
       if (accountText) accountText.textContent = label;
+      if (accountAvatar) accountAvatar.outerHTML = avatarHTML(profile, "account-avatar").replace("<span", "<span id=\"accountAvatar\"");
       if (logoutButton) logoutButton.disabled = !activeCloudUid;
     }
 
     function setAuthBusy(busy) {
       cloudBusy = busy;
-      document.querySelectorAll('[data-action="register"], [data-action="login"], [data-action="logout"]')
+      document.querySelectorAll('[data-action="register"], [data-action="login"], [data-action="login-google"], [data-action="login-facebook"], [data-action="logout"], [data-action="save-profile"]')
         .forEach(button => { button.disabled = busy || (button.dataset.action === "logout" && !activeCloudUid); });
     }
 
@@ -3220,9 +3350,71 @@
       return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
     }
 
-    function validateCredentials(username, password) {
+    function getPlayerProfile() {
+      const profile = state && state.profile && typeof state.profile === "object" ? state.profile : {};
+      return {
+        username: activeCloudUsername || profile.username || "Local Guest",
+        photoURL: profile.photoURL || "",
+        provider: profile.provider || (activeCloudUid ? "firebase" : "local")
+      };
+    }
+
+    function profileInitial(username) {
+      const text = String(username || "G").trim();
+      return (text[0] || "G").toUpperCase();
+    }
+
+    function avatarHTML(profile, className = "profile-avatar") {
+      const username = String(profile && profile.username || "Guest");
+      const photoURL = sanitizeProfilePhoto(profile && profile.photoURL || "");
+      if (photoURL) {
+        return `<span class="${className}"><img src="${escapeHTML(photoURL)}" alt="${escapeHTML(username)}" onerror="this.parentElement.textContent='${escapeHTML(profileInitial(username))}'"></span>`;
+      }
+      return `<span class="${className}">${escapeHTML(profileInitial(username))}</span>`;
+    }
+
+    function sanitizeProfilePhoto(value) {
+      const source = String(value || "").trim();
+      if (!source) return "";
+      if (/^https?:\/\//i.test(source) || /^data:image\//i.test(source)) return source.slice(0, 650000);
+      return "";
+    }
+
+    function validateUsernameOnly(username) {
       if (username.length < 3 || username.length > 24) return "Username ต้องยาว 3-24 ตัวอักษร";
       if (/[\\/]/.test(username)) return "Username ห้ามมีเครื่องหมาย \\ หรือ /";
+      if (!/^[\w\-.ก-๙ ]+$/u.test(username)) return "Username ใช้ได้เฉพาะตัวอักษร ตัวเลข ช่องว่าง . _ -";
+      return "";
+    }
+
+    function suggestUsernameFromFirebaseUser(user) {
+      const base = String(user && (user.displayName || (user.email || "").split("@")[0]) || "Player")
+        .replace(/[^\w\-.ก-๙ ]+/gu, "")
+        .trim()
+        .slice(0, 18) || "Player";
+      return `${base}${String(Date.now()).slice(-4)}`.slice(0, 24);
+    }
+
+    async function reserveUsernameForUid(uid, username, previousUsername = "") {
+      const key = normalizeUsernameKey(username);
+      const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, `usernameIndex/${key}`));
+      if (snapshot.exists() && String(snapshot.val()) !== String(uid)) {
+        const error = new Error("username-taken");
+        error.code = "profile/username-taken";
+        throw error;
+      }
+      const updates = {};
+      updates[`usernameIndex/${key}`] = uid;
+      const oldKey = previousUsername && previousUsername.toLowerCase() !== username.toLowerCase()
+        ? normalizeUsernameKey(previousUsername)
+        : "";
+      if (oldKey && oldKey !== key) updates[`usernameIndex/${oldKey}`] = null;
+      await cloudModules.update(cloudModules.ref(cloudDb), updates);
+    }
+
+    function validateCredentials(username, password) {
+      const usernameError = validateUsernameOnly(username);
+      if (usernameError) return usernameError;
       if (password.length < 6 || password.length > 64) return "Password ต้องยาว 6-64 ตัวอักษร";
       return "";
     }
@@ -3233,7 +3425,11 @@
       if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") return "Username หรือ Password ไม่ถูกต้อง";
       if (code === "auth/weak-password") return "Password ต้องมีอย่างน้อย 6 ตัวอักษร";
       if (code === "auth/unauthorized-domain") return "โดเมน GitHub Pages นี้ยังไม่ได้เพิ่มใน Firebase Authorized domains";
-      if (code === "auth/configuration-not-found" || code === "auth/operation-not-allowed") return "Firebase Authentication ยังไม่ได้เปิด Email/Password";
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return "ผู้ใช้ปิดหน้าต่างล็อกอินก่อนทำรายการเสร็จ";
+      if (code === "auth/popup-blocked") return "เบราว์เซอร์บล็อก Popup ให้กดอนุญาต Popup แล้วลองใหม่";
+      if (code === "auth/account-exists-with-different-credential") return "อีเมลนี้เคยสมัครด้วยวิธีอื่นแล้ว ให้ใช้วิธีล็อกอินเดิม";
+      if (code === "auth/configuration-not-found" || code === "auth/operation-not-allowed") return "Firebase Authentication ยังไม่ได้เปิด Provider นี้ใน Console";
+      if (code === "profile/username-taken") return "Username นี้ถูกใช้แล้ว ลองตั้งชื่ออื่น";
       if (code.includes("permission-denied")) return "Realtime Database Rules ไม่อนุญาตให้อ่านหรือบันทึกเซฟ";
       return `${mode}ไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตและการตั้งค่า Firebase`;
     }
@@ -3258,6 +3454,9 @@
           getAuth: authModule.getAuth,
           createUserWithEmailAndPassword: authModule.createUserWithEmailAndPassword,
           signInWithEmailAndPassword: authModule.signInWithEmailAndPassword,
+          signInWithPopup: authModule.signInWithPopup,
+          GoogleAuthProvider: authModule.GoogleAuthProvider,
+          FacebookAuthProvider: authModule.FacebookAuthProvider,
           signOut: authModule.signOut,
           onAuthStateChanged: authModule.onAuthStateChanged,
           getDatabase: databaseModule.getDatabase,
@@ -3294,8 +3493,14 @@
     async function writeCloudSave(extra = {}) {
       if (!cloudReady || !activeCloudUid || !activeCloudUsername) return false;
       const now = Date.now();
+      if (!state.profile || typeof state.profile !== "object") state.profile = {};
+      state.profile.username = activeCloudUsername;
+      state.profile.photoURL = sanitizeProfilePhoto(state.profile.photoURL || "");
+      state.profile.updatedAt = now;
       const userPayload = Object.assign({
         username: activeCloudUsername,
+        photoURL: state.profile.photoURL || "",
+        profile: state.profile,
         save: state,
         updatedAt: now,
         updatedAtText: new Date().toLocaleString("th-TH")
@@ -3347,6 +3552,9 @@
           state = normalizeState(account.save);
           SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
         }
+        state.profile.username = activeCloudUsername;
+        state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || (user && user.photoURL) || "");
+        state.profile.provider = state.profile.provider || "firebase";
         await writeCloudSave();
         renderAll();
         refreshFriends();
@@ -3378,7 +3586,10 @@
         );
         activeCloudUid = credential.user.uid;
         activeCloudUsername = username;
+        state.profile.username = username;
+        state.profile.provider = "username";
         SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
+        await reserveUsernameForUid(activeCloudUid, username);
         await writeCloudSave({
           createdAt: Date.now(),
           createdAtText: new Date().toLocaleString("th-TH")
@@ -3415,8 +3626,14 @@
         SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, activeCloudUsername);
         if (account && account.save) {
           state = normalizeState(account.save);
+          state.profile.username = activeCloudUsername;
+          state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || "");
+          state.profile.provider = state.profile.provider || "username";
           await writeCloudSave();
         } else {
+          state.profile.username = activeCloudUsername;
+          state.profile.provider = "username";
+          await reserveUsernameForUid(activeCloudUid, activeCloudUsername);
           await writeCloudSave({
             createdAt: Date.now(),
             createdAtText: new Date().toLocaleString("th-TH")
@@ -3436,6 +3653,56 @@
       }
     }
 
+    async function loginWithSocialProvider(providerName) {
+      if (cloudBusy) return;
+      setAuthBusy(true);
+      try {
+        if (!await initFirebase()) throw new Error("firebase-unavailable");
+        const provider = providerName === "facebook"
+          ? new cloudModules.FacebookAuthProvider()
+          : new cloudModules.GoogleAuthProvider();
+        if (provider.addScope) provider.addScope("email");
+        if (providerName === "google" && provider.addScope) provider.addScope("profile");
+        const credential = await cloudModules.signInWithPopup(cloudAuth, provider);
+        const user = credential.user;
+        const account = await loadCloudAccount(user.uid);
+        const typedUsername = document.getElementById("authUsername").value.trim();
+        const username = String(account && account.username || typedUsername || suggestUsernameFromFirebaseUser(user));
+        const usernameError = validateUsernameOnly(username);
+        if (usernameError) throw new Error(usernameError);
+
+        if (account && account.save) {
+          state = normalizeState(account.save);
+        }
+
+        activeCloudUid = user.uid;
+        activeCloudUsername = username;
+        state.profile.username = username;
+        state.profile.provider = providerName;
+        state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || user.photoURL || "");
+        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
+        await reserveUsernameForUid(activeCloudUid, username, account && account.username);
+        await writeCloudSave({
+          createdAt: account && account.createdAt || Date.now(),
+          createdAtText: account && account.createdAtText || new Date().toLocaleString("th-TH"),
+          authProvider: providerName
+        });
+        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
+        document.getElementById("authPassword").value = "";
+        renderAll();
+        refreshFriends();
+        setCloudStatus(`ล็อกอินด้วย ${providerName === "facebook" ? "Facebook" : "Google/Gmail"} แล้ว: ${activeCloudUsername}`, "ok");
+        showToast("ล็อกอิน Social และโหลดโปรไฟล์สำเร็จ");
+        openProfileModal();
+      } catch (error) {
+        const message = error && error.code ? firebaseErrorMessage(error, "ล็อกอิน Social") : String(error && error.message || "ล็อกอิน Social ไม่สำเร็จ");
+        setCloudStatus(message, "bad");
+        showToast(message);
+      } finally {
+        setAuthBusy(false);
+      }
+    }
+
     async function logoutCloudAccount() {
       if (!cloudReady || !cloudAuth || !activeCloudUid) return;
       setAuthBusy(true);
@@ -3444,6 +3711,7 @@
         await cloudModules.signOut(cloudAuth);
         activeCloudUid = "";
         activeCloudUsername = "";
+        activeProfileUid = "";
         friendRequests = [];
         friendProfiles = [];
         state.battle.supportUid = "";
@@ -3513,6 +3781,11 @@
         : [];
       next.pity = next.pity && typeof next.pity === "object" ? next.pity : {};
       next.recent = Array.isArray(next.recent) ? next.recent.map(String).filter(id => CARD_BY_ID.has(id)).slice(0, 10) : [];
+      next.profile = Object.assign(defaultState().profile, next.profile || {});
+      next.profile.username = String(next.profile.username || "").slice(0, 24);
+      next.profile.photoURL = sanitizeProfilePhoto(next.profile.photoURL || "");
+      next.profile.provider = String(next.profile.provider || "local").slice(0, 32);
+      next.profile.updatedAt = Number(next.profile.updatedAt) || Date.now();
       next.battle = Object.assign(defaultState().battle, next.battle || {});
       next.battle.stage = Math.max(1, Math.floor(Number(next.battle.stage) || 1));
       next.battle.energy = Math.min(CONFIG.battleMaxEnergy, Math.max(0, Math.floor(Number(next.battle.energy) || 0)));
@@ -3612,9 +3885,12 @@
     }
 
     function makePublicProfile(updatedAt = Date.now()) {
+      const profile = getPlayerProfile();
       return {
         uid: activeCloudUid,
-        username: activeCloudUsername,
+        username: profile.username,
+        photoURL: profile.photoURL,
+        provider: profile.provider,
         teamPower: Math.floor(getTeamPower()),
         collectionCount: Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length,
         battleStage: Number(state.battle && state.battle.stage || 1),
@@ -3820,6 +4096,7 @@
         updates[`friendRequests/${targetUid}/${activeCloudUid}`] = {
           uid: activeCloudUid,
           username: activeCloudUsername,
+          photoURL: getPlayerProfile().photoURL,
           teamPower: Math.floor(getTeamPower()),
           createdAt: Date.now()
         };
@@ -4283,9 +4560,12 @@
       document.getElementById("friendRequestList").innerHTML = friendRequests.length
         ? friendRequests.map(request => `
           <div class="friend-card">
-            <div>
-              <div class="friend-name">${escapeHTML(request.username || "Unknown Player")}</div>
-              <div class="friend-meta">Team Power ${formatNumber(request.teamPower || 0)}</div>
+            <div class="friend-row">
+              ${avatarHTML(request, "friend-avatar")}
+              <div>
+                <div class="friend-name">${escapeHTML(request.username || "Unknown Player")}</div>
+                <div class="friend-meta">Team Power ${formatNumber(request.teamPower || 0)}</div>
+              </div>
             </div>
             <div class="friend-actions">
               <button class="btn btn-primary" data-action="accept-friend" data-friend-id="${escapeHTML(request.uid)}">รับ</button>
@@ -4304,12 +4584,16 @@
             : "ยังไม่ได้จัดทีม";
           return `
             <div class="friend-card">
-              <div>
-                <div class="friend-name">${escapeHTML(profile.username || "Unknown Player")}</div>
-                ${selected ? `<div class="support-badge">ACTIVE SUPPORT</div>` : ""}
-                <div class="friend-meta">Power ${formatNumber(profile.teamPower || 0)} • Collection ${formatNumber(profile.collectionCount || 0)} • Tower ${formatNumber(profile.battleStage || 1)}<br>${escapeHTML(teamNames)}</div>
+              <div class="friend-row">
+                ${avatarHTML(profile, "friend-avatar")}
+                <div>
+                  <div class="friend-name">${escapeHTML(profile.username || "Unknown Player")}</div>
+                  ${selected ? `<div class="support-badge">ACTIVE SUPPORT</div>` : ""}
+                  <div class="friend-meta">Power ${formatNumber(profile.teamPower || 0)} • Collection ${formatNumber(profile.collectionCount || 0)} • Tower ${formatNumber(profile.battleStage || 1)}<br>${escapeHTML(teamNames)}</div>
+                </div>
               </div>
               <div class="friend-actions">
+                <button class="btn" data-action="view-profile" data-friend-id="${escapeHTML(profile.uid)}">ดูโปรไฟล์</button>
                 <button class="btn ${selected ? "btn-primary" : ""}" data-action="select-support" data-friend-id="${escapeHTML(profile.uid)}">${selected ? "Support อยู่" : "เลือก Support"}</button>
                 <button class="btn btn-gold" data-action="spar-friend" data-friend-id="${escapeHTML(profile.uid)}">ประลอง</button>
                 <button class="btn btn-danger" data-action="remove-friend" data-friend-id="${escapeHTML(profile.uid)}">ลบ</button>
@@ -4404,6 +4688,7 @@
       renderBattle();
       renderFriends();
       renderAccount();
+      if (!document.getElementById("profileModal").classList.contains("hidden")) renderProfileDetail(activeProfileUid && activeProfileUid !== "local" && activeProfileUid !== activeCloudUid ? friendProfiles.find(item => String(item.uid) === activeProfileUid) : null);
       if (modalCardId && !document.getElementById("cardModal").classList.contains("hidden")) renderCardDetail(modalCardId);
     }
 
@@ -4489,6 +4774,121 @@
     function closeAuthModal() {
       document.getElementById("authModal").classList.add("hidden");
       document.body.style.overflow = "";
+    }
+
+    function openProfileModal(profile = null) {
+      activeProfileUid = profile && profile.uid ? String(profile.uid) : (activeCloudUid || "local");
+      renderProfileDetail(profile);
+      document.getElementById("profileModal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeProfileModal() {
+      activeProfileUid = "";
+      document.getElementById("profileModal").classList.add("hidden");
+      if (document.getElementById("cardModal").classList.contains("hidden") && document.getElementById("authModal").classList.contains("hidden") && document.getElementById("revealScreen").classList.contains("hidden")) {
+        document.body.style.overflow = "";
+      }
+    }
+
+    function renderProfileDetail(profile = null) {
+      const ownProfile = !profile || String(profile.uid || "") === String(activeCloudUid || "");
+      const data = ownProfile ? Object.assign({ uid: activeCloudUid || "local" }, makePublicProfile(Date.now())) : profile;
+      const providerLabel = data.provider === "google" ? "Google/Gmail" : data.provider === "facebook" ? "Facebook" : data.provider === "username" ? "Username" : (activeCloudUid ? "Firebase" : "Local");
+      const team = Array.isArray(data.team) && data.team.length ? data.team : [];
+      document.getElementById("profileDetail").innerHTML = `
+        <div class="profile-layout">
+          <div class="profile-cover">
+            ${avatarHTML(data, "profile-avatar")}
+          </div>
+          <div class="profile-copy">
+            <p class="eyebrow">${ownProfile ? "My Player Profile" : "Friend Profile"}</p>
+            <h2>${escapeHTML(data.username || "Local Guest")}</h2>
+            <p class="profile-sub">เข้าสู่ระบบผ่าน ${escapeHTML(providerLabel)} • Tower ${formatNumber(data.battleStage || 1)} • Collection ${formatNumber(data.collectionCount || 0)} • Power ${formatNumber(data.teamPower || 0)}</p>
+            <div class="stat-grid">
+              <div class="stat"><span>UID</span><strong>${escapeHTML(String(data.uid || "local").slice(0, 10))}</strong></div>
+              <div class="stat"><span>Provider</span><strong>${escapeHTML(providerLabel)}</strong></div>
+              <div class="stat"><span>Team Power</span><strong>${formatNumber(data.teamPower || 0)}</strong></div>
+              <div class="stat"><span>Last Update</span><strong>${data.updatedAt ? new Date(Number(data.updatedAt)).toLocaleDateString("th-TH") : "-"}</strong></div>
+            </div>
+            <div>
+              <strong>ทีมโชว์</strong>
+              <div class="profile-team">
+                ${team.length ? team.map(card => `<span class="pill">${escapeHTML(card.rarity || "?")} • ${escapeHTML(card.name || "Card")}</span>`).join("") : `<span class="pill">ยังไม่ได้จัดทีม</span>`}
+              </div>
+            </div>
+            ${ownProfile ? `
+              <div class="profile-form">
+                <label>Username
+                  <input class="field" id="profileUsernameInput" maxlength="24" value="${escapeHTML(data.username === "Local Guest" ? "" : data.username || "")}" placeholder="ตั้งชื่อผู้เล่น 3-24 ตัวอักษร">
+                </label>
+                <label>รูปโปรไฟล์ URL
+                  <input class="field" id="profilePhotoInput" value="${escapeHTML(data.photoURL || "")}" placeholder="วางลิงก์รูป หรือกดเลือกรูปจากเครื่อง">
+                </label>
+              </div>
+              <div class="profile-actions">
+                <button class="btn btn-primary" data-action="save-profile">บันทึกโปรไฟล์</button>
+                <button class="btn" data-action="choose-profile-image">เลือกรูปจากเครื่อง</button>
+                <button class="btn btn-danger" data-action="clear-profile-image">ลบรูป</button>
+                <button class="btn btn-gold" data-action="open-auth">ล็อกอิน / จัดการบัญชี</button>
+              </div>
+              <p class="profile-sub" style="margin-top:12px">หมายเหตุ: รูปจากเครื่องจะถูกเก็บเป็น Data URL ในเซฟ เพื่อให้ใช้บน GitHub Pages ได้โดยไม่ต้องตั้ง Firebase Storage แยก</p>
+            ` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    async function saveProfileSettings() {
+      const usernameInput = document.getElementById("profileUsernameInput");
+      const photoInput = document.getElementById("profilePhotoInput");
+      if (!usernameInput || !photoInput) return;
+      const username = usernameInput.value.trim();
+      const photoURL = sanitizeProfilePhoto(photoInput.value.trim());
+      const usernameError = username ? validateUsernameOnly(username) : "Username ต้องยาว 3-24 ตัวอักษร";
+      if (usernameError) return showToast(usernameError);
+      const oldUsername = activeCloudUsername || (state.profile && state.profile.username) || "";
+      setAuthBusy(true);
+      try {
+        if (activeCloudUid) {
+          if (!await initFirebase()) throw new Error("firebase-unavailable");
+          await reserveUsernameForUid(activeCloudUid, username, oldUsername);
+          activeCloudUsername = username;
+          SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
+        }
+        state.profile.username = username;
+        state.profile.photoURL = photoURL;
+        state.profile.provider = state.profile.provider || (activeCloudUid ? "firebase" : "local");
+        state.profile.updatedAt = Date.now();
+        saveState(true);
+        if (activeCloudUid) await writeCloudSave();
+        renderAll();
+        renderProfileDetail();
+        showToast("บันทึกโปรไฟล์แล้ว");
+      } catch (error) {
+        showToast(firebaseErrorMessage(error, "บันทึกโปรไฟล์"));
+      } finally {
+        setAuthBusy(false);
+      }
+    }
+
+    function setProfileImageFromFile(file) {
+      if (!file) return;
+      if (!/^image\//i.test(file.type || "")) return showToast("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+      if (file.size > CONFIG.profilePhotoMaxBytes) return showToast("รูปใหญ่เกินไป กรุณาใช้รูปไม่เกิน 420 KB");
+      const reader = new FileReader();
+      reader.onload = () => {
+        const input = document.getElementById("profilePhotoInput");
+        if (input) input.value = String(reader.result || "");
+        saveProfileSettings();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function openFriendProfile(friendUid) {
+      const profile = friendProfiles.find(item => String(item.uid) === String(friendUid));
+      if (!profile) return showToast("ไม่พบโปรไฟล์เพื่อนคนนี้");
+      openProfileModal(profile);
     }
 
     function renderRevealSelection(index) {
@@ -4614,6 +5014,7 @@
       if (!target) {
         if (event.target.id === "cardModal") closeModal();
         if (event.target.id === "authModal") closeAuthModal();
+        if (event.target.id === "profileModal") closeProfileModal();
         if (event.target.id === "updateNoticeModal") closeUpdateNotice();
         return;
       }
@@ -4635,6 +5036,14 @@
       if (action === "close-modal") closeModal();
       if (action === "open-auth") openAuthModal();
       if (action === "close-auth") closeAuthModal();
+      if (action === "open-profile") openProfileModal();
+      if (action === "close-profile") closeProfileModal();
+      if (action === "login-google") loginWithSocialProvider("google");
+      if (action === "login-facebook") loginWithSocialProvider("facebook");
+      if (action === "save-profile") saveProfileSettings();
+      if (action === "choose-profile-image") document.getElementById("profileImageFile").click();
+      if (action === "clear-profile-image") { const input = document.getElementById("profilePhotoInput"); if (input) input.value = ""; saveProfileSettings(); }
+      if (action === "view-profile") openFriendProfile(friendId);
       if (action === "open-update-notice") openUpdateNotice(true);
       if (action === "close-update-notice") closeUpdateNotice();
       if (action === "close-reveal") closeReveal();
@@ -4675,6 +5084,11 @@
     document.getElementById("friendUsernameInput").addEventListener("keydown", event => {
       if (event.key === "Enter") sendFriendRequest();
     });
+    document.getElementById("profileImageFile").addEventListener("change", event => {
+      setProfileImageFromFile(event.target.files && event.target.files[0]);
+      event.target.value = "";
+    });
+
     document.getElementById("importInput").addEventListener("change", event => {
       importSave(event.target.files[0]);
       event.target.value = "";
