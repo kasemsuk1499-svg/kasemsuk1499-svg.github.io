@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-server-reset-v8-force-save-marker">
+  <meta name="gacha-app-build" content="2026-06-12-server-reset-v5">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1978,11 +1978,6 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-primary" data-action="open-profile">โปรไฟล์</button><button class="btn" data-action="open-auth">ล็อกอิน</button></div>
           </div>
           <div class="mini-card">
-            <strong>รีเซ็ตทั้งเซิร์ฟ</strong>
-            <p>ล้างเซฟผู้เล่นทุกคนใน Firebase ให้กลับเป็นค่าเริ่มต้น และกันเซฟเก่าถูกอัปโหลดกลับมาอีก</p>
-            <button class="btn btn-danger" data-action="server-reset-all">ล้างข้อมูลผู้เล่นทุกคน</button>
-          </div>
-          <div class="mini-card">
             <strong>โบนัสรายวัน</strong>
             <p id="dailyText">รับ Gems เพื่อเปิดแพ็กเพิ่มได้วันละครั้ง</p>
             <button class="btn btn-primary" id="dailyButton" data-action="daily">รับโบนัสวันนี้</button>
@@ -2213,9 +2208,6 @@
         <button class="btn btn-gold" data-action="login">ล็อกอิน Username</button>
         <button class="btn btn-danger" id="logoutButton" data-action="logout" disabled>ออกจากบัญชี</button>
       </div>
-      <div style="margin-top:10px">
-        <button class="btn btn-danger" style="width:100%" data-action="server-reset-all">ล้างข้อมูลผู้เล่นทุกคนในเซิร์ฟ</button>
-      </div>
       <div class="cloud-status warn" id="cloudStatusText">กำลังเชื่อมต่อ Firebase...</div>
     </div>
   </div>
@@ -2348,8 +2340,8 @@
     })();
 
     const CONFIG = Object.freeze({
-      saveKey: "anime_card_collection_clean_v8_reset_20260612",
-      cloudUsernameKey: "anime_card_cloud_username_v8_reset_20260612",
+      saveKey: "anime_card_collection_clean_v1",
+      cloudUsernameKey: "anime_card_cloud_username_v1",
       oldAccountsKey: "simple_gacha_accounts_v5_stable",
       oldActiveUserKey: "simple_gacha_active_user_v5_stable",
       oldBannerKey: "simple_gacha_active_banner_v5_stable",
@@ -2378,17 +2370,6 @@
       - เก็บเลขเวอร์ชันล่าสุดไว้ในเครื่อง เพื่อกันผู้เล่นอัปโหลด local save เก่ากลับขึ้น Cloud
     */
     const SERVER_RESET_LOCAL_KEY = `${CONFIG.saveKey}:server_reset_version`;
-    // เพิ่มโดยอลิซ v8: รีเซ็ตแบบบังคับด้วย marker ในตัวเซฟ
-    // แก้ปัญหาเดิม: บางบัญชีมี users/{uid}/resetVersion แล้ว แต่ users/{uid}/save ยังเป็นเซฟเก่า
-    // รอบนี้จะถือว่าเซฟถูกต้องก็ต่อเมื่อ root resetVersion + save.resetVersion/profile.resetVersion ตรงกันเท่านั้น
-    const HARD_RESET_VERSION = "hard-reset-2026-06-12-v8";
-
-    function forceResetMarkerOnState(targetState = state) {
-      if (!targetState.profile || typeof targetState.profile !== "object") targetState.profile = {};
-      targetState.profile.resetVersion = HARD_RESET_VERSION;
-      targetState.resetVersion = HARD_RESET_VERSION;
-      return targetState;
-    }
 
     /*
       เพิ่มโดยอลิซ: ตารางรางวัล Battle Tower
@@ -3898,7 +3879,6 @@
       const starter = makeStarterLoadout();
       return {
         version: 2,
-        resetVersion: HARD_RESET_VERSION,
         gems: CONFIG.startingGems,
         dust: CONFIG.startingDust,
         incomeBank: 0,
@@ -3921,8 +3901,7 @@
           // เพิ่มโดยอลิซ: การ์ดซัพพอร์ตประจำโปรไฟล์ เลือกได้ 1 ใบเพื่อให้เพื่อนยืมพลัง
           supportCardId: "",
           createdAt: Date.now(),
-          updatedAt: Date.now(),
-          resetVersion: HARD_RESET_VERSION
+          updatedAt: Date.now()
         },
         battle: {
           stage: 1,
@@ -4159,13 +4138,11 @@
       state.profile.username = activeCloudUsername;
       state.profile.photoURL = sanitizeProfilePhoto(state.profile.photoURL || "");
       state.profile.updatedAt = now;
-      forceResetMarkerOnState(state);
       const userPayload = Object.assign({
         username: activeCloudUsername,
         photoURL: state.profile.photoURL || "",
         profile: state.profile,
         save: state,
-        resetVersion: HARD_RESET_VERSION,
         updatedAt: now,
         updatedAtText: new Date().toLocaleString("th-TH")
       }, extra);
@@ -4194,105 +4171,43 @@
       if (!cloudReady || !cloudModules || !cloudDb) return "";
       try {
         const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, "serverMeta/resetVersion"));
-        if (!snapshot.exists()) return HARD_RESET_VERSION;
-        return String(snapshot.val() || HARD_RESET_VERSION).trim() || HARD_RESET_VERSION;
+        if (!snapshot.exists()) return "";
+        return String(snapshot.val() || "").trim();
       } catch (error) {
-        // ถ้า Rules ไม่ให้เว็บอ่าน serverMeta ก็ยังบังคับรีเซ็ตด้วย marker ในไฟล์นี้แทน
         setCloudStatus(firebaseErrorMessage(error, "อ่านคำสั่งรีเซ็ตเซิร์ฟ"), "bad");
-        return HARD_RESET_VERSION;
+        return "";
       }
-    }
-
-    function makeServerResetVersion() {
-      return HARD_RESET_VERSION;
-    }
-
-    function makeResetStateForAccount(account = null, user = null, resetVersion = "") {
-      const now = Date.now();
-      const accountProfile = account && account.profile && typeof account.profile === "object" ? account.profile : {};
-      const oldProfile = state && state.profile && typeof state.profile === "object" ? state.profile : {};
-      const keepUsername = activeCloudUsername || String(account && account.username || "") || accountProfile.username || oldProfile.username || (user && user.displayName) || "Player";
-      const keepPhotoURL = sanitizeProfilePhoto(
-        account && (account.photoURL || accountProfile.photoURL) ||
-        oldProfile.photoURL ||
-        (user && user.photoURL) ||
-        ""
-      );
-      const keepProvider = String(oldProfile.provider || accountProfile.provider || account && account.authProvider || "firebase").slice(0, 32);
-      const keepCreatedAt = Number(accountProfile.createdAt || account && account.createdAt || oldProfile.createdAt || now) || now;
-      const fresh = normalizeState(defaultState());
-      fresh.profile.username = String(keepUsername || "Player").slice(0, 24);
-      fresh.profile.photoURL = keepPhotoURL;
-      fresh.profile.provider = keepProvider;
-      fresh.profile.supportCardId = "";
-      fresh.profile.createdAt = keepCreatedAt;
-      fresh.profile.updatedAt = now;
-      fresh.profile.resetVersion = String(resetVersion || HARD_RESET_VERSION);
-      fresh.resetVersion = String(resetVersion || HARD_RESET_VERSION);
-      return fresh;
-    }
-
-    function makeResetStateForCloudAccount(uid, account = {}, resetVersion = "", now = Date.now()) {
-      const profile = account && account.profile && typeof account.profile === "object" ? account.profile : {};
-      const username = String(account && account.username || profile.username || `Player-${String(uid).slice(0, 5)}` || "Player").slice(0, 24);
-      const fresh = normalizeState(defaultState());
-      fresh.profile.username = username;
-      fresh.profile.photoURL = sanitizeProfilePhoto(account && (account.photoURL || profile.photoURL) || "");
-      fresh.profile.provider = String(profile.provider || account && account.authProvider || "firebase").slice(0, 32);
-      fresh.profile.supportCardId = "";
-      fresh.profile.createdAt = Number(profile.createdAt || account && account.createdAt || now) || now;
-      fresh.profile.updatedAt = now;
-      fresh.profile.resetVersion = String(resetVersion || HARD_RESET_VERSION);
-      fresh.resetVersion = String(resetVersion || HARD_RESET_VERSION);
-      return fresh;
-    }
-
-    function makeResetPublicProfile(uid, freshState, now = Date.now()) {
-      const profile = freshState && freshState.profile && typeof freshState.profile === "object" ? freshState.profile : {};
-      const owned = freshState && freshState.owned && typeof freshState.owned === "object" ? freshState.owned : {};
-      const team = Array.isArray(freshState && freshState.team) ? freshState.team : [];
-      const teamCards = team.map(id => CARD_BY_ID.get(String(id))).filter(Boolean).map(card => ({
-        id: String(card.id),
-        name: card.name,
-        rarity: card.rarity,
-        power: Math.floor(Number(card.power) || 0)
-      }));
-      return {
-        uid,
-        username: String(profile.username || "Player").slice(0, 24),
-        photoURL: sanitizeProfilePhoto(profile.photoURL || ""),
-        provider: String(profile.provider || "firebase").slice(0, 32),
-        supportCardId: "",
-        supportCard: null,
-        teamPower: teamCards.reduce((sum, card) => sum + Number(card.power || 0), 0),
-        collectionCount: Object.keys(owned).filter(id => CARD_BY_ID.has(String(id))).length,
-        battleStage: 1,
-        team: teamCards,
-        updatedAt: now
-      };
     }
 
     async function applyServerResetIfNeeded(account = null, user = null) {
       const serverResetVersion = await getServerResetVersion();
       if (!serverResetVersion) return false;
 
-      const accountSave = account && account.save && typeof account.save === "object" ? account.save : null;
-      const accountProfile = account && account.profile && typeof account.profile === "object" ? account.profile : {};
-      const saveProfile = accountSave && accountSave.profile && typeof accountSave.profile === "object" ? accountSave.profile : {};
-      const accountResetVersion = String(account && account.resetVersion || accountProfile.resetVersion || "").trim();
-      const accountSaveResetVersion = String(accountSave && (accountSave.resetVersion || saveProfile.resetVersion) || "").trim();
+      const accountResetVersion = String(account && account.resetVersion || "").trim();
       const localResetVersion = String(SAFE_STORAGE.getItem(SERVER_RESET_LOCAL_KEY) || "").trim();
 
-      if (accountResetVersion === serverResetVersion && accountSaveResetVersion === serverResetVersion && localResetVersion === serverResetVersion) {
+      if (accountResetVersion === serverResetVersion && localResetVersion === serverResetVersion) {
         return false;
       }
 
-      state = makeResetStateForAccount(account, user, serverResetVersion);
+      const oldProfile = state && state.profile && typeof state.profile === "object" ? state.profile : {};
+      const keepUsername = activeCloudUsername || String(account && account.username || "") || oldProfile.username || (user && user.displayName) || "Player";
+      const keepPhotoURL = sanitizeProfilePhoto(
+        oldProfile.photoURL ||
+        (account && (account.photoURL || (account.profile && account.profile.photoURL))) ||
+        (user && user.photoURL) ||
+        ""
+      );
+      const keepProvider = oldProfile.provider || "firebase";
+
+      state = normalizeState(defaultState());
+      state.profile.username = String(keepUsername || "Player").slice(0, 24);
+      state.profile.photoURL = keepPhotoURL;
+      state.profile.provider = String(keepProvider || "firebase").slice(0, 32);
+      state.profile.updatedAt = Date.now();
 
       SAFE_STORAGE.setItem(SERVER_RESET_LOCAL_KEY, serverResetVersion);
-      SAFE_STORAGE.removeItem("anime_card_collection_clean_v1");
-      SAFE_STORAGE.removeItem("anime_card_collection_clean_v7_reset_20260612");
-      SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(forceResetMarkerOnState(state)));
+      SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
 
       await writeCloudSave({
         resetVersion: serverResetVersion,
@@ -4331,7 +4246,7 @@
         const didServerReset = await applyServerResetIfNeeded(account, user);
         if (!didServerReset && account && account.save) {
           state = normalizeState(account.save);
-          SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(forceResetMarkerOnState(state)));
+          SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
         }
 
         state.profile.username = activeCloudUsername;
@@ -4384,12 +4299,9 @@
         state.profile.provider = "username";
         SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
         await reserveUsernameForUid(activeCloudUid, username);
-        const serverResetVersion = await getServerResetVersion();
-        if (serverResetVersion) SAFE_STORAGE.setItem(SERVER_RESET_LOCAL_KEY, serverResetVersion);
         await writeCloudSave({
           createdAt: Date.now(),
-          createdAtText: new Date().toLocaleString("th-TH"),
-          resetVersion: serverResetVersion || ""
+          createdAtText: new Date().toLocaleString("th-TH")
         });
         clearPasswordInputs();
         renderLoginGate(false);
@@ -4423,35 +4335,29 @@
         activeCloudUid = credential.user.uid;
         activeCloudUsername = String(account && account.username || username);
         SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, activeCloudUsername);
-        const didServerReset = await applyServerResetIfNeeded(account, credential.user);
-        if (!didServerReset && account && account.save) {
+        if (account && account.save) {
           state = normalizeState(account.save);
           state.profile.username = activeCloudUsername;
           state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || "");
           state.profile.provider = state.profile.provider || "username";
           await writeCloudSave();
-        } else if (!didServerReset) {
+        } else {
           state.profile.username = activeCloudUsername;
           state.profile.provider = "username";
           await reserveUsernameForUid(activeCloudUid, activeCloudUsername);
-          const serverResetVersion = await getServerResetVersion();
-          if (serverResetVersion) SAFE_STORAGE.setItem(SERVER_RESET_LOCAL_KEY, serverResetVersion);
           await writeCloudSave({
             createdAt: Date.now(),
-            createdAtText: new Date().toLocaleString("th-TH"),
-            resetVersion: serverResetVersion || ""
+            createdAtText: new Date().toLocaleString("th-TH")
           });
         }
-        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(forceResetMarkerOnState(state)));
+        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
         clearPasswordInputs();
         renderLoginGate(false);
         closeAuthModal();
         renderAll();
         refreshFriends();
-        setCloudStatus(didServerReset
-          ? `ล็อกอินแล้ว: ${activeCloudUsername} • เซิร์ฟรีเซ็ตเซฟให้เริ่มใหม่แล้ว`
-          : `ล็อกอินแล้ว: ${activeCloudUsername} • โหลด Cloud Save สำเร็จ • เครื่องนี้จำไว้แล้ว`, "ok");
-        showToast(didServerReset ? "รีเซ็ตเซฟตามคำสั่งเซิร์ฟแล้ว" : "ล็อกอินและเข้าเกมสำเร็จ");
+        setCloudStatus(`ล็อกอินแล้ว: ${activeCloudUsername} • โหลด Cloud Save สำเร็จ • เครื่องนี้จำไว้แล้ว`, "ok");
+        showToast("ล็อกอินและเข้าเกมสำเร็จ");
       } catch (error) {
         setCloudStatus(firebaseErrorMessage(error, "ล็อกอิน"), "bad");
         showToast(firebaseErrorMessage(error, "ล็อกอิน"));
@@ -4478,37 +4384,30 @@
         const usernameError = validateUsernameOnly(username);
         if (usernameError) throw new Error(usernameError);
 
-        activeCloudUid = user.uid;
-        activeCloudUsername = username;
-        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
-        const didServerReset = await applyServerResetIfNeeded(account, user);
-
-        if (!didServerReset && account && account.save) {
+        if (account && account.save) {
           state = normalizeState(account.save);
         }
 
+        activeCloudUid = user.uid;
+        activeCloudUsername = username;
         state.profile.username = username;
         state.profile.provider = providerName;
         state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || user.photoURL || "");
+        SAFE_STORAGE.setItem(CONFIG.cloudUsernameKey, username);
         await reserveUsernameForUid(activeCloudUid, username, account && account.username);
-        const serverResetVersion = didServerReset ? SAFE_STORAGE.getItem(SERVER_RESET_LOCAL_KEY) || "" : await getServerResetVersion();
-        if (serverResetVersion) SAFE_STORAGE.setItem(SERVER_RESET_LOCAL_KEY, serverResetVersion);
         await writeCloudSave({
           createdAt: account && account.createdAt || Date.now(),
           createdAtText: account && account.createdAtText || new Date().toLocaleString("th-TH"),
-          authProvider: providerName,
-          resetVersion: serverResetVersion || ""
+          authProvider: providerName
         });
-        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(forceResetMarkerOnState(state)));
+        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
         clearPasswordInputs();
         renderLoginGate(false);
         closeAuthModal();
         renderAll();
         refreshFriends();
-        setCloudStatus(didServerReset
-          ? `ล็อกอินด้วย ${providerName === "facebook" ? "Facebook" : "Google/Gmail"} แล้ว: ${activeCloudUsername} • เซิร์ฟรีเซ็ตเซฟให้เริ่มใหม่แล้ว`
-          : `ล็อกอินด้วย ${providerName === "facebook" ? "Facebook" : "Google/Gmail"} แล้ว: ${activeCloudUsername} • เครื่องนี้จำไว้แล้ว`, "ok");
-        showToast(didServerReset ? "รีเซ็ตเซฟตามคำสั่งเซิร์ฟแล้ว" : "ล็อกอิน Social และเข้าเกมสำเร็จ");
+        setCloudStatus(`ล็อกอินด้วย ${providerName === "facebook" ? "Facebook" : "Google/Gmail"} แล้ว: ${activeCloudUsername} • เครื่องนี้จำไว้แล้ว`, "ok");
+        showToast("ล็อกอิน Social และเข้าเกมสำเร็จ");
         openProfileModal();
       } catch (error) {
         const message = error && error.code ? firebaseErrorMessage(error, "ล็อกอิน Social") : String(error && error.message || "ล็อกอิน Social ไม่สำเร็จ");
@@ -4547,8 +4446,12 @@
       const stored = safeParse(SAFE_STORAGE.getItem(CONFIG.saveKey));
       if (stored && typeof stored === "object") return normalizeState(stored);
 
-      // v8 hard reset: ไม่ migrate เซฟเก่ากลับมา เพราะจะทำให้รีแล้วเด้งกลับ
-      return forceResetMarkerOnState(defaultState());
+      const migrated = migrateOldSave();
+      if (migrated) {
+        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(migrated));
+        return migrated;
+      }
+      return defaultState();
     }
 
     function migrateOldSave() {
@@ -4573,10 +4476,6 @@
     }
 
     function normalizeState(raw) {
-      const rawResetVersion = String(raw && (raw.resetVersion || raw.profile && raw.profile.resetVersion) || "").trim();
-      if (raw && rawResetVersion !== HARD_RESET_VERSION) {
-        return forceResetMarkerOnState(defaultState());
-      }
       const next = Object.assign(defaultState(), raw || {});
       if (Array.isArray(raw && raw.showcase) && !(raw && raw.team)) next.team = raw.showcase;
       if (raw && raw.lastDailyRewardDate && !raw.lastDaily) next.lastDaily = raw.lastDailyRewardDate;
@@ -4614,7 +4513,6 @@
       next.battle.losses = Math.max(0, Math.floor(Number(next.battle.losses) || 0));
       next.battle.supportUid = String(next.battle.supportUid || "");
       if (!BANNER_BY_ID.has(next.activeBannerId)) next.activeBannerId = BANNERS[0] ? BANNERS[0].id : "";
-      forceResetMarkerOnState(next);
       return next;
     }
 
@@ -4629,8 +4527,7 @@
     }
 
     function persistLocalState() {
-      forceResetMarkerOnState(state);
-      SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(forceResetMarkerOnState(state)));
+      SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(state));
     }
 
     function formatNumber(value) {
@@ -6652,13 +6549,6 @@
       if (!file) return;
       try {
         const parsed = JSON.parse(await file.text());
-        const parsedResetVersion = String(parsed && (parsed.resetVersion || parsed.profile && parsed.profile.resetVersion) || "").trim();
-        if (parsedResetVersion !== HARD_RESET_VERSION) {
-          state = forceResetMarkerOnState(defaultState());
-          saveState(true);
-          renderAll();
-          return showToast("ไฟล์เซฟเก่าไม่ตรงกับเซิร์ฟใหม่ จึงเริ่มใหม่แทน");
-        }
         state = normalizeState(parsed);
         saveState(true);
         renderAll();
@@ -6668,94 +6558,9 @@
       }
     }
 
-    async function serverResetAllPlayers() {
-      if (cloudBusy) return;
-      if (!window.confirm("คำสั่งนี้จะล้างเซฟผู้เล่นทุกคนใน Firebase ให้กลับไปเริ่มใหม่ทั้งเซิร์ฟ ต้องการทำต่อไหม?")) return;
-      const phrase = window.prompt("เพื่อยืนยัน ให้พิมพ์ RESET SERVER แบบตัวใหญ่ทั้งหมด");
-      if (phrase !== "RESET SERVER") return showToast("ยกเลิกการล้างข้อมูลทั้งเซิร์ฟ");
-
-      setAuthBusy(true);
-      setCloudStatus("กำลังสั่งล้างข้อมูลผู้เล่นทั้งเซิร์ฟ...", "warn");
-
-      try {
-        if (!await initFirebase()) throw new Error("firebase-unavailable");
-        if (!activeCloudUid) throw new Error("ต้องล็อกอินบัญชีเจ้าของเกมก่อนล้างทั้งเซิร์ฟ");
-
-        const now = Date.now();
-        const resetVersion = makeServerResetVersion();
-        const resetAtText = new Date(now).toLocaleString("th-TH");
-        const updates = {
-          "serverMeta/resetVersion": resetVersion,
-          "serverMeta/resetAt": now,
-          "serverMeta/resetAtText": resetAtText,
-          "serverMeta/resetBy": activeCloudUid,
-          "serverMeta/resetByUsername": activeCloudUsername || getPlayerProfile().username || "Owner"
-        };
-
-        let wipedCount = 0;
-        let usersReadFailed = false;
-        try {
-          const usersSnapshot = await cloudModules.get(cloudModules.ref(cloudDb, "users"));
-          const users = usersSnapshot.exists() ? usersSnapshot.val() || {} : {};
-          Object.entries(users).forEach(([uid, account]) => {
-            const fresh = makeResetStateForCloudAccount(uid, account || {}, resetVersion, now);
-            updates[`users/${uid}/save`] = fresh;
-            updates[`users/${uid}/profile`] = fresh.profile;
-            updates[`users/${uid}/photoURL`] = fresh.profile.photoURL || "";
-            updates[`users/${uid}/resetVersion`] = resetVersion;
-            updates[`users/${uid}/resetAppliedAt`] = now;
-            updates[`users/${uid}/resetAppliedAtText`] = resetAtText;
-            updates[`users/${uid}/updatedAt`] = now;
-            updates[`users/${uid}/updatedAtText`] = resetAtText;
-            updates[`publicProfiles/${uid}`] = makeResetPublicProfile(uid, fresh, now);
-            wipedCount += 1;
-          });
-        } catch (readError) {
-          usersReadFailed = true;
-          console.warn("Hard wipe skipped because users path is not readable:", readError);
-        }
-
-        await cloudModules.update(cloudModules.ref(cloudDb), updates);
-
-        // รีเซ็ตเครื่องเจ้าของเกมทันทีด้วย เพื่อไม่ให้ local save เก่าอัปกลับขึ้น Cloud หลังล้างเซิร์ฟ
-        state = makeResetStateForAccount({ username: activeCloudUsername, profile: getPlayerProfile() }, cloudAuth && cloudAuth.currentUser, resetVersion);
-        SAFE_STORAGE.setItem(SERVER_RESET_LOCAL_KEY, resetVersion);
-        SAFE_STORAGE.removeItem("anime_card_collection_clean_v1");
-        SAFE_STORAGE.removeItem("anime_card_collection_clean_v7_reset_20260612");
-        SAFE_STORAGE.setItem(CONFIG.saveKey, JSON.stringify(forceResetMarkerOnState(state)));
-        await writeCloudSave({
-          resetVersion,
-          resetAppliedAt: now,
-          resetAppliedAtText: resetAtText
-        });
-
-        closeModal();
-        closeReveal();
-        renderAll();
-        refreshFriends();
-        setCloudStatus(usersReadFailed
-          ? `ตั้งค่ารีเซ็ตเซิร์ฟแล้ว (${resetVersion}) • ผู้เล่นจะถูกล้างเมื่อเข้าเกมครั้งต่อไป`
-          : `ล้างเซฟผู้เล่นใน Firebase แล้ว ${wipedCount} บัญชี • ${resetVersion}`,
-          "ok"
-        );
-        showToast(usersReadFailed
-          ? "ตั้งค่ารีเซ็ตเซิร์ฟแล้ว รอผู้เล่นเข้าเกมเพื่อเริ่มใหม่"
-          : `ล้างข้อมูลผู้เล่นทุกคนแล้ว ${wipedCount} บัญชี`
-        );
-      } catch (error) {
-        const message = error && error.message && !error.code
-          ? error.message
-          : firebaseErrorMessage(error, "ล้างข้อมูลทั้งเซิร์ฟ");
-        setCloudStatus(message, "bad");
-        showToast(message);
-      } finally {
-        setAuthBusy(false);
-      }
-    }
-
     function resetSave() {
       if (!window.confirm("เริ่มเกมใหม่และลบเซฟในเบราว์เซอร์นี้ใช่ไหม?")) return;
-      state = forceResetMarkerOnState(defaultState());
+      state = defaultState();
       saveState(true);
       closeModal();
       closeReveal();
@@ -6818,7 +6623,6 @@
       if (action === "export-save") exportSave();
       if (action === "import-save") document.getElementById("importInput").click();
       if (action === "reset-save") resetSave();
-      if (action === "server-reset-all") serverResetAllPlayers();
       if (action === "register") registerCloudAccount();
       if (action === "login") loginCloudAccount();
       if (action === "logout") logoutCloudAccount();
