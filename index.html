@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-support-login-gate-v2">
+  <meta name="gacha-app-build" content="2026-06-12-fast-gacha-pity-v4">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -279,6 +279,70 @@
 
     .rates .pill { padding: 6px 9px; color: #dbe5ff; }
     .summon-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    /* เพิ่มโดยอลิซ: แถบโหมดเร็ว + สถานะการันตีของตู้ปัจจุบัน */
+    .summon-extra-row {
+      width: min(720px, 100%);
+      display: grid;
+      grid-template-columns: minmax(180px, auto) minmax(220px, 1fr);
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+
+    .fast-toggle,
+    .guarantee-box {
+      min-height: 42px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 15px;
+      padding: 9px 12px;
+      background: rgba(5,8,18,.58);
+    }
+
+    .fast-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: #dbe5ff;
+      font-size: .78rem;
+      font-weight: 900;
+      user-select: none;
+    }
+
+    .fast-toggle input { width: 18px; height: 18px; accent-color: var(--cyan); }
+    .guarantee-box { display: grid; gap: 7px; }
+    .guarantee-copy {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #dbe5ff;
+      font-size: .76rem;
+      font-weight: 900;
+    }
+
+    .guarantee-copy span { color: var(--gold); font-variant-numeric: tabular-nums; }
+    .guarantee-meter {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .guarantee-meter i {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--gold), var(--cyan), var(--violet));
+      transition: width .22s ease;
+    }
+
+    .summon-actions .btn[data-times="50"],
+    .summon-actions .btn[data-times="100"] {
+      border-color: rgba(255,209,102,.22);
+      background: rgba(255,209,102,.075);
+    }
 
     .btn {
       min-height: 46px;
@@ -1445,6 +1509,7 @@
       .banner h2 { font-size: clamp(2.3rem, 13vw, 4rem); }
       .summon-actions { width: 100%; }
       .summon-actions .btn { flex: 1; padding-inline: 10px; }
+      .summon-extra-row { grid-template-columns: 1fr; }
       .side-panel { grid-template-columns: 1fr; }
       .side-panel > h2 { grid-column: auto; }
       .workspace { padding: 14px; }
@@ -1573,7 +1638,26 @@
               <button class="btn btn-gold" data-action="pull" data-times="10">
                 เปิด 10 ใบ <span class="cost" id="tenCost">0 Gems</span>
               </button>
+              <button class="btn" data-action="pull" data-times="50" title="เปิดแบบเร็วอัตโนมัติ">
+                เปิด 50 ใบ <span class="cost" id="fiftyCost">0 Gems</span>
+              </button>
+              <button class="btn" data-action="pull" data-times="100" title="เปิดแบบเร็วอัตโนมัติ">
+                เปิด 100 ใบ <span class="cost" id="hundredCost">0 Gems</span>
+              </button>
               <select class="field" id="bannerSelect" aria-label="เลือกตู้กาชา"></select>
+              <div class="summon-extra-row">
+                <label class="fast-toggle" title="เปิดแล้วสรุปผลทันที ไม่เด้งหน้าผลลัพธ์ทีละใบ">
+                  <input type="checkbox" id="fastRevealToggle" checked>
+                  โหมดเร็ว / สรุปทันที
+                </label>
+                <div class="guarantee-box" aria-live="polite">
+                  <div class="guarantee-copy">
+                    <strong id="bannerGuaranteeText">กำลังโหลดการันตี...</strong>
+                    <span id="bannerGuaranteeRemain">-</span>
+                  </div>
+                  <div class="guarantee-meter"><i id="bannerGuaranteeBar"></i></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1603,7 +1687,7 @@
           </div>
           <div class="side-stats">
             <div class="side-stat"><span>Income / sec</span><strong id="incomeText">0</strong></div>
-            <div class="side-stat"><span>Pity</span><strong id="pityText">0</strong></div>
+            <div class="side-stat"><span>Guarantee</span><strong id="pityText">0/0</strong></div>
             <div class="side-stat"><span>Team</span><strong id="teamText">0/5</strong></div>
             <div class="side-stat"><span>Last pull</span><strong id="lastRarityText">-</strong></div>
           </div>
@@ -1836,25 +1920,25 @@
       <div class="update-hero">
         <span class="update-version">Patch Notice • 2026.06.12</span>
         <h2>ประกาศอัพเดตใหม่</h2>
-        <p>ยินดีต้อนรับกลับเข้าสู่ Anime Card Collection รอบนี้เพิ่มป้ายประกาศตอนเข้าเกม และเพิ่มปุ่มแยกระดับการ์ดในคลัง เพื่อค้นหาการ์ดระดับสูงได้ไวขึ้น</p>
+        <p>ยินดีต้อนรับกลับเข้าสู่ Anime Card Collection รอบนี้ปรับระบบเปิดกาชาให้ไวขึ้น เพิ่มเปิด x50/x100 และเพิ่มการันตีแยกตามตู้แบบชัดเจน</p>
       </div>
       <div class="update-body">
         <div class="update-list">
           <div class="update-item">
-            <strong>✨ ป้ายประกาศตอนเข้าเกม</strong>
-            <p>เมื่อเข้าเกมจะมีหน้าต่างประกาศเด้งขึ้นอัตโนมัติ เพื่อแจ้งข่าวอัพเดตล่าสุด</p>
+            <strong>⚡ เปิดกาชาไวขึ้น</strong>
+            <p>หลังเปิดตู้จะรีเฟรชเฉพาะส่วนที่เปลี่ยนจริง ไม่วาดทั้งเว็บใหม่ ลดอาการหน่วงตอนเปิดหลายใบ</p>
           </div>
           <div class="update-item">
-            <strong>🎮 ดูซ้ำได้ทุกเวลา</strong>
-            <p>เพิ่มปุ่ม “ประกาศอัพเดต” ในศูนย์บัญชาการ กดกลับมาอ่านรายละเอียดแพตช์ได้</p>
+            <strong>🎴 เปิด x50 / x100</strong>
+            <p>เพิ่มปุ่มเปิดจำนวนมาก พร้อมโหมดเร็วที่สรุปผลทันที ไม่ต้องไล่กดดูทีละใบ</p>
           </div>
           <div class="update-item">
-            <strong>👤 ระบบ User/Profile ใหม่</strong>
-            <p>เพิ่มล็อกอิน Google/Gmail, Facebook, ตั้ง Username, รูปโปรไฟล์ และหน้าโปรไฟล์ผู้เล่น</p>
+            <strong>🛡️ การันตีแยกตามตู้</strong>
+            <p>แต่ละตู้มี pity ของตัวเอง สลับตู้แล้วจำนวนสะสมไม่ปนกัน พร้อมแถบบอกจำนวนที่เหลือ</p>
           </div>
           <div class="update-item">
-            <strong>✅ ไม่แสดงซ้ำเวอร์ชันนี้</strong>
-            <p>ผู้เล่นสามารถติ๊กไม่ให้ประกาศเด้งซ้ำ จนกว่าจะมีการเปลี่ยนเวอร์ชันประกาศใหม่</p>
+            <strong>✅ ตู้มาตรฐาน/Legend มีการันตีแล้ว</strong>
+            <p>เพิ่มการันตีให้ตู้ Standard และ Legend เพื่อให้ทุกตู้หลักมีเป้าหมายสะสมชัดเจน</p>
           </div>
           <div class="update-item">
             <strong>🛡️ ไม่กระทบเซฟเดิม</strong>
@@ -1947,7 +2031,9 @@
       battleEnergyRegenMs: 15 * 60 * 1000,
       friendSupportRate: 0.10,
       friendSupportCapRate: 0.25,
-      profilePhotoMaxBytes: 420 * 1024
+      profilePhotoMaxBytes: 420 * 1024,
+      // เพิ่มโดยอลิซ: จำกัดจำนวนการ์ดล่าสุดที่วาดบนหน้าเว็บ เพื่อให้เปิด x50/x100 แล้วไม่หน่วง
+      recentPullLimit: 30
     });
 
     const FIREBASE_CONFIG = Object.freeze({
@@ -1962,9 +2048,9 @@
 
 
 
-    // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบปุ่มแยกระดับการ์ด
+    // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-support-login-gate-v2",
+      version: "2026-06-12-fast-gacha-pity-v4",
       seenKey: "anime_card_update_notice_seen_v1"
     });
 
@@ -2013,7 +2099,7 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 2000,
+      "every": 200,
       "rarityRates": {
         "JJKS": 80,
         "EX": 20
@@ -2058,7 +2144,7 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 1000,
+      "every": 150,
       "rarityRates": {
         "JJKS": 100
       },
@@ -2101,7 +2187,7 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 1000,
+      "every": 150,
       "rarityRates": {
         "JJKS": 100
       },
@@ -2145,7 +2231,7 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 10000,
+      "every": 300,
       "rarityRates": {
         "SC": 100
       },
@@ -2180,7 +2266,23 @@
       "EX": 0.015,
       "SC": 0.005
     },
-    "rateUpCards": {}
+    "rateUpCards": {},
+    "guarantee": {
+      "enabled": true,
+      "every": 120,
+      "rarityRates": {
+        "UR": 80,
+        "LR": 18,
+        "EX": 1.8,
+        "SC": 0.2
+      },
+      "resetWhenPullRarities": [
+        "UR",
+        "LR",
+        "EX",
+        "SC"
+      ]
+    }
   },
   {
     "id": "legend",
@@ -2213,6 +2315,20 @@
       "8": 5,
       "9": 5,
       "10": 5
+    },
+    "guarantee": {
+      "enabled": true,
+      "every": 150,
+      "rarityRates": {
+        "LR": 80,
+        "EX": 19,
+        "SC": 1
+      },
+      "resetWhenPullRarities": [
+        "LR",
+        "EX",
+        "SC"
+      ]
     }
   }
 ];
@@ -4511,7 +4627,7 @@
 
     function pullCards(times) {
       const banner = getActiveBanner();
-      const guarantee = banner.guarantee || {};
+      const guarantee = getBannerGuarantee(banner);
       const results = [];
 
       for (let index = 0; index < times; index += 1) {
@@ -4554,21 +4670,93 @@
       return BANNER_BY_ID.get(state.activeBannerId) || BANNERS[0];
     }
 
+    // เพิ่มโดยอลิซ: ดึงค่าการันตีของแต่ละตู้แบบปลอดภัย
+    // ถ้าตู้ไหนยังไม่ได้ตั้งค่า จะคืนค่า disabled เพื่อไม่ให้เกมพังตอน render หน้าแรก
+    function getBannerGuarantee(banner = getActiveBanner()) {
+      const guarantee = banner && banner.guarantee && typeof banner.guarantee === "object" ? banner.guarantee : {};
+      const rarityRates = guarantee.rarityRates && typeof guarantee.rarityRates === "object" ? guarantee.rarityRates : {};
+      const every = Math.max(0, Math.floor(Number(guarantee.every) || 0));
+      return {
+        enabled: guarantee.enabled !== false && every > 0 && Object.keys(rarityRates).length > 0,
+        every,
+        rarityRates,
+        cardRates: guarantee.cardRates && typeof guarantee.cardRates === "object" ? guarantee.cardRates : {},
+        resetWhenPullRarities: Array.isArray(guarantee.resetWhenPullRarities) ? guarantee.resetWhenPullRarities : []
+      };
+    }
+
+    // เพิ่มโดยอลิซ: ข้อมูลแถบ pity/การันตีของตู้ปัจจุบัน
+    // state.pity ใช้ banner.id เป็น key จึงแยกแต่ละตู้ ไม่ปนกัน
+    function getBannerPityInfo(banner = getActiveBanner()) {
+      const guarantee = getBannerGuarantee(banner);
+      const bannerId = banner && banner.id ? String(banner.id) : "default";
+      const current = Math.max(0, Number(state.pity && state.pity[bannerId]) || 0);
+      const every = guarantee.enabled ? guarantee.every : 0;
+      const remaining = every > 0 ? Math.max(0, every - current) : 0;
+      const progress = every > 0 ? Math.max(0, Math.min(100, (current / every) * 100)) : 0;
+      const target = guarantee.enabled
+        ? Object.keys(guarantee.rarityRates || {}).join(" / ") || "ระดับสูง"
+        : "-";
+      return { current, every, remaining, progress, target };
+    }
+
+    // เพิ่มโดยอลิซ: สรุปผลเปิดแบบเร็ว ไม่ต้อง render reveal ทีละใบ
+    function summarizePullResults(results = []) {
+      const total = results.length;
+      const newCount = results.filter(result => !result.duplicate).length;
+      const guaranteedCount = results.filter(result => result.guaranteed).length;
+      const rarityCounts = results.reduce((acc, result) => {
+        const rarity = result.card && result.card.rarity ? result.card.rarity : "?";
+        acc[rarity] = (acc[rarity] || 0) + 1;
+        return acc;
+      }, {});
+      const highRarityText = Object.entries(rarityCounts)
+        .filter(([rarity]) => (RARITIES[rarity] || RARITIES.N).order >= RARITIES.SR.order)
+        .sort((a, b) => ((RARITIES[b[0]] || RARITIES.N).order) - ((RARITIES[a[0]] || RARITIES.N).order))
+        .map(([rarity, amount]) => `${rarity}×${amount}`)
+        .join(" • ");
+      const parts = [`เปิด ${formatNumber(total)} ใบสำเร็จ`, `ใหม่ ${formatNumber(newCount)} ใบ`];
+      if (highRarityText) parts.push(highRarityText);
+      if (guaranteedCount) parts.push(`การันตี ${formatNumber(guaranteedCount)} ใบ`);
+      return parts.join(" • ");
+    }
+
     function getPullCost(times) {
       const banner = getActiveBanner();
-      return times === 10 ? Number(banner.tenPullCost || 0) : Number(banner.singlePullCost || 0);
+      const count = Math.max(1, Math.floor(Number(times) || 1));
+      const tenSets = Math.floor(count / 10);
+      const singles = count % 10;
+      return (tenSets * Number(banner.tenPullCost || 0)) + (singles * Number(banner.singlePullCost || 0));
+    }
+
+    // เพิ่มโดยอลิซ: หลังเปิดกาชาให้วาดเฉพาะส่วนที่เปลี่ยนจริง ไม่ renderAll() ทั้งเว็บ จึงเปิดได้ไวขึ้นมาก
+    function renderAfterPull() {
+      renderResources();
+      renderRecent();
+      renderRarityQuickFilters();
+      if (activeTab === "collection") renderCollection();
+      if (activeTab === "team") renderTeam();
+      if (activeTab === "battle") renderBattle();
+      if (activeTab === "friends") renderFriends();
+      if (!document.getElementById("profileModal").classList.contains("hidden")) renderProfileDetail(activeProfileUid && activeProfileUid !== "local" && activeProfileUid !== activeCloudUid ? friendProfiles.find(item => String(item.uid) === activeProfileUid) : null);
+      if (modalCardId && !document.getElementById("cardModal").classList.contains("hidden")) renderCardDetail(modalCardId);
     }
 
     function openPack(times) {
       updateIncome();
-      const cost = getPullCost(times);
+      const count = Math.max(1, Math.floor(Number(times) || 1));
+      const cost = getPullCost(count);
       if (state.gems < cost) return showToast("Gems ไม่พอ รับโบนัสรายวันหรือรายได้จากทีมก่อน");
 
       state.gems -= cost;
-      const results = pullCards(times);
-      state.recent = results.map(result => String(result.card.id));
+      const results = pullCards(count);
+      state.recent = results.slice(0, CONFIG.recentPullLimit).map(result => String(result.card.id));
       saveState(true);
-      renderAll();
+      renderAfterPull();
+
+      const fastToggle = document.getElementById("fastRevealToggle");
+      const useFastSummary = count >= 50 || Boolean(fastToggle && fastToggle.checked);
+      if (useFastSummary) return showToast(summarizePullResults(results));
       showReveal(results);
     }
 
@@ -4746,8 +4934,13 @@
       document.getElementById("bannerMedia").innerHTML = mediaHTML;
       document.getElementById("bannerTitle").textContent = banner.name;
       document.getElementById("bannerDescription").textContent = banner.description || "เปิดแพ็กเพื่อสะสมการ์ดและสร้างทีมที่แข็งแกร่งที่สุด";
-      document.getElementById("singleCost").textContent = `${formatNumber(banner.singlePullCost)} Gems`;
-      document.getElementById("tenCost").textContent = `${formatNumber(banner.tenPullCost)} Gems`;
+      document.getElementById("singleCost").textContent = `${formatNumber(getPullCost(1))} Gems`;
+      document.getElementById("tenCost").textContent = `${formatNumber(getPullCost(10))} Gems`;
+      const fiftyCost = document.getElementById("fiftyCost");
+      const hundredCost = document.getElementById("hundredCost");
+      if (fiftyCost) fiftyCost.textContent = `${formatNumber(getPullCost(50))} Gems`;
+      if (hundredCost) hundredCost.textContent = `${formatNumber(getPullCost(100))} Gems`;
+      renderGuaranteeStatus();
       document.getElementById("ratePills").innerHTML = Object.entries(banner.rateOverrides || {})
         .filter(([, rate]) => Number(rate) > 0 && Number(rate) < 10)
         .sort((a, b) => ((RARITIES[b[0]] && RARITIES[b[0]].order) || 0) - ((RARITIES[a[0]] && RARITIES[a[0]].order) || 0))
@@ -4758,6 +4951,24 @@
       const select = document.getElementById("bannerSelect");
       select.innerHTML = BANNERS.map(item => `<option value="${escapeHTML(item.id)}">${escapeHTML(item.name)}</option>`).join("");
       select.value = banner.id;
+      renderGuaranteeStatus();
+    }
+
+    function renderGuaranteeStatus() {
+      const info = getBannerPityInfo();
+      const label = info.every > 0
+        ? `การันตี ${escapeHTML(info.target)} ทุก ${formatNumber(info.every)} ครั้ง`
+        : "ตู้ปัจจุบันยังไม่ได้ตั้งการันตี";
+      const remain = info.every > 0
+        ? `เหลือ ${formatNumber(info.remaining)} ครั้ง`
+        : "-";
+
+      const guaranteeText = document.getElementById("bannerGuaranteeText");
+      const guaranteeRemain = document.getElementById("bannerGuaranteeRemain");
+      const guaranteeBar = document.getElementById("bannerGuaranteeBar");
+      if (guaranteeText) guaranteeText.innerHTML = label;
+      if (guaranteeRemain) guaranteeRemain.textContent = remain;
+      if (guaranteeBar) guaranteeBar.style.width = `${info.progress}%`;
     }
 
     function renderResources() {
@@ -4766,7 +4977,7 @@
       const teamIncome = getTeamIncome();
       const teamPower = getTeamPower();
       const activeBanner = getActiveBanner();
-      const pity = Number(state.pity[activeBanner ? activeBanner.id : ""] || 0);
+      const pityInfo = getBannerPityInfo(activeBanner);
       const todayClaimed = state.lastDaily === getLocalDateKey();
 
       document.getElementById("gemsText").textContent = formatNumber(state.gems);
@@ -4774,7 +4985,8 @@
       document.getElementById("ownedText").textContent = `${uniqueOwned}/${CARDS.length}`;
       document.getElementById("bankText").textContent = formatNumber(state.incomeBank);
       document.getElementById("incomeText").textContent = formatNumber(teamIncome);
-      document.getElementById("pityText").textContent = formatNumber(pity);
+      document.getElementById("pityText").textContent = pityInfo.every > 0 ? `${formatNumber(pityInfo.current)}/${formatNumber(pityInfo.every)}` : "-";
+      renderGuaranteeStatus();
       document.getElementById("teamText").textContent = `${state.team.length}/${CONFIG.teamSlots}`;
       document.getElementById("lastRarityText").textContent = state.recent[0] ? getRarity(CARD_BY_ID.get(state.recent[0])).label : "-";
       document.getElementById("teamIncomeText").textContent = `${formatNumber(teamIncome)} Gems/s`;
@@ -5238,7 +5450,7 @@
       const newCards = activeRevealResults.filter(result => !result.duplicate).length;
       document.getElementById("revealPanel").style.setProperty("--reveal-color", rarity.color);
       document.getElementById("revealTitle").textContent = selected.card.name;
-      document.getElementById("revealSubtitle").textContent = `${rarity.label} • ${selected.duplicate ? "การ์ดซ้ำ รับ Dust แล้ว" : "การ์ดใหม่เข้าคอลเล็กชั่น"} • ใหม่ทั้งหมด ${newCards} ใบ`;
+      document.getElementById("revealSubtitle").textContent = `${rarity.label} • ${selected.duplicate ? "การ์ดซ้ำ รับ Dust แล้ว" : "การ์ดใหม่เข้าคอลเล็กชั่น"}${selected.guaranteed ? " • ผลการันตี" : ""} • ใหม่ทั้งหมด ${newCards} ใบ`;
       document.getElementById("revealCounter").textContent = `ใบที่ ${activeRevealIndex + 1} / ${activeRevealResults.length}`;
       document.getElementById("revealHero").innerHTML = cardHTML(selected.card, { displayOnly: true });
       document.getElementById("revealList").innerHTML = activeRevealResults.map((result, resultIndex) => cardHTML(result.card, {
