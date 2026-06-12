@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-12-multi-element-progress-v3">
+  <meta name="gacha-app-build" content="2026-06-12-tower-rewards-friends-rank-v4">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1065,6 +1065,86 @@
     .battle-stat-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 9px; font-size: .8rem; }
     .battle-stat-row strong { color: var(--gold); }
 
+    /* เพิ่มโดยอลิซ: กล่องรางวัลหอคอย / เงื่อนไขพิเศษชั้น 200+ / อันดับเพื่อน */
+    .tower-reward-list,
+    .tower-restriction-box,
+    .friend-leaderboard {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tower-reward-item,
+    .tower-restriction-box,
+    .leaderboard-row {
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px 11px;
+      background: rgba(3,5,12,.34);
+    }
+
+    .tower-reward-item strong,
+    .tower-restriction-box strong {
+      display: block;
+      color: var(--gold);
+      font-size: .78rem;
+    }
+
+    .tower-reward-item span,
+    .tower-restriction-box span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .72rem;
+      line-height: 1.45;
+    }
+
+    .tower-restriction-box.warn {
+      border-color: rgba(251,113,133,.34);
+      background: rgba(190,24,93,.16);
+    }
+
+    .tower-restriction-box.ok {
+      border-color: rgba(86,227,159,.28);
+      background: rgba(22,163,74,.13);
+    }
+
+    .ticket-action-row {
+      width: min(720px, 100%);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .ticket-action-row .btn {
+      min-height: 40px;
+      padding: 8px 12px;
+      font-size: .76rem;
+    }
+
+    .leaderboard-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .leaderboard-rank {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: #071019;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--gold), var(--cyan));
+    }
+
+    .leaderboard-name { font-weight: 1000; }
+    .leaderboard-meta { margin-top: 3px; color: var(--muted); font-size: .7rem; }
+    .leaderboard-stage { color: var(--gold); font-weight: 1000; }
+
     .friends-toolbar {
       display: grid;
       grid-template-columns: minmax(180px, 1fr) auto auto;
@@ -1840,6 +1920,7 @@
       <div class="resource-bar" aria-label="ทรัพยากรผู้เล่น">
         <div class="resource gems"><span>Gems</span><strong id="gemsText">0</strong></div>
         <div class="resource dust"><span>Dust</span><strong id="dustText">0</strong></div>
+        <div class="resource owned"><span>Tickets</span><strong id="ticketsText">0</strong></div>
         <div class="resource owned"><span>Collection</span><strong id="ownedText">0/0</strong></div>
       </div>
     </header>
@@ -1879,6 +1960,11 @@
                   </div>
                   <div class="guarantee-meter"><i id="bannerGuaranteeBar"></i></div>
                 </div>
+              </div>
+              <div class="ticket-action-row" aria-label="ใช้ตั๋วกาชา">
+                <button class="btn" id="normalTicketOneButton" data-action="pull-ticket" data-times="1">ใช้ตั๋วธรรมดา 1 ใบ</button>
+                <button class="btn btn-gold" id="normalTicketTenButton" data-action="pull-ticket" data-times="10">ใช้ตั๋วธรรมดา 10 ใบ</button>
+                <button class="btn btn-primary" id="guaranteeTicketButton" data-action="pull-guarantee-ticket">ใช้ตั๋วการันตีสูงสุด</button>
               </div>
             </div>
           </div>
@@ -2016,6 +2102,11 @@
                 <h3>รางวัลด่านนี้</h3>
                 <div class="battle-stat-row"><span>Gems</span><strong id="battleGemReward">0</strong></div>
                 <div class="battle-stat-row"><span>Dust</span><strong id="battleDustReward">0</strong></div>
+                <div class="tower-reward-list" id="battleTowerRewardText"></div>
+              </div>
+              <div class="battle-card">
+                <h3>เงื่อนไขชั้นพิเศษ</h3>
+                <div id="battleTowerRestrictionText" class="tower-restriction-box"></div>
               </div>
               <div class="battle-card">
                 <h3>สถิติ</h3>
@@ -2058,6 +2149,11 @@
                 </div>
               </div>
               <div>
+                <div class="battle-card">
+                  <h3>อันดับไต่หอของเพื่อน</h3>
+                  <p>จัดอันดับจากชั้น Battle Tower สูงสุดของคุณและเพื่อน</p>
+                  <div class="friend-leaderboard" id="friendLeaderboard"></div>
+                </div>
                 <div class="battle-card">
                   <h3>รายชื่อเพื่อน</h3>
                   <p id="friendCountText">0 คน</p>
@@ -2170,8 +2266,8 @@
             <p>คอมโบธาตุส่งผลกับรายได้ต่อวินาทีด้วย เช่น คู่ประสานธาตุ, สมดุล 5 ธาตุ และไร้ธาตุเสถียร</p>
           </div>
           <div class="update-item">
-            <strong>🛡️ ไม่กระทบเซฟเดิม</strong>
-            <p>ระบบนี้เพิ่มเฉพาะการคำนวณทีม/ต่อสู้ ไม่ล้างกาชา คลังการ์ด ทีม เพื่อน หรือ Firebase Cloud Save เดิม</p>
+            <strong>🗼 รางวัลหอคอยและอันดับเพื่อน</strong>
+            <p>ทุก 5 ชั้นแจกตั๋วธรรมดา 10 ใบ ทุก 10 ชั้นแจกตั๋วการันตี/ใบเลือกการ์ด และมีอันดับไต่หอกับเพื่อน</p>
           </div>
         </div>
         <div class="update-actions">
@@ -2267,6 +2363,43 @@
       recentPullLimit: 30
     });
 
+    /*
+      เพิ่มโดยอลิซ: ตารางรางวัล Battle Tower
+      วิธีปรับตามที่คุณกำหนด:
+      - ทุก 5 ชั้น ใช้ normalTicketEvery / normalTicketAmount
+      - ทุก 10 ชั้น แก้ milestoneRewards ได้ว่าจะให้ guaranteeTicket หรือ selector และเป็นระดับอะไร
+      - selector = ใบเลือกการ์ดระดับนั้น ใช้ได้จากหน้ารายละเอียดการ์ดระดับเดียวกัน
+    */
+    const TOWER_REWARD_CONFIG = Object.freeze({
+      normalTicketEvery: 5,
+      normalTicketAmount: 10,
+      milestoneEvery: 10,
+      milestoneRewards: [
+        { minFloor: 10,  maxFloor: 49,  type: "guaranteeTicket", rarity: "SR",  amount: 1 },
+        { minFloor: 50,  maxFloor: 99,  type: "selector",        rarity: "SR",  amount: 1 },
+        { minFloor: 100, maxFloor: 149, type: "guaranteeTicket", rarity: "SSR", amount: 1 },
+        { minFloor: 150, maxFloor: 199, type: "selector",        rarity: "SSR", amount: 1 },
+        { minFloor: 200, maxFloor: 299, type: "guaranteeTicket", rarity: "UR",  amount: 1 },
+        { minFloor: 300, maxFloor: 399, type: "selector",        rarity: "UR",  amount: 1 },
+        { minFloor: 400, maxFloor: Infinity, type: "selector",   rarity: "LR",  amount: 1 }
+      ]
+    });
+
+    /*
+      เพิ่มโดยอลิซ: เงื่อนไขพิเศษของหอคอยหลังชั้น 200
+      - type "ban" = ห้ามใช้ธาตุใน elements ลงทีม
+      - type "only" = การ์ดทุกใบในทีมต้องมีเฉพาะธาตุใน elements เท่านั้น
+      แก้รายการนี้เพื่อกำหนดเงื่อนไขแต่ละชั้นเองได้เลย
+    */
+    const TOWER_SPECIAL_RULES = Object.freeze([
+      { type: "ban",  elements: ["ไฟ"],              name: "เขตห้ามเปลวเพลิง", note: "ห้ามนำการ์ดธาตุไฟลงทีม" },
+      { type: "only", elements: ["น้ำ", "น้ำแข็ง"], name: "สนามเหมันต์",       note: "ใช้ได้เฉพาะการ์ดธาตุน้ำหรือน้ำแข็ง" },
+      { type: "ban",  elements: ["แสง", "ความมืด"], name: "ม่านสมดุล",         note: "ห้ามใช้ธาตุแสงและความมืด" },
+      { type: "only", elements: ["ดิน", "เหล็ก"],   name: "ป้อมปราการเหล็ก",  note: "ใช้ได้เฉพาะการ์ดธาตุดินหรือเหล็ก" },
+      { type: "ban",  elements: ["มิติ"],            name: "ผนึกมิติ",          note: "ห้ามใช้ธาตุมิติ" },
+      { type: "only", elements: ["ไฟ", "สายฟ้า"],  name: "สนามโอเวอร์ชาร์จ", note: "ใช้ได้เฉพาะการ์ดธาตุไฟหรือสายฟ้า" }
+    ]);
+
     const FIREBASE_CONFIG = Object.freeze({
       apiKey: "AIzaSyCr3wjsWr8Op2I8QovVe7fUppthhHfyVa0",
       authDomain: "gacha-7a14f.firebaseapp.com",
@@ -2281,8 +2414,8 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-multi-element-progress-v3",
-      seenKey: "anime_card_update_notice_seen_v3"
+      version: "2026-06-12-tower-rewards-friends-rank-v4",
+      seenKey: "anime_card_update_notice_seen_v4"
     });
 
     /*
@@ -2302,6 +2435,8 @@
       UR:  { label: "UR",  color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,  basePower: 65000,  baseIncome: 1500,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021,  incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
       LR:  { label: "LR",  color: "#22d3ee", colors: ["#22d3ee", "#a78bfa", "#facc15"], gradient: "linear-gradient(135deg, #22d3ee, #a78bfa 48%, #facc15)", glow: "#22d3ee", textColor: "#04111a", order: 5, stars: 8,  dust: 9000,  basePower: 220000, baseIncome: 5200,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024,  incomePerLevel: .0115, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .38, incomeBonus: .25 },
       EX:  { label: "EX",  color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 6, stars: 10, dust: 50000, basePower: 800000, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028,  incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 }
+    },
+      SC:  { label: "SC",  color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 5000000, baseIncome: 30000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.092, powerPerLevel: .032,  incomePerLevel: .0215, awakenMax: 3,  awakenCopies: [1,1,1], powerBonus: .90, incomeBonus: .70 }
     });
 
     /*
@@ -2374,133 +2509,6 @@
 
     const BANNERS = [
   {
-    "id": "JJK_LIMITED",
-    "name": "LIMITED JJK COLLAB",
-    "description": "ตู้คอลแล็ป Jujutsu Kaisen พร้อมระดับ JJK : ผู้ใช้คุณไสย/ระดับพิเศษ/คำสาป",
-    "image": "",
-    "images": [
-      "assets/banners/LS1.mp4"
-    ],
-    "singlePullCost": 50000,
-    "tenPullCost": 500000,
-    "rateOverrides": {
-      "N": 48,
-      "R": 25,
-      "SR": 13,
-      "SSR": 9.1,
-      "UR": 2.0,
-      "LR": 2.68,
-      "EX": 0.22
-    },
-    "rateUpCards": {
-      "1035": 3,
-      "1036": 3,
-      "1037": 3
-    },
-    "guarantee": {
-      "enabled": true,
-      "every": 200,
-      "rarityRates": {
-        "UR": 70,
-        "LR": 27,
-        "EX": 3
-      },
-      "cardRates": {
-        "1041": 2,
-        "1042": 2,
-        "1043": 5
-      },
-      "resetWhenPullRarities": [
-        "LR",
-        "EX"
-      ]
-    }
-  },
-  {
-    "id": "JJK_A",
-    "name": "Innate Technique user RATE UP",
-    "description": "ตู้คอลแล็ป Jujutsu Kaisen ",
-    "image": "",
-    "images": [
-      "assets/banners/LB1.mp4"
-    ],
-    "singlePullCost": 230000,
-    "tenPullCost": 2150000,
-    "rateOverrides": {
-      "N": 48,
-      "R": 25,
-      "SR": 13,
-      "SSR": 9.1,
-      "UR": 2.0,
-      "LR": 2.68,
-      "EX": 0.22
-    },
-    "rateUpCards": {
-      "1021": 2,
-      "1022": 2,
-      "1023": 2
-    },
-    "guarantee": {
-      "enabled": true,
-      "every": 200,
-      "rarityRates": {
-        "UR": 70,
-        "LR": 27,
-        "EX": 3
-      },
-      "cardRates": {
-        "1021": 2,
-        "1022": 2,
-        "1023": 2
-      },
-      "resetWhenPullRarities": [
-        "LR",
-        "EX"
-      ]
-    }
-  },
-  {
-    "id": "JJK_B",
-    "name": "Cursed user RATE UP",
-    "description": "ตู้คอลแล็ป Jujutsu Kaisen ",
-    "image": "",
-    "images": [
-      "assets/banners/LC1.mp4"
-    ],
-    "singlePullCost": 40000,
-    "tenPullCost": 400000,
-    "rateOverrides": {
-      "N": 48,
-      "R": 25,
-      "SR": 13,
-      "SSR": 9.1,
-      "UR": 2.0,
-      "LR": 2.68,
-      "EX": 0.22
-    },
-    "rateUpCards": {
-      "1002": 3,
-      "1008": 3
-    },
-    "guarantee": {
-      "enabled": true,
-      "every": 200,
-      "rarityRates": {
-        "UR": 70,
-        "LR": 27,
-        "EX": 3
-      },
-      "cardRates": {
-        "1002": 2,
-        "1008": 2
-      },
-      "resetWhenPullRarities": [
-        "LR",
-        "EX"
-      ]
-    }
-  },
-  {
     "id": "standard",
     "name": "Aether Heroes",
     "description": "ตู้มาตรฐาน รวมการ์ดทุกระดับ",
@@ -2515,14 +2523,15 @@
       "R": 30,
       "SR": 10,
       "SSR": 4,
-      "UR": 0.85,
-      "LR": 0.14,
-      "EX": 0.01
+      "UR": 0.8499,
+      "LR": 0.149,
+      "EX": 0.001,
+      "SC": 0.0001
     },
     "rateUpCards": {},
     "guarantee": {
       "enabled": true,
-      "every": 200,
+      "every": 500,
       "rarityRates": {
         "UR": 80,
         "LR": 19,
@@ -2549,10 +2558,11 @@
       "N": 50,
       "R": 25,
       "SR": 13,
-      "SSR": 9.1,
-      "UR": 1.85,
+      "SSR": 9.3,
+      "UR": 1.8498,
       "LR": 0.83,
-      "EX": 0.22
+      "EX": 0.02,
+      "SC": 0.0002
     },
     "rateUpCards": {
       "1": 5,
@@ -2560,11 +2570,11 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 200,
+      "every": 500,
       "rarityRates": {
         "UR": 72,
-        "LR": 25,
-        "EX": 3
+        "LR": 26,
+        "EX": 2
       },
       "resetWhenPullRarities": [
         "LR",
@@ -2577,7 +2587,7 @@
   {
     "id": 0,
     "name": "DEV.",
-    "rarity": "EX",
+    "rarity": "SC",
     "element": "ความมืด",
     "power": 5000000,
     "incomePerSec": 30000,
@@ -2593,7 +2603,7 @@
   {
     "id": 999,
     "name": "CREATOR",
-    "rarity": "EX",
+    "rarity": "SC",
     "element": "สายฟ้า",
     "power": 5000000,
     "incomePerSec": 30000,
@@ -2608,7 +2618,7 @@
   {
     "id": 1000,
     "name": "Great Magician",
-    "rarity": "EX",
+    "rarity": "SC",
     "element": "ไร้ธาตุ",
     "power": 5000000,
     "incomePerSec": 30000,
@@ -2622,7 +2632,7 @@
   },
   {
     "id": 2000,
-    "name": "MAMON",
+    "name": "SC",
     "rarity": "EX",
     "element": "ไร้ธาตุ",
     "power": 5000000,
@@ -3872,6 +3882,11 @@
         team: starter.team,
         pity: {},
         recent: [],
+        tickets: {
+          normal: 0,
+          guarantee: {},
+          selector: {}
+        },
         profile: {
           username: "",
           photoURL: "",
@@ -4414,7 +4429,8 @@
         ? [...new Set(next.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.teamSlots)
         : [];
       next.pity = next.pity && typeof next.pity === "object" ? next.pity : {};
-      next.recent = Array.isArray(next.recent) ? next.recent.map(String).filter(id => CARD_BY_ID.has(id)).slice(0, 10) : [];
+      next.recent = Array.isArray(next.recent) ? next.recent.map(String).filter(id => CARD_BY_ID.has(id)).slice(0, CONFIG.recentPullLimit) : [];
+      next.tickets = normalizeTicketInventory(next.tickets || next.inventory || {});
       next.profile = Object.assign(defaultState().profile, next.profile || {});
       next.profile.username = String(next.profile.username || "").slice(0, 24);
       next.profile.photoURL = sanitizeProfilePhoto(next.profile.photoURL || "");
@@ -4823,6 +4839,141 @@
       showToast(id ? "ตั้งการ์ดซัพพอร์ตบนโปรไฟล์แล้ว" : "ล้างการ์ดซัพพอร์ตแล้ว");
     }
 
+    function normalizeTicketInventory(source = {}) {
+      const normal = Math.max(0, Math.floor(Number(source.normal ?? source.normalTickets ?? 0) || 0));
+      const cleanMap = value => {
+        const map = value && typeof value === "object" ? value : {};
+        return Object.fromEntries(Object.entries(map)
+          .map(([rarity, amount]) => [String(rarity), Math.max(0, Math.floor(Number(amount) || 0))])
+          .filter(([rarity, amount]) => RARITIES[rarity] && amount > 0));
+      };
+      return {
+        normal,
+        guarantee: cleanMap(source.guarantee || source.guaranteeTickets),
+        selector: cleanMap(source.selector || source.selectors)
+      };
+    }
+
+    function ensureTicketInventory() {
+      state.tickets = normalizeTicketInventory(state.tickets || {});
+      return state.tickets;
+    }
+
+    function getTotalTicketCount() {
+      const tickets = ensureTicketInventory();
+      const sumMap = map => Object.values(map || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+      return tickets.normal + sumMap(tickets.guarantee) + sumMap(tickets.selector);
+    }
+
+    function addTicketReward(type, rarity = "", amount = 1) {
+      const tickets = ensureTicketInventory();
+      const qty = Math.max(1, Math.floor(Number(amount) || 1));
+      if (type === "normal") {
+        tickets.normal += qty;
+        return;
+      }
+      const key = RARITIES[rarity] ? rarity : "SR";
+      if (type === "selector") tickets.selector[key] = Math.max(0, Number(tickets.selector[key]) || 0) + qty;
+      else tickets.guarantee[key] = Math.max(0, Number(tickets.guarantee[key]) || 0) + qty;
+    }
+
+    function getBestGuaranteeTicketRarity() {
+      const tickets = ensureTicketInventory();
+      return Object.entries(tickets.guarantee || {})
+        .filter(([rarity, amount]) => RARITIES[rarity] && Number(amount) > 0)
+        .sort((a, b) => RARITIES[b[0]].order - RARITIES[a[0]].order)[0]?.[0] || "";
+    }
+
+    function getSelectorCount(rarity) {
+      const key = RARITIES[rarity] ? rarity : "";
+      return key ? Math.max(0, Number(ensureTicketInventory().selector[key]) || 0) : 0;
+    }
+
+    function addCardToCollection(card, grantDustOnDuplicate = true) {
+      if (!card) return { card: null, duplicate: false };
+      const key = String(card.id);
+      const duplicate = Boolean(state.owned[key]);
+      if (duplicate) {
+        state.owned[key].count += 1;
+        if (grantDustOnDuplicate) state.dust += getRarity(card).dust;
+      } else {
+        state.owned[key] = { count: 1, level: 1, duplicateRank: 0 };
+      }
+      return { card, duplicate };
+    }
+
+    function getTowerMilestoneReward(floor) {
+      const safeFloor = Math.max(1, Math.floor(Number(floor) || 1));
+      return (TOWER_REWARD_CONFIG.milestoneRewards || []).find(item =>
+        safeFloor >= Number(item.minFloor || 0) && safeFloor <= Number(item.maxFloor || Infinity)
+      ) || { type: "guaranteeTicket", rarity: "SR", amount: 1 };
+    }
+
+    function rewardLabel(item) {
+      if (!item) return "-";
+      const amount = Math.max(1, Math.floor(Number(item.amount) || 1));
+      if (item.type === "normal") return `ตั๋วสุ่มตู้กาชาธรรมดา x${formatNumber(amount)}`;
+      const rarity = RARITIES[item.rarity] ? item.rarity : "SR";
+      return item.type === "selector"
+        ? `ใบเลือกการ์ดระดับ ${rarity} x${formatNumber(amount)}`
+        : `ตั๋วการันตีระดับ ${rarity} x${formatNumber(amount)}`;
+    }
+
+    function getTowerRewardPreview(floor) {
+      const safeFloor = Math.max(1, Math.floor(Number(floor) || 1));
+      const rewards = [];
+      if (safeFloor % TOWER_REWARD_CONFIG.normalTicketEvery === 0) {
+        rewards.push({ type: "normal", amount: TOWER_REWARD_CONFIG.normalTicketAmount });
+      }
+      if (safeFloor % TOWER_REWARD_CONFIG.milestoneEvery === 0) {
+        rewards.push(getTowerMilestoneReward(safeFloor));
+      }
+      return rewards;
+    }
+
+    function getNextTowerRewardFloors(floor) {
+      const safeFloor = Math.max(1, Math.floor(Number(floor) || 1));
+      const nextNormal = Math.ceil(safeFloor / TOWER_REWARD_CONFIG.normalTicketEvery) * TOWER_REWARD_CONFIG.normalTicketEvery;
+      const nextMilestone = Math.ceil(safeFloor / TOWER_REWARD_CONFIG.milestoneEvery) * TOWER_REWARD_CONFIG.milestoneEvery;
+      return { nextNormal, nextMilestone };
+    }
+
+    function grantTowerRewards(floor) {
+      const rewards = getTowerRewardPreview(floor);
+      rewards.forEach(item => addTicketReward(item.type || "guaranteeTicket", item.rarity || "", item.amount || 1));
+      return rewards;
+    }
+
+    function getTowerRestriction(floor) {
+      const safeFloor = Math.max(1, Math.floor(Number(floor) || 1));
+      if (safeFloor < 200 || !TOWER_SPECIAL_RULES.length) return null;
+      const rule = TOWER_SPECIAL_RULES[(safeFloor - 200) % TOWER_SPECIAL_RULES.length];
+      return Object.assign({ floor: safeFloor }, rule, { elements: normalizeElements(rule.elements || []) });
+    }
+
+    function getTeamRestrictionStatus(restriction = null) {
+      if (!restriction) return { ok: true, text: "ยังไม่มีเงื่อนไขพิเศษ", invalidCards: [] };
+      const teamCards = state.team.map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
+      const allowed = normalizeElements(restriction.elements || []);
+      const invalidCards = teamCards.filter(card => {
+        const elements = getCardElements(card);
+        if (restriction.type === "ban") return elements.some(element => allowed.includes(element));
+        if (restriction.type === "only") return !elements.length || elements.some(element => !allowed.includes(element));
+        return false;
+      });
+      const elementText = allowed.map(elementLabel).join(" / ");
+      const ok = invalidCards.length === 0;
+      const ruleText = restriction.type === "ban"
+        ? `ห้ามใช้: ${elementText}`
+        : `ใช้ได้เฉพาะ: ${elementText}`;
+      return {
+        ok,
+        text: `${restriction.name || "เงื่อนไขพิเศษ"} • ${ruleText}`,
+        detail: restriction.note || ruleText,
+        invalidCards
+      };
+    }
+
     function makePublicProfile(updatedAt = Date.now()) {
       const profile = getPlayerProfile();
       return {
@@ -4885,6 +5036,8 @@
       const enemyCard = getBattleEnemyCard(stage);
       const enemyElement = getCardElements(enemyCard);
       const matchup = getElementMatchup(elementSummary.dominantElement, enemyElement);
+      const towerRestriction = getTowerRestriction(stage);
+      const restrictionStatus = getTeamRestrictionStatus(towerRestriction);
       const preElementPower = basePower + formationPower + supportPower;
       const elementPower = preElementPower * matchup.modifier;
       const effectivePower = Math.max(0, preElementPower + elementPower);
@@ -4903,12 +5056,15 @@
         supportCard,
         supportSourcePower,
         supportPower,
+        towerRestriction,
+        restrictionStatus,
         preElementPower,
         elementPower,
         effectivePower,
         enemyPower,
         gemReward: 15000 + stage * 5000,
-        dustReward: 1000 + stage * 750
+        dustReward: 1000 + stage * 750,
+        ticketRewards: getTowerRewardPreview(stage)
       };
     }
 
@@ -4920,6 +5076,7 @@
       const stats = getBattleStats();
       if (battleAnimating) return;
       if (!state.team.length) return showToast("ต้องจัดการ์ดเข้าทีมก่อนต่อสู้");
+      if (!stats.restrictionStatus.ok) return showToast(`ทีมยังผิดเงื่อนไขชั้นนี้: ${stats.restrictionStatus.invalidCards.map(card => card.name).slice(0, 2).join(", ")}`);
       if (state.battle.energy < 1) return showToast("Energy หมด รอให้ฟื้นก่อน");
 
       const arena = document.querySelector(".battle-arena");
@@ -4949,11 +5106,13 @@
         if (won) {
           state.gems += stats.gemReward;
           state.dust += stats.dustReward;
+          const ticketRewards = grantTowerRewards(stats.stage);
+          const ticketText = ticketRewards.length ? ` • ${ticketRewards.map(rewardLabel).join(" • ")}` : "";
           state.battle.wins += 1;
           state.battle.stage += 1;
           battleResult = {
             tone: "win",
-            text: `ชนะชั้น ${stats.stage}! รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust`
+            text: `ชนะชั้น ${stats.stage}! รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust${ticketText}`
           };
         } else {
           const consolation = Math.max(100, Math.floor(stats.dustReward * .1));
@@ -5182,19 +5341,11 @@
         }
 
         const card = randomCard(rarity, banner, guaranteed);
-        const key = String(card.id);
-        const duplicate = Boolean(state.owned[key]);
-
-        if (duplicate) {
-          state.owned[key].count += 1;
-          state.dust += getRarity(card).dust;
-        } else {
-          state.owned[key] = { count: 1, level: 1, duplicateRank: 0 };
-        }
+        const added = addCardToCollection(card, true);
 
         if (guaranteed || (guarantee.resetWhenPullRarities || []).includes(card.rarity)) pity = 0;
         state.pity[banner.id] = pity;
-        results.push({ card, duplicate, guaranteed });
+        results.push({ card, duplicate: added.duplicate, guaranteed });
       }
       return results;
     }
@@ -5273,6 +5424,78 @@
       if (activeTab === "friends") renderFriends();
       if (!document.getElementById("profileModal").classList.contains("hidden")) renderProfileDetail(activeProfileUid && activeProfileUid !== "local" && activeProfileUid !== activeCloudUid ? friendProfiles.find(item => String(item.uid) === activeProfileUid) : null);
       if (modalCardId && !document.getElementById("cardModal").classList.contains("hidden")) renderCardDetail(modalCardId);
+    }
+
+    function pullCardsWithTicket(times, forcedRarity = "") {
+      const banner = getActiveBanner();
+      const count = Math.max(1, Math.floor(Number(times) || 1));
+      const results = [];
+      for (let index = 0; index < count; index += 1) {
+        let rarity = forcedRarity && RARITIES[forcedRarity]
+          ? forcedRarity
+          : weightedKey(banner.rateOverrides || {}, "N");
+
+        if (!forcedRarity && count === 10 && index === 9) {
+          const hasSRPlus = results.some(result => getRarity(result.card).order >= RARITIES.SR.order);
+          if (!hasSRPlus) {
+            const betterRates = {};
+            Object.entries(banner.rateOverrides || {}).forEach(([key, value]) => {
+              if ((RARITIES[key] || RARITIES.N).order >= RARITIES.SR.order) betterRates[key] = value;
+            });
+            rarity = weightedKey(betterRates, "SR");
+          }
+        }
+
+        const card = randomCard(rarity, banner, Boolean(forcedRarity));
+        const added = addCardToCollection(card, true);
+        results.push({ card, duplicate: added.duplicate, guaranteed: Boolean(forcedRarity), ticket: true });
+      }
+      return results;
+    }
+
+    function openPackWithNormalTickets(times = 1) {
+      updateIncome();
+      const count = Math.max(1, Math.floor(Number(times) || 1));
+      const tickets = ensureTicketInventory();
+      if (tickets.normal < count) return showToast(`ตั๋วธรรมดาไม่พอ ต้องใช้ ${formatNumber(count)} ใบ`);
+      tickets.normal -= count;
+      const results = pullCardsWithTicket(count, "");
+      state.recent = results.slice(0, CONFIG.recentPullLimit).map(result => String(result.card.id));
+      saveState(true);
+      renderAfterPull();
+      if (count >= 10 || (document.getElementById("fastRevealToggle") || {}).checked) return showToast(summarizePullResults(results));
+      showReveal(results);
+    }
+
+    function openPackWithBestGuaranteeTicket() {
+      updateIncome();
+      const rarity = getBestGuaranteeTicketRarity();
+      if (!rarity) return showToast("ยังไม่มีตั๋วการันตี");
+      const tickets = ensureTicketInventory();
+      tickets.guarantee[rarity] -= 1;
+      if (tickets.guarantee[rarity] <= 0) delete tickets.guarantee[rarity];
+      const results = pullCardsWithTicket(1, rarity);
+      state.recent = results.map(result => String(result.card.id));
+      saveState(true);
+      renderAfterPull();
+      showReveal(results);
+    }
+
+    function useSelectorTicket(cardId) {
+      updateIncome();
+      const card = CARD_BY_ID.get(String(cardId));
+      if (!card) return;
+      const rarity = card.rarity;
+      const tickets = ensureTicketInventory();
+      if (!RARITIES[rarity] || !tickets.selector[rarity]) return showToast(`ไม่มีใบเลือกการ์ดระดับ ${rarity}`);
+      tickets.selector[rarity] -= 1;
+      if (tickets.selector[rarity] <= 0) delete tickets.selector[rarity];
+      const added = addCardToCollection(card, false);
+      state.recent = [String(card.id), ...state.recent.filter(id => String(id) !== String(card.id))].slice(0, CONFIG.recentPullLimit);
+      saveState(true);
+      renderAfterPull();
+      openCardModal(card.id);
+      showToast(`${added.duplicate ? "รับซ้ำ" : "ปลดล็อก"} ${card.name} จากใบเลือกระดับ ${rarity}`);
     }
 
     function openPack(times) {
@@ -5585,6 +5808,7 @@
 
       document.getElementById("gemsText").textContent = formatNumber(state.gems);
       document.getElementById("dustText").textContent = formatNumber(state.dust);
+      document.getElementById("ticketsText").textContent = formatNumber(getTotalTicketCount());
       document.getElementById("ownedText").textContent = `${uniqueOwned}/${CARDS.length}`;
       document.getElementById("bankText").textContent = formatNumber(state.incomeBank);
       document.getElementById("incomeText").textContent = formatNumber(teamIncome);
@@ -5600,6 +5824,21 @@
         : `รับ ${formatNumber(CONFIG.dailyGems)} Gems ฟรีสำหรับเปิดแพ็ก`;
       document.getElementById("dailyButton").disabled = todayClaimed;
       document.getElementById("dailyButton").textContent = todayClaimed ? "รับแล้ววันนี้" : "รับโบนัสวันนี้";
+      const tickets = ensureTicketInventory();
+      const bestGuarantee = getBestGuaranteeTicketRarity();
+      const normalOne = document.getElementById("normalTicketOneButton");
+      const normalTen = document.getElementById("normalTicketTenButton");
+      const guaranteeButton = document.getElementById("guaranteeTicketButton");
+      if (normalOne) normalOne.disabled = tickets.normal < 1;
+      if (normalTen) normalTen.disabled = tickets.normal < 10;
+      if (normalOne) normalOne.innerHTML = `ใช้ตั๋วธรรมดา 1 ใบ <span class="cost">มี ${formatNumber(tickets.normal)}</span>`;
+      if (normalTen) normalTen.innerHTML = `ใช้ตั๋วธรรมดา 10 ใบ <span class="cost">มี ${formatNumber(tickets.normal)}</span>`;
+      if (guaranteeButton) {
+        guaranteeButton.disabled = !bestGuarantee;
+        guaranteeButton.innerHTML = bestGuarantee
+          ? `ใช้ตั๋วการันตี ${bestGuarantee} <span class="cost">มี ${formatNumber(tickets.guarantee[bestGuarantee] || 0)}</span>`
+          : `ใช้ตั๋วการันตี <span class="cost">ยังไม่มี</span>`;
+      }
     }
 
     function getFilteredCards() {
@@ -5710,10 +5949,28 @@
       document.getElementById("battleEnergyText").textContent = `${state.battle.energy}/${CONFIG.battleMaxEnergy}`;
       document.getElementById("battleGemReward").textContent = formatNumber(stats.gemReward);
       document.getElementById("battleDustReward").textContent = formatNumber(stats.dustReward);
+      const rewardBox = document.getElementById("battleTowerRewardText");
+      if (rewardBox) {
+        const directRewards = stats.ticketRewards || [];
+        const nextFloors = getNextTowerRewardFloors(stats.stage);
+        rewardBox.innerHTML = directRewards.length
+          ? directRewards.map(item => `<div class="tower-reward-item"><strong>ผ่านชั้นนี้ได้รับเพิ่ม</strong><span>${escapeHTML(rewardLabel(item))}</span></div>`).join("")
+          : `<div class="tower-reward-item"><strong>รางวัลตั๋วถัดไป</strong><span>ชั้น ${formatNumber(nextFloors.nextNormal)}: ตั๋วธรรมดา x${formatNumber(TOWER_REWARD_CONFIG.normalTicketAmount)} • ชั้น ${formatNumber(nextFloors.nextMilestone)}: ${escapeHTML(rewardLabel(getTowerMilestoneReward(nextFloors.nextMilestone)))}</span></div>`;
+      }
+      const restrictionBox = document.getElementById("battleTowerRestrictionText");
+      if (restrictionBox) {
+        const invalidText = stats.restrictionStatus.invalidCards && stats.restrictionStatus.invalidCards.length
+          ? `<br>การ์ดที่ติดเงื่อนไข: ${escapeHTML(stats.restrictionStatus.invalidCards.map(card => card.name).join(", "))}`
+          : "";
+        restrictionBox.className = `tower-restriction-box ${stats.towerRestriction ? (stats.restrictionStatus.ok ? "ok" : "warn") : ""}`;
+        restrictionBox.innerHTML = stats.towerRestriction
+          ? `<strong>${escapeHTML(stats.restrictionStatus.text)}</strong><span>${escapeHTML(stats.restrictionStatus.detail || "")} ${invalidText}</span>`
+          : `<strong>ยังไม่มีเงื่อนไขพิเศษ</strong><span>เงื่อนไขห้ามธาตุ/บังคับธาตุจะเริ่มทำงานตั้งแต่ชั้น 200 ขึ้นไป</span>`;
+      }
       document.getElementById("battleStageText").textContent = stats.stage;
       document.getElementById("battleRecordText").textContent = `${state.battle.wins} / ${state.battle.losses}`;
       document.getElementById("battleSupportText").textContent = supportText;
-      document.getElementById("battleButton").disabled = battleAnimating || !state.team.length || state.battle.energy < 1;
+      document.getElementById("battleButton").disabled = battleAnimating || !state.team.length || !stats.restrictionStatus.ok || state.battle.energy < 1;
       if (!battleAnimating) {
         result.textContent = battleResult ? battleResult.text : "จัดทีมให้พร้อมแล้วท้าทายหอคอย";
         result.className = `battle-result ${battleResult ? battleResult.tone : ""}`;
@@ -5743,6 +6000,24 @@
           </div>
         `).join("")
         : `<div class="empty-state" style="min-height:100px">ยังไม่มีคำขอใหม่</div>`;
+
+      const leaderboard = [Object.assign({ uid: activeCloudUid || "local", isMe: true }, makePublicProfile(Date.now())), ...friendProfiles]
+        .sort((a, b) => Number(b.battleStage || 1) - Number(a.battleStage || 1) || Number(b.teamPower || 0) - Number(a.teamPower || 0));
+      const leaderboardBox = document.getElementById("friendLeaderboard");
+      if (leaderboardBox) {
+        leaderboardBox.innerHTML = leaderboard.length
+          ? leaderboard.map((profile, index) => `
+            <div class="leaderboard-row">
+              <div class="leaderboard-rank">${index + 1}</div>
+              <div>
+                <div class="leaderboard-name">${escapeHTML(profile.isMe ? `${profile.username || "คุณ"} (คุณ)` : profile.username || "Unknown Player")}</div>
+                <div class="leaderboard-meta">Power ${formatNumber(profile.teamPower || 0)} • Collection ${formatNumber(profile.collectionCount || 0)}</div>
+              </div>
+              <div class="leaderboard-stage">ชั้น ${formatNumber(profile.battleStage || 1)}</div>
+            </div>
+          `).join("")
+          : `<div class="empty-state" style="min-height:100px">ยังไม่มีข้อมูลอันดับ</div>`;
+      }
 
       document.getElementById("friendCountText").textContent = `${friendProfiles.length} คน`;
       document.getElementById("friendList").innerHTML = friendProfiles.length
@@ -5889,6 +6164,10 @@
       const upgradeCost = status.upgradeCost;
       const awakenCost = status.awakenCost;
       const inTeam = state.team.includes(String(card.id));
+      const selectorCount = getSelectorCount(card.rarity);
+      const selectorButton = selectorCount > 0
+        ? `<button class="btn btn-primary" data-action="use-selector" data-card-id="${escapeHTML(card.id)}">ใช้ใบเลือก ${escapeHTML(card.rarity)} <span class="cost">มี ${formatNumber(selectorCount)} ใบ</span></button>`
+        : "";
 
       document.getElementById("cardDetail").innerHTML = `
         <div class="detail" style="${rarityStyleVars(rarity)}">
@@ -5920,7 +6199,8 @@
                 </button>
                 <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์"}</button>
                 <button class="btn btn-gold" data-action="set-support-card" data-card-id="${escapeHTML(card.id)}">${String(state.profile.supportCardId || "") === String(card.id) ? "เป็น Support อยู่" : "ตั้งเป็น Support โปรไฟล์"}</button>
-              ` : `<button class="btn" disabled>เปิดได้จากตู้กาชา</button>`}
+                ${selectorButton}
+              ` : `${selectorButton || `<button class="btn" disabled>เปิดได้จากตู้กาชา</button>`}`}
             </div>
           </div>
         </div>
@@ -6242,6 +6522,9 @@
       const cardId = target.dataset.cardId;
       const friendId = target.dataset.friendId;
       if (action === "pull") openPack(Number(target.dataset.times) || 1);
+      if (action === "pull-ticket") openPackWithNormalTickets(Number(target.dataset.times) || 1);
+      if (action === "pull-guarantee-ticket") openPackWithBestGuaranteeTicket();
+      if (action === "use-selector") useSelectorTicket(cardId);
       if (action === "daily") claimDaily();
       if (action === "claim-income") claimIncome();
       if (action === "open-card") openCardModal(cardId);
