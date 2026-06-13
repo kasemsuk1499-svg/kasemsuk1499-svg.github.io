@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-13-arena-opponent-team-v9">
+  <meta name="gacha-app-build" content="2026-06-13-team-sort-picker-v10">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -502,6 +502,36 @@
     }
 
     .field:focus { border-color: rgba(92,232,255,.62); box-shadow: 0 0 0 3px rgba(92,232,255,.08); }
+
+    /* เพิ่มโดยอลิซ: ปุ่มเรียงลำดับคลังแบบเลือกหัวข้อ + มากไปน้อย/น้อยไปมาก */
+    .sort-direction-switch {
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 5px;
+      min-height: 42px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(5,8,18,.72);
+    }
+
+    .sort-direction-button {
+      min-width: 92px;
+      border: 0;
+      border-radius: 9px;
+      padding: 6px 9px;
+      color: var(--muted);
+      font-size: .69rem;
+      font-weight: 1000;
+      background: transparent;
+    }
+
+    .sort-direction-button.active {
+      color: #071019;
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      box-shadow: 0 6px 16px rgba(92,232,255,.14);
+    }
+
     .section-title {
       display: flex;
       align-items: flex-end;
@@ -670,14 +700,152 @@
     }
 
     .team-slot {
+      position: relative;
       min-height: 260px;
+      overflow: hidden;
       border: 1px dashed rgba(255,255,255,.16);
       border-radius: 18px;
       display: grid;
-      place-items: center;
+      place-items: stretch;
       color: var(--muted);
       background: rgba(255,255,255,.025);
     }
+
+    button.team-slot {
+      width: 100%;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .team-slot-empty {
+      place-items: center;
+      align-content: center;
+      gap: 8px;
+      color: #cbd5e1;
+      font-weight: 1000;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(92,232,255,.12), transparent 44%),
+        rgba(255,255,255,.025);
+    }
+
+    .team-slot-empty b { color: var(--cyan); font-size: 1.8rem; line-height: 1; }
+    .team-slot-empty small { color: var(--muted); font-size: .7rem; font-weight: 800; }
+
+    .team-slot-filled {
+      border-style: solid;
+      border-color: color-mix(in srgb, var(--rarity-main, var(--cyan)) 42%, rgba(255,255,255,.10));
+      background: rgba(3,5,12,.48);
+      box-shadow: 0 10px 28px rgba(0,0,0,.24), 0 0 20px color-mix(in srgb, var(--rarity-glow, var(--cyan)) 12%, transparent);
+    }
+
+    .team-slot-select {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      padding: 0;
+      color: var(--text);
+      text-align: left;
+      background: transparent;
+    }
+
+    .team-slot-art {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: linear-gradient(145deg, #11162b, #070a13);
+    }
+
+    .team-slot-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .team-slot-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(4,7,16,.9), transparent 58%); }
+    .team-slot-number {
+      position: absolute;
+      z-index: 2;
+      top: 9px;
+      left: 9px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: #071019;
+      font-size: .62rem;
+      font-weight: 1000;
+      background: var(--rarity-gradient, var(--cyan));
+    }
+
+    .team-slot-copy { padding: 11px; }
+    .team-slot-name { margin: 0 34px 8px 0; font-size: .84rem; line-height: 1.25; font-weight: 1000; }
+    .team-slot-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+    .team-slot-stat { padding: 6px 7px; border-radius: 10px; background: rgba(255,255,255,.045); }
+    .team-slot-stat span { display: block; color: var(--muted); font-size: .54rem; font-weight: 900; }
+    .team-slot-stat strong { display: block; margin-top: 2px; overflow: hidden; font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
+    .team-slot-change { margin-top: 8px; color: var(--cyan); font-size: .63rem; font-weight: 1000; text-align: center; }
+    .team-slot-remove {
+      position: absolute;
+      z-index: 5;
+      right: 8px;
+      bottom: 8px;
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(251,113,133,.32);
+      border-radius: 10px;
+      color: #fecdd3;
+      font-weight: 1000;
+      background: rgba(190,24,93,.54);
+    }
+
+    /* เพิ่มโดยอลิซ: คู่มือคอมโบและตารางแพ้ทาง/ชนะทางทั้งหมด */
+    .element-guide {
+      display: grid;
+      grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+      gap: 12px;
+      margin: 0 0 14px;
+    }
+
+    .guide-card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .guide-card summary {
+      cursor: pointer;
+      color: #f8fafc;
+      font-weight: 1000;
+      list-style: none;
+    }
+    .guide-card summary::-webkit-details-marker { display: none; }
+    .guide-card summary::after { content: "＋"; float: right; color: var(--cyan); }
+    .guide-card[open] summary::after { content: "−"; }
+    .guide-list { display: grid; gap: 8px; margin-top: 12px; }
+    .guide-row {
+      display: grid;
+      grid-template-columns: minmax(110px, .7fr) minmax(0, 1.3fr);
+      gap: 10px;
+      align-items: center;
+      padding: 9px 10px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 13px;
+      background: rgba(3,5,12,.34);
+    }
+    .guide-row-title { font-size: .73rem; font-weight: 1000; }
+    .guide-row-copy { color: var(--muted); font-size: .68rem; line-height: 1.55; }
+    .guide-row-copy b { color: var(--green); }
+    .guide-row-copy em { color: #fda4af; font-style: normal; font-weight: 900; }
+
+    /* เพิ่มโดยอลิซ: หน้าต่างเลือกการ์ดจากช่องทีมโดยตรง */
+    .team-picker-panel { width: min(1180px, 100%); padding: 20px; }
+    .team-picker-head { padding-right: 48px; margin-bottom: 14px; }
+    .team-picker-head h2 { margin: 4px 0 5px; font-size: clamp(1.5rem, 4vw, 2.5rem); }
+    .team-picker-head p { margin: 0; color: var(--muted); }
+    .team-picker-tools {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 150px 190px auto;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .team-picker-grid { max-height: min(66vh, 720px); overflow: auto; padding: 2px 3px 10px; }
+    .team-picker-card.selected { box-shadow: 0 0 0 3px var(--green), 0 14px 30px rgba(0,0,0,.42); }
+    .team-picker-card.in-team:not(.selected) { box-shadow: 0 0 0 2px var(--gold), 0 12px 26px rgba(0,0,0,.34); }
+    .team-picker-note { margin: 10px 0 0; color: var(--muted); font-size: .72rem; line-height: 1.5; }
 
     .income-panel {
       display: grid;
@@ -767,10 +935,45 @@
     }
 
     .card-upgrade-mini {
-      margin-top: 8px;
+      margin-top: 9px;
       display: grid;
-      gap: 5px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
     }
+
+    .card-visible-stat {
+      min-width: 0;
+      min-height: 48px;
+      padding: 7px 8px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 11px;
+      background: rgba(3,5,12,.42);
+    }
+
+    .card-visible-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: .55rem;
+      font-weight: 900;
+      letter-spacing: .025em;
+      text-transform: uppercase;
+    }
+
+    .card-visible-stat strong {
+      display: block;
+      margin-top: 3px;
+      overflow: hidden;
+      color: #f8fafc;
+      font-size: .7rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-visible-stat.power strong { color: var(--cyan); }
+    .card-visible-stat.income strong { color: var(--green); }
+    .card-visible-stat.awaken strong { color: var(--gold); }
 
     .card-upgrade-mini-row {
       display: flex;
@@ -1926,11 +2129,21 @@
       .workspace-head { align-items: stretch; flex-direction: column; }
       .workspace-head .tabs { display: none; }
       .tools { display: grid; grid-template-columns: 1fr 110px; }
+      #sortMode { grid-column: 1 / -1; }
+      .sort-direction-switch { grid-column: 1 / -1; }
+      .sort-direction-button { min-width: 0; }
       /* เพิ่มโดยอลิซ: บนมือถือให้ปุ่มระดับการ์ดเลื่อนซ้าย-ขวาได้ ไม่เบียดช่องค้นหา */
       .rarity-filter-row { grid-column: 1 / -1; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding-bottom: 2px; }
       .rarity-chip { flex: 0 0 auto; }
       .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
       .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .team-slot { min-height: 235px; }
+      .element-guide { grid-template-columns: 1fr; }
+      .guide-row { grid-template-columns: 1fr; }
+      .team-picker-panel { padding: 14px; }
+      .team-picker-tools { grid-template-columns: 1fr 1fr; }
+      .team-picker-tools #teamPickerSearch { grid-column: 1 / -1; }
+      .team-picker-tools .sort-direction-switch { grid-column: 1 / -1; }
       .income-panel { grid-template-columns: repeat(2, 1fr); }
       .income-panel .btn { grid-column: 1 / -1; }
       .element-panel { grid-template-columns: 1fr; }
@@ -2136,6 +2349,18 @@
           <div class="tools hidden" id="collectionTools">
             <input class="field" id="searchInput" type="search" placeholder="ค้นหาการ์ด..." autocomplete="off">
             <select class="field" id="rarityFilter" aria-label="กรองระดับ"></select>
+            <select class="field" id="sortMode" aria-label="เรียงลำดับการ์ด">
+              <option value="power">เรียงตามพลัง</option>
+              <option value="acquired">เรียงตามลำดับการได้</option>
+              <option value="rarity">เรียงตามระดับการ์ด</option>
+              <option value="level">เรียงตามเลเวล</option>
+              <option value="awaken">เรียงตามอเวก</option>
+              <option value="income">เรียงตามรายได้</option>
+            </select>
+            <div class="sort-direction-switch" id="sortDirectionSwitch" aria-label="ทิศทางการเรียง">
+              <button type="button" class="sort-direction-button active" data-action="set-sort-direction" data-direction="desc">มาก → น้อย</button>
+              <button type="button" class="sort-direction-button" data-action="set-sort-direction" data-direction="asc">น้อย → มาก</button>
+            </div>
             <!--
               เพิ่มโดยอลิซ: จุดแสดงปุ่มแยกระดับการ์ด
               JavaScript จะสร้างปุ่ม “ทั้งหมด / SC / EX / UR / ...” เข้ามาใน div นี้อัตโนมัติ
@@ -2167,6 +2392,7 @@
           <div class="team-grid" id="teamGrid"></div>
           <!-- โน้ตจุดแก้ไขโดยอลิซ: แผงนี้แสดงธาตุหลัก คอมโบธาตุ และโบนัสทีมแบบเรียลไทม์ -->
           <div class="element-panel" id="teamElementPanel"></div>
+          <div class="element-guide" id="teamRulesGuide"></div>
           <div class="income-panel">
             <div class="income-value"><span>รายได้ต่อวินาที</span><strong id="teamIncomeText">0</strong></div>
             <div class="income-value"><span>กำลังรวม</span><strong id="teamPowerText">0</strong></div>
@@ -2355,6 +2581,35 @@
     <button data-tab="arena">อารีน่า</button>
     <button data-tab="friends">เพื่อน</button>
   </nav>
+
+  <div class="modal hidden" id="teamPickerModal" role="dialog" aria-modal="true" aria-label="เลือกการ์ดลงทีม">
+    <div class="modal-panel team-picker-panel">
+      <button class="close" data-action="close-team-picker" aria-label="ปิด">x</button>
+      <div class="team-picker-head">
+        <p class="eyebrow">Formation Editor</p>
+        <h2 id="teamPickerTitle">เลือกการ์ดลงช่องทีม</h2>
+        <p id="teamPickerSubtitle">เลือกจากการ์ดที่มีอยู่ในคลัง ระบบจะสลับช่องให้อัตโนมัติถ้าการ์ดอยู่ในทีมแล้ว</p>
+      </div>
+      <div class="team-picker-tools">
+        <input class="field" id="teamPickerSearch" type="search" placeholder="ค้นหาชื่อหรือธาตุ..." autocomplete="off">
+        <select class="field" id="teamPickerRarity" aria-label="กรองระดับในตัวเลือกทีม"></select>
+        <select class="field" id="teamPickerSortMode" aria-label="เรียงการ์ดในตัวเลือกทีม">
+          <option value="power">พลัง</option>
+          <option value="acquired">ลำดับการได้</option>
+          <option value="rarity">ระดับการ์ด</option>
+          <option value="level">เลเวล</option>
+          <option value="awaken">อเวก</option>
+          <option value="income">รายได้</option>
+        </select>
+        <div class="sort-direction-switch" id="teamPickerDirectionSwitch">
+          <button type="button" class="sort-direction-button active" data-action="set-picker-sort-direction" data-direction="desc">มาก → น้อย</button>
+          <button type="button" class="sort-direction-button" data-action="set-picker-sort-direction" data-direction="asc">น้อย → มาก</button>
+        </div>
+      </div>
+      <div class="card-grid team-picker-grid" id="teamPickerGrid"></div>
+      <p class="team-picker-note">แตะการ์ดเพื่อใส่ลงช่องที่เลือก • หากการ์ดนั้นอยู่ช่องอื่น ระบบจะสลับตำแหน่งแทนการใส่ซ้ำ</p>
+    </div>
+  </div>
 
   <div class="modal hidden" id="cardModal" role="dialog" aria-modal="true" aria-label="รายละเอียดการ์ด">
     <div class="modal-panel">
@@ -2642,8 +2897,8 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-13-arena-opponent-team-v9",
-      seenKey: "anime_card_update_notice_seen_v7"
+      version: "2026-06-13-team-sort-picker-v10",
+      seenKey: "anime_card_update_notice_seen_v8"
     });
 
     /*
@@ -4072,6 +4327,12 @@
     let activeRevealResults = [];
     let activeRevealIndex = 0;
     let returnToReveal = false;
+    // เพิ่มโดยอลิซ: สถานะเรียงลำดับคลังและหน้าต่างเลือกทีม
+    let collectionSortMode = "power";
+    let collectionSortDirection = "desc";
+    let teamPickerSortMode = "power";
+    let teamPickerSortDirection = "desc";
+    let teamPickerContext = { mode: "showcase", slotIndex: 0 };
 
     // แก้โดยอลิซ: เริ่มจากค่าเริ่มต้นชั่วคราวเสมอ แล้วค่อยโหลด Cloud Save หลังล็อกอิน
     // ไม่อ่านเซฟจากเครื่องอีกแล้ว เพื่อกันข้อมูลเก่าถูกดึงกลับเข้าระบบ
@@ -4086,10 +4347,15 @@
     function makeStarterLoadout() {
       const owned = {};
       const team = [];
+      const collectionOrder = [];
+      const starterTime = Date.now();
       const addOwned = card => {
         if (!card) return;
         const id = String(card.id);
-        if (!owned[id]) owned[id] = { count: 1, level: 1, duplicateRank: 0 };
+        if (!owned[id]) {
+          owned[id] = { count: 1, level: 1, duplicateRank: 0, acquiredAt: starterTime + collectionOrder.length };
+          collectionOrder.push(id);
+        }
       };
       const addTeam = card => {
         if (!card || team.length >= CONFIG.starterTeamSize) return;
@@ -4112,7 +4378,7 @@
       // เพิ่ม SR ฟรี 1 ใบไว้ในคลังเพื่อเป็นตัวหลักต้นเกม แต่ไม่ยัดเข้าทีมอัตโนมัติ
       const freeSR = CARDS.find(card => card.rarity === "SR") || null;
       addOwned(freeSR);
-      return { owned, team };
+      return { owned, team, collectionOrder };
     }
 
     function defaultState() {
@@ -4131,6 +4397,8 @@
         },
         activeBannerId: BANNERS[0] ? BANNERS[0].id : "",
         owned: starter.owned,
+        // เพิ่มโดยอลิซ: เก็บลำดับครั้งแรกที่ได้การ์ด เพื่อใช้ปุ่ม “เรียงตามลำดับการได้”
+        collectionOrder: starter.collectionOrder,
         team: starter.team,
         pity: {},
         recent: [],
@@ -4751,6 +5019,7 @@
         item.level = Math.min(getCardMaxLevel(card || {}), Math.max(1, Math.floor(Number(item.level) || 1)));
         const maxRank = getCardAwakenMax(card || {});
         item.duplicateRank = Math.min(maxRank, Math.max(0, Math.floor(Number(item.duplicateRank) || 0)));
+        item.acquiredAt = Math.max(0, Number(item.acquiredAt) || 0);
 
         if (card && item.duplicateRank >= maxRank && item.count > 1) {
           const extraCopies = item.count - 1;
@@ -4766,6 +5035,17 @@
       next.lastMaxAwakenStockConversion = convertedMaxAwakenCopies > 0
         ? { copies: convertedMaxAwakenCopies, dust: convertedMaxAwakenDust, at: Date.now() }
         : (next.lastMaxAwakenStockConversion || null);
+      // เพิ่มโดยอลิซ: เซฟเก่าที่ไม่มีประวัติลำดับจะถูกเติมรายการครั้งแรกหนึ่งครั้ง
+      const savedCollectionOrder = Array.isArray(next.collectionOrder) ? next.collectionOrder.map(String) : [];
+      const ownedIds = Object.keys(next.owned).filter(id => CARD_BY_ID.has(String(id)));
+      next.collectionOrder = [...new Set(savedCollectionOrder.filter(id => next.owned[id] && CARD_BY_ID.has(id)))];
+      ownedIds
+        .filter(id => !next.collectionOrder.includes(id))
+        .sort((a, b) => (Number(next.owned[a].acquiredAt) || 0) - (Number(next.owned[b].acquiredAt) || 0) || Number(a) - Number(b))
+        .forEach((id, index) => {
+          if (!next.owned[id].acquiredAt) next.owned[id].acquiredAt = Date.now() - ownedIds.length + index;
+          next.collectionOrder.push(id);
+        });
       next.team = Array.isArray(next.team)
         ? [...new Set(next.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.teamSlots)
         : [];
@@ -5285,7 +5565,10 @@
           }
         }
       } else {
-        state.owned[key] = { count: 1, level: 1, duplicateRank: 0 };
+        state.owned[key] = { count: 1, level: 1, duplicateRank: 0, acquiredAt: Date.now() };
+        if (!Array.isArray(state.collectionOrder)) state.collectionOrder = [];
+        state.collectionOrder = state.collectionOrder.filter(id => String(id) !== key);
+        state.collectionOrder.push(key);
       }
       return { card, duplicate, dustEarned, maxAwakenBonus, convertedCopies };
     }
@@ -6452,15 +6735,21 @@
     function cardUpgradeMiniHTML(card) {
       const status = getCardProgressStatus(card);
       if (!status.owned) {
-        return `<div class="card-upgrade-mini"><div class="card-upgrade-mini-row"><span>สถานะ</span><span>ยังไม่ปลดล็อก</span></div><div class="card-mini-meter"><i style="width:0%"></i></div></div>`;
+        return `
+          <div class="card-upgrade-mini">
+            <div class="card-visible-stat"><span>Level</span><strong>ยังไม่ปลดล็อก</strong></div>
+            <div class="card-visible-stat awaken"><span>Awaken</span><strong>0/${status.maxRank}</strong></div>
+            <div class="card-visible-stat power"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+            <div class="card-visible-stat income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+          </div>`;
       }
       return `
-        <div class="card-upgrade-mini" title="สถานะพัฒนาการ์ด">
-          <div class="card-upgrade-mini-row"><span>อัปแล้ว</span><span>${status.overallPercent}%</span></div>
-          <div class="card-mini-meter"><i style="width:${status.overallPercent}%"></i></div>
-          <div class="card-upgrade-mini-row"><span>Awaken ${status.rank}/${status.maxRank}</span><span>${status.rank >= status.maxRank ? "ซ้ำ → Dust x2" : `ซ้ำ ${status.availableDuplicates}`}</span></div>
-        </div>
-      `;
+        <div class="card-upgrade-mini" title="เลเวล อเวก พลัง และรายได้ปัจจุบัน">
+          <div class="card-visible-stat"><span>Level</span><strong>${status.level}/${status.maxLevel}</strong></div>
+          <div class="card-visible-stat awaken"><span>Awaken</span><strong>${status.rank}/${status.maxRank}</strong></div>
+          <div class="card-visible-stat power"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+          <div class="card-visible-stat income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+        </div>`;
     }
 
     function upgradeStatusPanelHTML(card, inTeam = false) {
@@ -6675,17 +6964,66 @@
       }
     }
 
+    function getCardAcquiredOrder(card) {
+      const id = String(card && card.id || "");
+      const order = Array.isArray(state.collectionOrder) ? state.collectionOrder : [];
+      const index = order.indexOf(id);
+      if (index >= 0) return index + 1;
+      const owned = getOwned(id);
+      return owned ? Number(owned.acquiredAt) || 0 : -1;
+    }
+
+    function getSortValue(card, mode) {
+      const status = getCardProgressStatus(card);
+      if (mode === "acquired") return getCardAcquiredOrder(card);
+      if (mode === "rarity") return getRarity(card).order;
+      if (mode === "level") return status.owned ? status.level : 0;
+      if (mode === "awaken") return status.owned ? status.rank : 0;
+      if (mode === "income") return getCardIncome(card);
+      return getCardPower(card);
+    }
+
+    function sortCardsForView(cards, mode = "power", direction = "desc", ownedFirst = true) {
+      const factor = direction === "asc" ? 1 : -1;
+      return cards.slice().sort((a, b) => {
+        if (ownedFirst) {
+          const ownedDiff = Number(Boolean(getOwned(b.id))) - Number(Boolean(getOwned(a.id)));
+          if (ownedDiff) return ownedDiff;
+        }
+        const valueA = getSortValue(a, mode);
+        const valueB = getSortValue(b, mode);
+        if (valueA !== valueB) return (valueA - valueB) * factor;
+        const rarityDiff = getRarity(b).order - getRarity(a).order;
+        if (rarityDiff) return rarityDiff;
+        return String(a.name).localeCompare(String(b.name), "th");
+      });
+    }
+
+    function getSortLabel(mode = collectionSortMode) {
+      return ({ power: "พลัง", acquired: "ลำดับการได้", rarity: "ระดับการ์ด", level: "เลเวล", awaken: "อเวก", income: "รายได้" })[mode] || "พลัง";
+    }
+
+    function getSortDirectionText(mode = collectionSortMode, direction = collectionSortDirection) {
+      if (mode === "acquired") return direction === "desc" ? "ใหม่ไปเก่า" : "เก่าไปใหม่";
+      return direction === "desc" ? "มากไปน้อย" : "น้อยไปมาก";
+    }
+
+    function renderSortDirectionButtons() {
+      document.querySelectorAll('#sortDirectionSwitch [data-direction]').forEach(button => {
+        button.classList.toggle('active', button.dataset.direction === collectionSortDirection);
+      });
+      document.querySelectorAll('#teamPickerDirectionSwitch [data-direction]').forEach(button => {
+        button.classList.toggle('active', button.dataset.direction === teamPickerSortDirection);
+      });
+    }
+
     function getFilteredCards() {
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
       const rarity = document.getElementById("rarityFilter").value;
-      return CARDS
+      const filtered = CARDS
         .filter(card => !query || `${card.name} ${getRawElementText(card)} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query))
-        .filter(card => !rarity || card.rarity === rarity)
-        .sort((a, b) => {
-          const ownedDiff = Number(Boolean(getOwned(b.id))) - Number(Boolean(getOwned(a.id)));
-          if (ownedDiff) return ownedDiff;
-          return getRarity(b).order - getRarity(a).order || String(a.name).localeCompare(String(b.name));
-        });
+        .filter(card => !rarity || card.rarity === rarity);
+      return sortCardsForView(filtered, collectionSortMode, collectionSortDirection, true);
     }
 
     function renderRecent() {
@@ -6699,10 +7037,207 @@
     function renderCollection() {
       const cards = getFilteredCards();
       const uniqueOwned = Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length;
-      document.getElementById("collectionText").textContent = `สะสมแล้ว ${uniqueOwned} จาก ${CARDS.length} ใบ (${Math.round(uniqueOwned / Math.max(1, CARDS.length) * 100)}%)`;
+      document.getElementById("collectionText").textContent = `สะสมแล้ว ${uniqueOwned} จาก ${CARDS.length} ใบ (${Math.round(uniqueOwned / Math.max(1, CARDS.length) * 100)}%) • เรียงตาม${getSortLabel()} ${getSortDirectionText()}`;
       document.getElementById("collectionGrid").innerHTML = cards.length
         ? cards.map(card => cardHTML(card)).join("")
         : `<div class="empty-state">ไม่พบการ์ดที่ตรงกับตัวกรอง</div>`;
+    }
+
+    function teamSlotHTML(card, index, mode = "showcase") {
+      const slotLabel = mode === "arena" ? `ช่อง ARENA ${index + 1}` : `ช่องทีม ${index + 1}`;
+      if (!card) {
+        return `
+          <button type="button" class="team-slot team-slot-empty" data-action="open-team-picker" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}">
+            <b>＋</b><span>${escapeHTML(slotLabel)}</span><small>กดเพื่อเลือกการ์ดจากคลัง</small>
+          </button>`;
+      }
+      const rarity = getRarity(card);
+      const status = getCardProgressStatus(card);
+      const image = getCardImage(card);
+      return `
+        <div class="team-slot team-slot-filled" style="${rarityStyleVars(rarity)}">
+          <button type="button" class="team-slot-select" data-action="open-team-picker" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}">
+            <div class="team-slot-art">
+              ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" onerror="this.remove()">` : ""}
+              <span class="team-slot-number">${escapeHTML(slotLabel)} • ${escapeHTML(rarity.label)}</span>
+            </div>
+            <div class="team-slot-copy">
+              <h3 class="team-slot-name">${escapeHTML(card.name)}</h3>
+              <div class="team-slot-stats">
+                <div class="team-slot-stat"><span>LEVEL</span><strong>${status.level}/${status.maxLevel}</strong></div>
+                <div class="team-slot-stat"><span>AWAKEN</span><strong>${status.rank}/${status.maxRank}</strong></div>
+                <div class="team-slot-stat"><span>POWER</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+                <div class="team-slot-stat"><span>INCOME</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+              </div>
+              <div class="team-slot-change">แตะเพื่อเปลี่ยนการ์ด</div>
+            </div>
+          </button>
+          <button type="button" class="team-slot-remove" data-action="clear-team-slot" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}" aria-label="นำออกจากทีม">×</button>
+        </div>`;
+    }
+
+    function renderAllElementRulesGuide() {
+      const panel = document.getElementById("teamRulesGuide");
+      if (!panel) return;
+      const specialComboRows = ELEMENT_COMBO_RULES.map(combo => `
+        <div class="guide-row">
+          <div class="guide-row-title">${escapeHTML(combo.name)}</div>
+          <div class="guide-row-copy">
+            <div class="element-chip-row" style="margin-top:0">${combo.required.map(element => elementChipHTML(element)).join("")}</div>
+            Power +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}
+          </div>
+        </div>`).join("");
+      const universalComboRows = `
+        <div class="guide-row">
+          <div class="guide-row-title">สายธาตุเดียว</div>
+          <div class="guide-row-copy">ธาตุเดียวกัน 2 ใบ: Power +5% / Income +5%<br>3 ใบ: +12% / +10% • 4 ใบ: +22% / +18% • 5 ใบ: +35% / +30%</div>
+        </div>
+        <div class="guide-row">
+          <div class="guide-row-title">คู่ประสานธาตุ</div>
+          <div class="guide-row-copy">มีอย่างน้อย 2 ธาตุ และแต่ละธาตุมี 2 แหล่งขึ้นไป • Power +8% / Income +10%</div>
+        </div>
+        <div class="guide-row">
+          <div class="guide-row-title">สมดุล 5 ธาตุ</div>
+          <div class="guide-row-copy">ทีมครบ 5 ใบและมีธาตุไม่ซ้ำ 5 ธาตุ โดยไม่รวมไร้ธาตุ • Power +10% / Income +15%</div>
+        </div>
+        <div class="guide-row">
+          <div class="guide-row-title">ไร้ธาตุประคองทีม</div>
+          <div class="guide-row-copy">มีไร้ธาตุอย่างน้อย 1 แหล่ง + ธาตุอื่นไม่ซ้ำอย่างน้อย 4 ธาตุ • Power +5% / Income +22%</div>
+        </div>`;
+      const matchupRows = THAI_ELEMENTS.map(element => {
+        const wins = ELEMENT_ADVANTAGES[element] || [];
+        const loses = getElementWeaknesses(element);
+        return `
+          <div class="guide-row">
+            <div class="guide-row-title">${escapeHTML(elementLabel(element))}</div>
+            <div class="guide-row-copy">
+              <b>ชนะทาง:</b> ${wins.length ? wins.map(item => escapeHTML(elementLabel(item))).join(" / ") : "-"}<br>
+              <em>แพ้ทาง:</em> ${loses.length ? loses.map(item => escapeHTML(elementLabel(item))).join(" / ") : "-"}
+            </div>
+          </div>`;
+      }).join("");
+      const comboCount = ELEMENT_COMBO_RULES.length + 4;
+      panel.innerHTML = `
+        <details class="guide-card" open>
+          <summary>🧩 คอมโบทั้งหมดในเกม (${comboCount} รูปแบบ)</summary>
+          <div class="guide-list">${universalComboRows}${specialComboRows}</div>
+        </details>
+        <details class="guide-card" open>
+          <summary>⚔️ แพ้ทาง–ชนะทางทั้งหมด (${THAI_ELEMENTS.length} ธาตุ)</summary>
+          <p class="element-mini-note">ได้เปรียบ +${Math.round(ELEMENT_MATCHUP.advantageRate * 100)}% Power • แพ้ทาง ${Math.round(ELEMENT_MATCHUP.disadvantageRate * 100)}% Power • ธาตุเดียวกัน/คู่ที่ไม่อยู่ในตารางเป็นกลาง</p>
+          <div class="guide-list">${matchupRows}</div>
+        </details>`;
+    }
+
+    function getTeamArrayByMode(mode) {
+      if (mode === "arena") {
+        if (!state.arena || !Array.isArray(state.arena.team)) state.arena = Object.assign(defaultState().arena, state.arena || {});
+        return state.arena.team;
+      }
+      return state.team;
+    }
+
+    function openTeamPicker(mode = "showcase", slotIndex = 0) {
+      const safeMode = mode === "arena" ? "arena" : "showcase";
+      const team = getTeamArrayByMode(safeMode);
+      const limit = safeMode === "arena" ? CONFIG.arenaTeamSlots : CONFIG.teamSlots;
+      const requestedIndex = Math.max(0, Math.floor(Number(slotIndex) || 0));
+      teamPickerContext = {
+        mode: safeMode,
+        // ทีมเก็บแบบเรียงชิดต่อกัน ช่องว่างที่กดจึงเติม “ช่องว่างแรก” เสมอ
+        slotIndex: Math.min(limit - 1, Math.min(requestedIndex, team.length))
+      };
+      const title = document.getElementById("teamPickerTitle");
+      const subtitle = document.getElementById("teamPickerSubtitle");
+      if (title) title.textContent = `${teamPickerContext.mode === "arena" ? "ทีม ARENA" : "ทีมโชว์/ไต่หอ"} • ช่อง ${teamPickerContext.slotIndex + 1}`;
+      if (subtitle) subtitle.textContent = "เลือกการ์ดที่ครอบครองอยู่ ระบบจะสลับตำแหน่งให้อัตโนมัติหากการ์ดอยู่ในทีมแล้ว";
+      renderTeamPicker();
+      document.getElementById("teamPickerModal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeTeamPicker() {
+      document.getElementById("teamPickerModal").classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function renderTeamPicker() {
+      const grid = document.getElementById("teamPickerGrid");
+      const raritySelect = document.getElementById("teamPickerRarity");
+      const sortSelect = document.getElementById("teamPickerSortMode");
+      if (!grid || !raritySelect || !sortSelect) return;
+      if (!raritySelect.options.length) {
+        raritySelect.innerHTML = `<option value="">ทุกระดับ</option>` + Object.entries(RARITIES)
+          .sort((a, b) => b[1].order - a[1].order)
+          .map(([key, info]) => `<option value="${escapeHTML(key)}">${escapeHTML(info.label)}</option>`).join("");
+      }
+      sortSelect.value = teamPickerSortMode;
+      const query = String(document.getElementById("teamPickerSearch")?.value || "").trim().toLowerCase();
+      const rarity = raritySelect.value;
+      const currentTeam = getTeamArrayByMode(teamPickerContext.mode);
+      const currentId = String(currentTeam[teamPickerContext.slotIndex] || "");
+      const cards = sortCardsForView(CARDS.filter(card => {
+        if (!getOwned(card.id)) return false;
+        if (rarity && card.rarity !== rarity) return false;
+        return !query || `${card.name} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query);
+      }), teamPickerSortMode, teamPickerSortDirection, false);
+      grid.innerHTML = cards.length ? cards.map(card => {
+        const id = String(card.id);
+        const selected = id === currentId;
+        const inTeam = currentTeam.includes(id);
+        return cardHTML(card, {
+          action: "assign-team-slot",
+          extraClass: `team-picker-card${selected ? " selected" : ""}${inTeam ? " in-team" : ""}`,
+          resultLabel: selected ? "ช่องนี้" : (inTeam ? "อยู่ในทีม" : `เลือกช่อง ${teamPickerContext.slotIndex + 1}`)
+        });
+      }).join("") : `<div class="empty-state">ไม่พบการ์ดที่ครอบครองตรงกับตัวกรอง</div>`;
+      renderSortDirectionButtons();
+    }
+
+    function assignCardToTeamSlot(cardId) {
+      const id = String(cardId || "");
+      if (!getOwned(id) || !CARD_BY_ID.has(id)) return showToast("เลือกได้เฉพาะการ์ดที่มีอยู่ในคลัง");
+      const mode = teamPickerContext.mode;
+      const limit = mode === "arena" ? CONFIG.arenaTeamSlots : CONFIG.teamSlots;
+      const targetIndex = Math.min(limit - 1, Math.max(0, teamPickerContext.slotIndex));
+      const team = getTeamArrayByMode(mode);
+      const existingIndex = team.indexOf(id);
+      const targetId = String(team[targetIndex] || "");
+      if (existingIndex === targetIndex) {
+        closeTeamPicker();
+        return showToast("การ์ดใบนี้อยู่ในช่องที่เลือกแล้ว");
+      }
+      updateIncome();
+      if (existingIndex >= 0) {
+        if (targetId) team[existingIndex] = targetId;
+        else team.splice(existingIndex, 1);
+      }
+      if (targetIndex < team.length) team[targetIndex] = id;
+      else if (team.length < limit) team.push(id);
+      else return showToast("ทีมเต็มแล้ว");
+      if (mode === "arena") {
+        currentArenaOpponent = null;
+        arenaResult = null;
+      }
+      saveState(true);
+      renderAll();
+      closeTeamPicker();
+      showToast(`ใส่ ${CARD_BY_ID.get(id).name} ลงช่อง ${targetIndex + 1} แล้ว`);
+    }
+
+    function clearTeamSlot(mode = "showcase", slotIndex = 0) {
+      const team = getTeamArrayByMode(mode === "arena" ? "arena" : "showcase");
+      const index = Math.max(0, Math.floor(Number(slotIndex) || 0));
+      if (!team[index]) return;
+      updateIncome();
+      team.splice(index, 1);
+      if (mode === "arena") {
+        currentArenaOpponent = null;
+        arenaResult = null;
+      }
+      saveState(true);
+      renderAll();
+      showToast("นำการ์ดออกจากทีมแล้ว");
     }
 
     function renderTeamElementPanel() {
@@ -6748,11 +7283,12 @@
       const grid = document.getElementById("teamGrid");
       const slots = [];
       for (let index = 0; index < CONFIG.teamSlots; index += 1) {
-        const card = CARD_BY_ID.get(state.team[index]);
-        slots.push(card ? cardHTML(card) : `<div class="team-slot">ช่อง ${index + 1}<br>เลือกการ์ดจากคอลเล็กชั่น</div>`);
+        const card = CARD_BY_ID.get(String(state.team[index] || ""));
+        slots.push(teamSlotHTML(card, index, "showcase"));
       }
       grid.innerHTML = slots.join("");
       renderTeamElementPanel();
+      renderAllElementRulesGuide();
     }
 
     function renderBattle() {
@@ -6818,7 +7354,7 @@
       const slots = [];
       for (let index = 0; index < CONFIG.arenaTeamSlots; index += 1) {
         const card = CARD_BY_ID.get(String(state.arena.team[index] || ""));
-        slots.push(card ? cardHTML(card) : `<div class="team-slot">ช่อง ARENA ${index + 1}<br>เลือกการ์ดจากคลัง</div>`);
+        slots.push(teamSlotHTML(card, index, "arena"));
       }
       grid.innerHTML = slots.join("");
       const summary = getArenaTeamSummary();
@@ -6968,6 +7504,8 @@
 
     function renderFilters() {
       const select = document.getElementById("rarityFilter");
+      const sortSelect = document.getElementById("sortMode");
+      if (sortSelect) sortSelect.value = collectionSortMode;
       if (!select.options.length) {
         select.innerHTML = `<option value="">ทุกระดับ</option>` + Object.entries(RARITIES)
           .sort((a, b) => b[1].order - a[1].order)
@@ -6978,6 +7516,7 @@
       // เพิ่มโดยอลิซ: หลังสร้างดรอปดาวน์แล้ว ให้สร้าง/อัปเดตปุ่มแยกระดับการ์ดด้วยเสมอ
       // เหตุผล: จำนวนการ์ดที่สะสมจะเปลี่ยนหลังเปิดแพ็ก จึงต้องอัปเดตตัวเลขบนปุ่มทุกครั้งที่ renderAll() ทำงาน
       renderRarityQuickFilters();
+      renderSortDirectionButtons();
     }
 
     function getRarityProgressText(rarityKey = "") {
@@ -7052,6 +7591,7 @@
       renderArena();
       renderFriends();
       renderAccount();
+      if (!document.getElementById("teamPickerModal").classList.contains("hidden")) renderTeamPicker();
       if (!document.getElementById("profileModal").classList.contains("hidden")) renderProfileDetail(activeProfileUid && activeProfileUid !== "local" && activeProfileUid !== activeCloudUid ? friendProfiles.find(item => String(item.uid) === activeProfileUid) : null);
       if (modalCardId && !document.getElementById("cardModal").classList.contains("hidden")) renderCardDetail(modalCardId);
     }
@@ -7429,6 +7969,7 @@
     document.addEventListener("click", event => {
       const target = event.target.closest("[data-action], [data-tab]");
       if (!target) {
+        if (event.target.id === "teamPickerModal") closeTeamPicker();
         if (event.target.id === "cardModal") closeModal();
         if (event.target.id === "authModal") closeAuthModal();
         if (event.target.id === "profileModal") closeProfileModal();
@@ -7454,6 +7995,19 @@
       if (action === "daily") claimDaily();
       if (action === "claim-income") claimIncome();
       if (action === "open-card") openCardModal(cardId);
+      if (action === "open-team-picker") openTeamPicker(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
+      if (action === "close-team-picker") closeTeamPicker();
+      if (action === "assign-team-slot") assignCardToTeamSlot(cardId);
+      if (action === "clear-team-slot") clearTeamSlot(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
+      if (action === "set-sort-direction") {
+        collectionSortDirection = target.dataset.direction === "asc" ? "asc" : "desc";
+        renderCollection();
+        renderSortDirectionButtons();
+      }
+      if (action === "set-picker-sort-direction") {
+        teamPickerSortDirection = target.dataset.direction === "asc" ? "asc" : "desc";
+        renderTeamPicker();
+      }
       if (action === "close-modal") closeModal();
       if (action === "open-auth") openAuthModal();
       if (action === "close-auth") closeAuthModal();
@@ -7509,6 +8063,17 @@
 
     document.getElementById("searchInput").addEventListener("input", renderCollection);
     document.getElementById("rarityFilter").addEventListener("change", event => setActiveRarityFilter(event.target.value));
+    document.getElementById("sortMode").addEventListener("change", event => {
+      collectionSortMode = event.target.value || "power";
+      renderCollection();
+      renderSortDirectionButtons();
+    });
+    document.getElementById("teamPickerSearch").addEventListener("input", renderTeamPicker);
+    document.getElementById("teamPickerRarity").addEventListener("change", renderTeamPicker);
+    document.getElementById("teamPickerSortMode").addEventListener("change", event => {
+      teamPickerSortMode = event.target.value || "power";
+      renderTeamPicker();
+    });
     document.getElementById("friendUsernameInput").addEventListener("keydown", event => {
       if (event.key === "Enter") sendFriendRequest();
     });
@@ -7540,6 +8105,7 @@
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
       if (!document.getElementById("updateNoticeModal").classList.contains("hidden")) closeUpdateNotice();
+      else if (!document.getElementById("teamPickerModal").classList.contains("hidden")) closeTeamPicker();
       else if (!document.getElementById("revealScreen").classList.contains("hidden")) closeReveal();
       else if (!document.getElementById("authModal").classList.contains("hidden")) closeAuthModal();
       else closeModal();
