@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-13-card-abilities-separated-v14-syntax-fixed">
+  <meta name="gacha-app-build" content="2026-06-13-all-in-light-awaken-sc-cutscene-v15">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -343,6 +343,15 @@
       border-color: rgba(255,209,102,.22);
       background: rgba(255,209,102,.075);
     }
+
+    /* เพิ่มโดยอลิซ: ปุ่มเทหน้าตักจะคำนวณจำนวนสูงสุดจาก Gems ปัจจุบัน */
+    .btn-all-in {
+      border-color: rgba(244,114,182,.38);
+      background: linear-gradient(135deg, rgba(88,28,135,.86), rgba(190,24,93,.72));
+      box-shadow: 0 10px 28px rgba(126,34,206,.18);
+    }
+
+    .btn-all-in .cost { color: #fce7f3; opacity: .9; }
 
     .btn {
       min-height: 46px;
@@ -682,29 +691,22 @@
     }
 
     .awaken-corner.max {
-      width: 36px;
-      min-width: 36px;
-      height: 36px;
-      border: 0;
+      width: 34px;
+      min-width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255,236,153,.78);
       padding: 0;
-      color: transparent;
-      font-size: 1.85rem;
-      background: conic-gradient(from 0deg, #ff4d6d, #facc15, #56e39f, #22d3ee, #a78bfa, #f472b6, #ff4d6d);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-stroke: .45px rgba(255,255,255,.72);
-      filter: drop-shadow(0 0 5px rgba(255,255,255,.8)) drop-shadow(0 0 10px rgba(167,139,250,.7));
-      animation: rainbow-awaken-pulse 1.8s ease-in-out infinite;
+      color: #fff3b0;
+      font-size: 1.18rem;
+      background: linear-gradient(135deg, #312e81, #0e7490);
+      box-shadow: 0 0 0 2px rgba(8,11,23,.72), 0 5px 14px rgba(14,116,144,.24);
+      text-shadow: 0 1px 2px rgba(0,0,0,.65);
     }
 
     .game-card.has-awaken-corner .copy-badge { top: 48px; }
     .battle-model-card .awaken-corner { top: 5px; right: 5px; min-width: 28px; height: 23px; padding: 0 6px; font-size: .6rem; }
     .battle-model-card .awaken-corner.max { width: 28px; min-width: 28px; height: 28px; padding: 0; font-size: 1.42rem; }
 
-    @keyframes rainbow-awaken-pulse {
-      0%, 100% { transform: scale(1) rotate(-4deg); filter: drop-shadow(0 0 4px rgba(255,255,255,.72)) drop-shadow(0 0 9px rgba(167,139,250,.58)); }
-      50% { transform: scale(1.12) rotate(4deg); filter: drop-shadow(0 0 7px rgba(255,255,255,.95)) drop-shadow(0 0 15px rgba(34,211,238,.82)); }
-    }
 
     .card-body { padding: 11px; }
     .card-name {
@@ -2050,6 +2052,152 @@
 
 
 
+    /* เพิ่มโดยอลิซ: คัทซีน SC แบบออริจินัล ใช้ transform/opacity เป็นหลักเพื่อให้ลื่น */
+    .sc-cutscene {
+      position: fixed;
+      inset: 0;
+      z-index: 96;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      isolation: isolate;
+      color: #fff;
+      background:
+        radial-gradient(circle at 50% 46%, rgba(124,58,237,.24), transparent 24%),
+        radial-gradient(circle at 50% 50%, #12112d 0%, #070914 48%, #02030a 100%);
+    }
+
+    .sc-cutscene::before {
+      content: "";
+      position: absolute;
+      inset: -15%;
+      z-index: -2;
+      opacity: .72;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.9) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(125,211,252,.75) 0 1px, transparent 1.5px);
+      background-position: 0 0, 38px 31px;
+      background-size: 74px 74px, 106px 106px;
+      animation: sc-star-drift 5.2s linear both;
+    }
+
+    .sc-cutscene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      pointer-events: none;
+      opacity: 0;
+      background: white;
+    }
+
+    .sc-cutscene.play::after { animation: sc-white-flash 4.8s ease-out both; }
+
+    .sc-skip {
+      position: absolute;
+      z-index: 20;
+      top: 18px;
+      right: 18px;
+      min-height: 38px;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 999px;
+      padding: 7px 13px;
+      color: #e9d5ff;
+      font-weight: 900;
+      background: rgba(3,5,12,.58);
+    }
+
+    .sc-rift {
+      position: absolute;
+      z-index: 1;
+      width: min(54vw, 520px);
+      aspect-ratio: 1;
+      border: 2px solid rgba(216,180,254,.72);
+      border-radius: 50%;
+      opacity: 0;
+      background:
+        radial-gradient(circle, transparent 0 38%, rgba(34,211,238,.14) 40%, transparent 58%),
+        conic-gradient(from 0deg, transparent, rgba(167,139,250,.62), transparent 26%, rgba(34,211,238,.55), transparent 58%, rgba(244,114,182,.58), transparent);
+      box-shadow: 0 0 60px rgba(124,58,237,.32), inset 0 0 44px rgba(34,211,238,.18);
+    }
+
+    .sc-cutscene.play .sc-rift { animation: sc-rift-open 4.3s cubic-bezier(.2,.78,.2,1) both; }
+
+    .sc-comet {
+      position: absolute;
+      z-index: 3;
+      top: 14%;
+      left: -24%;
+      width: min(42vw, 460px);
+      height: 6px;
+      border-radius: 999px;
+      opacity: 0;
+      background: linear-gradient(90deg, transparent, #67e8f9 54%, #fff 92%);
+      box-shadow: 0 0 18px #67e8f9, 0 0 42px rgba(167,139,250,.86);
+      transform: rotate(-18deg);
+      transform-origin: right center;
+    }
+
+    .sc-cutscene.play .sc-comet { animation: sc-comet-flight 2.05s cubic-bezier(.2,.72,.18,1) .35s both; }
+
+    .sc-cutscene-stage {
+      position: relative;
+      z-index: 10;
+      width: min(820px, calc(100% - 34px));
+      display: grid;
+      place-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(24px) scale(.88);
+    }
+
+    .sc-cutscene.play .sc-cutscene-stage { animation: sc-stage-arrive 1.05s cubic-bezier(.2,.9,.24,1.08) 2.25s both; }
+    .sc-cutscene-kicker { margin: 0 0 8px; color: #67e8f9; font-size: .72rem; font-weight: 1000; letter-spacing: .34em; text-transform: uppercase; }
+    .sc-cutscene-title { margin: 0 0 16px; font-size: clamp(2rem, 7vw, 5.4rem); line-height: .88; letter-spacing: -.05em; text-shadow: 0 0 28px rgba(167,139,250,.66); }
+
+    .sc-cutscene-card {
+      width: min(270px, 58vw);
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border: 2px solid rgba(255,236,153,.86);
+      border-radius: 22px;
+      background: linear-gradient(145deg, #312e81, #0f172a);
+      box-shadow: 0 0 0 5px rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.52), 0 0 48px rgba(34,211,238,.34);
+    }
+
+    .sc-cutscene-card img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .sc-cutscene-name { margin: 15px 0 3px; font-size: clamp(1.35rem, 4vw, 2.3rem); }
+    .sc-cutscene-copy { margin: 0; color: #dbeafe; font-size: .82rem; font-weight: 800; }
+
+    @keyframes sc-star-drift {
+      from { transform: translate3d(0,0,0) scale(1); }
+      to { transform: translate3d(3%,5%,0) scale(1.08); }
+    }
+
+    @keyframes sc-rift-open {
+      0% { opacity: 0; transform: scale(.08) rotate(-40deg); }
+      34% { opacity: 1; transform: scale(.54) rotate(45deg); }
+      68% { opacity: .92; transform: scale(1) rotate(130deg); }
+      100% { opacity: .42; transform: scale(1.28) rotate(190deg); }
+    }
+
+    @keyframes sc-comet-flight {
+      0% { opacity: 0; transform: translate3d(0,0,0) rotate(-18deg) scaleX(.35); }
+      18% { opacity: 1; }
+      100% { opacity: 0; transform: translate3d(170vw,54vh,0) rotate(-18deg) scaleX(1.2); }
+    }
+
+    @keyframes sc-white-flash {
+      0%, 44%, 100% { opacity: 0; }
+      49% { opacity: .95; }
+      55% { opacity: 0; }
+    }
+
+    @keyframes sc-stage-arrive {
+      from { opacity: 0; transform: translateY(24px) scale(.88); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     .update-panel {
       width: min(760px, 100%);
       overflow: hidden;
@@ -2555,6 +2703,9 @@
               <button class="btn" data-action="pull" data-times="100" title="เปิดแบบเร็วอัตโนมัติ">
                 เปิด 100 ใบ <span class="cost" id="hundredCost">0 Gems</span>
               </button>
+              <button class="btn btn-all-in" data-action="pull-all-in" id="allInPullButton" title="ใช้ Gems ที่มีเพื่อเปิดจำนวนสูงสุด และสรุปผลแบบเร็ว">
+                เทหน้าตัก <span class="cost" id="allInCost">กำลังคำนวณ...</span>
+              </button>
               <select class="field" id="bannerSelect" aria-label="เลือกตู้กาชา"></select>
               <div class="summon-extra-row">
                 <label class="fast-toggle" title="เปิดแล้วสรุปผลทันที ไม่เด้งหน้าผลลัพธ์ทีละใบ">
@@ -2966,6 +3117,19 @@
       </div>
       <div class="reveal-list" id="revealList"></div>
       <button class="btn btn-primary" data-action="close-reveal">เก็บเข้าคอลเล็กชั่น</button>
+    </div>
+  </div>
+
+  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดระดับ SC">
+    <button class="sc-skip" data-action="skip-sc-cutscene">ข้ามคัทซีน</button>
+    <div class="sc-rift" aria-hidden="true"></div>
+    <div class="sc-comet" aria-hidden="true"></div>
+    <div class="sc-cutscene-stage">
+      <p class="sc-cutscene-kicker">Astral Convergence</p>
+      <h2 class="sc-cutscene-title">จักรวาลตอบรับ</h2>
+      <div class="sc-cutscene-card" id="scCutsceneCard"></div>
+      <h3 class="sc-cutscene-name" id="scCutsceneName">SC Character</h3>
+      <p class="sc-cutscene-copy" id="scCutsceneCopy">การ์ดระดับสูงสุดปรากฏตัวแล้ว</p>
     </div>
   </div>
 
@@ -4813,6 +4977,9 @@
     let activeRevealResults = [];
     let activeRevealIndex = 0;
     let returnToReveal = false;
+    let allInPullBusy = false;
+    let scCutsceneTimer = 0;
+    let scCutsceneFinish = null;
     // เพิ่มโดยอลิซ: สถานะเรียงลำดับคลังและหน้าต่างเลือกทีม
     let collectionSortMode = "power";
     let collectionSortDirection = "desc";
@@ -7426,29 +7593,40 @@
       return { current, every, remaining, progress, target };
     }
 
-    // เพิ่มโดยอลิซ: สรุปผลเปิดแบบเร็ว ไม่ต้อง render reveal ทีละใบ
-    function summarizePullResults(results = []) {
-      const total = results.length;
-      const newCount = results.filter(result => !result.duplicate).length;
-      const guaranteedCount = results.filter(result => result.guaranteed).length;
-      const totalDustEarned = results.reduce((sum, result) => sum + Math.max(0, Number(result.dustEarned) || 0), 0);
-      const maxAwakenConverted = results.reduce((sum, result) => sum + Math.max(0, Number(result.convertedCopies) || 0), 0);
-      const rarityCounts = results.reduce((acc, result) => {
+    // เพิ่มโดยอลิซ: สรุปผลเปิดแบบเร็ว รองรับการเทหน้าตักจำนวนมากโดยไม่ต้องเก็บผลทุกใบไว้ในหน่วยความจำ
+    function createPullSummaryStats() {
+      return { total: 0, newCount: 0, guaranteedCount: 0, totalDustEarned: 0, maxAwakenConverted: 0, rarityCounts: {} };
+    }
+
+    function addPullResultsToSummary(stats, results = []) {
+      results.forEach(result => {
+        stats.total += 1;
+        if (!result.duplicate) stats.newCount += 1;
+        if (result.guaranteed) stats.guaranteedCount += 1;
+        stats.totalDustEarned += Math.max(0, Number(result.dustEarned) || 0);
+        stats.maxAwakenConverted += Math.max(0, Number(result.convertedCopies) || 0);
         const rarity = result.card && result.card.rarity ? result.card.rarity : "?";
-        acc[rarity] = (acc[rarity] || 0) + 1;
-        return acc;
-      }, {});
-      const highRarityText = Object.entries(rarityCounts)
+        stats.rarityCounts[rarity] = (stats.rarityCounts[rarity] || 0) + 1;
+      });
+      return stats;
+    }
+
+    function summarizePullStats(stats) {
+      const highRarityText = Object.entries(stats.rarityCounts || {})
         .filter(([rarity]) => (RARITIES[rarity] || RARITIES.N).order >= RARITIES.SR.order)
         .sort((a, b) => ((RARITIES[b[0]] || RARITIES.N).order) - ((RARITIES[a[0]] || RARITIES.N).order))
         .map(([rarity, amount]) => `${rarity}×${amount}`)
         .join(" • ");
-      const parts = [`เปิด ${formatNumber(total)} ใบสำเร็จ`, `ใหม่ ${formatNumber(newCount)} ใบ`];
+      const parts = [`เปิด ${formatNumber(stats.total)} ใบสำเร็จ`, `ใหม่ ${formatNumber(stats.newCount)} ใบ`];
       if (highRarityText) parts.push(highRarityText);
-      if (totalDustEarned) parts.push(`Dust +${formatNumber(totalDustEarned)}`);
-      if (maxAwakenConverted) parts.push(`อเวกเต็มโบนัส x2 จำนวน ${formatNumber(maxAwakenConverted)} ใบ`);
-      if (guaranteedCount) parts.push(`การันตี ${formatNumber(guaranteedCount)} ใบ`);
+      if (stats.totalDustEarned) parts.push(`Dust +${formatNumber(stats.totalDustEarned)}`);
+      if (stats.maxAwakenConverted) parts.push(`อเวกเต็มโบนัส x2 จำนวน ${formatNumber(stats.maxAwakenConverted)} ใบ`);
+      if (stats.guaranteedCount) parts.push(`การันตี ${formatNumber(stats.guaranteedCount)} ใบ`);
       return parts.join(" • ");
+    }
+
+    function summarizePullResults(results = []) {
+      return summarizePullStats(addPullResultsToSummary(createPullSummaryStats(), results));
     }
 
     function getPullCost(times) {
@@ -7457,6 +7635,43 @@
       const tenSets = Math.floor(count / 10);
       const singles = count % 10;
       return (tenSets * Number(banner.tenPullCost || 0)) + (singles * Number(banner.singlePullCost || 0));
+    }
+
+    // เพิ่มโดยอลิซ: คำนวณจำนวนเปิดสูงสุด โดยเลือกแพ็ค x10 เมื่อคุ้มกว่าการเปิดเดี่ยว
+    function getAllInPullPlan(gems = state.gems, banner = getActiveBanner()) {
+      const available = Math.max(0, Math.floor(Number(gems) || 0));
+      const singleCost = Math.floor(Number(banner && banner.singlePullCost) || 0);
+      const tenCost = Math.floor(Number(banner && banner.tenPullCost) || 0);
+      if (available <= 0 || singleCost <= 0 || tenCost <= 0) return { count: 0, cost: 0, remaining: available };
+
+      let count = 0;
+      if (tenCost <= singleCost * 10) {
+        const tenSets = Math.floor(available / tenCost);
+        const remainder = available - (tenSets * tenCost);
+        count = (tenSets * 10) + Math.min(9, Math.floor(remainder / singleCost));
+      } else {
+        count = Math.floor(available / singleCost);
+      }
+
+      const cost = count > 0 ? getPullCost(count) : 0;
+      return { count, cost, remaining: Math.max(0, available - cost) };
+    }
+
+    function renderAllInButton() {
+      const button = document.getElementById("allInPullButton");
+      const costText = document.getElementById("allInCost");
+      if (!button || !costText) return;
+      const plan = getAllInPullPlan();
+      button.disabled = allInPullBusy || plan.count < 1;
+      button.setAttribute("aria-busy", allInPullBusy ? "true" : "false");
+      document.querySelectorAll('[data-action="pull"]').forEach(pullButton => { pullButton.disabled = allInPullBusy; });
+      const bannerSelect = document.getElementById("bannerSelect");
+      if (bannerSelect) bannerSelect.disabled = allInPullBusy;
+      costText.textContent = allInPullBusy
+        ? "กำลังเปิดและประมวลผล..."
+        : plan.count > 0
+          ? `${formatNumber(plan.count)} ใบ • ${formatNumber(plan.cost)} Gems`
+          : "Gems ไม่พอ";
     }
 
     // เพิ่มโดยอลิซ: หลังเปิดกาชาให้วาดเฉพาะส่วนที่เปลี่ยนจริง ไม่ renderAll() ทั้งเว็บ จึงเปิดได้ไวขึ้นมาก
@@ -7516,8 +7731,8 @@
       state.recent = results.slice(0, CONFIG.recentPullLimit).map(result => String(result.card.id));
       saveState(true);
       renderAfterPull();
-      if (count >= 10 || (document.getElementById("fastRevealToggle") || {}).checked) return showToast(summarizePullResults(results));
-      showReveal(results);
+      const useFastSummary = count >= 10 || Boolean((document.getElementById("fastRevealToggle") || {}).checked);
+      presentPullResults(results, useFastSummary);
     }
 
     function openPackWithBestGuaranteeTicket() {
@@ -7529,7 +7744,7 @@
       state.recent = results.map(result => String(result.card.id));
       saveState(true);
       renderAfterPull();
-      showReveal(results);
+      presentPullResults(results, false);
     }
 
     function useSelectorTicket(cardId) {
@@ -7575,7 +7790,7 @@
       renderAfterPull();
       renderInventory();
       closeInventory();
-      showReveal(results);
+      presentPullResults(results, false);
     }
 
     function openInventory() { renderInventory(); document.getElementById("inventoryModal").classList.remove("hidden"); document.body.style.overflow = "hidden"; }
@@ -7585,7 +7800,7 @@
     function closeItemSelector() { activeSelectorItemId = ""; document.getElementById("itemSelectorModal").classList.add("hidden"); restoreBodyScroll(); }
 
     function restoreBodyScroll() {
-      const openIds = ["teamPickerModal", "cardModal", "authModal", "profileModal", "revealScreen", "updateNoticeModal", "inventoryModal", "mailboxModal", "itemSelectorModal"];
+      const openIds = ["teamPickerModal", "cardModal", "authModal", "profileModal", "revealScreen", "scCutscene", "updateNoticeModal", "inventoryModal", "mailboxModal", "itemSelectorModal"];
       const anyOpen = openIds.some(id => { const node = document.getElementById(id); return node && !node.classList.contains("hidden"); });
       if (!anyOpen) document.body.style.overflow = "";
     }
@@ -7666,6 +7881,7 @@
     }
 
     function openPack(times) {
+      if (allInPullBusy) return showToast("กำลังเปิดแบบเทหน้าตักอยู่");
       updateIncome();
       const count = Math.max(1, Math.floor(Number(times) || 1));
       const cost = getPullCost(count);
@@ -7679,8 +7895,57 @@
 
       const fastToggle = document.getElementById("fastRevealToggle");
       const useFastSummary = count >= 50 || Boolean(fastToggle && fastToggle.checked);
-      if (useFastSummary) return showToast(summarizePullResults(results));
-      showReveal(results);
+      presentPullResults(results, useFastSummary);
+    }
+
+    // เพิ่มโดยอลิซ: เทหน้าตักแบบแบ่งประมวลผลเป็นชุด ลดโอกาสหน้าเว็บค้างเมื่อ Gems เยอะ
+    async function openAllInPack() {
+      if (allInPullBusy) return;
+      updateIncome();
+      const plan = getAllInPullPlan();
+      if (plan.count < 1 || plan.cost < 1) return showToast("Gems ไม่พอสำหรับเปิดกาชา");
+
+      allInPullBusy = true;
+      renderAllInButton();
+      const stats = createPullSummaryStats();
+      const recentIds = [];
+      const scResults = [];
+      let remaining = plan.count;
+      let processed = 0;
+
+      try {
+        while (remaining > 0) {
+          const chunkSize = Math.min(250, remaining);
+          state.gems -= getPullCost(chunkSize);
+          const chunkResults = pullCards(chunkSize);
+          addPullResultsToSummary(stats, chunkResults);
+          for (const result of chunkResults) {
+            if (recentIds.length < CONFIG.recentPullLimit) recentIds.push(String(result.card.id));
+            if (result.card && result.card.rarity === "SC" && scResults.length < 8) scResults.push(result);
+          }
+          remaining -= chunkSize;
+          processed += chunkSize;
+          const progressText = document.getElementById("allInCost");
+          if (progressText) progressText.textContent = `เปิดแล้ว ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
+          if (remaining > 0) await new Promise(resolve => requestAnimationFrame(resolve));
+        }
+
+        state.recent = recentIds;
+        saveState(true);
+        renderAfterPull();
+        const summary = summarizePullStats(stats);
+        const finish = () => showToast(summary);
+        if (!playSCCutscene(scResults, finish, Number(stats.rarityCounts.SC || 0))) finish();
+      } catch (error) {
+        console.error("All-in summon failed", error);
+        state.recent = recentIds;
+        saveState(true);
+        renderAfterPull();
+        showToast(`เปิดได้ ${formatNumber(processed)} ใบก่อนเกิดข้อผิดพลาด ระบบบันทึกผลที่ได้ไว้แล้ว`);
+      } finally {
+        allInPullBusy = false;
+        renderAllInButton();
+      }
     }
 
     function getLocalDateKey() {
@@ -8025,6 +8290,7 @@
       select.innerHTML = BANNERS.map(item => `<option value="${escapeHTML(item.id)}">${escapeHTML(item.name)}</option>`).join("");
       select.value = banner.id;
       renderGuaranteeStatus();
+      renderAllInButton();
     }
 
     function renderGuaranteeStatus() {
@@ -8055,6 +8321,7 @@
 
       document.getElementById("gemsText").textContent = formatNumber(state.gems);
       document.getElementById("dustText").textContent = formatNumber(state.dust);
+      renderAllInButton();
       document.getElementById("ticketsText").textContent = formatNumber(getTotalTicketCount());
       document.getElementById("ownedText").textContent = `${uniqueOwned}/${CARDS.length}`;
       document.getElementById("bankText").textContent = formatNumber(state.incomeBank);
@@ -9002,6 +9269,58 @@
       openProfileModal(profile);
     }
 
+    function finishSCCutscene() {
+      clearTimeout(scCutsceneTimer);
+      scCutsceneTimer = 0;
+      const screen = document.getElementById("scCutscene");
+      if (screen) {
+        screen.classList.remove("play");
+        screen.classList.add("hidden");
+      }
+      const done = scCutsceneFinish;
+      scCutsceneFinish = null;
+      restoreBodyScroll();
+      if (typeof done === "function") done();
+    }
+
+    function playSCCutscene(results = [], onComplete = null, totalSC = 0) {
+      const scResults = results.filter(result => result && result.card && result.card.rarity === "SC");
+      if (!scResults.length) return false;
+      const selected = scResults[0];
+      const screen = document.getElementById("scCutscene");
+      if (!screen) return false;
+      const art = getCardImage(selected.card);
+      const cardNode = document.getElementById("scCutsceneCard");
+      const nameNode = document.getElementById("scCutsceneName");
+      const copyNode = document.getElementById("scCutsceneCopy");
+      if (cardNode) cardNode.innerHTML = art
+        ? `<img src="${escapeHTML(art)}" alt="${escapeHTML(selected.card.name)}">`
+        : `<div style="height:100%;display:grid;place-items:center;font-size:4rem;font-weight:1000">SC</div>`;
+      if (nameNode) nameNode.textContent = selected.card.name;
+      const amount = Math.max(scResults.length, Math.floor(Number(totalSC) || 0));
+      if (copyNode) copyNode.textContent = amount > 1
+        ? `พลังระดับ SC ปรากฏ ${formatNumber(amount)} ใบในครั้งนี้`
+        : "การ์ดระดับ SC ได้ตอบรับการอัญเชิญของคุณ";
+
+      clearTimeout(scCutsceneTimer);
+      scCutsceneFinish = onComplete;
+      screen.classList.remove("hidden", "play");
+      void screen.offsetWidth;
+      screen.classList.add("play");
+      document.body.style.overflow = "hidden";
+      const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      scCutsceneTimer = setTimeout(finishSCCutscene, reducedMotion ? 900 : 4900);
+      return true;
+    }
+
+    function presentPullResults(results = [], useFastSummary = false) {
+      const finish = () => {
+        if (useFastSummary) showToast(summarizePullResults(results));
+        else showReveal(results);
+      };
+      if (!playSCCutscene(results, finish)) finish();
+    }
+
     function renderRevealSelection(index) {
       if (!activeRevealResults.length) return;
       activeRevealIndex = (Number(index) + activeRevealResults.length) % activeRevealResults.length;
@@ -9158,6 +9477,7 @@
       const cardId = target.dataset.cardId;
       const friendId = target.dataset.friendId;
       if (action === "pull") openPack(Number(target.dataset.times) || 1);
+      if (action === "pull-all-in") openAllInPack();
       if (action === "pull-ticket") openPackWithNormalTickets(Number(target.dataset.times) || 1);
       if (action === "pull-guarantee-ticket") openPackWithBestGuaranteeTicket();
       if (action === "use-selector") useSelectorTicket(cardId);
@@ -9209,6 +9529,7 @@
       if (action === "open-update-notice") openUpdateNotice(true, "news");
       if (action === "close-update-notice") closeUpdateNotice();
       if (action === "close-reveal") closeReveal();
+      if (action === "skip-sc-cutscene") finishSCCutscene();
       if (action === "select-reveal-card") renderRevealSelection(Number(target.dataset.revealIndex) || 0);
       if (action === "previous-reveal-card") renderRevealSelection(activeRevealIndex - 1);
       if (action === "next-reveal-card") renderRevealSelection(activeRevealIndex + 1);
@@ -9287,7 +9608,8 @@
 
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
-      if (!document.getElementById("itemSelectorModal").classList.contains("hidden")) closeItemSelector();
+      if (!document.getElementById("scCutscene").classList.contains("hidden")) finishSCCutscene();
+      else if (!document.getElementById("itemSelectorModal").classList.contains("hidden")) closeItemSelector();
       else if (!document.getElementById("inventoryModal").classList.contains("hidden")) closeInventory();
       else if (!document.getElementById("mailboxModal").classList.contains("hidden")) closeMailbox();
       else if (!document.getElementById("updateNoticeModal").classList.contains("hidden")) closeUpdateNotice();
