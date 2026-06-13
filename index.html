@@ -3610,12 +3610,13 @@
     "poster": "1041.png",
     "ability": {
       "name": "Strongest in Present",
-      "description": "เมื่อการ์ดนี้อยู่ในทีมและทีมมีทั้งธาตุน้ำกับเหล็ก เพิ่มพลังรวมของฝ่ายเรา พร้อมเพิ่มพลังให้ตัวเอง",
+      "description": "เมื่อการ์ดนี้อยู่ในทีมและทีมมีทั้งธาตุน้ำกับเหล็ก เพิ่มพลังรวมของฝ่ายเรา15% พร้อมเพิ่มพลังให้ตัวเอง30%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "requiredElements": ["น้ำ", "เหล็ก"] },
+      "condition": { "requiredElements": ["น้ำ", "เหล็ก"]
+                     "minElementCount": { "น้ำ": 2, "เหล็ก": 2 } },
       "effects": [
         { "type": "teamPowerRate", "value": 0.15 },
-        { "type": "selfPowerRate", "value": 0.20 }
+        { "type": "selfPowerRate", "value": 0.30 }
       ]
     }
   },
@@ -3635,12 +3636,13 @@
     "icon": "",
     "image": "1042.png",
     "video": "1042.mp4",
-    "poster": "1042.png",
+    "poster": "1042.png"
      "ability": {
       "name": "Strongest in Present",
       "description": "เมื่อการ์ดนี้อยู่ในทีมและทีมมีทั้งธาตุมืดกับมิติ เพิ่มพลังรวมของฝ่ายเรา15% พร้อมลดพลังทีมฝั่งตรงข้าม20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "requiredElements": ["ความมืด", "มิติ"] },
+      "condition": { "requiredElements": ["ความมืด", "มิติ"],
+                     "minElementCount": { "ความมืด": 2, "มิติ": 2 } },
       "effects": [
         { "type": "teamPowerRate", "value": 0.15 },
         { "type": "enemyPowerRate", "value": -0.20 }
