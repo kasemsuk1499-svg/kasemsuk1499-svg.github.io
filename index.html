@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-13-team-element-awaken-plus-v12">
+  <meta name="gacha-app-build" content="2026-06-13-card-abilities-separated-v13">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1878,6 +1878,82 @@
       background: rgba(3,5,12,.76);
     }
 
+    /* =====================================================================
+       [UI-CARD-ABILITY] หน้าต่างความสามารถเฉพาะการ์ด
+       - แก้เฉพาะหน้าตาได้ในส่วนนี้ โดยไม่กระทบสูตรคำนวณ
+       ===================================================================== */
+    .card-ability-panel {
+      display: grid;
+      gap: 10px;
+      margin: 0 0 20px;
+      padding: 14px;
+      border: 1px solid rgba(167,139,250,.24);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(167,139,250,.12), transparent 38%),
+        rgba(255,255,255,.035);
+    }
+
+    .card-ability-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-ability-panel-head h3 { margin: 0; font-size: 1rem; }
+    .card-ability-panel-head span { color: var(--muted); font-size: .68rem; font-weight: 900; }
+    .card-ability-list { display: grid; gap: 9px; }
+
+    .card-ability-item {
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 15px;
+      background: rgba(3,5,12,.38);
+    }
+
+    .card-ability-item.active {
+      border-color: rgba(86,227,159,.36);
+      box-shadow: inset 0 0 0 1px rgba(86,227,159,.05), 0 0 20px rgba(86,227,159,.08);
+    }
+
+    .card-ability-item.inactive { opacity: .78; }
+    .card-ability-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .card-ability-title-row strong { color: #f8fafc; font-size: .86rem; }
+
+    .card-ability-status {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 4px 7px;
+      color: var(--muted);
+      font-size: .58rem;
+      font-weight: 1000;
+      background: rgba(255,255,255,.06);
+    }
+
+    .card-ability-item.active .card-ability-status { color: #071019; background: var(--green); }
+    .card-ability-description { margin: 7px 0 0; color: #cbd5e1; font-size: .74rem; line-height: 1.55; }
+    .card-ability-condition { margin: 8px 0 0; color: var(--gold); font-size: .66rem; line-height: 1.45; }
+    .card-ability-effects { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+
+    .card-ability-effect {
+      border: 1px solid rgba(92,232,255,.18);
+      border-radius: 999px;
+      padding: 5px 8px;
+      color: #dbeafe;
+      font-size: .62rem;
+      font-weight: 900;
+      background: rgba(92,232,255,.07);
+    }
+
+    .card-ability-effect.negative {
+      border-color: rgba(251,113,133,.25);
+      color: #fecdd3;
+      background: rgba(190,24,93,.12);
+    }
+
+    .team-ability-summary { margin-top: 10px; }
+
     .detail {
       display: grid;
       grid-template-columns: minmax(260px, .8fr) minmax(320px, 1.2fr);
@@ -3033,6 +3109,19 @@
     };
     const SAFE_SESSION = SAFE_STORAGE;
 
+    /* =====================================================================
+       แผนที่ส่วนพัฒนา — กดค้นหาชื่อ [SECTION ...] เพื่อข้ามไปแก้ได้ทันที
+       [SECTION 01 GAME-SCALE]       ค่าตั้งต้นและสเกลระบบหลัก
+       [SECTION 02 RARITY-COLORS]    สี/สเตตัส/สเกลของระดับการ์ด
+       [SECTION 03 ELEMENT-SYSTEM]   ธาตุ สีธาตุ แพ้ทาง และคอมโบ
+       [SECTION 04 GACHA-BANNERS]    ตู้กาชา ราคา เรท และการันตี
+       [SECTION 05 CARD-ABILITIES]   ตัวเลือกคำสั่งความสามารถเฉพาะการ์ด
+       [SECTION 06 CARD-DATA]        ข้อมูลการ์ดแต่ละใบ
+       [SECTION 07 CARD-CALC]        สูตรพลัง รายได้ และความสามารถทีม
+       [SECTION 08 CARD-DETAIL-UI]   หน้ารายละเอียดการ์ด
+       ===================================================================== */
+
+    /* ======================= [SECTION 01 GAME-SCALE] ======================= */
     const CONFIG = Object.freeze({
       saveKey: "anime_card_collection_accs_e2875_fresh_v1",
       cloudUsernameKey: "anime_card_cloud_username_accs_e2875_fresh_v1",
@@ -3051,9 +3140,9 @@
       powerGrowth: 0.015,
       incomeGrowth: 0.008,
       battleMaxEnergy: 50,
-      battleEnergyRegenMs: 9 * 60 * 1000,
-      friendSupportRate: 0.10,
-      friendSupportCapRate: 0.25,
+      battleEnergyRegenMs: 3 * 60 * 1000,
+      friendSupportRate: 0.50,
+      friendSupportCapRate: 0.55,
       profilePhotoMaxBytes: 420 * 1024,
       // เพิ่มโดยอลิซ: จำกัดจำนวนการ์ดล่าสุดที่วาดบนหน้าเว็บ เพื่อให้เปิด x50/x100 แล้วไม่หน่วง
       recentPullLimit: 30,
@@ -3094,15 +3183,15 @@
     const ARENA_CONFIG = Object.freeze({
       winPoints: 25,
       losePoints: 10,
-      realPlayerChance: 0.55,
+      realPlayerChance: 0.15,
       rankingRewards: [
-        { minRank: 1, maxRank: 1, selector: { rarity: "EX", amount: 1 }, gems: 500000, dust: 50000 },
-        { minRank: 2, maxRank: 2, selector: { rarity: "LR", amount: 3 }, gems: 350000, dust: 35000 },
-        { minRank: 3, maxRank: 3, selector: { rarity: "LR", amount: 2 }, gems: 250000, dust: 25000 },
-        { minRank: 4, maxRank: 10, gems: 180000, dust: 18000 },
-        { minRank: 11, maxRank: 50, gems: 120000, dust: 12000 },
-        { minRank: 51, maxRank: 100, gems: 80000, dust: 8000 },
-        { minRank: 101, maxRank: Infinity, gems: 50000, dust: 5000 }
+        { minRank: 1, maxRank: 1, selector: { rarity: "EX", amount: 1 }, gems: 1000000000, dust: 50000000 },
+        { minRank: 2, maxRank: 2, selector: { rarity: "LR", amount: 3 }, gems: 350000000, dust: 35000000 },
+        { minRank: 3, maxRank: 3, selector: { rarity: "LR", amount: 2 }, gems: 250000000, dust: 25000000 },
+        { minRank: 4, maxRank: 10, gems: 18000000, dust: 1800000 },
+        { minRank: 11, maxRank: 50, gems: 12000000, dust: 1200000 },
+        { minRank: 51, maxRank: 100, gems: 8000000, dust: 800000 },
+        { minRank: 101, maxRank: Infinity, gems: 5000000, dust: 500000 }
       ]
     });
 
@@ -3178,6 +3267,7 @@
       - glow = สีแสงเรืองรอบการ์ด
       - textColor = สีตัวอักษรบนป้ายแรร์ เพื่อให้อ่านง่ายบน gradient
     */
+    /* ===================== [SECTION 02 RARITY-COLORS] ===================== */
     const RARITIES = Object.freeze({
       N:   { label: "N",   color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,     basePower: 1000,   baseIncome: 35,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015,  incomePerLevel: .008,  awakenMax: 13, awakenCopies: [1,1,1,2,2,3,3,4,5,6,7,8,10], powerBonus: .07, incomeBonus: .05 },
       R:   { label: "R",   color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,    basePower: 2600,   baseIncome: 80,    maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016,  incomePerLevel: .0085, awakenMax: 11, awakenCopies: [1,1,2,2,3,3,4,5,6,7,8], powerBonus: .09, incomeBonus: .06 },
@@ -3199,6 +3289,7 @@
       รายชื่อที่ระบบรับ: ดิน, น้ำ, ลม, ไฟ, สายฟ้า, น้ำแข็ง, เหล็ก, พืช, แสง, ความมืด, มิติ, ไร้ธาตุ
       ถ้าการ์ดเดิมใส่ None / Water / Ice / คำอังกฤษ / คำอื่น ระบบจะแปลงเท่าที่รู้จัก ไม่รู้จักจะถือเป็น "ไร้ธาตุ" เพื่อกันคอมโบผิดพลาด
     */
+    /* ===================== [SECTION 03 ELEMENT-SYSTEM] ===================== */
     const THAI_ELEMENTS = Object.freeze(["ดิน", "น้ำ", "ลม", "ไฟ", "สายฟ้า", "น้ำแข็ง", "เหล็ก", "พืช", "แสง", "ความมืด", "มิติ", "ไร้ธาตุ"]);
     const THAI_ELEMENT_SET = new Set(THAI_ELEMENTS);
 
@@ -3261,6 +3352,7 @@
       { key: "eclipse", name: "สุริยันจันทราข้ามมิติ", required: ["แสง", "ความมืด", "มิติ"], powerRate: 0.25, incomeRate: 0.10, note: "มี แสง+ความมืด+มิติ" }
     ]);
 
+    /* ===================== [SECTION 04 GACHA-BANNERS] ====================== */
     const BANNERS = [
   {
     "id": "standard",
@@ -3337,6 +3429,69 @@
     }
   }
 ];
+    /* =====================================================================
+       [SECTION 05 CARD-ABILITIES] ตัวเลือกคำสั่งความสามารถเฉพาะการ์ด
+
+       ใส่ ability หรือ abilities ไว้ในข้อมูลการ์ดแต่ละใบ เช่น:
+
+       "ability": {
+         "name": "ชื่อสกิล",
+         "description": "คำอธิบายที่คุณเขียนเอง",
+         "activeIn": ["team", "tower", "arena"],
+         "condition": {
+           "requiredElements": ["ไฟ", "สายฟ้า"],
+           "minElementCount": { "ไฟ": 2 },
+           "requiredRarities": ["EX"],
+           "minRarityCount": { "LR": 2 },
+           "minUniqueElements": 3,
+           "minTeamSize": 5,
+           "leaderOnly": false,
+           "sourceMinLevel": 1,
+           "sourceMinAwaken": 0,
+           "requiredCardIds": [1041],
+           "anyCardIds": [1042, 1043]
+         },
+         "effects": [
+           { "type": "teamPowerRate", "value": 0.20 },
+           { "type": "teamIncomeRate", "value": 0.15 },
+           { "type": "enemyPowerRate", "value": -0.10 },
+           { "type": "luckRate", "value": 0.12 },
+           { "type": "selfPowerRate", "value": 0.25 },
+           { "type": "rarityPowerRate", "value": 0.18, "targetRarities": ["EX", "SC"] },
+           { "type": "rarityIncomeRate", "value": 0.12, "targetRarities": ["LR"] },
+           { "type": "elementPowerRate", "value": 0.10, "targetElements": ["ไฟ", "สายฟ้า"] },
+           { "type": "elementIncomeRate", "value": 0.08, "targetElements": ["น้ำ", "พืช"] },
+           { "type": "teamPowerFlat", "value": 50000 },
+           { "type": "teamIncomeFlat", "value": 500 }
+         ]
+       }
+
+       หมายเหตุสำคัญ
+       - value 0.20 = +20%, value -0.10 = -10%
+       - enemyPowerRate ใช้ค่าติดลบเพื่อลดพลังฝ่ายตรงข้าม
+       - luckRate เพิ่มโอกาสสุ่มค่าต่อสู้ฝั่งเรา ไม่แก้เรทกาชา
+       - effect แต่ละรายการใส่ condition ของตัวเองเพิ่มได้
+       - activeIn: team = ทีมโชว์/รายได้, tower = ไต่หอ, arena = อารีน่า
+       - ไม่มี ability ก็เล่นได้ตามปกติ ไม่ต้องแก้ข้อมูลการ์ดเก่า
+       ===================================================================== */
+    const CARD_ABILITY_EFFECT_TYPES = Object.freeze({
+      TEAM_POWER_RATE: "teamPowerRate",
+      TEAM_INCOME_RATE: "teamIncomeRate",
+      ENEMY_POWER_RATE: "enemyPowerRate",
+      LUCK_RATE: "luckRate",
+      SELF_POWER_RATE: "selfPowerRate",
+      SELF_INCOME_RATE: "selfIncomeRate",
+      RARITY_POWER_RATE: "rarityPowerRate",
+      RARITY_INCOME_RATE: "rarityIncomeRate",
+      ELEMENT_POWER_RATE: "elementPowerRate",
+      ELEMENT_INCOME_RATE: "elementIncomeRate",
+      TEAM_POWER_FLAT: "teamPowerFlat",
+      TEAM_INCOME_FLAT: "teamIncomeFlat"
+    });
+
+    const CARD_ABILITY_MODES = Object.freeze(["team", "tower", "arena"]);
+
+    /* ======================== [SECTION 06 CARD-DATA] ======================== */
     const CARDS = [
   {
     "id": 0,
@@ -3352,7 +3507,17 @@
     "image": "0.png",
     "poster": "0.png",
     "video": "0.mp4",
-    "overlay": "overlay.mp4"
+    "overlay": "overlay.mp4",
+    "ability": {
+      "name": "Developer Authority",
+      "description": "เมื่อ DEV. อยู่ในทีม เพิ่มพลังฝ่ายเราและกดพลังฝ่ายตรงข้าม หากทีมมีทั้งความมืดและมิติจะได้รับค่าโชคเพิ่ม",
+      "activeIn": ["team", "tower", "arena"],
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.20 },
+        { "type": "enemyPowerRate", "value": -0.10 },
+        { "type": "luckRate", "value": 0.15, "condition": { "requiredElements": ["ความมืด", "มิติ"] } }
+      ]
+    }
   },
   {
     "id": 999,
@@ -3367,7 +3532,16 @@
     "icon": "",
     "image": "999.png",
     "video": "999.mp4",
-    "poster": "999.png"
+    "poster": "999.png",
+    "ability": {
+      "name": "Creative Overdrive",
+      "description": "เมื่ออยู่ในทีม เพิ่มรายได้รวม และเสริมพลังให้การ์ดธาตุสายฟ้าหรือลมเมื่อมีทั้งสองธาตุในทีม",
+      "activeIn": ["team", "tower", "arena"],
+      "effects": [
+        { "type": "teamIncomeRate", "value": 0.25 },
+        { "type": "elementPowerRate", "value": 0.12, "targetElements": ["สายฟ้า", "ลม"], "condition": { "requiredElements": ["สายฟ้า", "ลม"] } }
+      ]
+    }
   },
   {
     "id": 1000,
@@ -3382,7 +3556,16 @@
     "icon": "",
     "image": "1000.png",
     "video": "1000.mp4",
-    "poster": "1000.png"
+    "poster": "1000.png",
+    "ability": {
+      "name": "Grand Arcana",
+      "description": "เมื่ออยู่ในทีม เพิ่มตัวคูณพลังและรายได้ให้การ์ดระดับ SC ทุกใบในทีม",
+      "activeIn": ["team", "tower", "arena"],
+      "effects": [
+        { "type": "rarityPowerRate", "value": 0.30, "targetRarities": ["SC"] },
+        { "type": "rarityIncomeRate", "value": 0.20, "targetRarities": ["SC"] }
+      ]
+    }
   },
   {
     "id": 2000,
@@ -3397,7 +3580,16 @@
     "icon": "",
     "image": "2000.png",
     "video": "2000.mp4",
-    "poster": "2000.png"
+    "poster": "2000.png",
+    "ability": {
+      "name": "Fortune of the Deep",
+      "description": "เมื่ออยู่ในทีม เพิ่มค่าโชคในการต่อสู้ และหากทีมมีธาตุไม่ซ้ำอย่างน้อย 4 ธาตุจะลดพลังฝ่ายตรงข้ามเพิ่มเติม",
+      "activeIn": ["tower", "arena"],
+      "effects": [
+        { "type": "luckRate", "value": 0.25 },
+        { "type": "enemyPowerRate", "value": -0.08, "condition": { "minUniqueElements": 4 } }
+      ]
+    }
   },
   {
     "id": 1041,
@@ -3415,7 +3607,17 @@
     "icon": "",
     "image": "1041.png",
     "video": "1041.mp4",
-    "poster": "1041.png"
+    "poster": "1041.png",
+    "ability": {
+      "name": "Strongest in Present",
+      "description": "เมื่อการ์ดนี้อยู่ในทีมและทีมมีทั้งธาตุน้ำกับเหล็ก เพิ่มพลังรวมของฝ่ายเรา พร้อมเพิ่มพลังให้ตัวเอง",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "requiredElements": ["น้ำ", "เหล็ก"] },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.15 },
+        { "type": "selfPowerRate", "value": 0.20 }
+      ]
+    }
   },
   {
     "id": 1042,
@@ -3434,6 +3636,16 @@
     "image": "1042.png",
     "video": "1042.mp4",
     "poster": "1042.png"
+     "ability": {
+      "name": "Strongest in Present",
+      "description": "เมื่อการ์ดนี้อยู่ในทีมและทีมมีทั้งธาตุมืดกับมิติ เพิ่มพลังรวมของฝ่ายเรา15% พร้อมลดพลังทีมฝั่งตรงข้าม20%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "requiredElements": ["ความมืด", "มิติ"] },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.15 },
+        { "type": "enemyPowerRate", "value": -0.20 }
+      ]
+    }
   },
   {
     "id": 1043,
@@ -5666,6 +5878,329 @@
         .join(";");
     }
 
+    /* ======================== [SECTION 07 CARD-CALC] ======================== */
+    function abilityArray(value) {
+      if (Array.isArray(value)) return value;
+      if (value === undefined || value === null || value === "") return [];
+      return [value];
+    }
+
+    function normalizeAbilityElements(value) {
+      const unique = [];
+      splitElementValue(value).forEach(item => {
+        const element = normalizeElementName(item);
+        if (!unique.includes(element)) unique.push(element);
+      });
+      return unique;
+    }
+
+    function normalizeAbilityRarities(value) {
+      return [...new Set(abilityArray(value)
+        .flatMap(item => String(item || "").split(/\s*(?:,|\||\+|\/|&|•)\s*/))
+        .map(item => String(item || "").trim().toUpperCase())
+        .filter(item => Boolean(RARITIES[item]))
+      )];
+    }
+
+    function normalizeAbilityCardIds(value) {
+      return [...new Set(abilityArray(value).map(item => String(item)).filter(Boolean))];
+    }
+
+    function getCardAbilities(card) {
+      if (!card) return [];
+      const source = Array.isArray(card.abilities) ? card.abilities : (card.ability ? [card.ability] : []);
+      return source.filter(item => item && typeof item === "object");
+    }
+
+    function getAbilityModes(ability) {
+      const modes = abilityArray(ability && ability.activeIn).map(item => String(item || "").trim().toLowerCase()).filter(Boolean);
+      return modes.length ? modes : CARD_ABILITY_MODES.slice();
+    }
+
+    function buildAbilityContext(teamIds = state.team, mode = "team") {
+      const ids = abilityArray(teamIds).map(id => String(id));
+      const cards = ids.map(id => CARD_BY_ID.get(id)).filter(Boolean);
+      const elementCounts = Object.fromEntries(THAI_ELEMENTS.map(element => [element, 0]));
+      const rarityCounts = Object.fromEntries(Object.keys(RARITIES).map(rarity => [rarity, 0]));
+      cards.forEach(card => {
+        getCardElements(card).forEach(element => { elementCounts[element] = (elementCounts[element] || 0) + 1; });
+        rarityCounts[card.rarity] = (rarityCounts[card.rarity] || 0) + 1;
+      });
+      return {
+        mode: String(mode || "team").toLowerCase(),
+        ids,
+        cards,
+        teamSize: cards.length,
+        leaderId: ids[0] || "",
+        elementCounts,
+        rarityCounts,
+        uniqueElements: THAI_ELEMENTS.filter(element => elementCounts[element] > 0),
+        cardIdSet: new Set(ids)
+      };
+    }
+
+    function isAbilityConditionMet(condition = {}, context, sourceCard) {
+      const rule = condition && typeof condition === "object" ? condition : {};
+      if (!context || !sourceCard || !context.cardIdSet.has(String(sourceCard.id))) return false;
+
+      const allowedModes = abilityArray(rule.mode || rule.modes).map(item => String(item || "").toLowerCase()).filter(Boolean);
+      if (allowedModes.length && !allowedModes.includes(context.mode)) return false;
+      if (Number(rule.minTeamSize || 0) > context.teamSize) return false;
+      if (Number(rule.maxTeamSize || Infinity) < context.teamSize) return false;
+      if (rule.leaderOnly && String(context.leaderId) !== String(sourceCard.id)) return false;
+
+      const requiredElements = normalizeAbilityElements(rule.requiredElements);
+      if (requiredElements.some(element => Number(context.elementCounts[element] || 0) < 1)) return false;
+      const anyElements = normalizeAbilityElements(rule.anyElements);
+      if (anyElements.length && !anyElements.some(element => Number(context.elementCounts[element] || 0) > 0)) return false;
+      if (Number(rule.minUniqueElements || 0) > context.uniqueElements.length) return false;
+
+      for (const [elementRaw, amountRaw] of Object.entries(rule.minElementCount || {})) {
+        const element = normalizeElementName(elementRaw);
+        if (Number(context.elementCounts[element] || 0) < Math.max(1, Number(amountRaw) || 1)) return false;
+      }
+
+      const requiredRarities = normalizeAbilityRarities(rule.requiredRarities);
+      if (requiredRarities.some(rarity => Number(context.rarityCounts[rarity] || 0) < 1)) return false;
+      const anyRarities = normalizeAbilityRarities(rule.anyRarities);
+      if (anyRarities.length && !anyRarities.some(rarity => Number(context.rarityCounts[rarity] || 0) > 0)) return false;
+
+      for (const [rarityRaw, amountRaw] of Object.entries(rule.minRarityCount || {})) {
+        const rarity = String(rarityRaw || "").toUpperCase();
+        if (Number(context.rarityCounts[rarity] || 0) < Math.max(1, Number(amountRaw) || 1)) return false;
+      }
+
+      const requiredCardIds = normalizeAbilityCardIds(rule.requiredCardIds);
+      if (requiredCardIds.some(id => !context.cardIdSet.has(id))) return false;
+      const anyCardIds = normalizeAbilityCardIds(rule.anyCardIds);
+      if (anyCardIds.length && !anyCardIds.some(id => context.cardIdSet.has(id))) return false;
+
+      const owned = getOwned(sourceCard.id);
+      if (Number(rule.sourceMinLevel || 0) > Number(owned && owned.level || 1)) return false;
+      if (Number(rule.sourceMinAwaken || 0) > Number(owned && owned.duplicateRank || 0)) return false;
+      return true;
+    }
+
+    function addAbilityMapRate(map, keys, value) {
+      abilityArray(keys).forEach(key => {
+        const safeKey = String(key || "");
+        if (!safeKey) return;
+        map[safeKey] = Number(map[safeKey] || 0) + value;
+      });
+    }
+
+    function getTeamAbilitySummary(teamIds = state.team, mode = "team") {
+      const context = buildAbilityContext(teamIds, mode);
+      const summary = {
+        context,
+        teamPowerRate: 0,
+        teamIncomeRate: 0,
+        enemyPowerRate: 0,
+        luckRate: 0,
+        teamPowerFlat: 0,
+        teamIncomeFlat: 0,
+        selfPowerRates: {},
+        selfIncomeRates: {},
+        rarityPowerRates: {},
+        rarityIncomeRates: {},
+        elementPowerRates: {},
+        elementIncomeRates: {},
+        activeAbilities: [],
+        inactiveAbilities: []
+      };
+
+      context.cards.forEach(sourceCard => {
+        getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
+          const modes = getAbilityModes(ability);
+          const baseActive = modes.includes(context.mode) && isAbilityConditionMet(ability.condition || {}, context, sourceCard);
+          const activeEffects = [];
+          const inactiveEffects = [];
+
+          abilityArray(ability.effects).forEach(effect => {
+            if (!effect || typeof effect !== "object") return;
+            const effectActive = baseActive && isAbilityConditionMet(effect.condition || {}, context, sourceCard);
+            const value = Number(effect.value || 0);
+            const record = { ...effect, value };
+            if (!effectActive) {
+              inactiveEffects.push(record);
+              return;
+            }
+            activeEffects.push(record);
+            switch (effect.type) {
+              case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE: summary.teamPowerRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_RATE: summary.teamIncomeRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE: summary.enemyPowerRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE: summary.luckRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT: summary.teamPowerFlat += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT: summary.teamIncomeFlat += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
+                addAbilityMapRate(summary.selfPowerRates, [String(sourceCard.id)], value);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE:
+                addAbilityMapRate(summary.selfIncomeRates, [String(sourceCard.id)], value);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.RARITY_POWER_RATE:
+                addAbilityMapRate(summary.rarityPowerRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.RARITY_INCOME_RATE:
+                addAbilityMapRate(summary.rarityIncomeRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.ELEMENT_POWER_RATE:
+                addAbilityMapRate(summary.elementPowerRates, normalizeAbilityElements(effect.targetElements || effect.elements), value);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.ELEMENT_INCOME_RATE:
+                addAbilityMapRate(summary.elementIncomeRates, normalizeAbilityElements(effect.targetElements || effect.elements), value);
+                break;
+              default:
+                console.warn("Unknown card ability effect type:", effect.type, sourceCard.name);
+            }
+          });
+
+          const entry = {
+            key: `${sourceCard.id}:${abilityIndex}`,
+            sourceCard,
+            ability,
+            modes,
+            active: baseActive && activeEffects.length > 0,
+            activeEffects,
+            inactiveEffects
+          };
+          (entry.active ? summary.activeAbilities : summary.inactiveAbilities).push(entry);
+        });
+      });
+
+      summary.teamPowerRate = Math.max(-0.90, summary.teamPowerRate);
+      summary.teamIncomeRate = Math.max(-0.90, summary.teamIncomeRate);
+      summary.enemyPowerRate = Math.max(-0.90, summary.enemyPowerRate);
+      summary.luckRate = Math.max(-0.75, Math.min(2, summary.luckRate));
+      return summary;
+    }
+
+    function getAbilityAdjustedCardPower(card, abilitySummary) {
+      const summary = abilitySummary || getTeamAbilitySummary();
+      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementPowerRates[element] || 0), 0);
+      const rate = Number(summary.selfPowerRates[String(card.id)] || 0)
+        + Number(summary.rarityPowerRates[card.rarity] || 0)
+        + elementRate;
+      return getCardPower(card) * Math.max(0, 1 + rate);
+    }
+
+    function getAbilityAdjustedCardIncome(card, abilitySummary) {
+      const summary = abilitySummary || getTeamAbilitySummary();
+      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementIncomeRates[element] || 0), 0);
+      const rate = Number(summary.selfIncomeRates[String(card.id)] || 0)
+        + Number(summary.rarityIncomeRates[card.rarity] || 0)
+        + elementRate;
+      return getCardIncome(card) * Math.max(0, 1 + rate);
+    }
+
+    function signedPercent(value) {
+      const percent = Math.round(Number(value || 0) * 1000) / 10;
+      return `${percent > 0 ? "+" : ""}${percent}%`;
+    }
+
+    function abilityEffectText(effect) {
+      const value = Number(effect && effect.value || 0);
+      const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).join("/") || "ที่กำหนด";
+      const elementText = normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).map(elementLabel).join(" + ") || "ที่กำหนด";
+      const labels = {
+        teamPowerRate: `พลังฝ่ายเรา ${signedPercent(value)}`,
+        teamIncomeRate: `รายได้ฝ่ายเรา ${signedPercent(value)}`,
+        enemyPowerRate: `พลังฝ่ายตรงข้าม ${signedPercent(value)}`,
+        luckRate: `ค่าโชค ${signedPercent(value)}`,
+        selfPowerRate: `พลังของการ์ดนี้ ${signedPercent(value)}`,
+        selfIncomeRate: `รายได้ของการ์ดนี้ ${signedPercent(value)}`,
+        rarityPowerRate: `พลังระดับ ${rarityText} ${signedPercent(value)}`,
+        rarityIncomeRate: `รายได้ระดับ ${rarityText} ${signedPercent(value)}`,
+        elementPowerRate: `พลังธาตุ ${elementText} ${signedPercent(value)}`,
+        elementIncomeRate: `รายได้ธาตุ ${elementText} ${signedPercent(value)}`,
+        teamPowerFlat: `พลังทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
+        teamIncomeFlat: `รายได้ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}/s`
+      };
+      return labels[effect && effect.type] || `${effect && effect.type || "effect"}: ${value}`;
+    }
+
+    function abilityConditionText(condition = {}) {
+      const parts = [];
+      const requiredElements = normalizeAbilityElements(condition.requiredElements);
+      if (requiredElements.length) parts.push(`ต้องมี ${requiredElements.map(elementLabel).join(" + ")}`);
+      const anyElements = normalizeAbilityElements(condition.anyElements);
+      if (anyElements.length) parts.push(`มีอย่างน้อยหนึ่งธาตุจาก ${anyElements.map(elementLabel).join(" / ")}`);
+      Object.entries(condition.minElementCount || {}).forEach(([element, amount]) => parts.push(`${elementLabel(element)} อย่างน้อย ${Math.max(1, Number(amount) || 1)} แหล่ง`));
+      const requiredRarities = normalizeAbilityRarities(condition.requiredRarities);
+      if (requiredRarities.length) parts.push(`ต้องมีระดับ ${requiredRarities.join(" + ")}`);
+      Object.entries(condition.minRarityCount || {}).forEach(([rarity, amount]) => parts.push(`ระดับ ${String(rarity).toUpperCase()} อย่างน้อย ${Math.max(1, Number(amount) || 1)} ใบ`));
+      if (Number(condition.minUniqueElements || 0) > 0) parts.push(`ธาตุไม่ซ้ำอย่างน้อย ${Number(condition.minUniqueElements)} ธาตุ`);
+      if (Number(condition.minTeamSize || 0) > 0) parts.push(`ทีมอย่างน้อย ${Number(condition.minTeamSize)} ใบ`);
+      if (condition.leaderOnly) parts.push("การ์ดนี้ต้องอยู่ช่องหัวหน้าทีม");
+      if (Number(condition.sourceMinLevel || 0) > 1) parts.push(`เลเวลการ์ดนี้อย่างน้อย ${Number(condition.sourceMinLevel)}`);
+      if (Number(condition.sourceMinAwaken || 0) > 0) parts.push(`อเวกการ์ดนี้อย่างน้อย +${Number(condition.sourceMinAwaken)}`);
+      const requiredIds = normalizeAbilityCardIds(condition.requiredCardIds);
+      if (requiredIds.length) parts.push(`ต้องมีการ์ด ID ${requiredIds.join(", ")}`);
+      const anyIds = normalizeAbilityCardIds(condition.anyCardIds);
+      if (anyIds.length) parts.push(`มีการ์ดอย่างน้อยหนึ่งใบจาก ID ${anyIds.join(", ")}`);
+      return parts.length ? parts.join(" • ") : "เพียงจัดการ์ดนี้อยู่ในทีม";
+    }
+
+    function cardAbilitiesHTML(card) {
+      const abilities = getCardAbilities(card);
+      if (!abilities.length) {
+        return `
+          <div class="card-ability-panel">
+            <div class="card-ability-panel-head"><h3>ความสามารถเฉพาะการ์ด</h3><span>ยังไม่ได้กำหนด</span></div>
+            <div class="card-ability-item inactive">
+              <div class="card-ability-title-row"><strong>รอเพิ่มความสามารถ</strong><span class="card-ability-status">DATA</span></div>
+              <p class="card-ability-description">เพิ่มฟิลด์ ability หรือ abilities ในข้อมูลการ์ดใบนี้ได้จาก [SECTION 06 CARD-DATA]</p>
+            </div>
+          </div>`;
+      }
+
+      const teamContext = buildAbilityContext(state.team, "team");
+      const towerContext = buildAbilityContext(state.team, "tower");
+      const arenaContext = buildAbilityContext(state.arena && Array.isArray(state.arena.team) ? state.arena.team : [], "arena");
+      const items = abilities.map(ability => {
+        const modes = getAbilityModes(ability);
+        const teamActive = modes.includes("team") && isAbilityConditionMet(ability.condition || {}, teamContext, card);
+        const towerActive = modes.includes("tower") && isAbilityConditionMet(ability.condition || {}, towerContext, card);
+        const arenaActive = modes.includes("arena") && isAbilityConditionMet(ability.condition || {}, arenaContext, card);
+        const statusText = teamActive ? "ทำงานในทีมโชว์" : towerActive ? "ทำงานในไต่หอ" : arenaActive ? "ทำงานใน ARENA" : "ยังไม่ทำงาน";
+        const active = teamActive || towerActive || arenaActive;
+        const effects = abilityArray(ability.effects).filter(effect => effect && typeof effect === "object");
+        const effectHTML = effects.length
+          ? effects.map(effect => `<span class="card-ability-effect ${Number(effect.value || 0) < 0 ? "negative" : ""}">${escapeHTML(abilityEffectText(effect))}</span>`).join("")
+          : `<span class="card-ability-effect">ยังไม่มี effect</span>`;
+        const effectConditions = effects
+          .filter(effect => effect.condition && Object.keys(effect.condition).length)
+          .map(effect => `${abilityEffectText(effect)}: ${abilityConditionText(effect.condition)}`);
+        const conditionText = [abilityConditionText(ability.condition || {}), ...effectConditions].join(" • ");
+        return `
+          <div class="card-ability-item ${active ? "active" : "inactive"}">
+            <div class="card-ability-title-row">
+              <strong>${escapeHTML(ability.name || "ความสามารถพิเศษ")}</strong>
+              <span class="card-ability-status">${escapeHTML(statusText)}</span>
+            </div>
+            <p class="card-ability-description">${escapeHTML(ability.description || "คุณสามารถใส่คำอธิบายความสามารถของการ์ดใบนี้ได้เอง")}</p>
+            <div class="card-ability-effects">${effectHTML}</div>
+            <p class="card-ability-condition">เงื่อนไข: ${escapeHTML(conditionText)} • โหมด: ${escapeHTML(modes.join(" / "))}</p>
+          </div>`;
+      }).join("");
+
+      return `
+        <div class="card-ability-panel">
+          <div class="card-ability-panel-head"><h3>ความสามารถเฉพาะการ์ด</h3><span>${abilities.length} ความสามารถ</span></div>
+          <div class="card-ability-list">${items}</div>
+        </div>`;
+    }
+
+    function getLuckRollMultiplier(luckRate = 0, baseMin = .90, baseSpread = .22) {
+      const luck = Math.max(-.75, Math.min(2, Number(luckRate || 0)));
+      const baseRoll = baseMin + Math.random() * baseSpread;
+      const luckRoll = luck >= 0
+        ? 1 + luck * (.35 + Math.random() * .65)
+        : Math.max(.2, 1 + luck * (.25 + Math.random() * .45));
+      return baseRoll * luckRoll;
+    }
+
     function getCardPower(card) {
       const owned = getOwned(card.id);
       const level = owned ? owned.level : 1;
@@ -5686,30 +6221,34 @@
       return baseIncome * (1 + (level - 1) * incomePerLevel) * (1 + rank * Number(rarity.incomeBonus || 0));
     }
 
-    function getRawTeamIncome() {
-      return state.team.reduce((sum, id) => {
+    function getRawTeamIncome(teamIds = state.team, mode = "team", abilitySummary = null) {
+      const summary = abilitySummary || getTeamAbilitySummary(teamIds, mode);
+      return abilityArray(teamIds).reduce((sum, id) => {
         const card = CARD_BY_ID.get(String(id));
-        return sum + (card ? getCardIncome(card) : 0);
+        return sum + (card ? getAbilityAdjustedCardIncome(card, summary) : 0);
       }, 0);
     }
 
-    function getRawTeamPower() {
-      return state.team.reduce((sum, id) => {
+    function getRawTeamPower(teamIds = state.team, mode = "team", abilitySummary = null) {
+      const summary = abilitySummary || getTeamAbilitySummary(teamIds, mode);
+      return abilityArray(teamIds).reduce((sum, id) => {
         const card = CARD_BY_ID.get(String(id));
-        return sum + (card ? getCardPower(card) : 0);
+        return sum + (card ? getAbilityAdjustedCardPower(card, summary) : 0);
       }, 0);
     }
 
     function getTeamIncome() {
-      const baseIncome = getRawTeamIncome();
+      const abilities = getTeamAbilitySummary(state.team, "team");
+      const baseIncome = getRawTeamIncome(state.team, "team", abilities) + abilities.teamIncomeFlat;
       const elementSummary = getTeamElementSummary();
-      return baseIncome * (1 + elementSummary.incomeRate);
+      return Math.max(0, baseIncome * (1 + elementSummary.incomeRate + abilities.teamIncomeRate));
     }
 
     function getTeamPower() {
-      const basePower = getRawTeamPower();
+      const abilities = getTeamAbilitySummary(state.team, "team");
+      const basePower = getRawTeamPower(state.team, "team", abilities) + abilities.teamPowerFlat;
       const elementSummary = getTeamElementSummary();
-      return basePower * (1 + elementSummary.powerRate);
+      return Math.max(0, basePower * (1 + elementSummary.powerRate + abilities.teamPowerRate));
     }
 
     function getFormationBonusRate() {
@@ -6052,11 +6591,10 @@
       };
     }
 
-    function getArenaRawPower() {
-      return (state.arena && Array.isArray(state.arena.team) ? state.arena.team : []).reduce((sum, id) => {
-        const card = CARD_BY_ID.get(String(id));
-        return sum + (card ? getCardPower(card) : 0);
-      }, 0);
+    function getArenaRawPower(abilitySummary = null) {
+      const teamIds = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
+      const abilities = abilitySummary || getTeamAbilitySummary(teamIds, "arena");
+      return getRawTeamPower(teamIds, "arena", abilities);
     }
 
     function getArenaTeamSummary() {
@@ -6064,9 +6602,11 @@
     }
 
     function getArenaTeamPower() {
-      const raw = getArenaRawPower();
+      const teamIds = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
+      const abilities = getTeamAbilitySummary(teamIds, "arena");
+      const raw = getArenaRawPower(abilities) + abilities.teamPowerFlat;
       const summary = getArenaTeamSummary();
-      return raw * (1 + summary.powerRate);
+      return Math.max(0, raw * (1 + summary.powerRate + abilities.teamPowerRate));
     }
 
     function makeArenaRankingEntry(updatedAt = Date.now()) {
@@ -6250,17 +6790,19 @@
     }
 
     function getArenaBattleStats(opponent = currentArenaOpponent) {
+      const teamIds = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
       const summary = getArenaTeamSummary();
-      const rawPower = getArenaRawPower();
-      const teamPower = Math.max(0, rawPower * (1 + summary.powerRate));
+      const abilitySummary = getTeamAbilitySummary(teamIds, "arena");
+      const rawPower = getArenaRawPower(abilitySummary) + abilitySummary.teamPowerFlat;
+      const teamPower = Math.max(0, rawPower * (1 + summary.powerRate + abilitySummary.teamPowerRate));
       const enemy = opponent || null;
       const enemyTeam = enemy && Array.isArray(enemy.arenaTeam) ? enemy.arenaTeam : [];
       const enemyElement = getSnapshotDominantElement(enemyTeam);
       const matchup = enemy ? getElementMatchup(summary.dominantElement, enemyElement) : makeMatchupResult(summary.dominantElement, "ไร้ธาตุ");
       const effectivePower = enemy ? teamPower * (1 + matchup.modifier) : teamPower;
       const enemyBasePower = enemy ? Math.max(1, Number(enemy.arenaPower || 1)) : 0;
-      const enemyEffectivePower = enemy ? enemyBasePower * (1 - matchup.modifier * .70) : 0;
-      return { summary, rawPower, teamPower, effectivePower, enemy, enemyTeam, enemyElement, enemyBasePower, enemyEffectivePower, matchup };
+      const enemyEffectivePower = enemy ? Math.max(1, enemyBasePower * (1 - matchup.modifier * .70) * (1 + abilitySummary.enemyPowerRate)) : 0;
+      return { summary, abilitySummary, rawPower, teamPower, effectivePower, enemy, enemyTeam, enemyElement, enemyBasePower, enemyEffectivePower, matchup, luckRate: abilitySummary.luckRate };
     }
 
     function arenaSnapshotModelHTML(item, index = 0, enemy = true) {
@@ -6339,7 +6881,7 @@
       result.className = "battle-result";
       stage.classList.add("player-strike");
 
-      const playerRoll = stats.effectivePower * (.91 + Math.random() * .18);
+      const playerRoll = stats.effectivePower * getLuckRollMultiplier(stats.luckRate, .91, .18);
       const enemyRoll = stats.enemyEffectivePower * (.91 + Math.random() * .18);
       const won = playerRoll >= enemyRoll;
 
@@ -6508,28 +7050,32 @@
     function getBattleStats() {
       updateBattleEnergy();
       const stage = Math.max(1, Number(state.battle.stage) || 1);
-      const basePower = getRawTeamPower();
+      const abilitySummary = getTeamAbilitySummary(state.team, "tower");
+      const basePower = getRawTeamPower(state.team, "tower", abilitySummary) + abilitySummary.teamPowerFlat;
       const elementSummary = getTeamElementSummary();
       const formationRate = elementSummary.powerRate;
       const formationPower = basePower * formationRate;
+      const abilityPowerRate = abilitySummary.teamPowerRate;
+      const abilityPower = basePower * abilityPowerRate;
       const support = getSelectedSupportProfile();
       const supportCard = getProfileSupportSnapshot(support);
       const supportSourcePower = support ? getSupportPowerSource(support) : 0;
       const rawSupportPower = supportSourcePower * CONFIG.friendSupportRate;
-      const supportCapBase = Math.max(0, basePower + formationPower);
+      const supportCapBase = Math.max(0, basePower + formationPower + abilityPower);
       const supportPower = Math.min(rawSupportPower, supportCapBase * CONFIG.friendSupportCapRate);
       const enemyCard = getBattleEnemyCard(stage);
       const enemyElement = getCardElements(enemyCard);
       const matchup = getElementMatchup(elementSummary.dominantElement, enemyElement);
       const towerRestriction = getTowerRestriction(stage);
       const restrictionStatus = getTeamRestrictionStatus(towerRestriction);
-      const preElementPower = basePower + formationPower + supportPower;
+      const preElementPower = basePower + formationPower + abilityPower + supportPower;
       const elementPower = preElementPower * matchup.modifier;
       const effectivePower = Math.max(0, preElementPower + elementPower);
-      const enemyPower = getTowerEnemyPower(stage);
+      const enemyPower = Math.max(1, getTowerEnemyPower(stage) * (1 + abilitySummary.enemyPowerRate));
       return {
         stage,
         basePower,
+        abilitySummary,
         elementSummary,
         dominantElement: elementSummary.dominantElement,
         enemyCard,
@@ -6537,6 +7083,9 @@
         matchup,
         formationRate,
         formationPower,
+        abilityPowerRate,
+        abilityPower,
+        luckRate: abilitySummary.luckRate,
         support,
         supportCard,
         supportSourcePower,
@@ -6569,7 +7118,7 @@
       const phaseDuration = reducedMotion ? 30 : 560;
       battleAnimating = true;
       state.battle.energy -= 1;
-      const playerRoll = stats.effectivePower * (.90 + Math.random() * .22);
+      const playerRoll = stats.effectivePower * getLuckRollMultiplier(stats.luckRate, .90, .22);
       const enemyRoll = stats.enemyPower * (.90 + Math.random() * .20);
       const won = playerRoll >= enemyRoll;
       const result = document.getElementById("battleResult");
@@ -7831,8 +8380,12 @@
       const panel = document.getElementById("teamElementPanel");
       if (!panel) return;
       const summary = getTeamElementSummary();
+      const abilitySummary = getTeamAbilitySummary(state.team, "team");
       const powerPercent = Math.round(summary.powerRate * 100);
       const incomePercent = Math.round(summary.incomeRate * 100);
+      const abilityPowerPercent = Math.round(abilitySummary.teamPowerRate * 100);
+      const abilityIncomePercent = Math.round(abilitySummary.teamIncomeRate * 100);
+      const luckPercent = Math.round(abilitySummary.luckRate * 100);
       const activeElementChips = summary.uniqueElements.length
         ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element])).join("")
         : `<span class="element-chip" style="${elementStyleVars("ไร้ธาตุ")}">ยังไม่มีธาตุ</span>`;
@@ -7848,16 +8401,25 @@
       const weaknessElements = getElementWeaknesses(summary.dominantElement);
       const advantageList = advantageElements.length ? advantageElements.map(element => elementChipHTML(element)).join("") : `<span class="element-chip" style="${elementStyleVars("ไร้ธาตุ")}">-</span>`;
       const weaknessList = weaknessElements.length ? weaknessElements.map(element => elementChipHTML(element)).join("") : `<span class="element-chip" style="${elementStyleVars("ไร้ธาตุ")}">-</span>`;
+      const activeAbilityHTML = abilitySummary.activeAbilities.length
+        ? abilitySummary.activeAbilities.map(entry => `
+            <div class="combo-card">
+              <strong>✨ ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong>
+              <span>${entry.activeEffects.map(effect => escapeHTML(abilityEffectText(effect))).join(" • ")}</span>
+            </div>`).join("")
+        : `<div class="combo-card"><strong>ยังไม่มีความสามารถทำงาน</strong><span>ใส่การ์ดที่มี ability ลงทีมและทำเงื่อนไขให้ครบ</span></div>`;
       panel.innerHTML = `
         <div>
           <h3>ธาตุหลักทีม: ${escapeHTML(elementLabel(summary.dominantElement))}</h3>
-          <p>${escapeHTML(summary.dominantReason)} • โบนัสรวมตอนนี้: Power +${powerPercent}% • Income +${incomePercent}%${summary.powerCapped || summary.incomeCapped ? " • โบนัสถูกจำกัดสูงสุด Power 45% / Income 40%" : ""}</p>
+          <p>${escapeHTML(summary.dominantReason)} • คอมโบธาตุ: Power +${powerPercent}% / Income +${incomePercent}% • ความสามารถ: Power ${signedPercent(abilitySummary.teamPowerRate)} / Income ${signedPercent(abilitySummary.teamIncomeRate)} / Luck ${signedPercent(abilitySummary.luckRate)}</p>
           <div class="element-chip-row">${activeElementChips}</div>
           <p class="element-mini-note">รองรับหลายธาตุ เช่น ["ไฟ", "สายฟ้า"] หรือ "ไฟ, สายฟ้า" • รายชื่อที่อ่านได้: ${THAI_ELEMENTS.map(element => `${getElementEmoji(element)} ${element}`).map(escapeHTML).join(" / ")}</p>
         </div>
         <div>
           <h3>คอมโบธาตุที่ทำงาน</h3>
           <div class="combo-list">${comboHTML}</div>
+          <h3 class="team-ability-summary">ความสามารถการ์ดที่ทำงาน</h3>
+          <div class="combo-list">${activeAbilityHTML}</div>
           <p class="element-mini-note">ธาตุหลักชนะทาง:</p>
           <div class="element-chip-row">${advantageList}</div>
           <p class="element-mini-note">ธาตุหลักแพ้ทาง:</p>
@@ -7882,6 +8444,9 @@
       const stats = getBattleStats();
       const maxPower = Math.max(1, stats.effectivePower, stats.enemyPower);
       const formationPercent = Math.round(stats.formationRate * 100);
+      const abilityPercent = Math.round(stats.abilityPowerRate * 100);
+      const luckPercent = Math.round(stats.luckRate * 100);
+      const enemyAbilityPercent = Math.round(stats.abilitySummary.enemyPowerRate * 100);
       const elementPercent = Math.round(stats.matchup.modifier * 100);
       const elementSign = elementPercent > 0 ? "+" : "";
       const supportName = stats.support ? stats.support.username : "";
@@ -7896,7 +8461,7 @@
       document.getElementById("battleEnemyPower").textContent = formatNumber(stats.enemyPower);
       document.getElementById("battleEnemyName").textContent = `Tower ชั้น ${stats.stage}`;
       document.getElementById("battlePowerBreakdown").textContent =
-        `พลังการ์ด ${formatNumber(stats.basePower)} • คอมโบธาตุ +${formationPercent}%${stats.support ? ` • Support +${formatNumber(stats.supportPower)}` : ""} • ${elementLabel(stats.dominantElement)} vs ${elementLabel(stats.enemyElement)} ${elementSign}${elementPercent}%`;
+        `พลังการ์ด ${formatNumber(stats.basePower)} • คอมโบธาตุ +${formationPercent}% • ความสามารถ ${abilityPercent >= 0 ? "+" : ""}${abilityPercent}% • Luck ${luckPercent >= 0 ? "+" : ""}${luckPercent}% • ศัตรู ${enemyAbilityPercent >= 0 ? "+" : ""}${enemyAbilityPercent}%${stats.support ? ` • Support +${formatNumber(stats.supportPower)}` : ""} • ${elementLabel(stats.dominantElement)} vs ${elementLabel(stats.enemyElement)} ${elementSign}${elementPercent}%`;
       document.getElementById("battleEnemyDetail").textContent =
         `ศัตรูธาตุ ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}${stats.effectivePower >= stats.enemyPower ? " • พลังทีมได้เปรียบ" : " • ศัตรูยังแข็งแกร่งกว่า"}`;
       const battleElementText = document.getElementById("battleElementText");
@@ -7945,17 +8510,21 @@
       }
       grid.innerHTML = slots.join("");
       const summary = getArenaTeamSummary();
+      const abilitySummary = getTeamAbilitySummary(state.arena.team, "arena");
       const comboHTML = summary.activeCombos.length
         ? summary.activeCombos.map(combo => `<div class="combo-card"><strong>${escapeHTML(combo.name)}</strong><span>Power +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}</span></div>`).join("")
         : `<div class="combo-card"><strong>ยังไม่มีคอมโบ</strong><span>จัดธาตุซ้ำหรือคอมโบธาตุให้ครบเงื่อนไขเพื่อเพิ่มพลัง ARENA</span></div>`;
+      const arenaAbilityHTML = abilitySummary.activeAbilities.length
+        ? abilitySummary.activeAbilities.map(entry => `<div class="combo-card"><strong>✨ ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong><span>${entry.activeEffects.map(effect => escapeHTML(abilityEffectText(effect))).join(" • ")}</span></div>`).join("")
+        : `<div class="combo-card"><strong>ยังไม่มีความสามารถทำงาน</strong><span>เพิ่มการ์ดที่มี ability ในทีม ARENA หรือทำเงื่อนไขให้ครบ</span></div>`;
       panel.innerHTML = `
         <div>
           <h3>ธาตุทีม ARENA</h3>
           <p>ทีมนี้แยกจากทีมโชว์และทีมไต่หอโดยสมบูรณ์</p>
           <div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div>
-          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • โบนัสรวม Power +${Math.round(summary.powerRate * 100)}%</p>
+          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ Power +${Math.round(summary.powerRate * 100)}% • ความสามารถ Power ${signedPercent(abilitySummary.teamPowerRate)} / Luck ${signedPercent(abilitySummary.luckRate)} / ศัตรู ${signedPercent(abilitySummary.enemyPowerRate)}</p>
         </div>
-        <div><h3>คอมโบที่ทำงาน</h3><div class="combo-list">${comboHTML}</div></div>`;
+        <div><h3>คอมโบที่ทำงาน</h3><div class="combo-list">${comboHTML}</div><h3 class="team-ability-summary">ความสามารถที่ทำงาน</h3><div class="combo-list">${arenaAbilityHTML}</div></div>`;
       const powerText = document.getElementById("arenaTeamPowerText");
       if (powerText) powerText.textContent = `Power ${formatNumber(getArenaTeamPower())}`;
     }
@@ -7982,7 +8551,7 @@
       const matchupPercent = Math.round(stats.matchup.modifier * 100);
       const matchupSign = matchupPercent > 0 ? "+" : "";
       document.getElementById("arenaPlayerPower").textContent = formatNumber(stats.effectivePower);
-      document.getElementById("arenaPlayerDetail").textContent = `พลังการ์ด ${formatNumber(stats.rawPower)} • คอมโบ +${Math.round(stats.summary.powerRate * 100)}%${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}`;
+      document.getElementById("arenaPlayerDetail").textContent = `พลังการ์ด ${formatNumber(stats.rawPower)} • คอมโบ +${Math.round(stats.summary.powerRate * 100)}% • ความสามารถ ${signedPercent(stats.abilitySummary.teamPowerRate)} • Luck ${signedPercent(stats.luckRate)} • ศัตรู ${signedPercent(stats.abilitySummary.enemyPowerRate)}${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}`;
       document.getElementById("arenaEnemyName").textContent = currentArenaOpponent ? `${currentArenaOpponent.username} (${currentArenaOpponent.type === "player" ? "ผู้เล่น" : "AI"})` : "คู่ต่อสู้ลึกลับ";
       document.getElementById("arenaEnemyPower").textContent = currentArenaOpponent ? formatNumber(stats.enemyEffectivePower) : "?";
       document.getElementById("arenaEnemyDetail").textContent = currentArenaOpponent
@@ -8186,6 +8755,7 @@
       if (modalCardId && !document.getElementById("cardModal").classList.contains("hidden")) renderCardDetail(modalCardId);
     }
 
+    /* ====================== [SECTION 08 CARD-DETAIL-UI] ====================== */
     function renderCardDetail(cardId) {
       const card = CARD_BY_ID.get(String(cardId));
       if (!card) return;
@@ -8236,6 +8806,7 @@
               <div class="stat"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
               <div class="stat"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
             </div>
+            ${cardAbilitiesHTML(card)}
             ${upgradeStatusPanelHTML(card, inTeam)}
             <div class="detail-actions">
               ${owned ? `
