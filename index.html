@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-13-tower-arena-login-v8">
+  <meta name="gacha-app-build" content="2026-06-13-arena-opponent-team-v9">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -2242,7 +2242,7 @@
 
         <section id="arenaView" class="hidden">
           <div class="section-title">
-            <div><h2>ARENA</h2><p>จัดทีมอารีน่าแยก 5 ใบ แล้วสุ่มเจอทีม AI หรือผู้เล่นในเซิร์ฟแบบไม่เปิดเผยก่อนเริ่ม</p></div>
+            <div><h2>ARENA</h2><p>จัดทีมอารีน่าแยก 5 ใบ แล้วสุ่มเจอทีม ARENA ของผู้เล่นในเซิร์ฟหรือทีม AI แบบไม่เปิดเผยก่อนเริ่ม</p></div>
             <button class="btn" data-action="refresh-arena">รีเฟรชอันดับ</button>
           </div>
           <div class="battle-layout">
@@ -2298,7 +2298,7 @@
 
           <div class="arena-team-zone">
             <div class="section-title">
-              <div><h2>ทีม ARENA แยก</h2><p>ไม่กระทบทีมโชว์หรือทีมไต่หอ กดการ์ดในคลังแล้วเลือก “เพิ่มเข้าทีม ARENA”</p></div>
+              <div><h2>ทีม ARENA แยก</h2><p>ไม่กระทบทีมโชว์หรือทีมไต่หอ และทีมนี้จะถูกใช้เมื่อผู้เล่นคนอื่นสุ่มเจอคุณใน ARENA</p></div>
               <strong id="arenaTeamPowerText">Power 0</strong>
             </div>
             <div class="team-grid" id="arenaTeamGrid"></div>
@@ -2642,7 +2642,7 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-13-arena-tower-login-v7",
+      version: "2026-06-13-arena-opponent-team-v9",
       seenKey: "anime_card_update_notice_seen_v7"
     });
 
@@ -5496,23 +5496,45 @@
       };
     }
 
+    // เพิ่มโดยอลิซ: คู่ต่อสู้ผู้เล่นต้องใช้เฉพาะทีม ARENA เท่านั้น
+    // - ไม่ดึงทีมโชว์ (profile.team) หรือพลังทีมโชว์ (profile.teamPower) มาเป็นตัวสำรองอีกต่อไป
+    // - ผู้เล่นที่ยังไม่ได้ตั้งทีม ARENA จะไม่ถูกสุ่มเจอ ระบบจะใช้ทีม AI แทน
+    function getArenaOpponentSnapshotTeam(profile) {
+      if (!profile || !Array.isArray(profile.arenaTeam)) return [];
+      return profile.arenaTeam
+        .filter(item => item && typeof item === "object" && (item.id || item.name) && Number(item.power || 0) > 0)
+        .slice(0, CONFIG.arenaTeamSlots);
+    }
+
+    function getArenaOpponentSnapshotPower(profile, team = getArenaOpponentSnapshotTeam(profile)) {
+      const publishedArenaPower = Math.max(0, Number(profile && profile.arenaPower) || 0);
+      const snapshotPower = team.reduce((sum, item) => sum + Math.max(0, Number(item.power) || 0), 0);
+      return Math.max(0, publishedArenaPower || snapshotPower);
+    }
+
     function pickArenaOpponent() {
-      const candidates = arenaOpponentPool.filter(profile => String(profile.uid || "") !== String(activeCloudUid || "") && Number(profile.arenaPower || profile.teamPower || 0) > 0);
+      const candidates = arenaOpponentPool.filter(profile => {
+        if (String(profile && profile.uid || "") === String(activeCloudUid || "")) return false;
+        const arenaTeam = getArenaOpponentSnapshotTeam(profile);
+        return arenaTeam.length > 0 && getArenaOpponentSnapshotPower(profile, arenaTeam) > 0;
+      });
       const playerPower = Math.max(1, getArenaTeamPower());
       const close = candidates.filter(profile => {
-        const power = Number(profile.arenaPower || profile.teamPower || 0);
+        const arenaTeam = getArenaOpponentSnapshotTeam(profile);
+        const power = getArenaOpponentSnapshotPower(profile, arenaTeam);
         const ratio = power / playerPower;
         return ratio >= .60 && ratio <= 1.65;
       });
       if (candidates.length && Math.random() < ARENA_CONFIG.realPlayerChance) {
         const pool = close.length ? close : candidates;
         const profile = pool[Math.floor(Math.random() * pool.length)];
+        const arenaTeam = getArenaOpponentSnapshotTeam(profile);
         return {
           uid: profile.uid,
           type: "player",
           username: profile.username || "Unknown Player",
-          arenaPower: Math.max(1, Number(profile.arenaPower || profile.teamPower || 1)),
-          arenaTeam: Array.isArray(profile.arenaTeam) && profile.arenaTeam.length ? profile.arenaTeam : (Array.isArray(profile.team) ? profile.team : []),
+          arenaPower: Math.max(1, getArenaOpponentSnapshotPower(profile, arenaTeam)),
+          arenaTeam,
           points: Math.max(0, Number(profile.arenaPoints || 0))
         };
       }
@@ -6841,7 +6863,7 @@
       document.getElementById("arenaEnemyName").textContent = currentArenaOpponent ? `${currentArenaOpponent.username} (${currentArenaOpponent.type === "player" ? "ผู้เล่น" : "AI"})` : "คู่ต่อสู้ลึกลับ";
       document.getElementById("arenaEnemyPower").textContent = currentArenaOpponent ? formatNumber(stats.enemyEffectivePower) : "?";
       document.getElementById("arenaEnemyDetail").textContent = currentArenaOpponent
-        ? `แต้ม ${formatNumber(currentArenaOpponent.points || 0)} • ธาตุหลัก ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}`
+        ? `ทีม ARENA • แต้ม ${formatNumber(currentArenaOpponent.points || 0)} • ธาตุหลัก ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}`
         : "ตัวตนและทีมจะถูกเปิดเผยเมื่อเริ่มต่อสู้";
       document.getElementById("arenaPlayerMeter").style.width = `${Math.max(3, stats.effectivePower / maxPower * 100)}%`;
       document.getElementById("arenaEnemyMeter").style.width = currentArenaOpponent ? `${Math.max(3, stats.enemyEffectivePower / maxPower * 100)}%` : "0%";
