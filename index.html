@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-13-max-awaken-dust-v7">
+  <meta name="gacha-app-build" content="2026-06-13-tower-arena-login-v8">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1145,6 +1145,117 @@
     .leaderboard-meta { margin-top: 3px; color: var(--muted); font-size: .7rem; }
     .leaderboard-stage { color: var(--gold); font-weight: 1000; }
 
+    /* เพิ่มโดยอลิซ: รางวัลล็อกอิน 7 วันแรก */
+    .login-reward-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
+      margin: 10px 0 11px;
+    }
+
+    .login-reward-day {
+      min-width: 0;
+      padding: 7px 3px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: .58rem;
+      font-weight: 900;
+      text-align: center;
+      background: rgba(3,5,12,.34);
+    }
+
+    .login-reward-day strong {
+      display: block;
+      margin-top: 3px;
+      color: #dbe5ff;
+      font-size: .61rem;
+      line-height: 1.25;
+    }
+
+    .login-reward-day.claimed {
+      color: #071019;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+    }
+
+    .login-reward-day.claimed strong { color: #071019; }
+    .login-reward-day.current {
+      border-color: rgba(255,209,102,.65);
+      box-shadow: 0 0 18px rgba(255,209,102,.20);
+    }
+
+    /* เพิ่มโดยอลิซ: ARENA ใช้ทีมแยกและดาบร่วมกับ Battle Tower */
+    .arena-team-zone {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid rgba(167,139,250,.22);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(167,139,250,.13), transparent 34%),
+        rgba(255,255,255,.025);
+    }
+
+    .arena-team-zone .section-title { margin-bottom: 12px; }
+    .arena-team-zone .team-grid { margin-bottom: 12px; }
+    .arena-team-zone .element-panel { margin-bottom: 0; }
+
+    .arena-secret-model {
+      width: clamp(72px, 8.5vw, 108px);
+      aspect-ratio: 4 / 5;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(251,113,133,.38);
+      border-radius: 13px;
+      color: #fda4af;
+      font-size: 2rem;
+      font-weight: 1000;
+      background:
+        radial-gradient(circle at 50% 22%, rgba(251,113,133,.20), transparent 38%),
+        linear-gradient(145deg, #261023, #090d1c);
+      box-shadow: 0 15px 28px rgba(0,0,0,.42), 0 0 18px rgba(251,113,133,.18);
+    }
+
+    .arena-reward-table,
+    .arena-leaderboard {
+      display: grid;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .arena-reward-row {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 9px;
+      align-items: center;
+      padding: 9px 10px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 13px;
+      background: rgba(3,5,12,.34);
+    }
+
+    .arena-reward-row b {
+      color: var(--gold);
+      text-align: center;
+    }
+
+    .arena-reward-row span {
+      color: var(--muted);
+      font-size: .7rem;
+      line-height: 1.42;
+    }
+
+    .arena-week-note {
+      margin-top: 8px !important;
+      color: #cbd5e1 !important;
+      font-size: .72rem !important;
+    }
+
+    @media (max-width: 760px) {
+      .login-reward-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .bottom-nav button { padding: 9px 2px; font-size: .64rem; }
+    }
+
     .friends-toolbar {
       display: grid;
       grid-template-columns: minmax(180px, 1fr) auto auto;
@@ -1185,7 +1296,7 @@
       left: 12px;
       right: 12px;
       bottom: 10px;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       padding: 7px;
       border: 1px solid var(--line);
       border-radius: 20px;
@@ -1978,8 +2089,9 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-primary" data-action="open-profile">โปรไฟล์</button><button class="btn" data-action="open-auth">ล็อกอิน</button></div>
           </div>
           <div class="mini-card">
-            <strong>โบนัสรายวัน</strong>
-            <p id="dailyText">รับ Gems เพื่อเปิดแพ็กเพิ่มได้วันละครั้ง</p>
+            <strong>โบนัสรายวัน + ล็อกอิน 7 วันแรก</strong>
+            <p id="dailyText">รับ Gems และรางวัลเริ่มต้นพิเศษได้วันละครั้ง</p>
+            <div class="login-reward-grid" id="firstLoginRewardGrid" aria-label="รางวัลล็อกอิน 7 วันแรก"></div>
             <button class="btn btn-primary" id="dailyButton" data-action="daily">รับโบนัสวันนี้</button>
           </div>
 
@@ -2017,7 +2129,8 @@
             <button class="tab active" data-tab="summon">เปิดแพ็ก</button>
             <button class="tab" data-tab="collection">คอลเล็กชั่น</button>
             <button class="tab" data-tab="team">ทีมโชว์</button>
-            <button class="tab" data-tab="battle">ต่อสู้</button>
+            <button class="tab" data-tab="battle">ไต่หอ</button>
+            <button class="tab" data-tab="arena">ARENA</button>
             <button class="tab" data-tab="friends">เพื่อน</button>
           </div>
           <div class="tools hidden" id="collectionTools">
@@ -2094,9 +2207,9 @@
             </div>
             <aside class="battle-sidebar">
               <div class="battle-card">
-                <h3>พลังงานต่อสู้</h3>
-                <p>ใช้ 1 Energy ต่อการต่อสู้ ฟื้น 1 ทุก 15 นาที</p>
-                <div class="battle-stat-row"><span>Energy</span><strong id="battleEnergyText">10/10</strong></div>
+                <h3>ดาบต่อสู้ร่วม</h3>
+                <p>ไต่หอและ ARENA ใช้ดาบกองเดียวกัน ครั้งละ 1 เล่ม ฟื้น 1 เล่มทุก 9 นาที</p>
+                <div class="battle-stat-row"><span>⚔️ ดาบ</span><strong id="battleEnergyText">10/10</strong></div>
               </div>
               <div class="battle-card">
                 <h3>รางวัลด่านนี้</h3>
@@ -2123,6 +2236,73 @@
                 <p id="battleElementText">จัดทีมเพื่อดูผลชนะ/แพ้ทาง</p>
               </div>
             </aside>
+          </div>
+        </section>
+
+
+        <section id="arenaView" class="hidden">
+          <div class="section-title">
+            <div><h2>ARENA</h2><p>จัดทีมอารีน่าแยก 5 ใบ แล้วสุ่มเจอทีม AI หรือผู้เล่นในเซิร์ฟแบบไม่เปิดเผยก่อนเริ่ม</p></div>
+            <button class="btn" data-action="refresh-arena">รีเฟรชอันดับ</button>
+          </div>
+          <div class="battle-layout">
+            <div class="battle-arena" id="arenaBattleStage">
+              <div class="battle-impact" aria-hidden="true"></div>
+              <div class="battle-sides">
+                <div class="fighter player">
+                  <div class="fighter-label">Your Arena Team</div>
+                  <div class="battle-model-stack" id="arenaPlayerModels"></div>
+                  <h3>ทีม ARENA</h3>
+                  <div class="fighter-power" id="arenaPlayerPower">0</div>
+                  <div class="power-breakdown" id="arenaPlayerDetail">จัดทีมเพื่อเปิดใช้งานคอมโบธาตุ</div>
+                  <div class="power-meter"><i id="arenaPlayerMeter"></i></div>
+                </div>
+                <div class="fighter enemy">
+                  <div class="fighter-label">Mystery Opponent</div>
+                  <div class="battle-model-stack" id="arenaEnemyModels"></div>
+                  <h3 id="arenaEnemyName">คู่ต่อสู้ลึกลับ</h3>
+                  <div class="fighter-power" id="arenaEnemyPower">?</div>
+                  <div class="power-breakdown" id="arenaEnemyDetail">ตัวตนและทีมจะถูกเปิดเผยเมื่อเริ่มต่อสู้</div>
+                  <div class="power-meter"><i id="arenaEnemyMeter"></i></div>
+                </div>
+              </div>
+              <div class="battle-actions">
+                <button class="btn btn-primary" id="arenaBattleButton" data-action="arena-battle">ใช้ดาบ 1 เล่มและสุ่มคู่ต่อสู้</button>
+                <div class="battle-result" id="arenaBattleResult">ชนะ +25 แต้ม • แพ้ -10 แต้ม</div>
+              </div>
+            </div>
+            <aside class="battle-sidebar">
+              <div class="battle-card">
+                <h3>สถานะ ARENA</h3>
+                <div class="battle-stat-row"><span>⚔️ ดาบร่วม</span><strong id="arenaSwordText">0/0</strong></div>
+                <div class="battle-stat-row"><span>แต้มสัปดาห์นี้</span><strong id="arenaPointText">0</strong></div>
+                <div class="battle-stat-row"><span>อันดับปัจจุบัน</span><strong id="arenaRankText">-</strong></div>
+                <div class="battle-stat-row"><span>ชนะ / แพ้</span><strong id="arenaRecordText">0 / 0</strong></div>
+                <p class="arena-week-note" id="arenaWeekText">รีอันดับทุกวันจันทร์</p>
+              </div>
+              <div class="battle-card">
+                <h3>รางวัลจัดอันดับรายสัปดาห์</h3>
+                <div class="arena-reward-table">
+                  <div class="arena-reward-row"><b>#1</b><span>ใบเลือก EX x1 + Gems 500,000 + Dust 50,000</span></div>
+                  <div class="arena-reward-row"><b>#2</b><span>ใบเลือก LR x3 + Gems 350,000 + Dust 35,000</span></div>
+                  <div class="arena-reward-row"><b>#3</b><span>ใบเลือก LR x2 + Gems 250,000 + Dust 25,000</span></div>
+                  <div class="arena-reward-row"><b>ทุกอันดับ</b><span>รับ Gems และ Dust ตามช่วงอันดับเมื่อสัปดาห์เปลี่ยน</span></div>
+                </div>
+              </div>
+              <div class="battle-card">
+                <h3>อันดับเซิร์ฟเวอร์</h3>
+                <div class="arena-leaderboard" id="arenaLeaderboard"></div>
+              </div>
+            </aside>
+          </div>
+
+          <div class="arena-team-zone">
+            <div class="section-title">
+              <div><h2>ทีม ARENA แยก</h2><p>ไม่กระทบทีมโชว์หรือทีมไต่หอ กดการ์ดในคลังแล้วเลือก “เพิ่มเข้าทีม ARENA”</p></div>
+              <strong id="arenaTeamPowerText">Power 0</strong>
+            </div>
+            <div class="team-grid" id="arenaTeamGrid"></div>
+            <div class="element-panel" id="arenaElementPanel"></div>
           </div>
         </section>
 
@@ -2171,7 +2351,8 @@
     <button class="active" data-tab="summon">เปิดแพ็ก</button>
     <button data-tab="collection">คลัง</button>
     <button data-tab="team">ทีม</button>
-    <button data-tab="battle">ต่อสู้</button>
+    <button data-tab="battle">ไต่หอ</button>
+    <button data-tab="arena">อารีน่า</button>
     <button data-tab="friends">เพื่อน</button>
   </nav>
 
@@ -2243,9 +2424,9 @@
     <div class="modal-panel update-panel">
       <button class="close" data-action="close-update-notice" aria-label="ปิด">x</button>
       <div class="update-hero">
-        <span class="update-version">Patch Notice • 2026.06.12</span>
+        <span class="update-version">Patch Notice • 2026.06.13</span>
         <h2>ประกาศอัพเดตใหม่</h2>
-        <p>ยินดีต้อนรับกลับเข้าสู่ Anime Card Collection รอบนี้ปรับบาลานซ์ทรัพยากรเริ่มต้น ซ่อมหน้ารายละเอียดการ์ด และเพิ่มอีโมจิ/คอมโบ/แพ้ทางธาตุในหน้าจัดทีม</p>
+        <p>อัพเดตรอบนี้ลดกำแพงพลังของ Battle Tower เพิ่มรางวัลล็อกอิน 7 วันแรก และเปิดโหมด ARENA พร้อมทีมแยก คู่ต่อสู้ลึกลับ และอันดับรายสัปดาห์</p>
       </div>
       <div class="update-body">
         <div class="update-list">
@@ -2266,8 +2447,16 @@
             <p>คอมโบธาตุส่งผลกับรายได้ต่อวินาทีด้วย เช่น คู่ประสานธาตุ, สมดุล 5 ธาตุ และไร้ธาตุเสถียร</p>
           </div>
           <div class="update-item">
-            <strong>🗼 รางวัลหอคอยและอันดับเพื่อน</strong>
-            <p>ทุก 5 ชั้นแจกตั๋วธรรมดา 10 ใบ ทุก 10 ชั้นแจกตั๋วการันตี/ใบเลือกการ์ด และมีอันดับไต่หอกับเพื่อน</p>
+            <strong>🗼 หอคอยสเกลใหม่</strong>
+            <p>ยกเลิกการโต 22% ทุกชั้น เปลี่ยนเป็นสเกลแบ่งช่วง ชั้นต้นผ่านง่ายขึ้นและชั้นสูงยังพัฒนาไปต่อได้</p>
+          </div>
+          <div class="update-item">
+            <strong>🎁 ล็อกอิน 7 วันแรก</strong>
+            <p>วันที่ 1-6 รับใบเลือก LR วันละ 1-2 ใบ และวันที่ 7 รับใบเลือก EX 1 ใบ</p>
+          </div>
+          <div class="update-item">
+            <strong>🏆 ARENA รายสัปดาห์</strong>
+            <p>สุ่มเจอ AI หรือผู้เล่นในเซิร์ฟ ชนะ +25 แต้ม แพ้ -10 แต้ม รีอันดับวันจันทร์ พร้อมรางวัล Top 3 และรางวัลทุกอันดับ</p>
           </div>
         </div>
         <div class="update-actions">
@@ -2346,7 +2535,52 @@
       // เพิ่มโดยอลิซ: จำกัดจำนวนการ์ดล่าสุดที่วาดบนหน้าเว็บ เพื่อให้เปิด x50/x100 แล้วไม่หน่วง
       recentPullLimit: 30,
       // เพิ่มโดยอลิซ: ถ้าอเวกเต็ม การ์ดซ้ำใหม่จะให้ Dust รวม x2 (Dust ปกติ + โบนัสอเวกเต็ม)
-      maxAwakenDuplicateDustMultiplier: 2
+      maxAwakenDuplicateDustMultiplier: 2,
+      // เพิ่มโดยอลิซ: หอคอยและ ARENA ใช้ดาบร่วมกัน
+      arenaTeamSlots: 5
+    });
+
+    // เพิ่มโดยอลิซ: รางวัลล็อกอินเฉพาะ 7 วันแรก (นับวันรับ ไม่บังคับให้ต่อเนื่อง)
+    const FIRST_LOGIN_REWARDS = Object.freeze([
+      { day: 1, type: "selector", rarity: "LR", amount: 1 },
+      { day: 2, type: "selector", rarity: "LR", amount: 1 },
+      { day: 3, type: "selector", rarity: "LR", amount: 2 },
+      { day: 4, type: "selector", rarity: "LR", amount: 1 },
+      { day: 5, type: "selector", rarity: "LR", amount: 2 },
+      { day: 6, type: "selector", rarity: "LR", amount: 2 },
+      { day: 7, type: "selector", rarity: "EX", amount: 1 }
+    ]);
+
+    /*
+      เพิ่มโดยอลิซ: สเกลพลังหอคอยแบบแบ่งช่วง
+      เดิมโต 22% ทุกชั้นแบบทบต้น ทำให้ชั้นสูงเป็นกำแพงเกินไป
+      สูตรใหม่จะโตเร็วพอให้รู้สึกพัฒนา แต่ชะลอลงตามช่วงชั้นสูง
+    */
+    const TOWER_SCALE_CONFIG = Object.freeze({
+      basePower: 4200,
+      brackets: [
+        { through: 50, growth: 1.050 },
+        { through: 100, growth: 1.035 },
+        { through: 200, growth: 1.022 },
+        { through: 400, growth: 1.014 },
+        { through: Infinity, growth: 1.008 }
+      ]
+    });
+
+    // เพิ่มโดยอลิซ: กติกา ARENA และรางวัลรีอันดับวันจันทร์
+    const ARENA_CONFIG = Object.freeze({
+      winPoints: 25,
+      losePoints: 10,
+      realPlayerChance: 0.55,
+      rankingRewards: [
+        { minRank: 1, maxRank: 1, selector: { rarity: "EX", amount: 1 }, gems: 500000, dust: 50000 },
+        { minRank: 2, maxRank: 2, selector: { rarity: "LR", amount: 3 }, gems: 350000, dust: 35000 },
+        { minRank: 3, maxRank: 3, selector: { rarity: "LR", amount: 2 }, gems: 250000, dust: 25000 },
+        { minRank: 4, maxRank: 10, gems: 180000, dust: 18000 },
+        { minRank: 11, maxRank: 50, gems: 120000, dust: 12000 },
+        { minRank: 51, maxRank: 100, gems: 80000, dust: 8000 },
+        { minRank: 101, maxRank: Infinity, gems: 50000, dust: 5000 }
+      ]
     });
 
     /*
@@ -2408,8 +2642,8 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-12-firebase-fresh-save-v6",
-      seenKey: "anime_card_update_notice_seen_v6"
+      version: "2026-06-13-arena-tower-login-v7",
+      seenKey: "anime_card_update_notice_seen_v7"
     });
 
     /*
@@ -3829,6 +4063,12 @@
     let friendsBusy = false;
     let battleResult = null;
     let battleAnimating = false;
+    let arenaResult = null;
+    let arenaAnimating = false;
+    let arenaResetBusy = false;
+    let currentArenaOpponent = null;
+    let arenaOpponentPool = [];
+    let arenaLeaderboardEntries = [];
     let activeRevealResults = [];
     let activeRevealIndex = 0;
     let returnToReveal = false;
@@ -3884,6 +4124,11 @@
         incomeBank: 0,
         lastIncomeAt: Date.now(),
         lastDaily: "",
+        firstLoginRewards: {
+          claimedDays: 0,
+          lastClaimDate: "",
+          completed: false
+        },
         activeBannerId: BANNERS[0] ? BANNERS[0].id : "",
         owned: starter.owned,
         team: starter.team,
@@ -3910,6 +4155,15 @@
           wins: 0,
           losses: 0,
           supportUid: ""
+        },
+        arena: {
+          team: starter.team.slice(0, CONFIG.arenaTeamSlots),
+          points: 0,
+          wins: 0,
+          losses: 0,
+          weekKey: getArenaWeekKey(),
+          rewardedWeeks: {},
+          lastWeeklyReward: null
         },
         migratedFromOldSave: false
       };
@@ -4096,6 +4350,7 @@
           getDatabase: databaseModule.getDatabase,
           ref: databaseModule.ref,
           get: databaseModule.get,
+          set: databaseModule.set,
           update: databaseModule.update
         };
         cloudApp = cloudModules.getApps().length
@@ -4153,6 +4408,19 @@
       updates[`publicProfiles/${activeCloudUid}`] = makePublicProfile(now);
       updates[`usernameIndex/${normalizeUsernameKey(activeCloudUsername)}`] = activeCloudUid;
       await cloudModules.update(cloudModules.ref(cloudDb), updates);
+
+      // บันทึกอันดับแยกจาก Cloud Save หลัก เพื่อให้กฎ Firebase รุ่นเก่าที่ไม่มี arenaRankings
+      // ไม่ทำให้การเซฟผู้เล่นทั้งหมดล้มเหลว หากเขียนอันดับไม่ได้จะยังเล่นกับ AI และใช้โปรไฟล์สาธารณะสำรองได้
+      if (state.arena && state.arena.weekKey) {
+        try {
+          await cloudModules.set(
+            cloudModules.ref(cloudDb, `arenaRankings/${state.arena.weekKey}/${activeCloudUid}`),
+            makeArenaRankingEntry(now)
+          );
+        } catch (arenaWriteError) {
+          console.warn("Arena ranking write skipped:", arenaWriteError);
+        }
+      }
       return true;
     }
 
@@ -4251,10 +4519,12 @@
         state.profile.username = activeCloudUsername;
         state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || (user && user.photoURL) || "");
         state.profile.provider = state.profile.provider || "firebase";
+        await processArenaWeeklyReset();
         await writeCloudSave(didServerReset ? { resetVersion: state.serverResetVersion || await getServerResetVersion() } : {});
         renderLoginGate(false);
         renderAll();
         refreshFriends();
+        refreshArenaData();
 
         if (didServerReset) {
           showToast("รีเซ็ตเซฟตามคำสั่งเซิร์ฟแล้ว เริ่มใหม่ทุกคนเรียบร้อย");
@@ -4431,6 +4701,9 @@
         activeProfileUid = "";
         friendRequests = [];
         friendProfiles = [];
+        arenaOpponentPool = [];
+        arenaLeaderboardEntries = [];
+        currentArenaOpponent = null;
         state.battle.supportUid = "";
         renderLoginGate(true);
         renderAll();
@@ -4462,6 +4735,10 @@
       next.dust = Math.max(0, Number(next.dust) || 0);
       next.incomeBank = Math.max(0, Number(next.incomeBank) || 0);
       next.lastIncomeAt = Number(next.lastIncomeAt) || Date.now();
+      next.firstLoginRewards = Object.assign(defaultState().firstLoginRewards, next.firstLoginRewards || {});
+      next.firstLoginRewards.claimedDays = Math.min(FIRST_LOGIN_REWARDS.length, Math.max(0, Math.floor(Number(next.firstLoginRewards.claimedDays) || 0)));
+      next.firstLoginRewards.lastClaimDate = String(next.firstLoginRewards.lastClaimDate || "");
+      next.firstLoginRewards.completed = next.firstLoginRewards.claimedDays >= FIRST_LOGIN_REWARDS.length;
       next.owned = next.owned && typeof next.owned === "object" ? next.owned : {};
       // เพิ่มโดยอลิซ: ย้ายสต็อกการ์ดซ้ำเก่าของใบที่อเวกเต็มเป็นโบนัส Dust อัตโนมัติ
       // การ์ดซ้ำเหล่านี้เคยได้รับ Dust ปกติตอนเปิดแล้ว จึงเติมเฉพาะโบนัสอีก 1 เท่าต่อใบ
@@ -4509,6 +4786,16 @@
       next.battle.wins = Math.max(0, Math.floor(Number(next.battle.wins) || 0));
       next.battle.losses = Math.max(0, Math.floor(Number(next.battle.losses) || 0));
       next.battle.supportUid = String(next.battle.supportUid || "");
+      next.arena = Object.assign(defaultState().arena, next.arena || {});
+      next.arena.team = Array.isArray(next.arena.team)
+        ? [...new Set(next.arena.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.arenaTeamSlots)
+        : next.team.slice(0, CONFIG.arenaTeamSlots);
+      next.arena.points = Math.max(0, Math.floor(Number(next.arena.points) || 0));
+      next.arena.wins = Math.max(0, Math.floor(Number(next.arena.wins) || 0));
+      next.arena.losses = Math.max(0, Math.floor(Number(next.arena.losses) || 0));
+      next.arena.weekKey = String(next.arena.weekKey || getArenaWeekKey());
+      next.arena.rewardedWeeks = next.arena.rewardedWeeks && typeof next.arena.rewardedWeeks === "object" ? next.arena.rewardedWeeks : {};
+      next.arena.lastWeeklyReward = next.arena.lastWeeklyReward || null;
       if (!BANNER_BY_ID.has(next.activeBannerId)) next.activeBannerId = BANNERS[0] ? BANNERS[0].id : "";
       return next;
     }
@@ -5003,6 +5290,361 @@
       return { card, duplicate, dustEarned, maxAwakenBonus, convertedCopies };
     }
 
+    function formatDateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function getArenaWeekKey(timestamp = Date.now()) {
+      const date = new Date(timestamp);
+      date.setHours(0, 0, 0, 0);
+      const daysSinceMonday = (date.getDay() + 6) % 7;
+      date.setDate(date.getDate() - daysSinceMonday);
+      return formatDateKey(date);
+    }
+
+    function getPreviousArenaWeekKey(weekKey = getArenaWeekKey()) {
+      const date = new Date(`${weekKey}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return "";
+      date.setDate(date.getDate() - 7);
+      return formatDateKey(date);
+    }
+
+    function getArenaWeekEndText(weekKey = getArenaWeekKey()) {
+      const date = new Date(`${weekKey}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return "รีอันดับทุกวันจันทร์";
+      date.setDate(date.getDate() + 7);
+      return `รีอันดับวันจันทร์ ${date.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}`;
+    }
+
+    function getTowerEnemyPower(floor) {
+      let remaining = Math.max(0, Math.floor(Number(floor) || 1) - 1);
+      let power = Number(TOWER_SCALE_CONFIG.basePower) || 4200;
+      let currentFloor = 1;
+      for (const bracket of TOWER_SCALE_CONFIG.brackets || []) {
+        if (remaining <= 0) break;
+        const through = Number(bracket.through);
+        const available = Number.isFinite(through) ? Math.max(0, through - currentFloor) : remaining;
+        const steps = Math.min(remaining, available);
+        power *= Math.pow(Number(bracket.growth) || 1, steps);
+        remaining -= steps;
+        currentFloor += steps;
+      }
+      return Math.max(1, Math.floor(power));
+    }
+
+    function getFirstLoginReward(day) {
+      return FIRST_LOGIN_REWARDS.find(item => Number(item.day) === Number(day)) || null;
+    }
+
+    function firstLoginRewardLabel(item) {
+      if (!item) return "-";
+      return `${item.rarity} x${Math.max(1, Number(item.amount) || 1)}`;
+    }
+
+    function makeArenaCardSnapshot(cardId) {
+      const card = CARD_BY_ID.get(String(cardId));
+      if (!card) return null;
+      return {
+        id: String(card.id),
+        name: card.name,
+        rarity: card.rarity,
+        power: Math.floor(getCardPower(card)),
+        elements: getCardElements(card)
+      };
+    }
+
+    function getArenaRawPower() {
+      return (state.arena && Array.isArray(state.arena.team) ? state.arena.team : []).reduce((sum, id) => {
+        const card = CARD_BY_ID.get(String(id));
+        return sum + (card ? getCardPower(card) : 0);
+      }, 0);
+    }
+
+    function getArenaTeamSummary() {
+      return getTeamElementSummary(state.arena && Array.isArray(state.arena.team) ? state.arena.team : []);
+    }
+
+    function getArenaTeamPower() {
+      const raw = getArenaRawPower();
+      const summary = getArenaTeamSummary();
+      return raw * (1 + summary.powerRate);
+    }
+
+    function makeArenaRankingEntry(updatedAt = Date.now()) {
+      const profile = getPlayerProfile();
+      return {
+        uid: activeCloudUid,
+        username: profile.username || activeCloudUsername || "Player",
+        photoURL: profile.photoURL || "",
+        points: Math.max(0, Number(state.arena && state.arena.points) || 0),
+        wins: Math.max(0, Number(state.arena && state.arena.wins) || 0),
+        losses: Math.max(0, Number(state.arena && state.arena.losses) || 0),
+        arenaPower: Math.floor(getArenaTeamPower()),
+        updatedAt
+      };
+    }
+
+    function getArenaRewardForRank(rank) {
+      const safeRank = Math.max(1, Math.floor(Number(rank) || 1));
+      return (ARENA_CONFIG.rankingRewards || []).find(item => safeRank >= item.minRank && safeRank <= item.maxRank) || null;
+    }
+
+    function grantArenaRankingReward(rank, weekKey) {
+      const reward = getArenaRewardForRank(rank);
+      if (!reward) return null;
+      state.gems += Math.max(0, Number(reward.gems) || 0);
+      state.dust += Math.max(0, Number(reward.dust) || 0);
+      if (reward.selector) addTicketReward("selector", reward.selector.rarity, reward.selector.amount);
+      const result = {
+        rank,
+        weekKey,
+        gems: Math.max(0, Number(reward.gems) || 0),
+        dust: Math.max(0, Number(reward.dust) || 0),
+        selector: reward.selector || null,
+        claimedAt: Date.now()
+      };
+      state.arena.lastWeeklyReward = result;
+      state.arena.rewardedWeeks[weekKey] = result;
+      return result;
+    }
+
+    async function processArenaWeeklyReset() {
+      const currentWeek = getArenaWeekKey();
+      const oldWeek = String(state.arena && state.arena.weekKey || currentWeek);
+      if (oldWeek === currentWeek) return false;
+
+      let reward = null;
+      if (state.arena.points > 0 && !state.arena.rewardedWeeks[oldWeek]) {
+        let rank = 0;
+        if (cloudReady && cloudModules && cloudDb && activeCloudUid) {
+          try {
+            const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, `arenaRankings/${oldWeek}`));
+            const rows = snapshot.exists() ? Object.entries(snapshot.val() || {}).map(([uid, value]) => Object.assign({ uid }, value || {})) : [];
+            rows.sort((a, b) => Number(b.points || 0) - Number(a.points || 0) || Number(b.arenaPower || 0) - Number(a.arenaPower || 0) || Number(a.updatedAt || 0) - Number(b.updatedAt || 0));
+            rank = rows.findIndex(item => String(item.uid) === String(activeCloudUid)) + 1;
+          } catch (error) {
+            console.warn("Arena weekly ranking read failed:", error);
+            try {
+              const profilesSnapshot = await cloudModules.get(cloudModules.ref(cloudDb, "publicProfiles"));
+              const rows = profilesSnapshot.exists()
+                ? Object.entries(profilesSnapshot.val() || {})
+                    .map(([uid, value]) => Object.assign({ uid }, value || {}))
+                    .filter(item => String(item.arenaWeekKey || "") === oldWeek)
+                    .map(item => ({ uid: item.uid, username: item.username, points: item.arenaPoints, arenaPower: item.arenaPower, updatedAt: item.updatedAt }))
+                : [];
+              rows.sort((a, b) => Number(b.points || 0) - Number(a.points || 0) || Number(b.arenaPower || 0) - Number(a.arenaPower || 0));
+              rank = rows.findIndex(item => String(item.uid) === String(activeCloudUid)) + 1;
+            } catch (fallbackError) {
+              console.warn("Arena weekly public profile fallback failed:", fallbackError);
+            }
+          }
+        }
+        // ถ้าอ่านอันดับไม่ได้แต่ผู้เล่นมีแต้ม ให้รางวัลเข้าร่วมขั้นต่ำแทนเพื่อไม่ให้เสียสิทธิ์
+        reward = grantArenaRankingReward(rank || 101, oldWeek);
+      }
+
+      state.arena.points = 0;
+      state.arena.wins = 0;
+      state.arena.losses = 0;
+      state.arena.weekKey = currentWeek;
+      currentArenaOpponent = null;
+      arenaResult = reward
+        ? { tone: "win", text: `สรุป ARENA สัปดาห์ก่อน: อันดับ ${reward.rank || "101+"} รับ ${formatNumber(reward.gems)} Gems และ ${formatNumber(reward.dust)} Dust${reward.selector ? ` • ใบเลือก ${reward.selector.rarity} x${reward.selector.amount}` : ""}` }
+        : { tone: "", text: "เริ่มสัปดาห์ ARENA ใหม่แล้ว แต้มถูกรีเซ็ตเป็น 0" };
+      return true;
+    }
+
+    function ensureArenaWeekCurrent() {
+      if (arenaResetBusy || !state.arena || String(state.arena.weekKey) === getArenaWeekKey()) return;
+      arenaResetBusy = true;
+      processArenaWeeklyReset()
+        .then(changed => {
+          if (!changed) return;
+          saveState(true);
+          renderAll();
+          refreshArenaData();
+          if (arenaResult) showToast(arenaResult.text);
+        })
+        .finally(() => { arenaResetBusy = false; });
+    }
+
+    function getSnapshotDominantElement(team = []) {
+      const counts = {};
+      team.forEach(item => normalizeElements(item && (item.elements || item.element || [])).forEach(element => {
+        counts[element] = (counts[element] || 0) + 1;
+      }));
+      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "ไร้ธาตุ";
+    }
+
+    function makeArenaAI() {
+      const playerPower = Math.max(4000, getArenaTeamPower());
+      const shuffled = CARDS.slice().sort(() => Math.random() - .5);
+      const cards = shuffled.slice(0, CONFIG.arenaTeamSlots).map(card => ({
+        id: String(card.id),
+        name: card.name,
+        rarity: card.rarity,
+        power: Math.max(1, Math.floor(playerPower / CONFIG.arenaTeamSlots)),
+        elements: getCardElements(card)
+      }));
+      return {
+        uid: "AI",
+        type: "ai",
+        username: ["AI Crimson", "AI Void", "AI Nova", "AI Vanguard", "AI Eclipse"][Math.floor(Math.random() * 5)],
+        arenaPower: Math.floor(playerPower * (.84 + Math.random() * .30)),
+        arenaTeam: cards,
+        points: Math.max(0, Math.floor(Number(state.arena.points || 0) * (.75 + Math.random() * .5)))
+      };
+    }
+
+    function pickArenaOpponent() {
+      const candidates = arenaOpponentPool.filter(profile => String(profile.uid || "") !== String(activeCloudUid || "") && Number(profile.arenaPower || profile.teamPower || 0) > 0);
+      const playerPower = Math.max(1, getArenaTeamPower());
+      const close = candidates.filter(profile => {
+        const power = Number(profile.arenaPower || profile.teamPower || 0);
+        const ratio = power / playerPower;
+        return ratio >= .60 && ratio <= 1.65;
+      });
+      if (candidates.length && Math.random() < ARENA_CONFIG.realPlayerChance) {
+        const pool = close.length ? close : candidates;
+        const profile = pool[Math.floor(Math.random() * pool.length)];
+        return {
+          uid: profile.uid,
+          type: "player",
+          username: profile.username || "Unknown Player",
+          arenaPower: Math.max(1, Number(profile.arenaPower || profile.teamPower || 1)),
+          arenaTeam: Array.isArray(profile.arenaTeam) && profile.arenaTeam.length ? profile.arenaTeam : (Array.isArray(profile.team) ? profile.team : []),
+          points: Math.max(0, Number(profile.arenaPoints || 0))
+        };
+      }
+      return makeArenaAI();
+    }
+
+    function getArenaBattleStats(opponent = currentArenaOpponent) {
+      const summary = getArenaTeamSummary();
+      const rawPower = getArenaRawPower();
+      const teamPower = Math.max(0, rawPower * (1 + summary.powerRate));
+      const enemy = opponent || null;
+      const enemyTeam = enemy && Array.isArray(enemy.arenaTeam) ? enemy.arenaTeam : [];
+      const enemyElement = getSnapshotDominantElement(enemyTeam);
+      const matchup = enemy ? getElementMatchup(summary.dominantElement, enemyElement) : makeMatchupResult(summary.dominantElement, "ไร้ธาตุ");
+      const effectivePower = enemy ? teamPower * (1 + matchup.modifier) : teamPower;
+      const enemyBasePower = enemy ? Math.max(1, Number(enemy.arenaPower || 1)) : 0;
+      const enemyEffectivePower = enemy ? enemyBasePower * (1 - matchup.modifier * .70) : 0;
+      return { summary, rawPower, teamPower, effectivePower, enemy, enemyTeam, enemyElement, enemyBasePower, enemyEffectivePower, matchup };
+    }
+
+    function arenaSnapshotModelHTML(item, index = 0, enemy = true) {
+      const card = CARD_BY_ID.get(String(item && item.id || ""));
+      const rarity = card ? getRarity(card) : (RARITIES[item && item.rarity] || RARITIES.N);
+      const image = card ? getCardImage(card) : "";
+      const name = item && item.name || (card && card.name) || "Unknown";
+      const tilt = enemy ? (index - 2) * -4 : (index - 2) * 4;
+      return `<div class="battle-model-card" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 4}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<span>${escapeHTML(name)}</span></div>`;
+    }
+
+    async function refreshArenaData(showNotice = false) {
+      if (!cloudReady || !cloudModules || !cloudDb || !activeCloudUid) {
+        arenaOpponentPool = friendProfiles.slice();
+        arenaLeaderboardEntries = [Object.assign({ uid: activeCloudUid || "local" }, makeArenaRankingEntry())];
+        renderArena();
+        return;
+      }
+      try {
+        const profilesSnapshot = await cloudModules.get(cloudModules.ref(cloudDb, "publicProfiles"));
+        arenaOpponentPool = profilesSnapshot.exists()
+          ? Object.entries(profilesSnapshot.val() || {}).map(([uid, value]) => Object.assign({ uid }, value || {}))
+          : friendProfiles.slice();
+
+        try {
+          const rankingSnapshot = await cloudModules.get(cloudModules.ref(cloudDb, `arenaRankings/${state.arena.weekKey}`));
+          arenaLeaderboardEntries = rankingSnapshot.exists()
+            ? Object.entries(rankingSnapshot.val() || {}).map(([uid, value]) => Object.assign({ uid }, value || {}))
+            : [];
+        } catch (rankingError) {
+          console.warn("Arena ranking list fallback:", rankingError);
+          arenaLeaderboardEntries = arenaOpponentPool
+            .filter(item => String(item.arenaWeekKey || "") === String(state.arena.weekKey))
+            .map(item => ({
+              uid: item.uid,
+              username: item.username,
+              photoURL: item.photoURL,
+              points: Number(item.arenaPoints || 0),
+              wins: 0,
+              losses: 0,
+              arenaPower: Number(item.arenaPower || item.teamPower || 0),
+              updatedAt: Number(item.updatedAt || 0)
+            }));
+        }
+
+        if (!arenaLeaderboardEntries.some(item => String(item.uid) === String(activeCloudUid))) {
+          arenaLeaderboardEntries.push(Object.assign({ uid: activeCloudUid }, makeArenaRankingEntry()));
+        }
+        arenaLeaderboardEntries.sort((a, b) => Number(b.points || 0) - Number(a.points || 0) || Number(b.arenaPower || 0) - Number(a.arenaPower || 0));
+        renderArena();
+        if (showNotice) showToast("รีเฟรชอันดับ ARENA แล้ว");
+      } catch (error) {
+        arenaOpponentPool = friendProfiles.slice();
+        arenaLeaderboardEntries = [Object.assign({ uid: activeCloudUid || "local" }, makeArenaRankingEntry())];
+        renderArena();
+        if (showNotice) showToast("โหลดผู้เล่นในเซิร์ฟไม่ได้ ใช้คู่ต่อสู้ AI แทน");
+      }
+    }
+
+    async function runArenaBattle() {
+      if (arenaAnimating) return;
+      updateBattleEnergy();
+      if (!state.arena.team.length) return showToast("ต้องจัดทีม ARENA ก่อนต่อสู้");
+      if (state.battle.energy < 1) return showToast("ดาบหมด รอให้ฟื้นก่อน");
+
+      currentArenaOpponent = pickArenaOpponent();
+      const stats = getArenaBattleStats(currentArenaOpponent);
+      const stage = document.getElementById("arenaBattleStage");
+      const result = document.getElementById("arenaBattleResult");
+      const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const phaseDuration = reducedMotion ? 30 : 560;
+      arenaAnimating = true;
+      state.battle.energy -= 1;
+      renderArena();
+      result.textContent = `พบ ${currentArenaOpponent.type === "player" ? "ผู้เล่นในเซิร์ฟ" : "ทีม AI"}: ${currentArenaOpponent.username} — กำลังเปิดฉากโจมตี...`;
+      result.className = "battle-result";
+      stage.classList.add("player-strike");
+
+      const playerRoll = stats.effectivePower * (.91 + Math.random() * .18);
+      const enemyRoll = stats.enemyEffectivePower * (.91 + Math.random() * .18);
+      const won = playerRoll >= enemyRoll;
+
+      try {
+        await wait(phaseDuration);
+        stage.classList.remove("player-strike");
+        stage.classList.add("enemy-strike");
+        result.textContent = `${currentArenaOpponent.username} กำลังสวนกลับ...`;
+        await wait(phaseDuration);
+        stage.classList.remove("enemy-strike");
+        stage.classList.add(won ? "battle-win" : "battle-lose");
+
+        if (won) {
+          state.arena.points += ARENA_CONFIG.winPoints;
+          state.arena.wins += 1;
+          arenaResult = { tone: "win", text: `ชนะ ${currentArenaOpponent.username}! +${ARENA_CONFIG.winPoints} แต้ม ARENA` };
+        } else {
+          const lost = Math.min(state.arena.points, ARENA_CONFIG.losePoints);
+          state.arena.points = Math.max(0, state.arena.points - ARENA_CONFIG.losePoints);
+          state.arena.losses += 1;
+          arenaResult = { tone: "lose", text: `แพ้ ${currentArenaOpponent.username} • -${lost} แต้ม ARENA` };
+        }
+
+        saveState(true);
+        renderAll();
+        showToast(arenaResult.text);
+        await wait(reducedMotion ? 30 : 650);
+        refreshArenaData();
+      } finally {
+        stage.classList.remove("player-strike", "enemy-strike", "battle-win", "battle-lose");
+        arenaAnimating = false;
+        renderArena();
+      }
+    }
+
     function getTowerMilestoneReward(floor) {
       const safeFloor = Math.max(1, Math.floor(Number(floor) || 1));
       return (TOWER_REWARD_CONFIG.milestoneRewards || []).find(item =>
@@ -5087,6 +5729,10 @@
         teamPower: Math.floor(getTeamPower()),
         collectionCount: Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length,
         battleStage: Number(state.battle && state.battle.stage || 1),
+        arenaPoints: Number(state.arena && state.arena.points || 0),
+        arenaWeekKey: String(state.arena && state.arena.weekKey || getArenaWeekKey()),
+        arenaPower: Math.floor(getArenaTeamPower()),
+        arenaTeam: (state.arena && Array.isArray(state.arena.team) ? state.arena.team : []).map(id => makeArenaCardSnapshot(id)).filter(Boolean),
         team: state.team.map(id => {
           const card = CARD_BY_ID.get(String(id));
           return card ? {
@@ -5142,7 +5788,7 @@
       const preElementPower = basePower + formationPower + supportPower;
       const elementPower = preElementPower * matchup.modifier;
       const effectivePower = Math.max(0, preElementPower + elementPower);
-      const enemyPower = Math.floor(10000 * Math.pow(1.22, stage - 1));
+      const enemyPower = getTowerEnemyPower(stage);
       return {
         stage,
         basePower,
@@ -5646,9 +6292,23 @@
       if (state.lastDaily === today) return showToast("รับโบนัสของวันนี้แล้ว");
       state.lastDaily = today;
       state.gems += CONFIG.dailyGems;
+
+      let firstLoginText = "";
+      if (!state.firstLoginRewards.completed && state.firstLoginRewards.lastClaimDate !== today) {
+        const nextDay = Math.min(FIRST_LOGIN_REWARDS.length, state.firstLoginRewards.claimedDays + 1);
+        const reward = getFirstLoginReward(nextDay);
+        if (reward) {
+          addTicketReward(reward.type, reward.rarity, reward.amount);
+          state.firstLoginRewards.claimedDays = nextDay;
+          state.firstLoginRewards.lastClaimDate = today;
+          state.firstLoginRewards.completed = nextDay >= FIRST_LOGIN_REWARDS.length;
+          firstLoginText = ` • วันที่ ${nextDay} รับใบเลือก ${reward.rarity} x${reward.amount}`;
+        }
+      }
+
       saveState(true);
       renderAll();
-      showToast(`รับ ${formatNumber(CONFIG.dailyGems)} Gems แล้ว`);
+      showToast(`รับ ${formatNumber(CONFIG.dailyGems)} Gems แล้ว${firstLoginText}`);
     }
 
     function claimIncome() {
@@ -5733,6 +6393,22 @@
       saveState();
       renderAll();
       openCardModal(id);
+    }
+
+    function toggleArenaTeam(cardId) {
+      const id = String(cardId);
+      if (!getOwned(id)) return;
+      if (!state.arena || !Array.isArray(state.arena.team)) state.arena = Object.assign(defaultState().arena, state.arena || {});
+      if (state.arena.team.includes(id)) state.arena.team = state.arena.team.filter(item => item !== id);
+      else {
+        if (state.arena.team.length >= CONFIG.arenaTeamSlots) return showToast("ทีม ARENA เต็มแล้ว เอาการ์ดใบอื่นออกก่อน");
+        state.arena.team.push(id);
+      }
+      currentArenaOpponent = null;
+      arenaResult = null;
+      saveState(true);
+      renderAll();
+      if (modalCardId) renderCardDetail(modalCardId);
     }
 
     function getCardProgressStatus(card) {
@@ -5947,9 +6623,19 @@
       document.getElementById("teamBankText").textContent = `${formatNumber(state.incomeBank)} Gems`;
       document.getElementById("dailyText").textContent = todayClaimed
         ? "รับโบนัสวันนี้แล้ว กลับมาใหม่หลังเที่ยงคืน"
-        : `รับ ${formatNumber(CONFIG.dailyGems)} Gems ฟรีสำหรับเปิดแพ็ก`;
+        : state.firstLoginRewards.completed
+          ? `รับ ${formatNumber(CONFIG.dailyGems)} Gems ฟรีสำหรับเปิดแพ็ก`
+          : `รับ ${formatNumber(CONFIG.dailyGems)} Gems + รางวัลล็อกอินวันที่ ${state.firstLoginRewards.claimedDays + 1}`;
       document.getElementById("dailyButton").disabled = todayClaimed;
-      document.getElementById("dailyButton").textContent = todayClaimed ? "รับแล้ววันนี้" : "รับโบนัสวันนี้";
+      document.getElementById("dailyButton").textContent = todayClaimed ? "รับแล้ววันนี้" : (state.firstLoginRewards.completed ? "รับโบนัสวันนี้" : `รับโบนัส + วันที่ ${state.firstLoginRewards.claimedDays + 1}`);
+      const loginGrid = document.getElementById("firstLoginRewardGrid");
+      if (loginGrid) {
+        loginGrid.innerHTML = FIRST_LOGIN_REWARDS.map(item => {
+          const claimed = item.day <= state.firstLoginRewards.claimedDays;
+          const current = !state.firstLoginRewards.completed && item.day === state.firstLoginRewards.claimedDays + 1;
+          return `<div class="login-reward-day ${claimed ? "claimed" : ""} ${current ? "current" : ""}">วันที่ ${item.day}<strong>${escapeHTML(firstLoginRewardLabel(item))}</strong></div>`;
+        }).join("");
+      }
       const tickets = ensureTicketInventory();
       const bestGuarantee = getBestGuaranteeTicketRarity();
       const normalOne = document.getElementById("normalTicketOneButton");
@@ -6103,6 +6789,89 @@
       }
     }
 
+    function renderArenaTeam() {
+      const grid = document.getElementById("arenaTeamGrid");
+      const panel = document.getElementById("arenaElementPanel");
+      if (!grid || !panel) return;
+      const slots = [];
+      for (let index = 0; index < CONFIG.arenaTeamSlots; index += 1) {
+        const card = CARD_BY_ID.get(String(state.arena.team[index] || ""));
+        slots.push(card ? cardHTML(card) : `<div class="team-slot">ช่อง ARENA ${index + 1}<br>เลือกการ์ดจากคลัง</div>`);
+      }
+      grid.innerHTML = slots.join("");
+      const summary = getArenaTeamSummary();
+      const comboHTML = summary.activeCombos.length
+        ? summary.activeCombos.map(combo => `<div class="combo-card"><strong>${escapeHTML(combo.name)}</strong><span>Power +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}</span></div>`).join("")
+        : `<div class="combo-card"><strong>ยังไม่มีคอมโบ</strong><span>จัดธาตุซ้ำหรือคอมโบธาตุให้ครบเงื่อนไขเพื่อเพิ่มพลัง ARENA</span></div>`;
+      panel.innerHTML = `
+        <div>
+          <h3>ธาตุทีม ARENA</h3>
+          <p>ทีมนี้แยกจากทีมโชว์และทีมไต่หอโดยสมบูรณ์</p>
+          <div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div>
+          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • โบนัสรวม Power +${Math.round(summary.powerRate * 100)}%</p>
+        </div>
+        <div><h3>คอมโบที่ทำงาน</h3><div class="combo-list">${comboHTML}</div></div>`;
+      const powerText = document.getElementById("arenaTeamPowerText");
+      if (powerText) powerText.textContent = `Power ${formatNumber(getArenaTeamPower())}`;
+    }
+
+    function renderArena() {
+      updateBattleEnergy();
+      const stats = getArenaBattleStats(currentArenaOpponent);
+      const playerModels = document.getElementById("arenaPlayerModels");
+      const enemyModels = document.getElementById("arenaEnemyModels");
+      if (!playerModels || !enemyModels) return;
+
+      playerModels.innerHTML = state.arena.team.length
+        ? state.arena.team.map((id, index) => {
+            const card = CARD_BY_ID.get(String(id));
+            return card ? battleModelHTML(card, index, false) : "";
+          }).join("")
+        : `<div class="arena-secret-model">+</div>`;
+
+      enemyModels.innerHTML = currentArenaOpponent && stats.enemyTeam.length
+        ? stats.enemyTeam.slice(0, CONFIG.arenaTeamSlots).map((item, index) => arenaSnapshotModelHTML(item, index, true)).join("")
+        : `<div class="arena-secret-model">?</div><div class="arena-secret-model">?</div><div class="arena-secret-model">?</div>`;
+
+      const maxPower = Math.max(1, stats.effectivePower, stats.enemyEffectivePower || 0);
+      const matchupPercent = Math.round(stats.matchup.modifier * 100);
+      const matchupSign = matchupPercent > 0 ? "+" : "";
+      document.getElementById("arenaPlayerPower").textContent = formatNumber(stats.effectivePower);
+      document.getElementById("arenaPlayerDetail").textContent = `พลังการ์ด ${formatNumber(stats.rawPower)} • คอมโบ +${Math.round(stats.summary.powerRate * 100)}%${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}`;
+      document.getElementById("arenaEnemyName").textContent = currentArenaOpponent ? `${currentArenaOpponent.username} (${currentArenaOpponent.type === "player" ? "ผู้เล่น" : "AI"})` : "คู่ต่อสู้ลึกลับ";
+      document.getElementById("arenaEnemyPower").textContent = currentArenaOpponent ? formatNumber(stats.enemyEffectivePower) : "?";
+      document.getElementById("arenaEnemyDetail").textContent = currentArenaOpponent
+        ? `แต้ม ${formatNumber(currentArenaOpponent.points || 0)} • ธาตุหลัก ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}`
+        : "ตัวตนและทีมจะถูกเปิดเผยเมื่อเริ่มต่อสู้";
+      document.getElementById("arenaPlayerMeter").style.width = `${Math.max(3, stats.effectivePower / maxPower * 100)}%`;
+      document.getElementById("arenaEnemyMeter").style.width = currentArenaOpponent ? `${Math.max(3, stats.enemyEffectivePower / maxPower * 100)}%` : "0%";
+      document.getElementById("arenaSwordText").textContent = `${state.battle.energy}/${CONFIG.battleMaxEnergy}`;
+      document.getElementById("arenaPointText").textContent = formatNumber(state.arena.points);
+      document.getElementById("arenaRecordText").textContent = `${state.arena.wins} / ${state.arena.losses}`;
+      document.getElementById("arenaWeekText").textContent = `${getArenaWeekEndText(state.arena.weekKey)} • ชนะ +${ARENA_CONFIG.winPoints} / แพ้ -${ARENA_CONFIG.losePoints}`;
+
+      const ownRank = arenaLeaderboardEntries.findIndex(item => String(item.uid) === String(activeCloudUid)) + 1;
+      document.getElementById("arenaRankText").textContent = ownRank > 0 ? `#${ownRank}` : "ยังไม่ติดอันดับ";
+      const leaderboard = document.getElementById("arenaLeaderboard");
+      leaderboard.innerHTML = arenaLeaderboardEntries.length
+        ? arenaLeaderboardEntries.slice(0, 10).map((entry, index) => `
+          <div class="leaderboard-row">
+            <div class="leaderboard-rank">${index + 1}</div>
+            <div><div class="leaderboard-name">${escapeHTML(String(entry.uid) === String(activeCloudUid) ? `${entry.username || "คุณ"} (คุณ)` : entry.username || "Unknown Player")}</div><div class="leaderboard-meta">Power ${formatNumber(entry.arenaPower || 0)} • W/L ${formatNumber(entry.wins || 0)}/${formatNumber(entry.losses || 0)}</div></div>
+            <div class="leaderboard-stage">${formatNumber(entry.points || 0)} แต้ม</div>
+          </div>`).join("")
+        : `<div class="empty-state" style="min-height:100px">ยังไม่มีข้อมูลอันดับสัปดาห์นี้</div>`;
+
+      const button = document.getElementById("arenaBattleButton");
+      button.disabled = arenaAnimating || !state.arena.team.length || state.battle.energy < 1;
+      const result = document.getElementById("arenaBattleResult");
+      if (!arenaAnimating) {
+        result.textContent = arenaResult ? arenaResult.text : `ชนะ +${ARENA_CONFIG.winPoints} แต้ม • แพ้ -${ARENA_CONFIG.losePoints} แต้ม`;
+        result.className = `battle-result ${arenaResult ? arenaResult.tone : ""}`;
+      }
+      renderArenaTeam();
+    }
+
     function renderFriends() {
       const loggedIn = Boolean(cloudReady && activeCloudUid);
       document.getElementById("friendsLoginRequired").classList.toggle("hidden", loggedIn);
@@ -6244,6 +7013,7 @@
       document.getElementById("collectionView").classList.toggle("hidden", activeTab !== "collection");
       document.getElementById("teamView").classList.toggle("hidden", activeTab !== "team");
       document.getElementById("battleView").classList.toggle("hidden", activeTab !== "battle");
+      document.getElementById("arenaView").classList.toggle("hidden", activeTab !== "arena");
       document.getElementById("friendsView").classList.toggle("hidden", activeTab !== "friends");
       document.getElementById("collectionTools").classList.toggle("hidden", activeTab !== "collection");
       document.getElementById("workspace").scrollIntoView({ block: "start", behavior: "smooth" });
@@ -6257,6 +7027,7 @@
       renderCollection();
       renderTeam();
       renderBattle();
+      renderArena();
       renderFriends();
       renderAccount();
       if (!document.getElementById("profileModal").classList.contains("hidden")) renderProfileDetail(activeProfileUid && activeProfileUid !== "local" && activeProfileUid !== activeCloudUid ? friendProfiles.find(item => String(item.uid) === activeProfileUid) : null);
@@ -6290,6 +7061,7 @@
       const upgradeCost = status.upgradeCost;
       const awakenCost = status.awakenCost;
       const inTeam = state.team.includes(String(card.id));
+      const inArenaTeam = Boolean(state.arena && Array.isArray(state.arena.team) && state.arena.team.includes(String(card.id)));
       const selectorCount = getSelectorCount(card.rarity);
       const selectorButton = selectorCount > 0
         ? `<button class="btn btn-primary" data-action="use-selector" data-card-id="${escapeHTML(card.id)}">ใช้ใบเลือก ${escapeHTML(card.rarity)} <span class="cost">มี ${formatNumber(selectorCount)} ใบ</span></button>`
@@ -6323,7 +7095,8 @@
                 <button class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
                   ปลุกพลัง <span class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
                 </button>
-                <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์"}</button>
+                <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์/ไต่หอ"}</button>
+                <button class="btn ${inArenaTeam ? "btn-danger" : "btn-primary"}" data-action="toggle-arena-team" data-card-id="${escapeHTML(card.id)}">${inArenaTeam ? "นำออกจากทีม ARENA" : "เพิ่มเข้าทีม ARENA"}</button>
                 <button class="btn btn-gold" data-action="set-support-card" data-card-id="${escapeHTML(card.id)}">${String(state.profile.supportCardId || "") === String(card.id) ? "เป็น Support อยู่" : "ตั้งเป็น Support โปรไฟล์"}</button>
                 ${selectorButton}
               ` : `${selectorButton || `<button class="btn" disabled>เปิดได้จากตู้กาชา</button>`}`}
@@ -6645,6 +7418,7 @@
         activeTab = target.dataset.tab;
         renderTabs();
         if (activeTab === "friends") refreshFriends();
+        if (activeTab === "arena") refreshArenaData();
         return;
       }
 
@@ -6683,6 +7457,9 @@
       if (action === "upgrade") upgradeCard(cardId);
       if (action === "awaken") awakenCard(cardId);
       if (action === "toggle-team") toggleTeam(cardId);
+      if (action === "toggle-arena-team") toggleArenaTeam(cardId);
+      if (action === "arena-battle") runArenaBattle();
+      if (action === "refresh-arena") refreshArenaData(true);
       if (action === "export-save") exportSave();
       if (action === "import-save") document.getElementById("importInput").click();
       if (action === "reset-save") resetSave();
@@ -6770,7 +7547,9 @@
       initFirebase();
       setInterval(() => {
         renderResources();
+        ensureArenaWeekCurrent();
         if (activeTab === "battle") renderBattle();
+        if (activeTab === "arena") renderArena();
       }, 1000);
       setInterval(persistLocalState, 15000);
       setInterval(scheduleCloudSave, 60000);
