@@ -5533,8 +5533,8 @@
 
       const rawPowerRate = activeCombos.reduce((sum, combo) => sum + Number(combo.powerRate || 0), 0);
       const rawIncomeRate = activeCombos.reduce((sum, combo) => sum + Number(combo.incomeRate || 0), 0);
-      const powerRate = Math.min(0.45, rawPowerRate);
-      const incomeRate = Math.min(0.40, rawIncomeRate);
+      const powerRate = Math.min(9.99, rawPowerRate);
+      const incomeRate = Math.min(9.99, rawIncomeRate);
       return { cards: teamCards, counts, uniqueElements, nonNeutralElements, dominantElement, activeCombos, rawPowerRate, rawIncomeRate, powerRate, incomeRate, powerCapped: rawPowerRate > powerRate, incomeCapped: rawIncomeRate > incomeRate };
     }
 
