@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-13-team-sort-picker-v10">
+  <meta name="gacha-app-build" content="2026-06-13-inventory-mail-login-v11">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1666,7 +1666,8 @@
     /* เพิ่มโดยอลิซ: หน้า Login Gate บังคับล็อกอินก่อนเข้าเกม + Cloud Save Only */
     body.auth-locked { overflow: hidden; }
     body.auth-locked .app-shell,
-    body.auth-locked .bottom-nav {
+    body.auth-locked .bottom-nav,
+    body.auth-locked .side-utility-dock {
       pointer-events: none;
       user-select: none;
       filter: blur(10px) saturate(.75);
@@ -2017,6 +2018,135 @@
       accent-color: var(--cyan);
     }
 
+    /* เพิ่มโดยอลิซ: กระเป๋าไอเทม + กล่องจดหมายแบบปุ่มลอยด้านข้าง */
+    .side-utility-dock {
+      position: fixed;
+      z-index: 46;
+      right: 14px;
+      top: 50%;
+      display: grid;
+      gap: 10px;
+      transform: translateY(-50%);
+    }
+
+    .utility-fab {
+      position: relative;
+      width: 64px;
+      min-height: 64px;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 20px;
+      padding: 8px 5px;
+      color: #f8fafc;
+      background:
+        radial-gradient(circle at 30% 10%, rgba(92,232,255,.18), transparent 45%),
+        rgba(8,11,23,.92);
+      box-shadow: 0 18px 42px rgba(0,0,0,.36), 0 0 22px rgba(92,232,255,.10);
+      backdrop-filter: blur(16px);
+    }
+
+    .utility-fab:hover { transform: translateY(-2px); border-color: rgba(92,232,255,.45); }
+    .utility-fab .utility-icon { font-size: 1.55rem; line-height: 1; }
+    .utility-fab .utility-label { color: #cbd5e1; font-size: .58rem; font-weight: 1000; }
+    .utility-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      min-width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #080b17;
+      border-radius: 999px;
+      padding: 0 6px;
+      color: #071019;
+      font-size: .64rem;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--gold), var(--cyan));
+      box-shadow: 0 0 18px rgba(255,209,102,.34);
+    }
+    .utility-badge.empty { display: none; }
+    .mail-fab.has-mail { border-color: rgba(255,209,102,.54); animation: mailbox-pulse 1.8s ease-in-out infinite; }
+
+    #inventoryModal, #mailboxModal { z-index: 82; }
+    #itemSelectorModal { z-index: 84; }
+    .system-panel { width: min(980px, 100%); padding: 22px; }
+    .system-panel-head { padding-right: 48px; margin-bottom: 16px; }
+    .system-panel-head h2 { margin: 4px 0 6px; font-size: clamp(1.55rem, 5vw, 2.8rem); }
+    .system-panel-head p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .system-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+    .system-summary > div { padding: 12px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.035); }
+    .system-summary span { display: block; color: var(--muted); font-size: .65rem; font-weight: 900; }
+    .system-summary strong { display: block; margin-top: 3px; color: var(--gold); font-size: 1rem; }
+
+    .inventory-grid, .mail-list, .selector-item-grid { display: grid; gap: 10px; }
+    .inventory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: 62vh; overflow: auto; padding: 2px; }
+    .inventory-item, .mail-item {
+      position: relative;
+      overflow: hidden;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--item-color, var(--cyan)) 18%, transparent), transparent 42%),
+        rgba(255,255,255,.035);
+    }
+    .inventory-item-icon { font-size: 2rem; }
+    .inventory-item h3, .mail-item h3 { margin: 8px 0 5px; font-size: .95rem; }
+    .inventory-item p, .mail-item p { margin: 0; color: var(--muted); font-size: .74rem; line-height: 1.5; }
+    .inventory-qty { position: absolute; top: 12px; right: 12px; color: var(--gold); font-weight: 1000; }
+    .inventory-actions, .mail-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .inventory-actions .btn, .mail-actions .btn { min-height: 36px; padding: 7px 10px; font-size: .7rem; }
+    .mail-list { max-height: 62vh; overflow: auto; padding: 2px; }
+    .mail-item.unread { border-color: rgba(255,209,102,.34); box-shadow: 0 0 20px rgba(255,209,102,.08); }
+    .mail-item.claimed { opacity: .62; }
+    .mail-meta { margin-top: 8px; color: #cbd5e1; font-size: .66rem; }
+    .mail-rewards { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .mail-reward-chip { border: 1px solid rgba(255,255,255,.10); border-radius: 999px; padding: 5px 8px; color: #dbe5ff; font-size: .66rem; font-weight: 900; background: rgba(3,5,12,.42); }
+
+    .notice-tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px clamp(18px, 4vw, 28px) 0; }
+    .notice-tab { border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; color: var(--muted); font-weight: 1000; background: rgba(255,255,255,.035); }
+    .notice-tab.active { color: #071019; border-color: transparent; background: linear-gradient(135deg, var(--cyan), var(--violet)); }
+    .notice-page.hidden { display: none !important; }
+    .login-reward-page { display: grid; gap: 14px; }
+    .login-reward-section { padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,.035); }
+    .login-reward-section h3 { margin: 0 0 5px; }
+    .login-reward-section > p { margin: 0 0 12px; color: var(--muted); font-size: .78rem; line-height: 1.55; }
+    .login-reward-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+    .login-reward-status span { color: #cbd5e1; font-size: .74rem; line-height: 1.45; }
+    .new-player-complete { padding: 18px; border: 1px solid rgba(86,227,159,.28); border-radius: 18px; color: var(--green); text-align: center; background: rgba(22,163,74,.10); }
+    .selector-item-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); max-height: 66vh; overflow: auto; padding: 2px; }
+    .selector-item-grid .game-card { cursor: default; }
+    .selector-pick { width: calc(100% - 16px); margin: 0 8px 8px; min-height: 34px; padding: 6px 8px; font-size: .67rem; }
+
+    @keyframes mailbox-pulse {
+      0%, 100% { box-shadow: 0 18px 42px rgba(0,0,0,.36), 0 0 12px rgba(255,209,102,.08); }
+      50% { box-shadow: 0 18px 42px rgba(0,0,0,.36), 0 0 28px rgba(255,209,102,.30); }
+    }
+
+    @media (max-width: 900px) {
+      .side-utility-dock { top: auto; right: 14px; bottom: 90px; transform: none; grid-template-columns: repeat(2, auto); }
+      .utility-fab { width: 58px; min-height: 58px; border-radius: 18px; }
+      .inventory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .selector-item-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .system-panel { padding: 16px; }
+      .system-summary { grid-template-columns: 1fr; }
+      .inventory-grid { grid-template-columns: 1fr; }
+      .selector-item-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .login-reward-status { align-items: stretch; flex-direction: column; }
+      .login-reward-status .btn { width: 100%; }
+    }
+
     .toast {
       position: fixed;
       z-index: 100;
@@ -2244,7 +2374,7 @@
       <div class="resource-bar" aria-label="ทรัพยากรผู้เล่น">
         <div class="resource gems"><span>Gems</span><strong id="gemsText">0</strong></div>
         <div class="resource dust"><span>Dust</span><strong id="dustText">0</strong></div>
-        <div class="resource owned"><span>Tickets</span><strong id="ticketsText">0</strong></div>
+        <div class="resource owned"><span>Items</span><strong id="ticketsText">0</strong></div>
         <div class="resource owned"><span>Collection</span><strong id="ownedText">0/0</strong></div>
       </div>
     </header>
@@ -2285,10 +2415,9 @@
                   <div class="guarantee-meter"><i id="bannerGuaranteeBar"></i></div>
                 </div>
               </div>
-              <div class="ticket-action-row" aria-label="ใช้ตั๋วกาชา">
-                <button class="btn" id="normalTicketOneButton" data-action="pull-ticket" data-times="1">ใช้ตั๋วธรรมดา 1 ใบ</button>
-                <button class="btn btn-gold" id="normalTicketTenButton" data-action="pull-ticket" data-times="10">ใช้ตั๋วธรรมดา 10 ใบ</button>
-                <button class="btn btn-primary" id="guaranteeTicketButton" data-action="pull-guarantee-ticket">ใช้ตั๋วการันตีสูงสุด</button>
+              <div class="ticket-action-row" aria-label="ไอเทมแพ็คการ์ด">
+                <button class="btn btn-primary" data-action="open-inventory">🎒 เปิดกระเป๋าไอเทมแพ็ค / ใบเลือก</button>
+                <button class="btn" data-action="open-mailbox">📬 ตรวจกล่องจดหมายรางวัล</button>
               </div>
             </div>
           </div>
@@ -2302,10 +2431,10 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-primary" data-action="open-profile">โปรไฟล์</button><button class="btn" data-action="open-auth">ล็อกอิน</button></div>
           </div>
           <div class="mini-card">
-            <strong>โบนัสรายวัน + ล็อกอิน 7 วันแรก</strong>
-            <p id="dailyText">รับ Gems และรางวัลเริ่มต้นพิเศษได้วันละครั้ง</p>
-            <div class="login-reward-grid" id="firstLoginRewardGrid" aria-label="รางวัลล็อกอิน 7 วันแรก"></div>
-            <button class="btn btn-primary" id="dailyButton" data-action="daily">รับโบนัสวันนี้</button>
+            <strong>ศูนย์รับรางวัลล็อกอิน</strong>
+            <p id="dailyText">โบนัสประจำวันและกิจกรรมผู้เล่นใหม่ 7 วันถูกแยกออกจากกันแล้ว</p>
+            <div class="login-reward-grid" id="firstLoginRewardGrid" aria-label="รางวัลผู้เล่นใหม่ 7 วัน"></div>
+            <button class="btn btn-primary" id="dailyButton" data-action="open-update-rewards">เปิดหน้ารับรางวัล</button>
           </div>
 
           <div class="mini-card">
@@ -2582,6 +2711,19 @@
     <button data-tab="friends">เพื่อน</button>
   </nav>
 
+  <aside class="side-utility-dock" aria-label="เมนูไอเทมและจดหมาย">
+    <button class="utility-fab" data-action="open-inventory" aria-label="เปิดกระเป๋าไอเทม">
+      <span class="utility-icon">🎒</span>
+      <span class="utility-label">กระเป๋า</span>
+      <span class="utility-badge empty" id="inventoryBadge">0</span>
+    </button>
+    <button class="utility-fab mail-fab" id="mailboxFab" data-action="open-mailbox" aria-label="เปิดกล่องจดหมาย">
+      <span class="utility-icon">📬</span>
+      <span class="utility-label">จดหมาย</span>
+      <span class="utility-badge empty" id="mailboxBadge">0</span>
+    </button>
+  </aside>
+
   <div class="modal hidden" id="teamPickerModal" role="dialog" aria-modal="true" aria-label="เลือกการ์ดลงทีม">
     <div class="modal-panel team-picker-panel">
       <button class="close" data-action="close-team-picker" aria-label="ปิด">x</button>
@@ -2674,46 +2816,94 @@
   </div>
 
 
+  <div class="modal hidden" id="inventoryModal" role="dialog" aria-modal="true" aria-label="กระเป๋าไอเทม">
+    <div class="modal-panel system-panel">
+      <button class="close" data-action="close-inventory" aria-label="ปิด">x</button>
+      <div class="system-panel-head">
+        <p class="eyebrow">Item Inventory</p>
+        <h2>🎒 กระเป๋าไอเทม</h2>
+        <p>แพ็คสุ่มการ์ด ใบการันตี และใบเลือกการ์ดจะเก็บอยู่ที่นี่ แยกออกจากตู้กาชาและไม่มีผลต่อการันตีของตู้</p>
+      </div>
+      <div class="system-summary" id="inventorySummary"></div>
+      <div class="inventory-grid" id="inventoryGrid"></div>
+    </div>
+  </div>
 
-  <div class="modal hidden update-notice" id="updateNoticeModal" role="dialog" aria-modal="true" aria-label="ประกาศอัพเดตเกม">
+  <div class="modal hidden" id="mailboxModal" role="dialog" aria-modal="true" aria-label="กล่องจดหมายรางวัล">
+    <div class="modal-panel system-panel">
+      <button class="close" data-action="close-mailbox" aria-label="ปิด">x</button>
+      <div class="system-panel-head">
+        <p class="eyebrow">System Mail</p>
+        <h2>📬 กล่องจดหมาย</h2>
+        <p>รางวัลจากกิจกรรม ล็อกอิน Battle Tower และ ARENA จะถูกส่งมาที่นี่ก่อน กดรับแล้วไอเทมจึงจะเข้ากระเป๋า</p>
+      </div>
+      <div class="mail-actions" style="margin:0 0 14px">
+        <button class="btn btn-primary" data-action="claim-all-mail">รับจดหมายทั้งหมด</button>
+        <button class="btn" data-action="delete-claimed-mail">ลบจดหมายที่รับแล้ว</button>
+      </div>
+      <div class="mail-list" id="mailboxList"></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="itemSelectorModal" role="dialog" aria-modal="true" aria-label="เลือกการ์ดจากไอเทม">
+    <div class="modal-panel system-panel">
+      <button class="close" data-action="close-item-selector" aria-label="ปิด">x</button>
+      <div class="system-panel-head">
+        <p class="eyebrow">Card Selector</p>
+        <h2 id="itemSelectorTitle">เลือกการ์ด</h2>
+        <p id="itemSelectorSubtitle">เลือกการ์ด 1 ใบ ไอเทมจะถูกใช้เมื่อยืนยันเลือกสำเร็จ</p>
+      </div>
+      <div class="selector-item-grid" id="itemSelectorGrid"></div>
+    </div>
+  </div>
+
+  <div class="modal hidden update-notice" id="updateNoticeModal" role="dialog" aria-modal="true" aria-label="ประกาศและรางวัลล็อกอิน">
     <div class="modal-panel update-panel">
       <button class="close" data-action="close-update-notice" aria-label="ปิด">x</button>
       <div class="update-hero">
         <span class="update-version">Patch Notice • 2026.06.13</span>
-        <h2>ประกาศอัพเดตใหม่</h2>
-        <p>อัพเดตรอบนี้ลดกำแพงพลังของ Battle Tower เพิ่มรางวัลล็อกอิน 7 วันแรก และเปิดโหมด ARENA พร้อมทีมแยก คู่ต่อสู้ลึกลับ และอันดับรายสัปดาห์</p>
+        <h2>ศูนย์ประกาศและรางวัล</h2>
+        <p>ประกาศเกม โบนัสล็อกอินประจำวัน และกิจกรรมผู้เล่นใหม่ 7 วันถูกจัดไว้คนละหน้าอย่างชัดเจน รางวัลไอเทมจะส่งผ่านกล่องจดหมายก่อนเข้ากระเป๋า</p>
+      </div>
+      <div class="notice-tabs" role="tablist">
+        <button class="notice-tab active" data-action="switch-notice-tab" data-notice-tab="news">📢 ประกาศเกม</button>
+        <button class="notice-tab" data-action="switch-notice-tab" data-notice-tab="rewards">🎁 รับรางวัลล็อกอิน</button>
       </div>
       <div class="update-body">
-        <div class="update-list">
-          <div class="update-item">
-            <strong>🧩 ระบบคอมโบธาตุทีม</strong>
-            <p>ทีม 5 ใบจะแสดงธาตุหลัก คอมโบ โบนัส Power/Income พร้อมอีโมจิธาตุแบบเรียลไทม์</p>
+        <section class="notice-page" id="noticeNewsPage">
+          <div class="update-list">
+            <div class="update-item"><strong>🎒 กระเป๋าไอเทมแยก</strong><p>แพ็คสุ่ม ใบการันตี และใบเลือกการ์ดไม่ปะปนกับตู้กาชา ใช้จากกระเป๋าด้านข้างได้โดยตรง</p></div>
+            <div class="update-item"><strong>📬 กล่องจดหมายรางวัล</strong><p>รางวัลจากกิจกรรม ล็อกอิน ไต่หอ และ ARENA จะส่งเข้าจดหมาย ป้องกันของรางวัลตกหล่น</p></div>
+            <div class="update-item"><strong>🎁 ผู้เล่นใหม่ 7 วัน</strong><p>แยกจากล็อกอินประจำวัน รับได้วันละขั้นเพียงครั้งเดียวต่อไอดี เมื่อครบวันที่ 7 กิจกรรมจะสิ้นสุดถาวร</p></div>
+            <div class="update-item"><strong>☀️ ล็อกอินประจำวัน</strong><p>รับ Gems ประจำวันแยกต่างหาก ไม่ทำให้วันกิจกรรมผู้เล่นใหม่เดินโดยอัตโนมัติ</p></div>
+            <div class="update-item"><strong>🗼 รางวัล Battle Tower</strong><p>แพ็คการ์ดและใบเลือกรางวัล milestone จะถูกส่งเข้ากล่องจดหมาย แล้วค่อยรับเข้า Inventory</p></div>
+            <div class="update-item"><strong>🏆 รางวัล ARENA</strong><p>เมื่อสัปดาห์เปลี่ยน ระบบส่ง Gems, Dust และใบเลือกตามอันดับเข้ากล่องจดหมายของไอดีนั้น</p></div>
           </div>
-          <div class="update-item">
-            <strong>⚔️ ธาตุชนะ/แพ้ทาง</strong>
-            <p>Battle Tower ใช้ธาตุหลักของทีมปะทะธาตุศัตรู ได้เปรียบ +25% หรือแพ้ทาง -20% Power</p>
+        </section>
+        <section class="notice-page login-reward-page hidden" id="noticeRewardPage">
+          <div class="login-reward-section">
+            <h3>☀️ โบนัสล็อกอินประจำวัน</h3>
+            <p>รับได้ทุกวันหลังเที่ยงคืน รางวัลนี้แยกจากกิจกรรมผู้เล่นใหม่ 7 วัน</p>
+            <div class="login-reward-status">
+              <span id="noticeDailyStatus">กำลังตรวจสอบ...</span>
+              <button class="btn btn-primary" id="noticeDailyButton" data-action="daily">รับโบนัสประจำวัน</button>
+            </div>
           </div>
-          <div class="update-item">
-            <strong>🔎 ดีเท็กธาตุไทยตรงตัว</strong>
-            <p>อ่านเฉพาะ ดิน น้ำ ลม ไฟ สายฟ้า น้ำแข็ง เหล็ก พืช แสง ความมืด มิติ และไร้ธาตุ</p>
+          <div class="login-reward-section" id="newPlayerRewardSection">
+            <h3>🌟 กิจกรรมผู้เล่นใหม่ 7 วัน</h3>
+            <p>รับได้วันละ 1 ขั้น ไม่จำเป็นต้องล็อกอินต่อเนื่อง เมื่อครบ 7 วันแล้วกิจกรรมจะหายไปจากไอดีนี้</p>
+            <div class="login-reward-grid" id="noticeFirstLoginRewardGrid"></div>
+            <div class="login-reward-status">
+              <span id="noticeFirstLoginStatus">กำลังตรวจสอบ...</span>
+              <button class="btn btn-gold" id="noticeFirstLoginButton" data-action="claim-first-login">รับรางวัลผู้เล่นใหม่</button>
+            </div>
           </div>
-          <div class="update-item">
-            <strong>💎 รายได้ Gem จากทีมมีโบนัส</strong>
-            <p>คอมโบธาตุส่งผลกับรายได้ต่อวินาทีด้วย เช่น คู่ประสานธาตุ, สมดุล 5 ธาตุ และไร้ธาตุเสถียร</p>
+          <div class="new-player-complete hidden" id="newPlayerRewardComplete">✅ คุณรับกิจกรรมผู้เล่นใหม่ครบ 7 วันแล้ว กิจกรรมนี้สิ้นสุดสำหรับไอดีนี้เรียบร้อย</div>
+          <div class="mail-actions">
+            <button class="btn" data-action="open-mailbox">📬 เปิดกล่องจดหมายเพื่อรับของ</button>
+            <button class="btn" data-action="open-inventory">🎒 เปิดกระเป๋าไอเทม</button>
           </div>
-          <div class="update-item">
-            <strong>🗼 หอคอยสเกลใหม่</strong>
-            <p>ยกเลิกการโต 22% ทุกชั้น เปลี่ยนเป็นสเกลแบ่งช่วง ชั้นต้นผ่านง่ายขึ้นและชั้นสูงยังพัฒนาไปต่อได้</p>
-          </div>
-          <div class="update-item">
-            <strong>🎁 ล็อกอิน 7 วันแรก</strong>
-            <p>วันที่ 1-6 รับใบเลือก LR วันละ 1-2 ใบ และวันที่ 7 รับใบเลือก EX 1 ใบ</p>
-          </div>
-          <div class="update-item">
-            <strong>🏆 ARENA รายสัปดาห์</strong>
-            <p>สุ่มเจอ AI หรือผู้เล่นในเซิร์ฟ ชนะ +25 แต้ม แพ้ -10 แต้ม รีอันดับวันจันทร์ พร้อมรางวัล Top 3 และรางวัลทุกอันดับ</p>
-          </div>
-        </div>
+        </section>
         <div class="update-actions">
           <label class="notice-check">
             <input type="checkbox" id="hideUpdateNotice">
@@ -2897,8 +3087,8 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-13-team-sort-picker-v10",
-      seenKey: "anime_card_update_notice_seen_v8"
+      version: "2026-06-13-inventory-mail-login-v11",
+      seenKey: "anime_card_update_notice_seen_v11"
     });
 
     /*
@@ -2920,6 +3110,10 @@
       EX:  { label: "EX",  color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 6, stars: 10, dust: 50000, basePower: 800000, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028,  incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 },
       SC:  { label: "SC",  color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 5000000, baseIncome: 30000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.092, powerPerLevel: .032,  incomePerLevel: .0215, awakenMax: 3,  awakenCopies: [1,1,1], powerBonus: .90, incomeBonus: .70 }
     });
+
+    // เพิ่มโดยอลิซ: เรทแพ็คสุ่มในกระเป๋า แยกจากตู้กาชาและไม่สะสม pity
+    const ITEM_PACK_RATES = Object.freeze({ N: 49.5, R: 30, SR: 14, SSR: 5, UR: 1.2, LR: .27, EX: .03, SC: 0 });
+    const ITEM_INVENTORY_VERSION = 1;
 
     /*
       โน้ตจุดแก้ไขโดยอลิซ: ตารางธาตุหลักของระบบทีม
@@ -4333,6 +4527,8 @@
     let teamPickerSortMode = "power";
     let teamPickerSortDirection = "desc";
     let teamPickerContext = { mode: "showcase", slotIndex: 0 };
+    let activeNoticeTab = "news";
+    let activeSelectorItemId = "";
 
     // แก้โดยอลิซ: เริ่มจากค่าเริ่มต้นชั่วคราวเสมอ แล้วค่อยโหลด Cloud Save หลังล็อกอิน
     // ไม่อ่านเซฟจากเครื่องอีกแล้ว เพื่อกันข้อมูลเก่าถูกดึงกลับเข้าระบบ
@@ -4407,6 +4603,10 @@
           guarantee: {},
           selector: {}
         },
+        // เพิ่มโดยอลิซ: ไอเทมรางวัลทั้งหมดเก็บแยกจากตู้กาชา
+        items: {},
+        mailbox: [],
+        itemInventoryVersion: ITEM_INVENTORY_VERSION,
         profile: {
           username: "",
           photoURL: "",
@@ -5052,6 +5252,22 @@
       next.pity = next.pity && typeof next.pity === "object" ? next.pity : {};
       next.recent = Array.isArray(next.recent) ? next.recent.map(String).filter(id => CARD_BY_ID.has(id)).slice(0, CONFIG.recentPullLimit) : [];
       next.tickets = normalizeTicketInventory(next.tickets || next.inventory || {});
+      next.items = normalizeItemInventory(next.items || {});
+      next.mailbox = normalizeMailbox(next.mailbox || []);
+      // ย้ายตั๋วจากเซฟรุ่นเก่าเข้ากระเป๋าเพียงครั้งเดียว เพื่อไม่ให้ของผู้เล่นหายหรือเพิ่มซ้ำ
+      if (Number(raw && raw.itemInventoryVersion || 0) < ITEM_INVENTORY_VERSION) {
+        if (next.tickets.normal > 0) next.items["pack:normal"] = (next.items["pack:normal"] || 0) + next.tickets.normal;
+        Object.entries(next.tickets.guarantee || {}).forEach(([rarity, amount]) => {
+          const id = `pack:guarantee:${rarity}`;
+          next.items[id] = (next.items[id] || 0) + Math.max(0, Number(amount) || 0);
+        });
+        Object.entries(next.tickets.selector || {}).forEach(([rarity, amount]) => {
+          const id = `selector:${rarity}`;
+          next.items[id] = (next.items[id] || 0) + Math.max(0, Number(amount) || 0);
+        });
+        next.tickets = normalizeTicketInventory({});
+        next.itemInventoryVersion = ITEM_INVENTORY_VERSION;
+      }
       next.profile = Object.assign(defaultState().profile, next.profile || {});
       next.profile.username = String(next.profile.username || "").slice(0, 24);
       next.profile.photoURL = sanitizeProfilePhoto(next.profile.photoURL || "");
@@ -5479,46 +5695,154 @@
           .map(([rarity, amount]) => [String(rarity), Math.max(0, Math.floor(Number(amount) || 0))])
           .filter(([rarity, amount]) => RARITIES[rarity] && amount > 0));
       };
-      return {
-        normal,
-        guarantee: cleanMap(source.guarantee || source.guaranteeTickets),
-        selector: cleanMap(source.selector || source.selectors)
-      };
+      return { normal, guarantee: cleanMap(source.guarantee || source.guaranteeTickets), selector: cleanMap(source.selector || source.selectors) };
     }
 
-    function ensureTicketInventory() {
-      state.tickets = normalizeTicketInventory(state.tickets || {});
-      return state.tickets;
+    function normalizeItemInventory(source = {}) {
+      const map = source && typeof source === "object" && !Array.isArray(source) ? source : {};
+      return Object.fromEntries(Object.entries(map)
+        .map(([id, amount]) => [String(id), Math.max(0, Math.floor(Number(amount) || 0))])
+        .filter(([id, amount]) => getItemMeta(id) && amount > 0));
     }
 
-    function getTotalTicketCount() {
-      const tickets = ensureTicketInventory();
-      const sumMap = map => Object.values(map || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
-      return tickets.normal + sumMap(tickets.guarantee) + sumMap(tickets.selector);
+    function normalizeRewardPayload(reward = {}) {
+      const type = String(reward.type || "");
+      const amount = Math.max(0, Math.floor(Number(reward.amount) || 0));
+      if ((type === "gems" || type === "dust") && amount > 0) return { type, amount };
+      if (type === "item" && getItemMeta(reward.itemId) && amount > 0) return { type, itemId: String(reward.itemId), amount };
+      return null;
     }
 
-    function addTicketReward(type, rarity = "", amount = 1) {
-      const tickets = ensureTicketInventory();
-      const qty = Math.max(1, Math.floor(Number(amount) || 1));
-      if (type === "normal") {
-        tickets.normal += qty;
-        return;
+    function normalizeMailbox(source = []) {
+      const rows = Array.isArray(source) ? source : [];
+      return rows.map((mail, index) => ({
+        id: String(mail && mail.id || `legacy-${index}-${Date.now()}`),
+        uniqueKey: String(mail && mail.uniqueKey || ""),
+        title: String(mail && mail.title || "จดหมายระบบ").slice(0, 100),
+        message: String(mail && mail.message || "").slice(0, 500),
+        source: String(mail && mail.source || "system").slice(0, 40),
+        createdAt: Math.max(0, Number(mail && mail.createdAt) || Date.now()),
+        claimedAt: Math.max(0, Number(mail && mail.claimedAt) || 0),
+        rewards: (Array.isArray(mail && mail.rewards) ? mail.rewards : []).map(normalizeRewardPayload).filter(Boolean)
+      })).filter(mail => mail.rewards.length).slice(-120);
+    }
+
+    function getItemMeta(itemId = "") {
+      const id = String(itemId || "");
+      if (id === "pack:normal") return { id, kind: "pack", icon: "🎴", name: "แพ็คสุ่มการ์ดธรรมดา", description: "สุ่มการ์ด 1 ใบจากเรทแพ็คกลาง แยกจากตู้กาชาและไม่เพิ่มการันตี", color: "#5ce8ff" };
+      if (id.startsWith("pack:guarantee:")) {
+        const rarity = id.split(":")[2];
+        if (!RARITIES[rarity]) return null;
+        return { id, kind: "pack", rarity, icon: "🌟", name: `แพ็คการันตี ${rarity}`, description: `สุ่มการ์ดระดับ ${rarity} 1 ใบจากการ์ดทั้งหมดในระดับนี้`, color: getRarityTheme(RARITIES[rarity]).main };
       }
-      const key = RARITIES[rarity] ? rarity : "SR";
-      if (type === "selector") tickets.selector[key] = Math.max(0, Number(tickets.selector[key]) || 0) + qty;
-      else tickets.guarantee[key] = Math.max(0, Number(tickets.guarantee[key]) || 0) + qty;
+      if (id.startsWith("selector:")) {
+        const rarity = id.split(":")[1];
+        if (!RARITIES[rarity]) return null;
+        return { id, kind: "selector", rarity, icon: "🎫", name: `ใบเลือกการ์ด ${rarity}`, description: `เลือกการ์ดระดับ ${rarity} ที่ต้องการได้ 1 ใบ`, color: getRarityTheme(RARITIES[rarity]).main };
+      }
+      return null;
     }
 
+    function rewardItemId(type, rarity = "") {
+      if (type === "normal") return "pack:normal";
+      if (type === "selector") return RARITIES[rarity] ? `selector:${rarity}` : "selector:SR";
+      return RARITIES[rarity] ? `pack:guarantee:${rarity}` : "pack:guarantee:SR";
+    }
+
+    function ensureItemInventory() {
+      state.items = normalizeItemInventory(state.items || {});
+      return state.items;
+    }
+
+    function getItemCount(itemId) { return Math.max(0, Number(ensureItemInventory()[String(itemId)]) || 0); }
+    function getTotalItemCount() { return Object.values(ensureItemInventory()).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0); }
+
+    function addInventoryItem(itemId, amount = 1) {
+      const meta = getItemMeta(itemId);
+      if (!meta) return false;
+      const qty = Math.max(1, Math.floor(Number(amount) || 1));
+      const items = ensureItemInventory();
+      items[meta.id] = Math.max(0, Number(items[meta.id]) || 0) + qty;
+      return true;
+    }
+
+    function removeInventoryItem(itemId, amount = 1) {
+      const items = ensureItemInventory();
+      const id = String(itemId);
+      const qty = Math.max(1, Math.floor(Number(amount) || 1));
+      if ((Number(items[id]) || 0) < qty) return false;
+      items[id] -= qty;
+      if (items[id] <= 0) delete items[id];
+      return true;
+    }
+
+    function ensureTicketInventory() { state.tickets = normalizeTicketInventory(state.tickets || {}); return state.tickets; }
+    function getTotalTicketCount() { return getTotalItemCount(); }
+
+    // ชื่อเดิมคงไว้เพื่อรองรับโค้ดรางวัลเก่า แต่ปลายทางใหม่คือกระเป๋าไอเทม
+    function addTicketReward(type, rarity = "", amount = 1) { return addInventoryItem(rewardItemId(type, rarity), amount); }
     function getBestGuaranteeTicketRarity() {
-      const tickets = ensureTicketInventory();
-      return Object.entries(tickets.guarantee || {})
-        .filter(([rarity, amount]) => RARITIES[rarity] && Number(amount) > 0)
-        .sort((a, b) => RARITIES[b[0]].order - RARITIES[a[0]].order)[0]?.[0] || "";
+      return Object.keys(ensureItemInventory())
+        .filter(id => id.startsWith("pack:guarantee:") && getItemCount(id) > 0)
+        .map(id => id.split(":")[2])
+        .filter(rarity => RARITIES[rarity])
+        .sort((a, b) => RARITIES[b].order - RARITIES[a].order)[0] || "";
+    }
+    function getSelectorCount(rarity) { return RARITIES[rarity] ? getItemCount(`selector:${rarity}`) : 0; }
+
+    function createSystemMail({ uniqueKey = "", title = "รางวัลจากระบบ", message = "", source = "system", rewards = [] } = {}) {
+      state.mailbox = normalizeMailbox(state.mailbox || []);
+      const key = String(uniqueKey || "");
+      if (key && state.mailbox.some(mail => mail.uniqueKey === key)) return null;
+      const cleanRewards = rewards.map(normalizeRewardPayload).filter(Boolean);
+      if (!cleanRewards.length) return null;
+      const mail = {
+        id: `mail-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        uniqueKey: key,
+        title: String(title || "รางวัลจากระบบ"),
+        message: String(message || ""),
+        source: String(source || "system"),
+        createdAt: Date.now(),
+        claimedAt: 0,
+        rewards: cleanRewards
+      };
+      state.mailbox.push(mail);
+      state.mailbox = state.mailbox.slice(-120);
+      return mail;
     }
 
-    function getSelectorCount(rarity) {
-      const key = RARITIES[rarity] ? rarity : "";
-      return key ? Math.max(0, Number(ensureTicketInventory().selector[key]) || 0) : 0;
+    function applyMailReward(reward) {
+      if (!reward) return;
+      if (reward.type === "gems") state.gems += Math.max(0, Number(reward.amount) || 0);
+      if (reward.type === "dust") state.dust += Math.max(0, Number(reward.amount) || 0);
+      if (reward.type === "item") addInventoryItem(reward.itemId, reward.amount);
+    }
+
+    function claimMail(mailId, silent = false) {
+      const mail = (state.mailbox || []).find(item => String(item.id) === String(mailId));
+      if (!mail || mail.claimedAt) return false;
+      mail.rewards.forEach(applyMailReward);
+      mail.claimedAt = Date.now();
+      saveState(true);
+      renderAll();
+      renderMailbox();
+      if (!silent) showToast(`รับรางวัลจาก “${mail.title}” เข้ากระเป๋าแล้ว`);
+      return true;
+    }
+
+    function claimAllMail() {
+      let count = 0;
+      (state.mailbox || []).forEach(mail => { if (!mail.claimedAt) { mail.rewards.forEach(applyMailReward); mail.claimedAt = Date.now(); count += 1; } });
+      if (!count) return showToast("ไม่มีจดหมายที่ยังไม่ได้รับ");
+      saveState(true); renderAll(); renderMailbox(); showToast(`รับรางวัลจากจดหมาย ${count} ฉบับแล้ว`);
+    }
+
+    function deleteClaimedMail() {
+      const before = (state.mailbox || []).length;
+      state.mailbox = (state.mailbox || []).filter(mail => !mail.claimedAt);
+      const removed = before - state.mailbox.length;
+      saveState(true); renderAll(); renderMailbox();
+      showToast(removed ? `ลบจดหมายที่รับแล้ว ${removed} ฉบับ` : "ยังไม่มีจดหมายที่รับแล้ว");
     }
 
     // เพิ่มโดยอลิซ: แปลงการ์ดซ้ำที่ค้างอยู่หลังอเวกเต็มเป็น "โบนัส Dust" ทันที
@@ -5621,7 +5945,7 @@
 
     function firstLoginRewardLabel(item) {
       if (!item) return "-";
-      return `${item.rarity} x${Math.max(1, Number(item.amount) || 1)}`;
+      return `ใบเลือก ${item.rarity} x${Math.max(1, Number(item.amount) || 1)}`;
     }
 
     function makeArenaCardSnapshot(cardId) {
@@ -5675,9 +5999,18 @@
     function grantArenaRankingReward(rank, weekKey) {
       const reward = getArenaRewardForRank(rank);
       if (!reward) return null;
-      state.gems += Math.max(0, Number(reward.gems) || 0);
-      state.dust += Math.max(0, Number(reward.dust) || 0);
-      if (reward.selector) addTicketReward("selector", reward.selector.rarity, reward.selector.amount);
+      const mailRewards = [
+        { type: "gems", amount: Math.max(0, Number(reward.gems) || 0) },
+        { type: "dust", amount: Math.max(0, Number(reward.dust) || 0) }
+      ];
+      if (reward.selector) mailRewards.push({ type: "item", itemId: rewardItemId("selector", reward.selector.rarity), amount: reward.selector.amount });
+      createSystemMail({
+        uniqueKey: `arena-${weekKey}-${activeCloudUid || "local"}`,
+        title: `รางวัล ARENA สัปดาห์ ${weekKey}`,
+        message: `อันดับ ${rank || "101+"} • รับของรางวัลผ่านกล่องจดหมาย`,
+        source: "arena",
+        rewards: mailRewards
+      });
       const result = {
         rank,
         weekKey,
@@ -5732,7 +6065,7 @@
       state.arena.weekKey = currentWeek;
       currentArenaOpponent = null;
       arenaResult = reward
-        ? { tone: "win", text: `สรุป ARENA สัปดาห์ก่อน: อันดับ ${reward.rank || "101+"} รับ ${formatNumber(reward.gems)} Gems และ ${formatNumber(reward.dust)} Dust${reward.selector ? ` • ใบเลือก ${reward.selector.rarity} x${reward.selector.amount}` : ""}` }
+        ? { tone: "win", text: `สรุป ARENA สัปดาห์ก่อน: อันดับ ${reward.rank || "101+"} • ส่งรางวัลเข้ากล่องจดหมายแล้ว${reward.selector ? ` • ใบเลือก ${reward.selector.rarity} x${reward.selector.amount}` : ""}` }
         : { tone: "", text: "เริ่มสัปดาห์ ARENA ใหม่แล้ว แต้มถูกรีเซ็ตเป็น 0" };
       return true;
     }
@@ -5960,11 +6293,11 @@
     function rewardLabel(item) {
       if (!item) return "-";
       const amount = Math.max(1, Math.floor(Number(item.amount) || 1));
-      if (item.type === "normal") return `ตั๋วสุ่มตู้กาชาธรรมดา x${formatNumber(amount)}`;
+      if (item.type === "normal") return `แพ็คสุ่มการ์ดธรรมดา x${formatNumber(amount)}`;
       const rarity = RARITIES[item.rarity] ? item.rarity : "SR";
       return item.type === "selector"
         ? `ใบเลือกการ์ดระดับ ${rarity} x${formatNumber(amount)}`
-        : `ตั๋วการันตีระดับ ${rarity} x${formatNumber(amount)}`;
+        : `แพ็คการันตีระดับ ${rarity} x${formatNumber(amount)}`;
     }
 
     function getTowerRewardPreview(floor) {
@@ -5988,7 +6321,15 @@
 
     function grantTowerRewards(floor) {
       const rewards = getTowerRewardPreview(floor);
-      rewards.forEach(item => addTicketReward(item.type || "guaranteeTicket", item.rarity || "", item.amount || 1));
+      if (rewards.length) {
+        createSystemMail({
+          uniqueKey: `tower-floor-${Math.max(1, Math.floor(Number(floor) || 1))}`,
+          title: `รางวัล Battle Tower ชั้น ${floor}`,
+          message: "รางวัล milestone ถูกส่งมาให้แล้ว กดรับเพื่อย้ายเข้ากระเป๋าไอเทม",
+          source: "tower",
+          rewards: rewards.map(item => ({ type: "item", itemId: rewardItemId(item.type || "guaranteeTicket", item.rarity || ""), amount: item.amount || 1 }))
+        });
+      }
       return rewards;
     }
 
@@ -6159,12 +6500,11 @@
           state.gems += stats.gemReward;
           state.dust += stats.dustReward;
           const ticketRewards = grantTowerRewards(stats.stage);
-          const ticketText = ticketRewards.length ? ` • ${ticketRewards.map(rewardLabel).join(" • ")}` : "";
           state.battle.wins += 1;
           state.battle.stage += 1;
           battleResult = {
             tone: "win",
-            text: `ชนะชั้น ${stats.stage}! รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust${ticketText}`
+            text: `ชนะชั้น ${stats.stage}! รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust${ticketRewards.length ? ` • ส่ง ${ticketRewards.map(rewardLabel).join(" • ")} เข้ากล่องจดหมาย` : ""}`
           };
         } else {
           const consolation = Math.max(100, Math.floor(stats.dustReward * .1));
@@ -6527,9 +6867,8 @@
     function openPackWithNormalTickets(times = 1) {
       updateIncome();
       const count = Math.max(1, Math.floor(Number(times) || 1));
-      const tickets = ensureTicketInventory();
-      if (tickets.normal < count) return showToast(`ตั๋วธรรมดาไม่พอ ต้องใช้ ${formatNumber(count)} ใบ`);
-      tickets.normal -= count;
+      if (getItemCount("pack:normal") < count) return showToast(`แพ็คสุ่มธรรมดาไม่พอ ต้องใช้ ${formatNumber(count)} ชิ้น`);
+      removeInventoryItem("pack:normal", count);
       const results = pullCardsWithTicket(count, "");
       state.recent = results.slice(0, CONFIG.recentPullLimit).map(result => String(result.card.id));
       saveState(true);
@@ -6542,9 +6881,7 @@
       updateIncome();
       const rarity = getBestGuaranteeTicketRarity();
       if (!rarity) return showToast("ยังไม่มีตั๋วการันตี");
-      const tickets = ensureTicketInventory();
-      tickets.guarantee[rarity] -= 1;
-      if (tickets.guarantee[rarity] <= 0) delete tickets.guarantee[rarity];
+      removeInventoryItem(`pack:guarantee:${rarity}`, 1);
       const results = pullCardsWithTicket(1, rarity);
       state.recent = results.map(result => String(result.card.id));
       saveState(true);
@@ -6557,16 +6894,132 @@
       const card = CARD_BY_ID.get(String(cardId));
       if (!card) return;
       const rarity = card.rarity;
-      const tickets = ensureTicketInventory();
-      if (!RARITIES[rarity] || !tickets.selector[rarity]) return showToast(`ไม่มีใบเลือกการ์ดระดับ ${rarity}`);
-      tickets.selector[rarity] -= 1;
-      if (tickets.selector[rarity] <= 0) delete tickets.selector[rarity];
+      if (!RARITIES[rarity] || getItemCount(`selector:${rarity}`) < 1) return showToast(`ไม่มีใบเลือกการ์ดระดับ ${rarity}`);
+      removeInventoryItem(`selector:${rarity}`, 1);
       const added = addCardToCollection(card, false);
       state.recent = [String(card.id), ...state.recent.filter(id => String(id) !== String(card.id))].slice(0, CONFIG.recentPullLimit);
       saveState(true);
       renderAfterPull();
       openCardModal(card.id);
       showToast(`${added.duplicate ? "รับซ้ำ" : "ปลดล็อก"} ${card.name} จากใบเลือกระดับ ${rarity}`);
+    }
+
+    function pullCardsFromInventoryItem(itemId, times = 1) {
+      const meta = getItemMeta(itemId);
+      const count = Math.max(1, Math.floor(Number(times) || 1));
+      if (!meta || meta.kind !== "pack") return [];
+      const results = [];
+      for (let index = 0; index < count; index += 1) {
+        const rarity = meta.rarity || weightedKey(ITEM_PACK_RATES, "N");
+        const pool = CARDS.filter(card => card.rarity === rarity);
+        const card = pool[Math.floor(Math.random() * pool.length)] || CARDS[0];
+        const added = addCardToCollection(card, true);
+        results.push({ card, duplicate: added.duplicate, guaranteed: Boolean(meta.rarity), ticket: false, item: true, dustEarned: added.dustEarned, maxAwakenBonus: added.maxAwakenBonus, convertedCopies: added.convertedCopies });
+      }
+      return results;
+    }
+
+    function useInventoryPack(itemId, times = 1) {
+      const count = Math.max(1, Math.floor(Number(times) || 1));
+      const meta = getItemMeta(itemId);
+      if (!meta || meta.kind !== "pack") return;
+      if (getItemCount(itemId) < count) return showToast("จำนวนแพ็คไม่พอ");
+      updateIncome();
+      removeInventoryItem(itemId, count);
+      const results = pullCardsFromInventoryItem(itemId, count);
+      state.recent = results.slice(0, CONFIG.recentPullLimit).map(result => String(result.card.id));
+      saveState(true);
+      renderAfterPull();
+      renderInventory();
+      closeInventory();
+      showReveal(results);
+    }
+
+    function openInventory() { renderInventory(); document.getElementById("inventoryModal").classList.remove("hidden"); document.body.style.overflow = "hidden"; }
+    function closeInventory() { document.getElementById("inventoryModal").classList.add("hidden"); restoreBodyScroll(); }
+    function openMailbox() { renderMailbox(); document.getElementById("mailboxModal").classList.remove("hidden"); document.body.style.overflow = "hidden"; }
+    function closeMailbox() { document.getElementById("mailboxModal").classList.add("hidden"); restoreBodyScroll(); }
+    function closeItemSelector() { activeSelectorItemId = ""; document.getElementById("itemSelectorModal").classList.add("hidden"); restoreBodyScroll(); }
+
+    function restoreBodyScroll() {
+      const openIds = ["teamPickerModal", "cardModal", "authModal", "profileModal", "revealScreen", "updateNoticeModal", "inventoryModal", "mailboxModal", "itemSelectorModal"];
+      const anyOpen = openIds.some(id => { const node = document.getElementById(id); return node && !node.classList.contains("hidden"); });
+      if (!anyOpen) document.body.style.overflow = "";
+    }
+
+    function rewardPayloadLabel(reward) {
+      if (reward.type === "gems") return `💎 ${formatNumber(reward.amount)} Gems`;
+      if (reward.type === "dust") return `✨ ${formatNumber(reward.amount)} Dust`;
+      const meta = getItemMeta(reward.itemId);
+      return meta ? `${meta.icon} ${meta.name} x${formatNumber(reward.amount)}` : "ไอเทม";
+    }
+
+    function renderUtilityDock() {
+      const itemCount = getTotalItemCount();
+      const unread = (state.mailbox || []).filter(mail => !mail.claimedAt).length;
+      const itemBadge = document.getElementById("inventoryBadge");
+      const mailBadge = document.getElementById("mailboxBadge");
+      const mailFab = document.getElementById("mailboxFab");
+      if (itemBadge) { itemBadge.textContent = formatNumber(itemCount); itemBadge.classList.toggle("empty", itemCount < 1); }
+      if (mailBadge) { mailBadge.textContent = formatNumber(unread); mailBadge.classList.toggle("empty", unread < 1); }
+      if (mailFab) mailFab.classList.toggle("has-mail", unread > 0);
+    }
+
+    function renderInventory() {
+      const items = ensureItemInventory();
+      const entries = Object.entries(items).filter(([, amount]) => Number(amount) > 0).sort((a, b) => {
+        const ma = getItemMeta(a[0]), mb = getItemMeta(b[0]);
+        return (mb && mb.rarity ? RARITIES[mb.rarity].order : -1) - (ma && ma.rarity ? RARITIES[ma.rarity].order : -1) || a[0].localeCompare(b[0]);
+      });
+      const packCount = entries.filter(([id]) => getItemMeta(id)?.kind === "pack").reduce((sum, [, n]) => sum + n, 0);
+      const selectorCount = entries.filter(([id]) => getItemMeta(id)?.kind === "selector").reduce((sum, [, n]) => sum + n, 0);
+      const summary = document.getElementById("inventorySummary");
+      if (summary) summary.innerHTML = `<div><span>ไอเทมทั้งหมด</span><strong>${formatNumber(getTotalItemCount())}</strong></div><div><span>แพ็คสุ่ม</span><strong>${formatNumber(packCount)}</strong></div><div><span>ใบเลือก</span><strong>${formatNumber(selectorCount)}</strong></div>`;
+      const grid = document.getElementById("inventoryGrid");
+      if (!grid) return;
+      grid.innerHTML = entries.length ? entries.map(([id, amount]) => {
+        const meta = getItemMeta(id);
+        const tenButton = meta.kind === "pack" && amount >= 10 ? `<button class="btn" data-action="use-item-pack" data-item-id="${escapeHTML(id)}" data-times="10">เปิด x10</button>` : "";
+        const primary = meta.kind === "selector"
+          ? `<button class="btn btn-primary" data-action="open-item-selector" data-item-id="${escapeHTML(id)}">เลือกการ์ด</button>`
+          : `<button class="btn btn-primary" data-action="use-item-pack" data-item-id="${escapeHTML(id)}" data-times="1">เปิด 1 ชิ้น</button>`;
+        return `<article class="inventory-item" style="--item-color:${escapeHTML(meta.color)}"><span class="inventory-qty">x${formatNumber(amount)}</span><div class="inventory-item-icon">${meta.icon}</div><h3>${escapeHTML(meta.name)}</h3><p>${escapeHTML(meta.description)}</p><div class="inventory-actions">${primary}${tenButton}</div></article>`;
+      }).join("") : `<div class="empty-state">กระเป๋ายังว่างอยู่<br>รับรางวัลจากกล่องจดหมาย หรือเล่น Battle Tower / ARENA เพื่อรับไอเทม</div>`;
+    }
+
+    function renderMailbox() {
+      state.mailbox = normalizeMailbox(state.mailbox || []);
+      const list = document.getElementById("mailboxList");
+      if (!list) return;
+      const rows = [...state.mailbox].sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+      list.innerHTML = rows.length ? rows.map(mail => {
+        const date = new Date(mail.createdAt).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+        return `<article class="mail-item ${mail.claimedAt ? "claimed" : "unread"}"><h3>${mail.claimedAt ? "✅" : "✉️"} ${escapeHTML(mail.title)}</h3><p>${escapeHTML(mail.message)}</p><div class="mail-rewards">${mail.rewards.map(reward => `<span class="mail-reward-chip">${escapeHTML(rewardPayloadLabel(reward))}</span>`).join("")}</div><div class="mail-meta">${escapeHTML(date)} • ${mail.claimedAt ? "รับแล้ว" : "ยังไม่ได้รับ"}</div><div class="mail-actions">${mail.claimedAt ? `<button class="btn" disabled>รับแล้ว</button>` : `<button class="btn btn-primary" data-action="claim-mail" data-mail-id="${escapeHTML(mail.id)}">รับรางวัล</button>`}</div></article>`;
+      }).join("") : `<div class="empty-state">ยังไม่มีจดหมายใหม่</div>`;
+      renderUtilityDock();
+    }
+
+    function openItemSelector(itemId) {
+      const meta = getItemMeta(itemId);
+      if (!meta || meta.kind !== "selector" || getItemCount(itemId) < 1) return showToast("ไม่มีใบเลือกนี้แล้ว");
+      activeSelectorItemId = itemId;
+      document.getElementById("itemSelectorTitle").textContent = `เลือกการ์ดระดับ ${meta.rarity}`;
+      document.getElementById("itemSelectorSubtitle").textContent = `มีใบเลือก ${formatNumber(getItemCount(itemId))} ใบ • เลือกแล้วจะได้รับการ์ดทันที`;
+      const cards = CARDS.filter(card => card.rarity === meta.rarity);
+      document.getElementById("itemSelectorGrid").innerHTML = cards.length ? cards.map(card => `<div>${cardHTML(card, { displayOnly: true })}<button class="btn btn-primary selector-pick" data-action="select-item-card" data-card-id="${escapeHTML(card.id)}">เลือก ${escapeHTML(card.name)}</button></div>`).join("") : `<div class="empty-state">ยังไม่มีการ์ดระดับนี้ในข้อมูลเกม</div>`;
+      document.getElementById("itemSelectorModal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function selectCardFromItem(cardId) {
+      const meta = getItemMeta(activeSelectorItemId);
+      const card = CARD_BY_ID.get(String(cardId));
+      if (!meta || meta.kind !== "selector" || !card || card.rarity !== meta.rarity) return;
+      if (!removeInventoryItem(activeSelectorItemId, 1)) return showToast("ใบเลือกไม่พอ");
+      const added = addCardToCollection(card, false);
+      state.recent = [String(card.id), ...state.recent.filter(id => String(id) !== String(card.id))].slice(0, CONFIG.recentPullLimit);
+      saveState(true); renderAll(); closeItemSelector(); closeInventory(); openCardModal(card.id);
+      showToast(`${added.duplicate ? "รับการ์ดซ้ำ" : "ปลดล็อก"} ${card.name} จากใบเลือก ${meta.rarity}`);
     }
 
     function openPack(times) {
@@ -6594,26 +7047,43 @@
 
     function claimDaily() {
       const today = getLocalDateKey();
-      if (state.lastDaily === today) return showToast("รับโบนัสของวันนี้แล้ว");
+      if (state.lastDaily === today) return showToast("รับโบนัสประจำวันแล้ว");
       state.lastDaily = today;
-      state.gems += CONFIG.dailyGems;
-
-      let firstLoginText = "";
-      if (!state.firstLoginRewards.completed && state.firstLoginRewards.lastClaimDate !== today) {
-        const nextDay = Math.min(FIRST_LOGIN_REWARDS.length, state.firstLoginRewards.claimedDays + 1);
-        const reward = getFirstLoginReward(nextDay);
-        if (reward) {
-          addTicketReward(reward.type, reward.rarity, reward.amount);
-          state.firstLoginRewards.claimedDays = nextDay;
-          state.firstLoginRewards.lastClaimDate = today;
-          state.firstLoginRewards.completed = nextDay >= FIRST_LOGIN_REWARDS.length;
-          firstLoginText = ` • วันที่ ${nextDay} รับใบเลือก ${reward.rarity} x${reward.amount}`;
-        }
-      }
-
+      createSystemMail({
+        uniqueKey: `daily-login-${today}`,
+        title: `โบนัสล็อกอินประจำวัน ${today}`,
+        message: "โบนัสประจำวันถูกส่งเข้ากล่องจดหมายแล้ว",
+        source: "daily",
+        rewards: [{ type: "gems", amount: CONFIG.dailyGems }]
+      });
       saveState(true);
       renderAll();
-      showToast(`รับ ${formatNumber(CONFIG.dailyGems)} Gems แล้ว${firstLoginText}`);
+      switchNoticeTab("rewards");
+      showToast(`ส่ง ${formatNumber(CONFIG.dailyGems)} Gems เข้ากล่องจดหมายแล้ว`);
+    }
+
+    function claimFirstLoginReward() {
+      const today = getLocalDateKey();
+      if (state.firstLoginRewards.completed) return showToast("กิจกรรมผู้เล่นใหม่ครบ 7 วันแล้ว");
+      if (state.firstLoginRewards.lastClaimDate === today) return showToast("รับรางวัลผู้เล่นใหม่ของวันนี้แล้ว");
+      const nextDay = Math.min(FIRST_LOGIN_REWARDS.length, state.firstLoginRewards.claimedDays + 1);
+      const reward = getFirstLoginReward(nextDay);
+      if (!reward) return;
+      const itemId = rewardItemId(reward.type, reward.rarity);
+      createSystemMail({
+        uniqueKey: `new-player-day-${nextDay}`,
+        title: `กิจกรรมผู้เล่นใหม่ วันที่ ${nextDay}`,
+        message: `รับ ${firstLoginRewardLabel(reward)} • กดรับจดหมายเพื่อย้ายเข้ากระเป๋า`,
+        source: "new-player-login",
+        rewards: [{ type: "item", itemId, amount: reward.amount }]
+      });
+      state.firstLoginRewards.claimedDays = nextDay;
+      state.firstLoginRewards.lastClaimDate = today;
+      state.firstLoginRewards.completed = nextDay >= FIRST_LOGIN_REWARDS.length;
+      saveState(true);
+      renderAll();
+      switchNoticeTab("rewards");
+      showToast(`รางวัลผู้เล่นใหม่วันที่ ${nextDay} ถูกส่งเข้ากล่องจดหมายแล้ว`);
     }
 
     function claimIncome() {
@@ -6932,36 +7402,39 @@
       document.getElementById("teamIncomeText").textContent = `${formatNumber(teamIncome)} Gems/s`;
       document.getElementById("teamPowerText").textContent = formatNumber(teamPower);
       document.getElementById("teamBankText").textContent = `${formatNumber(state.incomeBank)} Gems`;
+      const newcomerClaimedToday = state.firstLoginRewards.lastClaimDate === getLocalDateKey();
       document.getElementById("dailyText").textContent = todayClaimed
-        ? "รับโบนัสวันนี้แล้ว กลับมาใหม่หลังเที่ยงคืน"
-        : state.firstLoginRewards.completed
-          ? `รับ ${formatNumber(CONFIG.dailyGems)} Gems ฟรีสำหรับเปิดแพ็ก`
-          : `รับ ${formatNumber(CONFIG.dailyGems)} Gems + รางวัลล็อกอินวันที่ ${state.firstLoginRewards.claimedDays + 1}`;
-      document.getElementById("dailyButton").disabled = todayClaimed;
-      document.getElementById("dailyButton").textContent = todayClaimed ? "รับแล้ววันนี้" : (state.firstLoginRewards.completed ? "รับโบนัสวันนี้" : `รับโบนัส + วันที่ ${state.firstLoginRewards.claimedDays + 1}`);
-      const loginGrid = document.getElementById("firstLoginRewardGrid");
-      if (loginGrid) {
+        ? (state.firstLoginRewards.completed ? "รับโบนัสประจำวันแล้ว • กิจกรรมผู้เล่นใหม่ครบแล้ว" : "รับโบนัสประจำวันแล้ว • กิจกรรมผู้เล่นใหม่แยกรับอีกส่วน")
+        : `โบนัสประจำวัน ${formatNumber(CONFIG.dailyGems)} Gems • กิจกรรมผู้เล่นใหม่แยกต่างหาก`;
+      document.getElementById("dailyButton").disabled = false;
+      document.getElementById("dailyButton").textContent = "เปิดหน้ารับรางวัล";
+      const grids = [document.getElementById("firstLoginRewardGrid"), document.getElementById("noticeFirstLoginRewardGrid")].filter(Boolean);
+      grids.forEach(loginGrid => {
         loginGrid.innerHTML = FIRST_LOGIN_REWARDS.map(item => {
           const claimed = item.day <= state.firstLoginRewards.claimedDays;
           const current = !state.firstLoginRewards.completed && item.day === state.firstLoginRewards.claimedDays + 1;
           return `<div class="login-reward-day ${claimed ? "claimed" : ""} ${current ? "current" : ""}">วันที่ ${item.day}<strong>${escapeHTML(firstLoginRewardLabel(item))}</strong></div>`;
         }).join("");
-      }
-      const tickets = ensureTicketInventory();
-      const bestGuarantee = getBestGuaranteeTicketRarity();
-      const normalOne = document.getElementById("normalTicketOneButton");
-      const normalTen = document.getElementById("normalTicketTenButton");
-      const guaranteeButton = document.getElementById("guaranteeTicketButton");
-      if (normalOne) normalOne.disabled = tickets.normal < 1;
-      if (normalTen) normalTen.disabled = tickets.normal < 10;
-      if (normalOne) normalOne.innerHTML = `ใช้ตั๋วธรรมดา 1 ใบ <span class="cost">มี ${formatNumber(tickets.normal)}</span>`;
-      if (normalTen) normalTen.innerHTML = `ใช้ตั๋วธรรมดา 10 ใบ <span class="cost">มี ${formatNumber(tickets.normal)}</span>`;
-      if (guaranteeButton) {
-        guaranteeButton.disabled = !bestGuarantee;
-        guaranteeButton.innerHTML = bestGuarantee
-          ? `ใช้ตั๋วการันตี ${bestGuarantee} <span class="cost">มี ${formatNumber(tickets.guarantee[bestGuarantee] || 0)}</span>`
-          : `ใช้ตั๋วการันตี <span class="cost">ยังไม่มี</span>`;
-      }
+      });
+      const dailyStatus = document.getElementById("noticeDailyStatus");
+      const dailyButton = document.getElementById("noticeDailyButton");
+      if (dailyStatus) dailyStatus.textContent = todayClaimed ? "รับโบนัสวันนี้แล้ว กลับมาใหม่หลังเที่ยงคืน" : `พร้อมรับ ${formatNumber(CONFIG.dailyGems)} Gems`;
+      if (dailyButton) { dailyButton.disabled = todayClaimed; dailyButton.textContent = todayClaimed ? "รับแล้ววันนี้" : "รับโบนัสประจำวัน"; }
+      const firstStatus = document.getElementById("noticeFirstLoginStatus");
+      const firstButton = document.getElementById("noticeFirstLoginButton");
+      if (firstStatus) firstStatus.textContent = state.firstLoginRewards.completed
+        ? "กิจกรรมครบ 7 วันแล้ว"
+        : newcomerClaimedToday
+          ? `รับวันที่ ${state.firstLoginRewards.claimedDays} แล้ว กลับมาใหม่พรุ่งนี้`
+          : `พร้อมรับวันที่ ${state.firstLoginRewards.claimedDays + 1} • ${firstLoginRewardLabel(getFirstLoginReward(state.firstLoginRewards.claimedDays + 1))}`;
+      if (firstButton) { firstButton.disabled = state.firstLoginRewards.completed || newcomerClaimedToday; firstButton.textContent = state.firstLoginRewards.completed ? "กิจกรรมสิ้นสุดแล้ว" : newcomerClaimedToday ? "รับแล้ววันนี้" : `รับวันที่ ${state.firstLoginRewards.claimedDays + 1}`; }
+      const firstSection = document.getElementById("newPlayerRewardSection");
+      const firstComplete = document.getElementById("newPlayerRewardComplete");
+      if (firstSection) firstSection.classList.toggle("hidden", state.firstLoginRewards.completed);
+      if (firstComplete) firstComplete.classList.toggle("hidden", !state.firstLoginRewards.completed);
+      renderUtilityDock();
+      if (!document.getElementById("inventoryModal").classList.contains("hidden")) renderInventory();
+      if (!document.getElementById("mailboxModal").classList.contains("hidden")) renderMailbox();
     }
 
     function getCardAcquiredOrder(card) {
@@ -7591,6 +8064,9 @@
       renderArena();
       renderFriends();
       renderAccount();
+      renderUtilityDock();
+      if (!document.getElementById("inventoryModal").classList.contains("hidden")) renderInventory();
+      if (!document.getElementById("mailboxModal").classList.contains("hidden")) renderMailbox();
       if (!document.getElementById("teamPickerModal").classList.contains("hidden")) renderTeamPicker();
       if (!document.getElementById("profileModal").classList.contains("hidden")) renderProfileDetail(activeProfileUid && activeProfileUid !== "local" && activeProfileUid !== activeCloudUid ? friendProfiles.find(item => String(item.uid) === activeProfileUid) : null);
       if (modalCardId && !document.getElementById("cardModal").classList.contains("hidden")) renderCardDetail(modalCardId);
@@ -7897,12 +8373,23 @@
 
 
 
-    function openUpdateNotice(force = false) {
+    function switchNoticeTab(tab = "news") {
+      activeNoticeTab = tab === "rewards" ? "rewards" : "news";
+      document.querySelectorAll("[data-notice-tab]").forEach(button => button.classList.toggle("active", button.dataset.noticeTab === activeNoticeTab));
+      const news = document.getElementById("noticeNewsPage");
+      const rewards = document.getElementById("noticeRewardPage");
+      if (news) news.classList.toggle("hidden", activeNoticeTab !== "news");
+      if (rewards) rewards.classList.toggle("hidden", activeNoticeTab !== "rewards");
+      renderResources();
+    }
+
+    function openUpdateNotice(force = false, tab = "news") {
       const notice = document.getElementById("updateNoticeModal");
       if (!notice) return;
       const alreadySeen = SAFE_STORAGE.getItem(UPDATE_NOTICE.seenKey) === UPDATE_NOTICE.version;
       if (!force && alreadySeen) return;
       notice.classList.remove("hidden");
+      switchNoticeTab(tab);
       document.body.style.overflow = "hidden";
     }
 
@@ -7914,13 +8401,7 @@
         SAFE_STORAGE.setItem(UPDATE_NOTICE.seenKey, UPDATE_NOTICE.version);
       }
       notice.classList.add("hidden");
-      if (
-        document.getElementById("cardModal").classList.contains("hidden") &&
-        document.getElementById("authModal").classList.contains("hidden") &&
-        document.getElementById("revealScreen").classList.contains("hidden")
-      ) {
-        document.body.style.overflow = "";
-      }
+      restoreBodyScroll();
     }
 
     function showToast(message) {
@@ -7974,6 +8455,9 @@
         if (event.target.id === "authModal") closeAuthModal();
         if (event.target.id === "profileModal") closeProfileModal();
         if (event.target.id === "updateNoticeModal") closeUpdateNotice();
+        if (event.target.id === "inventoryModal") closeInventory();
+        if (event.target.id === "mailboxModal") closeMailbox();
+        if (event.target.id === "itemSelectorModal") closeItemSelector();
         return;
       }
 
@@ -7993,6 +8477,20 @@
       if (action === "pull-guarantee-ticket") openPackWithBestGuaranteeTicket();
       if (action === "use-selector") useSelectorTicket(cardId);
       if (action === "daily") claimDaily();
+      if (action === "claim-first-login") claimFirstLoginReward();
+      if (action === "open-inventory") openInventory();
+      if (action === "close-inventory") closeInventory();
+      if (action === "open-mailbox") openMailbox();
+      if (action === "close-mailbox") closeMailbox();
+      if (action === "claim-mail") claimMail(target.dataset.mailId);
+      if (action === "claim-all-mail") claimAllMail();
+      if (action === "delete-claimed-mail") deleteClaimedMail();
+      if (action === "use-item-pack") useInventoryPack(target.dataset.itemId, Number(target.dataset.times) || 1);
+      if (action === "open-item-selector") openItemSelector(target.dataset.itemId);
+      if (action === "close-item-selector") closeItemSelector();
+      if (action === "select-item-card") selectCardFromItem(cardId);
+      if (action === "switch-notice-tab") switchNoticeTab(target.dataset.noticeTab);
+      if (action === "open-update-rewards") openUpdateNotice(true, "rewards");
       if (action === "claim-income") claimIncome();
       if (action === "open-card") openCardModal(cardId);
       if (action === "open-team-picker") openTeamPicker(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
@@ -8023,7 +8521,7 @@
         setOwnSupportCard(cardId || (supportSelect ? supportSelect.value : ""));
       }
       if (action === "view-profile") openFriendProfile(friendId);
-      if (action === "open-update-notice") openUpdateNotice(true);
+      if (action === "open-update-notice") openUpdateNotice(true, "news");
       if (action === "close-update-notice") closeUpdateNotice();
       if (action === "close-reveal") closeReveal();
       if (action === "select-reveal-card") renderRevealSelection(Number(target.dataset.revealIndex) || 0);
@@ -8104,7 +8602,10 @@
 
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
-      if (!document.getElementById("updateNoticeModal").classList.contains("hidden")) closeUpdateNotice();
+      if (!document.getElementById("itemSelectorModal").classList.contains("hidden")) closeItemSelector();
+      else if (!document.getElementById("inventoryModal").classList.contains("hidden")) closeInventory();
+      else if (!document.getElementById("mailboxModal").classList.contains("hidden")) closeMailbox();
+      else if (!document.getElementById("updateNoticeModal").classList.contains("hidden")) closeUpdateNotice();
       else if (!document.getElementById("teamPickerModal").classList.contains("hidden")) closeTeamPicker();
       else if (!document.getElementById("revealScreen").classList.contains("hidden")) closeReveal();
       else if (!document.getElementById("authModal").classList.contains("hidden")) closeAuthModal();
