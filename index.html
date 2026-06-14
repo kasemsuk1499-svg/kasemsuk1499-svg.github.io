@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-14-advanced-element-conditions-v24">
+  <meta name="gacha-app-build" content="2026-06-15-targeted-ignore-active-trigger-v26">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -666,6 +666,24 @@
       box-shadow: 0 0 18px color-mix(in srgb, var(--rarity-glow, var(--rarity)) 32%, transparent);
     }
     .copy-badge { right: 9px; color: white; background: rgba(5,8,18,.72); }
+    .card-id-badge {
+      position: absolute;
+      z-index: 5;
+      left: 9px;
+      bottom: 9px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 999px;
+      padding: 4px 7px;
+      color: #eaf8ff;
+      font-size: .58rem;
+      font-weight: 1000;
+      letter-spacing: .035em;
+      background: rgba(5,8,18,.78);
+      box-shadow: 0 5px 14px rgba(0,0,0,.30);
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+    }
+    .team-slot-name small { display:block; margin-top:3px; color:var(--cyan); font-size:.58rem; letter-spacing:.04em; }
 
     /* เพิ่มโดยอลิซ: สถานะอเวกแบบตีบวกที่มุมขวาบนของการ์ด */
     .awaken-corner {
@@ -3417,7 +3435,7 @@
             <button class="tab" data-tab="friends">เพื่อน</button>
           </div>
           <div class="tools hidden" id="collectionTools">
-            <input class="field" id="searchInput" type="search" placeholder="ค้นหาการ์ด..." autocomplete="off">
+            <input class="field" id="searchInput" type="search" placeholder="ค้นหาชื่อ ธาตุ หรือ ID..." autocomplete="off">
             <select class="field" id="rarityFilter" aria-label="กรองระดับ"></select>
             <select class="field" id="sortMode" aria-label="เรียงลำดับการ์ด">
               <option value="power">เรียงตามพลังโจมตี</option>
@@ -3676,7 +3694,7 @@
         <p id="teamPickerSubtitle">เลือกจากการ์ดที่มีอยู่ในคลัง ระบบจะสลับช่องให้อัตโนมัติถ้าการ์ดอยู่ในทีมแล้ว</p>
       </div>
       <div class="team-picker-tools">
-        <input class="field" id="teamPickerSearch" type="search" placeholder="ค้นหาชื่อหรือธาตุ..." autocomplete="off">
+        <input class="field" id="teamPickerSearch" type="search" placeholder="ค้นหาชื่อ ธาตุ หรือ ID..." autocomplete="off">
         <select class="field" id="teamPickerRarity" aria-label="กรองระดับในตัวเลือกทีม"></select>
         <select class="field" id="teamPickerSortMode" aria-label="เรียงการ์ดในตัวเลือกทีม">
           <option value="power">พลัง</option>
@@ -3967,12 +3985,18 @@
       combatMinimumDamageRate: 0.08,
       combatMultiHitPenalty: 0.025,
       combatMultiHitMinEfficiency: 0.82,
-      combatMaxAttackHits: 8,
-      combatMaxShieldHits: 6,
+      combatMaxAttackHits: 99,
+      combatMaxShieldHits: 99,
       // เพิ่มโดยอลิซ: ต่อสู้ผลัดกันตีจน DEF ฝ่ายใดฝ่ายหนึ่งหมด
       combatMaxTurns: 120,
       combatFatigueStartRound: 18,
-      combatFatigueMaxDefenseRate: 0.10
+      combatFatigueMaxDefenseRate: 0.10,
+      // เพิ่มโดยอลิซ: เพดานระบบ Active Skill แบบชาร์จจำนวนครั้งโจมตี
+      combatMaxTriggerChargeAttacks: 99,
+      combatMaxTriggeredAttackRate: 5.00,
+      combatMaxTriggeredHealRate: 1.00,
+      combatMaxTriggeredExtraHits: 20,
+      combatMaxTriggeredShieldHits: 20
     });
 
     // เพิ่มโดยอลิซ: รางวัลล็อกอินเฉพาะ 7 วันแรก (นับวันรับ ไม่บังคับให้ต่อเนื่อง)
@@ -4287,6 +4311,13 @@
            { "type": "gachaRarityRate", "value": 0.15, "targetRarities": ["UR", "LR", "EX", "SC"] },
            { "type": "selfPowerRate", "value": 0.25 },
            { "type": "selfDefenseRate", "value": 0.25 },
+           { "type": "cardPowerRate", "value": 0.20, "targetCardIds": [1001, 1041] },
+           { "type": "cardDefenseRate", "value": 0.20, "targetCardIds": [1001, 1041] },
+           { "type": "cardIncomeRate", "value": 0.15, "targetCardIds": [1001, 1041] },
+           { "type": "nullifyCardAbilities", "targetSide": "enemy", "targetCardIds": [1041] },
+           { "type": "ignoreAbilityConditions", "targetSide": "ally", "targetElements": ["ไฟ"], "targetRarities": ["LR"], "targetMatch": "any" },
+           { "type": "nextAttackPowerRate", "value": 0.50, "condition": { "afterOwnAttacks": 3, "repeat": true } },
+           { "type": "healDefenseRate", "value": 0.20, "condition": { "afterOwnAttacks": 3, "repeat": true } },
            { "type": "rarityPowerRate", "value": 0.18, "targetRarities": ["EX", "SC"] },
            { "type": "rarityDefenseRate", "value": 0.18, "targetRarities": ["EX", "SC"] },
            { "type": "rarityIncomeRate", "value": 0.12, "targetRarities": ["LR"] },
@@ -4312,6 +4343,13 @@
        - luckRate เพิ่มโอกาสสุ่มค่าต่อสู้ฝั่งเรา ไม่แก้เรทกาชา
        - gachaRarityRate เพิ่ม “น้ำหนักสุ่ม” ของระดับที่กำหนด เช่น 0.15 = น้ำหนักระดับนั้น +15% แล้วระบบคำนวณเปอร์เซ็นต์จริงใหม่
        - effect แต่ละรายการใส่ condition ของตัวเองเพิ่มได้
+       - cardPowerRate/cardDefenseRate/cardIncomeRate ใช้ targetCardIds เพื่อเพิ่มค่าสเตตัสเฉพาะ ID ที่กำหนด
+       - nullifyCardAbilities ใช้ targetSide: "ally"/"self"/"enemy" และ targetCardIds เพื่อทำให้ความสามารถของการ์ดเป้าหมายไร้ผล
+       - ignoreAbilityConditions เลือกเป้าหมายด้วย targetCardIds / targetElements / targetRarities และ targetMatch: "any"/"all" ได้
+       - condition: { "afterOwnAttacks": 3, "repeat": true } = ตีปกติครบ 3 ครั้ง แล้วเอฟเฟกต์ทำงานในการโจมตีครั้งถัดไป จากนั้นรีเซ็ตวนลูป
+       - nextAttackPowerRate/nextAttackPowerFlat เพิ่ม ATK เฉพาะการโจมตีที่ Active แล้วกลับเป็นค่าปกติทันที
+       - healDefenseRate/healDefenseFlat ฟื้น DEF ปัจจุบันหลังโจมตีที่ Active โดยไม่เพิ่ม DEF สูงสุด
+       - สกิล nullify มีลำดับควบคุมสูงสุด จึงไม่ถูก nullify ซ้อน เพื่อให้ผลลัพธ์ไม่วนลูป
        - minAnyElementCount: { "ดิน": 5, "เหล็ก": 5 } = ดินครบ 5 ใบ หรือเหล็กครบ 5 ใบ อย่างใดอย่างหนึ่ง
        - minCombinedElementCount: { "elements": ["ดิน", "เหล็ก"], "count": 5 } = การ์ดที่มีดินหรือเหล็กรวมกันอย่างน้อย 5 ใบ (การ์ดหลายธาตุนับใบละ 1)
        - teamElementsOnly: ["ดิน", "เหล็ก"] = ทุกธาตุบนการ์ดทุกใบในทีมต้องอยู่ในรายการนี้เท่านั้น; มักใช้ร่วมกับ minTeamSize: 5
@@ -4329,6 +4367,17 @@
       SELF_POWER_RATE: "selfPowerRate",
       SELF_DEFENSE_RATE: "selfDefenseRate",
       SELF_INCOME_RATE: "selfIncomeRate",
+      CARD_POWER_RATE: "cardPowerRate",
+      CARD_DEFENSE_RATE: "cardDefenseRate",
+      CARD_INCOME_RATE: "cardIncomeRate",
+      NULLIFY_CARD_ABILITIES: "nullifyCardAbilities",
+      IGNORE_ABILITY_CONDITIONS: "ignoreAbilityConditions",
+      NEXT_ATTACK_POWER_RATE: "nextAttackPowerRate",
+      NEXT_ATTACK_POWER_FLAT: "nextAttackPowerFlat",
+      HEAL_DEFENSE_RATE: "healDefenseRate",
+      HEAL_DEFENSE_FLAT: "healDefenseFlat",
+      RESTORE_SHIELD_HITS: "restoreShieldHits",
+      NEXT_ATTACK_HITS: "nextAttackHits",
       RARITY_POWER_RATE: "rarityPowerRate",
       RARITY_DEFENSE_RATE: "rarityDefenseRate",
       RARITY_INCOME_RATE: "rarityIncomeRate",
@@ -4386,6 +4435,27 @@
        3) ทีมครบ 5 ใบและทุกธาตุบนการ์ดต้องเป็นดินหรือเหล็กเท่านั้น
           "condition": { "teamElementsOnly": ["ดิน", "เหล็ก"], "minTeamSize": 5 }
     */
+
+    /* ตัวอย่าง Active Skill แบบวนลูป:
+       1) ตีครบ 3 ครั้ง ครั้งที่ 4 ATK +50% แค่ครั้งเดียว แล้วเริ่มนับใหม่
+          "effects": [{
+            "type": "nextAttackPowerRate", "value": 0.50,
+            "condition": { "afterOwnAttacks": 3, "repeat": true }
+          }]
+
+       2) ตีครบ 2 ครั้ง ครั้งที่ 3 ฟื้น DEF 20% แล้วเริ่มนับใหม่
+          "effects": [{
+            "type": "healDefenseRate", "value": 0.20,
+            "condition": { "afterOwnAttacks": 2, "repeat": true }
+          }]
+
+       3) ยกเลิกเงื่อนไขเฉพาะการ์ดธาตุไฟ หรือระดับ LR หรือ ID 1041
+          { "type": "ignoreAbilityConditions", "targetSide": "ally",
+            "targetElements": ["ไฟ"], "targetRarities": ["LR"], "targetCardIds": [1041], "targetMatch": "any" }
+       - targetMatch: "any" = ตรงอย่างใดอย่างหนึ่งก็ผ่าน
+       - targetMatch: "all" = ต้องตรงทุกตัวกรองที่ใส่
+    */
+
     /* ======================== [SECTION 06 CARD-DATA] ======================== */
     const CARDS = [
   {
@@ -4722,8 +4792,9 @@
     "id": 44,
     "name": "Hana Kurusu",
     "rarity": "LR",
-    "element": "แสง",
+    "element": "น้ำ",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4737,6 +4808,7 @@
     "rarity": "LR",
     "element": "ไร้ธาตุ",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4750,6 +4822,7 @@
     "rarity": "LR",
     "element": "แสง",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4761,8 +4834,9 @@
     "id": 2,
     "name": "Sung Jinwoo",
     "rarity": "LR",
-    "element": "ความมืด",
+    "element": "มิติ",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4774,8 +4848,9 @@
     "id": 3,
     "name": "Frieren",
     "rarity": "LR",
-    "element": "สายฟ้า",
+    "element": "ดิน",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4789,6 +4864,7 @@
     "rarity": "LR",
     "element": "แสง",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4802,6 +4878,7 @@
     "rarity": "LR",
     "element": "ลม",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4815,6 +4892,7 @@
     "rarity": "LR",
     "element": "พืช",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4826,8 +4904,9 @@
     "id": 7,
     "name": "Satoru Gojo",
     "rarity": "LR",
-    "element": "มิติ",
+    "element": "สายฟ้า",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4839,8 +4918,9 @@
     "id": 8,
     "name": "CID",
     "rarity": "LR",
-    "element": "มิติ",
+    "element": "ความมืด",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4854,6 +4934,7 @@
     "rarity": "LR",
     "element": "น้ำ",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4865,8 +4946,9 @@
     "id": 10,
     "name": "Uzumaki Naruto",
     "rarity": "LR",
-    "element": "ไฟ",
+    "element": "ดิน",
     "power": 220000,
+        "defense": 400000,
     "incomePerSec": 5200,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
@@ -4878,8 +4960,9 @@
     "id": 1038,
     "name": "Marulu Val Vol Yelvori",
     "rarity": "LR",
-    "element": "มิติ",
+    "element": "น้ำแข็ง",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -4893,6 +4976,7 @@
     "rarity": "LR",
     "element": "ลม",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -4906,6 +4990,7 @@
     "rarity": "LR",
     "element": "ไฟ",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -4917,8 +5002,9 @@
     "id": 1033,
     "name": "Kinji Hakari",
     "rarity": "LR",
-    "element": "สายฟ้า",
+    "element": "มิติ",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -4930,8 +5016,9 @@
     "id": 1034,
     "name": "Hajime Kashimo",
     "rarity": "LR",
-    "element": "ลม",
+    "element": "สายฟ้า",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -4943,8 +5030,9 @@
     "id": 1023,
     "name": "Yuji Itadori",
     "rarity": "LR",
-    "element": "ไร้ธาตุ",
+    "element": "ความมืด",
     "power": 230000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 3110,
     "upgradeDustGrowth": 1.078,
@@ -4956,8 +5044,9 @@
     "id": 1021,
     "name": "Hiromi Higuruma",
     "rarity": "LR",
-    "element": "ไฟ",
+    "element": "เหล็ก",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -4969,8 +5058,9 @@
     "id": 1022,
     "name": "Fumihiko Takaba",
     "rarity": "LR",
-    "element": "น้ำแข็ง",
+    "element": "ไร้ธาตุ",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -4982,8 +5072,9 @@
     "id": 1001,
     "name": "Satoru Gojo",
     "rarity": "LR",
-    "element": "ความมืด",
+    "element": "แสง",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -4995,8 +5086,9 @@
     "id": 1002,
     "name": "Sukuna",
     "rarity": "LR",
-    "element": "มิติ",
+    "element": "แสง",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -5008,8 +5100,9 @@
     "id": 1003,
     "name": "Senin Toji",
     "rarity": "LR",
-    "element": "ไร้ธาตุ",
+    "element": "ความมืด",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -5023,6 +5116,7 @@
     "rarity": "LR",
     "element": "ไร้ธาตุ",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -5036,6 +5130,7 @@
     "rarity": "LR",
     "element": "ไร้ธาตุ",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -5047,8 +5142,9 @@
     "id": 1006,
     "name": "Yuki Tsukumo",
     "rarity": "LR",
-    "element": "ความมืด",
+    "element": "มิติ",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -5062,6 +5158,7 @@
     "rarity": "LR",
     "element": "มิติ",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -5073,8 +5170,9 @@
     "id": 1008,
     "name": "Kenjaku",
     "rarity": "LR",
-    "element": "ไร้ธาตุ",
+    "element": "ความมืด",
     "power": 221000,
+        "defense": 400000,
     "incomePerSec": 5210,
     "upgradeDustBase": 2810,
     "upgradeDustGrowth": 1.078,
@@ -5095,6 +5193,17 @@
     "awakenMax": 5,
     "icon": "",
     "image": "1009.png"
+    "ability": {
+      "name": "ภาชนะของสุคุนะ",
+      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'Nobara Kugisaki'UR หรือ megimi fushiguro'UR หรือ gojo stouru'LR หรือ Todo aoi; ATK+25%และโจมตี+4โล่+4 ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "anyCardIds": true, "requiredCardIds": [10010,1011,1001,1013] },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.255 },
+        { "type": "attackHits", "value": 3 },
+        { "type": "teamDefenseRate", "value": 4 }
+      ]
+    }
   },
   {
     "id": 1010,
@@ -5109,6 +5218,16 @@
     "awakenMax": 5,
     "icon": "",
     "image": "1010.png"
+    "ability": {
+      "name": "เสียงสั่นพ้อง",
+      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'yuji itadori'UR;'megimi fushiguro'UR;'gojo stouru'LR; ATK+45%และโจมตี+7 ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "leaderOnly": true, "requiredCardIds": [1009,1011,1001] },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.45 },
+        { "type": "attackHits", "value": 6 }
+      ]
+    }
   },
   {
     "id": 1011,
@@ -5123,6 +5242,18 @@
     "awakenMax": 5,
     "icon": "",
     "image": "1011.png"
+    "ability": {
+      "name": "ปี1โตเกียว",
+      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'yuji itadori'UR;'nobara kigisaki'UR;'gojo stouru'LR; ATK/DEF+35%และโจมตีและโล่เพิ่มขึ้น +4 ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "leaderOnly": true, "requiredCardIds": [1009,1010,1001] },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.35 },
+        { "type": "teamDefenseRate", "value": 0.35 },
+        { "type": "attackHits", "value": 3 },
+        { "type": "shieldHits", "value": 4 }
+      ]
+    }
   },
   {
     "id": 1012,
@@ -5137,6 +5268,15 @@
     "awakenMax": 5,
     "icon": "",
     "image": "1012.png"
+    "ability": {
+      "name": "ได้เวลาโอทีแล้ว...",
+      "description": "เมื่อตีครบ 10 ครั้ง ตีครั้งต่อไปจะบวก ATK+1400000 ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "afterOwnAttacks": 10, "repeat": true },
+      "effects": [
+        { "type": "nextAttackPowerFlat", "value": 1400000 }
+      ]
+    }
   },
   {
     "id": 1036,
@@ -5151,6 +5291,16 @@
     "awakenMax": 5,
     "icon": "",
     "image": "1036.png"
+    "ability": {
+      "name": "หยุดซ้ะ",
+      "description": "ลด DEF ฝั่งตรงข้าม 35%  เมื่อใส่ 'panda'UR;'maki'UR;'yuta'LR ในทีม",
+      "activeIn": ["team", "tower"],
+      "condition": {"requiredCardIds": [1037, 1016, 1005]
+      },
+      "effects": [
+        { "type": "enemyDefenseRate", "value": -0.35 }
+      ]
+    }
   },
   {
     "id": 1037,
@@ -5164,7 +5314,17 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1037.png"
+    "image": "1037.png",
+    "ability": {
+      "name": "ชิกิกามิที่พูดได้",
+      "description": "เพิ่มรายได้ +60% เมื่อใส่ 'inumaki'UR;'maki'UR;'yuta'LR ในทีม",
+      "activeIn": ["team", "tower"],
+      "condition": {"requiredCardIds": [1036, 1016, 1005]
+      },
+      "effects": [
+        { "type": "teamIncomeRate", "value": 0.60 }
+      ]
+    }
   },
   {
     "id": 1013,
@@ -5178,7 +5338,21 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1013.png"
+    "image": "1013.png",
+    "ability": {
+      "name": "มายบราเทอร์",
+      "description": "เพิ่มโชคในการต่อสู้ 10%, เมื่อจัดทีมกับ 'Itadori Yuji'ระดับ UR ในทีมแค่ 2 คน; ATK/DEF +4000% /โจมตีและโล่เพิ่มอย่างละ +4",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"requiredCardIds": [1009], "maxTeamSize": 2
+      },
+      "effects": [
+        { "type": "teamPowerRate", "value": 40.0 },
+        { "type": "teamDefenseRate", "value": 40.0 },
+        { "type": "shieldHits", "value": 4 },
+        { "type": "attackHits", "value": 3 },
+        { "type": "luckRate", "value": 0.10 }
+      ]
+    }
   },
   {
     "id": 1014,
@@ -5192,7 +5366,17 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1014.png"
+    "image": "1014.png",
+    "ability": {
+      "name": "ลัคกี้...",
+      "description": "เพิ่มโชคในการต่อสู้ 25%, เพิ่มเรทกาชา ;UR/LR/EX +14%",
+      "activeIn": ["team", "tower"],
+      "condition": { "mode": "tower"},
+      "effects": [
+        { "type": "luckRate", "value": 0.25 },
+        { "type": "gachaRarityRate", "value": 0.14, "targetRarities": ["UR", "LR", "EX"] }
+      ]
+    }
   },
   {
     "id": 1015,
@@ -5206,7 +5390,17 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1015.png"
+    "image": "1015.png",
+    "ability": {
+      "name": "ฝาแฝดเซนอิง",
+      "description": "เมื่อในทีมมีตัวละครที่ชื่อ 'Maki' ; ตัวละครทั้งคู่จะได้รับ โล่ +2",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "anyCardIds": [1016, 1004]
+      },
+      "effects": [
+        { "type": "shieldHits", "value": 4 }
+      ]
+    }
   },
   {
     "id": 1016,
@@ -5220,7 +5414,19 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1016.png"
+    "image": "1016.png",
+    "ability": {
+      "name": "ผู้ไร้พรสวรรค์",
+      "description": " ATK+200% ;อเวกตัน 'โจมตี + 2 ฮิต';เลเวลตัน สกิลของตัวละคร'Naoya'ไร้ผล",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { 
+      },
+      "effects": [
+        { "type": "selfPowerRate", "value": 2.0 },
+        { "type": "attackHits", "value": 2, "condition": {"sourceMinAwaken": 5 } },
+        { "type": "nullifyCardAbilities", "targetSide": "enemy", "targetCardIds": [1031], "condition": {"sourceMinLevel": 180 } }
+      ]
+    }
   },
   {
     "id": 1017,
@@ -5234,7 +5440,17 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1017.png"
+    "image": "1017.png",
+    "ability": {
+      "name": "อณาเขตแบบย่อ",
+      "description": "หากในทีมมีผู้ใช้ไสยเวทนอกจากตัวเอง ; โจมตี + 2 ฮิต",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 42, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
+      },
+      "effects": [
+        { "type": "attackHits", "value": 2 }
+      ]
+    }
   },
   {
     "id": 1018,
@@ -5248,7 +5464,20 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1018.png"
+    "image": "1018.png",
+    "ability": {
+      "name": "MegaMARU!!!",
+      "description": "หากการ์ดใบนี้อเวกตัน/เลเวลตัน ; ตัวเองได้รับ ATK/DEF +9000000และโจมตีเพิ่ม +5 ฮิต ;จะใส่ได้แค่ 4 ตัวละคร",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+         "maxTeamSize": 4, "sourceMinAwaken": 5, "sourceMinLevel": 180
+      },
+      "effects": [
+        { "type": "teamPowerFlat", "value": 9000000 },
+        { "type": "teamDefenseFlat", "value": 9000000 },
+        { "type": "attackHits", "value": 5 }
+      ]
+    }
   },
   {
     "id": 1019,
@@ -5262,7 +5491,18 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1019.png"
+    "image": "1019.png",
+    "ability": {
+      "name": "เงินมาก่อนงานถึงเดิน",
+      "description": "เมื่อจัดลงทีมโชว์ รายได้+50%;เงื่อนไขห้ามใส่เกิน3คน",
+      "activeIn": ["team"],
+      "condition": {
+        "mode": "tower", "maxTeamSize": 3
+      },
+      "effects": [
+        { "type": "teamIncomeRate", "value": 0.5 }
+      ]
+    }
   },
   {
     "id": 1020,
@@ -5276,7 +5516,20 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1020.png"
+    "image": "1020.png",
+    "ability": {
+      "name": "อาณาเขตเสริมพลัง",
+      "description": "หากอเวกตัน/เลเวลตัน และมีผู้ใช้ไสยเวทในทีมนอกจากตัวเอง; เพื่อนร่วมทีมเพิ่ม ATK/DEF +40% ;คำสาปในทีม ATK/DEF -90%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "sourceMinAwaken": 5, "sourceMinLevel": 180,
+                "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 42, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
+      },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.4 },
+        { "type": "cardPowerRate", "value": -1.3, "targetCardIds": [1002, 1042, 1035, 1024, 1025, 1026, 1027, 1030, 1041, 1023] }
+      ]
+    }
   },
   {
     "id": 1035,
@@ -5290,7 +5543,22 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1035.png"
+    "image": "1035.png",
+    "ability": {
+      "name": "อารามสงฆ์ซ่อนมาร",
+      "description": "หากอเวกตัน/เลเวลตัน และมีคนเดียวในทีมจะเก่งขึ้น 7000% และโจมตีและเพิ่มโล่อย่างละ 8",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "sourceMinAwaken": 5, "sourceMinLevel": 180,
+                "maxTeamSize": 1, "leaderOnly": true
+      },
+      "effects": [
+        { "type": "selfPowerRate", "value": 70.0 },
+        { "type": "selfDefenseRate", "value": 70.0 },
+        { "type": "attackHits", "value": 7 },
+        { "type": "shieldHits", "value": 8 }
+      ]
+    }
   },
   {
     "id": 1024,
@@ -5304,7 +5572,19 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1024.png"
+    "image": "1024.png",
+    "ability": {
+      "name": "ฝาโลงภูผาเหล็ก",
+      "description": "หากอเวกตัน/เลเวลตัน สมาชิกทีมที่มีธาตุไฟได้รับ ATK+30% และทีมโจมตีเพิ่ม +3 ฮิต ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "sourceMinAwaken": 5, "sourceMinLevel": 180
+      },
+      "effects": [
+        { "type": "elementPowerRate", "value": 0.30, "targetElements": ["ไฟ"] },
+        { "type": "attackHits", "value": 3}
+      ]
+    }
   },
   {
     "id": 1025,
@@ -5318,7 +5598,19 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1025.png"
+    "image": "1025.png",
+    "ability": {
+      "name": "พงไพรดอกไม้",
+      "description": "หากอเวกตัน/เลเวลตัน สมาชิกทีมที่มีธาตุพืชได้รับ ATK+30% และทีมโจมตีเพิ่ม +3 ฮิต ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "sourceMinAwaken": 5, "sourceMinLevel": 180
+      },
+      "effects": [
+        { "type": "elementPowerRate", "value": 0.30, "targetElements": ["พืช"] },
+        { "type": "attackHits", "value": 3}
+      ]
+    }
   },
   {
     "id": 1026,
@@ -5332,7 +5624,19 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1026.png"
+    "image": "1026.png",
+    "ability": {
+      "name": "มหาสมุทร",
+      "description": "หากอเวกตัน/เลเวลตัน สมาชิกทีมที่มีธาตุน้ำได้รับ ATK+30% และทีมโจมตีเพิ่ม +3 ฮิต ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "sourceMinAwaken": 5, "sourceMinLevel": 180
+      },
+      "effects": [
+        { "type": "elementPowerRate", "value": 0.30, "targetElements": ["น้ำ"] },
+        { "type": "attackHits", "value": 3}
+      ]
+    }
   },
   {
     "id": 1027,
@@ -5346,7 +5650,20 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1027.png"
+    "image": "1027.png",
+    "ability": {
+      "name": "ธรรมชาติแปรผัน",
+      "description": "เมื่อจัดเข้าทีมที่มีคำสาปอยู่ ทีมได้รับ ATK+15%/DEF+15%; หากอเวกตัน/เลเวลตัน ทีมได้รับโจมตีเพิ่ม +3 ฮิต ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "anyCardIds": [1026, 1025, 1024, 1035, 1002, 1042, 1041, 1023]
+      },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.15 },
+        { "type": "teamDefenseRate", "value": 0.15 },
+        { "type": "attackHits", "value": 3, "condition": { "sourceMinAwaken": 5, "sourceMinLevel": 180 } }
+      ]
+    }
   },
   {
     "id": 1028,
@@ -5360,7 +5677,19 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1028.png"
+    "image": "1028.png",
+    "ability": {
+      "name": "พื้นที่ไร้จำกัดท้องฟ้าคืออณาเขตของข้า",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ตัวเองได้รับ DEF +90%; หากอเวกตัน/เลเวลตัน ทีมได้รับโล่เพิ่ม +4 ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1029, 42, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
+      },
+      "effects": [
+        { "type": "selfDefenseRate", "value": 0.90 },
+        { "type": "shieldHits", "value": 4, "condition": { "sourceMinAwaken": 5, "sourceMinLevel": 180 } }
+      ]
+    }
   },
   {
     "id": 1029,
@@ -5374,7 +5703,19 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1029.png"
+    "image": "1029.png",
+    "ability": {
+      "name": "ไสยเวททะลุทะลวง",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ตัวเองได้รับ ATK +80%; หากอเวกตัน/เลเวลตัน ทีมโจมตีเพิ่ม +3 ฮิต",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 42, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
+      },
+      "effects": [
+        { "type": "selfPowerRate", "value": 0.80 },
+        { "type": "attackHits", "value": 3, "condition": { "sourceMinAwaken": 5, "sourceMinLevel": 180 } }
+      ]
+    }
   },
   {
     "id": 1030,
@@ -5391,10 +5732,10 @@
     "image": "1030.png",
     "ability": {
       "name": "เจาะโลหิต",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่ ทีมได้รับ ATK +18%; หากมีผู้ใช้ไสยเวทชื่อ 'Yuji' อยู่ด้วย ทีมโจมตีเพิ่ม +1 ฮิต",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ทีมได้รับ ATK +18%; หากมีผู้ใช้ไสยเวทชื่อ 'Yuji' อยู่ด้วย ทีมโจมตีเพิ่ม +1 ฮิต",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
-        "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043]
+        "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 42, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
       },
       "effects": [
         { "type": "teamPowerRate", "value": 0.18 },
@@ -5489,11 +5830,11 @@
     "image": "42.png",
     "ability": {
       "name": "ไสยเวทย้อนกลับ...",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่, ทีมได้รับ DEF+500000",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง, ทีมได้รับ DEF+5000000",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043] },
+      "condition": {"anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26] },
       "effects": [
-        { "type": "teamDefenseFlat", "value": 500000 }
+        { "type": "teamDefenseFlat", "value": 5000000 }
       ]
         }
   },
@@ -7285,6 +7626,133 @@
       return [...new Set(abilityArray(value).map(item => String(item)).filter(Boolean))];
     }
 
+    function normalizeAbilityTargetSide(value) {
+      const side = String(value || "ally").trim().toLowerCase();
+      if (["enemy", "opponent", "foe", "ฝ่ายตรงข้าม"].includes(side)) return "enemy";
+      if (["self", "source", "ตนเอง", "ตัวเอง"].includes(side)) return "self";
+      return "ally";
+    }
+
+    function normalizeAbilityTargetMatch(value) {
+      return String(value || "any").trim().toLowerCase() === "all" ? "all" : "any";
+    }
+
+    function isNullifyAbilityEffect(effect) {
+      return Boolean(effect && effect.type === CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES);
+    }
+
+    function isIgnoreConditionAbilityEffect(effect) {
+      return Boolean(effect && effect.type === CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS);
+    }
+
+    function isAbilityControlEffect(effect) {
+      return isNullifyAbilityEffect(effect) || isIgnoreConditionAbilityEffect(effect);
+    }
+
+    // เงื่อนไข Active Skill แบบทั่วไป:
+    // condition: { afterOwnAttacks: 3, repeat: true }
+    // ตีปกติครบ 3 ครั้ง แล้วเอฟเฟกต์จะทำงานในการโจมตีครั้งถัดไป จากนั้นรีเซ็ตและวนใหม่
+    function normalizeBattleTriggerRule(condition = {}) {
+      const raw = condition && typeof condition === "object" ? condition : {};
+      const nested = raw.battleTrigger && typeof raw.battleTrigger === "object" ? raw.battleTrigger : raw;
+      const amount = Math.floor(Number(
+        nested.afterOwnAttacks !== undefined ? nested.afterOwnAttacks
+          : nested.triggerEveryOwnAttacks !== undefined ? nested.triggerEveryOwnAttacks
+          : nested.ownAttacksBeforeTrigger
+      ) || 0);
+      if (amount < 1) return null;
+      const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
+      return {
+        afterOwnAttacks: Math.min(cap, amount),
+        repeat: nested.repeat !== false,
+        triggerOn: "nextAttack"
+      };
+    }
+
+    function getStaticAbilityCondition(condition = {}) {
+      const source = condition && typeof condition === "object" ? condition : {};
+      const result = { ...source };
+      delete result.battleTrigger;
+      delete result.afterOwnAttacks;
+      delete result.triggerEveryOwnAttacks;
+      delete result.ownAttacksBeforeTrigger;
+      delete result.activateOnNextAttack;
+      delete result.triggerOn;
+      delete result.repeat;
+      return result;
+    }
+
+    function getAbilityTargetFilter(effect = {}) {
+      return {
+        ids: normalizeAbilityCardIds(effect.targetCardIds || effect.cardIds),
+        elements: normalizeAbilityElements(effect.targetElements || effect.elements),
+        rarities: normalizeAbilityRarities(effect.targetRarities || effect.rarities),
+        match: normalizeAbilityTargetMatch(effect.targetMatch)
+      };
+    }
+
+    function cardMatchesAbilityTarget(card, effect = {}) {
+      if (!card) return false;
+      const filter = getAbilityTargetFilter(effect);
+      const checks = [];
+      if (filter.ids.length) checks.push(filter.ids.includes(String(card.id)));
+      if (filter.elements.length) {
+        const cardElements = getCardElements(card);
+        checks.push(filter.elements.some(element => cardElements.includes(element)));
+      }
+      if (filter.rarities.length) checks.push(filter.rarities.includes(String(card.rarity || "").toUpperCase()));
+      if (!checks.length) return true;
+      return filter.match === "all" ? checks.every(Boolean) : checks.some(Boolean);
+    }
+
+    function resolveAbilityTargetCardIds(effect, sourceCard, targetContext) {
+      const side = normalizeAbilityTargetSide(effect && effect.targetSide);
+      if (side === "self") return sourceCard ? [String(sourceCard.id)] : [];
+      if (!targetContext || !Array.isArray(targetContext.cards)) return [];
+      return targetContext.cards.filter(card => cardMatchesAbilityTarget(card, effect)).map(card => String(card.id));
+    }
+
+    function addAbilityMapRate(map, keys, value) {
+      abilityArray(keys).forEach(key => {
+        const safeKey = String(key || "");
+        if (!safeKey) return;
+        map[safeKey] = Number(map[safeKey] || 0) + Number(value || 0);
+      });
+    }
+
+    function mergeExternalAbilityRateMap(target, source, context) {
+      Object.entries(source && typeof source === "object" ? source : {}).forEach(([key, value]) => {
+        const amount = Number(value || 0);
+        if (!amount) return;
+        if (key === "*") {
+          (context && context.ids || []).forEach(id => addAbilityMapRate(target, [id], amount));
+        } else if (!context || context.cardIdSet.has(String(key))) {
+          addAbilityMapRate(target, [String(key)], amount);
+        }
+      });
+    }
+
+    function resolveEnemySelectorIds(selectors, targetContext) {
+      const result = new Set();
+      abilityArray(selectors).forEach(item => {
+        if (!item || !item.effect) return;
+        resolveAbilityTargetCardIds({ ...item.effect, targetSide: "ally" }, item.sourceCard, targetContext)
+          .forEach(id => result.add(String(id)));
+      });
+      return [...result];
+    }
+
+    function resolveEnemyRateMap(selectors, targetContext) {
+      const result = {};
+      abilityArray(selectors).forEach(item => {
+        if (!item || !item.effect) return;
+        const value = Number(item.effect.value || 0);
+        resolveAbilityTargetCardIds({ ...item.effect, targetSide: "ally" }, item.sourceCard, targetContext)
+          .forEach(id => addAbilityMapRate(result, [id], value));
+      });
+      return result;
+    }
+
     function getCardAbilities(card) {
       if (!card) return [];
       const source = Array.isArray(card.abilities) ? card.abilities : (card.ability ? [card.ability] : []);
@@ -7304,7 +7772,7 @@
       return modes.length ? modes : CARD_ABILITY_MODES.slice();
     }
 
-    function buildAbilityContext(teamIds = state.team, mode = "team") {
+    function buildAbilityContext(teamIds = state.team, mode = "team", options = {}) {
       const ids = abilityArray(teamIds).map(id => String(id));
       const cards = ids.map(id => CARD_BY_ID.get(id)).filter(Boolean);
       const elementCounts = Object.fromEntries(THAI_ELEMENTS.map(element => [element, 0]));
@@ -7322,7 +7790,8 @@
         elementCounts,
         rarityCounts,
         uniqueElements: THAI_ELEMENTS.filter(element => elementCounts[element] > 0),
-        cardIdSet: new Set(ids)
+        cardIdSet: new Set(ids),
+        progressByCardId: options && typeof options.progressByCardId === "object" ? options.progressByCardId : {}
       };
     }
 
@@ -7407,22 +7876,75 @@
       const anyCardIds = normalizeAbilityCardIds(rule.anyCardIds);
       if (anyCardIds.length && !anyCardIds.some(id => context.cardIdSet.has(id))) return false;
 
-      const owned = getOwned(sourceCard.id);
-      if (Number(rule.sourceMinLevel || 0) > Number(owned && owned.level || 1)) return false;
-      if (Number(rule.sourceMinAwaken || 0) > Number(owned && owned.duplicateRank || 0)) return false;
+      const sourceId = String(sourceCard.id);
+      const progress = context.progressByCardId[sourceId] || getOwned(sourceId) || {};
+      if (Number(rule.sourceMinLevel || 0) > Number(progress.level || 1)) return false;
+      if (Number(rule.sourceMinAwaken || 0) > Number(progress.duplicateRank ?? progress.awaken ?? 0)) return false;
       return true;
     }
 
-    function addAbilityMapRate(map, keys, value) {
-      abilityArray(keys).forEach(key => {
-        const safeKey = String(key || "");
-        if (!safeKey) return;
-        map[safeKey] = Number(map[safeKey] || 0) + value;
-      });
-    }
+    function getTeamAbilitySummary(teamIds = state.team, mode = "team", options = {}) {
+      const context = buildAbilityContext(teamIds, mode, options);
+      const externalNullified = new Set(normalizeAbilityCardIds(options.externalNullifiedCardIds));
+      const externalConditionIgnored = new Set(normalizeAbilityCardIds(options.externalConditionIgnoredCardIds));
+      const allyNullified = new Set();
+      const allyConditionIgnored = new Set(externalConditionIgnored);
+      const enemyNullifySelectors = [];
+      const enemyIgnoreConditionSelectors = [];
+      const nullifyEffects = [];
+      const ignoreConditionEffects = [];
 
-    function getTeamAbilitySummary(teamIds = state.team, mode = "team") {
-      const context = buildAbilityContext(teamIds, mode);
+      // Control pass 1: nullify ทำงานก่อนเอฟเฟกต์ทั่วไปและไม่ถูก nullify ซ้อน
+      context.cards.forEach(sourceCard => {
+        getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
+          const modes = getAbilityModes(ability);
+          const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
+          const baseActive = !abilityTrigger
+            && modes.includes(context.mode)
+            && isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard);
+          if (!baseActive) return;
+          abilityArray(ability.effects).forEach((effect, effectIndex) => {
+            if (!isNullifyAbilityEffect(effect) || normalizeBattleTriggerRule(effect.condition || {})) return;
+            if (!isAbilityConditionMet(getStaticAbilityCondition(effect.condition || {}), context, sourceCard)) return;
+            const targetSide = normalizeAbilityTargetSide(effect.targetSide);
+            if (targetSide === "enemy") {
+              enemyNullifySelectors.push({ sourceCard, ability, effect });
+            } else {
+              resolveAbilityTargetCardIds(effect, sourceCard, context).forEach(id => allyNullified.add(String(id)));
+            }
+            nullifyEffects.push({ key: `${sourceCard.id}:${abilityIndex}:${effectIndex}`, sourceCard, ability, effect: { ...effect, targetSide } });
+          });
+        });
+      });
+
+      const preliminaryNullified = new Set([...externalNullified, ...allyNullified]);
+
+      // Control pass 2: เลือกการ์ดที่ไม่ต้องผ่านเงื่อนไขด้วย ID / ธาตุ / ระดับ
+      context.cards.forEach(sourceCard => {
+        if (preliminaryNullified.has(String(sourceCard.id))) return;
+        getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
+          const modes = getAbilityModes(ability);
+          const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
+          const baseActive = !abilityTrigger
+            && modes.includes(context.mode)
+            && isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard);
+          if (!baseActive) return;
+          abilityArray(ability.effects).forEach((effect, effectIndex) => {
+            if (!isIgnoreConditionAbilityEffect(effect) || normalizeBattleTriggerRule(effect.condition || {})) return;
+            if (!isAbilityConditionMet(getStaticAbilityCondition(effect.condition || {}), context, sourceCard)) return;
+            const targetSide = normalizeAbilityTargetSide(effect.targetSide);
+            if (targetSide === "enemy") {
+              enemyIgnoreConditionSelectors.push({ sourceCard, ability, effect });
+            } else {
+              resolveAbilityTargetCardIds(effect, sourceCard, context).forEach(id => allyConditionIgnored.add(String(id)));
+            }
+            ignoreConditionEffects.push({ key: `${sourceCard.id}:${abilityIndex}:${effectIndex}`, sourceCard, ability, effect: { ...effect, targetSide } });
+          });
+        });
+      });
+
+      const nullifiedCardIdSet = preliminaryNullified;
+      const conditionIgnoredCardIdSet = allyConditionIgnored;
       const summary = {
         context,
         teamPowerRate: 0,
@@ -7440,32 +7962,77 @@
         selfPowerRates: {},
         selfDefenseRates: {},
         selfIncomeRates: {},
+        cardPowerRates: {},
+        cardDefenseRates: {},
+        cardIncomeRates: {},
+        enemyCardPowerSelectors: [],
+        enemyCardDefenseSelectors: [],
+        enemyCardIncomeSelectors: [],
         rarityPowerRates: {},
         rarityDefenseRates: {},
         rarityIncomeRates: {},
         elementPowerRates: {},
         elementDefenseRates: {},
         elementIncomeRates: {},
+        nullifiedCardIds: [...nullifiedCardIdSet],
+        allyNullifiedCardIds: [...allyNullified],
+        conditionIgnoredCardIds: [...conditionIgnoredCardIdSet],
+        allyConditionIgnoredCardIds: [...allyConditionIgnored],
+        enemyNullifySelectors,
+        enemyIgnoreConditionSelectors,
+        nullifyEffects,
+        ignoreConditionEffects,
+        triggeredEffects: [],
         activeAbilities: [],
         inactiveAbilities: []
       };
 
+      mergeExternalAbilityRateMap(summary.cardPowerRates, options.externalCardPowerRates, context);
+      mergeExternalAbilityRateMap(summary.cardDefenseRates, options.externalCardDefenseRates, context);
+      mergeExternalAbilityRateMap(summary.cardIncomeRates, options.externalCardIncomeRates, context);
+
       context.cards.forEach(sourceCard => {
         getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
           const modes = getAbilityModes(ability);
-          const baseActive = modes.includes(context.mode) && isAbilityConditionMet(ability.condition || {}, context, sourceCard);
+          const sourceId = String(sourceCard.id);
+          const sourceNullified = nullifiedCardIdSet.has(sourceId);
+          const sourceIgnoresConditions = conditionIgnoredCardIdSet.has(sourceId);
+          const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
+          const baseConditionActive = modes.includes(context.mode)
+            && (sourceIgnoresConditions || isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard));
           const activeEffects = [];
           const inactiveEffects = [];
 
-          abilityArray(ability.effects).forEach(effect => {
+          abilityArray(ability.effects).forEach((effect, effectIndex) => {
             if (!effect || typeof effect !== "object") return;
-            const effectActive = baseActive && isAbilityConditionMet(effect.condition || {}, context, sourceCard);
+            const nullifyControl = isNullifyAbilityEffect(effect);
+            const ignoreControl = isIgnoreConditionAbilityEffect(effect);
+            const effectTrigger = normalizeBattleTriggerRule(effect.condition || {}) || abilityTrigger;
+            const conditionActive = baseConditionActive
+              && (sourceIgnoresConditions || isAbilityConditionMet(getStaticAbilityCondition(effect.condition || {}), context, sourceCard));
+            const effectActive = conditionActive && (nullifyControl || !sourceNullified);
             const value = Number(effect.value || 0);
             const record = { ...effect, value };
             if (!effectActive) {
               inactiveEffects.push(record);
               return;
             }
+
+            // Active Skill แบบนับจำนวนครั้งโจมตี: เก็บไว้ให้ battle engine ประมวลผล ไม่ใช้เป็น Passive ทันที
+            if (effectTrigger && !isAbilityControlEffect(effect)) {
+              const runtimeRecord = {
+                key: `${sourceCard.id}:${abilityIndex}:${effectIndex}`,
+                triggerKey: `${sourceCard.id}:${abilityIndex}:${JSON.stringify(effectTrigger)}`,
+                sourceCard,
+                ability,
+                effect: record,
+                trigger: effectTrigger
+              };
+              summary.triggeredEffects.push(runtimeRecord);
+              activeEffects.push({ ...record, runtimeTriggered: true, trigger: effectTrigger });
+              return;
+            }
+
             activeEffects.push(record);
             switch (effect.type) {
               case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE: summary.teamPowerRate += value; break;
@@ -7482,33 +8049,50 @@
               case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS: summary.shieldHits += value; break;
               case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS: summary.attackHits += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT: summary.teamIncomeFlat += value; break;
-              case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
-                addAbilityMapRate(summary.selfPowerRates, [String(sourceCard.id)], value);
+              case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE: addAbilityMapRate(summary.selfPowerRates, [sourceId], value); break;
+              case CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE: addAbilityMapRate(summary.selfDefenseRates, [sourceId], value); break;
+              case CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE: addAbilityMapRate(summary.selfIncomeRates, [sourceId], value); break;
+              case CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                if (side === "enemy") summary.enemyCardPowerSelectors.push({ sourceCard, ability, effect: record });
+                else addAbilityMapRate(summary.cardPowerRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
                 break;
-              case CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE:
-                addAbilityMapRate(summary.selfDefenseRates, [String(sourceCard.id)], value);
+              }
+              case CARD_ABILITY_EFFECT_TYPES.CARD_DEFENSE_RATE: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                if (side === "enemy") summary.enemyCardDefenseSelectors.push({ sourceCard, ability, effect: record });
+                else addAbilityMapRate(summary.cardDefenseRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
                 break;
-              case CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE:
-                addAbilityMapRate(summary.selfIncomeRates, [String(sourceCard.id)], value);
+              }
+              case CARD_ABILITY_EFFECT_TYPES.CARD_INCOME_RATE: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                if (side === "enemy") summary.enemyCardIncomeSelectors.push({ sourceCard, ability, effect: record });
+                else addAbilityMapRate(summary.cardIncomeRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                break;
+              }
+              case CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES:
+              case CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS:
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE:
+              case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_FLAT:
+              case CARD_ABILITY_EFFECT_TYPES.HEAL_DEFENSE_RATE:
+              case CARD_ABILITY_EFFECT_TYPES.HEAL_DEFENSE_FLAT:
+              case CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS:
+              case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS:
+                console.warn("Active battle effect requires condition.afterOwnAttacks:", effect.type, sourceCard.name);
                 break;
               case CARD_ABILITY_EFFECT_TYPES.RARITY_POWER_RATE:
-                addAbilityMapRate(summary.rarityPowerRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
-                break;
+                addAbilityMapRate(summary.rarityPowerRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value); break;
               case CARD_ABILITY_EFFECT_TYPES.RARITY_DEFENSE_RATE:
-                addAbilityMapRate(summary.rarityDefenseRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
-                break;
+                addAbilityMapRate(summary.rarityDefenseRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value); break;
               case CARD_ABILITY_EFFECT_TYPES.RARITY_INCOME_RATE:
-                addAbilityMapRate(summary.rarityIncomeRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
-                break;
+                addAbilityMapRate(summary.rarityIncomeRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value); break;
               case CARD_ABILITY_EFFECT_TYPES.ELEMENT_POWER_RATE:
-                addAbilityMapRate(summary.elementPowerRates, normalizeAbilityElements(effect.targetElements || effect.elements), value);
-                break;
+                addAbilityMapRate(summary.elementPowerRates, normalizeAbilityElements(effect.targetElements || effect.elements), value); break;
               case CARD_ABILITY_EFFECT_TYPES.ELEMENT_DEFENSE_RATE:
-                addAbilityMapRate(summary.elementDefenseRates, normalizeAbilityElements(effect.targetElements || effect.elements), value);
-                break;
+                addAbilityMapRate(summary.elementDefenseRates, normalizeAbilityElements(effect.targetElements || effect.elements), value); break;
               case CARD_ABILITY_EFFECT_TYPES.ELEMENT_INCOME_RATE:
-                addAbilityMapRate(summary.elementIncomeRates, normalizeAbilityElements(effect.targetElements || effect.elements), value);
-                break;
+                addAbilityMapRate(summary.elementIncomeRates, normalizeAbilityElements(effect.targetElements || effect.elements), value); break;
               default:
                 console.warn("Unknown card ability effect type:", effect.type, sourceCard.name);
             }
@@ -7519,7 +8103,9 @@
             sourceCard,
             ability,
             modes,
-            active: baseActive && activeEffects.length > 0,
+            nullified: sourceNullified,
+            conditionsIgnored: sourceIgnoresConditions,
+            active: activeEffects.length > 0,
             activeEffects,
             inactiveEffects
           };
@@ -7541,6 +8127,32 @@
       return summary;
     }
 
+    function getPairedAbilitySummaries(allyTeamIds, enemyTeamIds, mode = "arena", allyOptions = {}, enemyOptions = {}) {
+      const allyControl = getTeamAbilitySummary(allyTeamIds, mode, allyOptions);
+      const enemyControl = getTeamAbilitySummary(enemyTeamIds, mode, enemyOptions);
+      const allyContext = allyControl.context;
+      const enemyContext = enemyControl.context;
+
+      return {
+        ally: getTeamAbilitySummary(allyTeamIds, mode, {
+          ...allyOptions,
+          externalNullifiedCardIds: resolveEnemySelectorIds(enemyControl.enemyNullifySelectors, allyContext),
+          externalConditionIgnoredCardIds: resolveEnemySelectorIds(enemyControl.enemyIgnoreConditionSelectors, allyContext),
+          externalCardPowerRates: resolveEnemyRateMap(enemyControl.enemyCardPowerSelectors, allyContext),
+          externalCardDefenseRates: resolveEnemyRateMap(enemyControl.enemyCardDefenseSelectors, allyContext),
+          externalCardIncomeRates: resolveEnemyRateMap(enemyControl.enemyCardIncomeSelectors, allyContext)
+        }),
+        enemy: getTeamAbilitySummary(enemyTeamIds, mode, {
+          ...enemyOptions,
+          externalNullifiedCardIds: resolveEnemySelectorIds(allyControl.enemyNullifySelectors, enemyContext),
+          externalConditionIgnoredCardIds: resolveEnemySelectorIds(allyControl.enemyIgnoreConditionSelectors, enemyContext),
+          externalCardPowerRates: resolveEnemyRateMap(allyControl.enemyCardPowerSelectors, enemyContext),
+          externalCardDefenseRates: resolveEnemyRateMap(allyControl.enemyCardDefenseSelectors, enemyContext),
+          externalCardIncomeRates: resolveEnemyRateMap(allyControl.enemyCardIncomeSelectors, enemyContext)
+        })
+      };
+    }
+
     // เพิ่มโดยอลิซ: รวมโบนัสเรทกาชาจากทีมโชว์และทีม ARENA ตาม activeIn โดยไม่นับสกิลเดิมซ้ำสองครั้ง
     function getGachaAbilitySummary() {
       const summary = { rarityRateBonuses: {}, activeEffects: [] };
@@ -7551,22 +8163,17 @@
       ];
 
       scopes.forEach(scope => {
-        const context = buildAbilityContext(scope.teamIds, scope.mode);
-        context.cards.forEach(sourceCard => {
-          getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
-            const modes = getAbilityModes(ability);
-            if (!modes.includes(scope.mode) || !isAbilityConditionMet(ability.condition || {}, context, sourceCard)) return;
-            abilityArray(ability.effects).forEach((effect, effectIndex) => {
-              if (!effect || effect.type !== CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE) return;
-              if (!isAbilityConditionMet(effect.condition || {}, context, sourceCard)) return;
-              const uniqueKey = `${sourceCard.id}:${abilityIndex}:${effectIndex}`;
-              if (seenEffects.has(uniqueKey)) return;
-              seenEffects.add(uniqueKey);
-              const value = Math.max(-0.90, Math.min(5, Number(effect.value) || 0));
-              const rarities = normalizeAbilityRarities(effect.targetRarities || effect.rarities);
-              addAbilityMapRate(summary.rarityRateBonuses, rarities, value);
-              summary.activeEffects.push({ sourceCard, ability, effect: { ...effect, value }, mode: scope.mode });
-            });
+        const abilitySummary = getTeamAbilitySummary(scope.teamIds, scope.mode);
+        abilitySummary.activeAbilities.forEach(entry => {
+          entry.activeEffects.forEach((effect, effectIndex) => {
+            if (!effect || effect.type !== CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE) return;
+            const uniqueKey = `${entry.key}:${effectIndex}`;
+            if (seenEffects.has(uniqueKey)) return;
+            seenEffects.add(uniqueKey);
+            const value = Math.max(-0.90, Math.min(5, Number(effect.value) || 0));
+            const rarities = normalizeAbilityRarities(effect.targetRarities || effect.rarities);
+            addAbilityMapRate(summary.rarityRateBonuses, rarities, value);
+            summary.activeEffects.push({ sourceCard: entry.sourceCard, ability: entry.ability, effect: { ...effect, value }, mode: scope.mode });
           });
         });
       });
@@ -7598,6 +8205,7 @@
       const summary = abilitySummary || getTeamAbilitySummary();
       const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementPowerRates[element] || 0), 0);
       const rate = Number(summary.selfPowerRates[String(card.id)] || 0)
+        + Number(summary.cardPowerRates[String(card.id)] || 0)
         + Number(summary.rarityPowerRates[card.rarity] || 0)
         + elementRate;
       return getCardPower(card) * Math.max(0, 1 + rate);
@@ -7607,6 +8215,7 @@
       const summary = abilitySummary || getTeamAbilitySummary();
       const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementDefenseRates[element] || 0), 0);
       const rate = Number(summary.selfDefenseRates[String(card.id)] || 0)
+        + Number(summary.cardDefenseRates[String(card.id)] || 0)
         + Number(summary.rarityDefenseRates[card.rarity] || 0)
         + elementRate;
       return getCardDefense(card) * Math.max(0, 1 + rate);
@@ -7616,6 +8225,7 @@
       const summary = abilitySummary || getTeamAbilitySummary();
       const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementIncomeRates[element] || 0), 0);
       const rate = Number(summary.selfIncomeRates[String(card.id)] || 0)
+        + Number(summary.cardIncomeRates[String(card.id)] || 0)
         + Number(summary.rarityIncomeRates[card.rarity] || 0)
         + elementRate;
       return getCardIncome(card) * Math.max(0, 1 + rate);
@@ -7643,8 +8253,15 @@
 
     function abilityEffectText(effect) {
       const value = Number(effect && effect.value || 0);
-      const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).join("/") || "ที่กำหนด";
-      const elementText = normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).map(elementLabel).join(" + ") || "ที่กำหนด";
+      const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).join("/") || "ทุกระดับ";
+      const elementText = normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).map(elementLabel).join(" + ") || "ทุกธาตุ";
+      const ids = normalizeAbilityCardIds(effect && (effect.targetCardIds || effect.cardIds));
+      const targetSideText = ({ ally: "ฝ่ายเรา", self: "การ์ดนี้", enemy: "ฝ่ายตรงข้าม" })[normalizeAbilityTargetSide(effect && effect.targetSide)] || "ฝ่ายเรา";
+      const filterParts = [];
+      if (ids.length) filterParts.push(`ID ${ids.join(", ")}`);
+      if (normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).length) filterParts.push(`ธาตุ ${elementText}`);
+      if (normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).length) filterParts.push(`ระดับ ${rarityText}`);
+      const targetText = filterParts.length ? `${targetSideText} • ${filterParts.join(" • ")}` : targetSideText;
       const labels = {
         teamPowerRate: `ATK ฝ่ายเรา ${signedPercent(value)}`,
         teamDefenseRate: `DEF ฝ่ายเรา ${signedPercent(value)}`,
@@ -7656,6 +8273,17 @@
         selfPowerRate: `ATK ของการ์ดนี้ ${signedPercent(value)}`,
         selfDefenseRate: `DEF ของการ์ดนี้ ${signedPercent(value)}`,
         selfIncomeRate: `รายได้ของการ์ดนี้ ${signedPercent(value)}`,
+        cardPowerRate: `ATK ${targetText} ${signedPercent(value)}`,
+        cardDefenseRate: `DEF ${targetText} ${signedPercent(value)}`,
+        cardIncomeRate: `รายได้ ${targetText} ${signedPercent(value)}`,
+        nullifyCardAbilities: `ยกเลิกความสามารถ ${targetText}`,
+        ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
+        nextAttackPowerRate: `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
+        nextAttackPowerFlat: `โจมตีครั้งที่สกิลทำงาน ATK +${formatNumber(value)}`,
+        healDefenseRate: `เมื่อสกิลทำงาน ฟื้น DEF ${signedPercent(Math.max(0, value))}`,
+        healDefenseFlat: `เมื่อสกิลทำงาน ฟื้น DEF ${formatNumber(value)}`,
+        restoreShieldHits: `เมื่อสกิลทำงาน ฟื้นโล่ ${Math.max(0, Math.round(value))} ฮิต`,
+        nextAttackHits: `โจมตีครั้งที่สกิลทำงาน +${Math.max(0, Math.round(value))} ฮิต`,
         rarityPowerRate: `ATK ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityDefenseRate: `DEF ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityIncomeRate: `รายได้ระดับ ${rarityText} ${signedPercent(value)}`,
@@ -7699,6 +8327,8 @@
       if (requiredIds.length) parts.push(`ต้องมีการ์ด ID ${requiredIds.join(", ")}`);
       const anyIds = normalizeAbilityCardIds(condition.anyCardIds);
       if (anyIds.length) parts.push(`มีการ์ดอย่างน้อยหนึ่งใบจาก ID ${anyIds.join(", ")}`);
+      const battleTrigger = normalizeBattleTriggerRule(condition);
+      if (battleTrigger) parts.push(`ฝ่ายเจ้าของสกิลโจมตีครบ ${battleTrigger.afterOwnAttacks} ครั้ง → ทำงานในการโจมตีครั้งถัดไป${battleTrigger.repeat ? " และวนลูป" : " ครั้งเดียว"}`);
       return parts.length ? parts.join(" • ") : "เพียงจัดการ์ดนี้อยู่ในทีม";
     }
 
@@ -7715,19 +8345,19 @@
           </div>`;
       }
 
-      const teamContext = buildAbilityContext(state.team, "team");
-      const towerContext = buildAbilityContext(state.team, "tower");
-      const arenaContext = buildAbilityContext(state.arena && Array.isArray(state.arena.team) ? state.arena.team : [], "arena");
+      const modeSummaries = {
+        team: getTeamAbilitySummary(state.team, "team"),
+        tower: getTeamAbilitySummary(state.team, "tower"),
+        arena: getTeamAbilitySummary(state.arena && Array.isArray(state.arena.team) ? state.arena.team : [], "arena")
+      };
       const items = abilities.map(ability => {
         const modes = getAbilityModes(ability);
         const effects = abilityArray(ability.effects).filter(effect => effect && typeof effect === "object");
-        const modeContexts = { team: teamContext, tower: towerContext, arena: arenaContext };
-        const activeModes = modes.filter(mode => {
-          const context = modeContexts[mode];
-          if (!context || !isAbilityConditionMet(ability.condition || {}, context, card)) return false;
-          return !effects.length || effects.some(effect => isAbilityConditionMet(effect.condition || {}, context, card));
-        });
-        const statusText = activeModes.length ? `ทำงาน: ${activeModes.map(abilityModeLabel).join(" / ")}` : "ยังไม่ทำงาน";
+        const activeModes = modes.filter(mode => modeSummaries[mode].activeAbilities.some(entry => String(entry.sourceCard.id) === String(card.id) && entry.ability === ability));
+        const nullifiedModes = modes.filter(mode => modeSummaries[mode].nullifiedCardIds.includes(String(card.id)));
+        const statusText = activeModes.length
+          ? `ทำงาน: ${activeModes.map(abilityModeLabel).join(" / ")}`
+          : nullifiedModes.length ? `ถูกยกเลิก: ${nullifiedModes.map(abilityModeLabel).join(" / ")}` : "ยังไม่ทำงาน";
         const active = activeModes.length > 0;
         const effectHTML = effects.length
           ? effects.map(effect => `<span class="card-ability-effect ${Number(effect.value || 0) < 0 ? "negative" : ""}">${escapeHTML(abilityEffectText(effect))}</span>`).join("")
@@ -7814,25 +8444,75 @@
     // เพิ่มโดยอลิซ: จำลองการต่อสู้แบบผลัดกันตีจน DEF ฝ่ายใดฝ่ายหนึ่งหมด
     // โล่เป็นจำนวนฮิตรวมต่อหนึ่งการต่อสู้ ไม่รีเซ็ตทุกเทิร์น
     function buildTurnBasedCombat(options = {}) {
-      const player = {
-        attack: Math.max(1, Number(options.playerAttack || 1)),
-        maxDefense: Math.max(1, Number(options.playerDefense || 1)),
-        defense: Math.max(1, Number(options.playerDefense || 1)),
-        attackHits: Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(options.playerAttackHits) || 1))),
-        shieldHits: Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(options.playerShieldHits) || 0))),
-        initialShieldHits: Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(options.playerShieldHits) || 0))),
-        totalDamage: 0
-      };
-      const enemy = {
-        attack: Math.max(1, Number(options.enemyAttack || 1)),
-        maxDefense: Math.max(1, Number(options.enemyDefense || 1)),
-        defense: Math.max(1, Number(options.enemyDefense || 1)),
-        attackHits: Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(options.enemyAttackHits) || 1))),
-        shieldHits: Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(options.enemyShieldHits) || 0))),
-        initialShieldHits: Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(options.enemyShieldHits) || 0))),
-        totalDamage: 0
-      };
+      function normalizeTriggers(value) {
+        return abilityArray(value).filter(Boolean).map((item, index) => ({
+          key: String(item.key || `trigger-${index}`),
+          name: String(item.name || "Active Skill"),
+          afterOwnAttacks: Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Math.floor(Number(item.afterOwnAttacks) || 1))),
+          repeat: item.repeat !== false,
+          attackBonus: Number(item.attackBonus || 0),
+          healDefense: Math.max(0, Number(item.healDefense || 0)),
+          extraHits: Math.max(0, Math.round(Number(item.extraHits || 0))),
+          restoreShieldHits: Math.max(0, Math.round(Number(item.restoreShieldHits || 0))),
+          charge: 0,
+          armed: false,
+          completed: false,
+          activations: 0
+        }));
+      }
 
+      function makeFighter(prefix) {
+        const initialAttack = Math.max(1, Number(options[`${prefix}Attack`] || 1));
+        const initialDefense = Math.max(1, Number(options[`${prefix}Defense`] || 1));
+        return {
+          initialAttack,
+          attack: initialAttack,
+          initialMaxDefense: initialDefense,
+          maxDefense: initialDefense,
+          defense: initialDefense,
+          attackHits: Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(options[`${prefix}AttackHits`]) || 1))),
+          shieldHits: Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(options[`${prefix}ShieldHits`]) || 0))),
+          initialShieldHits: Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(options[`${prefix}ShieldHits`]) || 0))),
+          activeTriggers: normalizeTriggers(options[`${prefix}ActiveTriggers`]),
+          totalDamage: 0,
+          totalHealing: 0,
+          totalTriggerActivations: 0
+        };
+      }
+
+      function prepareTriggerActivation(fighter) {
+        const fired = fighter.activeTriggers.filter(trigger => trigger.armed && !trigger.completed);
+        return {
+          fired,
+          names: fired.map(trigger => trigger.name),
+          attackBonus: fired.reduce((sum, trigger) => sum + trigger.attackBonus, 0),
+          healDefense: fired.reduce((sum, trigger) => sum + trigger.healDefense, 0),
+          extraHits: fired.reduce((sum, trigger) => sum + trigger.extraHits, 0),
+          restoreShieldHits: fired.reduce((sum, trigger) => sum + trigger.restoreShieldHits, 0)
+        };
+      }
+
+      function finishTriggerCycle(fighter, activation) {
+        const firedKeys = new Set(activation.fired.map(trigger => trigger.key));
+        fighter.activeTriggers.forEach(trigger => {
+          if (trigger.completed) return;
+          if (firedKeys.has(trigger.key)) {
+            trigger.activations += 1;
+            fighter.totalTriggerActivations += 1;
+            trigger.charge = 0;
+            trigger.armed = false;
+            if (!trigger.repeat) trigger.completed = true;
+            return;
+          }
+          if (!trigger.armed) {
+            trigger.charge += 1;
+            if (trigger.charge >= trigger.afterOwnAttacks) trigger.armed = true;
+          }
+        });
+      }
+
+      const player = makeFighter("player");
+      const enemy = makeFighter("enemy");
       const playerVariance = typeof options.playerVariance === "function" ? options.playerVariance : () => 1;
       const enemyVariance = typeof options.enemyVariance === "function" ? options.enemyVariance : () => 1;
       const playerFirst = options.playerFirst === undefined ? player.attack >= enemy.attack : Boolean(options.playerFirst);
@@ -7844,25 +8524,33 @@
         const round = Math.floor(turnIndex / 2) + 1;
         const attacker = actingSide === "player" ? player : enemy;
         const defender = actingSide === "player" ? enemy : player;
-        const variance = actingSide === "player"
-          ? playerVariance(round, turnIndex)
-          : enemyVariance(round, turnIndex);
-        const exchange = resolveCombatExchange(attacker.attack, defender.defense, attacker.attackHits, defender.shieldHits, variance);
+        const variance = actingSide === "player" ? playerVariance(round, turnIndex) : enemyVariance(round, turnIndex);
+        const activation = prepareTriggerActivation(attacker);
+        const activeAttack = Math.max(1, attacker.attack + activation.attackBonus);
+        const activeHits = Math.max(1, Math.min(CONFIG.combatMaxAttackHits, attacker.attackHits + activation.extraHits));
+        const exchange = resolveCombatExchange(activeAttack, defender.defense, activeHits, defender.shieldHits, variance);
         defender.shieldHits = Math.max(0, defender.shieldHits - exchange.blockedHits);
 
         let damage = exchange.unblockedHits > 0 ? Math.max(1, Number(exchange.damage || 0)) : 0;
         const fatigueStart = Math.max(1, Number(CONFIG.combatFatigueStartRound || 18));
         if (damage > 0 && round >= fatigueStart) {
-          const fatigueRate = Math.min(
-            Number(CONFIG.combatFatigueMaxDefenseRate || .10),
-            .01 + Math.max(0, round - fatigueStart) * .003
-          );
+          const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxDefenseRate || .10), .01 + Math.max(0, round - fatigueStart) * .003);
           damage = Math.max(damage, defender.maxDefense * fatigueRate);
         }
         damage = Math.min(defender.defense, damage);
         defender.defense = Math.max(0, defender.defense - damage);
         attacker.totalDamage += damage;
 
+        // Active Skill ฟื้น DEF หลังการโจมตีที่เปิดสกิล คล้ายการฮีล HP และไม่เพิ่ม DEF สูงสุด
+        const healDefense = Math.max(0, Math.min(attacker.maxDefense - attacker.defense, activation.healDefense));
+        if (healDefense > 0) {
+          attacker.defense += healDefense;
+          attacker.totalHealing += healDefense;
+        }
+        const shieldGain = Math.max(0, Math.min(CONFIG.combatMaxShieldHits - attacker.shieldHits, activation.restoreShieldHits));
+        if (shieldGain > 0) attacker.shieldHits += shieldGain;
+
+        finishTriggerCycle(attacker, activation);
         turns.push({
           round,
           side: actingSide,
@@ -7870,6 +8558,11 @@
           blockedHits: exchange.blockedHits,
           unblockedHits: exchange.unblockedHits,
           damage,
+          triggerActivated: activation.fired.length > 0,
+          triggeredSkills: activation.names,
+          attackBonus: activation.attackBonus,
+          healDefense,
+          shieldGain,
           playerRemaining: player.defense,
           enemyRemaining: enemy.defense,
           playerShieldRemaining: player.shieldHits,
@@ -7888,17 +8581,10 @@
         defender.defense = 0;
         attacker.totalDamage += damage;
         turns.push({
-          round,
-          side: actingSide,
-          hits: attacker.attackHits,
-          blockedHits: 0,
-          unblockedHits: attacker.attackHits,
-          damage,
-          suddenBreak: true,
-          playerRemaining: player.defense,
-          enemyRemaining: enemy.defense,
-          playerShieldRemaining: player.shieldHits,
-          enemyShieldRemaining: enemy.shieldHits
+          round, side: actingSide, hits: attacker.attackHits, blockedHits: 0, unblockedHits: attacker.attackHits,
+          damage, suddenBreak: true, triggerActivated: false, triggeredSkills: [], attackBonus: 0, healDefense: 0, shieldGain: 0,
+          playerRemaining: player.defense, enemyRemaining: enemy.defense,
+          playerShieldRemaining: player.shieldHits, enemyShieldRemaining: enemy.shieldHits
         });
       }
 
@@ -7918,7 +8604,11 @@
         playerShieldRemaining: player.shieldHits,
         enemyShieldRemaining: enemy.shieldHits,
         playerTotalDamage: player.totalDamage,
-        enemyTotalDamage: enemy.totalDamage
+        enemyTotalDamage: enemy.totalDamage,
+        playerTotalHealing: player.totalHealing,
+        enemyTotalHealing: enemy.totalHealing,
+        playerTriggerActivations: player.totalTriggerActivations,
+        enemyTriggerActivations: enemy.totalTriggerActivations
       };
     }
 
@@ -7948,7 +8638,10 @@
         const strikeClass = turn.side === "player" ? "player-strike" : "enemy-strike";
         const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
         const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
-        result.textContent = `รอบ ${turn.round} • ${attackerLabel} โจมตี ${turn.hits} ฮิต${blockText} • ${defenderLabel} เสีย DEF ${formatNumber(turn.damage)} เหลือ ${formatNumber(remaining)}`;
+        const activeText = turn.triggerActivated
+          ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว +${formatNumber(turn.attackBonus)}` : ""}${turn.healDefense ? ` • ฟื้น DEF ${formatNumber(turn.healDefense)}` : ""}${turn.shieldGain ? ` • ฟื้นโล่ ${turn.shieldGain} ฮิต` : ""}`
+          : "";
+        result.textContent = `รอบ ${turn.round} • ${attackerLabel} โจมตี ${turn.hits} ฮิต${blockText}${activeText} • ${defenderLabel} เสีย DEF ${formatNumber(turn.damage)} เหลือ ${formatNumber(remaining)}`;
         const speed = turn.round > 6 ? Math.max(45, Math.floor(phaseDuration * .45)) : phaseDuration;
         await playStrikeSequence(stage, strikeClass, turn.hits, speed);
         updateTurnBattleDisplay(display, combat, turn);
@@ -8001,6 +8694,113 @@
         return sum + (card ? getAbilityAdjustedCardDefense(card, summary) : 0);
       }, 0);
     }
+
+    function getBattleItemCard(item) {
+      if (!item) return null;
+      if (typeof item === "object" && item.id !== undefined) return CARD_BY_ID.get(String(item.id)) || item;
+      return CARD_BY_ID.get(String(item)) || null;
+    }
+
+    function getBattleItemId(item) {
+      const card = getBattleItemCard(item);
+      return card ? String(card.id) : "";
+    }
+
+    function battleItemMatchesTarget(item, effect, sourceCard) {
+      const side = normalizeAbilityTargetSide(effect && effect.targetSide);
+      const id = getBattleItemId(item);
+      if (side === "enemy") return false;
+      if (side === "self") return id && sourceCard && id === String(sourceCard.id);
+      const card = getBattleItemCard(item);
+      return cardMatchesAbilityTarget(card, effect || {});
+    }
+
+    function getBattleItemStat(item, summary, stat, snapshotMode) {
+      if (snapshotMode && item && typeof item === "object") return getSnapshotAdjustedStat(item, summary, stat);
+      const card = getBattleItemCard(item);
+      if (!card) return 0;
+      return stat === "defense" ? getAbilityAdjustedCardDefense(card, summary) : getAbilityAdjustedCardPower(card, summary);
+    }
+
+    // แปลง triggeredEffects เป็น Active Skill ของ battle engine
+    // เงื่อนไข afterOwnAttacks ใช้ร่วมกับเอฟเฟกต์ Active ด้านล่าง และใช้กับ Passive เดิมบางชนิดเป็น alias ได้
+    function buildTeamBattleTriggerConfigs(team, abilitySummary, snapshotMode = false) {
+      const summary = abilitySummary || {};
+      const items = abilityArray(team).filter(Boolean);
+      const grouped = new Map();
+      abilityArray(summary.triggeredEffects).forEach(record => {
+        if (!record || !record.effect || !record.trigger) return;
+        const effect = record.effect;
+        const selected = items.filter(item => battleItemMatchesTarget(item, effect, record.sourceCard));
+        const filter = getAbilityTargetFilter(effect);
+        const hasFilters = filter.ids.length || filter.elements.length || filter.rarities.length;
+        const side = normalizeAbilityTargetSide(effect.targetSide);
+        const targetItems = selected.length ? selected : (!hasFilters && side === "ally" ? items : []);
+        const targetPower = targetItems.reduce((sum, item) => sum + getBattleItemStat(item, summary, "power", snapshotMode), 0);
+        const targetDefense = targetItems.reduce((sum, item) => sum + getBattleItemStat(item, summary, "defense", snapshotMode), 0);
+        const value = Number(effect.value || 0);
+        const key = record.triggerKey || record.key;
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            key,
+            name: String(record.ability && record.ability.name || record.sourceCard && record.sourceCard.name || "Active Skill"),
+            sourceCardId: String(record.sourceCard && record.sourceCard.id || ""),
+            afterOwnAttacks: record.trigger.afterOwnAttacks,
+            repeat: record.trigger.repeat !== false,
+            attackBonus: 0,
+            healDefense: 0,
+            extraHits: 0,
+            restoreShieldHits: 0
+          });
+        }
+        const group = grouped.get(key);
+        switch (effect.type) {
+          case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE:
+            group.attackBonus += targetPower * value;
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_FLAT:
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT:
+            group.attackBonus += value;
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.HEAL_DEFENSE_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.CARD_DEFENSE_RATE:
+            group.healDefense += targetDefense * Math.max(0, value);
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.HEAL_DEFENSE_FLAT:
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_FLAT:
+            group.healDefense += Math.max(0, value);
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS:
+          case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS:
+            group.extraHits += Math.max(0, Math.round(value));
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS:
+          case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS:
+            group.restoreShieldHits += Math.max(0, Math.round(value));
+            break;
+          default:
+            console.warn("Effect type is not supported by battle trigger runtime:", effect.type);
+        }
+      });
+
+      const teamPower = items.reduce((sum, item) => sum + getBattleItemStat(item, summary, "power", snapshotMode), 0);
+      const teamDefense = items.reduce((sum, item) => sum + getBattleItemStat(item, summary, "defense", snapshotMode), 0);
+      const attackCap = Math.max(0, teamPower * Number(CONFIG.combatMaxTriggeredAttackRate || 5));
+      const healCap = Math.max(0, teamDefense * Number(CONFIG.combatMaxTriggeredHealRate || 1));
+      return [...grouped.values()].map(item => ({
+        ...item,
+        attackBonus: Math.max(-teamPower * .90, Math.min(attackCap, Number(item.attackBonus || 0))),
+        healDefense: Math.max(0, Math.min(healCap, Number(item.healDefense || 0))),
+        extraHits: Math.max(0, Math.min(Number(CONFIG.combatMaxTriggeredExtraHits || 20), Math.round(item.extraHits || 0))),
+        restoreShieldHits: Math.max(0, Math.min(Number(CONFIG.combatMaxTriggeredShieldHits || 20), Math.round(item.restoreShieldHits || 0)))
+      })).filter(item => item.attackBonus || item.healDefense || item.extraHits || item.restoreShieldHits);
+    }
+
 
     function getTeamIncome() {
       const abilities = getTeamAbilitySummary(state.team, "team");
@@ -8366,8 +9166,31 @@
         rarity: card.rarity,
         power: Math.floor(getCardPower(card)),
         defense: Math.floor(getCardDefense(card)),
-        elements: getCardElements(card)
+        elements: getCardElements(card),
+        level: Math.floor(Number(getOwned(card.id)?.level) || 1),
+        awaken: Math.floor(Number(getOwned(card.id)?.duplicateRank) || 0)
       };
+    }
+
+    function snapshotProgressByCardId(team = []) {
+      return Object.fromEntries(abilityArray(team).filter(Boolean).map(item => [String(item.id), {
+        level: Math.max(1, Math.floor(Number(item.level) || 1)),
+        duplicateRank: Math.max(0, Math.floor(Number(item.awaken ?? item.duplicateRank) || 0))
+      }]));
+    }
+
+    function getSnapshotAdjustedStat(item, abilitySummary, stat = "power") {
+      const card = CARD_BY_ID.get(String(item && item.id || ""));
+      if (!card) return Math.max(0, Number(item && item[stat]) || 0);
+      const summary = abilitySummary || {};
+      const id = String(card.id);
+      const elementMap = stat === "defense" ? summary.elementDefenseRates : stat === "income" ? summary.elementIncomeRates : summary.elementPowerRates;
+      const rarityMap = stat === "defense" ? summary.rarityDefenseRates : stat === "income" ? summary.rarityIncomeRates : summary.rarityPowerRates;
+      const selfMap = stat === "defense" ? summary.selfDefenseRates : stat === "income" ? summary.selfIncomeRates : summary.selfPowerRates;
+      const cardMap = stat === "defense" ? summary.cardDefenseRates : stat === "income" ? summary.cardIncomeRates : summary.cardPowerRates;
+      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(elementMap && elementMap[element] || 0), 0);
+      const rate = Number(selfMap && selfMap[id] || 0) + Number(cardMap && cardMap[id] || 0) + Number(rarityMap && rarityMap[card.rarity] || 0) + elementRate;
+      return Math.max(0, Number(item && item[stat]) || 0) * Math.max(0, 1 + rate);
     }
 
     function getArenaRawPower(abilitySummary = null) {
@@ -8534,7 +9357,9 @@
         rarity: card.rarity,
         power: Math.max(1, Math.floor(playerPower / CONFIG.arenaTeamSlots)),
         defense: Math.max(1, Math.floor(playerPower / CONFIG.arenaTeamSlots * Number(CONFIG.defenseBaseRatio || .64))),
-        elements: getCardElements(card)
+        elements: getCardElements(card),
+        level: 1,
+        awaken: 0
       }));
       return {
         uid: "AI",
@@ -8613,33 +9438,50 @@
     function getArenaBattleStats(opponent = currentArenaOpponent) {
       const teamIds = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
       const summary = getArenaTeamSummary();
-      const abilitySummary = getTeamAbilitySummary(teamIds, "arena");
+      const enemy = opponent || null;
+      const enemyTeam = enemy && Array.isArray(enemy.arenaTeam) ? enemy.arenaTeam : [];
+      const enemyTeamIds = enemyTeam.map(item => String(item && item.id || "")).filter(id => CARD_BY_ID.has(id));
+      const paired = enemyTeamIds.length
+        ? getPairedAbilitySummaries(teamIds, enemyTeamIds, "arena", {}, { progressByCardId: snapshotProgressByCardId(enemyTeam) })
+        : { ally: getTeamAbilitySummary(teamIds, "arena"), enemy: getTeamAbilitySummary([], "arena") };
+      const abilitySummary = paired.ally;
+      const enemyAbilitySummary = paired.enemy;
       const rawPower = getArenaRawPower(abilitySummary) + abilitySummary.teamPowerFlat;
       const rawDefense = getArenaRawDefense(abilitySummary) + abilitySummary.teamDefenseFlat;
       const teamPower = Math.max(0, rawPower * (1 + summary.powerRate + abilitySummary.teamPowerRate));
       const teamDefense = Math.max(0, rawDefense * (1 + abilitySummary.teamDefenseRate));
       const attackHits = getCombatAttackHits(abilitySummary);
       const shieldHits = getCombatShieldHits(abilitySummary);
-      const enemy = opponent || null;
-      const enemyTeam = enemy && Array.isArray(enemy.arenaTeam) ? enemy.arenaTeam : [];
       const enemyElement = getSnapshotDominantElement(enemyTeam);
+      const enemyElementSummary = enemyTeamIds.length ? getTeamElementSummary(enemyTeamIds) : { powerRate: 0 };
       const matchup = enemy ? getElementMatchup(summary.dominantElement, enemyElement) : makeMatchupResult(summary.dominantElement, "ไร้ธาตุ");
-      const effectivePower = enemy ? teamPower * (1 + matchup.modifier) : teamPower;
-      const effectiveDefense = teamDefense;
-      const enemyBasePower = enemy ? Math.max(1, Number(enemy.arenaPower || 1)) : 0;
-      const enemyBaseDefense = enemy ? Math.max(1, Number(enemy.arenaDefense || enemyBasePower * Number(CONFIG.defenseBaseRatio || .64))) : 0;
+      const effectivePower = enemy ? Math.max(0, teamPower * (1 + matchup.modifier) * (1 + enemyAbilitySummary.enemyPowerRate)) : teamPower;
+      const effectiveDefense = Math.max(0, teamDefense * (1 + enemyAbilitySummary.enemyDefenseRate));
+
+      const snapshotRawPower = enemyTeam.reduce((sum, item) => sum + getSnapshotAdjustedStat(item, enemyAbilitySummary, "power"), 0);
+      const snapshotRawDefense = enemyTeam.reduce((sum, item) => sum + getSnapshotAdjustedStat(item, enemyAbilitySummary, "defense"), 0);
+      const publishedPower = enemy ? Math.max(1, Number(enemy.arenaPower || 1)) : 0;
+      const publishedDefense = enemy ? Math.max(1, Number(enemy.arenaDefense || publishedPower * Number(CONFIG.defenseBaseRatio || .64))) : 0;
+      const enemyRawPower = snapshotRawPower > 0 ? snapshotRawPower + enemyAbilitySummary.teamPowerFlat : publishedPower;
+      const enemyRawDefense = snapshotRawDefense > 0 ? snapshotRawDefense + enemyAbilitySummary.teamDefenseFlat : publishedDefense;
+      const enemyBasePower = enemy ? Math.max(1, enemyRawPower * (1 + enemyElementSummary.powerRate + enemyAbilitySummary.teamPowerRate)) : 0;
+      const enemyBaseDefense = enemy ? Math.max(1, enemyRawDefense * (1 + enemyAbilitySummary.teamDefenseRate)) : 0;
       const enemyEffectivePower = enemy ? Math.max(1, enemyBasePower * (1 - matchup.modifier * .70) * (1 + abilitySummary.enemyPowerRate)) : 0;
       const enemyEffectiveDefense = enemy ? Math.max(1, enemyBaseDefense * (1 + abilitySummary.enemyDefenseRate)) : 0;
-      const enemyAttackHits = enemy ? Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(enemy.arenaAttackHits) || 1))) : 1;
-      const enemyShieldHits = enemy ? Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(enemy.arenaShieldHits) || 0))) : 0;
+      const publishedTraits = getArenaOpponentCombatTraits(enemy);
+      const usePublishedTraits = !enemyTeamIds.length || String(enemy && enemy.type || "") === "ai";
+      const enemyAttackHits = enemy ? (usePublishedTraits ? Math.max(publishedTraits.attackHits, getCombatAttackHits(enemyAbilitySummary)) : getCombatAttackHits(enemyAbilitySummary)) : 1;
+      const enemyShieldHits = enemy ? (usePublishedTraits ? Math.max(publishedTraits.shieldHits, getCombatShieldHits(enemyAbilitySummary)) : getCombatShieldHits(enemyAbilitySummary)) : 0;
       const playerPreview = enemy ? resolveCombatExchange(effectivePower, enemyEffectiveDefense, attackHits, enemyShieldHits, 1) : null;
       const enemyPreview = enemy ? resolveCombatExchange(enemyEffectivePower, effectiveDefense, enemyAttackHits, shieldHits, 1) : null;
       return {
-        summary, abilitySummary, rawPower, rawDefense, teamPower, teamDefense,
+        summary, abilitySummary, enemyAbilitySummary, rawPower, rawDefense, teamPower, teamDefense,
         effectivePower, effectiveAttack: effectivePower, effectiveDefense,
         attackHits, shieldHits, enemy, enemyTeam, enemyElement,
         enemyBasePower, enemyBaseDefense, enemyEffectivePower, enemyAttack: enemyEffectivePower,
         enemyEffectiveDefense, enemyAttackHits, enemyShieldHits,
+        playerActiveTriggers: buildTeamBattleTriggerConfigs(teamIds, abilitySummary, false),
+        enemyActiveTriggers: buildTeamBattleTriggerConfigs(enemyTeam, enemyAbilitySummary, true),
         playerPreview, enemyPreview, matchup, luckRate: abilitySummary.luckRate
       };
     }
@@ -8650,7 +9492,7 @@
       const image = card ? getCardImage(card) : "";
       const name = item && item.name || (card && card.name) || "Unknown";
       const tilt = enemy ? (index - 2) * -4 : (index - 2) * 4;
-      return `<div class="battle-model-card" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 4}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<span>${escapeHTML(name)}</span></div>`;
+      return `<div class="battle-model-card" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 4}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
     }
 
     async function refreshArenaData(showNotice = false) {
@@ -8726,6 +9568,8 @@
         enemyDefense: stats.enemyEffectiveDefense,
         enemyAttackHits: stats.enemyAttackHits,
         enemyShieldHits: stats.enemyShieldHits,
+        playerActiveTriggers: stats.playerActiveTriggers,
+        enemyActiveTriggers: stats.enemyActiveTriggers,
         playerVariance: () => getLuckRollMultiplier(stats.luckRate, .91, .18),
         enemyVariance: () => .91 + Math.random() * .18
       });
@@ -8746,7 +9590,7 @@
 
         const playerShieldUsed = combat.playerInitialShieldHits - combat.playerShieldRemaining;
         const enemyShieldUsed = combat.enemyInitialShieldHits - combat.enemyShieldRemaining;
-        const combatText = `${combat.rounds} รอบ • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const combatText = `${combat.rounds} รอบ • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล DEF ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.arena.points += ARENA_CONFIG.winPoints;
           state.arena.wins += 1;
@@ -8957,6 +9801,7 @@
         effectivePower, effectiveAttack: effectivePower, effectiveDefense,
         enemyPower, enemyAttack: enemyPower, enemyDefense,
         attackHits, shieldHits, enemyAttackHits, enemyShieldHits,
+        activeTriggers: buildTeamBattleTriggerConfigs(state.team, abilitySummary, false),
         playerPreview, enemyPreview,
         gemReward: 15000 + stage * 5000,
         dustReward: 1000 + stage * 750,
@@ -8989,6 +9834,8 @@
         enemyDefense: stats.enemyDefense,
         enemyAttackHits: stats.enemyAttackHits,
         enemyShieldHits: stats.enemyShieldHits,
+        playerActiveTriggers: stats.activeTriggers,
+        enemyActiveTriggers: [],
         playerVariance: () => getLuckRollMultiplier(stats.luckRate, .90, .22),
         enemyVariance: () => .90 + Math.random() * .20
       });
@@ -9012,7 +9859,7 @@
 
         const playerShieldUsed = combat.playerInitialShieldHits - combat.playerShieldRemaining;
         const enemyShieldUsed = combat.enemyInitialShieldHits - combat.enemyShieldRemaining;
-        const combatText = `${combat.rounds} รอบ • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const combatText = `${combat.rounds} รอบ • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล DEF ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.gems += stats.gemReward;
           state.dust += stats.dustReward;
@@ -9917,6 +10764,7 @@
           <div class="card-art">
             ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" onerror="this.remove()">` : ""}
             <span class="rarity-badge">${escapeHTML(rarity.label)}</span>
+            <span class="card-id-badge">ID ${escapeHTML(card.id)}</span>
             ${awakenBadge}
             ${resultLabel}
           </div>
@@ -9957,7 +10805,7 @@
         <${tag} class="battle-model-card" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`})}"${action} aria-label="${escapeHTML(card.name)}">
           ${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
           ${enemy ? "" : awakenBadgeHTML(card)}
-          <span>${escapeHTML(card.name)}</span>
+          <span>ID ${escapeHTML(card.id)} • ${escapeHTML(card.name)}</span>
         </${tag}>
       `;
     }
@@ -10144,7 +10992,7 @@
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
       const rarity = document.getElementById("rarityFilter").value;
       const filtered = CARDS
-        .filter(card => !query || `${card.name} ${getRawElementText(card)} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query))
+        .filter(card => !query || `${card.id} id:${card.id} id ${card.id} #${card.id} ${card.name} ${getRawElementText(card)} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query))
         .filter(card => !rarity || card.rarity === rarity);
       return sortCardsForView(filtered, collectionSortMode, collectionSortDirection, true);
     }
@@ -10186,7 +11034,7 @@
               ${awakenBadgeHTML(card)}
             </div>
             <div class="team-slot-copy">
-              <h3 class="team-slot-name">${escapeHTML(card.name)}</h3>
+              <h3 class="team-slot-name">${escapeHTML(card.name)}<small>ID ${escapeHTML(card.id)}</small></h3>
               <div class="team-slot-stats">
                 <div class="team-slot-stat"><span>LEVEL</span><strong>${status.level}/${status.maxLevel}</strong></div>
                 <div class="team-slot-stat"><span>AWAKEN</span><strong>${status.rank}/${status.maxRank}</strong></div>
@@ -10351,7 +11199,7 @@
       const cards = sortCardsForView(CARDS.filter(card => {
         if (!getOwned(card.id)) return false;
         if (rarity && card.rarity !== rarity) return false;
-        return !query || `${card.name} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query);
+        return !query || `${card.id} id:${card.id} id ${card.id} #${card.id} ${card.name} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query);
       }), teamPickerSortMode, teamPickerSortDirection, false);
       grid.innerHTML = cards.length
         ? cards.map(card => teamPickerCardHTML(card, currentId)).join("")
@@ -10840,7 +11688,7 @@
             <div class="detail-heading">
               <span class="pill detail-rarity-pill" style="${rarityStyleVars(rarity)};color:${getRarityTheme(rarity).main};border-color:color-mix(in srgb, ${getRarityTheme(rarity).main} 44%, rgba(255,255,255,.14))">${escapeHTML(rarity.label)} / ${escapeHTML(card.rarity)}</span>
               <h2>${escapeHTML(card.name)}</h2>
-              <p class="detail-sub">${escapeHTML(elementDetail)} ${owned ? `• มี ${owned.count} ใบ` : "• ยังไม่ได้ครอบครอง"}</p>
+              <p class="detail-sub"><strong style="color:var(--cyan)">Card ID: ${escapeHTML(card.id)}</strong> • ${escapeHTML(elementDetail)} ${owned ? `• มี ${owned.count} ใบ` : "• ยังไม่ได้ครอบครอง"}</p>
               ${membershipHTML}
             </div>
 
