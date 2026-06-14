@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-14-team-picker-detail-membership-gacha-ability-v18">
+  <meta name="gacha-app-build" content="2026-06-14-readable-picker-card-detail-tabs-v19">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -2911,6 +2911,325 @@
       *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; transition-duration: .001ms !important; }
       .panel { backdrop-filter: none; }
     }
+  
+
+    /* =====================================================================
+       [UI-READABILITY-V19] ปรับหน้าเลือกการ์ด + รายละเอียดแบบแท็บ
+       - หน้าเลือกทีมใช้ขนาดการ์ดขั้นต่ำ ไม่ถูกบีบตามกริดคลัง 6 ช่อง
+       - รูปหน้ารายละเอียดคงสัดส่วนและไม่ยืดตามความสูงของข้อความ
+       - แยกสแตต/ความสามารถเป็นแท็บด้านขวา พร้อมเพิ่มขนาดตัวอักษร
+       ===================================================================== */
+    #teamPickerModal .team-picker-panel {
+      width: min(1460px, calc(100vw - 28px));
+      max-height: calc(100vh - 28px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 22px;
+    }
+
+    .team-picker-head h2 { font-size: clamp(1.75rem, 3vw, 2.7rem); }
+    .team-picker-head p,
+    .team-picker-note { font-size: .88rem; line-height: 1.65; color: #cbd5e1; }
+
+    .team-picker-tools { flex: 0 0 auto; }
+    .team-picker-tools .field,
+    .team-picker-tools .sort-direction-switch { min-height: 46px; }
+    .team-picker-tools .field { font-size: .88rem; }
+    .team-picker-tools .sort-direction-button { font-size: .76rem; }
+
+    .team-picker-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      align-content: start;
+      gap: 15px;
+      overflow: auto;
+      padding: 4px 7px 16px 3px;
+      scrollbar-gutter: stable;
+    }
+
+    .team-picker-entry {
+      gap: 9px;
+      padding: 7px;
+      border-radius: 23px;
+    }
+
+    .team-picker-entry .game-card {
+      min-width: 0;
+      height: auto;
+    }
+
+    .team-picker-entry .card-art {
+      min-height: 260px;
+      aspect-ratio: 4 / 5;
+    }
+
+    .team-picker-entry .card-name {
+      min-height: 2.7em;
+      margin-bottom: 9px;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .team-picker-entry .card-body { padding: 13px; }
+    .team-picker-entry .card-meta { gap: 8px; font-size: .78rem; }
+    .team-picker-entry .card-element { font-size: .67rem; padding: 4px 7px; }
+    .team-picker-entry .card-upgrade-mini { gap: 8px; margin-top: 11px; }
+    .team-picker-entry .card-visible-stat { min-height: 58px; padding: 9px 10px; }
+    .team-picker-entry .card-visible-stat span { font-size: .65rem; color: #b8c5e4; }
+    .team-picker-entry .card-visible-stat strong { font-size: .82rem; }
+    .team-picker-entry .card-upgrade-mini-row { font-size: .72rem; }
+    .team-picker-entry .team-picker-actions .btn {
+      min-height: 44px;
+      padding: 9px 10px;
+      font-size: .78rem;
+      line-height: 1.3;
+    }
+    .team-picker-memberships { top: 58px; }
+    .team-membership-badge { font-size: .64rem; padding: 5px 8px; }
+
+    #cardModal .modal-panel {
+      width: min(1280px, calc(100vw - 28px));
+      max-height: calc(100vh - 28px);
+      overflow: hidden;
+    }
+
+    #cardModal .detail {
+      height: calc(100vh - 28px);
+      min-height: 620px;
+      grid-template-columns: minmax(390px, .92fr) minmax(520px, 1.08fr);
+      align-items: stretch;
+    }
+
+    #cardModal .detail-art {
+      min-height: 0;
+      height: 100%;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      overflow: hidden;
+      border-right: 1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(circle at 50% 22%, color-mix(in srgb, var(--rarity-main, var(--cyan)) 20%, transparent), transparent 42%),
+        #070a13;
+    }
+
+    .detail-art-frame {
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: 18px;
+    }
+
+    #cardModal .detail-art-frame img,
+    #cardModal .detail-art-frame video {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      object-position: center;
+      filter: drop-shadow(0 20px 38px rgba(0,0,0,.42));
+    }
+
+    #cardModal .detail-art::after { display: none; }
+
+    .detail-art-caption {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 3px;
+      padding: 14px 18px 17px;
+      border-top: 1px solid rgba(255,255,255,.09);
+      background: rgba(3,5,12,.76);
+      backdrop-filter: blur(12px);
+    }
+    .detail-art-caption span { color: var(--gold); font-size: .72rem; font-weight: 1000; letter-spacing: .08em; }
+    .detail-art-caption strong { overflow: hidden; font-size: 1.08rem; text-overflow: ellipsis; white-space: nowrap; }
+
+    #cardModal .detail-copy {
+      min-width: 0;
+      height: 100%;
+      overflow-y: auto;
+      padding: 30px 32px 38px;
+      scrollbar-gutter: stable;
+    }
+
+    .detail-heading { padding-right: 40px; }
+    #cardModal .detail-copy h2 {
+      margin: 11px 0 7px;
+      font-size: clamp(2.15rem, 4vw, 3.55rem);
+      line-height: 1.02;
+      letter-spacing: -.035em;
+    }
+    #cardModal .detail-sub { margin-bottom: 12px; color: #c4cee8; font-size: .92rem; line-height: 1.65; }
+    .detail-membership-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 4px; }
+
+    .detail-tabbar {
+      position: sticky;
+      z-index: 4;
+      top: -30px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      margin: 20px 0 18px;
+      padding: 10px 0;
+      background: linear-gradient(to bottom, var(--panel-strong) 76%, transparent);
+    }
+
+    .detail-tab {
+      min-width: 0;
+      min-height: 66px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto auto;
+      column-gap: 9px;
+      align-items: center;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 16px;
+      padding: 10px 12px;
+      color: #d6def3;
+      text-align: left;
+      background: rgba(255,255,255,.045);
+    }
+    .detail-tab > span { grid-row: 1 / 3; font-size: 1.35rem; }
+    .detail-tab strong { font-size: .91rem; }
+    .detail-tab small { overflow: hidden; color: #9faccc; font-size: .69rem; text-overflow: ellipsis; white-space: nowrap; }
+    .detail-tab.active {
+      color: #071019;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--cyan), #a7f3d0 48%, var(--violet));
+      box-shadow: 0 10px 24px rgba(92,232,255,.16);
+    }
+    .detail-tab.active small { color: rgba(7,16,25,.72); }
+
+    .detail-tab-panel { display: none; }
+    .detail-tab-panel.active { display: block; animation: detail-tab-in .18s ease; }
+
+    #cardModal .stat-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 11px;
+      margin: 12px 0 20px;
+    }
+    #cardModal .stat {
+      min-height: 78px;
+      padding: 14px 15px;
+      border-color: rgba(255,255,255,.11);
+      background: rgba(255,255,255,.045);
+    }
+    #cardModal .stat span { color: #aebbd9; font-size: .76rem; font-weight: 900; letter-spacing: .035em; text-transform: uppercase; }
+    #cardModal .stat strong { margin-top: 5px; font-size: 1.2rem; line-height: 1.25; }
+    #cardModal .stat-power strong { color: var(--cyan); }
+    #cardModal .stat-income strong { color: var(--green); }
+    #cardModal .stat-element { grid-column: 1 / -1; }
+    #cardModal .stat-element .element-chip { font-size: .76rem; padding: 6px 9px; }
+
+    #cardModal .upgrade-status-panel { margin-bottom: 18px; padding: 16px; }
+    #cardModal .upgrade-status-head { font-size: .95rem; }
+    #cardModal .upgrade-status-card { min-height: 88px; padding: 12px; }
+    #cardModal .upgrade-status-card span { font-size: .72rem; }
+    #cardModal .upgrade-status-card strong { font-size: 1rem; }
+    #cardModal .upgrade-status-card small { color: #cbd5e1; font-size: .74rem; line-height: 1.5; }
+
+    #cardModal .detail-actions .btn { min-height: 51px; font-size: .86rem; line-height: 1.3; }
+    #cardModal .detail-actions .cost { font-size: .73rem; }
+
+    .ability-tab-intro {
+      display: grid;
+      gap: 5px;
+      margin-bottom: 12px;
+      padding: 14px 15px;
+      border: 1px solid rgba(167,139,250,.22);
+      border-radius: 16px;
+      background: rgba(167,139,250,.07);
+    }
+    .ability-tab-intro strong { font-size: 1rem; }
+    .ability-tab-intro span { color: #c6d0e8; font-size: .82rem; line-height: 1.55; }
+
+    #cardModal .card-ability-panel { margin-bottom: 0; padding: 16px; }
+    #cardModal .card-ability-panel-head h3 { font-size: 1.08rem; }
+    #cardModal .card-ability-panel-head span { color: #b8c5e4; font-size: .75rem; }
+    #cardModal .card-ability-list { gap: 11px; }
+    #cardModal .card-ability-item { padding: 15px; }
+    #cardModal .card-ability-title-row strong { font-size: .97rem; line-height: 1.4; }
+    #cardModal .card-ability-status { font-size: .66rem; padding: 5px 8px; }
+    #cardModal .card-ability-description { color: #d7def0; font-size: .84rem; line-height: 1.68; }
+    #cardModal .card-ability-condition { font-size: .76rem; line-height: 1.58; }
+    #cardModal .card-ability-effect { padding: 6px 9px; font-size: .72rem; line-height: 1.35; }
+
+    @keyframes detail-tab-in {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1050px) {
+      .team-picker-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+      #cardModal .detail { grid-template-columns: minmax(320px, .82fr) minmax(440px, 1.18fr); }
+    }
+
+    @media (max-width: 760px) {
+      #teamPickerModal .team-picker-panel {
+        width: calc(100vw - 12px);
+        max-height: calc(100vh - 12px);
+        padding: 15px;
+      }
+      .team-picker-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .team-picker-entry .card-art { min-height: 0; }
+      .team-picker-entry .card-name { font-size: .9rem; }
+      .team-picker-entry .card-visible-stat { min-height: 52px; padding: 8px; }
+      .team-picker-entry .card-visible-stat span { font-size: .58rem; }
+      .team-picker-entry .card-visible-stat strong { font-size: .72rem; }
+      .team-picker-entry .team-picker-actions { grid-template-columns: 1fr; }
+      .team-picker-entry .team-picker-actions .btn { font-size: .72rem; }
+
+      #cardModal .modal-panel {
+        width: calc(100vw - 12px);
+        max-height: calc(100vh - 12px);
+        overflow-y: auto;
+      }
+      #cardModal .detail {
+        height: auto;
+        min-height: 0;
+        grid-template-columns: 1fr;
+      }
+      #cardModal .detail-art {
+        height: auto;
+        min-height: 0;
+        grid-template-rows: auto auto;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255,255,255,.10);
+      }
+      #cardModal .detail-art-frame {
+        height: min(64vh, 560px);
+        padding: 12px;
+      }
+      #cardModal .detail-copy {
+        height: auto;
+        overflow: visible;
+        padding: 23px 17px 30px;
+      }
+      .detail-heading { padding-right: 34px; }
+      #cardModal .detail-copy h2 { font-size: clamp(2rem, 11vw, 3.1rem); }
+      .detail-tabbar { top: 0; margin-top: 16px; padding-top: 7px; }
+      .detail-tab { min-height: 62px; padding: 9px; }
+      .detail-tab > span { font-size: 1.15rem; }
+      .detail-tab strong { font-size: .8rem; }
+      .detail-tab small { font-size: .61rem; }
+      #cardModal .upgrade-status-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 470px) {
+      .team-picker-grid { grid-template-columns: 1fr; }
+      .team-picker-entry .card-art { min-height: 360px; }
+      .detail-tabbar { grid-template-columns: 1fr; }
+      #cardModal .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+
   </style>
 </head>
 <body class="auth-locked">
@@ -4136,7 +4455,7 @@
     "id": 2000,
     "name": "MAMON",
     "rarity": "SC",
-    "element": "น้ำ",
+    "element": "น้ำแข็ง",
     "power": 5000000,
     "incomePerSec": 30000,
     "upgradeDustBase": 20000,
@@ -4172,7 +4491,7 @@
         "activeIn": ["tower", "arena"],
         "effects": [
           { "type": "luckRate", "value": 0.25 },
-          { "type": "enemyPowerRate", "value": -0.08, "condition": { "minUniqueElements": 4 } }
+          { "type": "enemyPowerRate", "value": -0.10, "condition": { "minUniqueElements": 4 } }
         ]
       },
       {
@@ -5380,6 +5699,7 @@
 
     let activeTab = "summon";
     let modalCardId = "";
+    let cardDetailActiveTab = "stats";
     let toastTimer = 0;
     let saveTimer = 0;
     let cloudSaveTimer = 0;
@@ -9622,41 +9942,71 @@
       const selectorButton = selectorCount > 0
         ? `<button class="btn btn-primary" data-action="use-selector" data-card-id="${escapeHTML(card.id)}">ใช้ใบเลือก ${escapeHTML(card.rarity)} <span class="cost">มี ${formatNumber(selectorCount)} ใบ</span></button>`
         : "";
+      const abilityCount = getCardAbilities(card).length;
+      const statsActive = cardDetailActiveTab !== "ability";
+      const membershipHTML = owned
+        ? `<div class="detail-membership-row">${inTeam ? `<span class="team-membership-badge showcase">ทีมโชว์ #${state.team.indexOf(String(card.id)) + 1}</span>` : ""}${inArenaTeam ? `<span class="team-membership-badge arena">ARENA #${state.arena.team.indexOf(String(card.id)) + 1}</span>` : ""}${!inTeam && !inArenaTeam ? `<span class="pill">ยังไม่ได้จัดลงทีม</span>` : ""}</div>`
+        : "";
 
       document.getElementById("cardDetail").innerHTML = `
         <div class="detail" style="${rarityStyleVars(rarity)}">
           <div class="detail-art">
-            ${media}
+            <div class="detail-art-frame">${media}</div>
+            <div class="detail-art-caption">
+              <span>${escapeHTML(rarity.label)} / ${escapeHTML(card.rarity)}</span>
+              <strong>${escapeHTML(card.name)}</strong>
+            </div>
           </div>
           <div class="detail-copy">
-            <span class="pill" style="${rarityStyleVars(rarity)};color:${getRarityTheme(rarity).main};border-color:color-mix(in srgb, ${getRarityTheme(rarity).main} 44%, rgba(255,255,255,.14))">${escapeHTML(rarity.label)} / ${escapeHTML(card.rarity)}</span>
-            <h2>${escapeHTML(card.name)}</h2>
-            <p class="detail-sub">${escapeHTML(elementDetail)} ${owned ? `• มี ${owned.count} ใบ` : "• ยังไม่ได้ครอบครอง"}</p>
-            ${owned ? `<div class="element-chip-row" style="margin:0 0 12px">${inTeam ? `<span class="team-membership-badge showcase">ทีมโชว์ #${state.team.indexOf(String(card.id)) + 1}</span>` : ""}${inArenaTeam ? `<span class="team-membership-badge arena">ARENA #${state.arena.team.indexOf(String(card.id)) + 1}</span>` : ""}${!inTeam && !inArenaTeam ? `<span class="pill">ยังไม่ได้จัดลงทีม</span>` : ""}</div>` : ""}
-            ${awakenDetailStatusHTML(card)}
-            <div class="stat-grid">
-              <div class="stat"><span>Level</span><strong>${level}/${maxLevel}</strong></div>
-              <div class="stat"><span>Awaken</span><strong>${rank}/${maxRank}</strong></div>
-              <div class="stat"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
-              <div class="stat"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
-              <div class="stat"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
+            <div class="detail-heading">
+              <span class="pill detail-rarity-pill" style="${rarityStyleVars(rarity)};color:${getRarityTheme(rarity).main};border-color:color-mix(in srgb, ${getRarityTheme(rarity).main} 44%, rgba(255,255,255,.14))">${escapeHTML(rarity.label)} / ${escapeHTML(card.rarity)}</span>
+              <h2>${escapeHTML(card.name)}</h2>
+              <p class="detail-sub">${escapeHTML(elementDetail)} ${owned ? `• มี ${owned.count} ใบ` : "• ยังไม่ได้ครอบครอง"}</p>
+              ${membershipHTML}
             </div>
-            ${cardAbilitiesHTML(card)}
-            ${upgradeStatusPanelHTML(card, inTeam)}
-            <div class="detail-actions">
-              ${owned ? `
-                <button class="btn btn-primary" data-action="upgrade" data-card-id="${escapeHTML(card.id)}" ${level >= maxLevel ? "disabled" : ""}>
-                  อัปเกรดเลเวล <span class="cost">${level >= maxLevel ? "เลเวลเต็ม" : `${formatNumber(upgradeCost)} Dust`}</span>
-                </button>
-                <button class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
-                  ปลุกพลัง <span class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
-                </button>
-                <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์/ไต่หอ"}</button>
-                <button class="btn ${inArenaTeam ? "btn-danger" : "btn-primary"}" data-action="toggle-arena-team" data-card-id="${escapeHTML(card.id)}">${inArenaTeam ? "นำออกจากทีม ARENA" : "เพิ่มเข้าทีม ARENA"}</button>
-                <button class="btn btn-gold" data-action="set-support-card" data-card-id="${escapeHTML(card.id)}">${String(state.profile.supportCardId || "") === String(card.id) ? "เป็น Support อยู่" : "ตั้งเป็น Support โปรไฟล์"}</button>
-                ${selectorButton}
-              ` : `${selectorButton || `<button class="btn" disabled>เปิดได้จากตู้กาชา</button>`}`}
+
+            <div class="detail-tabbar" role="tablist" aria-label="หมวดรายละเอียดการ์ด">
+              <button type="button" class="detail-tab ${statsActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="stats" role="tab" aria-selected="${statsActive}">
+                <span>📊</span><strong>สแตตและพัฒนา</strong><small>เลเวล พลัง รายได้ อเวก</small>
+              </button>
+              <button type="button" class="detail-tab ${!statsActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="ability" role="tab" aria-selected="${!statsActive}">
+                <span>✨</span><strong>ความสามารถ</strong><small>${abilityCount ? `${abilityCount} ความสามารถ` : "ยังไม่ได้กำหนด"}</small>
+              </button>
             </div>
+
+            <section class="detail-tab-panel ${statsActive ? "active" : ""}" role="tabpanel">
+              ${awakenDetailStatusHTML(card)}
+              <div class="stat-grid">
+                <div class="stat"><span>Level</span><strong>${level}/${maxLevel}</strong></div>
+                <div class="stat"><span>Awaken</span><strong>${rank}/${maxRank}</strong></div>
+                <div class="stat stat-power"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+                <div class="stat stat-income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+                <div class="stat stat-element"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
+              </div>
+              ${upgradeStatusPanelHTML(card, inTeam)}
+              <div class="detail-actions">
+                ${owned ? `
+                  <button class="btn btn-primary" data-action="upgrade" data-card-id="${escapeHTML(card.id)}" ${level >= maxLevel ? "disabled" : ""}>
+                    อัปเกรดเลเวล <span class="cost">${level >= maxLevel ? "เลเวลเต็ม" : `${formatNumber(upgradeCost)} Dust`}</span>
+                  </button>
+                  <button class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
+                    ปลุกพลัง <span class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
+                  </button>
+                  <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์/ไต่หอ"}</button>
+                  <button class="btn ${inArenaTeam ? "btn-danger" : "btn-primary"}" data-action="toggle-arena-team" data-card-id="${escapeHTML(card.id)}">${inArenaTeam ? "นำออกจากทีม ARENA" : "เพิ่มเข้าทีม ARENA"}</button>
+                  <button class="btn btn-gold" data-action="set-support-card" data-card-id="${escapeHTML(card.id)}">${String(state.profile.supportCardId || "") === String(card.id) ? "เป็น Support อยู่" : "ตั้งเป็น Support โปรไฟล์"}</button>
+                  ${selectorButton}
+                ` : `${selectorButton || `<button class="btn" disabled>เปิดได้จากตู้กาชา</button>`}`}
+              </div>
+            </section>
+
+            <section class="detail-tab-panel ${!statsActive ? "active" : ""}" role="tabpanel">
+              <div class="ability-tab-intro">
+                <strong>ความสามารถเฉพาะการ์ด</strong>
+                <span>แยกออกจากหน้าสแตตแล้ว เพื่อให้อ่านเงื่อนไขและผลของสกิลได้เต็มพื้นที่</span>
+              </div>
+              ${cardAbilitiesHTML(card)}
+            </section>
           </div>
         </div>
       `;
@@ -9665,7 +10015,9 @@
     function openCardModal(cardId) {
       const modalAlreadyOpen = !document.getElementById("cardModal").classList.contains("hidden");
       if (!modalAlreadyOpen) returnToReveal = false;
-      modalCardId = String(cardId);
+      const nextCardId = String(cardId);
+      if (modalCardId !== nextCardId) cardDetailActiveTab = "stats";
+      modalCardId = nextCardId;
       renderCardDetail(modalCardId);
       document.getElementById("cardModal").classList.remove("hidden");
       document.body.style.overflow = "hidden";
@@ -10253,6 +10605,10 @@
       if (action === "claim-income") claimIncome();
       if (action === "open-card") openCardModal(cardId);
       if (action === "open-picker-card-detail") openCardModal(cardId);
+      if (action === "switch-card-detail-tab") {
+        cardDetailActiveTab = target.dataset.detailTab === "ability" ? "ability" : "stats";
+        if (modalCardId) renderCardDetail(modalCardId);
+      }
       if (action === "open-team-picker") openTeamPicker(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
       if (action === "close-team-picker") closeTeamPicker();
       if (action === "assign-team-slot") assignCardToTeamSlot(cardId);
