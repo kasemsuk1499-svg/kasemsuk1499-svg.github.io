@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-14-fullbleed-card-detail-v21">
+  <meta name="gacha-app-build" content="2026-06-14-defense-combat-v22">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -971,7 +971,7 @@
 
     .income-panel {
       display: grid;
-      grid-template-columns: repeat(3, 1fr) auto;
+      grid-template-columns: repeat(4, 1fr) auto;
       gap: 10px;
       align-items: stretch;
       padding: 14px;
@@ -1094,6 +1094,7 @@
     }
 
     .card-visible-stat.power strong { color: var(--cyan); }
+    .card-visible-stat.defense strong { color: var(--violet); }
     .card-visible-stat.income strong { color: var(--green); }
     .card-visible-stat.awaken strong { color: var(--gold); }
 
@@ -1254,6 +1255,14 @@
     .fighter-power { font-size: clamp(1.6rem, 5vw, 3.4rem); font-weight: 1000; font-variant-numeric: tabular-nums; }
     .fighter.player .fighter-power { color: var(--cyan); }
     .fighter.enemy .fighter-power { color: var(--danger); }
+    .fighter-power { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+    .fighter.enemy .fighter-power { justify-content: flex-end; }
+    .fighter-power .combat-def { color: var(--violet); font-size: .52em; }
+    .combat-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .fighter.enemy .combat-tags { justify-content: flex-end; }
+    .combat-tag { padding: 5px 8px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #dbe5ff; font-size: .66rem; font-weight: 1000; background: rgba(3,5,12,.42); }
+    .combat-tag.shield { color: #ddd6fe; border-color: rgba(167,139,250,.32); }
+    .combat-tag.hit { color: #bae6fd; border-color: rgba(92,232,255,.30); }
     .power-breakdown { min-height: 3em; margin-top: 8px; color: var(--muted); font-size: .78rem; line-height: 1.55; }
 
     .power-meter {
@@ -3128,6 +3137,7 @@
     #cardModal .stat span { color: #aebbd9; font-size: .76rem; font-weight: 900; letter-spacing: .035em; text-transform: uppercase; }
     #cardModal .stat strong { margin-top: 5px; font-size: 1.2rem; line-height: 1.25; }
     #cardModal .stat-power strong { color: var(--cyan); }
+    #cardModal .stat-defense strong { color: var(--violet); }
     #cardModal .stat-income strong { color: var(--green); }
     #cardModal .stat-element { grid-column: 1 / -1; }
     #cardModal .stat-element .element-chip { font-size: .76rem; padding: 6px 9px; }
@@ -3410,7 +3420,8 @@
             <input class="field" id="searchInput" type="search" placeholder="ค้นหาการ์ด..." autocomplete="off">
             <select class="field" id="rarityFilter" aria-label="กรองระดับ"></select>
             <select class="field" id="sortMode" aria-label="เรียงลำดับการ์ด">
-              <option value="power">เรียงตามพลัง</option>
+              <option value="power">เรียงตามพลังโจมตี</option>
+              <option value="defense">เรียงตามพลังป้องกัน</option>
               <option value="acquired">เรียงตามลำดับการได้</option>
               <option value="rarity">เรียงตามระดับการ์ด</option>
               <option value="level">เรียงตามเลเวล</option>
@@ -3455,7 +3466,8 @@
           <div class="element-guide" id="teamRulesGuide"></div>
           <div class="income-panel">
             <div class="income-value"><span>รายได้ต่อวินาที</span><strong id="teamIncomeText">0</strong></div>
-            <div class="income-value"><span>กำลังรวม</span><strong id="teamPowerText">0</strong></div>
+            <div class="income-value"><span>พลังโจมตีรวม</span><strong id="teamPowerText">0</strong></div>
+            <div class="income-value"><span>พลังป้องกันรวม</span><strong id="teamDefenseText">0</strong></div>
             <div class="income-value"><span>Gems ที่สะสม</span><strong id="teamBankText">0</strong></div>
             <button class="btn btn-gold" data-action="claim-income">รับรายได้</button>
           </div>
@@ -3463,7 +3475,7 @@
 
         <section id="battleView" class="hidden">
           <div class="section-title">
-            <div><h2>Battle Tower</h2><p>ใช้พลังจริงของทีม เลเวล อเวก ธาตุ และ Support จากเพื่อนเพื่อผ่านด่าน</p></div>
+            <div><h2>Battle Tower</h2><p>ใช้ ATK ปะทะ DEF พร้อมสกิลโจมตีหลายฮิต โล่กันจำนวนครั้ง ธาตุ และ Support จากเพื่อน</p></div>
           </div>
           <div class="battle-layout">
             <div class="battle-arena">
@@ -3585,7 +3597,7 @@
           <div class="arena-team-zone">
             <div class="section-title">
               <div><h2>ทีม ARENA แยก</h2><p>ไม่กระทบทีมโชว์หรือทีมไต่หอ และทีมนี้จะถูกใช้เมื่อผู้เล่นคนอื่นสุ่มเจอคุณใน ARENA</p></div>
-              <strong id="arenaTeamPowerText">Power 0</strong>
+              <strong id="arenaTeamPowerText">ATK 0 • DEF 0</strong>
             </div>
             <div class="team-grid" id="arenaTeamGrid"></div>
             <div class="element-panel" id="arenaElementPanel"></div>
@@ -3946,7 +3958,17 @@
       // เพิ่มโดยอลิซ: ถ้าอเวกเต็ม การ์ดซ้ำใหม่จะให้ Dust รวม x2 (Dust ปกติ + โบนัสอเวกเต็ม)
       maxAwakenDuplicateDustMultiplier: 2,
       // เพิ่มโดยอลิซ: หอคอยและ ARENA ใช้ดาบร่วมกัน
-      arenaTeamSlots: 5
+      arenaTeamSlots: 5,
+      // เพิ่มโดยอลิซ: ระบบ ATK ปะทะ DEF + หลายฮิต/โล่
+      defenseBaseRatio: 0.64,
+      defenseLevelGrowthScale: 0.88,
+      defenseAwakenGrowthScale: 0.85,
+      combatDefenseWeight: 0.72,
+      combatMinimumDamageRate: 0.08,
+      combatMultiHitPenalty: 0.025,
+      combatMultiHitMinEfficiency: 0.82,
+      combatMaxAttackHits: 8,
+      combatMaxShieldHits: 6
     });
 
     // เพิ่มโดยอลิซ: รางวัลล็อกอินเฉพาะ 7 วันแรก (นับวันรับ ไม่บังคับให้ต่อเนื่อง)
@@ -4051,8 +4073,8 @@
 
     // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-13-inventory-mail-login-v11",
-      seenKey: "anime_card_update_notice_seen_v11"
+      version: "2026-06-14-defense-combat-v12",
+      seenKey: "anime_card_update_notice_seen_v12"
     });
 
     /*
@@ -4072,8 +4094,8 @@
       SSR: { label: "SSR", color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,   basePower: 20000,  baseIncome: 500,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019,  incomePerLevel: .0095, awakenMax: 7,  awakenCopies: [1,1,2,3,4,5,7], powerBonus: .17, incomeBonus: .11 },
       UR:  { label: "UR",  color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,  basePower: 65000,  baseIncome: 1500,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021,  incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
       LR:  { label: "LR",  color: "#22d3ee", colors: ["#22d3ee", "#a78bfa", "#facc15"], gradient: "linear-gradient(135deg, #22d3ee, #a78bfa 48%, #facc15)", glow: "#22d3ee", textColor: "#04111a", order: 5, stars: 8,  dust: 9000,  basePower: 220000, baseIncome: 5200,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024,  incomePerLevel: .0115, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .38, incomeBonus: .25 },
-      EX:  { label: "EX",  color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 6, stars: 10, dust: 50000, basePower: 800000, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028,  incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 },
-      SC:  { label: "SC",  color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 5000000, baseIncome: 30000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.092, powerPerLevel: .032,  incomePerLevel: .0215, awakenMax: 3,  awakenCopies: [1,1,1], powerBonus: .90, incomeBonus: .70 }
+      EX:  { label: "EX",  color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 6, stars: 9, dust: 50000, basePower: 800000, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028,  incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 },
+      SC:  { label: "SC",  color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 10, dust: 100000, basePower: 5000000, baseIncome: 30000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.092, powerPerLevel: .032,  incomePerLevel: .0215, awakenMax: 3,  awakenCopies: [1,1,1], powerBonus: .90, incomeBonus: .70 }
     });
 
     // เพิ่มโดยอลิซ: เรทแพ็คสุ่มในกระเป๋า แยกจากตู้กาชาและไม่สะสม pity
@@ -4250,23 +4272,36 @@
          },
          "effects": [
            { "type": "teamPowerRate", "value": 0.20 },
+           { "type": "teamDefenseRate", "value": 0.20 },
            { "type": "teamIncomeRate", "value": 0.15 },
            { "type": "enemyPowerRate", "value": -0.10 },
+           { "type": "enemyDefenseRate", "value": -0.10 },
            { "type": "luckRate", "value": 0.12 },
            { "type": "gachaRarityRate", "value": 0.15, "targetRarities": ["UR", "LR", "EX", "SC"] },
            { "type": "selfPowerRate", "value": 0.25 },
+           { "type": "selfDefenseRate", "value": 0.25 },
            { "type": "rarityPowerRate", "value": 0.18, "targetRarities": ["EX", "SC"] },
+           { "type": "rarityDefenseRate", "value": 0.18, "targetRarities": ["EX", "SC"] },
            { "type": "rarityIncomeRate", "value": 0.12, "targetRarities": ["LR"] },
            { "type": "elementPowerRate", "value": 0.10, "targetElements": ["ไฟ", "สายฟ้า"] },
+           { "type": "elementDefenseRate", "value": 0.10, "targetElements": ["ดิน", "เหล็ก"] },
            { "type": "elementIncomeRate", "value": 0.08, "targetElements": ["น้ำ", "พืช"] },
            { "type": "teamPowerFlat", "value": 50000 },
+           { "type": "teamDefenseFlat", "value": 35000 },
+           { "type": "shieldHits", "value": 2 },
+           { "type": "attackHits", "value": 1 },
            { "type": "teamIncomeFlat", "value": 500 }
          ]
        }
 
        หมายเหตุสำคัญ
        - value 0.20 = +20%, value -0.10 = -10%
-       - enemyPowerRate ใช้ค่าติดลบเพื่อลดพลังฝ่ายตรงข้าม
+       - enemyPowerRate ใช้ค่าติดลบเพื่อลดพลังโจมตีฝ่ายตรงข้าม
+       - enemyDefenseRate ใช้ค่าติดลบเพื่อลดพลังป้องกันฝ่ายตรงข้าม
+       - shieldHits = จำนวนฮิตที่โล่กันได้ทั้งหมดต่อการต่อสู้ (ระบบจำกัดสูงสุด 6)
+       - attackHits = จำนวนฮิตที่โจมตีเพิ่มจากค่าพื้นฐาน 1 ฮิต (ระบบจำกัดรวมสูงสุด 8)
+       - การโจมตีหลายฮิตไม่ได้คูณ ATK ฟรี แต่แบ่ง ATK รวมเป็นหลายฮิตเพื่อเจาะโล่ได้ดีขึ้น
+       - การ์ดแต่ละใบใส่ "defense": 620000 ได้เอง หากไม่ใส่ระบบสร้าง DEF จาก ATK อัตโนมัติ
        - luckRate เพิ่มโอกาสสุ่มค่าต่อสู้ฝั่งเรา ไม่แก้เรทกาชา
        - gachaRarityRate เพิ่ม “น้ำหนักสุ่ม” ของระดับที่กำหนด เช่น 0.15 = น้ำหนักระดับนั้น +15% แล้วระบบคำนวณเปอร์เซ็นต์จริงใหม่
        - effect แต่ละรายการใส่ condition ของตัวเองเพิ่มได้
@@ -4275,17 +4310,25 @@
        ===================================================================== */
     const CARD_ABILITY_EFFECT_TYPES = Object.freeze({
       TEAM_POWER_RATE: "teamPowerRate",
+      TEAM_DEFENSE_RATE: "teamDefenseRate",
       TEAM_INCOME_RATE: "teamIncomeRate",
       ENEMY_POWER_RATE: "enemyPowerRate",
+      ENEMY_DEFENSE_RATE: "enemyDefenseRate",
       LUCK_RATE: "luckRate",
       GACHA_RARITY_RATE: "gachaRarityRate",
       SELF_POWER_RATE: "selfPowerRate",
+      SELF_DEFENSE_RATE: "selfDefenseRate",
       SELF_INCOME_RATE: "selfIncomeRate",
       RARITY_POWER_RATE: "rarityPowerRate",
+      RARITY_DEFENSE_RATE: "rarityDefenseRate",
       RARITY_INCOME_RATE: "rarityIncomeRate",
       ELEMENT_POWER_RATE: "elementPowerRate",
+      ELEMENT_DEFENSE_RATE: "elementDefenseRate",
       ELEMENT_INCOME_RATE: "elementIncomeRate",
       TEAM_POWER_FLAT: "teamPowerFlat",
+      TEAM_DEFENSE_FLAT: "teamDefenseFlat",
+      SHIELD_HITS: "shieldHits",
+      ATTACK_HITS: "attackHits",
       TEAM_INCOME_FLAT: "teamIncomeFlat"
     });
 
@@ -4365,6 +4408,8 @@
       "activeIn": ["team", "tower", "arena"],
       "effects": [
         { "type": "teamPowerRate", "value": 0.20 },
+        { "type": "teamDefenseRate", "value": 0.15 },
+        { "type": "shieldHits", "value": 1 },
         { "type": "enemyPowerRate", "value": -0.10 },
         { "type": "luckRate", "value": 0.15, "condition": { "requiredElements": ["ความมืด", "มิติ"] } }
       ]
@@ -4409,6 +4454,7 @@
       "activeIn": ["team", "tower", "arena"],
       "effects": [
         { "type": "teamIncomeRate", "value": 0.25 },
+        { "type": "attackHits", "value": 1, "condition": { "requiredElements": ["สายฟ้า", "ลม"] } },
         { "type": "elementPowerRate", "value": 0.12, "targetElements": ["สายฟ้า", "ลม"], "condition": { "requiredElements": ["สายฟ้า", "ลม"] } }
       ]
     }
@@ -4452,6 +4498,7 @@
       "activeIn": ["team", "tower", "arena"],
       "effects": [
         { "type": "rarityPowerRate", "value": 0.30, "targetRarities": ["SC"] },
+        { "type": "rarityDefenseRate", "value": 0.20, "targetRarities": ["SC"] },
         { "type": "rarityIncomeRate", "value": 0.20, "targetRarities": ["SC"] }
       ]
     }
@@ -4496,6 +4543,7 @@
         "activeIn": ["tower", "arena"],
         "effects": [
           { "type": "luckRate", "value": 0.25 },
+          { "type": "shieldHits", "value": 2 },
           { "type": "enemyPowerRate", "value": -0.10, "condition": { "minUniqueElements": 4 } }
         ]
       },
@@ -4534,6 +4582,8 @@
                      "minElementCount": { "น้ำ": 2, "เหล็ก": 2 } },
       "effects": [
         { "type": "teamPowerRate", "value": 0.15 },
+        { "type": "teamDefenseRate", "value": 0.15 },
+        { "type": "shieldHits", "value": 1 },
         { "type": "selfPowerRate", "value": 0.30 }
       ]
     }
@@ -4563,7 +4613,9 @@
                      "minElementCount": { "ความมืด": 2, "มิติ": 2 } },
       "effects": [
         { "type": "teamPowerRate", "value": 0.15 },
-        { "type": "enemyPowerRate", "value": -0.20 }
+        { "type": "attackHits", "value": 1 },
+        { "type": "enemyPowerRate", "value": -0.20 },
+        { "type": "enemyDefenseRate", "value": -0.15 }
       ]
     }
   },
@@ -6928,17 +6980,25 @@
       const summary = {
         context,
         teamPowerRate: 0,
+        teamDefenseRate: 0,
         teamIncomeRate: 0,
         enemyPowerRate: 0,
+        enemyDefenseRate: 0,
         luckRate: 0,
         gachaRarityRates: {},
         teamPowerFlat: 0,
+        teamDefenseFlat: 0,
         teamIncomeFlat: 0,
+        shieldHits: 0,
+        attackHits: 0,
         selfPowerRates: {},
+        selfDefenseRates: {},
         selfIncomeRates: {},
         rarityPowerRates: {},
+        rarityDefenseRates: {},
         rarityIncomeRates: {},
         elementPowerRates: {},
+        elementDefenseRates: {},
         elementIncomeRates: {},
         activeAbilities: [],
         inactiveAbilities: []
@@ -6963,16 +7023,24 @@
             activeEffects.push(record);
             switch (effect.type) {
               case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE: summary.teamPowerRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_RATE: summary.teamDefenseRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_RATE: summary.teamIncomeRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE: summary.enemyPowerRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE: summary.enemyDefenseRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE: summary.luckRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE:
                 addAbilityMapRate(summary.gachaRarityRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
                 break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT: summary.teamPowerFlat += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_FLAT: summary.teamDefenseFlat += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS: summary.shieldHits += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS: summary.attackHits += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT: summary.teamIncomeFlat += value; break;
               case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
                 addAbilityMapRate(summary.selfPowerRates, [String(sourceCard.id)], value);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE:
+                addAbilityMapRate(summary.selfDefenseRates, [String(sourceCard.id)], value);
                 break;
               case CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE:
                 addAbilityMapRate(summary.selfIncomeRates, [String(sourceCard.id)], value);
@@ -6980,11 +7048,17 @@
               case CARD_ABILITY_EFFECT_TYPES.RARITY_POWER_RATE:
                 addAbilityMapRate(summary.rarityPowerRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
                 break;
+              case CARD_ABILITY_EFFECT_TYPES.RARITY_DEFENSE_RATE:
+                addAbilityMapRate(summary.rarityDefenseRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
+                break;
               case CARD_ABILITY_EFFECT_TYPES.RARITY_INCOME_RATE:
                 addAbilityMapRate(summary.rarityIncomeRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
                 break;
               case CARD_ABILITY_EFFECT_TYPES.ELEMENT_POWER_RATE:
                 addAbilityMapRate(summary.elementPowerRates, normalizeAbilityElements(effect.targetElements || effect.elements), value);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.ELEMENT_DEFENSE_RATE:
+                addAbilityMapRate(summary.elementDefenseRates, normalizeAbilityElements(effect.targetElements || effect.elements), value);
                 break;
               case CARD_ABILITY_EFFECT_TYPES.ELEMENT_INCOME_RATE:
                 addAbilityMapRate(summary.elementIncomeRates, normalizeAbilityElements(effect.targetElements || effect.elements), value);
@@ -7008,8 +7082,12 @@
       });
 
       summary.teamPowerRate = Math.max(-0.90, summary.teamPowerRate);
+      summary.teamDefenseRate = Math.max(-0.90, summary.teamDefenseRate);
       summary.teamIncomeRate = Math.max(-0.90, summary.teamIncomeRate);
       summary.enemyPowerRate = Math.max(-0.90, summary.enemyPowerRate);
+      summary.enemyDefenseRate = Math.max(-0.90, summary.enemyDefenseRate);
+      summary.attackHits = Math.max(0, Math.min(CONFIG.combatMaxAttackHits - 1, Math.round(summary.attackHits)));
+      summary.shieldHits = Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(summary.shieldHits)));
       summary.luckRate = Math.max(-0.75, Math.min(2, summary.luckRate));
       Object.keys(summary.gachaRarityRates).forEach(rarity => {
         summary.gachaRarityRates[rarity] = Math.max(-0.90, Math.min(5, Number(summary.gachaRarityRates[rarity]) || 0));
@@ -7079,6 +7157,15 @@
       return getCardPower(card) * Math.max(0, 1 + rate);
     }
 
+    function getAbilityAdjustedCardDefense(card, abilitySummary) {
+      const summary = abilitySummary || getTeamAbilitySummary();
+      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementDefenseRates[element] || 0), 0);
+      const rate = Number(summary.selfDefenseRates[String(card.id)] || 0)
+        + Number(summary.rarityDefenseRates[card.rarity] || 0)
+        + elementRate;
+      return getCardDefense(card) * Math.max(0, 1 + rate);
+    }
+
     function getAbilityAdjustedCardIncome(card, abilitySummary) {
       const summary = abilitySummary || getTeamAbilitySummary();
       const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementIncomeRates[element] || 0), 0);
@@ -7113,18 +7200,26 @@
       const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).join("/") || "ที่กำหนด";
       const elementText = normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).map(elementLabel).join(" + ") || "ที่กำหนด";
       const labels = {
-        teamPowerRate: `พลังฝ่ายเรา ${signedPercent(value)}`,
+        teamPowerRate: `ATK ฝ่ายเรา ${signedPercent(value)}`,
+        teamDefenseRate: `DEF ฝ่ายเรา ${signedPercent(value)}`,
         teamIncomeRate: `รายได้ฝ่ายเรา ${signedPercent(value)}`,
-        enemyPowerRate: `พลังฝ่ายตรงข้าม ${signedPercent(value)}`,
+        enemyPowerRate: `ATK ฝ่ายตรงข้าม ${signedPercent(value)}`,
+        enemyDefenseRate: `DEF ฝ่ายตรงข้าม ${signedPercent(value)}`,
         luckRate: `ค่าโชค ${signedPercent(value)}`,
         gachaRarityRate: `น้ำหนักกาชาระดับ ${rarityText} ${signedPercent(value)}`,
-        selfPowerRate: `พลังของการ์ดนี้ ${signedPercent(value)}`,
+        selfPowerRate: `ATK ของการ์ดนี้ ${signedPercent(value)}`,
+        selfDefenseRate: `DEF ของการ์ดนี้ ${signedPercent(value)}`,
         selfIncomeRate: `รายได้ของการ์ดนี้ ${signedPercent(value)}`,
-        rarityPowerRate: `พลังระดับ ${rarityText} ${signedPercent(value)}`,
+        rarityPowerRate: `ATK ระดับ ${rarityText} ${signedPercent(value)}`,
+        rarityDefenseRate: `DEF ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityIncomeRate: `รายได้ระดับ ${rarityText} ${signedPercent(value)}`,
-        elementPowerRate: `พลังธาตุ ${elementText} ${signedPercent(value)}`,
+        elementPowerRate: `ATK ธาตุ ${elementText} ${signedPercent(value)}`,
+        elementDefenseRate: `DEF ธาตุ ${elementText} ${signedPercent(value)}`,
         elementIncomeRate: `รายได้ธาตุ ${elementText} ${signedPercent(value)}`,
-        teamPowerFlat: `พลังทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
+        teamPowerFlat: `ATK ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
+        teamDefenseFlat: `DEF ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
+        shieldHits: `โล่กัน ${Math.max(0, Math.round(value))} ฮิต`,
+        attackHits: `โจมตีเพิ่ม +${Math.max(0, Math.round(value))} ฮิต`,
         teamIncomeFlat: `รายได้ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}/s`
       };
       return labels[effect && effect.type] || `${effect && effect.type || "effect"}: ${value}`;
@@ -7224,6 +7319,60 @@
       return basePower * (1 + (level - 1) * powerPerLevel) * (1 + rank * Number(rarity.powerBonus || 0));
     }
 
+    // เพิ่มโดยอลิซ: DEF แยกจาก ATK หากไม่ใส่ defense ใน CARD-DATA จะคำนวณจาก ATK อัตโนมัติ
+    function getCardDefense(card) {
+      const owned = getOwned(card.id);
+      const level = owned ? owned.level : 1;
+      const rank = owned ? owned.duplicateRank : 0;
+      const rarity = getRarity(card);
+      const fallbackBase = Number(card.power || rarity.basePower || 0) * Number(CONFIG.defenseBaseRatio || .64);
+      const baseDefense = Number(card.defense !== undefined ? card.defense : fallbackBase);
+      const powerPerLevel = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
+      const defensePerLevel = Number(rarity.defensePerLevel !== undefined ? rarity.defensePerLevel : powerPerLevel * Number(CONFIG.defenseLevelGrowthScale || .88));
+      const defenseBonus = Number(rarity.defenseBonus !== undefined ? rarity.defenseBonus : Number(rarity.powerBonus || 0) * Number(CONFIG.defenseAwakenGrowthScale || .85));
+      return Math.max(0, baseDefense * (1 + (level - 1) * defensePerLevel) * (1 + rank * defenseBonus));
+    }
+
+    function getCombatAttackHits(abilitySummary = {}) {
+      return Math.max(1, Math.min(CONFIG.combatMaxAttackHits, 1 + Math.round(Number(abilitySummary.attackHits || 0))));
+    }
+
+    function getCombatShieldHits(abilitySummary = {}) {
+      return Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(abilitySummary.shieldHits || 0))));
+    }
+
+    function resolveCombatExchange(attackerAttack, defenderDefense, attackHits = 1, shieldHits = 0, variance = 1) {
+      const attack = Math.max(1, Number(attackerAttack || 0) * Math.max(.2, Number(variance) || 1));
+      const defense = Math.max(0, Number(defenderDefense || 0));
+      const hits = Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(attackHits) || 1)));
+      const shields = Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(shieldHits) || 0)));
+      const blockedHits = Math.min(hits, shields);
+      const unblockedHits = Math.max(0, hits - blockedHits);
+      const unblockedRate = unblockedHits / hits;
+      const minimumDamage = attack * Number(CONFIG.combatMinimumDamageRate || .08);
+      const afterDefense = Math.max(minimumDamage, attack - defense * Number(CONFIG.combatDefenseWeight || .72));
+      const multiHitEfficiency = Math.max(Number(CONFIG.combatMultiHitMinEfficiency || .82), 1 - Math.max(0, hits - 1) * Number(CONFIG.combatMultiHitPenalty || .025));
+      const damage = unblockedHits > 0 ? Math.max(1, afterDefense * unblockedRate * multiHitEfficiency) : 0;
+      return { attack, defense, hits, shields, blockedHits, unblockedHits, unblockedRate, multiHitEfficiency, damage };
+    }
+
+    // คะแนนตัดสินใช้ทั้งดาเมจที่ทำได้และ DEF ที่ยังเหลือ จึงไม่ทำให้โล่ 1 ฮิตชนะทีมที่แข็งกว่าทันที
+    function getCombatOutcomeScore(outgoingExchange, ownDefense, incomingDamage) {
+      const remainingGuard = Math.max(0, Number(ownDefense || 0) - Math.max(0, Number(incomingDamage || 0)));
+      return Math.max(0, Number(outgoingExchange && outgoingExchange.damage || 0)) + remainingGuard * .35;
+    }
+
+    async function playStrikeSequence(stage, className, hits, phaseDuration) {
+      const visualHits = Math.max(1, Math.min(4, Math.round(Number(hits) || 1)));
+      const perHitDuration = Math.max(30, Math.floor(Number(phaseDuration || 560) / Math.max(1, visualHits > 1 ? 1.45 : 1)));
+      for (let index = 0; index < visualHits; index += 1) {
+        stage.classList.add(className);
+        await wait(perHitDuration);
+        stage.classList.remove(className);
+        if (index < visualHits - 1) await wait(Math.min(90, Math.max(20, Math.floor(perHitDuration * .15))));
+      }
+    }
+
     function getCardIncome(card) {
       const owned = getOwned(card.id);
       const level = owned ? owned.level : 1;
@@ -7250,6 +7399,14 @@
       }, 0);
     }
 
+    function getRawTeamDefense(teamIds = state.team, mode = "team", abilitySummary = null) {
+      const summary = abilitySummary || getTeamAbilitySummary(teamIds, mode);
+      return abilityArray(teamIds).reduce((sum, id) => {
+        const card = CARD_BY_ID.get(String(id));
+        return sum + (card ? getAbilityAdjustedCardDefense(card, summary) : 0);
+      }, 0);
+    }
+
     function getTeamIncome() {
       const abilities = getTeamAbilitySummary(state.team, "team");
       const baseIncome = getRawTeamIncome(state.team, "team", abilities) + abilities.teamIncomeFlat;
@@ -7262,6 +7419,12 @@
       const basePower = getRawTeamPower(state.team, "team", abilities) + abilities.teamPowerFlat;
       const elementSummary = getTeamElementSummary();
       return Math.max(0, basePower * (1 + elementSummary.powerRate + abilities.teamPowerRate));
+    }
+
+    function getTeamDefense() {
+      const abilities = getTeamAbilitySummary(state.team, "team");
+      const baseDefense = getRawTeamDefense(state.team, "team", abilities) + abilities.teamDefenseFlat;
+      return Math.max(0, baseDefense * (1 + abilities.teamDefenseRate));
     }
 
     function getFormationBonusRate() {
@@ -7284,6 +7447,7 @@
         rarity: card.rarity,
         element: getCardElements(card),
         power: Math.floor(getCardPower(card)),
+        defense: Math.floor(getCardDefense(card)),
         income: Math.floor(getCardIncome(card)),
         level: Math.floor(Number(owned.level) || 1),
         awaken: Math.floor(Number(owned.duplicateRank) || 0),
@@ -7300,6 +7464,12 @@
       return supportCard ? Number(supportCard.power || 0) : Number(profile && profile.teamPower || 0);
     }
 
+    function getSupportDefenseSource(profile) {
+      const supportCard = getProfileSupportSnapshot(profile);
+      if (supportCard) return Number(supportCard.defense || Number(supportCard.power || 0) * Number(CONFIG.defenseBaseRatio || .64));
+      return Number(profile && profile.teamDefense || Number(profile && profile.teamPower || 0) * Number(CONFIG.defenseBaseRatio || .64));
+    }
+
     function supportCardHTML(supportCard, emptyText = "ยังไม่ได้ตั้งการ์ดซัพพอร์ต") {
       if (!supportCard) return `<div class="support-card-box"><div class="support-card-art"></div><div><div class="support-card-title">${escapeHTML(emptyText)}</div><div class="support-card-meta">ตั้งได้ 1 ใบจากหน้าโปรไฟล์</div></div></div>`;
       const rarity = getRarity({ rarity: supportCard.rarity });
@@ -7309,7 +7479,7 @@
           <div class="support-card-art">${img}</div>
           <div>
             <div class="support-card-title">${escapeHTML(supportCard.rarity || "?")} • ${escapeHTML(supportCard.name || "Support Card")}</div>
-            <div class="support-card-meta">Power ${formatNumber(supportCard.power || 0)} • Lv.${formatNumber(supportCard.level || 1)} • Awaken ${formatNumber(supportCard.awaken || 0)}</div>
+            <div class="support-card-meta">ATK ${formatNumber(supportCard.power || 0)} • DEF ${formatNumber(supportCard.defense || Number(supportCard.power || 0) * Number(CONFIG.defenseBaseRatio || .64))} • Lv.${formatNumber(supportCard.level || 1)} • Awaken ${formatNumber(supportCard.awaken || 0)}</div>
           </div>
         </div>
       `;
@@ -7600,6 +7770,7 @@
         name: card.name,
         rarity: card.rarity,
         power: Math.floor(getCardPower(card)),
+        defense: Math.floor(getCardDefense(card)),
         elements: getCardElements(card)
       };
     }
@@ -7608,6 +7779,12 @@
       const teamIds = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
       const abilities = abilitySummary || getTeamAbilitySummary(teamIds, "arena");
       return getRawTeamPower(teamIds, "arena", abilities);
+    }
+
+    function getArenaRawDefense(abilitySummary = null) {
+      const teamIds = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
+      const abilities = abilitySummary || getTeamAbilitySummary(teamIds, "arena");
+      return getRawTeamDefense(teamIds, "arena", abilities);
     }
 
     function getArenaTeamSummary() {
@@ -7622,6 +7799,19 @@
       return Math.max(0, raw * (1 + summary.powerRate + abilities.teamPowerRate));
     }
 
+    function getArenaTeamDefense() {
+      const teamIds = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
+      const abilities = getTeamAbilitySummary(teamIds, "arena");
+      const raw = getArenaRawDefense(abilities) + abilities.teamDefenseFlat;
+      return Math.max(0, raw * (1 + abilities.teamDefenseRate));
+    }
+
+    function getArenaCombatTraits() {
+      const teamIds = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
+      const abilities = getTeamAbilitySummary(teamIds, "arena");
+      return { attackHits: getCombatAttackHits(abilities), shieldHits: getCombatShieldHits(abilities) };
+    }
+
     function makeArenaRankingEntry(updatedAt = Date.now()) {
       const profile = getPlayerProfile();
       return {
@@ -7632,6 +7822,9 @@
         wins: Math.max(0, Number(state.arena && state.arena.wins) || 0),
         losses: Math.max(0, Number(state.arena && state.arena.losses) || 0),
         arenaPower: Math.floor(getArenaTeamPower()),
+        arenaDefense: Math.floor(getArenaTeamDefense()),
+        arenaAttackHits: getArenaCombatTraits().attackHits,
+        arenaShieldHits: getArenaCombatTraits().shieldHits,
         updatedAt
       };
     }
@@ -7745,6 +7938,7 @@
         name: card.name,
         rarity: card.rarity,
         power: Math.max(1, Math.floor(playerPower / CONFIG.arenaTeamSlots)),
+        defense: Math.max(1, Math.floor(playerPower / CONFIG.arenaTeamSlots * Number(CONFIG.defenseBaseRatio || .64))),
         elements: getCardElements(card)
       }));
       return {
@@ -7752,6 +7946,9 @@
         type: "ai",
         username: ["AI Crimson", "AI Void", "AI Nova", "AI Vanguard", "AI Eclipse"][Math.floor(Math.random() * 5)],
         arenaPower: Math.floor(playerPower * (.84 + Math.random() * .30)),
+        arenaDefense: Math.floor(Math.max(1, getArenaTeamDefense()) * (.84 + Math.random() * .30)),
+        arenaAttackHits: 1 + Math.min(3, Math.floor(Number(state.arena.points || 0) / 500)),
+        arenaShieldHits: Math.min(2, Math.floor(Number(state.arena.points || 0) / 1000)),
         arenaTeam: cards,
         points: Math.max(0, Math.floor(Number(state.arena.points || 0) * (.75 + Math.random() * .5)))
       };
@@ -7771,6 +7968,19 @@
       const publishedArenaPower = Math.max(0, Number(profile && profile.arenaPower) || 0);
       const snapshotPower = team.reduce((sum, item) => sum + Math.max(0, Number(item.power) || 0), 0);
       return Math.max(0, publishedArenaPower || snapshotPower);
+    }
+
+    function getArenaOpponentSnapshotDefense(profile, team = getArenaOpponentSnapshotTeam(profile)) {
+      const published = Math.max(0, Number(profile && profile.arenaDefense) || 0);
+      const snapshot = team.reduce((sum, item) => sum + Math.max(0, Number(item.defense || Number(item.power || 0) * Number(CONFIG.defenseBaseRatio || .64)) || 0), 0);
+      return Math.max(1, published || snapshot || getArenaOpponentSnapshotPower(profile, team) * Number(CONFIG.defenseBaseRatio || .64));
+    }
+
+    function getArenaOpponentCombatTraits(profile) {
+      return {
+        attackHits: Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(profile && profile.arenaAttackHits) || 1))),
+        shieldHits: Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(profile && profile.arenaShieldHits) || 0)))
+      };
     }
 
     function pickArenaOpponent() {
@@ -7795,6 +8005,9 @@
           type: "player",
           username: profile.username || "Unknown Player",
           arenaPower: Math.max(1, getArenaOpponentSnapshotPower(profile, arenaTeam)),
+          arenaDefense: getArenaOpponentSnapshotDefense(profile, arenaTeam),
+          arenaAttackHits: getArenaOpponentCombatTraits(profile).attackHits,
+          arenaShieldHits: getArenaOpponentCombatTraits(profile).shieldHits,
           arenaTeam,
           points: Math.max(0, Number(profile.arenaPoints || 0))
         };
@@ -7807,15 +8020,33 @@
       const summary = getArenaTeamSummary();
       const abilitySummary = getTeamAbilitySummary(teamIds, "arena");
       const rawPower = getArenaRawPower(abilitySummary) + abilitySummary.teamPowerFlat;
+      const rawDefense = getArenaRawDefense(abilitySummary) + abilitySummary.teamDefenseFlat;
       const teamPower = Math.max(0, rawPower * (1 + summary.powerRate + abilitySummary.teamPowerRate));
+      const teamDefense = Math.max(0, rawDefense * (1 + abilitySummary.teamDefenseRate));
+      const attackHits = getCombatAttackHits(abilitySummary);
+      const shieldHits = getCombatShieldHits(abilitySummary);
       const enemy = opponent || null;
       const enemyTeam = enemy && Array.isArray(enemy.arenaTeam) ? enemy.arenaTeam : [];
       const enemyElement = getSnapshotDominantElement(enemyTeam);
       const matchup = enemy ? getElementMatchup(summary.dominantElement, enemyElement) : makeMatchupResult(summary.dominantElement, "ไร้ธาตุ");
       const effectivePower = enemy ? teamPower * (1 + matchup.modifier) : teamPower;
+      const effectiveDefense = teamDefense;
       const enemyBasePower = enemy ? Math.max(1, Number(enemy.arenaPower || 1)) : 0;
+      const enemyBaseDefense = enemy ? Math.max(1, Number(enemy.arenaDefense || enemyBasePower * Number(CONFIG.defenseBaseRatio || .64))) : 0;
       const enemyEffectivePower = enemy ? Math.max(1, enemyBasePower * (1 - matchup.modifier * .70) * (1 + abilitySummary.enemyPowerRate)) : 0;
-      return { summary, abilitySummary, rawPower, teamPower, effectivePower, enemy, enemyTeam, enemyElement, enemyBasePower, enemyEffectivePower, matchup, luckRate: abilitySummary.luckRate };
+      const enemyEffectiveDefense = enemy ? Math.max(1, enemyBaseDefense * (1 + abilitySummary.enemyDefenseRate)) : 0;
+      const enemyAttackHits = enemy ? Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(enemy.arenaAttackHits) || 1))) : 1;
+      const enemyShieldHits = enemy ? Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(enemy.arenaShieldHits) || 0))) : 0;
+      const playerPreview = enemy ? resolveCombatExchange(effectivePower, enemyEffectiveDefense, attackHits, enemyShieldHits, 1) : null;
+      const enemyPreview = enemy ? resolveCombatExchange(enemyEffectivePower, effectiveDefense, enemyAttackHits, shieldHits, 1) : null;
+      return {
+        summary, abilitySummary, rawPower, rawDefense, teamPower, teamDefense,
+        effectivePower, effectiveAttack: effectivePower, effectiveDefense,
+        attackHits, shieldHits, enemy, enemyTeam, enemyElement,
+        enemyBasePower, enemyBaseDefense, enemyEffectivePower, enemyAttack: enemyEffectivePower,
+        enemyEffectiveDefense, enemyAttackHits, enemyShieldHits,
+        playerPreview, enemyPreview, matchup, luckRate: abilitySummary.luckRate
+      };
     }
 
     function arenaSnapshotModelHTML(item, index = 0, enemy = true) {
@@ -7886,42 +8117,56 @@
       const stage = document.getElementById("arenaBattleStage");
       const result = document.getElementById("arenaBattleResult");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 30 : 560;
+      const phaseDuration = reducedMotion ? 30 : 420;
       arenaAnimating = true;
       state.battle.energy -= 1;
       renderArena();
-      result.textContent = `พบ ${currentArenaOpponent.type === "player" ? "ผู้เล่นในเซิร์ฟ" : "ทีม AI"}: ${currentArenaOpponent.username} — กำลังเปิดฉากโจมตี...`;
-      result.className = "battle-result";
-      stage.classList.add("player-strike");
 
-      const playerRoll = stats.effectivePower * getLuckRollMultiplier(stats.luckRate, .91, .18);
-      const enemyRoll = stats.enemyEffectivePower * (.91 + Math.random() * .18);
-      const won = playerRoll >= enemyRoll;
+      const playerExchange = resolveCombatExchange(
+        stats.effectiveAttack,
+        stats.enemyEffectiveDefense,
+        stats.attackHits,
+        stats.enemyShieldHits,
+        getLuckRollMultiplier(stats.luckRate, .91, .18)
+      );
+      const enemyExchange = resolveCombatExchange(
+        stats.enemyAttack,
+        stats.effectiveDefense,
+        stats.enemyAttackHits,
+        stats.shieldHits,
+        .91 + Math.random() * .18
+      );
+      const playerScore = getCombatOutcomeScore(playerExchange, stats.effectiveDefense, enemyExchange.damage);
+      const enemyScore = getCombatOutcomeScore(enemyExchange, stats.enemyEffectiveDefense, playerExchange.damage);
+      const won = Math.abs(playerScore - enemyScore) > 1
+        ? playerScore > enemyScore
+        : (stats.effectiveAttack + stats.effectiveDefense) >= (stats.enemyAttack + stats.enemyEffectiveDefense);
+
+      result.textContent = `พบ ${currentArenaOpponent.type === "player" ? "ผู้เล่นในเซิร์ฟ" : "ทีม AI"}: ${currentArenaOpponent.username} — เราโจมตี ${stats.attackHits} ฮิต...`;
+      result.className = "battle-result";
 
       try {
-        await wait(phaseDuration);
-        stage.classList.remove("player-strike");
-        stage.classList.add("enemy-strike");
-        result.textContent = `${currentArenaOpponent.username} กำลังสวนกลับ...`;
-        await wait(phaseDuration);
-        stage.classList.remove("enemy-strike");
+        await playStrikeSequence(stage, "player-strike", stats.attackHits, phaseDuration);
+        result.textContent = `${currentArenaOpponent.username} สวนกลับ ${stats.enemyAttackHits} ฮิต...`;
+        await playStrikeSequence(stage, "enemy-strike", stats.enemyAttackHits, phaseDuration);
         stage.classList.add(won ? "battle-win" : "battle-lose");
 
+        const combatText = `ดาเมจ ${formatNumber(playerExchange.damage)} ต่อ ${formatNumber(enemyExchange.damage)} • โล่บล็อก ${playerExchange.blockedHits}/${enemyExchange.blockedHits} ฮิต`;
         if (won) {
           state.arena.points += ARENA_CONFIG.winPoints;
           state.arena.wins += 1;
-          arenaResult = { tone: "win", text: `ชนะ ${currentArenaOpponent.username}! +${ARENA_CONFIG.winPoints} แต้ม ARENA` };
+          arenaResult = { tone: "win", text: `ชนะ ${currentArenaOpponent.username}! +${ARENA_CONFIG.winPoints} แต้ม • ${combatText}` };
         } else {
           const lost = Math.min(state.arena.points, ARENA_CONFIG.losePoints);
           state.arena.points = Math.max(0, state.arena.points - ARENA_CONFIG.losePoints);
           state.arena.losses += 1;
-          arenaResult = { tone: "lose", text: `แพ้ ${currentArenaOpponent.username} • -${lost} แต้ม ARENA` };
+          arenaResult = { tone: "lose", text: `แพ้ ${currentArenaOpponent.username} • -${lost} แต้ม • ${combatText}` };
         }
 
         saveState(true);
         renderAll();
         showToast(arenaResult.text);
-        await wait(reducedMotion ? 30 : 650);
+        await wait(reducedMotion ? 30 : 500);
         refreshArenaData();
       } finally {
         stage.classList.remove("player-strike", "enemy-strike", "battle-win", "battle-lose");
@@ -8020,11 +8265,15 @@
         supportCardId: getProfileSupportCardId(),
         supportCard: makeSupportCardSnapshot(),
         teamPower: Math.floor(getTeamPower()),
+        teamDefense: Math.floor(getTeamDefense()),
         collectionCount: Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length,
         battleStage: Number(state.battle && state.battle.stage || 1),
         arenaPoints: Number(state.arena && state.arena.points || 0),
         arenaWeekKey: String(state.arena && state.arena.weekKey || getArenaWeekKey()),
         arenaPower: Math.floor(getArenaTeamPower()),
+        arenaDefense: Math.floor(getArenaTeamDefense()),
+        arenaAttackHits: getArenaCombatTraits().attackHits,
+        arenaShieldHits: getArenaCombatTraits().shieldHits,
         arenaTeam: (state.arena && Array.isArray(state.arena.team) ? state.arena.team : []).map(id => makeArenaCardSnapshot(id)).filter(Boolean),
         team: state.team.map(id => {
           const card = CARD_BY_ID.get(String(id));
@@ -8032,7 +8281,8 @@
             id: String(card.id),
             name: card.name,
             rarity: card.rarity,
-            power: Math.floor(getCardPower(card))
+            power: Math.floor(getCardPower(card)),
+            defense: Math.floor(getCardDefense(card))
           } : null;
         }).filter(Boolean),
         updatedAt
@@ -8065,17 +8315,24 @@
       const stage = Math.max(1, Number(state.battle.stage) || 1);
       const abilitySummary = getTeamAbilitySummary(state.team, "tower");
       const basePower = getRawTeamPower(state.team, "tower", abilitySummary) + abilitySummary.teamPowerFlat;
+      const baseDefense = getRawTeamDefense(state.team, "tower", abilitySummary) + abilitySummary.teamDefenseFlat;
       const elementSummary = getTeamElementSummary();
       const formationRate = elementSummary.powerRate;
       const formationPower = basePower * formationRate;
       const abilityPowerRate = abilitySummary.teamPowerRate;
       const abilityPower = basePower * abilityPowerRate;
+      const abilityDefenseRate = abilitySummary.teamDefenseRate;
+      const abilityDefense = baseDefense * abilityDefenseRate;
       const support = getSelectedSupportProfile();
       const supportCard = getProfileSupportSnapshot(support);
       const supportSourcePower = support ? getSupportPowerSource(support) : 0;
+      const supportSourceDefense = support ? getSupportDefenseSource(support) : 0;
       const rawSupportPower = supportSourcePower * CONFIG.friendSupportRate;
+      const rawSupportDefense = supportSourceDefense * CONFIG.friendSupportRate;
       const supportCapBase = Math.max(0, basePower + formationPower + abilityPower);
+      const supportDefenseCapBase = Math.max(0, baseDefense + abilityDefense);
       const supportPower = Math.min(rawSupportPower, supportCapBase * CONFIG.friendSupportCapRate);
+      const supportDefense = Math.min(rawSupportDefense, supportDefenseCapBase * CONFIG.friendSupportCapRate);
       const enemyCard = getBattleEnemyCard(stage);
       const enemyElement = getCardElements(enemyCard);
       const matchup = getElementMatchup(elementSummary.dominantElement, enemyElement);
@@ -8084,31 +8341,28 @@
       const preElementPower = basePower + formationPower + abilityPower + supportPower;
       const elementPower = preElementPower * matchup.modifier;
       const effectivePower = Math.max(0, preElementPower + elementPower);
-      const enemyPower = Math.max(1, getTowerEnemyPower(stage) * (1 + abilitySummary.enemyPowerRate));
+      const effectiveDefense = Math.max(0, baseDefense + abilityDefense + supportDefense);
+      const enemyBase = getTowerEnemyPower(stage);
+      const enemyPower = Math.max(1, enemyBase * (1 + abilitySummary.enemyPowerRate));
+      const enemyDefenseRatio = Math.min(.78, .56 + Math.floor((stage - 1) / 100) * .025);
+      const enemyDefense = Math.max(1, enemyBase * enemyDefenseRatio * (1 + abilitySummary.enemyDefenseRate));
+      const attackHits = getCombatAttackHits(abilitySummary);
+      const shieldHits = getCombatShieldHits(abilitySummary);
+      const enemyAttackHits = 1 + Math.min(3, Math.floor((stage - 1) / 100));
+      const enemyShieldHits = Math.min(3, Math.floor((stage - 1) / 150));
+      const playerPreview = resolveCombatExchange(effectivePower, enemyDefense, attackHits, enemyShieldHits, 1);
+      const enemyPreview = resolveCombatExchange(enemyPower, effectiveDefense, enemyAttackHits, shieldHits, 1);
       return {
-        stage,
-        basePower,
-        abilitySummary,
-        elementSummary,
-        dominantElement: elementSummary.dominantElement,
-        enemyCard,
-        enemyElement,
-        matchup,
-        formationRate,
-        formationPower,
-        abilityPowerRate,
-        abilityPower,
-        luckRate: abilitySummary.luckRate,
-        support,
-        supportCard,
-        supportSourcePower,
-        supportPower,
-        towerRestriction,
-        restrictionStatus,
-        preElementPower,
-        elementPower,
-        effectivePower,
-        enemyPower,
+        stage, basePower, baseAttack: basePower, baseDefense, abilitySummary, elementSummary,
+        dominantElement: elementSummary.dominantElement, enemyCard, enemyElement, matchup,
+        formationRate, formationPower, abilityPowerRate, abilityPower,
+        abilityDefenseRate, abilityDefense, luckRate: abilitySummary.luckRate,
+        support, supportCard, supportSourcePower, supportSourceDefense, supportPower, supportDefense,
+        towerRestriction, restrictionStatus, preElementPower, elementPower,
+        effectivePower, effectiveAttack: effectivePower, effectiveDefense,
+        enemyPower, enemyAttack: enemyPower, enemyDefense,
+        attackHits, shieldHits, enemyAttackHits, enemyShieldHits,
+        playerPreview, enemyPreview,
         gemReward: 15000 + stage * 5000,
         dustReward: 1000 + stage * 750,
         ticketRewards: getTowerRewardPreview(stage)
@@ -8126,30 +8380,43 @@
       if (!stats.restrictionStatus.ok) return showToast(`ทีมยังผิดเงื่อนไขชั้นนี้: ${stats.restrictionStatus.invalidCards.map(card => card.name).slice(0, 2).join(", ")}`);
       if (state.battle.energy < 1) return showToast("Energy หมด รอให้ฟื้นก่อน");
 
-      const arena = document.querySelector(".battle-arena");
+      const arena = document.querySelector("#battleView .battle-arena");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 30 : 560;
+      const phaseDuration = reducedMotion ? 30 : 420;
       battleAnimating = true;
       state.battle.energy -= 1;
-      const playerRoll = stats.effectivePower * getLuckRollMultiplier(stats.luckRate, .90, .22);
-      const enemyRoll = stats.enemyPower * (.90 + Math.random() * .20);
-      const won = playerRoll >= enemyRoll;
+      const playerExchange = resolveCombatExchange(
+        stats.effectiveAttack,
+        stats.enemyDefense,
+        stats.attackHits,
+        stats.enemyShieldHits,
+        getLuckRollMultiplier(stats.luckRate, .90, .22)
+      );
+      const enemyExchange = resolveCombatExchange(
+        stats.enemyAttack,
+        stats.effectiveDefense,
+        stats.enemyAttackHits,
+        stats.shieldHits,
+        .90 + Math.random() * .20
+      );
+      const playerScore = getCombatOutcomeScore(playerExchange, stats.effectiveDefense, enemyExchange.damage);
+      const enemyScore = getCombatOutcomeScore(enemyExchange, stats.enemyDefense, playerExchange.damage);
+      const won = Math.abs(playerScore - enemyScore) > 1
+        ? playerScore > enemyScore
+        : (stats.effectiveAttack + stats.effectiveDefense) >= (stats.enemyAttack + stats.enemyDefense);
       const result = document.getElementById("battleResult");
 
       renderBattle();
-      result.textContent = "ทีมของคุณกำลังเปิดฉากโจมตี...";
+      result.textContent = `ทีมของคุณโจมตี ${stats.attackHits} ฮิต${stats.enemyShieldHits ? ` • โล่ศัตรูกัน ${playerExchange.blockedHits} ฮิต` : ""}...`;
       result.className = "battle-result";
-      arena.classList.add("player-strike");
 
       try {
-        await wait(phaseDuration);
-        arena.classList.remove("player-strike");
-        arena.classList.add("enemy-strike");
-        result.textContent = "ศัตรูกำลังสวนกลับ...";
-        await wait(phaseDuration);
-        arena.classList.remove("enemy-strike");
+        await playStrikeSequence(arena, "player-strike", stats.attackHits, phaseDuration);
+        result.textContent = `ศัตรูสวนกลับ ${stats.enemyAttackHits} ฮิต${stats.shieldHits ? ` • โล่เรากัน ${enemyExchange.blockedHits} ฮิต` : ""}...`;
+        await playStrikeSequence(arena, "enemy-strike", stats.enemyAttackHits, phaseDuration);
         arena.classList.add(won ? "battle-win" : "battle-lose");
 
+        const combatText = `ดาเมจ ${formatNumber(playerExchange.damage)} ต่อ ${formatNumber(enemyExchange.damage)} • บล็อก ${playerExchange.blockedHits}/${enemyExchange.blockedHits} ฮิต`;
         if (won) {
           state.gems += stats.gemReward;
           state.dust += stats.dustReward;
@@ -8158,7 +8425,7 @@
           state.battle.stage += 1;
           battleResult = {
             tone: "win",
-            text: `ชนะชั้น ${stats.stage}! รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust${ticketRewards.length ? ` • ส่ง ${ticketRewards.map(rewardLabel).join(" • ")} เข้ากล่องจดหมาย` : ""}`
+            text: `ชนะชั้น ${stats.stage}! ${combatText} • รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust${ticketRewards.length ? ` • ส่ง ${ticketRewards.map(rewardLabel).join(" • ")} เข้ากล่องจดหมาย` : ""}`
           };
         } else {
           const consolation = Math.max(100, Math.floor(stats.dustReward * .1));
@@ -8166,14 +8433,14 @@
           state.battle.losses += 1;
           battleResult = {
             tone: "lose",
-            text: `แพ้ชั้น ${stats.stage} แต่ได้รับ ${formatNumber(consolation)} Dust • เพิ่มเลเวล อเวก หรือเปลี่ยน Support แล้วลองใหม่`
+            text: `แพ้ชั้น ${stats.stage} • ${combatText} • ได้ ${formatNumber(consolation)} Dust — เพิ่ม DEF, โล่ หรือจำนวนฮิตแล้วลองใหม่`
           };
         }
 
         saveState(true);
         renderAll();
         showToast(battleResult.text);
-        await wait(reducedMotion ? 30 : 650);
+        await wait(reducedMotion ? 30 : 500);
       } finally {
         arena.classList.remove("player-strike", "enemy-strike", "battle-win", "battle-lose");
         battleAnimating = false;
@@ -8981,15 +9248,17 @@
           <div class="card-upgrade-mini">
             <div class="card-visible-stat"><span>Level</span><strong>ยังไม่ปลดล็อก</strong></div>
             <div class="card-visible-stat awaken"><span>Awaken</span><strong>0/${status.maxRank}</strong></div>
-            <div class="card-visible-stat power"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+            <div class="card-visible-stat power"><span>ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+            <div class="card-visible-stat defense"><span>DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
             <div class="card-visible-stat income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
           </div>`;
       }
       return `
-        <div class="card-upgrade-mini" title="เลเวล อเวก พลัง และรายได้ปัจจุบัน">
+        <div class="card-upgrade-mini" title="เลเวล อเวก ATK DEF และรายได้ปัจจุบัน">
           <div class="card-visible-stat"><span>Level</span><strong>${status.level}/${status.maxLevel}</strong></div>
           <div class="card-visible-stat awaken"><span>Awaken</span><strong>${status.rank}/${status.maxRank}</strong></div>
-          <div class="card-visible-stat power"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+          <div class="card-visible-stat power"><span>ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+          <div class="card-visible-stat defense"><span>DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
           <div class="card-visible-stat income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
         </div>`;
     }
@@ -9165,6 +9434,7 @@
       const uniqueOwned = Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length;
       const teamIncome = getTeamIncome();
       const teamPower = getTeamPower();
+      const teamDefense = getTeamDefense();
       const activeBanner = getActiveBanner();
       const pityInfo = getBannerPityInfo(activeBanner);
       const todayClaimed = state.lastDaily === getLocalDateKey();
@@ -9182,6 +9452,8 @@
       document.getElementById("lastRarityText").textContent = state.recent[0] ? getRarity(CARD_BY_ID.get(state.recent[0])).label : "-";
       document.getElementById("teamIncomeText").textContent = `${formatNumber(teamIncome)} Gems/s`;
       document.getElementById("teamPowerText").textContent = formatNumber(teamPower);
+      const teamDefenseText = document.getElementById("teamDefenseText");
+      if (teamDefenseText) teamDefenseText.textContent = formatNumber(teamDefense);
       document.getElementById("teamBankText").textContent = `${formatNumber(state.incomeBank)} Gems`;
       const newcomerClaimedToday = state.firstLoginRewards.lastClaimDate === getLocalDateKey();
       document.getElementById("dailyText").textContent = todayClaimed
@@ -9234,6 +9506,7 @@
       if (mode === "level") return status.owned ? status.level : 0;
       if (mode === "awaken") return status.owned ? status.rank : 0;
       if (mode === "income") return getCardIncome(card);
+      if (mode === "defense") return getCardDefense(card);
       return getCardPower(card);
     }
 
@@ -9254,7 +9527,7 @@
     }
 
     function getSortLabel(mode = collectionSortMode) {
-      return ({ power: "พลัง", acquired: "ลำดับการได้", rarity: "ระดับการ์ด", level: "เลเวล", awaken: "อเวก", income: "รายได้" })[mode] || "พลัง";
+      return ({ power: "พลังโจมตี", defense: "พลังป้องกัน", acquired: "ลำดับการได้", rarity: "ระดับการ์ด", level: "เลเวล", awaken: "อเวก", income: "รายได้" })[mode] || "พลังโจมตี";
     }
 
     function getSortDirectionText(mode = collectionSortMode, direction = collectionSortDirection) {
@@ -9321,7 +9594,8 @@
               <div class="team-slot-stats">
                 <div class="team-slot-stat"><span>LEVEL</span><strong>${status.level}/${status.maxLevel}</strong></div>
                 <div class="team-slot-stat"><span>AWAKEN</span><strong>${status.rank}/${status.maxRank}</strong></div>
-                <div class="team-slot-stat"><span>POWER</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+                <div class="team-slot-stat"><span>ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+                <div class="team-slot-stat"><span>DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
                 <div class="team-slot-stat"><span>INCOME</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
               </div>
               <div class="team-slot-change">แตะเพื่อเปลี่ยนการ์ด</div>
@@ -9339,7 +9613,7 @@
           <div class="guide-row-title">${escapeHTML(combo.name)}</div>
           <div class="guide-row-copy">
             <div class="element-chip-row" style="margin-top:0">${combo.required.map(element => elementChipHTML(element)).join("")}</div>
-            Power +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}
+            ATK +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}
           </div>
         </div>`).join("");
       const universalComboRows = `
@@ -9601,32 +9875,34 @@
 
     function renderBattle() {
       const stats = getBattleStats();
-      const maxPower = Math.max(1, stats.effectivePower, stats.enemyPower);
+      const maxAttack = Math.max(1, stats.effectiveAttack, stats.enemyAttack);
       const formationPercent = Math.round(stats.formationRate * 100);
       const abilityPercent = Math.round(stats.abilityPowerRate * 100);
+      const defenseAbilityPercent = Math.round(stats.abilityDefenseRate * 100);
       const luckPercent = Math.round(stats.luckRate * 100);
       const enemyAbilityPercent = Math.round(stats.abilitySummary.enemyPowerRate * 100);
+      const enemyDefensePercent = Math.round(stats.abilitySummary.enemyDefenseRate * 100);
       const elementPercent = Math.round(stats.matchup.modifier * 100);
       const elementSign = elementPercent > 0 ? "+" : "";
       const supportName = stats.support ? stats.support.username : "";
       const supportCardName = stats.supportCard ? stats.supportCard.name : "";
       const supportText = stats.support
-        ? `${supportName}${supportCardName ? ` • ${supportCardName}` : ""} เพิ่ม ${formatNumber(stats.supportPower)} Power`
+        ? `${supportName}${supportCardName ? ` • ${supportCardName}` : ""} เพิ่ม ATK ${formatNumber(stats.supportPower)} / DEF ${formatNumber(stats.supportDefense)}`
         : "ยังไม่ได้เลือกเพื่อน Support";
       const result = document.getElementById("battleResult");
 
       if (!battleAnimating || !document.getElementById("battlePlayerModels").children.length) renderBattleModels(stats);
-      document.getElementById("battlePlayerPower").textContent = formatNumber(stats.effectivePower);
-      document.getElementById("battleEnemyPower").textContent = formatNumber(stats.enemyPower);
+      document.getElementById("battlePlayerPower").innerHTML = `<span>⚔️ ${formatNumber(stats.effectiveAttack)}</span><span class="combat-def">🛡️ ${formatNumber(stats.effectiveDefense)}</span>`;
+      document.getElementById("battleEnemyPower").innerHTML = `<span>⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">🛡️ ${formatNumber(stats.enemyDefense)}</span>`;
       document.getElementById("battleEnemyName").textContent = `Tower ชั้น ${stats.stage}`;
-      document.getElementById("battlePowerBreakdown").textContent =
-        `พลังการ์ด ${formatNumber(stats.basePower)} • คอมโบธาตุ +${formationPercent}% • ความสามารถ ${abilityPercent >= 0 ? "+" : ""}${abilityPercent}% • Luck ${luckPercent >= 0 ? "+" : ""}${luckPercent}% • ศัตรู ${enemyAbilityPercent >= 0 ? "+" : ""}${enemyAbilityPercent}%${stats.support ? ` • Support +${formatNumber(stats.supportPower)}` : ""} • ${elementLabel(stats.dominantElement)} vs ${elementLabel(stats.enemyElement)} ${elementSign}${elementPercent}%`;
-      document.getElementById("battleEnemyDetail").textContent =
-        `ศัตรูธาตุ ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}${stats.effectivePower >= stats.enemyPower ? " • พลังทีมได้เปรียบ" : " • ศัตรูยังแข็งแกร่งกว่า"}`;
+      document.getElementById("battlePowerBreakdown").innerHTML =
+        `ATK การ์ด ${formatNumber(stats.baseAttack)} • DEF การ์ด ${formatNumber(stats.baseDefense)} • คอมโบ ATK +${formationPercent}% • สกิล ATK ${abilityPercent >= 0 ? "+" : ""}${abilityPercent}% / DEF ${defenseAbilityPercent >= 0 ? "+" : ""}${defenseAbilityPercent}% • Luck ${luckPercent >= 0 ? "+" : ""}${luckPercent}%${stats.support ? ` • Support ATK +${formatNumber(stats.supportPower)} DEF +${formatNumber(stats.supportDefense)}` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span><span class="combat-tag">คาดการณ์ดาเมจ ${formatNumber(stats.playerPreview.damage)}</span></div>`;
+      document.getElementById("battleEnemyDetail").innerHTML =
+        `ศัตรูธาตุ ${elementLabel(stats.enemyElement)} • ${stats.matchup.text} • สกิลลดศัตรู ATK ${enemyAbilityPercent >= 0 ? "+" : ""}${enemyAbilityPercent}% / DEF ${enemyDefensePercent >= 0 ? "+" : ""}${enemyDefensePercent}%<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.enemyAttackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.enemyShieldHits} ฮิต</span><span class="combat-tag">คาดการณ์ดาเมจ ${formatNumber(stats.enemyPreview.damage)}</span></div>`;
       const battleElementText = document.getElementById("battleElementText");
-      if (battleElementText) battleElementText.textContent = `${elementLabel(stats.dominantElement)} ปะทะ ${elementLabel(stats.enemyElement)}: ${stats.matchup.label} (${elementSign}${elementPercent}% Power)`;
-      document.getElementById("battlePlayerMeter").style.width = `${Math.max(3, stats.effectivePower / maxPower * 100)}%`;
-      document.getElementById("battleEnemyMeter").style.width = `${Math.max(3, stats.enemyPower / maxPower * 100)}%`;
+      if (battleElementText) battleElementText.textContent = `${elementLabel(stats.dominantElement)} ปะทะ ${elementLabel(stats.enemyElement)}: ${stats.matchup.label} (${elementSign}${elementPercent}% ATK)`;
+      document.getElementById("battlePlayerMeter").style.width = `${Math.max(3, stats.effectiveAttack / maxAttack * 100)}%`;
+      document.getElementById("battleEnemyMeter").style.width = `${Math.max(3, stats.enemyAttack / maxAttack * 100)}%`;
       document.getElementById("battleEnergyText").textContent = `${state.battle.energy}/${CONFIG.battleMaxEnergy}`;
       document.getElementById("battleGemReward").textContent = formatNumber(stats.gemReward);
       document.getElementById("battleDustReward").textContent = formatNumber(stats.dustReward);
@@ -9671,7 +9947,7 @@
       const summary = getArenaTeamSummary();
       const abilitySummary = getTeamAbilitySummary(state.arena.team, "arena");
       const comboHTML = summary.activeCombos.length
-        ? summary.activeCombos.map(combo => `<div class="combo-card"><strong>${escapeHTML(combo.name)}</strong><span>Power +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}</span></div>`).join("")
+        ? summary.activeCombos.map(combo => `<div class="combo-card"><strong>${escapeHTML(combo.name)}</strong><span>ATK +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}</span></div>`).join("")
         : `<div class="combo-card"><strong>ยังไม่มีคอมโบ</strong><span>จัดธาตุซ้ำหรือคอมโบธาตุให้ครบเงื่อนไขเพื่อเพิ่มพลัง ARENA</span></div>`;
       const arenaAbilityHTML = abilitySummary.activeAbilities.length
         ? abilitySummary.activeAbilities.map(entry => `<div class="combo-card"><strong>✨ ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong><span>${entry.activeEffects.map(effect => escapeHTML(abilityEffectText(effect))).join(" • ")}</span></div>`).join("")
@@ -9681,11 +9957,11 @@
           <h3>ธาตุทีม ARENA</h3>
           <p>ทีมนี้แยกจากทีมโชว์และทีมไต่หอโดยสมบูรณ์</p>
           <div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div>
-          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ Power +${Math.round(summary.powerRate * 100)}% • ความสามารถ Power ${signedPercent(abilitySummary.teamPowerRate)} / Luck ${signedPercent(abilitySummary.luckRate)} / ศัตรู ${signedPercent(abilitySummary.enemyPowerRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
+          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ ATK +${Math.round(summary.powerRate * 100)}% • ความสามารถ ATK ${signedPercent(abilitySummary.teamPowerRate)} / DEF ${signedPercent(abilitySummary.teamDefenseRate)} / Hit ${getCombatAttackHits(abilitySummary)} / Shield ${getCombatShieldHits(abilitySummary)} / Luck ${signedPercent(abilitySummary.luckRate)} / ศัตรู ATK ${signedPercent(abilitySummary.enemyPowerRate)} DEF ${signedPercent(abilitySummary.enemyDefenseRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
         </div>
         <div><h3>คอมโบที่ทำงาน</h3><div class="combo-list">${comboHTML}</div><h3 class="team-ability-summary">ความสามารถที่ทำงาน</h3><div class="combo-list">${arenaAbilityHTML}</div></div>`;
       const powerText = document.getElementById("arenaTeamPowerText");
-      if (powerText) powerText.textContent = `Power ${formatNumber(getArenaTeamPower())}`;
+      if (powerText) powerText.textContent = `ATK ${formatNumber(getArenaTeamPower())} • DEF ${formatNumber(getArenaTeamDefense())}`;
     }
 
     function renderArena() {
@@ -9706,18 +9982,20 @@
         ? stats.enemyTeam.slice(0, CONFIG.arenaTeamSlots).map((item, index) => arenaSnapshotModelHTML(item, index, true)).join("")
         : `<div class="arena-secret-model">?</div><div class="arena-secret-model">?</div><div class="arena-secret-model">?</div>`;
 
-      const maxPower = Math.max(1, stats.effectivePower, stats.enemyEffectivePower || 0);
+      const maxPower = Math.max(1, stats.effectiveAttack, stats.enemyAttack || 0);
       const matchupPercent = Math.round(stats.matchup.modifier * 100);
       const matchupSign = matchupPercent > 0 ? "+" : "";
-      document.getElementById("arenaPlayerPower").textContent = formatNumber(stats.effectivePower);
-      document.getElementById("arenaPlayerDetail").textContent = `พลังการ์ด ${formatNumber(stats.rawPower)} • คอมโบ +${Math.round(stats.summary.powerRate * 100)}% • ความสามารถ ${signedPercent(stats.abilitySummary.teamPowerRate)} • Luck ${signedPercent(stats.luckRate)} • ศัตรู ${signedPercent(stats.abilitySummary.enemyPowerRate)}${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}`;
+      document.getElementById("arenaPlayerPower").innerHTML = `<span>⚔️ ${formatNumber(stats.effectiveAttack)}</span><span class="combat-def">🛡️ ${formatNumber(stats.effectiveDefense)}</span>`;
+      document.getElementById("arenaPlayerDetail").innerHTML = `ATK ดิบ ${formatNumber(stats.rawPower)} • DEF ดิบ ${formatNumber(stats.rawDefense)} • คอมโบ ATK +${Math.round(stats.summary.powerRate * 100)}% • สกิล ATK ${signedPercent(stats.abilitySummary.teamPowerRate)} / DEF ${signedPercent(stats.abilitySummary.teamDefenseRate)} • Luck ${signedPercent(stats.luckRate)}${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span>${stats.playerPreview ? `<span class="combat-tag">ดาเมจคาดการณ์ ${formatNumber(stats.playerPreview.damage)}</span>` : ""}</div>`;
       document.getElementById("arenaEnemyName").textContent = currentArenaOpponent ? `${currentArenaOpponent.username} (${currentArenaOpponent.type === "player" ? "ผู้เล่น" : "AI"})` : "คู่ต่อสู้ลึกลับ";
-      document.getElementById("arenaEnemyPower").textContent = currentArenaOpponent ? formatNumber(stats.enemyEffectivePower) : "?";
-      document.getElementById("arenaEnemyDetail").textContent = currentArenaOpponent
-        ? `ทีม ARENA • แต้ม ${formatNumber(currentArenaOpponent.points || 0)} • ธาตุหลัก ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}`
+      document.getElementById("arenaEnemyPower").innerHTML = currentArenaOpponent
+        ? `<span>⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">🛡️ ${formatNumber(stats.enemyEffectiveDefense)}</span>`
+        : "?";
+      document.getElementById("arenaEnemyDetail").innerHTML = currentArenaOpponent
+        ? `ทีม ARENA • แต้ม ${formatNumber(currentArenaOpponent.points || 0)} • ธาตุหลัก ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.enemyAttackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.enemyShieldHits} ฮิต</span><span class="combat-tag">ดาเมจคาดการณ์ ${formatNumber(stats.enemyPreview.damage)}</span></div>`
         : "ตัวตนและทีมจะถูกเปิดเผยเมื่อเริ่มต่อสู้";
-      document.getElementById("arenaPlayerMeter").style.width = `${Math.max(3, stats.effectivePower / maxPower * 100)}%`;
-      document.getElementById("arenaEnemyMeter").style.width = currentArenaOpponent ? `${Math.max(3, stats.enemyEffectivePower / maxPower * 100)}%` : "0%";
+      document.getElementById("arenaPlayerMeter").style.width = `${Math.max(3, stats.effectiveAttack / maxPower * 100)}%`;
+      document.getElementById("arenaEnemyMeter").style.width = currentArenaOpponent ? `${Math.max(3, stats.enemyAttack / maxPower * 100)}%` : "0%";
       document.getElementById("arenaSwordText").textContent = `${state.battle.energy}/${CONFIG.battleMaxEnergy}`;
       document.getElementById("arenaPointText").textContent = formatNumber(state.arena.points);
       document.getElementById("arenaRecordText").textContent = `${state.arena.wins} / ${state.arena.losses}`;
@@ -9730,7 +10008,7 @@
         ? arenaLeaderboardEntries.slice(0, 10).map((entry, index) => `
           <div class="leaderboard-row">
             <div class="leaderboard-rank">${index + 1}</div>
-            <div><div class="leaderboard-name">${escapeHTML(String(entry.uid) === String(activeCloudUid) ? `${entry.username || "คุณ"} (คุณ)` : entry.username || "Unknown Player")}</div><div class="leaderboard-meta">Power ${formatNumber(entry.arenaPower || 0)} • W/L ${formatNumber(entry.wins || 0)}/${formatNumber(entry.losses || 0)}</div></div>
+            <div><div class="leaderboard-name">${escapeHTML(String(entry.uid) === String(activeCloudUid) ? `${entry.username || "คุณ"} (คุณ)` : entry.username || "Unknown Player")}</div><div class="leaderboard-meta">ATK ${formatNumber(entry.arenaPower || 0)} • DEF ${formatNumber(entry.arenaDefense || Number(entry.arenaPower || 0) * Number(CONFIG.defenseBaseRatio || .64))} • W/L ${formatNumber(entry.wins || 0)}/${formatNumber(entry.losses || 0)}</div></div>
             <div class="leaderboard-stage">${formatNumber(entry.points || 0)} แต้ม</div>
           </div>`).join("")
         : `<div class="empty-state" style="min-height:100px">ยังไม่มีข้อมูลอันดับสัปดาห์นี้</div>`;
@@ -9802,7 +10080,7 @@
                 <div>
                   <div class="friend-name">${escapeHTML(profile.username || "Unknown Player")}</div>
                   ${selected ? `<div class="support-badge">ACTIVE SUPPORT</div>` : ""}
-                  <div class="friend-meta">Power ${formatNumber(profile.teamPower || 0)} • Collection ${formatNumber(profile.collectionCount || 0)} • Tower ${formatNumber(profile.battleStage || 1)}<br>Support: ${supportCard ? `${escapeHTML(supportCard.rarity || "?")} • ${escapeHTML(supportCard.name || "Card")} (${formatNumber(supportCard.power || 0)})` : "ยังไม่ได้ตั้ง"}<br>${escapeHTML(teamNames)}</div>
+                  <div class="friend-meta">Power ${formatNumber(profile.teamPower || 0)} • Collection ${formatNumber(profile.collectionCount || 0)} • Tower ${formatNumber(profile.battleStage || 1)}<br>Support: ${supportCard ? `${escapeHTML(supportCard.rarity || "?")} • ${escapeHTML(supportCard.name || "Card")} (ATK ${formatNumber(supportCard.power || 0)} / DEF ${formatNumber(supportCard.defense || Number(supportCard.power || 0) * Number(CONFIG.defenseBaseRatio || .64))})` : "ยังไม่ได้ตั้ง"}<br>${escapeHTML(teamNames)}</div>
                 </div>
               </div>
               <div class="friend-actions">
@@ -9972,7 +10250,7 @@
 
             <div class="detail-tabbar" role="tablist" aria-label="หมวดรายละเอียดการ์ด">
               <button type="button" class="detail-tab ${statsActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="stats" role="tab" aria-selected="${statsActive}">
-                <span>📊</span><strong>สแตตและพัฒนา</strong><small>เลเวล พลัง รายได้ อเวก</small>
+                <span>📊</span><strong>สแตตและพัฒนา</strong><small>เลเวล ATK DEF รายได้ อเวก</small>
               </button>
               <button type="button" class="detail-tab ${!statsActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="ability" role="tab" aria-selected="${!statsActive}">
                 <span>✨</span><strong>ความสามารถ</strong><small>${abilityCount ? `${abilityCount} ความสามารถ` : "ยังไม่ได้กำหนด"}</small>
@@ -9984,7 +10262,8 @@
               <div class="stat-grid">
                 <div class="stat"><span>Level</span><strong>${level}/${maxLevel}</strong></div>
                 <div class="stat"><span>Awaken</span><strong>${rank}/${maxRank}</strong></div>
-                <div class="stat stat-power"><span>Power</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+                <div class="stat stat-power"><span>Attack / ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
+                <div class="stat stat-defense"><span>Defense / DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
                 <div class="stat stat-income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
                 <div class="stat stat-element"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
               </div>
