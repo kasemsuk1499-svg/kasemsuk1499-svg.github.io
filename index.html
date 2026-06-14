@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-13-all-in-light-awaken-sc-video-cutscene-centered-v17">
+  <meta name="gacha-app-build" content="2026-06-14-team-picker-detail-membership-gacha-ability-v18">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -897,6 +897,77 @@
     .team-picker-card.selected { box-shadow: 0 0 0 3px var(--green), 0 14px 30px rgba(0,0,0,.42); }
     .team-picker-card.in-team:not(.selected) { box-shadow: 0 0 0 2px var(--gold), 0 12px 26px rgba(0,0,0,.34); }
     .team-picker-note { margin: 10px 0 0; color: var(--muted); font-size: .72rem; line-height: 1.5; }
+
+    /* เพิ่มโดยอลิซ: การ์ดในหน้าต่างเลือกทีม แยกปุ่ม “ดูรายละเอียด” และ “เลือกลงช่อง” */
+    .team-picker-entry {
+      position: relative;
+      min-width: 0;
+      display: grid;
+      align-content: start;
+      gap: 7px;
+      padding: 5px;
+      border: 1px solid transparent;
+      border-radius: 21px;
+      background: rgba(3,5,12,.22);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .team-picker-entry:hover { transform: translateY(-3px); }
+    .team-picker-entry.current-slot {
+      border-color: rgba(86,227,159,.76);
+      box-shadow: 0 0 0 2px rgba(86,227,159,.22), 0 15px 34px rgba(0,0,0,.36);
+    }
+    .team-picker-entry.in-showcase:not(.current-slot) {
+      border-color: rgba(92,232,255,.58);
+      box-shadow: 0 0 22px rgba(92,232,255,.12);
+    }
+    .team-picker-entry.in-arena:not(.current-slot) {
+      border-color: rgba(251,113,133,.58);
+      box-shadow: 0 0 22px rgba(251,113,133,.12);
+    }
+    .team-picker-entry.in-both:not(.current-slot) {
+      border-color: rgba(255,209,102,.72);
+      box-shadow: 0 0 0 2px rgba(92,232,255,.10), 0 0 26px rgba(255,209,102,.14);
+    }
+    .team-picker-entry .game-card { width: 100%; }
+    .team-picker-memberships {
+      position: absolute;
+      z-index: 8;
+      top: 51px;
+      right: 10px;
+      left: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 4px;
+      pointer-events: none;
+    }
+    .team-membership-badge {
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 999px;
+      padding: 4px 7px;
+      color: #071019;
+      font-size: .56rem;
+      font-weight: 1000;
+      line-height: 1;
+      box-shadow: 0 4px 12px rgba(0,0,0,.28);
+      backdrop-filter: blur(8px);
+    }
+    .team-membership-badge.showcase { background: linear-gradient(135deg, var(--cyan), #bfdbfe); }
+    .team-membership-badge.arena { color: #fff; background: linear-gradient(135deg, #fb7185, #be123c); }
+    .team-membership-badge.current { background: linear-gradient(135deg, var(--green), #d9f99d); }
+    .team-picker-actions { display: grid; grid-template-columns: .86fr 1.14fr; gap: 6px; }
+    .team-picker-actions .btn { min-height: 38px; padding: 7px 8px; font-size: .68rem; }
+    .team-picker-actions .assign-current { color: #071019; background: linear-gradient(135deg, var(--green), var(--cyan)); }
+    .team-picker-actions .assign-showcase { border-color: rgba(92,232,255,.32); }
+    .team-picker-actions .assign-arena { border-color: rgba(251,113,133,.34); }
+
+    .gacha-rate-pill {
+      border-color: rgba(244,114,182,.34) !important;
+      color: #fce7f3 !important;
+      background: linear-gradient(135deg, rgba(126,34,206,.30), rgba(190,24,93,.22)) !important;
+      box-shadow: 0 0 20px rgba(244,114,182,.12);
+    }
 
     .income-panel {
       display: grid;
@@ -2805,6 +2876,8 @@
       .team-picker-tools { grid-template-columns: 1fr 1fr; }
       .team-picker-tools #teamPickerSearch { grid-column: 1 / -1; }
       .team-picker-tools .sort-direction-switch { grid-column: 1 / -1; }
+      .team-picker-actions { grid-template-columns: 1fr; }
+      .team-picker-memberships { top: 47px; }
       .income-panel { grid-template-columns: repeat(2, 1fr); }
       .income-panel .btn { grid-column: 1 / -1; }
       .element-panel { grid-template-columns: 1fr; }
@@ -3283,7 +3356,7 @@
         </div>
       </div>
       <div class="card-grid team-picker-grid" id="teamPickerGrid"></div>
-      <p class="team-picker-note">แตะการ์ดเพื่อใส่ลงช่องที่เลือก • หากการ์ดนั้นอยู่ช่องอื่น ระบบจะสลับตำแหน่งแทนการใส่ซ้ำ</p>
+      <p class="team-picker-note">กด “ดูรายละเอียด” เพื่อเช็กสกิลก่อน • กด “เลือกลงช่อง” เมื่อต้องการจัดทีม • สีฟ้า = ทีมโชว์, สีแดง = ARENA, สีทอง = อยู่ทั้งสองทีม</p>
     </div>
   </div>
 
@@ -3856,6 +3929,7 @@
            { "type": "teamIncomeRate", "value": 0.15 },
            { "type": "enemyPowerRate", "value": -0.10 },
            { "type": "luckRate", "value": 0.12 },
+           { "type": "gachaRarityRate", "value": 0.15, "targetRarities": ["UR", "LR", "EX", "SC"] },
            { "type": "selfPowerRate", "value": 0.25 },
            { "type": "rarityPowerRate", "value": 0.18, "targetRarities": ["EX", "SC"] },
            { "type": "rarityIncomeRate", "value": 0.12, "targetRarities": ["LR"] },
@@ -3870,8 +3944,9 @@
        - value 0.20 = +20%, value -0.10 = -10%
        - enemyPowerRate ใช้ค่าติดลบเพื่อลดพลังฝ่ายตรงข้าม
        - luckRate เพิ่มโอกาสสุ่มค่าต่อสู้ฝั่งเรา ไม่แก้เรทกาชา
+       - gachaRarityRate เพิ่ม “น้ำหนักสุ่ม” ของระดับที่กำหนด เช่น 0.15 = น้ำหนักระดับนั้น +15% แล้วระบบคำนวณเปอร์เซ็นต์จริงใหม่
        - effect แต่ละรายการใส่ condition ของตัวเองเพิ่มได้
-       - activeIn: team = ทีมโชว์/รายได้, tower = ไต่หอ, arena = อารีน่า
+       - activeIn: team/showcase = ทีมโชว์/รายได้/โบนัสกาชาจากทีมโชว์, tower/battle = ไต่หอ, arena/pvp = อารีน่า/โบนัสกาชาจากทีมอารีน่า
        - ไม่มี ability ก็เล่นได้ตามปกติ ไม่ต้องแก้ข้อมูลการ์ดเก่า
        ===================================================================== */
     const CARD_ABILITY_EFFECT_TYPES = Object.freeze({
@@ -3879,6 +3954,7 @@
       TEAM_INCOME_RATE: "teamIncomeRate",
       ENEMY_POWER_RATE: "enemyPowerRate",
       LUCK_RATE: "luckRate",
+      GACHA_RARITY_RATE: "gachaRarityRate",
       SELF_POWER_RATE: "selfPowerRate",
       SELF_INCOME_RATE: "selfIncomeRate",
       RARITY_POWER_RATE: "rarityPowerRate",
@@ -4089,15 +4165,25 @@
       "revealKicker": "FORTUNE ANSWERS",
       "revealTitle": "SC · MAMON"
     },
-    "ability": {
-      "name": "Fortune of the Deep",
-      "description": "เมื่ออยู่ในทีม เพิ่มค่าโชคในการต่อสู้ และหากทีมมีธาตุไม่ซ้ำอย่างน้อย 4 ธาตุจะลดพลังฝ่ายตรงข้ามเพิ่มเติม",
-      "activeIn": ["tower", "arena"],
-      "effects": [
-        { "type": "luckRate", "value": 0.25 },
-        { "type": "enemyPowerRate", "value": -0.08, "condition": { "minUniqueElements": 4 } }
-      ]
-    }
+    "abilities": [
+      {
+        "name": "Fortune of the Deep",
+        "description": "สกิลต่อสู้ทำงานเฉพาะไต่หอและ ARENA: เพิ่มค่าโชค และเมื่อมีธาตุไม่ซ้ำอย่างน้อย 4 ธาตุจะลดพลังฝ่ายตรงข้าม",
+        "activeIn": ["tower", "arena"],
+        "effects": [
+          { "type": "luckRate", "value": 0.25 },
+          { "type": "enemyPowerRate", "value": -0.08, "condition": { "minUniqueElements": 4 } }
+        ]
+      },
+      {
+        "name": "Abyssal Gacha Blessing",
+        "description": "ทำงานเฉพาะเมื่อ MAMON อยู่ในทีมโชว์ เพิ่มน้ำหนักสุ่มระดับ UR, LR, EX และ SC ขึ้น 15% โดยไม่เปลี่ยนระบบการันตี",
+        "activeIn": ["team"],
+        "effects": [
+          { "type": "gachaRarityRate", "value": 0.15, "targetRarities": ["UR", "LR", "EX", "SC"] }
+        ]
+      }
+    ]
   },
   {
     "id": 1041,
@@ -6427,8 +6513,16 @@
       return source.filter(item => item && typeof item === "object");
     }
 
+    function normalizeAbilityMode(value) {
+      const mode = String(value || "").trim().toLowerCase();
+      if (["team", "showcase", "show", "display"].includes(mode)) return "team";
+      if (["tower", "battle", "pve"].includes(mode)) return "tower";
+      if (["arena", "pvp"].includes(mode)) return "arena";
+      return mode;
+    }
+
     function getAbilityModes(ability) {
-      const modes = abilityArray(ability && ability.activeIn).map(item => String(item || "").trim().toLowerCase()).filter(Boolean);
+      const modes = [...new Set(abilityArray(ability && ability.activeIn).map(normalizeAbilityMode).filter(mode => CARD_ABILITY_MODES.includes(mode)))];
       return modes.length ? modes : CARD_ABILITY_MODES.slice();
     }
 
@@ -6458,7 +6552,7 @@
       const rule = condition && typeof condition === "object" ? condition : {};
       if (!context || !sourceCard || !context.cardIdSet.has(String(sourceCard.id))) return false;
 
-      const allowedModes = abilityArray(rule.mode || rule.modes).map(item => String(item || "").toLowerCase()).filter(Boolean);
+      const allowedModes = abilityArray(rule.mode || rule.modes).map(normalizeAbilityMode).filter(Boolean);
       if (allowedModes.length && !allowedModes.includes(context.mode)) return false;
       if (Number(rule.minTeamSize || 0) > context.teamSize) return false;
       if (Number(rule.maxTeamSize || Infinity) < context.teamSize) return false;
@@ -6512,6 +6606,7 @@
         teamIncomeRate: 0,
         enemyPowerRate: 0,
         luckRate: 0,
+        gachaRarityRates: {},
         teamPowerFlat: 0,
         teamIncomeFlat: 0,
         selfPowerRates: {},
@@ -6546,6 +6641,9 @@
               case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_RATE: summary.teamIncomeRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE: summary.enemyPowerRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE: summary.luckRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE:
+                addAbilityMapRate(summary.gachaRarityRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
+                break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT: summary.teamPowerFlat += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT: summary.teamIncomeFlat += value; break;
               case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
@@ -6588,7 +6686,63 @@
       summary.teamIncomeRate = Math.max(-0.90, summary.teamIncomeRate);
       summary.enemyPowerRate = Math.max(-0.90, summary.enemyPowerRate);
       summary.luckRate = Math.max(-0.75, Math.min(2, summary.luckRate));
+      Object.keys(summary.gachaRarityRates).forEach(rarity => {
+        summary.gachaRarityRates[rarity] = Math.max(-0.90, Math.min(5, Number(summary.gachaRarityRates[rarity]) || 0));
+      });
       return summary;
+    }
+
+    // เพิ่มโดยอลิซ: รวมโบนัสเรทกาชาจากทีมโชว์และทีม ARENA ตาม activeIn โดยไม่นับสกิลเดิมซ้ำสองครั้ง
+    function getGachaAbilitySummary() {
+      const summary = { rarityRateBonuses: {}, activeEffects: [] };
+      const seenEffects = new Set();
+      const scopes = [
+        { mode: "team", teamIds: state.team },
+        { mode: "arena", teamIds: state.arena && Array.isArray(state.arena.team) ? state.arena.team : [] }
+      ];
+
+      scopes.forEach(scope => {
+        const context = buildAbilityContext(scope.teamIds, scope.mode);
+        context.cards.forEach(sourceCard => {
+          getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
+            const modes = getAbilityModes(ability);
+            if (!modes.includes(scope.mode) || !isAbilityConditionMet(ability.condition || {}, context, sourceCard)) return;
+            abilityArray(ability.effects).forEach((effect, effectIndex) => {
+              if (!effect || effect.type !== CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE) return;
+              if (!isAbilityConditionMet(effect.condition || {}, context, sourceCard)) return;
+              const uniqueKey = `${sourceCard.id}:${abilityIndex}:${effectIndex}`;
+              if (seenEffects.has(uniqueKey)) return;
+              seenEffects.add(uniqueKey);
+              const value = Math.max(-0.90, Math.min(5, Number(effect.value) || 0));
+              const rarities = normalizeAbilityRarities(effect.targetRarities || effect.rarities);
+              addAbilityMapRate(summary.rarityRateBonuses, rarities, value);
+              summary.activeEffects.push({ sourceCard, ability, effect: { ...effect, value }, mode: scope.mode });
+            });
+          });
+        });
+      });
+
+      Object.keys(summary.rarityRateBonuses).forEach(rarity => {
+        summary.rarityRateBonuses[rarity] = Math.max(-0.90, Math.min(5, Number(summary.rarityRateBonuses[rarity]) || 0));
+      });
+      return summary;
+    }
+
+    function getEffectiveBannerRates(banner = getActiveBanner()) {
+      const baseRates = banner && banner.rateOverrides && typeof banner.rateOverrides === "object" ? banner.rateOverrides : {};
+      const gachaSummary = getGachaAbilitySummary();
+      const weights = {};
+      Object.entries(baseRates).forEach(([rarity, rate]) => {
+        const base = Math.max(0, Number(rate) || 0);
+        const bonus = Number(gachaSummary.rarityRateBonuses[rarity] || 0);
+        weights[rarity] = Math.max(0, base * Math.max(0.10, 1 + bonus));
+      });
+      const total = Object.values(weights).reduce((sum, value) => sum + Number(value || 0), 0);
+      const percentages = {};
+      Object.entries(weights).forEach(([rarity, weight]) => {
+        percentages[rarity] = total > 0 ? Number(weight) / total * 100 : 0;
+      });
+      return { baseRates, weights, percentages, gachaSummary };
     }
 
     function getAbilityAdjustedCardPower(card, abilitySummary) {
@@ -6614,6 +6768,21 @@
       return `${percent > 0 ? "+" : ""}${percent}%`;
     }
 
+    function abilityModeLabel(mode) {
+      return ({ team: "ทีมโชว์", tower: "ไต่หอ", arena: "ARENA" })[String(mode || "").toLowerCase()] || String(mode || "");
+    }
+
+    function formatRatePercent(value) {
+      const number = Math.max(0, Number(value) || 0);
+      const decimals = number < 0.1 ? 4 : number < 1 ? 3 : 2;
+      return number.toFixed(decimals).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function gachaBonusSummaryText(summary) {
+      const entries = Object.entries(summary && summary.rarityRateBonuses || {}).filter(([, value]) => Math.abs(Number(value) || 0) > 0.000001);
+      return entries.length ? entries.map(([rarity, value]) => `${rarity} ${signedPercent(value)}`).join(" / ") : "ไม่มีโบนัสเรทกาชา";
+    }
+
     function abilityEffectText(effect) {
       const value = Number(effect && effect.value || 0);
       const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).join("/") || "ที่กำหนด";
@@ -6623,6 +6792,7 @@
         teamIncomeRate: `รายได้ฝ่ายเรา ${signedPercent(value)}`,
         enemyPowerRate: `พลังฝ่ายตรงข้าม ${signedPercent(value)}`,
         luckRate: `ค่าโชค ${signedPercent(value)}`,
+        gachaRarityRate: `น้ำหนักกาชาระดับ ${rarityText} ${signedPercent(value)}`,
         selfPowerRate: `พลังของการ์ดนี้ ${signedPercent(value)}`,
         selfIncomeRate: `รายได้ของการ์ดนี้ ${signedPercent(value)}`,
         rarityPowerRate: `พลังระดับ ${rarityText} ${signedPercent(value)}`,
@@ -6675,12 +6845,15 @@
       const arenaContext = buildAbilityContext(state.arena && Array.isArray(state.arena.team) ? state.arena.team : [], "arena");
       const items = abilities.map(ability => {
         const modes = getAbilityModes(ability);
-        const teamActive = modes.includes("team") && isAbilityConditionMet(ability.condition || {}, teamContext, card);
-        const towerActive = modes.includes("tower") && isAbilityConditionMet(ability.condition || {}, towerContext, card);
-        const arenaActive = modes.includes("arena") && isAbilityConditionMet(ability.condition || {}, arenaContext, card);
-        const statusText = teamActive ? "ทำงานในทีมโชว์" : towerActive ? "ทำงานในไต่หอ" : arenaActive ? "ทำงานใน ARENA" : "ยังไม่ทำงาน";
-        const active = teamActive || towerActive || arenaActive;
         const effects = abilityArray(ability.effects).filter(effect => effect && typeof effect === "object");
+        const modeContexts = { team: teamContext, tower: towerContext, arena: arenaContext };
+        const activeModes = modes.filter(mode => {
+          const context = modeContexts[mode];
+          if (!context || !isAbilityConditionMet(ability.condition || {}, context, card)) return false;
+          return !effects.length || effects.some(effect => isAbilityConditionMet(effect.condition || {}, context, card));
+        });
+        const statusText = activeModes.length ? `ทำงาน: ${activeModes.map(abilityModeLabel).join(" / ")}` : "ยังไม่ทำงาน";
+        const active = activeModes.length > 0;
         const effectHTML = effects.length
           ? effects.map(effect => `<span class="card-ability-effect ${Number(effect.value || 0) < 0 ? "negative" : ""}">${escapeHTML(abilityEffectText(effect))}</span>`).join("")
           : `<span class="card-ability-effect">ยังไม่มี effect</span>`;
@@ -6696,7 +6869,7 @@
             </div>
             <p class="card-ability-description">${escapeHTML(ability.description || "คุณสามารถใส่คำอธิบายความสามารถของการ์ดใบนี้ได้เอง")}</p>
             <div class="card-ability-effects">${effectHTML}</div>
-            <p class="card-ability-condition">เงื่อนไข: ${escapeHTML(conditionText)} • โหมด: ${escapeHTML(modes.join(" / "))}</p>
+            <p class="card-ability-condition">เงื่อนไข: ${escapeHTML(conditionText)} • ทำงานเฉพาะ: ${escapeHTML(modes.map(abilityModeLabel).join(" / "))}</p>
           </div>`;
       }).join("");
 
@@ -7868,6 +8041,7 @@
     function pullCards(times) {
       const banner = getActiveBanner();
       const guarantee = getBannerGuarantee(banner);
+      const effectiveRates = getEffectiveBannerRates(banner);
       const results = [];
 
       for (let index = 0; index < times; index += 1) {
@@ -7875,13 +8049,13 @@
         const guaranteed = guarantee.enabled !== false && Number(guarantee.every) > 0 && pity >= Number(guarantee.every);
         let rarity = guaranteed
           ? weightedKey(guarantee.rarityRates || {}, Object.keys(guarantee.rarityRates || {})[0] || "UR")
-          : weightedKey(banner.rateOverrides || {}, "N");
+          : weightedKey(effectiveRates.weights, "N");
 
         if (times === 10 && index === 9) {
           const hasSRPlus = results.some(result => getRarity(result.card).order >= RARITIES.SR.order);
           if (!hasSRPlus && !guaranteed) {
             const betterRates = {};
-            Object.entries(banner.rateOverrides || {}).forEach(([key, value]) => {
+            Object.entries(effectiveRates.weights).forEach(([key, value]) => {
               if ((RARITIES[key] || RARITIES.N).order >= RARITIES.SR.order) betterRates[key] = value;
             });
             rarity = weightedKey(betterRates, "SR");
@@ -8035,18 +8209,19 @@
 
     function pullCardsWithTicket(times, forcedRarity = "") {
       const banner = getActiveBanner();
+      const effectiveRates = getEffectiveBannerRates(banner);
       const count = Math.max(1, Math.floor(Number(times) || 1));
       const results = [];
       for (let index = 0; index < count; index += 1) {
         let rarity = forcedRarity && RARITIES[forcedRarity]
           ? forcedRarity
-          : weightedKey(banner.rateOverrides || {}, "N");
+          : weightedKey(effectiveRates.weights, "N");
 
         if (!forcedRarity && count === 10 && index === 9) {
           const hasSRPlus = results.some(result => getRarity(result.card).order >= RARITIES.SR.order);
           if (!hasSRPlus) {
             const betterRates = {};
-            Object.entries(banner.rateOverrides || {}).forEach(([key, value]) => {
+            Object.entries(effectiveRates.weights).forEach(([key, value]) => {
               if ((RARITIES[key] || RARITIES.N).order >= RARITIES.SR.order) betterRates[key] = value;
             });
             rarity = weightedKey(betterRates, "SR");
@@ -8625,12 +8800,16 @@
       if (fiftyCost) fiftyCost.textContent = `${formatNumber(getPullCost(50))} Gems`;
       if (hundredCost) hundredCost.textContent = `${formatNumber(getPullCost(100))} Gems`;
       renderGuaranteeStatus();
-      document.getElementById("ratePills").innerHTML = Object.entries(banner.rateOverrides || {})
+      const effectiveRateInfo = getEffectiveBannerRates(banner);
+      const ratePills = Object.entries(effectiveRateInfo.percentages)
         .filter(([, rate]) => Number(rate) > 0 && Number(rate) < 10)
         .sort((a, b) => ((RARITIES[b[0]] && RARITIES[b[0]].order) || 0) - ((RARITIES[a[0]] && RARITIES[a[0]].order) || 0))
         .slice(0, 6)
-        .map(([rarity, rate]) => `<span class="pill" style="color:${(RARITIES[rarity] && RARITIES[rarity].color) || "white"}">${escapeHTML((RARITIES[rarity] && RARITIES[rarity].label) || rarity)} ${Number(rate)}%</span>`)
-        .join("");
+        .map(([rarity, rate]) => `<span class="pill" style="color:${(RARITIES[rarity] && RARITIES[rarity].color) || "white"}">${escapeHTML((RARITIES[rarity] && RARITIES[rarity].label) || rarity)} ${formatRatePercent(rate)}%</span>`);
+      if (effectiveRateInfo.gachaSummary.activeEffects.length) {
+        ratePills.unshift(`<span class="pill gacha-rate-pill">🎰 โบนัสทีม: ${escapeHTML(gachaBonusSummaryText(effectiveRateInfo.gachaSummary))}</span>`);
+      }
+      document.getElementById("ratePills").innerHTML = ratePills.join("");
 
       const select = document.getElementById("bannerSelect");
       select.innerHTML = BANNERS.map(item => `<option value="${escapeHTML(item.id)}">${escapeHTML(item.name)}</option>`).join("");
@@ -8901,7 +9080,7 @@
       const title = document.getElementById("teamPickerTitle");
       const subtitle = document.getElementById("teamPickerSubtitle");
       if (title) title.textContent = `${teamPickerContext.mode === "arena" ? "ทีม ARENA" : "ทีมโชว์/ไต่หอ"} • ช่อง ${teamPickerContext.slotIndex + 1}`;
-      if (subtitle) subtitle.textContent = "เลือกการ์ดที่ครอบครองอยู่ ระบบจะสลับตำแหน่งให้อัตโนมัติหากการ์ดอยู่ในทีมแล้ว";
+      if (subtitle) subtitle.textContent = "ดูรายละเอียดสกิลก่อนเลือกได้ และมีป้ายบอกชัดเจนว่าการ์ดอยู่ทีมโชว์หรือทีม ARENA ช่องใด";
       renderTeamPicker();
       document.getElementById("teamPickerModal").classList.remove("hidden");
       document.body.style.overflow = "hidden";
@@ -8910,6 +9089,53 @@
     function closeTeamPicker() {
       document.getElementById("teamPickerModal").classList.add("hidden");
       document.body.style.overflow = "";
+    }
+
+    function getCardTeamMembership(cardId) {
+      const id = String(cardId || "");
+      const showcaseIndex = state.team.indexOf(id);
+      const arenaTeam = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
+      const arenaIndex = arenaTeam.indexOf(id);
+      return {
+        showcaseIndex,
+        arenaIndex,
+        inShowcase: showcaseIndex >= 0,
+        inArena: arenaIndex >= 0
+      };
+    }
+
+    function teamPickerCardHTML(card, currentId) {
+      const id = String(card.id);
+      const membership = getCardTeamMembership(id);
+      const selected = id === String(currentId || "");
+      const inCurrentTeam = getTeamArrayByMode(teamPickerContext.mode).includes(id);
+      const membershipClass = membership.inShowcase && membership.inArena
+        ? "in-both"
+        : membership.inShowcase ? "in-showcase" : membership.inArena ? "in-arena" : "";
+      const badges = [
+        membership.inShowcase ? `<span class="team-membership-badge showcase">ทีมโชว์ #${membership.showcaseIndex + 1}</span>` : "",
+        membership.inArena ? `<span class="team-membership-badge arena">ARENA #${membership.arenaIndex + 1}</span>` : "",
+        selected ? `<span class="team-membership-badge current">ช่องที่กำลังแก้</span>` : ""
+      ].filter(Boolean).join("");
+      const selectLabel = selected
+        ? "อยู่ในช่องนี้แล้ว"
+        : inCurrentTeam
+          ? `สลับมาช่อง ${teamPickerContext.slotIndex + 1}`
+          : `เลือกลงช่อง ${teamPickerContext.slotIndex + 1}`;
+      const resultLabel = selected ? "ช่องนี้" : membership.inShowcase && membership.inArena ? "2 ทีม" : membership.inShowcase ? "ทีมโชว์" : membership.inArena ? "ARENA" : `เลือก #${teamPickerContext.slotIndex + 1}`;
+      return `
+        <div class="team-picker-entry ${membershipClass} ${selected ? "current-slot" : ""}">
+          ${cardHTML(card, {
+            displayOnly: true,
+            extraClass: `team-picker-card${selected ? " selected" : ""}${inCurrentTeam ? " in-team" : ""}`,
+            resultLabel
+          })}
+          ${badges ? `<div class="team-picker-memberships">${badges}</div>` : ""}
+          <div class="team-picker-actions">
+            <button type="button" class="btn" data-action="open-picker-card-detail" data-card-id="${escapeHTML(id)}">🔎 ดูรายละเอียด</button>
+            <button type="button" class="btn ${selected ? "assign-current" : teamPickerContext.mode === "arena" ? "assign-arena" : "assign-showcase"}" data-action="assign-team-slot" data-card-id="${escapeHTML(id)}">${escapeHTML(selectLabel)}</button>
+          </div>
+        </div>`;
     }
 
     function renderTeamPicker() {
@@ -8932,16 +9158,9 @@
         if (rarity && card.rarity !== rarity) return false;
         return !query || `${card.name} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query);
       }), teamPickerSortMode, teamPickerSortDirection, false);
-      grid.innerHTML = cards.length ? cards.map(card => {
-        const id = String(card.id);
-        const selected = id === currentId;
-        const inTeam = currentTeam.includes(id);
-        return cardHTML(card, {
-          action: "assign-team-slot",
-          extraClass: `team-picker-card${selected ? " selected" : ""}${inTeam ? " in-team" : ""}`,
-          resultLabel: selected ? "ช่องนี้" : (inTeam ? "อยู่ในทีม" : `เลือกช่อง ${teamPickerContext.slotIndex + 1}`)
-        });
-      }).join("") : `<div class="empty-state">ไม่พบการ์ดที่ครอบครองตรงกับตัวกรอง</div>`;
+      grid.innerHTML = cards.length
+        ? cards.map(card => teamPickerCardHTML(card, currentId)).join("")
+        : `<div class="empty-state">ไม่พบการ์ดที่ครอบครองตรงกับตัวกรอง</div>`;
       renderSortDirectionButtons();
     }
 
@@ -9026,7 +9245,7 @@
       panel.innerHTML = `
         <div>
           <h3>ธาตุหลักทีม: ${escapeHTML(elementLabel(summary.dominantElement))}</h3>
-          <p>${escapeHTML(summary.dominantReason)} • คอมโบธาตุ: Power +${powerPercent}% / Income +${incomePercent}% • ความสามารถ: Power ${signedPercent(abilitySummary.teamPowerRate)} / Income ${signedPercent(abilitySummary.teamIncomeRate)} / Luck ${signedPercent(abilitySummary.luckRate)}</p>
+          <p>${escapeHTML(summary.dominantReason)} • คอมโบธาตุ: Power +${powerPercent}% / Income +${incomePercent}% • ความสามารถ: Power ${signedPercent(abilitySummary.teamPowerRate)} / Income ${signedPercent(abilitySummary.teamIncomeRate)} / Luck ${signedPercent(abilitySummary.luckRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
           <div class="element-chip-row">${activeElementChips}</div>
           <p class="element-mini-note">รองรับหลายธาตุ เช่น ["ไฟ", "สายฟ้า"] หรือ "ไฟ, สายฟ้า" • รายชื่อที่อ่านได้: ${THAI_ELEMENTS.map(element => `${getElementEmoji(element)} ${element}`).map(escapeHTML).join(" / ")}</p>
         </div>
@@ -9137,7 +9356,7 @@
           <h3>ธาตุทีม ARENA</h3>
           <p>ทีมนี้แยกจากทีมโชว์และทีมไต่หอโดยสมบูรณ์</p>
           <div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div>
-          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ Power +${Math.round(summary.powerRate * 100)}% • ความสามารถ Power ${signedPercent(abilitySummary.teamPowerRate)} / Luck ${signedPercent(abilitySummary.luckRate)} / ศัตรู ${signedPercent(abilitySummary.enemyPowerRate)}</p>
+          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ Power +${Math.round(summary.powerRate * 100)}% • ความสามารถ Power ${signedPercent(abilitySummary.teamPowerRate)} / Luck ${signedPercent(abilitySummary.luckRate)} / ศัตรู ${signedPercent(abilitySummary.enemyPowerRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
         </div>
         <div><h3>คอมโบที่ทำงาน</h3><div class="combo-list">${comboHTML}</div><h3 class="team-ability-summary">ความสามารถที่ทำงาน</h3><div class="combo-list">${arenaAbilityHTML}</div></div>`;
       const powerText = document.getElementById("arenaTeamPowerText");
@@ -9413,6 +9632,7 @@
             <span class="pill" style="${rarityStyleVars(rarity)};color:${getRarityTheme(rarity).main};border-color:color-mix(in srgb, ${getRarityTheme(rarity).main} 44%, rgba(255,255,255,.14))">${escapeHTML(rarity.label)} / ${escapeHTML(card.rarity)}</span>
             <h2>${escapeHTML(card.name)}</h2>
             <p class="detail-sub">${escapeHTML(elementDetail)} ${owned ? `• มี ${owned.count} ใบ` : "• ยังไม่ได้ครอบครอง"}</p>
+            ${owned ? `<div class="element-chip-row" style="margin:0 0 12px">${inTeam ? `<span class="team-membership-badge showcase">ทีมโชว์ #${state.team.indexOf(String(card.id)) + 1}</span>` : ""}${inArenaTeam ? `<span class="team-membership-badge arena">ARENA #${state.arena.team.indexOf(String(card.id)) + 1}</span>` : ""}${!inTeam && !inArenaTeam ? `<span class="pill">ยังไม่ได้จัดลงทีม</span>` : ""}</div>` : ""}
             ${awakenDetailStatusHTML(card)}
             <div class="stat-grid">
               <div class="stat"><span>Level</span><strong>${level}/${maxLevel}</strong></div>
@@ -9457,6 +9677,8 @@
       if (returnToReveal && activeRevealResults.length) {
         returnToReveal = false;
         document.getElementById("revealScreen").classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      } else if (!document.getElementById("teamPickerModal").classList.contains("hidden")) {
         document.body.style.overflow = "hidden";
       } else {
         document.body.style.overflow = "";
@@ -10030,6 +10252,7 @@
       if (action === "open-update-rewards") openUpdateNotice(true, "rewards");
       if (action === "claim-income") claimIncome();
       if (action === "open-card") openCardModal(cardId);
+      if (action === "open-picker-card-detail") openCardModal(cardId);
       if (action === "open-team-picker") openTeamPicker(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
       if (action === "close-team-picker") closeTeamPicker();
       if (action === "assign-team-slot") assignCardToTeamSlot(cardId);
