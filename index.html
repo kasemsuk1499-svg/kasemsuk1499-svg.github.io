@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-14-turn-defense-combat-v23">
+  <meta name="gacha-app-build" content="2026-06-14-advanced-element-conditions-v24">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -4264,6 +4264,9 @@
          "condition": {
            "requiredElements": ["ไฟ", "สายฟ้า"],
            "minElementCount": { "ไฟ": 2 },
+           "minAnyElementCount": { "ดิน": 5, "เหล็ก": 5 },
+           "minCombinedElementCount": { "elements": ["ดิน", "เหล็ก"], "count": 5 },
+           "teamElementsOnly": ["ดิน", "เหล็ก"],
            "requiredRarities": ["EX"],
            "minRarityCount": { "LR": 2 },
            "minUniqueElements": 3,
@@ -4309,6 +4312,9 @@
        - luckRate เพิ่มโอกาสสุ่มค่าต่อสู้ฝั่งเรา ไม่แก้เรทกาชา
        - gachaRarityRate เพิ่ม “น้ำหนักสุ่ม” ของระดับที่กำหนด เช่น 0.15 = น้ำหนักระดับนั้น +15% แล้วระบบคำนวณเปอร์เซ็นต์จริงใหม่
        - effect แต่ละรายการใส่ condition ของตัวเองเพิ่มได้
+       - minAnyElementCount: { "ดิน": 5, "เหล็ก": 5 } = ดินครบ 5 ใบ หรือเหล็กครบ 5 ใบ อย่างใดอย่างหนึ่ง
+       - minCombinedElementCount: { "elements": ["ดิน", "เหล็ก"], "count": 5 } = การ์ดที่มีดินหรือเหล็กรวมกันอย่างน้อย 5 ใบ (การ์ดหลายธาตุนับใบละ 1)
+       - teamElementsOnly: ["ดิน", "เหล็ก"] = ทุกธาตุบนการ์ดทุกใบในทีมต้องอยู่ในรายการนี้เท่านั้น; มักใช้ร่วมกับ minTeamSize: 5
        - activeIn: team/showcase = ทีมโชว์/รายได้/โบนัสกาชาจากทีมโชว์, tower/battle = ไต่หอ, arena/pvp = อารีน่า/โบนัสกาชาจากทีมอารีน่า
        - ไม่มี ability ก็เล่นได้ตามปกติ ไม่ต้องแก้ข้อมูลการ์ดเก่า
        ===================================================================== */
@@ -4370,6 +4376,16 @@
        - path เช่น "assets/cutscenes/999.mp4" หรือ URL เต็ม จะใช้ตามนั้นโดยตรง
        ===================================================================== */
 
+    /* ตัวอย่างเงื่อนไขใหม่:
+       1) ดินครบ 5 ใบ หรือเหล็กครบ 5 ใบ
+          "condition": { "minAnyElementCount": { "ดิน": 5, "เหล็ก": 5 } }
+
+       2) ดิน+เหล็กผสมกันรวม 5 ใบ (การ์ดสองธาตุนับเป็น 1 ใบ)
+          "condition": { "minCombinedElementCount": { "elements": ["ดิน", "เหล็ก"], "count": 5 } }
+
+       3) ทีมครบ 5 ใบและทุกธาตุบนการ์ดต้องเป็นดินหรือเหล็กเท่านั้น
+          "condition": { "teamElementsOnly": ["ดิน", "เหล็ก"], "minTeamSize": 5 }
+    */
     /* ======================== [SECTION 06 CARD-DATA] ======================== */
     const CARDS = [
   {
@@ -5372,20 +5388,19 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1030.png"
+    "image": "1030.png",
     "ability": {
       "name": "เจาะโลหิต",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่, ทีมได้รับ ATK+18%, หากมีผู้ใช้ไสยเวทที่ชื่อ"Yuji"อยู่, ทีมได้รับ ฮิต+1"
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่ ทีมได้รับ ATK +18%; หากมีผู้ใช้ไสยเวทชื่อ 'Yuji' อยู่ด้วย ทีมโจมตีเพิ่ม +1 ฮิต",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043] },
+      "condition": {
+        "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043]
+      },
       "effects": [
-        { "type": "teamPowerRate", "value": 0.18 }
-      ],
-      "condition": {"anyCardIds": [26, 1041, 1023, 1009] },
-      "effects": [
-        { "type": "attackHits", "value": 1 }
+        { "type": "teamPowerRate", "value": 0.18 },
+        { "type": "attackHits", "value": 1, "condition": { "anyCardIds": [26, 1041, 1023, 1009] } }
       ]
-        }    
+    }
   },
   {
     "id": 1031,
@@ -5399,19 +5414,19 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1031.png"
+    "image": "1031.png",
     "ability": {
       "name": "24fps...",
-      "description": "เมื่ออยู่คนเดียวจะเก่งขึ้น 3000%",
+      "description": "เมื่อจัดทีมเพียงการ์ดใบนี้ใบเดียว จะได้รับ ATK/DEF +3000%, โจมตีหลายฮิตและมีโล่สูงสุด",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"leaderOnly": true, "maxTeamSize: 1 },
-      "effects": [ 
-        { "type": "selfPowerRate", "value": 30.0 }
-        { "type": "selfDefenseRate", "value": 30.0 }
-        { "type": "attackHits", "value": 8 }
+      "condition": { "leaderOnly": true, "maxTeamSize": 1 },
+      "effects": [
+        { "type": "selfPowerRate", "value": 30.0 },
+        { "type": "selfDefenseRate", "value": 30.0 },
+        { "type": "attackHits", "value": 7 },
         { "type": "shieldHits", "value": 6 }
       ]
-        }
+    }
   },
   {
     "id": 1032,
@@ -5425,10 +5440,10 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1032.png"
+    "image": "1032.png",
     "ability": {
       "name": "เหมันนิรันด์กาล...",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวท"Sukuna"อยู่, ทีมฝ่ายตรงข้าม DEF-15%",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวท 'Sukuna' อยู่, ทีมฝ่ายตรงข้าม DEF-15%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"anyCardIds": [1035, 1042, 1002] },
       "effects": [ 
@@ -5448,10 +5463,10 @@
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
-    "image": "43.png"
+    "image": "43.png",
     "ability": {
       "name": "หมู่ดาวซ่อนแอบ",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวท"Kinji Hakari"อยู่, ทีมได้โล่+3",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวท 'Kinji Hakari' อยู่, ทีมได้โล่+3",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"requiredCardIds": [1033] },
       "effects": [
@@ -5471,7 +5486,7 @@
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
-    "image": "42.png"
+    "image": "42.png",
     "ability": {
       "name": "ไสยเวทย้อนกลับ...",
       "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่, ทีมได้รับ DEF+500000",
@@ -5494,12 +5509,12 @@
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
-    "image": "37.png"
+    "image": "37.png",
     "ability": {
       "name": "คัพCที่ขยำได้ดีกว่าคัพDที่ขยำไม่ได้เป็นไหนๆ...",
       "description": "หากจัดทีมน้ำแข็งครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ DEF+70% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {น้ำแข็ง:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "น้ำแข็ง":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamDefenseRate", "value": 0.7 },
         { "type": "teamIncomeRate", "value": 0.20 }
@@ -5518,12 +5533,12 @@
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
-    "image": "11.png"
+    "image": "11.png",
     "ability": {
       "name": "S2...",
       "description": "หากจัดทีมพืชครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+70% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {พืช:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "พืช":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamPowerRate", "value": 0.7 },
         { "type": "teamIncomeRate", "value": 0.20 }
@@ -5542,12 +5557,12 @@
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
-    "image": "12.png"
+    "image": "12.png",
     "ability": {
       "name": "ปราณสายฟ้ากระบวนท่าที่ 1...",
       "description": "หากจัดทีมสายฟ้าครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+70% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {สายฟ้า:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "สายฟ้า":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamPowerRate", "value": 0.7 },
         { "type": "teamIncomeRate", "value": 0.20 }
@@ -5566,12 +5581,12 @@
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
-    "image": "13.png"
+    "image": "13.png",
     "ability": {
       "name": "ตรีสหกโลกธาตุรวมเป็น1...",
       "description": "หากจัดทีมเหล็กครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ DEF+70% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {เหล็ก:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "เหล็ก":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamDefenseRate", "value": 0.7 },
         { "type": "teamIncomeRate", "value": 0.20 }
@@ -5590,12 +5605,12 @@
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
     "icon": "",
-    "image": "36.png"
+    "image": "36.png",
     "ability": {
       "name": "พี่ชายมายบราเทอร์...",
       "description": "หากจัดทีมไฟครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+70% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {ไฟ:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "ไฟ":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamPowerRate", "value": 0.7 },
         { "type": "teamIncomeRate", "value": 0.20 }
@@ -5614,12 +5629,12 @@
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
     "icon": "",
-    "image": "14.png"
+    "image": "14.png",
     "ability": {
       "name": "จงลิ้มรสดาบฉันซ้ะ...",
       "description": "หากจัดทีมความมืดครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ DEF+60% ,รายได้รวม +25%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {ความมืด:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "ความมืด":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamDefenseRate", "value": 0.6 },
         { "type": "teamIncomeRate", "value": 0.25 }
@@ -5638,12 +5653,12 @@
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
     "icon": "",
-    "image": "15.png"
+    "image": "15.png",
     "ability": {
       "name": "ประกายแสงแห่งหวัง...",
       "description": "หากจัดทีมแสงครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+60% ,รายได้รวม +25%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {แสง:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "แสง":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamPowerRate", "value": 0.6 },
         { "type": "teamIncomeRate", "value": 0.25 }
@@ -5662,12 +5677,12 @@
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
     "icon": "",
-    "image": "16.png"
+    "image": "16.png",
     "ability": {
       "name": "ลิ้มรสพิษของฉันไหม...",
       "description": "หากจัดทีมน้ำครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ DEF+70% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {น้ำ:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "น้ำ":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamDefenseRate", "value": 0.7 },
         { "type": "teamIncomeRate", "value": 0.2 }
@@ -5686,12 +5701,12 @@
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
     "icon": "",
-    "image": "17.png"
+    "image": "17.png",
     "ability": {
       "name": "เงินอยู่ในอากาศ...",
       "description": "หากจัดทีมลมครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+70% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": {ลม:5}, "leaderOnly": true},
+      "condition": {"minElementCount": { "ลม":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamPowerRate", "value": 0.7 },
         { "type": "teamIncomeRate", "value": 0.2 }
@@ -5710,12 +5725,12 @@
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
     "icon": "",
-    "image": "18.png"
+    "image": "18.png",
     "ability": {
       "name": "เค้กชิ้นนี้ซื้อที่ไหนคะ...",
       "description": "หากจัดทีมดินครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ DEF+70% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "minElementCount": {ดิน:5}, "leaderOnly": true},
+      "condition": { "minElementCount": { "ดิน":5}, "leaderOnly": true},
       "effects": [
         { "type": "teamDefenseRate", "value": 0.7 },
         { "type": "teamIncomeRate", "value": 0.2 }
@@ -5734,12 +5749,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "19.png"
+    "image": "19.png",
     "ability": {
       "name": "โนๆฉันไม่ได้ชอบนายสักหน่อย...",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุน้ำแข็งได้รับ ATK/DEF +40%,และโล่+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {น้ำแข็ง:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "น้ำแข็ง":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["น้ำแข็ง"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["น้ำแข็ง"] },
@@ -5759,12 +5774,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "20.png"
+    "image": "20.png",
     "ability": {
       "name": "ลูกน้องของข้าตามข้ามา...",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุพืชได้รับ ATK/DEF +40%,และฮิต+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {พืช:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "พืช":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["พืช"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["พืช"] },
@@ -5784,12 +5799,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "21.png"
+    "image": "21.png",
     "ability": {
       "name": "ไม่มีอะไรต้องกังวล...",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุสายฟ้าได้รับ ATK/DEF +40%,และฮิต+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {สายฟ้า:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "สายฟ้า":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["สายฟ้า"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["สายฟ้า"] },
@@ -5809,12 +5824,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "22.png"
+    "image": "22.png",
     "ability": {
       "name": "หรือจะมีเรื่อง...",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุดินได้รับ ATK/DEF +40%,และโล่+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {ดิน:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "ดิน":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["ดิน"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["ดิน"] },
@@ -5834,12 +5849,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "23.png"
+    "image": "23.png",
     "ability": {
       "name": "เสียงเพลงของฉัน..จะดังกังวาล",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุน้ำได้รับ ATK/DEF +40%,และโล่+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {น้ำ:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "น้ำ":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["น้ำ"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["น้ำ"] },
@@ -5859,12 +5874,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "24.png"
+    "image": "24.png",
     "ability": {
       "name": "มีอะไรน่าสนใจ...",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุมืดได้รับ ATK/DEF +40%,และโล่+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {ความมืด:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "ความมืด":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["ความมืด"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["ความมืด"] },
@@ -5884,12 +5899,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "25.png"
+    "image": "25.png",
     "ability": {
       "name": "แกมันกระจอก...",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุแสงได้รับ ATK/DEF +40%,และฮิต+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {แสง:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "แสง":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["แสง"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["แสง"] },
@@ -5909,12 +5924,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "26.png"
+    "image": "26.png",
     "ability": {
       "name": "เฮเทคเคน!!!",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุลมได้รับ ATK/DEF +40%,และฮิต+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {ลม:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "ลม":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["ลม"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["ลม"] },
@@ -5934,12 +5949,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "27.png"
+    "image": "27.png",
     "ability": {
       "name": "ไปซ้ะให้พ้น...",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุไฟได้รับ ATK/DEF +40%,และฮิต+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {ไฟ:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "ไฟ":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["ไฟ"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["ไฟ"] },
@@ -5959,12 +5974,12 @@
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
     "icon": "",
-    "image": "28.png"
+    "image": "28.png",
     "ability": {
       "name": "นักรบ...",
       "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุเหล็กได้รับ ATK/DEF +40%,และโล่+1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": {เหล็ก:2}, "leaderOnly": true},
+      "condition": {"sourceMinAwaken": 9, "minElementCount": { "เหล็ก":2}, "leaderOnly": true},
       "effects": [
         { "type": "elementPowerRate", "value": 0.4, "targetElements": ["เหล็ก"] },
         { "type": "elementDefenseRate", "value": 0.4, "targetElements": ["เหล็ก"] },
@@ -5984,7 +5999,7 @@
     "upgradeDustGrowth": 1.032,
     "awakenMax": 11,
     "icon": "",
-    "image": "29.png"
+    "image": "29.png",
     "ability": {
       "name": "เกียร์ 2...",
       "description": "หากการ์ดนี้เลเวล 120/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ตนเองได้รับATK +100%,DEF +100%",
@@ -6008,7 +6023,7 @@
     "upgradeDustGrowth": 1.032,
     "awakenMax": 11,
     "icon": "",
-    "image": "30.png"
+    "image": "30.png",
     "ability": {
       "name": "โหมดคลั่ง...",
       "description": "หากการ์ดนี้เลเวล 120/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ตนเองได้รับATK +100%,DEF +100%",
@@ -6032,7 +6047,7 @@
     "upgradeDustGrowth": 1.032,
     "awakenMax": 11,
     "icon": "",
-    "image": "31.png"
+    "image": "31.png",
     "ability": {
       "name": "หมัดไคโอ...",
       "description": "หากการ์ดนี้เลเวล 120/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ตนเองได้รับATK +200%",
@@ -6055,7 +6070,7 @@
     "upgradeDustGrowth": 1.032,
     "awakenMax": 11,
     "icon": "",
-    "image": "32.png"
+    "image": "32.png",
     "ability": {
       "name": "บังไค...",
       "description": "หากการ์ดนี้เลเวล 120/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ตนเองได้รับATK +200%",
@@ -6078,7 +6093,7 @@
     "upgradeDustGrowth": 1.025,
     "awakenMax": 13,
     "icon": "",
-    "image": "33.png"
+    "image": "33.png",
     "ability": {
       "name": "ทหารเรือปกป้องประชาชน...",
       "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ได้โล่ +1",
@@ -6101,7 +6116,7 @@
     "upgradeDustGrowth": 1.025,
     "awakenMax": 13,
     "icon": "",
-    "image": "34.png"
+    "image": "34.png",
     "ability": {
       "name": "ความจริงมีเพียง1เดียว...",
       "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ได้ฮิต +1",
@@ -6131,7 +6146,7 @@
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinLevel": 100, "sourceMinAwaken": 13},
       "effects": [
-        { "type": "gachaRarityRate", "value": 0.20 ,"targetRarities":[SR,SSR] },
+        { "type": "gachaRarityRate", "value": 0.05, "targetRarities": ["SR", "SSR"] },
         { "type": "luckRate", "value": .10 }
       ]
         }
@@ -7311,6 +7326,33 @@
       };
     }
 
+    // เพิ่มโดยอลิซ: เงื่อนไขกลุ่มธาตุขั้นสูง
+    function normalizeCombinedElementCountRules(value) {
+      const rawRules = Array.isArray(value) ? value : (value && typeof value === "object" ? [value] : []);
+      return rawRules.map(rule => ({
+        elements: normalizeAbilityElements(rule && (rule.elements || rule.targetElements)),
+        count: Math.max(1, Number(rule && (rule.count ?? rule.minCount)) || 1)
+      })).filter(rule => rule.elements.length);
+    }
+
+    function countCardsMatchingAnyElement(context, elements) {
+      const allowed = new Set(normalizeAbilityElements(elements));
+      if (!context || !allowed.size) return 0;
+      return context.cards.reduce((total, card) => {
+        const matches = getCardElements(card).some(element => allowed.has(element));
+        return total + (matches ? 1 : 0);
+      }, 0);
+    }
+
+    function teamUsesOnlyElements(context, elements) {
+      const allowed = new Set(normalizeAbilityElements(elements));
+      if (!context || !context.cards.length || !allowed.size) return false;
+      return context.cards.every(card => {
+        const cardElements = getCardElements(card);
+        return cardElements.length > 0 && cardElements.every(element => allowed.has(element));
+      });
+    }
+
     function isAbilityConditionMet(condition = {}, context, sourceCard) {
       const rule = condition && typeof condition === "object" ? condition : {};
       if (!context || !sourceCard || !context.cardIdSet.has(String(sourceCard.id))) return false;
@@ -7331,6 +7373,24 @@
         const element = normalizeElementName(elementRaw);
         if (Number(context.elementCounts[element] || 0) < Math.max(1, Number(amountRaw) || 1)) return false;
       }
+
+      // ผ่านเมื่อมีอย่างน้อยหนึ่งธาตุที่ถึงจำนวนขั้นต่ำของตัวเอง (OR)
+      const anyElementThresholds = Object.entries(rule.minAnyElementCount || {});
+      if (anyElementThresholds.length) {
+        const anyThresholdMet = anyElementThresholds.some(([elementRaw, amountRaw]) => {
+          const element = normalizeElementName(elementRaw);
+          return Number(context.elementCounts[element] || 0) >= Math.max(1, Number(amountRaw) || 1);
+        });
+        if (!anyThresholdMet) return false;
+      }
+
+      // นับจำนวน “การ์ด” ที่มีธาตุใดธาตุหนึ่งในกลุ่ม โดยการ์ดหลายธาตุนับเพียงหนึ่งใบ
+      const combinedElementRules = normalizeCombinedElementCountRules(rule.minCombinedElementCount);
+      if (combinedElementRules.some(group => countCardsMatchingAnyElement(context, group.elements) < group.count)) return false;
+
+      // ทุกธาตุของการ์ดทุกใบต้องอยู่ในรายการที่อนุญาตเท่านั้น
+      const onlyElements = normalizeAbilityElements(rule.teamElementsOnly);
+      if (onlyElements.length && !teamUsesOnlyElements(context, onlyElements)) return false;
 
       const requiredRarities = normalizeAbilityRarities(rule.requiredRarities);
       if (requiredRarities.some(rarity => Number(context.rarityCounts[rarity] || 0) < 1)) return false;
@@ -7618,6 +7678,15 @@
       const anyElements = normalizeAbilityElements(condition.anyElements);
       if (anyElements.length) parts.push(`มีอย่างน้อยหนึ่งธาตุจาก ${anyElements.map(elementLabel).join(" / ")}`);
       Object.entries(condition.minElementCount || {}).forEach(([element, amount]) => parts.push(`${elementLabel(element)} อย่างน้อย ${Math.max(1, Number(amount) || 1)} แหล่ง`));
+      const minAnyElementEntries = Object.entries(condition.minAnyElementCount || {});
+      if (minAnyElementEntries.length) {
+        parts.push(minAnyElementEntries.map(([element, amount]) => `${elementLabel(element)} ${Math.max(1, Number(amount) || 1)} ใบ`).join(" หรือ "));
+      }
+      normalizeCombinedElementCountRules(condition.minCombinedElementCount).forEach(group => {
+        parts.push(`${group.elements.map(elementLabel).join(" หรือ ")} รวมกันอย่างน้อย ${group.count} ใบ`);
+      });
+      const onlyElements = normalizeAbilityElements(condition.teamElementsOnly);
+      if (onlyElements.length) parts.push(`ทุกใบในทีมใช้เฉพาะธาตุ ${onlyElements.map(elementLabel).join(" / ")}`);
       const requiredRarities = normalizeAbilityRarities(condition.requiredRarities);
       if (requiredRarities.length) parts.push(`ต้องมีระดับ ${requiredRarities.join(" + ")}`);
       Object.entries(condition.minRarityCount || {}).forEach(([rarity, amount]) => parts.push(`ระดับ ${String(rarity).toUpperCase()} อย่างน้อย ${Math.max(1, Number(amount) || 1)} ใบ`));
