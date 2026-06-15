@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-15-stop-all-in-on-sc-v27">
+  <meta name="gacha-app-build" content="2026-06-15-tower-team-skill-panel-v28">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -943,7 +943,13 @@
       border-color: rgba(251,113,133,.58);
       box-shadow: 0 0 22px rgba(251,113,133,.12);
     }
-    .team-picker-entry.in-both:not(.current-slot) {
+    .team-picker-entry.in-tower:not(.current-slot) {
+      border-color: rgba(255,209,102,.64);
+      box-shadow: 0 0 22px rgba(255,209,102,.12);
+    }
+    .team-picker-entry.in-both:not(.current-slot),
+    .team-picker-entry.in-multiple:not(.current-slot),
+    .team-picker-entry.in-all:not(.current-slot) {
       border-color: rgba(255,209,102,.72);
       box-shadow: 0 0 0 2px rgba(92,232,255,.10), 0 0 26px rgba(255,209,102,.14);
     }
@@ -972,12 +978,14 @@
       backdrop-filter: blur(8px);
     }
     .team-membership-badge.showcase { background: linear-gradient(135deg, var(--cyan), #bfdbfe); }
+    .team-membership-badge.tower { color: #211500; background: linear-gradient(135deg, var(--gold), #f59e0b); }
     .team-membership-badge.arena { color: #fff; background: linear-gradient(135deg, #fb7185, #be123c); }
     .team-membership-badge.current { background: linear-gradient(135deg, var(--green), #d9f99d); }
     .team-picker-actions { display: grid; grid-template-columns: .86fr 1.14fr; gap: 6px; }
     .team-picker-actions .btn { min-height: 38px; padding: 7px 8px; font-size: .68rem; }
     .team-picker-actions .assign-current { color: #071019; background: linear-gradient(135deg, var(--green), var(--cyan)); }
     .team-picker-actions .assign-showcase { border-color: rgba(92,232,255,.32); }
+    .team-picker-actions .assign-tower { color: #211500; border-color: transparent; background: linear-gradient(135deg, #ffe08a, #f59e0b); }
     .team-picker-actions .assign-arena { border-color: rgba(251,113,133,.34); }
 
     .gacha-rate-pill {
@@ -1551,6 +1559,37 @@
     .arena-team-zone .section-title { margin-bottom: 12px; }
     .arena-team-zone .team-grid { margin-bottom: 12px; }
     .arena-team-zone .element-panel { margin-bottom: 0; }
+
+    /* เพิ่มโดยอลิซ: ทีมไต่หอแยกจากทีมโชว์/ARENA พร้อมแผงสกิลและบัฟ */
+    .tower-team-zone {
+      margin: 0 0 16px;
+      border-color: rgba(255,209,102,.26);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(255,209,102,.13), transparent 34%),
+        radial-gradient(circle at 92% 0%, rgba(92,232,255,.08), transparent 35%),
+        rgba(255,255,255,.025);
+    }
+    .tower-team-zone .element-panel {
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255,209,102,.11), transparent 38%),
+        rgba(255,255,255,.03);
+    }
+    .combo-card.inactive-skill {
+      opacity: .72;
+      border-style: dashed;
+    }
+    .combo-card.inactive-skill strong { color: var(--muted); }
+    .tower-buff-total {
+      margin-top: 10px;
+      padding: 10px 11px;
+      border: 1px solid rgba(255,209,102,.22);
+      border-radius: 14px;
+      color: #f8fafc;
+      font-size: .72rem;
+      font-weight: 900;
+      line-height: 1.65;
+      background: rgba(255,209,102,.055);
+    }
 
     .arena-secret-model {
       width: clamp(72px, 8.5vw, 108px);
@@ -3495,6 +3534,17 @@
           <div class="section-title">
             <div><h2>Battle Tower</h2><p>ผลัดกันโจมตีเป็นเทิร์น ลด DEF ไปเรื่อย ๆ ใคร DEF หมดก่อนแพ้ พร้อมสกิลหลายฮิต โล่ ธาตุ และ Support</p></div>
           </div>
+
+          <!-- เพิ่มโดยอลิซ: ทีมไต่หอแยกต่างหาก + แสดงสกิลและบัฟที่ทำงาน -->
+          <div class="arena-team-zone tower-team-zone">
+            <div class="section-title">
+              <div><h2>ทีมไต่หอ</h2><p>ทีมนี้แยกจากทีมโชว์และทีม ARENA โดยสมบูรณ์ เปลี่ยนการ์ดได้จากช่องด้านล่าง</p></div>
+              <strong id="towerTeamPowerText">ATK 0 • DEF 0</strong>
+            </div>
+            <div class="team-grid" id="towerTeamGrid"></div>
+            <div class="element-panel" id="towerElementPanel"></div>
+          </div>
+
           <div class="battle-layout">
             <div class="battle-arena">
               <div class="battle-impact" aria-hidden="true"></div>
@@ -3502,7 +3552,7 @@
                 <div class="fighter player">
                   <div class="fighter-label">Your Formation</div>
                   <div class="battle-model-stack" id="battlePlayerModels"></div>
-                  <h3 id="battleTeamName">ทีมโชว์</h3>
+                  <h3 id="battleTeamName">ทีมไต่หอ</h3>
                   <div class="fighter-power" id="battlePlayerPower">0</div>
                   <div class="power-breakdown" id="battlePowerBreakdown"></div>
                   <div class="power-meter"><i id="battlePlayerMeter"></i></div>
@@ -3975,7 +4025,8 @@
       recentPullLimit: 30,
       // เพิ่มโดยอลิซ: ถ้าอเวกเต็ม การ์ดซ้ำใหม่จะให้ Dust รวม x2 (Dust ปกติ + โบนัสอเวกเต็ม)
       maxAwakenDuplicateDustMultiplier: 2,
-      // เพิ่มโดยอลิซ: หอคอยและ ARENA ใช้ดาบร่วมกัน
+      // เพิ่มโดยอลิซ: ทีมไต่หอแยกจากทีมโชว์ และหอคอย/ARENA ใช้ดาบร่วมกัน
+      towerTeamSlots: 5,
       arenaTeamSlots: 5,
       // เพิ่มโดยอลิซ: ระบบ ATK ปะทะ DEF + หลายฮิต/โล่
       defenseBaseRatio: 0.64,
@@ -5239,7 +5290,7 @@
       "name": "ภาชนะของสุคุนะ",
       "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'Nobara Kugisaki'UR หรือ 'megimi fushiguro'UR หรือ 'gojo stouru'LR หรือ 'Todo aoi'; ATK+25%และโจมตี+4โล่+4 ",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "anyCardIds": true, "requiredCardIds": [1010,1011,1001,1013] },
+      "condition": { "anyCardIds": [1010,1011,1001,1013], "leaderOnly": "true" },
       "effects": [
         { "type": "teamPowerRate", "value": 0.25 },
         { "type": "attackHits", "value": 3 },
@@ -5383,13 +5434,13 @@
     "image": "1013.png",
     "ability": {
       "name": "มายบราเทอร์",
-      "description": "เพิ่มโชคในการต่อสู้ 10%, เมื่อจัดทีมกับ 'Itadori Yuji'ระดับ UR ในทีมแค่ 2 คน; ATK/DEF +4000% /โจมตีและโล่เพิ่มอย่างละ +4",
+      "description": "เพิ่มโชคในการต่อสู้ 10%, เมื่อจัดทีมกับ 'Itadori Yuji'ระดับ UR ในทีมแค่ 2 คน; ATK/DEF +2000% /โจมตีและโล่เพิ่มอย่างละ +4",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"requiredCardIds": [1009], "maxTeamSize": 2
       },
       "effects": [
-        { "type": "teamPowerRate", "value": 40.0 },
-        { "type": "teamDefenseRate", "value": 40.0 },
+        { "type": "teamPowerRate", "value": 20.0 },
+        { "type": "teamDefenseRate", "value": 20.0 },
         { "type": "shieldHits", "value": 4 },
         { "type": "attackHits", "value": 3 },
         { "type": "luckRate", "value": 0.10 }
@@ -6694,6 +6745,8 @@
           updatedAt: Date.now()
         },
         battle: {
+          // เพิ่มโดยอลิซ: ทีมไต่หอแยกต่างหาก เริ่มต้นด้วยสำเนาทีมเริ่มเกม
+          team: starter.team.slice(0, CONFIG.towerTeamSlots),
           stage: 1,
           energy: CONFIG.battleMaxEnergy,
           lastEnergyAt: Date.now(),
@@ -7353,6 +7406,11 @@
       if (next.profile.supportCardId && (!next.owned[next.profile.supportCardId] || !CARD_BY_ID.has(next.profile.supportCardId))) next.profile.supportCardId = "";
       next.profile.updatedAt = Number(next.profile.updatedAt) || Date.now();
       next.battle = Object.assign(defaultState().battle, next.battle || {});
+      // เพิ่มโดยอลิซ: เซฟเก่าที่ยังไม่มีทีมไต่หอ จะคัดลอกทีมโชว์เดิมมาให้ครั้งแรก
+      const hasSavedTowerTeam = Boolean(raw && raw.battle && Array.isArray(raw.battle.team));
+      next.battle.team = hasSavedTowerTeam
+        ? [...new Set(next.battle.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.towerTeamSlots)
+        : next.team.slice(0, CONFIG.towerTeamSlots);
       next.battle.stage = Math.max(1, Math.floor(Number(next.battle.stage) || 1));
       next.battle.energy = Math.min(CONFIG.battleMaxEnergy, Math.max(0, Math.floor(Number(next.battle.energy) || 0)));
       next.battle.lastEnergyAt = Number(next.battle.lastEnergyAt) || Date.now();
@@ -8414,7 +8472,7 @@
 
       const modeSummaries = {
         team: getTeamAbilitySummary(state.team, "team"),
-        tower: getTeamAbilitySummary(state.team, "tower"),
+        tower: getTeamAbilitySummary(getTowerTeamIds(), "tower"),
         arena: getTeamAbilitySummary(state.arena && Array.isArray(state.arena.team) ? state.arena.team : [], "arena")
       };
       const items = abilities.map(ability => {
@@ -9738,9 +9796,9 @@
       return Object.assign({ floor: safeFloor }, rule, { elements: normalizeElements(rule.elements || []) });
     }
 
-    function getTeamRestrictionStatus(restriction = null) {
+    function getTeamRestrictionStatus(restriction = null, teamIds = getTowerTeamIds()) {
       if (!restriction) return { ok: true, text: "ยังไม่มีเงื่อนไขพิเศษ", invalidCards: [] };
-      const teamCards = state.team.map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
+      const teamCards = abilityArray(teamIds).map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
       const allowed = normalizeElements(restriction.elements || []);
       const invalidCards = teamCards.filter(card => {
         const elements = getCardElements(card);
@@ -9819,10 +9877,11 @@
     function getBattleStats() {
       updateBattleEnergy();
       const stage = Math.max(1, Number(state.battle.stage) || 1);
-      const abilitySummary = getTeamAbilitySummary(state.team, "tower");
-      const basePower = getRawTeamPower(state.team, "tower", abilitySummary) + abilitySummary.teamPowerFlat;
-      const baseDefense = getRawTeamDefense(state.team, "tower", abilitySummary) + abilitySummary.teamDefenseFlat;
-      const elementSummary = getTeamElementSummary();
+      const towerTeam = getTowerTeamIds();
+      const abilitySummary = getTeamAbilitySummary(towerTeam, "tower");
+      const basePower = getRawTeamPower(towerTeam, "tower", abilitySummary) + abilitySummary.teamPowerFlat;
+      const baseDefense = getRawTeamDefense(towerTeam, "tower", abilitySummary) + abilitySummary.teamDefenseFlat;
+      const elementSummary = getTeamElementSummary(towerTeam);
       const formationRate = elementSummary.powerRate;
       const formationPower = basePower * formationRate;
       const abilityPowerRate = abilitySummary.teamPowerRate;
@@ -9843,7 +9902,7 @@
       const enemyElement = getCardElements(enemyCard);
       const matchup = getElementMatchup(elementSummary.dominantElement, enemyElement);
       const towerRestriction = getTowerRestriction(stage);
-      const restrictionStatus = getTeamRestrictionStatus(towerRestriction);
+      const restrictionStatus = getTeamRestrictionStatus(towerRestriction, towerTeam);
       const preElementPower = basePower + formationPower + abilityPower + supportPower;
       const elementPower = preElementPower * matchup.modifier;
       const effectivePower = Math.max(0, preElementPower + elementPower);
@@ -9868,7 +9927,7 @@
         effectivePower, effectiveAttack: effectivePower, effectiveDefense,
         enemyPower, enemyAttack: enemyPower, enemyDefense,
         attackHits, shieldHits, enemyAttackHits, enemyShieldHits,
-        activeTriggers: buildTeamBattleTriggerConfigs(state.team, abilitySummary, false),
+        activeTriggers: buildTeamBattleTriggerConfigs(towerTeam, abilitySummary, false),
         playerPreview, enemyPreview,
         gemReward: 15000 + stage * 5000,
         dustReward: 1000 + stage * 750,
@@ -9883,7 +9942,7 @@
     async function runBattle() {
       const stats = getBattleStats();
       if (battleAnimating) return;
-      if (!state.team.length) return showToast("ต้องจัดการ์ดเข้าทีมก่อนต่อสู้");
+      if (!getTowerTeamIds().length) return showToast("ต้องจัดการ์ดเข้าทีมไต่หอก่อนต่อสู้");
       if (!stats.restrictionStatus.ok) return showToast(`ทีมยังผิดเงื่อนไขชั้นนี้: ${stats.restrictionStatus.invalidCards.map(card => card.name).slice(0, 2).join(", ")}`);
       if (state.battle.energy < 1) return showToast("Energy หมด รอให้ฟื้นก่อน");
 
@@ -10732,6 +10791,21 @@
       openCardModal(id);
     }
 
+    function toggleTowerTeam(cardId) {
+      const id = String(cardId);
+      if (!getOwned(id)) return;
+      const team = getTowerTeamIds();
+      if (team.includes(id)) state.battle.team = team.filter(item => item !== id);
+      else {
+        if (team.length >= CONFIG.towerTeamSlots) return showToast("ทีมไต่หอเต็มแล้ว เอาการ์ดใบอื่นออกก่อน");
+        team.push(id);
+      }
+      battleResult = null;
+      saveState(true);
+      renderAll();
+      if (modalCardId) renderCardDetail(modalCardId);
+    }
+
     function toggleArenaTeam(cardId) {
       const id = String(cardId);
       if (!getOwned(id)) return;
@@ -10889,11 +10963,11 @@
       return pool[(stage * 13 + 7) % pool.length];
     }
 
-    function battleModelHTML(card, index, enemy) {
+    function battleModelHTML(card, index, enemy, teamCount = null) {
       if (!card) return "";
       const rarity = getRarity(card);
       const image = getCardImage(card);
-      const count = Math.max(1, enemy ? 1 : state.team.length);
+      const count = Math.max(1, enemy ? 1 : Number(teamCount) || state.team.length);
       const center = (count - 1) / 2;
       const tilt = enemy ? 3 : (index - center) * 5;
       const lift = enemy ? 0 : Math.abs(index - center) * 5;
@@ -10909,11 +10983,11 @@
     }
 
     function renderBattleModels(stats) {
-      const teamCards = state.team.map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
+      const teamCards = getTowerTeamIds().map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
       const enemyCard = stats.enemyCard || getBattleEnemyCard(stats.stage);
       document.getElementById("battlePlayerModels").innerHTML = teamCards.length
-        ? teamCards.map((card, index) => battleModelHTML(card, index, false)).join("")
-        : `<div class="empty-state" style="min-height:130px;padding:14px">ยังไม่มีการ์ดในทีม</div>`;
+        ? teamCards.map((card, index) => battleModelHTML(card, index, false, teamCards.length)).join("")
+        : `<div class="empty-state" style="min-height:130px;padding:14px">ยังไม่มีการ์ดในทีมไต่หอ</div>`;
       document.getElementById("battleEnemyModels").innerHTML = battleModelHTML(enemyCard, 0, true);
     }
 
@@ -11113,7 +11187,9 @@
     }
 
     function teamSlotHTML(card, index, mode = "showcase") {
-      const slotLabel = mode === "arena" ? `ช่อง ARENA ${index + 1}` : `ช่องทีม ${index + 1}`;
+      const slotLabel = mode === "arena"
+        ? `ช่อง ARENA ${index + 1}`
+        : mode === "tower" ? `ช่องไต่หอ ${index + 1}` : `ช่องทีมโชว์ ${index + 1}`;
       if (!card) {
         return `
           <button type="button" class="team-slot team-slot-empty" data-action="open-team-picker" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}">
@@ -11200,7 +11276,14 @@
         </details>`;
     }
 
+    function getTowerTeamIds() {
+      if (!state.battle || typeof state.battle !== "object") state.battle = Object.assign(defaultState().battle, state.battle || {});
+      if (!Array.isArray(state.battle.team)) state.battle.team = state.team.slice(0, CONFIG.towerTeamSlots);
+      return state.battle.team;
+    }
+
     function getTeamArrayByMode(mode) {
+      if (mode === "tower") return getTowerTeamIds();
       if (mode === "arena") {
         if (!state.arena || !Array.isArray(state.arena.team)) state.arena = Object.assign(defaultState().arena, state.arena || {});
         return state.arena.team;
@@ -11209,9 +11292,9 @@
     }
 
     function openTeamPicker(mode = "showcase", slotIndex = 0) {
-      const safeMode = mode === "arena" ? "arena" : "showcase";
+      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
       const team = getTeamArrayByMode(safeMode);
-      const limit = safeMode === "arena" ? CONFIG.arenaTeamSlots : CONFIG.teamSlots;
+      const limit = safeMode === "arena" ? CONFIG.arenaTeamSlots : safeMode === "tower" ? CONFIG.towerTeamSlots : CONFIG.teamSlots;
       const requestedIndex = Math.max(0, Math.floor(Number(slotIndex) || 0));
       teamPickerContext = {
         mode: safeMode,
@@ -11220,8 +11303,9 @@
       };
       const title = document.getElementById("teamPickerTitle");
       const subtitle = document.getElementById("teamPickerSubtitle");
-      if (title) title.textContent = `${teamPickerContext.mode === "arena" ? "ทีม ARENA" : "ทีมโชว์/ไต่หอ"} • ช่อง ${teamPickerContext.slotIndex + 1}`;
-      if (subtitle) subtitle.textContent = "ดูรายละเอียดสกิลก่อนเลือกได้ และมีป้ายบอกชัดเจนว่าการ์ดอยู่ทีมโชว์หรือทีม ARENA ช่องใด";
+      const modeLabel = teamPickerContext.mode === "arena" ? "ทีม ARENA" : teamPickerContext.mode === "tower" ? "ทีมไต่หอ" : "ทีมโชว์";
+      if (title) title.textContent = `${modeLabel} • ช่อง ${teamPickerContext.slotIndex + 1}`;
+      if (subtitle) subtitle.textContent = "ดูรายละเอียดสกิลก่อนเลือกได้ และมีป้ายบอกว่าการ์ดอยู่ทีมโชว์ ทีมไต่หอ หรือทีม ARENA ช่องใด";
       renderTeamPicker();
       document.getElementById("teamPickerModal").classList.remove("hidden");
       document.body.style.overflow = "hidden";
@@ -11235,12 +11319,15 @@
     function getCardTeamMembership(cardId) {
       const id = String(cardId || "");
       const showcaseIndex = state.team.indexOf(id);
+      const towerIndex = getTowerTeamIds().indexOf(id);
       const arenaTeam = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
       const arenaIndex = arenaTeam.indexOf(id);
       return {
         showcaseIndex,
+        towerIndex,
         arenaIndex,
         inShowcase: showcaseIndex >= 0,
+        inTower: towerIndex >= 0,
         inArena: arenaIndex >= 0
       };
     }
@@ -11250,11 +11337,15 @@
       const membership = getCardTeamMembership(id);
       const selected = id === String(currentId || "");
       const inCurrentTeam = getTeamArrayByMode(teamPickerContext.mode).includes(id);
-      const membershipClass = membership.inShowcase && membership.inArena
-        ? "in-both"
-        : membership.inShowcase ? "in-showcase" : membership.inArena ? "in-arena" : "";
+      const membershipCount = [membership.inShowcase, membership.inTower, membership.inArena].filter(Boolean).length;
+      const membershipClass = membershipCount >= 3
+        ? "in-all"
+        : membershipCount >= 2
+          ? "in-multiple"
+          : membership.inShowcase ? "in-showcase" : membership.inTower ? "in-tower" : membership.inArena ? "in-arena" : "";
       const badges = [
         membership.inShowcase ? `<span class="team-membership-badge showcase">ทีมโชว์ #${membership.showcaseIndex + 1}</span>` : "",
+        membership.inTower ? `<span class="team-membership-badge tower">ไต่หอ #${membership.towerIndex + 1}</span>` : "",
         membership.inArena ? `<span class="team-membership-badge arena">ARENA #${membership.arenaIndex + 1}</span>` : "",
         selected ? `<span class="team-membership-badge current">ช่องที่กำลังแก้</span>` : ""
       ].filter(Boolean).join("");
@@ -11263,7 +11354,10 @@
         : inCurrentTeam
           ? `สลับมาช่อง ${teamPickerContext.slotIndex + 1}`
           : `เลือกลงช่อง ${teamPickerContext.slotIndex + 1}`;
-      const resultLabel = selected ? "ช่องนี้" : membership.inShowcase && membership.inArena ? "2 ทีม" : membership.inShowcase ? "ทีมโชว์" : membership.inArena ? "ARENA" : `เลือก #${teamPickerContext.slotIndex + 1}`;
+      const resultLabel = selected ? "ช่องนี้" : membershipCount > 1 ? `${membershipCount} ทีม` : membership.inShowcase ? "ทีมโชว์" : membership.inTower ? "ไต่หอ" : membership.inArena ? "ARENA" : `เลือก #${teamPickerContext.slotIndex + 1}`;
+      const assignClass = selected
+        ? "assign-current"
+        : teamPickerContext.mode === "arena" ? "assign-arena" : teamPickerContext.mode === "tower" ? "assign-tower" : "assign-showcase";
       return `
         <div class="team-picker-entry ${membershipClass} ${selected ? "current-slot" : ""}">
           ${cardHTML(card, {
@@ -11274,7 +11368,7 @@
           ${badges ? `<div class="team-picker-memberships">${badges}</div>` : ""}
           <div class="team-picker-actions">
             <button type="button" class="btn" data-action="open-picker-card-detail" data-card-id="${escapeHTML(id)}">🔎 ดูรายละเอียด</button>
-            <button type="button" class="btn ${selected ? "assign-current" : teamPickerContext.mode === "arena" ? "assign-arena" : "assign-showcase"}" data-action="assign-team-slot" data-card-id="${escapeHTML(id)}">${escapeHTML(selectLabel)}</button>
+            <button type="button" class="btn ${assignClass}" data-action="assign-team-slot" data-card-id="${escapeHTML(id)}">${escapeHTML(selectLabel)}</button>
           </div>
         </div>`;
     }
@@ -11309,7 +11403,7 @@
       const id = String(cardId || "");
       if (!getOwned(id) || !CARD_BY_ID.has(id)) return showToast("เลือกได้เฉพาะการ์ดที่มีอยู่ในคลัง");
       const mode = teamPickerContext.mode;
-      const limit = mode === "arena" ? CONFIG.arenaTeamSlots : CONFIG.teamSlots;
+      const limit = mode === "arena" ? CONFIG.arenaTeamSlots : mode === "tower" ? CONFIG.towerTeamSlots : CONFIG.teamSlots;
       const targetIndex = Math.min(limit - 1, Math.max(0, teamPickerContext.slotIndex));
       const team = getTeamArrayByMode(mode);
       const existingIndex = team.indexOf(id);
@@ -11330,6 +11424,7 @@
         currentArenaOpponent = null;
         arenaResult = null;
       }
+      if (mode === "tower") battleResult = null;
       saveState(true);
       renderAll();
       closeTeamPicker();
@@ -11337,15 +11432,17 @@
     }
 
     function clearTeamSlot(mode = "showcase", slotIndex = 0) {
-      const team = getTeamArrayByMode(mode === "arena" ? "arena" : "showcase");
+      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const team = getTeamArrayByMode(safeMode);
       const index = Math.max(0, Math.floor(Number(slotIndex) || 0));
       if (!team[index]) return;
       updateIncome();
       team.splice(index, 1);
-      if (mode === "arena") {
+      if (safeMode === "arena") {
         currentArenaOpponent = null;
         arenaResult = null;
       }
+      if (safeMode === "tower") battleResult = null;
       saveState(true);
       renderAll();
       showToast("นำการ์ดออกจากทีมแล้ว");
@@ -11415,8 +11512,69 @@
       renderAllElementRulesGuide();
     }
 
+    function renderTowerTeam(stats = null) {
+      const grid = document.getElementById("towerTeamGrid");
+      const panel = document.getElementById("towerElementPanel");
+      if (!grid || !panel) return;
+      const teamIds = getTowerTeamIds();
+      const slots = [];
+      for (let index = 0; index < CONFIG.towerTeamSlots; index += 1) {
+        const card = CARD_BY_ID.get(String(teamIds[index] || ""));
+        slots.push(teamSlotHTML(card, index, "tower"));
+      }
+      grid.innerHTML = slots.join("");
+
+      const summary = getTeamElementSummary(teamIds);
+      const abilitySummary = stats && stats.abilitySummary ? stats.abilitySummary : getTeamAbilitySummary(teamIds, "tower");
+      const activeTowerAbilities = abilitySummary.activeAbilities.filter(entry => entry.modes.includes("tower"));
+      const inactiveTowerAbilities = abilitySummary.inactiveAbilities.filter(entry => entry.modes.includes("tower"));
+      const comboHTML = summary.activeCombos.length
+        ? summary.activeCombos.map(combo => `<div class="combo-card"><strong>${escapeHTML(combo.name)}</strong><span>ATK +${Math.round(Number(combo.powerRate || 0) * 100)}% • ${escapeHTML(combo.note || "")}</span></div>`).join("")
+        : `<div class="combo-card"><strong>ยังไม่มีคอมโบธาตุ</strong><span>จัดธาตุซ้ำหรือคอมโบธาตุให้ครบเพื่อเพิ่ม ATK ในหอคอย</span></div>`;
+      const activeAbilityHTML = activeTowerAbilities.length
+        ? activeTowerAbilities.map(entry => {
+            const effects = entry.activeEffects.length
+              ? entry.activeEffects.map(effect => escapeHTML(abilityEffectText(effect))).join(" • ")
+              : "สกิลพร้อมทำงาน";
+            return `<div class="combo-card"><strong>✅ ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong><span>${effects}<br>เงื่อนไข: ${escapeHTML(abilityConditionText(entry.ability.condition || {}))}</span></div>`;
+          }).join("")
+        : `<div class="combo-card"><strong>ยังไม่มีสกิลทำงาน</strong><span>เพิ่มการ์ดที่มีสกิลสำหรับไต่หอ หรือจัดทีมให้ครบเงื่อนไขของสกิล</span></div>`;
+      const inactiveAbilityHTML = inactiveTowerAbilities.length
+        ? inactiveTowerAbilities.map(entry => `<div class="combo-card inactive-skill"><strong>${entry.nullified ? "🚫 ถูกยกเลิก" : "⏸ ยังไม่ทำงาน"} • ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong><span>${entry.nullified ? "ความสามารถของการ์ดนี้ถูกสกิลอื่นยกเลิก" : `เงื่อนไข: ${escapeHTML(abilityConditionText(entry.ability.condition || {}))}`}</span></div>`).join("")
+        : `<div class="combo-card inactive-skill"><strong>ไม่มีสกิลที่รอเงื่อนไข</strong><span>สกิลสำหรับโหมดไต่หอทั้งหมดในทีมกำลังทำงานแล้ว</span></div>`;
+      const rawAttack = getRawTeamPower(teamIds, "tower", abilitySummary) + abilitySummary.teamPowerFlat;
+      const rawDefense = getRawTeamDefense(teamIds, "tower", abilitySummary) + abilitySummary.teamDefenseFlat;
+      const previewAttack = Math.max(0, rawAttack * (1 + summary.powerRate + abilitySummary.teamPowerRate));
+      const previewDefense = Math.max(0, rawDefense * (1 + abilitySummary.teamDefenseRate));
+      const powerText = document.getElementById("towerTeamPowerText");
+      if (powerText) powerText.textContent = `ATK ${formatNumber(previewAttack)} • DEF ${formatNumber(previewDefense)}`;
+
+      panel.innerHTML = `
+        <div>
+          <h3>สถานะทีมไต่หอ</h3>
+          <p>ธาตุหลัก: ${escapeHTML(elementLabel(summary.dominantElement))} • ${escapeHTML(summary.dominantReason)} • สมาชิก ${teamIds.length}/${CONFIG.towerTeamSlots}</p>
+          <div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div>
+          <div class="tower-buff-total">
+            บัฟรวมหลัก: ATK ${signedPercent(abilitySummary.teamPowerRate)}${abilitySummary.teamPowerFlat ? ` +${formatNumber(abilitySummary.teamPowerFlat)}` : ""}
+            • DEF ${signedPercent(abilitySummary.teamDefenseRate)}${abilitySummary.teamDefenseFlat ? ` +${formatNumber(abilitySummary.teamDefenseFlat)}` : ""}
+            • ศัตรู ATK ${signedPercent(abilitySummary.enemyPowerRate)} / DEF ${signedPercent(abilitySummary.enemyDefenseRate)}
+            • โจมตี ${getCombatAttackHits(abilitySummary)} ฮิต • โล่ ${getCombatShieldHits(abilitySummary)} ฮิต • Luck ${signedPercent(abilitySummary.luckRate)}
+            ${abilitySummary.triggeredEffects.length ? ` • Active Skill แบบชาร์จ ${abilitySummary.triggeredEffects.length} เอฟเฟกต์` : ""}
+          </div>
+          <h3 class="team-ability-summary">คอมโบธาตุที่ทำงาน</h3>
+          <div class="combo-list">${comboHTML}</div>
+        </div>
+        <div>
+          <h3>สกิลที่กำลังทำงาน (${activeTowerAbilities.length})</h3>
+          <div class="combo-list">${activeAbilityHTML}</div>
+          <h3 class="team-ability-summary">สกิลที่ยังไม่ทำงาน (${inactiveTowerAbilities.length})</h3>
+          <div class="combo-list">${inactiveAbilityHTML}</div>
+        </div>`;
+    }
+
     function renderBattle() {
       const stats = getBattleStats();
+      renderTowerTeam(stats);
       const maxDefense = Math.max(1, stats.effectiveDefense, stats.enemyDefense);
       const formationPercent = Math.round(stats.formationRate * 100);
       const abilityPercent = Math.round(stats.abilityPowerRate * 100);
@@ -11469,9 +11627,9 @@
       document.getElementById("battleStageText").textContent = stats.stage;
       document.getElementById("battleRecordText").textContent = `${state.battle.wins} / ${state.battle.losses}`;
       document.getElementById("battleSupportText").textContent = supportText;
-      document.getElementById("battleButton").disabled = battleAnimating || !state.team.length || !stats.restrictionStatus.ok || state.battle.energy < 1;
+      document.getElementById("battleButton").disabled = battleAnimating || !getTowerTeamIds().length || !stats.restrictionStatus.ok || state.battle.energy < 1;
       if (!battleAnimating) {
-        result.textContent = battleResult ? battleResult.text : "จัดทีมให้พร้อมแล้วท้าทายหอคอย";
+        result.textContent = battleResult ? battleResult.text : "จัดทีมไต่หอให้พร้อมแล้วท้าทายหอคอย";
         result.className = `battle-result ${battleResult ? battleResult.tone : ""}`;
       }
     }
@@ -11516,7 +11674,7 @@
       playerModels.innerHTML = state.arena.team.length
         ? state.arena.team.map((id, index) => {
             const card = CARD_BY_ID.get(String(id));
-            return card ? battleModelHTML(card, index, false) : "";
+            return card ? battleModelHTML(card, index, false, state.arena.team.length) : "";
           }).join("")
         : `<div class="arena-secret-model">+</div>`;
 
@@ -11762,6 +11920,7 @@
       const upgradeCost = status.upgradeCost;
       const awakenCost = status.awakenCost;
       const inTeam = state.team.includes(String(card.id));
+      const inTowerTeam = getTowerTeamIds().includes(String(card.id));
       const inArenaTeam = Boolean(state.arena && Array.isArray(state.arena.team) && state.arena.team.includes(String(card.id)));
       const selectorCount = getSelectorCount(card.rarity);
       const selectorButton = selectorCount > 0
@@ -11770,7 +11929,7 @@
       const abilityCount = getCardAbilities(card).length;
       const statsActive = cardDetailActiveTab !== "ability";
       const membershipHTML = owned
-        ? `<div class="detail-membership-row">${inTeam ? `<span class="team-membership-badge showcase">ทีมโชว์ #${state.team.indexOf(String(card.id)) + 1}</span>` : ""}${inArenaTeam ? `<span class="team-membership-badge arena">ARENA #${state.arena.team.indexOf(String(card.id)) + 1}</span>` : ""}${!inTeam && !inArenaTeam ? `<span class="pill">ยังไม่ได้จัดลงทีม</span>` : ""}</div>`
+        ? `<div class="detail-membership-row">${inTeam ? `<span class="team-membership-badge showcase">ทีมโชว์ #${state.team.indexOf(String(card.id)) + 1}</span>` : ""}${inTowerTeam ? `<span class="team-membership-badge tower">ไต่หอ #${getTowerTeamIds().indexOf(String(card.id)) + 1}</span>` : ""}${inArenaTeam ? `<span class="team-membership-badge arena">ARENA #${state.arena.team.indexOf(String(card.id)) + 1}</span>` : ""}${!inTeam && !inTowerTeam && !inArenaTeam ? `<span class="pill">ยังไม่ได้จัดลงทีม</span>` : ""}</div>`
         : "";
 
       document.getElementById("cardDetail").innerHTML = `
@@ -11818,7 +11977,8 @@
                   <button class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
                     ปลุกพลัง <span class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
                   </button>
-                  <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีม" : "เพิ่มเข้าทีมโชว์/ไต่หอ"}</button>
+                  <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีมโชว์" : "เพิ่มเข้าทีมโชว์"}</button>
+                  <button class="btn ${inTowerTeam ? "btn-danger" : "btn-gold"}" data-action="toggle-tower-team" data-card-id="${escapeHTML(card.id)}">${inTowerTeam ? "นำออกจากทีมไต่หอ" : "เพิ่มเข้าทีมไต่หอ"}</button>
                   <button class="btn ${inArenaTeam ? "btn-danger" : "btn-primary"}" data-action="toggle-arena-team" data-card-id="${escapeHTML(card.id)}">${inArenaTeam ? "นำออกจากทีม ARENA" : "เพิ่มเข้าทีม ARENA"}</button>
                   <button class="btn btn-gold" data-action="set-support-card" data-card-id="${escapeHTML(card.id)}">${String(state.profile.supportCardId || "") === String(card.id) ? "เป็น Support อยู่" : "ตั้งเป็น Support โปรไฟล์"}</button>
                   ${selectorButton}
@@ -12474,6 +12634,7 @@
       if (action === "upgrade") upgradeCard(cardId);
       if (action === "awaken") awakenCard(cardId);
       if (action === "toggle-team") toggleTeam(cardId);
+      if (action === "toggle-tower-team") toggleTowerTeam(cardId);
       if (action === "toggle-arena-team") toggleArenaTeam(cardId);
       if (action === "arena-battle") runArenaBattle();
       if (action === "refresh-arena") refreshArenaData(true);
@@ -12594,20 +12755,6 @@
     }
   </script>
 
-<script>
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    try {
-      const testCard = Object.assign({}, CARDS.find(card => card.rarity === "SC"));
-      testCard.scCutscene = Object.assign({}, testCard.scCutscene, { video: "", introMs: 2200, revealMs: 5000 });
-      testCard.video = "";
-      playSCCutscene([{card:testCard}], () => console.log("SC_TEST_DONE"), 1);
-    } catch (error) {
-      console.error("SC_TEST_ERROR", error);
-    }
-  }, 100);
-});
-</script>
 
 </body>
 </html>
