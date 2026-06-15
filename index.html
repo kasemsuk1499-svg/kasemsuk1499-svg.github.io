@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-15-tower-team-skill-panel-v28">
+  <meta name="gacha-app-build" content="2026-06-15-allowed-teammates-v29">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -4350,7 +4350,8 @@
            "sourceMinLevel": 1,
            "sourceMinAwaken": 0,
            "requiredCardIds": [1041],
-           "anyCardIds": [1042, 1043]
+           "anyCardIds": [1042, 1043],
+           "allowedTeammateCardIds": [1032]
          },
          "effects": [
            { "type": "teamPowerRate", "value": 0.20 },
@@ -4404,6 +4405,7 @@
        - minAnyElementCount: { "ดิน": 5, "เหล็ก": 5 } = ดินครบ 5 ใบ หรือเหล็กครบ 5 ใบ อย่างใดอย่างหนึ่ง
        - minCombinedElementCount: { "elements": ["ดิน", "เหล็ก"], "count": 5 } = การ์ดที่มีดินหรือเหล็กรวมกันอย่างน้อย 5 ใบ (การ์ดหลายธาตุนับใบละ 1)
        - teamElementsOnly: ["ดิน", "เหล็ก"] = ทุกธาตุบนการ์ดทุกใบในทีมต้องอยู่ในรายการนี้เท่านั้น; มักใช้ร่วมกับ minTeamSize: 5
+       - allowedTeammateCardIds: [1032] = การ์ดเจ้าของสกิลอยู่เดี่ยวได้ หรืออยู่ร่วมกับ ID ที่กำหนดเท่านั้น; ไม่ได้บังคับว่าต้องใส่การ์ดนั้น
        - activeIn: team/showcase = ทีมโชว์/รายได้/โบนัสกาชาจากทีมโชว์, tower/battle = ไต่หอ, arena/pvp = อารีน่า/โบนัสกาชาจากทีมอารีน่า
        - ไม่มี ability ก็เล่นได้ตามปกติ ไม่ต้องแก้ข้อมูลการ์ดเก่า
        ===================================================================== */
@@ -4485,6 +4487,10 @@
 
        3) ทีมครบ 5 ใบและทุกธาตุบนการ์ดต้องเป็นดินหรือเหล็กเท่านั้น
           "condition": { "teamElementsOnly": ["ดิน", "เหล็ก"], "minTeamSize": 5 }
+
+       4) อยู่เดี่ยวได้ หรืออยู่ร่วมกับ Uraume (ID 1032) เท่านั้น
+          "condition": { "allowedTeammateCardIds": [1032] }
+          หมายเหตุ: ถ้ามีสมาชิกคนอื่นนอกเหนือจาก ID ที่อนุญาต สกิลจะไม่ทำงาน
     */
 
     /* ตัวอย่าง Active Skill แบบวนลูป:
@@ -4543,18 +4549,6 @@
       "showCardAfterVideo": true,
       "revealKicker": "SYSTEM ACCESS GRANTED",
       "revealTitle": "SC · DEV."
-    },
-    "ability": {
-      "name": "Developer Authority",
-      "description": "เมื่อ DEV. อยู่ในทีม เพิ่มพลังฝ่ายเราและกดพลังฝ่ายตรงข้าม หากทีมมีทั้งความมืดและมิติจะได้รับค่าโชคเพิ่ม",
-      "activeIn": ["team", "tower", "arena"],
-      "effects": [
-        { "type": "teamPowerRate", "value": 0.20 },
-        { "type": "teamDefenseRate", "value": 0.15 },
-        { "type": "shieldHits", "value": 1 },
-        { "type": "enemyPowerRate", "value": -0.10 },
-        { "type": "luckRate", "value": 0.15, "condition": { "requiredElements": ["ความมืด", "มิติ"] } }
-      ]
     }
   },
   {
@@ -4589,16 +4583,6 @@
       "showCardAfterVideo": true,
       "revealKicker": "ORIGIN SIGNATURE",
       "revealTitle": "SC · CREATOR"
-    },
-    "ability": {
-      "name": "Creative Overdrive",
-      "description": "เมื่ออยู่ในทีม เพิ่มรายได้รวม และเสริมพลังให้การ์ดธาตุสายฟ้าหรือลมเมื่อมีทั้งสองธาตุในทีม",
-      "activeIn": ["team", "tower", "arena"],
-      "effects": [
-        { "type": "teamIncomeRate", "value": 0.25 },
-        { "type": "attackHits", "value": 1, "condition": { "requiredElements": ["สายฟ้า", "ลม"] } },
-        { "type": "elementPowerRate", "value": 0.12, "targetElements": ["สายฟ้า", "ลม"], "condition": { "requiredElements": ["สายฟ้า", "ลม"] } }
-      ]
     }
   },
   {
@@ -4633,16 +4617,6 @@
       "showCardAfterVideo": true,
       "revealKicker": "THE GRAND ARCANA",
       "revealTitle": "SC · GREAT MAGICIAN"
-    },
-    "ability": {
-      "name": "Grand Arcana",
-      "description": "เมื่ออยู่ในทีม เพิ่มตัวคูณพลังและรายได้ให้การ์ดระดับ SC ทุกใบในทีม",
-      "activeIn": ["team", "tower", "arena"],
-      "effects": [
-        { "type": "rarityPowerRate", "value": 0.30, "targetRarities": ["SC"] },
-        { "type": "rarityDefenseRate", "value": 0.20, "targetRarities": ["SC"] },
-        { "type": "rarityIncomeRate", "value": 0.20, "targetRarities": ["SC"] }
-      ]
     }
   },
   {
@@ -4677,27 +4651,7 @@
       "showCardAfterVideo": true,
       "revealKicker": "FORTUNE ANSWERS",
       "revealTitle": "SC · MAMON"
-    },
-    "abilities": [
-      {
-        "name": "Fortune of the Deep",
-        "description": "สกิลต่อสู้ทำงานเฉพาะไต่หอและ ARENA: เพิ่มค่าโชค และเมื่อมีธาตุไม่ซ้ำอย่างน้อย 4 ธาตุจะลดพลังฝ่ายตรงข้าม",
-        "activeIn": ["tower", "arena"],
-        "effects": [
-          { "type": "luckRate", "value": 0.25 },
-          { "type": "shieldHits", "value": 2 },
-          { "type": "enemyPowerRate", "value": -0.10, "condition": { "minUniqueElements": 4 } }
-        ]
-      },
-      {
-        "name": "Abyssal Gacha Blessing",
-        "description": "ทำงานเฉพาะเมื่อ MAMON อยู่ในทีมโชว์ เพิ่มน้ำหนักสุ่มระดับ UR, LR, EX และ SC ขึ้น 15% โดยไม่เปลี่ยนระบบการันตี",
-        "activeIn": ["team"],
-        "effects": [
-          { "type": "gachaRarityRate", "value": 0.15, "targetRarities": ["UR", "LR", "EX", "SC"] }
-        ]
-      }
-    ]
+    }
   },
   {
     "id": 1041,
@@ -4715,20 +4669,7 @@
     "icon": "",
     "image": "1041.png",
     "video": "1041.mp4",
-    "poster": "1041.png",
-    "ability": {
-      "name": "Strongest in Present",
-      "description": "เมื่อการ์ดนี้อยู่ในทีมและทีมมีทั้งธาตุน้ำกับเหล็ก เพิ่มพลังรวมของฝ่ายเรา15% พร้อมเพิ่มพลังให้ตัวเอง30%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": { "requiredElements": ["น้ำ", "เหล็ก"],
-                     "minElementCount": { "น้ำ": 2, "เหล็ก": 2 } },
-      "effects": [
-        { "type": "teamPowerRate", "value": 0.15 },
-        { "type": "teamDefenseRate", "value": 0.15 },
-        { "type": "shieldHits", "value": 1 },
-        { "type": "selfPowerRate", "value": 0.30 }
-      ]
-    }
+    "poster": "1041.png"
   },
   {
     "id": 1042,
@@ -4746,20 +4687,7 @@
     "icon": "",
     "image": "1042.png",
     "video": "1042.mp4",
-    "poster": "1042.png",
-    "ability": {
-      "name": "Strongest in Present",
-      "description": "เมื่อการ์ดนี้อยู่ในทีมและทีมมีทั้งธาตุมืดกับมิติ เพิ่มพลังรวมของฝ่ายเรา15% พร้อมลดพลังทีมฝั่งตรงข้าม20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": { "requiredElements": ["ความมืด", "มิติ"],
-                     "minElementCount": { "ความมืด": 2, "มิติ": 2 } },
-      "effects": [
-        { "type": "teamPowerRate", "value": 0.15 },
-        { "type": "attackHits", "value": 1 },
-        { "type": "enemyPowerRate", "value": -0.20 },
-        { "type": "enemyDefenseRate", "value": -0.15 }
-      ]
-    }
+    "poster": "1042.png"
   },
   {
     "id": 1043,
@@ -4851,7 +4779,19 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "44.png"
+    "image": "44.png",
+    "ability": {
+      "name": "เมตตาจากสวรรค์",
+      "description": "จะลบเงื่อนไขของสกิลฝ่ายเราทั้งหมดเมื่อจัดทีมไม่เกิน3คน ;(ทำงานตลอดเวลา)สกิลของการ์ดที่ชื่อ'Sukuna'ฝ่ายตรงข้ามไร้ผล ATK/DEF-90%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {},
+      "effects": [
+        { "type": "nullifyCardAbilities", "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] },
+        { "type": "ignoreAbilityConditions", "targetSide": "ally", "condition": { "maxTeamSize": 3 } },
+        { "type": "cardPowerRate", "value": -0.90, "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] }
+        { "type": "cardDefenseRate", "value": -0.90, "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] }
+      ]
+    }
   },
   {
     "id": 45,
@@ -4865,7 +4805,18 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "45.png"
+    "image": "45.png",
+    "ability": {
+      "name": "เทพแห่งดวงดาว",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; โชคในการต่อสู้+20% เรทกาชา EX/SC +25% รายได้+30%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "luckRate", "value": 0.2 },
+        { "type": "teamIncomeRate", "value": 0.25 },
+        { "type": "gachaRarityRate", "value": 0.30, "targetRarities": ["EX", "SC"] }
+      ]
+    }
   },
   {
     "id": 1,
@@ -4879,7 +4830,17 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1.png"
+    "image": "1.png",
+    "ability": {
+      "name": "เอ็กคาลิเบอร์",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ทุกการโจมตีครั้งที่4 +ATK10%(ไม่แสต็ค)",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "nextAttackPowerRate", "value": 0.1, "condition": { "afterOwnAttacks": 4, "repeat": true } }
+      ]
+    }
+  },
   },
   {
     "id": 2,
@@ -4893,7 +4854,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "2.png"
+    "image": "2.png",
+    "ability": {
+      "name": "จงตื่น",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ฮีล+5%ที่ตี3ครั้ง",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "healDefenseRate", "value": 0.05, "condition": { "afterOwnAttacks": 3, "repeat": true } }
+      ]
+    }
   },
   {
     "id": 3,
@@ -4907,7 +4877,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "3.png"
+    "image": "3.png",
+    "ability": {
+      "name": "1000ปี",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; DEF+500%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "selfDefenseRate", "value": 5 }
+      ]
+    }
   },
   {
     "id": 4,
@@ -4921,7 +4900,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "4.png"
+    "image": "4.png",
+    "ability": {
+      "name": "อะตอมมิค",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; โล่+10",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "shieldHits", "value": 10 }
+      ]
+    }
   },
   {
     "id": 5,
@@ -4935,7 +4923,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "5.png"
+    "image": "5.png",
+    "ability": {
+      "name": "เร็วขึ้นอีก",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ATK +500%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "selfPowerRate", "value": 5 }
+      ]
+    }
   },
   {
     "id": 6,
@@ -4949,7 +4946,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "6.png"
+    "image": "6.png",
+    "ability": {
+      "name": "นิกะนิกะโนมิ",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ATK +500%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "selfPowerRate", "value": 5 }
+      ]
+    }
   },
   {
     "id": 7,
@@ -4963,7 +4969,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "7.png"
+    "image": "7.png",
+    "ability": {
+      "name": "มุราซากิ",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ATK +500%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "selfPowerRate", "value": 5 }
+      ]
+    }
   },
   {
     "id": 8,
@@ -4977,7 +4992,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "8.png"
+    "image": "8.png",
+    "ability": {
+      "name": "ไอแอม..อะตอมมิค",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; โจมตี +8ฮิต",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "attackHits", "value": 8 }
+      ]
+    }
   },
   {
     "id": 9,
@@ -4991,7 +5015,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "9.png"
+    "image": "9.png",
+    "ability": {
+      "name": "ปราณวารี",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; DEF+500%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "selfDefenseRate", "value": 5 }
+      ]
+    }
   },
   {
     "id": 10,
@@ -5005,7 +5038,16 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "10.png"
+    "image": "10.png",
+    "ability": {
+      "name": "โหมดเซียน",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; DEF+500%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "effects": [
+        { "type": "selfDefenseRate", "value": 5 }
+      ]
+    }
   },
   {
     "id": 1038,
@@ -5019,7 +5061,18 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1038.png"
+    "image": "1038.png",
+    "ability": {
+      "name": "ตั้งมั่นสานสัมพันธ์",
+      "description": "ทีมเรา ATK-20% DEF+90% และ เมื่ออเวกตันและเลเวล 150 โจมตี +5ฮิต",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {},
+      "effects": [
+         { "type": "teamPowerRate", "value": -0.20 },
+        { "type": "teamDefenseRate", "value": 0.90 },
+        { "type": "attackHits", "value": 5, "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 150} }
+      ]
+    }
   },
   {
     "id": 1039,
@@ -5033,7 +5086,18 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1039.png"
+    "image": "1039.png",
+    "ability": {
+      "name": "มโหฬากาฬ",
+      "description": "หากการ์ดใบนี้ ตีครบ 10 ครั้ง จะอัญเชินมหโหฬาการ ; ATK/DEF+40% และทุกครั้งที่ตี3ครั้งจะได้รับโล่ +3",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "afterOwnAttacks": 10, "repeat": false } },
+      "effects": [
+         { "type": "teamPowerRate", "value": 0.40 },
+        { "type": "teamDefenseRate", "value": 0.40 },
+        { "type": "restoreShieldHits", "value": 3, "condition": { "afterOwnAttacks": 3, "repeat": true } }
+      ]
+    }
   },
   {
     "id": 1040,
@@ -5047,7 +5111,30 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1040.png"
+    "image": "1040.png",
+    "abilities": [
+      {
+        "name": "สายสัมพันธ์มนุษย์และมนุษย์ต่างดาว",
+        "description": "หากการ์ดใบนี้จัดทีมร่วมกับ 'Yuka Okkotsu'และ'Marulu Val Vol Yelvori'จะได้รับ; รายได้+50% และ ATK/DEF+40%",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "requiredCardIds": [1039, 1038] },
+        "effects": [
+          { "type": "teamIncomeRate", "value": 0.50 },
+          { "type": "teamPowerRate", "value": 0.4 },
+          { "type": "teamDefenseRate", "value": 0.4 }
+        ]
+      },
+      {
+        "name": "บัญญัติสวรรค์",
+        "description": "ATK/DEF+150%",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": {},
+        "effects": [
+          { "type": "selfDefenseRate", "value": 1.5 },
+          { "type": "selfPowerRate", "value": 1.5 }
+        ]
+      }
+    ]
   },
   {
     "id": 1033,
@@ -5061,7 +5148,18 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1033.png"
+    "image": "1033.png",
+    "ability": {
+      "name": "พนันลั่นลาง",
+      "description": "หากการ์ดใบนี้ ตีครบ 7 ครั้ง จะเปิดอาณาเขต ; DEF+777% และทุกครั้งที่ตีจะได้รับโล่ +7 และ DEF+7%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "afterOwnAttacks": 7, "repeat": false } },
+      "effects": [
+        { "type": "healDefenseRate", "value": 7.77 },
+        { "type": "restoreShieldHits", "value": 7, "condition": { "afterOwnAttacks": 0, "repeat": true } },
+        { "type": "healDefenseRate", "value": 0.07, "condition": { "afterOwnAttacks": 0, "repeat": true } }
+      ]
+    }
   },
   {
     "id": 1034,
@@ -5075,7 +5173,17 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1034.png"
+    "image": "1034.png",
+    "ability": {
+      "name": "พยัคสายฟ้าทะลุทะลวง",
+      "description": "หากการ์ดใบนี้ ตีครบ 6 ครั้ง ครั้งต่อไปจะตี+12ฮิต ATK+10000000",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "afterOwnAttacks": 6, "repeat": true } },
+      "effects": [
+        { "type": "nextAttackHits", "value": 12 },
+        { "type": "nextAttackPowerFlat", "value": 10000000 }
+      ]
+    }
   },
   {
     "id": 1023,
@@ -5089,7 +5197,29 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1023.png"
+    "image": "1023.png",
+    "ability": [
+      {
+        "name": "ผู้ใช้คุณไสยในตำนาน",
+        "description": "หากอเวกตันและเลเวล 150 จะได้รับความสามารถ ; โจมตี+16ครั้ง DEF+1000%" เมื่อตีครบ 30 ครั้งจะได้โล่เพิ่ม +2",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 150 },
+        "effects": [
+         { "type": "teamDefenseRate", "value": 10.0 },
+         { "type": "attackHits", "value": 16 },
+         { "type": "restoreShieldHits", "value": 2, "condition": { "afterOwnAttacks": 30, "repeat": true } }
+        ]
+      },
+      {
+        "name": "ตัดสะบั้นV2",
+        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 160 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 8000%",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "allowedTeammateCardIds": [1032] },
+        "effects": [
+          { "type": "nextAttackPowerRate", "value": 80.0, "condition": { "afterOwnAttacks": 160, "repeat": true } }
+        ]
+      }
+    ]
   },
   {
     "id": 1021,
@@ -5103,7 +5233,17 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1021.png"
+    "image": "1021.png",
+    "ability": {
+      "name": "หลักฐานมัดตัว",
+      "description": "หากการ์ดใบนี้ ตีครบ 50 ครั้งจะเปิดอาณาเขต; ศัตรู ATK-50%"และความสามารถการ์ดทั้งหมดของศัตรูไร้ผล,
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "afterOwnAttacks": 50, "repeat": false } },
+      "effects": [
+        { "type": "enemyPowerRate", "value": -0.5 },
+        { "type": "nullifyCardAbilities","targetSide": "enemy" }
+      ]
+    }
   },
   {
     "id": 1022,
@@ -5117,7 +5257,17 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1022.png"
+    "image": "1022.png",
+    "ability": {
+      "name": "ไม่ว่าอะไรก็จะเป็นเรื่องตลกไปหมด5555",
+      "description": "หากอเวกตัน/เลเวลตัน จะได้รับความสามารถ; เพิ่มโชคในการต่อสู้ +90% และเพิ่มเรทกาชา SC/EX 50%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 220 },
+      "effects": [
+        { "type": "luckRate", "value": 0.9 },
+        { "type": "gachaRarityRate", "value": 0.5, "targetRarities": ["EX", "SC"] }
+      ]
+    }
   },
   {
     "id": 1001,
@@ -5131,7 +5281,31 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1001.png"
+    "image": "1001.png",
+    "abilities": [
+      {
+        "name": "ดวงตาเรียวคุกันและไร้ขีดจำกัดล่าง",
+        "description": "เพื่มรายได้กับทีม +30% ;เมื่ออเวกตัน จะได้รับ ATK+500% DEF+800% และโล่ +15 ;หากเลเวล150/อเวกตัน เมื่อตีครบ 3 ครั้งจะได้โล่เพิ่ม +2",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": {},
+        "effects": [
+                  { "type": "teamIncomeRate", "value": 0.3 },                 
+                  { "type": "teamPowerRate", "value": 5.0, "condition": { "sourceMinAwaken": 4 } },
+         { "type": "teamDefenseRate", "value": 8.0, "condition": { "sourceMinAwaken": 4 } },
+         { "type": "shieldHits", "value": 15, "condition": { "sourceMinAwaken": 4 } },
+         { "type": "restoreShieldHits", "value": 2, "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 150, "afterOwnAttacks": 3, "repeat": true } }
+        ]
+      },
+      {
+        "name": "มุราซากิ",
+        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 50 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 5000%",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": {},
+        "effects": [
+          { "type": "nextAttackPowerRate", "value": 50.0, "condition": { "afterOwnAttacks": 50, "repeat": false } }
+        ]
+      }
+    ]
   },
   {
     "id": 1002,
@@ -5145,7 +5319,31 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1002.png"
+    "image": "1002.png",
+    "abilities": [
+      {
+        "name": "ราชาคำสาป",
+        "description": "การ์ดใบนี้อยู่เดี่ยวได้ หรือจัดทีมร่วมกับ 'Uraume' เท่านั้น หากมีสมาชิกคนอื่น สกิลนี้จะไม่ทำงาน",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "allowedTeammateCardIds": [1032] },
+        "effects": [
+                   { "type": "teamPowerRate", "value": 10.0 },
+         { "type": "teamDefenseRate", "value": 10.0 },
+         { "type": "shieldHits", "value": 10 },
+         { "type": "attackHits", "value": 7 },
+         { "type": "restoreShieldHits", "value": 2, "condition": { "afterOwnAttacks": 16, "repeat": true } }
+        ]
+      },
+      {
+        "name": "ตัดสะบั้น",
+        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 80 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 2000%",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "allowedTeammateCardIds": [1032] },
+        "effects": [
+          { "type": "nextAttackPowerRate", "value": 20.0, "condition": { "afterOwnAttacks": 80, "repeat": true } }
+        ]
+      }
+    ]
   },
   {
     "id": 1003,
@@ -5159,7 +5357,30 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1003.png"
+    "image": "1003.png",
+    "abilities": [
+      {
+        "name": "นักล่าพ่อมด",
+        "description": "เมื่ออเวกตัน/เลเวล 150 การ์ดใบนี้ได้รับความสามารถ ; ลด ATK/DEF 50% ของฝ่าตรงข้าม และโจมตีเพิ่ม 4 ฮิต",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "sourceMinLevel": 150, "sourceMinAwaken": 4 },
+        "effects": [
+          { "type": "attackHits", "value": 4 },
+          { "type": "enemyDefenseRate", "value": 0.4 },
+          { "type": "selfDefenseRate", "value": 0.4 }
+        ]
+      },
+      {
+        "name": "บัญญัติสวรรค์",
+        "description": "ATK/DEF+150%",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": {},
+        "effects": [
+          { "type": "selfDefenseRate", "value": 1.5 },
+          { "type": "selfPowerRate", "value": 1.5 }
+        ]
+      }
+    ]
   },
   {
     "id": 1004,
@@ -5173,7 +5394,30 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1004.png"
+    "image": "1004.png",
+    "abilities": [
+      {
+        "name": "ผู้มีพรสวรรค์",
+        "description": "เมื่ออเวกตัน/เลเวล 150 การ์ดใบนี้ได้รับความสามารถ ; ATK/DEF+220% และโจมตีเพิ่ม 4 ฮิต",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "sourceMinLevel": 150, "sourceMinAwaken": 4 },
+        "effects": [
+          { "type": "attackHits", "value": 4 },
+          { "type": "selfDefenseRate", "value": 2.2 },
+          { "type": "selfPowerRate", "value": 2.2 }
+        ]
+      },
+      {
+        "name": "บัญญัติสวรรค์",
+        "description": "ATK/DEF+150%",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": {},
+        "effects": [
+          { "type": "selfDefenseRate", "value": 1.5 },
+          { "type": "selfPowerRate", "value": 1.5 }
+        ]
+      }
+    ]
   },
   {
     "id": 1005,
@@ -5313,12 +5557,12 @@
     "image": "1010.png",
     "ability": {
       "name": "เสียงสั่นพ้อง",
-      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'yuji itadori'UR;'megimi fushiguro'UR;'gojo stouru'LR; ATK+45%และโจมตี+7 ",
+      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'yuji itadori'UR;'megimi fushiguro'UR;'gojo stouru'LR; ATK+45%และโจมตีเพิ่ม 7 ฮิต ",
       "activeIn": ["team", "tower", "arena"],
       "condition": { "leaderOnly": true, "requiredCardIds": [1009,1011,1001] },
       "effects": [
         { "type": "teamPowerRate", "value": 0.45 },
-        { "type": "attackHits", "value": 6 }
+        { "type": "attackHits", "value": 7 }
       ]
     }
   },
@@ -5343,7 +5587,7 @@
       "effects": [
         { "type": "teamPowerRate", "value": 0.35 },
         { "type": "teamDefenseRate", "value": 0.35 },
-        { "type": "attackHits", "value": 3 },
+        { "type": "attackHits", "value": 4 },
         { "type": "shieldHits", "value": 4 }
       ]
     }
@@ -5442,7 +5686,7 @@
         { "type": "teamPowerRate", "value": 20.0 },
         { "type": "teamDefenseRate", "value": 20.0 },
         { "type": "shieldHits", "value": 4 },
-        { "type": "attackHits", "value": 3 },
+        { "type": "attackHits", "value": 4 },
         { "type": "luckRate", "value": 0.10 }
       ]
     }
@@ -5948,7 +6192,7 @@
     "ability": {
       "name": "ไม่มีที่ไหนจะดีไปกว่าการได้เจอเธอทุกวัน...",
       "description": "หากจัดทีมร่วมกับการ์ด 'Yuki Suou(WaguriSuit)' ;การ์ดที่ชื่อ 'Yuki Suou(WaguriSuit)'ได้รับการยกเลิกเงื่อนไข และ ทีมได้รับรายได้+10%",
-      "activeIn": ["team", "tower"],
+      "activeIn": ["team", "tower", "arena"],
       "condition": {"requiredCardIds": [37]},
       "effects": [
         { "type": "teamIncomeRate", "value": 0.1 },
@@ -7751,6 +7995,24 @@
       return [...new Set(abilityArray(value).map(item => String(item)).filter(Boolean))];
     }
 
+    // เงื่อนไขทีมแบบ whitelist: เจ้าของสกิลอยู่เดี่ยวได้ และสมาชิกคนอื่นต้องเป็น ID ที่อนุญาตเท่านั้น
+    // รองรับชื่อคีย์หลัก allowedTeammateCardIds และ alias เพื่อแก้ข้อมูลได้ยืดหยุ่น
+    function getAllowedTeammateCardIds(condition = {}) {
+      const rule = condition && typeof condition === "object" ? condition : {};
+      return normalizeAbilityCardIds(
+        rule.allowedTeammateCardIds
+          ?? rule.allowedTeamCardIds
+          ?? rule.teamCardIdsOnly
+          ?? rule.onlyWithCardIds
+      );
+    }
+
+    function abilityCardIdLabel(id) {
+      const safeId = String(id);
+      const card = typeof CARD_BY_ID !== "undefined" ? CARD_BY_ID.get(safeId) : null;
+      return card ? `${card.name} (ID ${safeId})` : `ID ${safeId}`;
+    }
+
     function normalizeAbilityTargetSide(value) {
       const side = String(value || "ally").trim().toLowerCase();
       if (["enemy", "opponent", "foe", "ฝ่ายตรงข้าม"].includes(side)) return "enemy";
@@ -7956,6 +8218,15 @@
       if (Number(rule.minTeamSize || 0) > context.teamSize) return false;
       if (Number(rule.maxTeamSize || Infinity) < context.teamSize) return false;
       if (rule.leaderOnly && String(context.leaderId) !== String(sourceCard.id)) return false;
+
+      // อยู่เดี่ยวได้ หรืออยู่กับการ์ดที่ระบุเท่านั้น: ไม่บังคับให้ต้องมีการ์ดที่อนุญาต
+      const allowedTeammateCardIds = getAllowedTeammateCardIds(rule);
+      if (allowedTeammateCardIds.length) {
+        const allowedSet = new Set(allowedTeammateCardIds);
+        const sourceId = String(sourceCard.id);
+        const hasForbiddenTeammate = context.ids.some(id => String(id) !== sourceId && !allowedSet.has(String(id)));
+        if (hasForbiddenTeammate) return false;
+      }
 
       const requiredElements = normalizeAbilityElements(rule.requiredElements);
       if (requiredElements.some(element => Number(context.elementCounts[element] || 0) < 1)) return false;
@@ -8446,6 +8717,10 @@
       if (Number(condition.minUniqueElements || 0) > 0) parts.push(`ธาตุไม่ซ้ำอย่างน้อย ${Number(condition.minUniqueElements)} ธาตุ`);
       if (Number(condition.minTeamSize || 0) > 0) parts.push(`ทีมอย่างน้อย ${Number(condition.minTeamSize)} ใบ`);
       if (condition.leaderOnly) parts.push("การ์ดนี้ต้องอยู่ช่องหัวหน้าทีม");
+      const allowedTeammateIds = getAllowedTeammateCardIds(condition);
+      if (allowedTeammateIds.length) {
+        parts.push(`อยู่เดี่ยวได้ หรืออยู่ร่วมได้เฉพาะ ${allowedTeammateIds.map(abilityCardIdLabel).join(" / ")}`);
+      }
       if (Number(condition.sourceMinLevel || 0) > 1) parts.push(`เลเวลการ์ดนี้อย่างน้อย ${Number(condition.sourceMinLevel)}`);
       if (Number(condition.sourceMinAwaken || 0) > 0) parts.push(`อเวกการ์ดนี้อย่างน้อย +${Number(condition.sourceMinAwaken)}`);
       const requiredIds = normalizeAbilityCardIds(condition.requiredCardIds);
