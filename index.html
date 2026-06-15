@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-15-allowed-teammates-v29">
+  <meta name="gacha-app-build" content="2026-06-15-allowed-teammates-checked-v30">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -4521,7 +4521,7 @@
     "rarity": "SC",
     "element": "ความมืด",
     "power": 5000000,
-    "defense": 10000000,
+    "defense": 5000000,
     "incomePerSec": 30000,
     "upgradeDustBase": 20000,
     "upgradeDustGrowth": 1.112,
@@ -4557,6 +4557,7 @@
     "rarity": "SC",
     "element": "สายฟ้า",
     "power": 5000000,
+        "defense": 5000000,
     "incomePerSec": 30000,
     "upgradeDustBase": 20000,
     "upgradeDustGrowth": 1.112,
@@ -4591,6 +4592,7 @@
     "rarity": "SC",
     "element": "ไร้ธาตุ",
     "power": 5000000,
+        "defense": 5000000,
     "incomePerSec": 30000,
     "upgradeDustBase": 20000,
     "upgradeDustGrowth": 1.112,
@@ -4625,6 +4627,7 @@
     "rarity": "SC",
     "element": "น้ำแข็ง",
     "power": 5000000,
+        "defense": 5000000,
     "incomePerSec": 30000,
     "upgradeDustBase": 20000,
     "upgradeDustGrowth": 1.112,
@@ -4662,6 +4665,7 @@
       "เหล็ก"
     ],
     "power": 800000,
+        "defense": 1600000,
     "incomePerSec": 18000,
     "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
@@ -4680,6 +4684,7 @@
       "มิติ"
     ],
     "power": 800000,
+        "defense": 1600000,
     "incomePerSec": 18000,
     "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
@@ -4698,6 +4703,7 @@
       "ลม"
     ],
     "power": 801000,
+        "defense": 1600000,
     "incomePerSec": 18100,
     "upgradeDustBase": 10100,
     "upgradeDustGrowth": 1.092,
@@ -4713,6 +4719,7 @@
     "rarity": "EX",
     "element": "มิติ",
     "power": 810000,
+        "defense": 1600000,
     "incomePerSec": 18800,
     "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
@@ -4728,6 +4735,7 @@
     "rarity": "EX",
     "element": "ความมืด",
     "power": 810000,
+        "defense": 1600000,
     "incomePerSec": 18800,
     "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
@@ -4743,6 +4751,7 @@
     "rarity": "EX",
     "element": "ไฟ",
     "power": 810000,
+        "defense": 1600000,
     "incomePerSec": 18800,
     "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
@@ -4758,6 +4767,7 @@
     "rarity": "EX",
     "element": "แสง",
     "power": 810000,
+        "defense": 1600000,
     "incomePerSec": 18800,
     "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
@@ -4788,7 +4798,7 @@
       "effects": [
         { "type": "nullifyCardAbilities", "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] },
         { "type": "ignoreAbilityConditions", "targetSide": "ally", "condition": { "maxTeamSize": 3 } },
-        { "type": "cardPowerRate", "value": -0.90, "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] }
+        { "type": "cardPowerRate", "value": -0.90, "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] },
         { "type": "cardDefenseRate", "value": -0.90, "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] }
       ]
     }
@@ -4840,7 +4850,6 @@
         { "type": "nextAttackPowerRate", "value": 0.1, "condition": { "afterOwnAttacks": 4, "repeat": true } }
       ]
     }
-  },
   },
   {
     "id": 2,
@@ -5091,7 +5100,7 @@
       "name": "มโหฬากาฬ",
       "description": "หากการ์ดใบนี้ ตีครบ 10 ครั้ง จะอัญเชินมหโหฬาการ ; ATK/DEF+40% และทุกครั้งที่ตี3ครั้งจะได้รับโล่ +3",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "afterOwnAttacks": 10, "repeat": false } },
+      "condition": { "afterOwnAttacks": 10, "repeat": false },
       "effects": [
          { "type": "teamPowerRate", "value": 0.40 },
         { "type": "teamDefenseRate", "value": 0.40 },
@@ -5153,7 +5162,7 @@
       "name": "พนันลั่นลาง",
       "description": "หากการ์ดใบนี้ ตีครบ 7 ครั้ง จะเปิดอาณาเขต ; DEF+777% และทุกครั้งที่ตีจะได้รับโล่ +7 และ DEF+7%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "afterOwnAttacks": 7, "repeat": false } },
+      "condition": { "afterOwnAttacks": 7, "repeat": false },
       "effects": [
         { "type": "healDefenseRate", "value": 7.77 },
         { "type": "restoreShieldHits", "value": 7, "condition": { "afterOwnAttacks": 0, "repeat": true } },
@@ -5178,7 +5187,7 @@
       "name": "พยัคสายฟ้าทะลุทะลวง",
       "description": "หากการ์ดใบนี้ ตีครบ 6 ครั้ง ครั้งต่อไปจะตี+12ฮิต ATK+10000000",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "afterOwnAttacks": 6, "repeat": true } },
+      "condition": { "afterOwnAttacks": 6, "repeat": true },
       "effects": [
         { "type": "nextAttackHits", "value": 12 },
         { "type": "nextAttackPowerFlat", "value": 10000000 }
@@ -5198,10 +5207,10 @@
     "awakenMax": 4,
     "icon": "",
     "image": "1023.png",
-    "ability": [
+    "abilities": [
       {
         "name": "ผู้ใช้คุณไสยในตำนาน",
-        "description": "หากอเวกตันและเลเวล 150 จะได้รับความสามารถ ; โจมตี+16ครั้ง DEF+1000%" เมื่อตีครบ 30 ครั้งจะได้โล่เพิ่ม +2",
+        "description": "หากอเวกตันและเลเวล 150 จะได้รับความสามารถ ; โจมตี+16ครั้ง DEF+1000% เมื่อตีครบ 30 ครั้งจะได้โล่เพิ่ม +2",
         "activeIn": ["team", "tower", "arena"],
         "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 150 },
         "effects": [
@@ -5236,9 +5245,9 @@
     "image": "1021.png",
     "ability": {
       "name": "หลักฐานมัดตัว",
-      "description": "หากการ์ดใบนี้ ตีครบ 50 ครั้งจะเปิดอาณาเขต; ศัตรู ATK-50%"และความสามารถการ์ดทั้งหมดของศัตรูไร้ผล,
+      "description": "หากการ์ดใบนี้ตีครบ 50 ครั้งจะเปิดอาณาเขต; ศัตรู ATK-50% และความสามารถการ์ดทั้งหมดของศัตรูไร้ผล",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "afterOwnAttacks": 50, "repeat": false } },
+      "condition": { "afterOwnAttacks": 50, "repeat": false },
       "effects": [
         { "type": "enemyPowerRate", "value": -0.5 },
         { "type": "nullifyCardAbilities","targetSide": "enemy" }
