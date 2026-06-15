@@ -5136,7 +5136,18 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1005.png"
+    "image": "1005.png",
+    "ability": {
+      "name": "ริกะจัง",
+      "description": "เมื่อการ์ดนี้อยู่ในทีมหากใส่ 4 ตัวละครหรือต่ำกว่าจะได้รับเอฟเฟค; ตัวเองจะได้รับ ATK/DEF+90% และเมื่อตีครบ 10 ครั้ง จะได้รับฟื้นฟู +5% ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "maxTeamSize": 4 },
+      "effects": [
+        { "type": "healDefenseRate", "value": 0.05, "condition": { "afterOwnAttacks": 9, "repeat": true } },
+        { "type": "selfDefenseRate", "value": 0.9 },
+        { "type": "selfPowerRate", "value": 0.9 }
+      ]
+    }
   },
   {
     "id": 1006,
@@ -5150,7 +5161,17 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1006.png"
+    "image": "1006.png",
+    "ability": {
+      "name": "นายชอบผู้หญิงแบบไหนล่ะ",
+      "description": "เมื่อการ์ดนี้อยู่ในทีม ทั้งทีมจะได้รับ DEF+100% และเมื่อตีครบ 5 ครั้ง ได้รับโล่ +2 ;ทำงานเฉพาะโหมด Tower",
+      "activeIn": ["tower"],
+      "condition": { "mode": "tower" },
+      "effects": [
+        { "type": "restoreShieldHits", "value": 2, "condition": { "afterOwnAttacks": 5, "repeat": true } },
+        { "type": "teamDefenseRate", "value": 1 }
+      ]
+    }
   },
   {
     "id": 1007,
@@ -5164,7 +5185,17 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1007.png"
+    "image": "1007.png",
+    "ability": {
+      "name": "ผู้ใช้คุุณไสยต้องปกป้องคนอ่อนแอ",
+      "description": "หากการ์ดใบนี้จัดทีมกับการ์ดที่มีชื่อ 'Gojo' ; ATK+20%/DEF+35%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "anyCardIds": [1041, 1001, 7] },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.2 },
+        { "type": "teamDefenseRate", "value": 0.35 }
+      ]
+    }
   },
   {
     "id": 1008,
@@ -5178,7 +5209,18 @@
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
-    "image": "1008.png"
+    "image": "1008.png",
+    "ability": {
+      "name": "กลยุทธ์ของคำสาปฉันเหนือกว่า",
+      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับคำสาปหรือนักสาปแช่ง ; ATK/DEF+10%และยกเลิกเงื่อนไขสกิลของคำสาปหรือนักสาปแช่งในทีมทั้งหมด",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": { "leaderOnly": true, "anyCardIds": [1002, 1035, 1042, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032] },
+      "effects": [
+        { "type": "teamPowerRate", "value": 0.1 },
+        { "type": "teamDefenseRate", "value": 0.1 },
+        { "type": "ignoreAbilityConditions", "targetSide": "ally", "targetCardIds": [1002, 1035, 1042, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032], "targetMatch": "any" }
+      ]
+    }
   },
   {
     "id": 1009,
@@ -5192,16 +5234,16 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1009.png"
+    "image": "1009.png",
     "ability": {
       "name": "ภาชนะของสุคุนะ",
-      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'Nobara Kugisaki'UR หรือ megimi fushiguro'UR หรือ gojo stouru'LR หรือ Todo aoi; ATK+25%และโจมตี+4โล่+4 ",
+      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'Nobara Kugisaki'UR หรือ 'megimi fushiguro'UR หรือ 'gojo stouru'LR หรือ 'Todo aoi'; ATK+25%และโจมตี+4โล่+4 ",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "anyCardIds": true, "requiredCardIds": [10010,1011,1001,1013] },
+      "condition": { "anyCardIds": true, "requiredCardIds": [1010,1011,1001,1013] },
       "effects": [
-        { "type": "teamPowerRate", "value": 0.255 },
+        { "type": "teamPowerRate", "value": 0.25 },
         { "type": "attackHits", "value": 3 },
-        { "type": "teamDefenseRate", "value": 4 }
+        { "type": "shieldHits", "value": 4 }
       ]
     }
   },
@@ -5217,7 +5259,7 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1010.png"
+    "image": "1010.png",
     "ability": {
       "name": "เสียงสั่นพ้อง",
       "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'yuji itadori'UR;'megimi fushiguro'UR;'gojo stouru'LR; ATK+45%และโจมตี+7 ",
@@ -5241,7 +5283,7 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1011.png"
+    "image": "1011.png",
     "ability": {
       "name": "ปี1โตเกียว",
       "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'yuji itadori'UR;'nobara kigisaki'UR;'gojo stouru'LR; ATK/DEF+35%และโจมตีและโล่เพิ่มขึ้น +4 ",
@@ -5267,7 +5309,7 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1012.png"
+    "image": "1012.png",
     "ability": {
       "name": "ได้เวลาโอทีแล้ว...",
       "description": "เมื่อตีครบ 10 ครั้ง ตีครั้งต่อไปจะบวก ATK+1400000 ",
@@ -5290,7 +5332,7 @@
     "upgradeDustGrowth": 1.067,
     "awakenMax": 5,
     "icon": "",
-    "image": "1036.png"
+    "image": "1036.png",
     "ability": {
       "name": "หยุดซ้ะ",
       "description": "ลด DEF ฝั่งตรงข้าม 35%  เมื่อใส่ 'panda'UR;'maki'UR;'yuta'LR ในทีม",
@@ -5830,17 +5872,42 @@
     "image": "42.png",
     "ability": {
       "name": "ไสยเวทย้อนกลับ...",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง, ทีมได้รับ DEF+5000000",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง; ทีมได้รับ DEF+5000000;เมื่ออเวกตัน/เลเวลตัน ได้รับความสามารถเพิ่ม ;เมื่อตีครบ 4 ครั้ง ฟื้นฟู +5000000",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26] },
       "effects": [
-        { "type": "teamDefenseFlat", "value": 5000000 }
+        { "type": "teamDefenseFlat", "value": 5000000 },
+        { "type": "healDefenseFlat", "value": 5000000, "condition": { "sourceMinLevel": 180, "sourceMinAwaken": 5, "afterOwnAttacks": 4, "repeat": true } }
+      ]
+        }
+  },
+  {
+    "id": 46,
+    "name": "Kaoruko Waguri(YukiSuit)",
+    "rarity": "UR",
+    "element": "น้ำแข็ง",
+    "power": 65000,
+        "defense": 100000,
+    "incomePerSec": 1500,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
+    "awakenMax": 5,
+    "icon": "",
+    "image": "37.png",
+    "ability": {
+      "name": "ไม่มีที่ไหนจะดีไปกว่าการได้เจอเธอทุกวัน...",
+      "description": "หากจัดทีมร่วมกับการ์ด 'Yuki Suou(WaguriSuit)' ;การ์ดที่ชื่อ 'Yuki Suou(WaguriSuit)'ได้รับการยกเลิกเงื่อนไข และ ทีมได้รับรายได้+10%",
+      "activeIn": ["team", "tower"],
+      "condition": {"requiredCardIds": [37]},
+      "effects": [
+        { "type": "teamIncomeRate", "value": 0.1 },
+        { "type": "ignoreAbilityConditions", "targetSide": "ally", "targetCardIds": [37],"targetMatch": "all" }
       ]
         }
   },
   {
     "id": 37,
-    "name": "Yuki Suou",
+    "name": "Yuki Suou(WaguriSuit)",
     "rarity": "UR",
     "element": "น้ำแข็ง",
     "power": 65000,
