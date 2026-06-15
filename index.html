@@ -456,6 +456,20 @@
 
     .tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 
+    /* เพิ่มโดยอลิซ: ช่องค้นหาความสามารถและตัวกรองธาตุ */
+    #searchInput { min-width: 190px; }
+    #abilitySearchInput {
+      min-width: 285px;
+      border-color: rgba(167,139,250,.26);
+      background:
+        linear-gradient(135deg, rgba(126,34,206,.10), rgba(5,8,18,.72));
+    }
+    #abilitySearchInput:focus {
+      border-color: rgba(167,139,250,.68);
+      box-shadow: 0 0 0 3px rgba(167,139,250,.09);
+    }
+    #elementFilter { min-width: 145px; }
+
     /*
       เพิ่มโดยอลิซ: แถบปุ่มแยกระดับการ์ดในหน้าคลัง
       - ใช้คู่กับ select#rarityFilter เดิม เพื่อให้ผู้เล่นกดแยก N/R/SR/... ได้ทันที
@@ -907,9 +921,13 @@
     .team-picker-head p { margin: 0; color: var(--muted); }
     .team-picker-tools {
       display: grid;
-      grid-template-columns: minmax(180px, 1fr) 150px 190px auto;
+      grid-template-columns: minmax(190px, 1fr) minmax(235px, 1.2fr) 135px 135px 175px auto;
       gap: 8px;
       margin-bottom: 14px;
+    }
+    #teamPickerAbilitySearch {
+      border-color: rgba(167,139,250,.24);
+      background: linear-gradient(135deg, rgba(126,34,206,.09), rgba(5,8,18,.72));
     }
     .team-picker-grid { max-height: min(66vh, 720px); overflow: auto; padding: 2px 3px 10px; }
     .team-picker-card.selected { box-shadow: 0 0 0 3px var(--green), 0 14px 30px rgba(0,0,0,.42); }
@@ -2896,6 +2914,14 @@
       .hero-grid { grid-template-columns: 1fr; }
       .side-panel { display: grid; grid-template-columns: repeat(2, 1fr); }
       .side-panel > h2 { grid-column: 1 / -1; }
+      /* จอแท็บเล็ต/โน้ตบุ๊ก: ให้เครื่องมือค้นหาในหน้าจัดทีมขึ้นสองแถวแทนการล้นแนวนอน */
+      .team-picker-tools { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .team-picker-tools #teamPickerSearch,
+      .team-picker-tools #teamPickerAbilitySearch { grid-column: span 3; }
+      .team-picker-tools #teamPickerElement,
+      .team-picker-tools #teamPickerRarity,
+      .team-picker-tools #teamPickerSortMode { grid-column: span 2; }
+      .team-picker-tools .sort-direction-switch { grid-column: 1 / -1; }
     }
 
     @media (max-width: 760px) {
@@ -2926,7 +2952,9 @@
       .workspace { padding: 14px; }
       .workspace-head { align-items: stretch; flex-direction: column; }
       .workspace-head .tabs { display: none; }
-      .tools { display: grid; grid-template-columns: 1fr 110px; }
+      .tools { display: grid; grid-template-columns: 1fr 1fr; }
+      #searchInput, #abilitySearchInput { grid-column: 1 / -1; min-width: 0; width: 100%; }
+      #elementFilter, #rarityFilter { min-width: 0; width: 100%; }
       #sortMode { grid-column: 1 / -1; }
       .sort-direction-switch { grid-column: 1 / -1; }
       .sort-direction-button { min-width: 0; }
@@ -2940,7 +2968,11 @@
       .guide-row { grid-template-columns: 1fr; }
       .team-picker-panel { padding: 14px; }
       .team-picker-tools { grid-template-columns: 1fr 1fr; }
-      .team-picker-tools #teamPickerSearch { grid-column: 1 / -1; }
+      .team-picker-tools #teamPickerSearch,
+      .team-picker-tools #teamPickerAbilitySearch { grid-column: 1 / -1; }
+      .team-picker-tools #teamPickerElement,
+      .team-picker-tools #teamPickerRarity { grid-column: auto; }
+      .team-picker-tools #teamPickerSortMode { grid-column: 1 / -1; }
       .team-picker-tools .sort-direction-switch { grid-column: 1 / -1; }
       .team-picker-actions { grid-template-columns: 1fr; }
       .team-picker-memberships { top: 47px; }
@@ -3474,7 +3506,9 @@
             <button class="tab" data-tab="friends">เพื่อน</button>
           </div>
           <div class="tools hidden" id="collectionTools">
-            <input class="field" id="searchInput" type="search" placeholder="ค้นหาชื่อ ธาตุ หรือ ID..." autocomplete="off">
+            <input class="field" id="searchInput" type="search" placeholder="ค้นหาชื่อ, ID, ธาตุ หรือสกิลทั้งหมด..." autocomplete="off" aria-label="ค้นหาการ์ดทั้งหมด">
+            <input class="field" id="abilitySearchInput" type="search" placeholder="ค้นหาเฉพาะความสามารถ เช่น โล่, ATK, รายได้, เรทกาชา..." autocomplete="off" aria-label="ค้นหาเฉพาะความสามารถการ์ด">
+            <select class="field" id="elementFilter" aria-label="กรองการ์ดตามธาตุ"></select>
             <select class="field" id="rarityFilter" aria-label="กรองระดับ"></select>
             <select class="field" id="sortMode" aria-label="เรียงลำดับการ์ด">
               <option value="power">เรียงตามพลังโจมตี</option>
@@ -3744,7 +3778,9 @@
         <p id="teamPickerSubtitle">เลือกจากการ์ดที่มีอยู่ในคลัง ระบบจะสลับช่องให้อัตโนมัติถ้าการ์ดอยู่ในทีมแล้ว</p>
       </div>
       <div class="team-picker-tools">
-        <input class="field" id="teamPickerSearch" type="search" placeholder="ค้นหาชื่อ ธาตุ หรือ ID..." autocomplete="off">
+        <input class="field" id="teamPickerSearch" type="search" placeholder="ค้นหาชื่อ, ID, ธาตุ หรือสกิล..." autocomplete="off" aria-label="ค้นหาการ์ดในตัวเลือกทีม">
+        <input class="field" id="teamPickerAbilitySearch" type="search" placeholder="ค้นหาเฉพาะความสามารถที่ต้องการ..." autocomplete="off" aria-label="ค้นหาเฉพาะความสามารถในตัวเลือกทีม">
+        <select class="field" id="teamPickerElement" aria-label="กรองธาตุในตัวเลือกทีม"></select>
         <select class="field" id="teamPickerRarity" aria-label="กรองระดับในตัวเลือกทีม"></select>
         <select class="field" id="teamPickerSortMode" aria-label="เรียงการ์ดในตัวเลือกทีม">
           <option value="power">พลัง</option>
@@ -3760,7 +3796,7 @@
         </div>
       </div>
       <div class="card-grid team-picker-grid" id="teamPickerGrid"></div>
-      <p class="team-picker-note">กด “ดูรายละเอียด” เพื่อเช็กสกิลก่อน • กด “เลือกลงช่อง” เมื่อต้องการจัดทีม • สีฟ้า = ทีมโชว์, สีแดง = ARENA, สีทอง = อยู่ทั้งสองทีม</p>
+      <p class="team-picker-note">ค้นหาได้ทั้งชื่อ, ID, ธาตุ และคำในสกิล เช่น “โล่”, “ATK”, “เรทกาชา” หรือชื่อตัวละครที่สกิลอ้างถึง • กด “ดูรายละเอียด” เพื่อเช็กสกิลก่อนเลือก</p>
     </div>
   </div>
 
@@ -4070,10 +4106,10 @@
       basePower: 42000,
       brackets: [
         { through: 50, growth: 1.050 },
-        { through: 100, growth: 1.045 },
-        { through: 200, growth: 1.042 },
-        { through: 400, growth: 1.034 },
-        { through: Infinity, growth: 1.028 }
+        { through: 100, growth: 0.54 },
+        { through: 200, growth: 0.442 },
+        { through: 400, growth: 0.335 },
+        { through: Infinity, growth: 0.228 }
       ]
     });
 
@@ -5299,8 +5335,8 @@
         "condition": {},
         "effects": [
                   { "type": "teamIncomeRate", "value": 0.3 },                 
-                  { "type": "teamPowerRate", "value": 5.0, "condition": { "sourceMinAwaken": 4 } },
-         { "type": "teamDefenseRate", "value": 8.0, "condition": { "sourceMinAwaken": 4 } },
+                  { "type": "selfPowerRate", "value": 5.0, "condition": { "sourceMinAwaken": 4 } },
+         { "type": "selfDefenseRate", "value": 8.0, "condition": { "sourceMinAwaken": 4 } },
          { "type": "shieldHits", "value": 15, "condition": { "sourceMinAwaken": 4 } },
          { "type": "restoreShieldHits", "value": 2, "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 150, "afterOwnAttacks": 3, "repeat": true } }
         ]
@@ -11444,11 +11480,172 @@
       });
     }
 
+    /* เพิ่มโดยอลิซ: ดัชนีค้นหาการ์ดแบบครอบคลุมชื่อ ธาตุ สกิล เงื่อนไข และเป้าหมายที่สกิลอ้างถึง */
+    const ABILITY_EFFECT_SEARCH_ALIASES = Object.freeze({
+      teamPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk ทั้งทีม",
+      selfPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk ตัวเอง ตนเอง",
+      cardPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk เฉพาะการ์ด",
+      rarityPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk ระดับการ์ด",
+      elementPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk ธาตุ",
+      nextAttackPowerRate: "atk attack power พลังโจมตี โจมตีครั้งถัดไป แอคทีฟสกิล",
+      nextAttackPowerFlat: "atk attack power พลังโจมตี โจมตีครั้งถัดไป ค่าคงที่ แอคทีฟสกิล",
+      teamPowerFlat: "atk attack power พลังโจมตี โจมตี ค่าคงที่ ทั้งทีม",
+      enemyPowerRate: "ลด atk ลดพลังโจมตี ศัตรู ฝ่ายตรงข้าม ดีบัฟ enemy",
+      teamDefenseRate: "def defense พลังป้องกัน ป้องกัน บัฟ def ทั้งทีม",
+      selfDefenseRate: "def defense พลังป้องกัน ป้องกัน บัฟ def ตัวเอง ตนเอง",
+      cardDefenseRate: "def defense พลังป้องกัน ป้องกัน บัฟ def เฉพาะการ์ด",
+      rarityDefenseRate: "def defense พลังป้องกัน ป้องกัน บัฟ def ระดับการ์ด",
+      elementDefenseRate: "def defense พลังป้องกัน ป้องกัน บัฟ def ธาตุ",
+      teamDefenseFlat: "def defense พลังป้องกัน ป้องกัน ค่าคงที่ ทั้งทีม",
+      enemyDefenseRate: "ลด def ลดพลังป้องกัน ศัตรู ฝ่ายตรงข้าม ดีบัฟ enemy",
+      teamIncomeRate: "รายได้ income gem gems ออฟไลน์ ทั้งทีม",
+      selfIncomeRate: "รายได้ income gem gems ตัวเอง ตนเอง",
+      cardIncomeRate: "รายได้ income gem gems เฉพาะการ์ด",
+      rarityIncomeRate: "รายได้ income gem gems ระดับการ์ด",
+      elementIncomeRate: "รายได้ income gem gems ธาตุ",
+      teamIncomeFlat: "รายได้ income gem gems ค่าคงที่ ทั้งทีม",
+      shieldHits: "โล่ shield ป้องกันฮิต กันการโจมตี",
+      restoreShieldHits: "ฟื้นโล่ คืนโล่ restore shield",
+      attackHits: "ฮิต hit โจมตีหลายครั้ง เพิ่มจำนวนโจมตี",
+      nextAttackHits: "ฮิต hit โจมตีครั้งถัดไป เพิ่มจำนวนโจมตี แอคทีฟสกิล",
+      healDefenseRate: "ฮีล heal ฟื้นฟู def พลังป้องกัน เปอร์เซ็นต์",
+      healDefenseFlat: "ฮีล heal ฟื้นฟู def พลังป้องกัน ค่าคงที่",
+      luckRate: "โชค luck โชคต่อสู้ สุ่มค่าต่อสู้",
+      gachaRarityRate: "กาชา gacha เรทกาชา rate up เพิ่มเรท ระดับการ์ด",
+      nullifyCardAbilities: "ยกเลิกสกิล ลบสกิล ปิดสกิล ความสามารถไร้ผล nullify",
+      ignoreAbilityConditions: "ยกเลิกเงื่อนไข ไม่สนเงื่อนไข ปลดเงื่อนไข ignore condition"
+    });
+
+    const ABILITY_FIELD_SEARCH_ALIASES = Object.freeze({
+      name: "ชื่อสกิล ความสามารถ",
+      description: "รายละเอียดสกิล คำอธิบายความสามารถ",
+      activeIn: "โหมดที่ทำงาน ทีมโชว์ ไต่หอ อารีน่า",
+      condition: "เงื่อนไขสกิล เงื่อนไขการทำงาน",
+      effects: "เอฟเฟกต์ ผลความสามารถ",
+      requiredElements: "ต้องมีธาตุ ธาตุที่ต้องการ",
+      minElementCount: "จำนวนธาตุขั้นต่ำ",
+      minAnyElementCount: "ธาตุอย่างใดอย่างหนึ่ง จำนวนขั้นต่ำ",
+      minCombinedElementCount: "รวมจำนวนธาตุขั้นต่ำ",
+      teamElementsOnly: "ทีมธาตุล้วน จำกัดธาตุ",
+      requiredRarities: "ระดับการ์ดที่ต้องมี rarity",
+      minRarityCount: "จำนวนระดับการ์ดขั้นต่ำ rarity",
+      minUniqueElements: "จำนวนธาตุไม่ซ้ำขั้นต่ำ",
+      minTeamSize: "จำนวนสมาชิกทีมขั้นต่ำ",
+      maxTeamSize: "จำนวนสมาชิกทีมสูงสุด จำกัดคน",
+      leaderOnly: "หัวหน้าทีม leader ช่องหนึ่ง",
+      sourceMinLevel: "เลเวลขั้นต่ำ level",
+      sourceMinAwaken: "อเวกขั้นต่ำ awaken",
+      requiredCardIds: "ต้องจัดทีมร่วมกับ การ์ดที่ต้องมี",
+      anyCardIds: "มีการ์ดอย่างใดอย่างหนึ่ง จัดทีมร่วมกับ",
+      allowedTeammateCardIds: "สมาชิกที่อนุญาต อยู่เดี่ยวได้ whitelist",
+      targetCardIds: "การ์ดเป้าหมาย เกี่ยวข้องกับตัวละคร",
+      targetElements: "ธาตุเป้าหมาย",
+      targetRarities: "ระดับเป้าหมาย rarity",
+      targetSide: "ฝ่ายเป้าหมาย ฝ่ายเรา ฝ่ายตรงข้าม ตัวเอง",
+      afterOwnAttacks: "ตีครบ โจมตีครบ จำนวนครั้ง",
+      triggerEveryOwnAttacks: "ตีครบ โจมตีครบ วนซ้ำ",
+      ownAttacksBeforeTrigger: "ตีครบ โจมตีครบ ก่อนทำงาน",
+      repeat: "ทำซ้ำ วนลูป"
+    });
+
+    const CARD_SEARCH_CACHE = new Map();
+    const CARD_ABILITY_SEARCH_CACHE = new Map();
+
+    function normalizeCardSearchText(value) {
+      return String(value === undefined || value === null ? "" : value)
+        .normalize("NFKC")
+        .toLowerCase()
+        .replace(/[\s,;:|/+&•·()[\]{}<>"'`~!@#$%^*=?.\\_-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function cardSearchMatches(searchText, query) {
+      const tokens = normalizeCardSearchText(query).split(" ").filter(Boolean);
+      if (!tokens.length) return true;
+      const haystack = normalizeCardSearchText(searchText);
+      return tokens.every(token => haystack.includes(token));
+    }
+
+    function appendRelatedCardSearchParts(value, parts) {
+      normalizeAbilityCardIds(value).forEach(id => {
+        const related = CARD_BY_ID.get(String(id));
+        parts.push(`id ${id}`);
+        if (related) {
+          parts.push(related.name, related.rarity, getRawElementText(related), cardElementText(related));
+        }
+      });
+    }
+
+    function collectAbilitySearchParts(value, parts, key = "") {
+      if (Array.isArray(value)) {
+        value.forEach(item => collectAbilitySearchParts(item, parts, key));
+        return;
+      }
+      if (value && typeof value === "object") {
+        Object.entries(value).forEach(([childKey, childValue]) => {
+          parts.push(childKey, ABILITY_FIELD_SEARCH_ALIASES[childKey] || "");
+          collectAbilitySearchParts(childValue, parts, childKey);
+        });
+        return;
+      }
+      if (value === undefined || value === null || value === "") return;
+
+      const raw = String(value);
+      parts.push(raw);
+      if (key === "type") parts.push(ABILITY_EFFECT_SEARCH_ALIASES[raw] || "");
+      if (["requiredCardIds", "anyCardIds", "allowedTeammateCardIds", "targetCardIds", "cardIds"].includes(key)) {
+        appendRelatedCardSearchParts(value, parts);
+      }
+      if (["activeIn", "mode"].includes(key)) {
+        const mode = normalizeAbilityMode(raw);
+        if (mode === "team") parts.push("ทีมโชว์ showcase รายได้ กาชา");
+        if (mode === "tower") parts.push("ไต่หอ tower battle pve");
+        if (mode === "arena") parts.push("อารีน่า arena pvp");
+      }
+      if (/element/i.test(key)) {
+        normalizeAbilityElements(value).forEach(element => parts.push(element, elementLabel(element)));
+      }
+      if (/rarit/i.test(key)) parts.push(raw.toUpperCase(), "ระดับการ์ด rarity");
+      if (/rate$/i.test(key) && Number.isFinite(Number(value))) {
+        const percent = Math.round(Number(value) * 10000) / 100;
+        parts.push(`${percent}%`, `${percent >= 0 ? "+" : ""}${percent}%`);
+      }
+    }
+
+    function getCardAbilitySearchText(card) {
+      const id = String(card && card.id || "");
+      if (CARD_ABILITY_SEARCH_CACHE.has(id)) return CARD_ABILITY_SEARCH_CACHE.get(id);
+      const parts = [];
+      getCardAbilities(card).forEach(ability => collectAbilitySearchParts(ability, parts));
+      const result = normalizeCardSearchText(parts.filter(Boolean).join(" "));
+      CARD_ABILITY_SEARCH_CACHE.set(id, result);
+      return result;
+    }
+
+    function getCardSearchText(card) {
+      const id = String(card && card.id || "");
+      if (CARD_SEARCH_CACHE.has(id)) return CARD_SEARCH_CACHE.get(id);
+      const baseParts = [
+        card.id, `id ${card.id}`, `#${card.id}`, card.name, card.rarity,
+        getRawElementText(card), cardElementText(card),
+        ...getCardElements(card).flatMap(element => [element, elementLabel(element)]),
+        getCardAbilitySearchText(card)
+      ];
+      const result = normalizeCardSearchText(baseParts.filter(Boolean).join(" "));
+      CARD_SEARCH_CACHE.set(id, result);
+      return result;
+    }
+
     function getFilteredCards() {
-      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const query = document.getElementById("searchInput").value;
+      const abilityQuery = document.getElementById("abilitySearchInput")?.value || "";
+      const element = document.getElementById("elementFilter")?.value || "";
       const rarity = document.getElementById("rarityFilter").value;
       const filtered = CARDS
-        .filter(card => !query || `${card.id} id:${card.id} id ${card.id} #${card.id} ${card.name} ${getRawElementText(card)} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query))
+        .filter(card => cardSearchMatches(getCardSearchText(card), query))
+        .filter(card => cardSearchMatches(getCardAbilitySearchText(card), abilityQuery))
+        .filter(card => !element || getCardElements(card).includes(element))
         .filter(card => !rarity || card.rarity === rarity);
       return sortCardsForView(filtered, collectionSortMode, collectionSortDirection, true);
     }
@@ -11464,7 +11661,7 @@
     function renderCollection() {
       const cards = getFilteredCards();
       const uniqueOwned = Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length;
-      document.getElementById("collectionText").textContent = `สะสมแล้ว ${uniqueOwned} จาก ${CARDS.length} ใบ (${Math.round(uniqueOwned / Math.max(1, CARDS.length) * 100)}%) • เรียงตาม${getSortLabel()} ${getSortDirectionText()}`;
+      document.getElementById("collectionText").textContent = `สะสมแล้ว ${uniqueOwned} จาก ${CARDS.length} ใบ (${Math.round(uniqueOwned / Math.max(1, CARDS.length) * 100)}%) • แสดง ${cards.length} ใบ • เรียงตาม${getSortLabel()} ${getSortDirectionText()}`;
       document.getElementById("collectionGrid").innerHTML = cards.length
         ? cards.map(card => cardHTML(card)).join("")
         : `<div class="empty-state">ไม่พบการ์ดที่ตรงกับตัวกรอง</div>`;
@@ -11662,20 +11859,25 @@
       const raritySelect = document.getElementById("teamPickerRarity");
       const sortSelect = document.getElementById("teamPickerSortMode");
       if (!grid || !raritySelect || !sortSelect) return;
+      populateElementFilter(document.getElementById("teamPickerElement"), "ทุกธาตุ");
       if (!raritySelect.options.length) {
         raritySelect.innerHTML = `<option value="">ทุกระดับ</option>` + Object.entries(RARITIES)
           .sort((a, b) => b[1].order - a[1].order)
           .map(([key, info]) => `<option value="${escapeHTML(key)}">${escapeHTML(info.label)}</option>`).join("");
       }
       sortSelect.value = teamPickerSortMode;
-      const query = String(document.getElementById("teamPickerSearch")?.value || "").trim().toLowerCase();
+      const query = String(document.getElementById("teamPickerSearch")?.value || "");
+      const abilityQuery = String(document.getElementById("teamPickerAbilitySearch")?.value || "");
+      const element = String(document.getElementById("teamPickerElement")?.value || "");
       const rarity = raritySelect.value;
       const currentTeam = getTeamArrayByMode(teamPickerContext.mode);
       const currentId = String(currentTeam[teamPickerContext.slotIndex] || "");
       const cards = sortCardsForView(CARDS.filter(card => {
         if (!getOwned(card.id)) return false;
         if (rarity && card.rarity !== rarity) return false;
-        return !query || `${card.id} id:${card.id} id ${card.id} #${card.id} ${card.name} ${cardElementText(card)} ${card.rarity}`.toLowerCase().includes(query);
+        if (element && !getCardElements(card).includes(element)) return false;
+        if (!cardSearchMatches(getCardSearchText(card), query)) return false;
+        return cardSearchMatches(getCardAbilitySearchText(card), abilityQuery);
       }), teamPickerSortMode, teamPickerSortDirection, false);
       grid.innerHTML = cards.length
         ? cards.map(card => teamPickerCardHTML(card, currentId)).join("")
@@ -12079,10 +12281,19 @@
         : `<div class="empty-state" style="min-height:130px">ยังไม่มีเพื่อน ลองค้นหาด้วย Username</div>`;
     }
 
+    function populateElementFilter(select, allLabel = "ทุกธาตุ") {
+      if (!select || select.options.length) return;
+      select.innerHTML = `<option value="">${escapeHTML(allLabel)}</option>` + THAI_ELEMENTS
+        .map(element => `<option value="${escapeHTML(element)}">${escapeHTML(elementLabel(element))}</option>`)
+        .join("");
+    }
+
     function renderFilters() {
       const select = document.getElementById("rarityFilter");
       const sortSelect = document.getElementById("sortMode");
       if (sortSelect) sortSelect.value = collectionSortMode;
+      populateElementFilter(document.getElementById("elementFilter"), "ทุกธาตุ");
+      populateElementFilter(document.getElementById("teamPickerElement"), "ทุกธาตุ");
       if (!select.options.length) {
         select.innerHTML = `<option value="">ทุกระดับ</option>` + Object.entries(RARITIES)
           .sort((a, b) => b[1].order - a[1].order)
@@ -12948,6 +13159,8 @@
     });
 
     document.getElementById("searchInput").addEventListener("input", renderCollection);
+    document.getElementById("abilitySearchInput").addEventListener("input", renderCollection);
+    document.getElementById("elementFilter").addEventListener("change", renderCollection);
     document.getElementById("rarityFilter").addEventListener("change", event => setActiveRarityFilter(event.target.value));
     document.getElementById("sortMode").addEventListener("change", event => {
       collectionSortMode = event.target.value || "power";
@@ -12955,6 +13168,8 @@
       renderSortDirectionButtons();
     });
     document.getElementById("teamPickerSearch").addEventListener("input", renderTeamPicker);
+    document.getElementById("teamPickerAbilitySearch").addEventListener("input", renderTeamPicker);
+    document.getElementById("teamPickerElement").addEventListener("change", renderTeamPicker);
     document.getElementById("teamPickerRarity").addEventListener("change", renderTeamPicker);
     document.getElementById("teamPickerSortMode").addEventListener("change", event => {
       teamPickerSortMode = event.target.value || "power";
