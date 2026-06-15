@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-15-targeted-ignore-active-trigger-v26">
+  <meta name="gacha-app-build" content="2026-06-15-stop-all-in-on-sc-v27">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -5539,7 +5539,7 @@
       "description": "เมื่อจัดลงทีมโชว์ รายได้+50%;เงื่อนไขห้ามใส่เกิน3คน",
       "activeIn": ["team"],
       "condition": {
-        "mode": "tower", "maxTeamSize": 3
+        "maxTeamSize": 3
       },
       "effects": [
         { "type": "teamIncomeRate", "value": 0.5 }
@@ -10140,11 +10140,14 @@
       return CARD_BY_ID.get(String(id)) || pool[0];
     }
 
-    function pullCards(times) {
+    function pullCards(times, options = {}) {
       const banner = getActiveBanner();
       const guarantee = getBannerGuarantee(banner);
       const effectiveRates = getEffectiveBannerRates(banner);
       const results = [];
+      // เพิ่มโดยอลิซ: โหมดหยุดสุ่มทันทีเมื่อเจอระดับที่กำหนด
+      // ใช้กับ “เทหน้าตัก” เพื่อให้ SC เล่นคัทซีนทันทีและไม่กินผลสุ่มใบถัดไป
+      const stopOnRarity = String(options && options.stopOnRarity || "").toUpperCase();
 
       for (let index = 0; index < times; index += 1) {
         let pity = Math.max(0, Number(state.pity[banner.id]) || 0) + 1;
@@ -10177,6 +10180,9 @@
           maxAwakenBonus: added.maxAwakenBonus,
           convertedCopies: added.convertedCopies
         });
+
+        // สำคัญ: ตรวจหลังบันทึกการ์ดและ pity แล้ว จากนั้นตัดลูปก่อนสุ่มใบต่อไปทันที
+        if (stopOnRarity && String(card.rarity || "").toUpperCase() === stopOnRarity) break;
       }
       return results;
     }
@@ -10522,6 +10528,7 @@
     }
 
     // เพิ่มโดยอลิซ: เทหน้าตักแบบแบ่งประมวลผลเป็นชุด ลดโอกาสหน้าเว็บค้างเมื่อ Gems เยอะ
+    // อัปเดต: เมื่อสุ่มพบ SC จะหยุดทันที ไม่สุ่ม/ไม่หัก Gems ของใบที่เหลือ และเริ่มคัทซีน SC
     async function openAllInPack() {
       if (allInPullBusy) return;
       updateIncome();
@@ -10535,30 +10542,54 @@
       const scResults = [];
       let remaining = plan.count;
       let processed = 0;
+      let stoppedOnSC = false;
 
       try {
-        while (remaining > 0) {
+        while (remaining > 0 && !stoppedOnSC) {
           const chunkSize = Math.min(250, remaining);
-          state.gems -= getPullCost(chunkSize);
-          const chunkResults = pullCards(chunkSize);
+
+          // pullCards จะตัดลูปภายในก้อนทันทีที่เจอ SC จึงไม่มีผลสุ่มใบอื่นแอบตามหลัง SC
+          const chunkResults = pullCards(chunkSize, { stopOnRarity: "SC" });
+          const actualPulled = chunkResults.length;
+          if (actualPulled < 1) break;
+
+          // หักเฉพาะจำนวนที่สุ่มจริง ใบที่ยังไม่ถูกสุ่มหลังเจอ SC จะไม่เสีย Gems
+          state.gems -= getPullCost(actualPulled);
           addPullResultsToSummary(stats, chunkResults);
+
           for (const result of chunkResults) {
             if (recentIds.length < CONFIG.recentPullLimit) recentIds.push(String(result.card.id));
-            if (result.card && result.card.rarity === "SC" && scResults.length < 8) scResults.push(result);
+            if (result.card && result.card.rarity === "SC") {
+              scResults.push(result);
+              stoppedOnSC = true;
+              break;
+            }
           }
-          remaining -= chunkSize;
-          processed += chunkSize;
+
+          remaining = Math.max(0, remaining - actualPulled);
+          processed += actualPulled;
           const progressText = document.getElementById("allInCost");
-          if (progressText) progressText.textContent = `เปิดแล้ว ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
-          if (remaining > 0) await new Promise(resolve => requestAnimationFrame(resolve));
+          if (progressText) {
+            progressText.textContent = stoppedOnSC
+              ? `พบ SC ที่ใบ ${formatNumber(processed)} • หยุดสุ่มแล้ว`
+              : `เปิดแล้ว ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
+          }
+
+          if (remaining > 0 && !stoppedOnSC) await new Promise(resolve => requestAnimationFrame(resolve));
         }
 
         state.recent = recentIds;
         saveState(true);
         renderAfterPull();
-        const summary = summarizePullStats(stats);
+
+        const baseSummary = summarizePullStats(stats);
+        const summary = stoppedOnSC
+          ? `${baseSummary} • หยุดอัตโนมัติเมื่อพบ SC • Gems คงเหลือ ${formatNumber(state.gems)}`
+          : baseSummary;
         const finish = () => showToast(summary);
-        if (!playSCCutscene(scResults, finish, Number(stats.rarityCounts.SC || 0))) finish();
+
+        // หลังหยุดลูปแล้วจึงเล่นคัทซีนทันที โดยมี SC เพียงใบที่เป็นจุดหยุดเท่านั้น
+        if (!playSCCutscene(scResults, finish, scResults.length)) finish();
       } catch (error) {
         console.error("All-in summon failed", error);
         state.recent = recentIds;
