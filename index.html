@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-15-allowed-teammates-checked-v30">
+  <meta name="gacha-app-build" content="2026-06-15-active-skill-cutscene-hit-report-v32">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1442,6 +1442,196 @@
     .battle-card p, .friend-card p { margin-bottom: 0; color: var(--muted); font-size: .78rem; line-height: 1.5; }
     .battle-stat-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 9px; font-size: .8rem; }
     .battle-stat-row strong { color: var(--gold); }
+
+
+    /* เพิ่มโดยอลิซ: คัทซีน ACTIVE Skill ทุกครั้งที่สกิลทำงาน */
+    .active-skill-cutscene {
+      --active-accent: #a78bfa;
+      --active-accent-2: #22d3ee;
+      position: fixed;
+      inset: 0;
+      z-index: 280;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: clamp(18px, 4vw, 46px);
+      color: #fff;
+      background: #03050d;
+      isolation: isolate;
+    }
+
+    .active-skill-cutscene.enemy-side {
+      --active-accent: #fb7185;
+      --active-accent-2: #f59e0b;
+    }
+
+    .active-skill-media,
+    .active-skill-image,
+    .active-skill-backdrop {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .active-skill-media,
+    .active-skill-image {
+      z-index: -4;
+      object-fit: cover;
+      object-position: center center;
+      filter: saturate(1.12) contrast(1.04);
+      opacity: .72;
+    }
+
+    .active-skill-image { transform: scale(1.035); }
+    .active-skill-backdrop {
+      z-index: -3;
+      background:
+        radial-gradient(circle at 22% 34%, color-mix(in srgb, var(--active-accent) 38%, transparent), transparent 34%),
+        radial-gradient(circle at 82% 22%, color-mix(in srgb, var(--active-accent-2) 34%, transparent), transparent 30%),
+        linear-gradient(90deg, rgba(3,5,13,.96) 0%, rgba(3,5,13,.76) 46%, rgba(3,5,13,.91) 100%),
+        linear-gradient(to top, rgba(3,5,13,.98), transparent 62%);
+      backdrop-filter: blur(2px);
+    }
+
+    .active-skill-cutscene::before,
+    .active-skill-cutscene::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .active-skill-cutscene::before {
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 68px, rgba(255,255,255,.026) 69px 70px),
+        linear-gradient(115deg, transparent 30%, color-mix(in srgb, var(--active-accent) 18%, transparent) 48%, transparent 66%);
+      animation: active-skill-scan 1.25s linear infinite;
+    }
+
+    .active-skill-cutscene::after {
+      top: 50%;
+      left: 50%;
+      width: min(76vw, 980px);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--active-accent-2), #fff, var(--active-accent), transparent);
+      box-shadow: 0 0 24px var(--active-accent), 0 0 54px var(--active-accent-2);
+      transform: translate(-50%, -50%) rotate(-8deg);
+      animation: active-skill-flash .72s ease-out both;
+    }
+
+    .active-skill-panel {
+      width: min(1040px, 100%);
+      min-height: min(510px, 76vh);
+      display: grid;
+      grid-template-columns: minmax(190px, .72fr) minmax(0, 1.28fr);
+      align-items: center;
+      gap: clamp(20px, 5vw, 66px);
+      border: 1px solid color-mix(in srgb, var(--active-accent) 50%, rgba(255,255,255,.18));
+      border-radius: 30px;
+      padding: clamp(20px, 4vw, 52px);
+      background: linear-gradient(135deg, rgba(8,11,23,.84), rgba(3,5,13,.60));
+      box-shadow: 0 34px 110px rgba(0,0,0,.62), 0 0 60px color-mix(in srgb, var(--active-accent) 22%, transparent);
+      animation: active-skill-panel-in .42s cubic-bezier(.2,.84,.22,1) both;
+    }
+
+    .active-skill-card {
+      position: relative;
+      width: min(330px, 100%);
+      aspect-ratio: 4 / 5;
+      justify-self: center;
+      overflow: hidden;
+      border: 2px solid var(--active-accent-2);
+      border-radius: 24px;
+      background: linear-gradient(145deg, #11162b, #060914);
+      box-shadow: 0 24px 55px rgba(0,0,0,.54), 0 0 38px color-mix(in srgb, var(--active-accent) 42%, transparent);
+      transform: perspective(900px) rotateY(5deg) rotateZ(-1.5deg);
+    }
+
+    .active-skill-card img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .active-skill-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(3,5,13,.88), transparent 46%); pointer-events: none; }
+    .active-skill-copy { min-width: 0; }
+    .active-skill-kicker { margin: 0 0 10px; color: var(--active-accent-2); font-size: clamp(.7rem, 1.6vw, .95rem); font-weight: 1000; letter-spacing: .24em; text-transform: uppercase; }
+    .active-skill-title { margin: 0; font-size: clamp(2rem, 6vw, 5rem); line-height: .9; letter-spacing: -.055em; text-wrap: balance; text-shadow: 0 0 30px color-mix(in srgb, var(--active-accent) 52%, transparent); }
+    .active-skill-source { margin: 13px 0 0; color: #dbe5ff; font-size: clamp(.9rem, 2vw, 1.2rem); font-weight: 900; }
+    .active-skill-quote { max-width: 720px; margin: 14px 0 0; color: #cbd5e1; font-size: clamp(.78rem, 1.7vw, 1rem); line-height: 1.65; }
+    .active-skill-hit-row { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 20px; }
+    .active-skill-hit-badge {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      border: 1px solid color-mix(in srgb, var(--active-accent-2) 62%, transparent);
+      border-radius: 18px;
+      padding: 11px 15px;
+      color: #071019;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--active-accent-2), #fff 45%, var(--active-accent));
+      box-shadow: 0 0 28px color-mix(in srgb, var(--active-accent) 34%, transparent);
+    }
+    .active-skill-hit-badge strong { font-size: clamp(1.7rem, 5vw, 3.6rem); line-height: .8; }
+    .active-skill-hit-badge span { font-size: .72rem; letter-spacing: .12em; }
+    .active-skill-effect-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .active-skill-effect-chip { border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: 7px 10px; color: #e5edff; font-size: .68rem; font-weight: 900; background: rgba(3,5,13,.58); }
+    .active-skill-skip {
+      position: absolute;
+      z-index: 5;
+      top: max(16px, env(safe-area-inset-top));
+      right: max(16px, env(safe-area-inset-right));
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 999px;
+      padding: 9px 13px;
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 1000;
+      background: rgba(3,5,13,.68);
+      backdrop-filter: blur(10px);
+    }
+
+    /* เพิ่มโดยอลิซ: รายงานจำนวนฮิตหลังจบไฟต์ */
+    .hit-report { display: grid; gap: 9px; }
+    .hit-report-empty { margin: 0; color: var(--muted); font-size: .76rem; line-height: 1.55; }
+    .hit-report-total { padding: 10px 11px; border: 1px solid rgba(92,232,255,.18); border-radius: 13px; color: #dff9ff; font-size: .74rem; font-weight: 1000; line-height: 1.55; background: rgba(92,232,255,.055); }
+    .hit-report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .hit-report-side { min-width: 0; padding: 10px; border: 1px solid rgba(255,255,255,.09); border-radius: 14px; background: rgba(3,5,12,.36); }
+    .hit-report-side.enemy { border-color: rgba(251,113,133,.18); }
+    .hit-report-side h4 { margin: 0 0 8px; color: var(--cyan); font-size: .76rem; }
+    .hit-report-side.enemy h4 { color: #fda4af; }
+    .hit-report-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+    .hit-report-metric { min-width: 0; padding: 7px; border-radius: 10px; background: rgba(255,255,255,.04); }
+    .hit-report-metric span { display: block; color: var(--muted); font-size: .56rem; font-weight: 900; }
+    .hit-report-metric strong { display: block; margin-top: 2px; overflow: hidden; color: #f8fafc; font-size: .73rem; text-overflow: ellipsis; white-space: nowrap; }
+    .hit-report-skills { display: grid; gap: 5px; margin-top: 8px; }
+    .hit-report-skill { padding: 7px 8px; border: 1px solid rgba(167,139,250,.16); border-radius: 10px; color: #dbe5ff; font-size: .61rem; line-height: 1.45; background: rgba(126,34,206,.07); }
+    .hit-report-skill b { color: var(--gold); }
+
+    @keyframes active-skill-panel-in {
+      from { opacity: 0; transform: translateY(30px) scale(.94); filter: blur(9px); }
+      to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    @keyframes active-skill-flash {
+      0% { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scaleX(.1); }
+      34% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scaleX(1.12); }
+    }
+    @keyframes active-skill-scan { to { transform: translateX(70px); } }
+
+    @media (max-width: 760px) {
+      .active-skill-cutscene { padding: 14px; }
+      .active-skill-panel { min-height: 0; grid-template-columns: minmax(105px, .48fr) minmax(0, 1.52fr); gap: 15px; border-radius: 22px; padding: 18px; }
+      .active-skill-card { border-radius: 16px; }
+      .active-skill-title { font-size: clamp(1.45rem, 8vw, 3.3rem); }
+      .active-skill-quote { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+      .active-skill-hit-row { margin-top: 13px; }
+      .active-skill-hit-badge { padding: 8px 10px; }
+      .hit-report-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .active-skill-cutscene::before,
+      .active-skill-cutscene::after,
+      .active-skill-panel { animation: none !important; }
+    }
 
     /* เพิ่มโดยอลิซ: กล่องรางวัลหอคอย / เงื่อนไขพิเศษชั้น 200+ / อันดับเพื่อน */
     .tower-reward-list,
@@ -3627,6 +3817,10 @@
                 <div class="battle-stat-row"><span>ชนะ / แพ้</span><strong id="battleRecordText">0 / 0</strong></div>
               </div>
               <div class="battle-card">
+                <h3>รายงานฮิตไฟต์ล่าสุด</h3>
+                <div class="hit-report" id="battleHitReport"><p class="hit-report-empty">หลังจบการต่อสู้ ระบบจะแสดงจำนวนครั้งโจมตี ฮิตรวม ฮิตผ่านโล่ ฮิตที่ถูกบล็อก และโบนัสฮิตจาก ACTIVE Skill</p></div>
+              </div>
+              <div class="battle-card">
                 <h3>Friend Support</h3>
                 <p id="battleSupportText">ยังไม่ได้เลือกเพื่อน Support</p>
               </div>
@@ -3679,6 +3873,10 @@
                 <div class="battle-stat-row"><span>อันดับปัจจุบัน</span><strong id="arenaRankText">-</strong></div>
                 <div class="battle-stat-row"><span>ชนะ / แพ้</span><strong id="arenaRecordText">0 / 0</strong></div>
                 <p class="arena-week-note" id="arenaWeekText">รีอันดับทุกวันจันทร์</p>
+              </div>
+              <div class="battle-card">
+                <h3>รายงานฮิตไฟต์ล่าสุด</h3>
+                <div class="hit-report" id="arenaHitReport"><p class="hit-report-empty">เมื่อจบ ARENA จะสรุปฮิตของทั้งสองทีม รวมถึงฮิตที่ ACTIVE Skill เพิ่มจริง</p></div>
               </div>
               <div class="battle-card">
                 <h3>รางวัลจัดอันดับรายสัปดาห์</h3>
@@ -3879,6 +4077,26 @@
       <div class="sc-cutscene-card" id="scCutsceneCard"></div>
       <h3 class="sc-cutscene-name" id="scCutsceneName">SC Character</h3>
       <p class="sc-cutscene-copy" id="scCutsceneCopy">การ์ดระดับสูงสุดปรากฏตัวแล้ว</p>
+    </div>
+  </div>
+
+  <div class="active-skill-cutscene hidden" id="activeSkillCutscene" role="dialog" aria-modal="true" aria-label="คัทซีน ACTIVE Skill">
+    <video class="active-skill-media hidden" id="activeSkillCutsceneVideo" playsinline preload="auto"></video>
+    <img class="active-skill-image hidden" id="activeSkillCutsceneImage" alt="">
+    <div class="active-skill-backdrop" aria-hidden="true"></div>
+    <button class="active-skill-skip" data-action="skip-active-skill-cutscene" aria-label="ข้ามคัทซีน ACTIVE Skill">ข้าม · ESC</button>
+    <div class="active-skill-panel">
+      <div class="active-skill-card" id="activeSkillCutsceneCard"></div>
+      <div class="active-skill-copy">
+        <p class="active-skill-kicker" id="activeSkillCutsceneKicker">ACTIVE SKILL</p>
+        <h2 class="active-skill-title" id="activeSkillCutsceneTitle">Skill Activated</h2>
+        <p class="active-skill-source" id="activeSkillCutsceneSource">Character</p>
+        <p class="active-skill-quote" id="activeSkillCutsceneQuote">ความสามารถพิเศษเริ่มทำงาน</p>
+        <div class="active-skill-hit-row">
+          <div class="active-skill-hit-badge"><strong id="activeSkillCutsceneHits">1</strong><span>TOTAL HIT</span></div>
+          <div class="active-skill-effect-list" id="activeSkillCutsceneEffects"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -4547,6 +4765,30 @@
             "targetElements": ["ไฟ"], "targetRarities": ["LR"], "targetCardIds": [1041], "targetMatch": "any" }
        - targetMatch: "any" = ตรงอย่างใดอย่างหนึ่งก็ผ่าน
        - targetMatch: "all" = ต้องตรงทุกตัวกรองที่ใส่
+
+       4) ตั้งคัทซีนเฉพาะ ACTIVE Skill ใส่ใน ability ใบนั้นได้โดยตรง
+          "activeCutscene": {
+            "enabled": true,
+            "kicker": "DOMAIN EXPANSION",
+            "title": "ชื่อท่าไม้ตาย",
+            "quote": "ประโยคตอนใช้สกิล",
+            "video": "skill_1041.mp4",
+            "image": "skill_1041.png",
+            "poster": "1041.png",
+            "accent": "#a78bfa",
+            "accent2": "#22d3ee",
+            "durationMs": 1100,
+            "maxVideoMs": 6000,
+            "objectFit": "cover",
+            "objectPosition": "center center",
+            "muted": true,
+            "volume": 0.8,
+            "showHitCount": true
+          }
+       - ไม่ใส่ activeCutscene ก็ยังขึ้นคัทซีนอัตโนมัติ โดยใช้ภาพการ์ด ชื่อสกิล และจำนวนฮิตจริง
+       - ตั้ง "enabled": false เมื่อต้องการปิดคัทซีนเฉพาะสกิลนั้น
+       - video/image ชื่อไฟล์สั้นจะอ่านจาก assets/cards/ และรองรับ URL/path เต็ม
+       - ระบบขึ้นคัทซีน “ทุกครั้ง” ที่ ACTIVE ทำงาน รวมถึงรอบถัดไปของสกิล repeat
     */
 
     /* ======================== [SECTION 06 CARD-DATA] ======================== */
@@ -6938,6 +7180,11 @@
     let scCutsceneFinish = null;
     let scCutsceneToken = 0;
     let scCutscenePhase = "";
+    let activeSkillCutsceneTimer = 0;
+    let activeSkillCutsceneFinish = null;
+    let activeSkillCutsceneToken = 0;
+    let lastBattleCombat = null;
+    let lastArenaCombat = null;
     // เพิ่มโดยอลิซ: สถานะเรียงลำดับคลังและหน้าต่างเลือกทีม
     let collectionSortMode = "power";
     let collectionSortDirection = "desc";
@@ -8893,6 +9140,11 @@
         return abilityArray(value).filter(Boolean).map((item, index) => ({
           key: String(item.key || `trigger-${index}`),
           name: String(item.name || "Active Skill"),
+          sourceCardId: String(item.sourceCardId || ""),
+          sourceCardName: String(item.sourceCardName || "Unknown Character"),
+          sourceCardImage: String(item.sourceCardImage || ""),
+          sourceCardRarity: String(item.sourceCardRarity || "N"),
+          cutscene: item.cutscene && typeof item.cutscene === "object" ? { ...item.cutscene } : {},
           afterOwnAttacks: Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Math.floor(Number(item.afterOwnAttacks) || 1))),
           repeat: item.repeat !== false,
           attackBonus: Number(item.attackBonus || 0),
@@ -8930,6 +9182,19 @@
         return {
           fired,
           names: fired.map(trigger => trigger.name),
+          details: fired.map(trigger => ({
+            key: trigger.key,
+            name: trigger.name,
+            sourceCardId: trigger.sourceCardId,
+            sourceCardName: trigger.sourceCardName,
+            sourceCardImage: trigger.sourceCardImage,
+            sourceCardRarity: trigger.sourceCardRarity,
+            cutscene: trigger.cutscene,
+            attackBonus: trigger.attackBonus,
+            healDefense: trigger.healDefense,
+            extraHits: trigger.extraHits,
+            restoreShieldHits: trigger.restoreShieldHits
+          })),
           attackBonus: fired.reduce((sum, trigger) => sum + trigger.attackBonus, 0),
           healDefense: fired.reduce((sum, trigger) => sum + trigger.healDefense, 0),
           extraHits: fired.reduce((sum, trigger) => sum + trigger.extraHits, 0),
@@ -8996,15 +9261,26 @@
         if (shieldGain > 0) attacker.shieldHits += shieldGain;
 
         finishTriggerCycle(attacker, activation);
+        const appliedExtraHits = Math.max(0, exchange.hits - attacker.attackHits);
+        let remainingExtraHits = appliedExtraHits;
+        const triggeredDetails = activation.details.map(detail => {
+          const applied = Math.min(remainingExtraHits, Math.max(0, Math.round(Number(detail.extraHits) || 0)));
+          remainingExtraHits -= applied;
+          return { ...detail, appliedExtraHits: applied };
+        });
         turns.push({
           round,
           side: actingSide,
           hits: exchange.hits,
+          baseHits: attacker.attackHits,
+          extraHits: appliedExtraHits,
+          requestedExtraHits: activation.extraHits,
           blockedHits: exchange.blockedHits,
           unblockedHits: exchange.unblockedHits,
           damage,
           triggerActivated: activation.fired.length > 0,
           triggeredSkills: activation.names,
+          triggeredDetails,
           attackBonus: activation.attackBonus,
           healDefense,
           shieldGain,
@@ -9026,8 +9302,8 @@
         defender.defense = 0;
         attacker.totalDamage += damage;
         turns.push({
-          round, side: actingSide, hits: attacker.attackHits, blockedHits: 0, unblockedHits: attacker.attackHits,
-          damage, suddenBreak: true, triggerActivated: false, triggeredSkills: [], attackBonus: 0, healDefense: 0, shieldGain: 0,
+          round, side: actingSide, hits: attacker.attackHits, baseHits: attacker.attackHits, extraHits: 0, requestedExtraHits: 0, blockedHits: 0, unblockedHits: attacker.attackHits,
+          damage, suddenBreak: true, triggerActivated: false, triggeredSkills: [], triggeredDetails: [], attackBonus: 0, healDefense: 0, shieldGain: 0,
           playerRemaining: player.defense, enemyRemaining: enemy.defense,
           playerShieldRemaining: player.shieldHits, enemyShieldRemaining: enemy.shieldHits
         });
@@ -9069,6 +9345,241 @@
       if (display.enemyMeter) display.enemyMeter.style.width = `${Math.max(0, Math.min(100, enemyDefense / combat.enemyMaxDefense * 100))}%`;
     }
 
+    function clampActiveCutsceneNumber(value, fallback, min, max) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return fallback;
+      return Math.min(max, Math.max(min, number));
+    }
+
+    function getActiveSkillCutsceneConfig(ability = {}, card = null) {
+      const cardDefaults = card && card.activeCutscene && typeof card.activeCutscene === "object" ? card.activeCutscene : {};
+      const abilityCustom = ability && (ability.activeCutscene || ability.activeSkillCutscene);
+      const custom = abilityCustom && typeof abilityCustom === "object" ? abilityCustom : {};
+      const merged = { ...cardDefaults, ...custom };
+      const rarity = card ? getRarity(card) : RARITIES.N;
+      const title = String(merged.title || ability && ability.name || "ACTIVE SKILL");
+      return {
+        enabled: merged.enabled !== false,
+        kicker: String(merged.kicker || "ACTIVE SKILL ACTIVATED"),
+        title,
+        quote: String(merged.quote || ability && ability.description || `${title} เริ่มทำงาน`),
+        video: resolveAsset(merged.video || "", "card"),
+        image: resolveAsset(merged.image || "", "card") || (card ? getCardImage(card) : ""),
+        poster: resolveAsset(merged.poster || "", "card") || (card ? getCardImage(card) : ""),
+        accent: String(merged.accent || rarity.glow || rarity.color || "#a78bfa"),
+        accent2: String(merged.accent2 || rarity.color || "#22d3ee"),
+        durationMs: clampActiveCutsceneNumber(merged.durationMs, 1050, 160, 12000),
+        maxVideoMs: clampActiveCutsceneNumber(merged.maxVideoMs, 6000, 400, 120000),
+        objectFit: merged.objectFit === "contain" ? "contain" : "cover",
+        objectPosition: String(merged.objectPosition || "center center"),
+        muted: merged.muted === undefined ? true : Boolean(merged.muted),
+        volume: clampActiveCutsceneNumber(merged.volume, .8, 0, 1),
+        showHitCount: merged.showHitCount !== false
+      };
+    }
+
+    function stopActiveSkillCutsceneMedia() {
+      const video = document.getElementById("activeSkillCutsceneVideo");
+      if (!video) return;
+      video.onended = null;
+      video.onerror = null;
+      try { video.pause(); } catch (error) {}
+      video.removeAttribute("src");
+      video.load();
+    }
+
+    function finishActiveSkillCutscene() {
+      activeSkillCutsceneToken += 1;
+      if (activeSkillCutsceneTimer) clearTimeout(activeSkillCutsceneTimer);
+      activeSkillCutsceneTimer = 0;
+      stopActiveSkillCutsceneMedia();
+      const screen = document.getElementById("activeSkillCutscene");
+      if (screen) {
+        screen.classList.add("hidden");
+        screen.classList.remove("player-side", "enemy-side");
+      }
+      const done = activeSkillCutsceneFinish;
+      activeSkillCutsceneFinish = null;
+      restoreBodyScroll();
+      if (typeof done === "function") done();
+    }
+
+    function activeSkillEffectChipHTML(detail, turn) {
+      const chips = [];
+      if (Number(detail.attackBonus || 0)) chips.push(`ATK ชั่วคราว ${Number(detail.attackBonus) >= 0 ? "+" : ""}${formatNumber(detail.attackBonus)}`);
+      if (Number(detail.healDefense || 0)) chips.push(`ฟื้น DEF สูงสุด ${formatNumber(detail.healDefense)}`);
+      if (Number(detail.appliedExtraHits || 0)) chips.push(`เพิ่มฮิตจริง +${formatNumber(detail.appliedExtraHits)}`);
+      else if (Number(detail.extraHits || 0)) chips.push(`ขอเพิ่มฮิต +${formatNumber(detail.extraHits)} (ติดเพดาน)`);
+      if (Number(detail.restoreShieldHits || 0)) chips.push(`ฟื้นโล่สูงสุด +${formatNumber(detail.restoreShieldHits)} ฮิต`);
+      if (Number(turn.blockedHits || 0)) chips.push(`ศัตรูบล็อก ${formatNumber(turn.blockedHits)} ฮิต`);
+      chips.push(`ผ่านโล่ ${formatNumber(turn.unblockedHits || 0)} ฮิต`);
+      return chips.map(text => `<span class="active-skill-effect-chip">${escapeHTML(text)}</span>`).join("");
+    }
+
+    function playActiveSkillCutscene(detail, turn, labels = {}, side = "player") {
+      const config = detail && detail.cutscene && typeof detail.cutscene === "object"
+        ? detail.cutscene
+        : getActiveSkillCutsceneConfig({ name: detail && detail.name }, detail && detail.sourceCardId ? CARD_BY_ID.get(String(detail.sourceCardId)) : null);
+      if (!detail || config.enabled === false) return Promise.resolve();
+      const screen = document.getElementById("activeSkillCutscene");
+      if (!screen) return Promise.resolve();
+
+      finishActiveSkillCutscene();
+      const token = ++activeSkillCutsceneToken;
+      const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const video = document.getElementById("activeSkillCutsceneVideo");
+      const image = document.getElementById("activeSkillCutsceneImage");
+      const cardNode = document.getElementById("activeSkillCutsceneCard");
+      const kickerNode = document.getElementById("activeSkillCutsceneKicker");
+      const titleNode = document.getElementById("activeSkillCutsceneTitle");
+      const sourceNode = document.getElementById("activeSkillCutsceneSource");
+      const quoteNode = document.getElementById("activeSkillCutsceneQuote");
+      const hitNode = document.getElementById("activeSkillCutsceneHits");
+      const effectsNode = document.getElementById("activeSkillCutsceneEffects");
+      const sourceCard = detail.sourceCardId ? CARD_BY_ID.get(String(detail.sourceCardId)) : null;
+      const sourceImage = String(detail.sourceCardImage || (sourceCard ? getCardImage(sourceCard) : "") || config.image || "");
+      const sourceName = String(detail.sourceCardName || sourceCard && sourceCard.name || labels.attacker || "Unknown Character");
+
+      screen.style.setProperty("--active-accent", config.accent);
+      screen.style.setProperty("--active-accent-2", config.accent2);
+      screen.classList.remove("hidden", "player-side", "enemy-side");
+      screen.classList.add(side === "enemy" ? "enemy-side" : "player-side");
+      if (kickerNode) kickerNode.textContent = config.kicker;
+      if (titleNode) titleNode.textContent = config.title || detail.name;
+      if (sourceNode) sourceNode.textContent = `${sourceName} • ${side === "enemy" ? "ฝ่ายตรงข้าม" : "ฝ่ายคุณ"}`;
+      if (quoteNode) quoteNode.textContent = config.quote;
+      if (hitNode) {
+        hitNode.textContent = config.showHitCount ? formatNumber(turn.hits || 1) : "ACTIVE";
+        const label = hitNode.nextElementSibling;
+        if (label) label.textContent = config.showHitCount ? "TOTAL HIT" : "SKILL";
+      }
+      if (effectsNode) effectsNode.innerHTML = activeSkillEffectChipHTML(detail, turn);
+      if (cardNode) cardNode.innerHTML = sourceImage
+        ? `<img src="${escapeHTML(sourceImage)}" alt="${escapeHTML(sourceName)}">`
+        : `<div style="height:100%;display:grid;place-items:center;font-size:3rem;font-weight:1000">ACTIVE</div>`;
+
+      if (video) {
+        video.classList.add("hidden");
+        video.style.objectFit = config.objectFit;
+        video.style.objectPosition = config.objectPosition;
+      }
+      if (image) {
+        const backgroundImage = config.image || sourceImage;
+        image.classList.toggle("hidden", !backgroundImage);
+        if (backgroundImage) image.src = backgroundImage;
+        else image.removeAttribute("src");
+        image.alt = sourceName;
+        image.style.objectFit = config.objectFit;
+        image.style.objectPosition = config.objectPosition;
+      }
+      document.body.style.overflow = "hidden";
+
+      return new Promise(resolve => {
+        activeSkillCutsceneFinish = resolve;
+        const fallbackDuration = reducedMotion ? 180 : config.durationMs;
+        const useStaticTimer = () => {
+          if (token !== activeSkillCutsceneToken) return;
+          activeSkillCutsceneTimer = setTimeout(finishActiveSkillCutscene, fallbackDuration);
+        };
+
+        if (!config.video || !video) {
+          useStaticTimer();
+          return;
+        }
+
+        video.classList.remove("hidden");
+        if (image) image.classList.add("hidden");
+        video.muted = config.muted;
+        video.volume = config.volume;
+        if (config.poster) video.poster = config.poster;
+        video.src = config.video;
+        video.onended = finishActiveSkillCutscene;
+        video.onerror = () => {
+          stopActiveSkillCutsceneMedia();
+          if (image) image.classList.toggle("hidden", !sourceImage);
+          useStaticTimer();
+        };
+        video.load();
+        let playPromise;
+        try { playPromise = video.play(); } catch (error) { playPromise = null; }
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => {
+            if (token !== activeSkillCutsceneToken) return;
+            video.muted = true;
+            let retry;
+            try { retry = video.play(); } catch (error) { retry = null; }
+            if (retry && typeof retry.catch === "function") retry.catch(() => video.onerror());
+            else if (!retry) video.onerror();
+          });
+        } else if (!playPromise) {
+          video.onerror();
+          return;
+        }
+        activeSkillCutsceneTimer = setTimeout(finishActiveSkillCutscene, reducedMotion ? 220 : config.maxVideoMs);
+      });
+    }
+
+    function getCombatHitSideSummary(combat, side) {
+      const turns = abilityArray(combat && combat.turns).filter(turn => turn && turn.side === side);
+      const skills = new Map();
+      turns.forEach(turn => {
+        abilityArray(turn.triggeredDetails).forEach(detail => {
+          const key = String(detail.key || `${detail.sourceCardId || ""}:${detail.name || "Active Skill"}`);
+          if (!skills.has(key)) skills.set(key, {
+            name: String(detail.name || "Active Skill"),
+            sourceCardName: String(detail.sourceCardName || "Unknown Character"),
+            activations: 0,
+            appliedExtraHits: 0,
+            turnHits: 0
+          });
+          const item = skills.get(key);
+          item.activations += 1;
+          item.appliedExtraHits += Math.max(0, Number(detail.appliedExtraHits || 0));
+          item.turnHits += Math.max(0, Number(turn.hits || 0));
+        });
+      });
+      return {
+        attacks: turns.length,
+        totalHits: turns.reduce((sum, turn) => sum + Math.max(0, Number(turn.hits || 0)), 0),
+        baseHits: turns.reduce((sum, turn) => sum + Math.max(0, Number(turn.baseHits || turn.hits || 0)), 0),
+        extraHits: turns.reduce((sum, turn) => sum + Math.max(0, Number(turn.extraHits || 0)), 0),
+        blockedHits: turns.reduce((sum, turn) => sum + Math.max(0, Number(turn.blockedHits || 0)), 0),
+        unblockedHits: turns.reduce((sum, turn) => sum + Math.max(0, Number(turn.unblockedHits || 0)), 0),
+        activeTurns: turns.filter(turn => turn.triggerActivated).length,
+        maxHits: turns.reduce((max, turn) => Math.max(max, Math.max(0, Number(turn.hits || 0))), 0),
+        skills: [...skills.values()]
+      };
+    }
+
+    function combatHitReportHTML(combat, labels = {}) {
+      if (!combat || !Array.isArray(combat.turns) || !combat.turns.length) return `<p class="hit-report-empty">ยังไม่มีข้อมูลการต่อสู้ล่าสุด</p>`;
+      const player = getCombatHitSideSummary(combat, "player");
+      const enemy = getCombatHitSideSummary(combat, "enemy");
+      const sideHTML = (summary, title, enemySide = false) => `
+        <div class="hit-report-side ${enemySide ? "enemy" : ""}">
+          <h4>${escapeHTML(title)}</h4>
+          <div class="hit-report-metrics">
+            <div class="hit-report-metric"><span>ครั้งโจมตี</span><strong>${formatNumber(summary.attacks)}</strong></div>
+            <div class="hit-report-metric"><span>ฮิตรวม</span><strong>${formatNumber(summary.totalHits)}</strong></div>
+            <div class="hit-report-metric"><span>ฮิตพื้นฐาน</span><strong>${formatNumber(summary.baseHits)}</strong></div>
+            <div class="hit-report-metric"><span>เทิร์น ACTIVE</span><strong>${formatNumber(summary.activeTurns)}</strong></div>
+            <div class="hit-report-metric"><span>ผ่านโล่</span><strong>${formatNumber(summary.unblockedHits)}</strong></div>
+            <div class="hit-report-metric"><span>ถูกบล็อก</span><strong>${formatNumber(summary.blockedHits)}</strong></div>
+            <div class="hit-report-metric"><span>ACTIVE เพิ่มจริง</span><strong>+${formatNumber(summary.extraHits)}</strong></div>
+            <div class="hit-report-metric"><span>คอมโบสูงสุด</span><strong>${formatNumber(summary.maxHits)} ฮิต</strong></div>
+          </div>
+          <div class="hit-report-skills">${summary.skills.length ? summary.skills.map(skill => `<div class="hit-report-skill"><b>${escapeHTML(skill.sourceCardName)} — ${escapeHTML(skill.name)}</b><br>ทำงาน ${formatNumber(skill.activations)} ครั้ง • เพิ่มฮิตจริง +${formatNumber(skill.appliedExtraHits)} • เทิร์นที่สกิลทำงานรวม ${formatNumber(skill.turnHits)} ฮิต</div>`).join("") : `<div class="hit-report-skill">ไม่มี ACTIVE Skill ทำงานในไฟต์นี้</div>`}</div>
+        </div>`;
+      const totalHits = player.totalHits + enemy.totalHits;
+      const totalBlocked = player.blockedHits + enemy.blockedHits;
+      return `<div class="hit-report-total">ทั้งไฟต์โจมตีรวม ${formatNumber(player.attacks + enemy.attacks)} ครั้ง • ${formatNumber(totalHits)} ฮิต • ผ่านโล่ ${formatNumber(player.unblockedHits + enemy.unblockedHits)} • ถูกบล็อก ${formatNumber(totalBlocked)} • ACTIVE เพิ่มจริง +${formatNumber(player.extraHits + enemy.extraHits)} ฮิต</div><div class="hit-report-grid">${sideHTML(player, labels.player || "ทีมของคุณ")}${sideHTML(enemy, labels.enemy || "ฝ่ายตรงข้าม", true)}</div>`;
+    }
+
+    function renderCombatHitReport(targetId, combat, labels = {}) {
+      const target = document.getElementById(targetId);
+      if (target) target.innerHTML = combatHitReportHTML(combat, labels);
+    }
+
     async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
       updateTurnBattleDisplay(display, combat);
       const playerLabel = labels.player || "ทีมของคุณ";
@@ -9087,6 +9598,11 @@
           ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว +${formatNumber(turn.attackBonus)}` : ""}${turn.healDefense ? ` • ฟื้น DEF ${formatNumber(turn.healDefense)}` : ""}${turn.shieldGain ? ` • ฟื้นโล่ ${turn.shieldGain} ฮิต` : ""}`
           : "";
         result.textContent = `รอบ ${turn.round} • ${attackerLabel} โจมตี ${turn.hits} ฮิต${blockText}${activeText} • ${defenderLabel} เสีย DEF ${formatNumber(turn.damage)} เหลือ ${formatNumber(remaining)}`;
+        if (turn.triggerActivated) {
+          for (const detail of abilityArray(turn.triggeredDetails)) {
+            await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
+          }
+        }
         const speed = turn.round > 6 ? Math.max(45, Math.floor(phaseDuration * .45)) : phaseDuration;
         await playStrikeSequence(stage, strikeClass, turn.hits, speed);
         updateTurnBattleDisplay(display, combat, turn);
@@ -9190,6 +9706,10 @@
             key,
             name: String(record.ability && record.ability.name || record.sourceCard && record.sourceCard.name || "Active Skill"),
             sourceCardId: String(record.sourceCard && record.sourceCard.id || ""),
+            sourceCardName: String(record.sourceCard && record.sourceCard.name || "Unknown Character"),
+            sourceCardImage: record.sourceCard ? getCardImage(record.sourceCard) : "",
+            sourceCardRarity: String(record.sourceCard && record.sourceCard.rarity || "N"),
+            cutscene: getActiveSkillCutsceneConfig(record.ability, record.sourceCard),
             afterOwnAttacks: record.trigger.afterOwnAttacks,
             repeat: record.trigger.repeat !== false,
             attackBonus: 0,
@@ -10033,9 +10553,12 @@
         }, phaseDuration);
         stage.classList.add(won ? "battle-win" : "battle-lose");
 
+        lastArenaCombat = combat;
         const playerShieldUsed = combat.playerInitialShieldHits - combat.playerShieldRemaining;
         const enemyShieldUsed = combat.enemyInitialShieldHits - combat.enemyShieldRemaining;
-        const combatText = `${combat.rounds} รอบ • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล DEF ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const playerHitSummary = getCombatHitSideSummary(combat, "player");
+        const enemyHitSummary = getCombatHitSideSummary(combat, "enemy");
+        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE เพิ่มฮิตจริง +${formatNumber(playerHitSummary.extraHits)}/+${formatNumber(enemyHitSummary.extraHits)} • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล DEF ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.arena.points += ARENA_CONFIG.winPoints;
           state.arena.wins += 1;
@@ -10303,9 +10826,12 @@
         }, phaseDuration);
         arena.classList.add(won ? "battle-win" : "battle-lose");
 
+        lastBattleCombat = combat;
         const playerShieldUsed = combat.playerInitialShieldHits - combat.playerShieldRemaining;
         const enemyShieldUsed = combat.enemyInitialShieldHits - combat.enemyShieldRemaining;
-        const combatText = `${combat.rounds} รอบ • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล DEF ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const playerHitSummary = getCombatHitSideSummary(combat, "player");
+        const enemyHitSummary = getCombatHitSideSummary(combat, "enemy");
+        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE เพิ่มฮิตจริง +${formatNumber(playerHitSummary.extraHits)}/+${formatNumber(enemyHitSummary.extraHits)} • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล DEF ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.gems += stats.gemReward;
           state.dust += stats.dustReward;
@@ -10808,7 +11334,7 @@
     function closeItemSelector() { activeSelectorItemId = ""; document.getElementById("itemSelectorModal").classList.add("hidden"); restoreBodyScroll(); }
 
     function restoreBodyScroll() {
-      const openIds = ["teamPickerModal", "cardModal", "authModal", "profileModal", "revealScreen", "scCutscene", "updateNoticeModal", "inventoryModal", "mailboxModal", "itemSelectorModal"];
+      const openIds = ["teamPickerModal", "cardModal", "authModal", "profileModal", "revealScreen", "scCutscene", "activeSkillCutscene", "updateNoticeModal", "inventoryModal", "mailboxModal", "itemSelectorModal"];
       const anyOpen = openIds.some(id => { const node = document.getElementById(id); return node && !node.classList.contains("hidden"); });
       if (!anyOpen) document.body.style.overflow = "";
     }
@@ -12118,6 +12644,7 @@
         result.textContent = battleResult ? battleResult.text : "จัดทีมไต่หอให้พร้อมแล้วท้าทายหอคอย";
         result.className = `battle-result ${battleResult ? battleResult.tone : ""}`;
       }
+      renderCombatHitReport("battleHitReport", lastBattleCombat, { player: "ทีมของคุณ", enemy: `Tower ชั้น ${lastBattleCombat ? stats.stage - (battleResult && battleResult.tone === "win" ? 1 : 0) : stats.stage}` });
     }
 
     function renderArenaTeam() {
@@ -12206,6 +12733,7 @@
         result.textContent = arenaResult ? arenaResult.text : `ชนะ +${ARENA_CONFIG.winPoints} แต้ม • แพ้ -${ARENA_CONFIG.losePoints} แต้ม`;
         result.className = `battle-result ${arenaResult ? arenaResult.tone : ""}`;
       }
+      renderCombatHitReport("arenaHitReport", lastArenaCombat, { player: "ทีม ARENA ของคุณ", enemy: currentArenaOpponent && currentArenaOpponent.username || "ฝ่ายตรงข้าม" });
       renderArenaTeam();
     }
 
@@ -13122,6 +13650,7 @@
       if (action === "close-update-notice") closeUpdateNotice();
       if (action === "close-reveal") closeReveal();
       if (action === "skip-sc-cutscene") finishSCCutscene();
+      if (action === "skip-active-skill-cutscene") finishActiveSkillCutscene();
       if (action === "select-reveal-card") renderRevealSelection(Number(target.dataset.revealIndex) || 0);
       if (action === "previous-reveal-card") renderRevealSelection(activeRevealIndex - 1);
       if (action === "next-reveal-card") renderRevealSelection(activeRevealIndex + 1);
@@ -13205,7 +13734,8 @@
 
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
-      if (!document.getElementById("scCutscene").classList.contains("hidden")) finishSCCutscene();
+      if (!document.getElementById("activeSkillCutscene").classList.contains("hidden")) finishActiveSkillCutscene();
+      else if (!document.getElementById("scCutscene").classList.contains("hidden")) finishSCCutscene();
       else if (!document.getElementById("itemSelectorModal").classList.contains("hidden")) closeItemSelector();
       else if (!document.getElementById("inventoryModal").classList.contains("hidden")) closeInventory();
       else if (!document.getElementById("mailboxModal").classList.contains("hidden")) closeMailbox();
