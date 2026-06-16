@@ -1,0 +1,91 @@
+{
+  "collaboration": "ANIME CARD COLLECTION × KonoSuba",
+  "recommended_folder": "assets/ui/konosuba/",
+  "source_sheet": "a_high_resolution_game_ui_asset_sheet_mockup_ima.png",
+  "assets": {
+    "ui_topbar.png": {
+      "usage": "แถบข้อมูลผู้เล่นด้านบน",
+      "width": 627,
+      "height": 98,
+      "suggested_path": "assets/ui/konosuba/ui_topbar.png"
+    },
+    "ui_currencybar.png": {
+      "usage": "แถบเงิน เหรียญ เพชร และพลังงาน",
+      "width": 575,
+      "height": 80,
+      "suggested_path": "assets/ui/konosuba/ui_currencybar.png"
+    },
+    "logo_konosuba.png": {
+      "usage": "โลโก้คอลแลป KonoSuba",
+      "width": 290,
+      "height": 116,
+      "suggested_path": "assets/ui/konosuba/logo_konosuba.png"
+    },
+    "ui_mainmenu_buttons.png": {
+      "usage": "ชุดปุ่มเมนูหลัก",
+      "width": 837,
+      "height": 124,
+      "suggested_path": "assets/ui/konosuba/ui_mainmenu_buttons.png"
+    },
+    "ui_event_banner.png": {
+      "usage": "แบนเนอร์กิจกรรมคอลแลป",
+      "width": 673,
+      "height": 140,
+      "suggested_path": "assets/ui/konosuba/ui_event_banner.png"
+    },
+    "ui_gacha_banner.png": {
+      "usage": "แบนเนอร์หน้ากาชา",
+      "width": 478,
+      "height": 275,
+      "suggested_path": "assets/ui/konosuba/ui_gacha_banner.png"
+    },
+    "ui_gacha_panel.png": {
+      "usage": "กรอบและองค์ประกอบหน้ากาชา",
+      "width": 458,
+      "height": 278,
+      "suggested_path": "assets/ui/konosuba/ui_gacha_panel.png"
+    },
+    "ui_shop_panel.png": {
+      "usage": "กรอบหน้าร้านค้า",
+      "width": 578,
+      "height": 263,
+      "suggested_path": "assets/ui/konosuba/ui_shop_panel.png"
+    },
+    "ui_character_detail.png": {
+      "usage": "กรอบหน้ารายละเอียดตัวละคร",
+      "width": 480,
+      "height": 212,
+      "suggested_path": "assets/ui/konosuba/ui_character_detail.png"
+    },
+    "ui_quest_panel.png": {
+      "usage": "กรอบหน้าภารกิจ",
+      "width": 453,
+      "height": 204,
+      "suggested_path": "assets/ui/konosuba/ui_quest_panel.png"
+    },
+    "ui_team_setup.png": {
+      "usage": "กรอบหน้าจัดทีม",
+      "width": 578,
+      "height": 212,
+      "suggested_path": "assets/ui/konosuba/ui_team_setup.png"
+    },
+    "ui_popup_messages.png": {
+      "usage": "กรอบป๊อปอัป ยืนยัน และรับรางวัล",
+      "width": 610,
+      "height": 136,
+      "suggested_path": "assets/ui/konosuba/ui_popup_messages.png"
+    },
+    "ui_system_icons.png": {
+      "usage": "ไอคอนระบบและกรอบระดับการ์ด",
+      "width": 385,
+      "height": 150,
+      "suggested_path": "assets/ui/konosuba/ui_system_icons.png"
+    },
+    "ui_bottombar_loading.png": {
+      "usage": "แถบเมนูล่างและหน้ากำลังโหลด",
+      "width": 523,
+      "height": 146,
+      "suggested_path": "assets/ui/konosuba/ui_bottombar_loading.png"
+    }
+  }
+}
