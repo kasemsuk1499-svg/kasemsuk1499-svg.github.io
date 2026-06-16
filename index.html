@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-15-active-skill-cutscene-hit-report-v32">
+  <meta name="gacha-app-build" content="2026-06-16-card-team-random-target-battle-v33">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1383,6 +1383,125 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
+
+    /* เพิ่มโดยอลิซ: การต่อสู้แบบทีมรายใบ — DEF/โล่/ฮิตแยกต่อการ์ด */
+    .battle-model-card.team-combat-unit {
+      overflow: visible;
+      transition: transform .2s ease, filter .2s ease, opacity .2s ease, box-shadow .2s ease;
+    }
+
+    .battle-model-card.team-combat-unit > img {
+      overflow: hidden;
+      border-radius: 11px;
+    }
+
+    .combat-unit-overlay {
+      position: absolute;
+      z-index: 9;
+      right: 4px;
+      bottom: 4px;
+      left: 4px;
+      display: grid;
+      gap: 3px;
+      padding: 5px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 9px;
+      color: #f8fafc;
+      background: rgba(3,5,13,.86);
+      box-shadow: 0 5px 16px rgba(0,0,0,.36);
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+    }
+
+    .combat-unit-name {
+      overflow: hidden;
+      font-size: .52rem;
+      font-weight: 1000;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .combat-unit-stats {
+      display: flex;
+      justify-content: space-between;
+      gap: 4px;
+      color: #dbeafe;
+      font-size: .46rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .combat-unit-bar {
+      height: 4px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+    }
+
+    .combat-unit-bar i {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #56e39f, #5ce8ff);
+      transition: width .18s ease;
+    }
+
+    .battle-model-card.team-combat-unit.is-attacker {
+      z-index: 20;
+      filter: brightness(1.18) drop-shadow(0 0 16px rgba(92,232,255,.85));
+      transform: translateY(calc(var(--model-lift) - 13px)) rotate(0deg) scale(1.08);
+      box-shadow: 0 0 0 3px rgba(92,232,255,.75), 0 20px 38px rgba(0,0,0,.5);
+    }
+
+    .battle-model-card.team-combat-unit.is-target {
+      z-index: 19;
+      filter: brightness(1.12) drop-shadow(0 0 16px rgba(251,113,133,.85));
+      box-shadow: 0 0 0 3px rgba(251,113,133,.78), 0 20px 38px rgba(0,0,0,.5);
+    }
+
+    .battle-model-card.team-combat-unit.is-defeated {
+      z-index: 0;
+      opacity: .26;
+      filter: grayscale(1) brightness(.55);
+      transform: translateY(calc(var(--model-lift) + 13px)) rotate(var(--model-tilt)) scale(.88);
+    }
+
+    .battle-model-card.team-combat-unit.is-defeated::before {
+      content: "K.O.";
+      position: absolute;
+      z-index: 12;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      border-radius: inherit;
+      color: #fecdd3;
+      font-size: 1rem;
+      font-weight: 1000;
+      text-shadow: 0 2px 8px #000;
+      background: rgba(3,5,13,.35);
+    }
+
+    .combat-card-report {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 7px;
+      margin-top: 9px;
+    }
+
+    .combat-card-report-item {
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 11px;
+      color: #cbd5e1;
+      font-size: .64rem;
+      line-height: 1.45;
+      background: rgba(3,5,12,.34);
+    }
+
+    .combat-card-report-item b { display: block; color: #f8fafc; margin-bottom: 3px; }
+    .combat-card-report-item.ko { border-color: rgba(251,113,133,.32); opacity: .7; }
 
     .battle-impact {
       position: absolute;
@@ -3756,7 +3875,7 @@
 
         <section id="battleView" class="hidden">
           <div class="section-title">
-            <div><h2>Battle Tower</h2><p>ผลัดกันโจมตีเป็นเทิร์น ลด DEF ไปเรื่อย ๆ ใคร DEF หมดก่อนแพ้ พร้อมสกิลหลายฮิต โล่ ธาตุ และ Support</p></div>
+            <div><h2>Battle Tower</h2><p>ต่อสู้แบบทีม 5 ต่อ 5 สุ่มการ์ดผู้โจมตีและเป้าหมายในแต่ละเทิร์น โดยแต่ละใบมี DEF โล่ และจำนวนฮิตแยกกัน</p></div>
           </div>
 
           <!-- เพิ่มโดยอลิซ: ทีมไต่หอแยกต่างหาก + แสดงสกิลและบัฟที่ทำงาน -->
@@ -3818,7 +3937,7 @@
               </div>
               <div class="battle-card">
                 <h3>รายงานฮิตไฟต์ล่าสุด</h3>
-                <div class="hit-report" id="battleHitReport"><p class="hit-report-empty">หลังจบการต่อสู้ ระบบจะแสดงจำนวนครั้งโจมตี ฮิตรวม ฮิตผ่านโล่ ฮิตที่ถูกบล็อก และโบนัสฮิตจาก ACTIVE Skill</p></div>
+                <div class="hit-report" id="battleHitReport"><p class="hit-report-empty">หลังจบการต่อสู้ ระบบจะแสดงผลรายใบ จำนวนครั้งโจมตี ฮิต โล่ ดาเมจ และการ์ดที่ถูกกำจัด</p></div>
               </div>
               <div class="battle-card">
                 <h3>Friend Support</h3>
@@ -3876,7 +3995,7 @@
               </div>
               <div class="battle-card">
                 <h3>รายงานฮิตไฟต์ล่าสุด</h3>
-                <div class="hit-report" id="arenaHitReport"><p class="hit-report-empty">เมื่อจบ ARENA จะสรุปฮิตของทั้งสองทีม รวมถึงฮิตที่ ACTIVE Skill เพิ่มจริง</p></div>
+                <div class="hit-report" id="arenaHitReport"><p class="hit-report-empty">เมื่อจบ ARENA จะสรุปผลรายใบของทั้งสองทีม รวมฮิต โล่ ดาเมจ และการ์ดที่รอด</p></div>
               </div>
               <div class="battle-card">
                 <h3>รางวัลจัดอันดับรายสัปดาห์</h3>
@@ -4294,6 +4413,7 @@
       combatMaxShieldHits: 99,
       // เพิ่มโดยอลิซ: ต่อสู้ผลัดกันตีจน DEF ฝ่ายใดฝ่ายหนึ่งหมด
       combatMaxTurns: 120,
+      combatTeamMaxTurns: 240,
       combatFatigueStartRound: 18,
       combatFatigueMaxDefenseRate: 0.10,
       // เพิ่มโดยอลิซ: เพดานระบบ Active Skill แบบชาร์จจำนวนครั้งโจมตี
@@ -4323,11 +4443,11 @@
     const TOWER_SCALE_CONFIG = Object.freeze({
       basePower: 14000,
       brackets: [
-        { through: 50, growth: 1.060 },
-        { through: 100, growth: 1.054 },
-        { through: 200, growth: 1.0442 },
-        { through: 400, growth: 1.0335 },
-        { through: Infinity, growth: 1.0228 }
+        { through: 50, growth: 1.09750 },
+        { through: 100, growth: 1.024 },
+        { through: 200, growth: 1.0142 },
+        { through: 400, growth: 1.0085 },
+        { through: Infinity, growth: 1.0028 }
       ]
     });
 
@@ -4432,7 +4552,7 @@
     });
 
     // เพิ่มโดยอลิซ: เรทแพ็คสุ่มในกระเป๋า แยกจากตู้กาชาและไม่สะสม pity
-    const ITEM_PACK_RATES = Object.freeze({ N: 49.5, R: 30, SR: 14, SSR: 5, UR: 1.2, LR: .27, EX: .03, SC: 0 });
+    const ITEM_PACK_RATES = Object.freeze({ N: 49.5, R: 30, SR: 14, SSR: 5, UR: 1.2, LR: .37, EX: .01999, SC: .00001 });
     const ITEM_INVENTORY_VERSION = 1;
 
     /*
@@ -4472,7 +4592,7 @@
       "แสง": "✨",
       "ความมืด": "🌑",
       "มิติ": "🌀",
-      "ไร้ธาตุ": "▫️"
+      "ไร้ธาตุ": "🔰"
     });
 
     const ELEMENT_ADVANTAGES = Object.freeze({
@@ -4529,16 +4649,16 @@
     "rateUpCards": {},
     "guarantee": {
       "enabled": true,
-      "every": 500,
+      "every": 700,
       "rarityRates": {
         "UR": 80,
-        "LR": 19,
-        "EX": 1
+        "LR": 19.9,
+        "EX": 0.1
       },
       "resetWhenPullRarities": [
-        "UR",
         "LR",
-        "EX"
+        "EX",
+        "SC"
       ]
     }
   },
@@ -4563,20 +4683,18 @@
       "SC": 0.0002
     },
     "rateUpCards": {
-      "1": 5,
-      "2": 5
     },
     "guarantee": {
       "enabled": true,
-      "every": 500,
+      "every": 5000,
       "rarityRates": {
-        "UR": 72,
-        "LR": 26,
-        "EX": 2
+        "LR": 99.8,
+        "EX": 0.2
       },
       "resetWhenPullRarities": [
         "LR",
-        "EX"
+        "EX",
+        "SC"
       ]
     }
   }
@@ -4649,6 +4767,7 @@
        - luckRate เพิ่มโอกาสสุ่มค่าต่อสู้ฝั่งเรา ไม่แก้เรทกาชา
        - gachaRarityRate เพิ่ม “น้ำหนักสุ่ม” ของระดับที่กำหนด เช่น 0.15 = น้ำหนักระดับนั้น +15% แล้วระบบคำนวณเปอร์เซ็นต์จริงใหม่
        - effect แต่ละรายการใส่ condition ของตัวเองเพิ่มได้
+       - attackHits/shieldHits และ alias cardAttackHits/cardShieldHits ใช้ targetSide/targetCardIds ได้; หากไม่ระบุจะมีผลกับเจ้าของสกิล
        - cardPowerRate/cardDefenseRate/cardIncomeRate ใช้ targetCardIds เพื่อเพิ่มค่าสเตตัสเฉพาะ ID ที่กำหนด
        - nullifyCardAbilities ใช้ targetSide: "ally"/"self"/"enemy" และ targetCardIds เพื่อทำให้ความสามารถของการ์ดเป้าหมายไร้ผล
        - ignoreAbilityConditions เลือกเป้าหมายด้วย targetCardIds / targetElements / targetRarities และ targetMatch: "any"/"all" ได้
@@ -4695,6 +4814,8 @@
       TEAM_DEFENSE_FLAT: "teamDefenseFlat",
       SHIELD_HITS: "shieldHits",
       ATTACK_HITS: "attackHits",
+      CARD_SHIELD_HITS: "cardShieldHits",
+      CARD_ATTACK_HITS: "cardAttackHits",
       TEAM_INCOME_FLAT: "teamIncomeFlat"
     });
 
@@ -5070,14 +5191,17 @@
     "image": "44.png",
     "ability": {
       "name": "เมตตาจากสวรรค์",
-      "description": "จะลบเงื่อนไขของสกิลฝ่ายเราทั้งหมดเมื่อจัดทีมไม่เกิน3คน ;(ทำงานตลอดเวลา)สกิลของการ์ดที่ชื่อ'Sukuna'ฝ่ายตรงข้ามไร้ผล ATK/DEF-90%",
+      "description": "จะลบเงื่อนไขของสกิลฝ่ายเราทั้งหมดเมื่อจัดทีมไม่เกิน3คน ;(ทำงานตลอดเวลา)สกิลของการ์ดที่ชื่อ'Sukuna'ทุกฝ่ายไร้ผล ATK/DEF-90%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {},
       "effects": [
+        { "type": "nullifyCardAbilities", "targetSide": "ally", "targetCardIds": [1002, 1035, 1042] },
         { "type": "nullifyCardAbilities", "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] },
         { "type": "ignoreAbilityConditions", "targetSide": "ally", "condition": { "maxTeamSize": 3 } },
         { "type": "cardPowerRate", "value": -0.90, "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] },
-        { "type": "cardDefenseRate", "value": -0.90, "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] }
+        { "type": "cardDefenseRate", "value": -0.90, "targetSide": "enemy", "targetCardIds": [1002, 1035, 1042] },
+        { "type": "cardPowerRate", "value": -0.90, "targetSide": "ally", "targetCardIds": [1002, 1035, 1042] },
+        { "type": "cardDefenseRate", "value": -0.90, "targetSide": "ally", "targetCardIds": [1002, 1035, 1042] }
       ]
     }
   },
@@ -8647,6 +8771,8 @@
         teamIncomeFlat: 0,
         shieldHits: 0,
         attackHits: 0,
+        cardShieldHits: {},
+        cardAttackHits: {},
         selfPowerRates: {},
         selfDefenseRates: {},
         selfIncomeRates: {},
@@ -8734,8 +8860,20 @@
                 break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT: summary.teamPowerFlat += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_FLAT: summary.teamDefenseFlat += value; break;
-              case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS: summary.shieldHits += value; break;
-              case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS: summary.attackHits += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS:
+              case CARD_ABILITY_EFFECT_TYPES.CARD_SHIELD_HITS: {
+                const hitTargets = resolveAbilityTargetCardIds({ ...effect, targetSide: effect.targetSide || "self" }, sourceCard, context);
+                addAbilityMapRate(summary.cardShieldHits, hitTargets, value);
+                summary.shieldHits += value;
+                break;
+              }
+              case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS:
+              case CARD_ABILITY_EFFECT_TYPES.CARD_ATTACK_HITS: {
+                const hitTargets = resolveAbilityTargetCardIds({ ...effect, targetSide: effect.targetSide || "self" }, sourceCard, context);
+                addAbilityMapRate(summary.cardAttackHits, hitTargets, value);
+                summary.attackHits += value;
+                break;
+              }
               case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT: summary.teamIncomeFlat += value; break;
               case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE: addAbilityMapRate(summary.selfPowerRates, [sourceId], value); break;
               case CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE: addAbilityMapRate(summary.selfDefenseRates, [sourceId], value); break;
@@ -8808,6 +8946,12 @@
       summary.enemyDefenseRate = Math.max(-0.90, summary.enemyDefenseRate);
       summary.attackHits = Math.max(0, Math.min(CONFIG.combatMaxAttackHits - 1, Math.round(summary.attackHits)));
       summary.shieldHits = Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(summary.shieldHits)));
+      Object.keys(summary.cardAttackHits).forEach(id => {
+        summary.cardAttackHits[id] = Math.max(0, Math.min(CONFIG.combatMaxAttackHits - 1, Math.round(Number(summary.cardAttackHits[id]) || 0)));
+      });
+      Object.keys(summary.cardShieldHits).forEach(id => {
+        summary.cardShieldHits[id] = Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(summary.cardShieldHits[id]) || 0)));
+      });
       summary.luckRate = Math.max(-0.75, Math.min(2, summary.luckRate));
       Object.keys(summary.gachaRarityRates).forEach(rarity => {
         summary.gachaRarityRates[rarity] = Math.max(-0.90, Math.min(5, Number(summary.gachaRarityRates[rarity]) || 0));
@@ -8980,8 +9124,10 @@
         elementIncomeRate: `รายได้ธาตุ ${elementText} ${signedPercent(value)}`,
         teamPowerFlat: `ATK ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
         teamDefenseFlat: `DEF ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
-        shieldHits: `โล่กัน ${Math.max(0, Math.round(value))} ฮิต`,
-        attackHits: `โจมตีเพิ่ม +${Math.max(0, Math.round(value))} ฮิต`,
+        shieldHits: `โล่ ${targetText} +${Math.max(0, Math.round(value))} ฮิต`,
+        attackHits: `จำนวนฮิต ${targetText} +${Math.max(0, Math.round(value))}`,
+        cardShieldHits: `โล่ ${targetText} +${Math.max(0, Math.round(value))} ฮิต`,
+        cardAttackHits: `จำนวนฮิต ${targetText} +${Math.max(0, Math.round(value))}`,
         teamIncomeFlat: `รายได้ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}/s`
       };
       return labels[effect && effect.type] || `${effect && effect.type || "effect"}: ${value}`;
@@ -9116,6 +9262,19 @@
 
     function getCombatShieldHits(abilitySummary = {}) {
       return Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(abilitySummary.shieldHits || 0))));
+    }
+
+
+    function getCombatAttackHitsForCard(card, abilitySummary = {}, fallbackHits = 1) {
+      const id = String(card && card.id || "");
+      const extra = Math.max(0, Math.round(Number(abilitySummary && abilitySummary.cardAttackHits && abilitySummary.cardAttackHits[id]) || 0));
+      return Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.max(1, Math.round(Number(fallbackHits) || 1)) + extra));
+    }
+
+    function getCombatShieldHitsForCard(card, abilitySummary = {}, fallbackShieldHits = 0) {
+      const id = String(card && card.id || "");
+      const bonus = Math.max(0, Math.round(Number(abilitySummary && abilitySummary.cardShieldHits && abilitySummary.cardShieldHits[id]) || 0));
+      return Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.max(0, Math.round(Number(fallbackShieldHits) || 0)) + bonus));
     }
 
     function resolveCombatExchange(attackerAttack, defenderDefense, attackHits = 1, shieldHits = 0, variance = 1) {
@@ -9331,6 +9490,359 @@
         playerTriggerActivations: player.totalTriggerActivations,
         enemyTriggerActivations: enemy.totalTriggerActivations
       };
+    }
+
+
+    // เพิ่มโดยอลิซ: ระบบต่อสู้แบบทีมคล้าย Seven Knights
+    // - แต่ละเทิร์นสุ่มการ์ดผู้โจมตีจากฝั่งที่ยังมีชีวิต
+    // - สุ่มเป้าหมายจากการ์ดฝ่ายตรงข้ามที่ยังมีชีวิต
+    // - ATK / DEF / โล่ / จำนวนฮิตเก็บแยกต่อการ์ด และการ์ด DEF 0 จะออกจากพูลสุ่มทันที
+    function distributeIntegerAcrossCards(total, count) {
+      const safeCount = Math.max(0, Math.floor(Number(count) || 0));
+      const result = Array.from({ length: safeCount }, () => 0);
+      let remaining = Math.max(0, Math.floor(Number(total) || 0));
+      let index = 0;
+      while (remaining > 0 && safeCount > 0) {
+        result[index % safeCount] += 1;
+        remaining -= 1;
+        index += 1;
+      }
+      return result;
+    }
+
+    function buildScaledCombatSquad(items, abilitySummary = {}, options = {}) {
+      const sourceItems = abilityArray(items).filter(Boolean).slice(0, Math.max(CONFIG.teamSlots, CONFIG.towerTeamSlots, CONFIG.arenaTeamSlots));
+      const snapshotMode = Boolean(options.snapshotMode);
+      const totalAttack = Math.max(1, Number(options.totalAttack) || 1);
+      const totalDefense = Math.max(1, Number(options.totalDefense) || 1);
+      const fallbackAttackHits = Math.max(1, Math.round(Number(options.fallbackAttackHits) || 1));
+      const fallbackShields = distributeIntegerAcrossCards(options.fallbackShieldHits, sourceItems.length);
+
+      const prepared = sourceItems.map((item, index) => {
+        const card = getBattleItemCard(item);
+        const id = String(card && card.id !== undefined ? card.id : item && item.id !== undefined ? item.id : `unit-${index}`);
+        const name = String(item && item.name || card && card.name || `Unit ${index + 1}`);
+        const rarityKey = String(item && item.rarity || card && card.rarity || "N");
+        const rarity = RARITIES[rarityKey] || RARITIES.N;
+        const image = card ? getCardImage(card) : resolveAsset(item && item.image || "", "card");
+        const rawAttack = snapshotMode
+          ? Math.max(1, getSnapshotAdjustedStat(item, abilitySummary, "power"))
+          : Math.max(1, card ? getAbilityAdjustedCardPower(card, abilitySummary) : Number(item && item.power) || 1);
+        const rawDefense = snapshotMode
+          ? Math.max(1, getSnapshotAdjustedStat(item, abilitySummary, "defense"))
+          : Math.max(1, card ? getAbilityAdjustedCardDefense(card, abilitySummary) : Number(item && item.defense) || 1);
+        const attackHits = card
+          ? getCombatAttackHitsForCard(card, abilitySummary, Number(item && item.attackHits) || fallbackAttackHits)
+          : Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Number(item && item.attackHits) || fallbackAttackHits));
+        const shieldHits = card
+          ? getCombatShieldHitsForCard(card, abilitySummary, Number(item && item.shieldHits) || fallbackShields[index] || 0)
+          : Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Number(item && item.shieldHits) || fallbackShields[index] || 0));
+        return { item, card, id, name, rarityKey, rarity, image, rawAttack, rawDefense, attackHits, shieldHits };
+      });
+
+      const rawAttackTotal = prepared.reduce((sum, unit) => sum + unit.rawAttack, 0) || 1;
+      const rawDefenseTotal = prepared.reduce((sum, unit) => sum + unit.rawDefense, 0) || 1;
+      let assignedAttack = 0;
+      let assignedDefense = 0;
+      return prepared.map((unit, index) => {
+        const last = index === prepared.length - 1;
+        const attack = Math.max(1, last ? totalAttack - assignedAttack : Math.round(totalAttack * unit.rawAttack / rawAttackTotal));
+        const defense = Math.max(1, last ? totalDefense - assignedDefense : Math.round(totalDefense * unit.rawDefense / rawDefenseTotal));
+        assignedAttack += attack;
+        assignedDefense += defense;
+        return {
+          key: `${String(options.side || "side")}:${index}:${unit.id}`,
+          side: String(options.side || "side"),
+          slot: index,
+          id: unit.id,
+          name: unit.name,
+          rarity: unit.rarityKey,
+          image: unit.image,
+          attack,
+          initialAttack: attack,
+          maxDefense: defense,
+          initialMaxDefense: defense,
+          defense,
+          attackHits: unit.attackHits,
+          shieldHits: unit.shieldHits,
+          initialShieldHits: unit.shieldHits,
+          attacks: 0,
+          totalHits: 0,
+          blockedHits: 0,
+          damageDealt: 0,
+          damageTaken: 0,
+          defeated: false
+        };
+      });
+    }
+
+    function cloneCombatUnit(unit) {
+      return unit ? { ...unit } : null;
+    }
+
+    function buildCardTeamCombat(options = {}) {
+      const playerCards = abilityArray(options.playerCards).filter(Boolean).map(cloneCombatUnit);
+      const enemyCards = abilityArray(options.enemyCards).filter(Boolean).map(cloneCombatUnit);
+      const playerInitialCards = playerCards.map(cloneCombatUnit);
+      const enemyInitialCards = enemyCards.map(cloneCombatUnit);
+      const playerVariance = typeof options.playerVariance === "function" ? options.playerVariance : () => 1;
+      const enemyVariance = typeof options.enemyVariance === "function" ? options.enemyVariance : () => 1;
+      const random = typeof options.random === "function" ? options.random : Math.random;
+      const totalAttack = cards => cards.reduce((sum, unit) => sum + Math.max(0, Number(unit.attack) || 0), 0);
+      const totalDefense = cards => cards.reduce((sum, unit) => sum + Math.max(0, Number(unit.defense) || 0), 0);
+      const totalShield = cards => cards.reduce((sum, unit) => sum + Math.max(0, Number(unit.shieldHits) || 0), 0);
+      const alive = cards => cards.filter(unit => !unit.defeated && Number(unit.defense) > 0);
+      const choose = cards => cards[Math.max(0, Math.min(cards.length - 1, Math.floor(random() * cards.length)))];
+      const playerFirst = options.playerFirst === undefined
+        ? (totalAttack(playerCards) === totalAttack(enemyCards) ? random() >= .5 : totalAttack(playerCards) >= totalAttack(enemyCards))
+        : Boolean(options.playerFirst);
+      let actingSide = playerFirst ? "player" : "enemy";
+      const turns = [];
+      const maxTurns = Math.max(20, Math.floor(Number(CONFIG.combatTeamMaxTurns || CONFIG.combatMaxTurns) || 240));
+      const playerInitialDefense = totalDefense(playerCards);
+      const enemyInitialDefense = totalDefense(enemyCards);
+      const playerInitialShield = totalShield(playerCards);
+      const enemyInitialShield = totalShield(enemyCards);
+
+      for (let turnIndex = 0; turnIndex < maxTurns && alive(playerCards).length && alive(enemyCards).length; turnIndex += 1) {
+        const round = Math.floor(turnIndex / 2) + 1;
+        const attackerPool = actingSide === "player" ? alive(playerCards) : alive(enemyCards);
+        const defenderPool = actingSide === "player" ? alive(enemyCards) : alive(playerCards);
+        const attacker = choose(attackerPool);
+        const target = choose(defenderPool);
+        const variance = actingSide === "player"
+          ? playerVariance(round, turnIndex, attacker, target)
+          : enemyVariance(round, turnIndex, attacker, target);
+        const exchange = resolveCombatExchange(attacker.attack, target.defense, attacker.attackHits, target.shieldHits, variance);
+        target.shieldHits = Math.max(0, target.shieldHits - exchange.blockedHits);
+
+        let damage = exchange.unblockedHits > 0 ? Math.max(1, Number(exchange.damage) || 0) : 0;
+        const fatigueStart = Math.max(1, Number(CONFIG.combatFatigueStartRound || 18));
+        if (damage > 0 && round >= fatigueStart) {
+          const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxDefenseRate || .10), .01 + Math.max(0, round - fatigueStart) * .003);
+          damage = Math.max(damage, target.maxDefense * fatigueRate);
+        }
+        damage = Math.min(target.defense, damage);
+        target.defense = Math.max(0, target.defense - damage);
+        target.defeated = target.defense <= 0;
+        attacker.attacks += 1;
+        attacker.totalHits += exchange.hits;
+        attacker.blockedHits += exchange.blockedHits;
+        attacker.damageDealt += damage;
+        target.damageTaken += damage;
+
+        turns.push({
+          round,
+          side: actingSide,
+          attackerKey: attacker.key,
+          attackerId: attacker.id,
+          attackerName: attacker.name,
+          targetKey: target.key,
+          targetId: target.id,
+          targetName: target.name,
+          targetDefeated: target.defeated,
+          targetRemaining: target.defense,
+          targetMaxDefense: target.maxDefense,
+          targetShieldRemaining: target.shieldHits,
+          hits: exchange.hits,
+          baseHits: attacker.attackHits,
+          extraHits: 0,
+          requestedExtraHits: 0,
+          blockedHits: exchange.blockedHits,
+          unblockedHits: exchange.unblockedHits,
+          damage,
+          triggerActivated: false,
+          triggeredSkills: [],
+          triggeredDetails: [],
+          attackBonus: 0,
+          healDefense: 0,
+          shieldGain: 0,
+          playerRemaining: totalDefense(playerCards),
+          enemyRemaining: totalDefense(enemyCards),
+          playerShieldRemaining: totalShield(playerCards),
+          enemyShieldRemaining: totalShield(enemyCards),
+          playerAlive: alive(playerCards).length,
+          enemyAlive: alive(enemyCards).length
+        });
+
+        if (!alive(defenderPool).length) break;
+        actingSide = actingSide === "player" ? "enemy" : "player";
+      }
+
+      // กันไฟต์ยืดเยื้อเกินเพดาน: เข้าช่วง Sudden Break และสลับกำจัดการ์ด DEF ต่ำสุด
+      // จนกว่าฝ่ายหนึ่งจะถูก K.O. ครบทีม เพื่อให้ผลชนะ/แพ้ตรงกับกติกาทีมรายใบเสมอ
+      let suddenGuard = 0;
+      while (alive(playerCards).length && alive(enemyCards).length && suddenGuard < playerCards.length + enemyCards.length + 2) {
+        const attackerPool = actingSide === "player" ? alive(playerCards) : alive(enemyCards);
+        const defenderPool = actingSide === "player" ? alive(enemyCards) : alive(playerCards);
+        const attacker = choose(attackerPool);
+        const target = defenderPool.slice().sort((a, b) => a.defense - b.defense)[0];
+        const damage = target.defense;
+        target.defense = 0;
+        target.defeated = true;
+        attacker.attacks += 1;
+        attacker.totalHits += attacker.attackHits;
+        attacker.damageDealt += damage;
+        target.damageTaken += damage;
+        turns.push({
+          round: Math.floor(turns.length / 2) + 1,
+          side: actingSide,
+          attackerKey: attacker.key,
+          attackerId: attacker.id,
+          attackerName: attacker.name,
+          targetKey: target.key,
+          targetId: target.id,
+          targetName: target.name,
+          targetDefeated: true,
+          targetRemaining: 0,
+          targetMaxDefense: target.maxDefense,
+          targetShieldRemaining: target.shieldHits,
+          hits: attacker.attackHits,
+          baseHits: attacker.attackHits,
+          extraHits: 0,
+          requestedExtraHits: 0,
+          blockedHits: 0,
+          unblockedHits: attacker.attackHits,
+          damage,
+          suddenBreak: true,
+          triggerActivated: false,
+          triggeredSkills: [],
+          triggeredDetails: [],
+          attackBonus: 0,
+          healDefense: 0,
+          shieldGain: 0,
+          playerRemaining: totalDefense(playerCards),
+          enemyRemaining: totalDefense(enemyCards),
+          playerShieldRemaining: totalShield(playerCards),
+          enemyShieldRemaining: totalShield(enemyCards),
+          playerAlive: alive(playerCards).length,
+          enemyAlive: alive(enemyCards).length
+        });
+        suddenGuard += 1;
+        if (!alive(defenderPool).length) break;
+        actingSide = actingSide === "player" ? "enemy" : "player";
+      }
+
+      const playerRemainingDefense = totalDefense(playerCards);
+      const enemyRemainingDefense = totalDefense(enemyCards);
+      const winner = alive(enemyCards).length === 0 ? "player" : alive(playerCards).length === 0 ? "enemy" : (playerRemainingDefense >= enemyRemainingDefense ? "player" : "enemy");
+      return {
+        type: "card-team",
+        winner,
+        playerFirst,
+        turns,
+        rounds: turns.length ? Math.max(...turns.map(turn => turn.round)) : 0,
+        playerCards,
+        enemyCards,
+        playerInitialCards,
+        enemyInitialCards,
+        playerAttack: totalAttack(playerCards),
+        enemyAttack: totalAttack(enemyCards),
+        playerMaxDefense: playerInitialDefense,
+        enemyMaxDefense: enemyInitialDefense,
+        playerRemainingDefense,
+        enemyRemainingDefense,
+        playerInitialShieldHits: playerInitialShield,
+        enemyInitialShieldHits: enemyInitialShield,
+        playerShieldRemaining: totalShield(playerCards),
+        enemyShieldRemaining: totalShield(enemyCards),
+        playerTotalDamage: playerCards.reduce((sum, unit) => sum + unit.damageDealt, 0),
+        enemyTotalDamage: enemyCards.reduce((sum, unit) => sum + unit.damageDealt, 0),
+        playerTotalHealing: 0,
+        enemyTotalHealing: 0,
+        playerTriggerActivations: 0,
+        enemyTriggerActivations: 0,
+        playerAlive: alive(playerCards).length,
+        enemyAlive: alive(enemyCards).length
+      };
+    }
+
+    function combatSquadModelHTML(unit, index, count, enemySide = false) {
+      const rarity = RARITIES[unit.rarity] || RARITIES.N;
+      const center = (Math.max(1, count) - 1) / 2;
+      const tilt = (index - center) * (enemySide ? -5 : 5);
+      const lift = Math.abs(index - center) * 5;
+      const defenseRate = Math.max(0, Math.min(100, Number(unit.defense) / Math.max(1, Number(unit.maxDefense)) * 100));
+      return `<div class="battle-model-card team-combat-unit${unit.defeated ? " is-defeated" : ""}" data-combat-key="${escapeHTML(unit.key)}" data-attack-hits="${escapeHTML(unit.attackHits)}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`})}" aria-label="${escapeHTML(unit.name)}">
+        ${unit.image ? `<img src="${escapeHTML(unit.image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+        <div class="combat-unit-overlay">
+          <div class="combat-unit-name">${escapeHTML(unit.name)}</div>
+          <div class="combat-unit-stats"><span>DEF ${formatNumber(unit.defense)}</span><span>🛡${formatNumber(unit.shieldHits)} ⚔${formatNumber(unit.attackHits)}</span></div>
+          <div class="combat-unit-bar"><i style="width:${defenseRate}%"></i></div>
+        </div>
+      </div>`;
+    }
+
+    function renderCombatSquadModels(containerId, units, enemySide = false) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = abilityArray(units).map((unit, index) => combatSquadModelHTML(unit, index, units.length, enemySide)).join("");
+    }
+
+    function findCombatUnitNode(stage, key) {
+      return [...stage.querySelectorAll("[data-combat-key]")].find(node => String(node.dataset.combatKey) === String(key)) || null;
+    }
+
+    function updateCombatUnitNode(node, state = {}) {
+      if (!node) return;
+      const defense = Math.max(0, Number(state.defense) || 0);
+      const maxDefense = Math.max(1, Number(state.maxDefense) || 1);
+      const shieldHits = Math.max(0, Number(state.shieldHits) || 0);
+      const stats = node.querySelector(".combat-unit-stats");
+      const bar = node.querySelector(".combat-unit-bar i");
+      if (stats) stats.innerHTML = `<span>DEF ${formatNumber(defense)}</span><span>🛡${formatNumber(shieldHits)} ⚔${formatNumber(state.attackHits || 1)}</span>`;
+      if (bar) bar.style.width = `${Math.max(0, Math.min(100, defense / maxDefense * 100))}%`;
+      node.classList.toggle("is-defeated", defense <= 0 || Boolean(state.defeated));
+    }
+
+    function updateCardTeamBattleDisplay(display, combat, turn = null) {
+      const playerDefense = Math.max(0, Number(turn ? turn.playerRemaining : combat.playerMaxDefense));
+      const enemyDefense = Math.max(0, Number(turn ? turn.enemyRemaining : combat.enemyMaxDefense));
+      const playerAlive = Math.max(0, Number(turn ? turn.playerAlive : combat.playerCards.length));
+      const enemyAlive = Math.max(0, Number(turn ? turn.enemyAlive : combat.enemyCards.length));
+      const playerShield = Math.max(0, Number(turn ? turn.playerShieldRemaining : combat.playerInitialShieldHits));
+      const enemyShield = Math.max(0, Number(turn ? turn.enemyShieldRemaining : combat.enemyInitialShieldHits));
+      if (display.playerPower) display.playerPower.innerHTML = `<span>⚔️ ${formatNumber(combat.playerAttack)}</span><span class="combat-def">🛡️ DEF ${formatNumber(playerDefense)}/${formatNumber(combat.playerMaxDefense)} • รอด ${playerAlive}/${combat.playerCards.length} • โล่ ${playerShield}</span>`;
+      if (display.enemyPower) display.enemyPower.innerHTML = `<span>⚔️ ${formatNumber(combat.enemyAttack)}</span><span class="combat-def">🛡️ DEF ${formatNumber(enemyDefense)}/${formatNumber(combat.enemyMaxDefense)} • รอด ${enemyAlive}/${combat.enemyCards.length} • โล่ ${enemyShield}</span>`;
+      if (display.playerMeter) display.playerMeter.style.width = `${Math.max(0, Math.min(100, playerDefense / Math.max(1, combat.playerMaxDefense) * 100))}%`;
+      if (display.enemyMeter) display.enemyMeter.style.width = `${Math.max(0, Math.min(100, enemyDefense / Math.max(1, combat.enemyMaxDefense) * 100))}%`;
+    }
+
+    async function playCardTeamCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
+      renderCombatSquadModels(display.playerModelsId, combat.playerInitialCards || combat.playerCards, false);
+      renderCombatSquadModels(display.enemyModelsId, combat.enemyInitialCards || combat.enemyCards, true);
+      updateCardTeamBattleDisplay(display, combat);
+      const playerLabel = labels.player || "ทีมของคุณ";
+      const enemyLabel = labels.enemy || "ศัตรู";
+      result.textContent = `${combat.playerFirst ? playerLabel : enemyLabel} ได้เริ่มก่อน • สุ่มผู้โจมตีและเป้าหมายจากการ์ดที่ยังมี DEF`;
+      await wait(Math.min(240, Math.max(20, phaseDuration)));
+
+      for (const turn of combat.turns) {
+        stage.querySelectorAll(".team-combat-unit").forEach(node => node.classList.remove("is-attacker", "is-target"));
+        const attackerNode = findCombatUnitNode(stage, turn.attackerKey);
+        const targetNode = findCombatUnitNode(stage, turn.targetKey);
+        if (attackerNode) attackerNode.classList.add("is-attacker");
+        if (targetNode) targetNode.classList.add("is-target");
+        const attackerLabel = turn.side === "player" ? playerLabel : enemyLabel;
+        const defenderLabel = turn.side === "player" ? enemyLabel : playerLabel;
+        const strikeClass = turn.side === "player" ? "player-strike" : "enemy-strike";
+        const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
+        const koText = turn.targetDefeated ? ` • 💥 ${turn.targetName} ถูกกำจัด` : "";
+        result.textContent = `รอบ ${turn.round} • ${attackerLabel}: ${turn.attackerName} → ${defenderLabel}: ${turn.targetName} • ${turn.hits} ฮิต${blockText} • เสีย DEF ${formatNumber(turn.damage)} เหลือ ${formatNumber(turn.targetRemaining)}${koText}`;
+        const speed = turn.round > 6 ? Math.max(45, Math.floor(phaseDuration * .45)) : phaseDuration;
+        await playStrikeSequence(stage, strikeClass, turn.hits, speed);
+        updateCombatUnitNode(targetNode, {
+          defense: turn.targetRemaining,
+          maxDefense: turn.targetMaxDefense,
+          shieldHits: turn.targetShieldRemaining,
+          attackHits: targetNode ? Number(targetNode.dataset.attackHits || 1) : 1,
+          defeated: turn.targetDefeated
+        });
+        updateCardTeamBattleDisplay(display, combat, turn);
+        if (turn.suddenBreak) result.textContent += " • Sudden Break!";
+        if (turn.playerAlive <= 0 || turn.enemyAlive <= 0) break;
+      }
+      stage.querySelectorAll(".team-combat-unit").forEach(node => node.classList.remove("is-attacker", "is-target"));
     }
 
     function updateTurnBattleDisplay(display, combat, turn = null) {
@@ -9551,6 +10063,13 @@
       };
     }
 
+
+    function combatCardBreakdownHTML(combat) {
+      if (!combat || combat.type !== "card-team") return "";
+      const side = (units, title) => `<div class="hit-report-side"><h4>${escapeHTML(title)}</h4><div class="combat-card-report">${units.map(unit => `<div class="combat-card-report-item ${unit.defeated ? "ko" : ""}"><b>${escapeHTML(unit.name)} ${unit.defeated ? "• K.O." : "• รอด"}</b>โจมตี ${formatNumber(unit.attacks)} ครั้ง • ${formatNumber(unit.totalHits)} ฮิต<br>ดาเมจทำ ${formatNumber(unit.damageDealt)} • รับ ${formatNumber(unit.damageTaken)}<br>DEF ${formatNumber(unit.defense)}/${formatNumber(unit.maxDefense)} • โล่เหลือ ${formatNumber(unit.shieldHits)}/${formatNumber(unit.initialShieldHits)}</div>`).join("")}</div></div>`;
+      return `<div class="hit-report-total">ผลรายใบ — การ์ด DEF 0 จะไม่ถูกสุ่มโจมตีหรือสุ่มเป็นผู้โจมตีอีก</div><div class="hit-report-grid">${side(combat.playerCards, "การ์ดฝ่ายเรา")}${side(combat.enemyCards, "การ์ดฝ่ายตรงข้าม")}</div>`;
+    }
+
     function combatHitReportHTML(combat, labels = {}) {
       if (!combat || !Array.isArray(combat.turns) || !combat.turns.length) return `<p class="hit-report-empty">ยังไม่มีข้อมูลการต่อสู้ล่าสุด</p>`;
       const player = getCombatHitSideSummary(combat, "player");
@@ -9572,7 +10091,8 @@
         </div>`;
       const totalHits = player.totalHits + enemy.totalHits;
       const totalBlocked = player.blockedHits + enemy.blockedHits;
-      return `<div class="hit-report-total">ทั้งไฟต์โจมตีรวม ${formatNumber(player.attacks + enemy.attacks)} ครั้ง • ${formatNumber(totalHits)} ฮิต • ผ่านโล่ ${formatNumber(player.unblockedHits + enemy.unblockedHits)} • ถูกบล็อก ${formatNumber(totalBlocked)} • ACTIVE เพิ่มจริง +${formatNumber(player.extraHits + enemy.extraHits)} ฮิต</div><div class="hit-report-grid">${sideHTML(player, labels.player || "ทีมของคุณ")}${sideHTML(enemy, labels.enemy || "ฝ่ายตรงข้าม", true)}</div>`;
+      const cardBreakdown = combatCardBreakdownHTML(combat);
+      return `<div class="hit-report-total">ทั้งไฟต์โจมตีรวม ${formatNumber(player.attacks + enemy.attacks)} ครั้ง • ${formatNumber(totalHits)} ฮิต • ผ่านโล่ ${formatNumber(player.unblockedHits + enemy.unblockedHits)} • ถูกบล็อก ${formatNumber(totalBlocked)}</div><div class="hit-report-grid">${sideHTML(player, labels.player || "ทีมของคุณ")}${sideHTML(enemy, labels.enemy || "ฝ่ายตรงข้าม", true)}</div>${cardBreakdown}`;
     }
 
     function renderCombatHitReport(targetId, combat, labels = {}) {
@@ -10524,17 +11044,23 @@
       state.battle.energy -= 1;
       renderArena();
 
-      const combat = buildTurnBasedCombat({
-        playerAttack: stats.effectiveAttack,
-        playerDefense: stats.effectiveDefense,
-        playerAttackHits: stats.attackHits,
-        playerShieldHits: stats.shieldHits,
-        enemyAttack: stats.enemyAttack,
-        enemyDefense: stats.enemyEffectiveDefense,
-        enemyAttackHits: stats.enemyAttackHits,
-        enemyShieldHits: stats.enemyShieldHits,
-        playerActiveTriggers: stats.playerActiveTriggers,
-        enemyActiveTriggers: stats.enemyActiveTriggers,
+      const playerSquad = buildScaledCombatSquad(state.arena.team, stats.abilitySummary, {
+        side: "player",
+        totalAttack: stats.effectiveAttack,
+        totalDefense: stats.effectiveDefense
+      });
+      const enemySquad = buildScaledCombatSquad(stats.enemyTeam, stats.enemyAbilitySummary, {
+        side: "enemy",
+        snapshotMode: true,
+        totalAttack: stats.enemyAttack,
+        totalDefense: stats.enemyEffectiveDefense,
+        // ทีมผู้เล่นจริงมี hit/shield จากแผนที่ราย Card ID อยู่แล้ว จึงไม่กระจายค่ารวมซ้ำทุกใบ
+        fallbackAttackHits: 1,
+        fallbackShieldHits: 0
+      });
+      const combat = buildCardTeamCombat({
+        playerCards: playerSquad,
+        enemyCards: enemySquad,
         playerVariance: () => getLuckRollMultiplier(stats.luckRate, .91, .18),
         enemyVariance: () => .91 + Math.random() * .18
       });
@@ -10542,11 +11068,13 @@
       result.className = "battle-result";
 
       try {
-        await playTurnBasedCombat(stage, result, combat, {
+        await playCardTeamCombat(stage, result, combat, {
           playerPower: document.getElementById("arenaPlayerPower"),
           enemyPower: document.getElementById("arenaEnemyPower"),
           playerMeter: document.getElementById("arenaPlayerMeter"),
-          enemyMeter: document.getElementById("arenaEnemyMeter")
+          enemyMeter: document.getElementById("arenaEnemyMeter"),
+          playerModelsId: "arenaPlayerModels",
+          enemyModelsId: "arenaEnemyModels"
         }, {
           player: "ทีม ARENA ของคุณ",
           enemy: currentArenaOpponent.username
@@ -10558,16 +11086,16 @@
         const enemyShieldUsed = combat.enemyInitialShieldHits - combat.enemyShieldRemaining;
         const playerHitSummary = getCombatHitSideSummary(combat, "player");
         const enemyHitSummary = getCombatHitSideSummary(combat, "enemy");
-        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE เพิ่มฮิตจริง +${formatNumber(playerHitSummary.extraHits)}/+${formatNumber(enemyHitSummary.extraHits)} • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล DEF ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const combatText = `${combat.rounds} รอบ • การ์ดรอด ${combat.playerAlive}/${combat.playerCards.length} ต่อ ${combat.enemyAlive}/${combat.enemyCards.length} • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • DEF รวมเหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.arena.points += ARENA_CONFIG.winPoints;
           state.arena.wins += 1;
-          arenaResult = { tone: "win", text: `ชนะ ${currentArenaOpponent.username}! DEF ศัตรูหมดก่อน • +${ARENA_CONFIG.winPoints} แต้ม • ${combatText}` };
+          arenaResult = { tone: "win", text: `ชนะ ${currentArenaOpponent.username}! กำจัดการ์ดศัตรูครบทีม • +${ARENA_CONFIG.winPoints} แต้ม • ${combatText}` };
         } else {
           const lost = Math.min(state.arena.points, ARENA_CONFIG.losePoints);
           state.arena.points = Math.max(0, state.arena.points - ARENA_CONFIG.losePoints);
           state.arena.losses += 1;
-          arenaResult = { tone: "lose", text: `แพ้ ${currentArenaOpponent.username} เพราะ DEF ของเราหมดก่อน • -${lost} แต้ม • ${combatText}` };
+          arenaResult = { tone: "lose", text: `แพ้ ${currentArenaOpponent.username} เพราะการ์ดฝ่ายเราถูกกำจัดครบทีม • -${lost} แต้ม • ${combatText}` };
         }
 
         saveState(true);
@@ -10741,8 +11269,10 @@
       const supportDefenseCapBase = Math.max(0, baseDefense + abilityDefense);
       const supportPower = Math.min(rawSupportPower, supportCapBase * CONFIG.friendSupportCapRate);
       const supportDefense = Math.min(rawSupportDefense, supportDefenseCapBase * CONFIG.friendSupportCapRate);
-      const enemyCard = getBattleEnemyCard(stage);
-      const enemyElement = getCardElements(enemyCard);
+      const enemyTeam = getBattleEnemyTeam(stage);
+      const enemyCard = enemyTeam[0] || getBattleEnemyCard(stage);
+      const enemyElementSummary = getTeamElementSummary(enemyTeam.map(card => card.id));
+      const enemyElement = enemyElementSummary.dominantElement || getCardElements(enemyCard);
       const matchup = getElementMatchup(elementSummary.dominantElement, enemyElement);
       const towerRestriction = getTowerRestriction(stage);
       const restrictionStatus = getTeamRestrictionStatus(towerRestriction, towerTeam);
@@ -10762,7 +11292,7 @@
       const enemyPreview = resolveCombatExchange(enemyPower, effectiveDefense, enemyAttackHits, shieldHits, 1);
       return {
         stage, basePower, baseAttack: basePower, baseDefense, abilitySummary, elementSummary,
-        dominantElement: elementSummary.dominantElement, enemyCard, enemyElement, matchup,
+        dominantElement: elementSummary.dominantElement, enemyCard, enemyTeam, enemyElement, matchup,
         formationRate, formationPower, abilityPowerRate, abilityPower,
         abilityDefenseRate, abilityDefense, luckRate: abilitySummary.luckRate,
         support, supportCard, supportSourcePower, supportSourceDefense, supportPower, supportDefense,
@@ -10794,17 +11324,28 @@
       const phaseDuration = reducedMotion ? 20 : 175;
       battleAnimating = true;
       state.battle.energy -= 1;
-      const combat = buildTurnBasedCombat({
-        playerAttack: stats.effectiveAttack,
-        playerDefense: stats.effectiveDefense,
-        playerAttackHits: stats.attackHits,
-        playerShieldHits: stats.shieldHits,
-        enemyAttack: stats.enemyAttack,
-        enemyDefense: stats.enemyDefense,
-        enemyAttackHits: stats.enemyAttackHits,
-        enemyShieldHits: stats.enemyShieldHits,
-        playerActiveTriggers: stats.activeTriggers,
-        enemyActiveTriggers: [],
+      const playerSquad = buildScaledCombatSquad(getTowerTeamIds(), stats.abilitySummary, {
+        side: "player",
+        totalAttack: stats.effectiveAttack,
+        totalDefense: stats.effectiveDefense
+      });
+      const enemySnapshots = stats.enemyTeam.map(card => ({
+        id: String(card.id), name: card.name, rarity: card.rarity,
+        power: Math.max(1, Number(card.power) || 1),
+        defense: Math.max(1, Number(card.defense !== undefined ? card.defense : Number(card.power || 1) * Number(CONFIG.defenseBaseRatio || .64))),
+        elements: getCardElements(card)
+      }));
+      const enemySquad = buildScaledCombatSquad(enemySnapshots, {}, {
+        side: "enemy",
+        snapshotMode: true,
+        totalAttack: stats.enemyAttack,
+        totalDefense: stats.enemyDefense,
+        fallbackAttackHits: stats.enemyAttackHits,
+        fallbackShieldHits: stats.enemyShieldHits
+      });
+      const combat = buildCardTeamCombat({
+        playerCards: playerSquad,
+        enemyCards: enemySquad,
         playerVariance: () => getLuckRollMultiplier(stats.luckRate, .90, .22),
         enemyVariance: () => .90 + Math.random() * .20
       });
@@ -10815,11 +11356,13 @@
       result.className = "battle-result";
 
       try {
-        await playTurnBasedCombat(arena, result, combat, {
+        await playCardTeamCombat(arena, result, combat, {
           playerPower: document.getElementById("battlePlayerPower"),
           enemyPower: document.getElementById("battleEnemyPower"),
           playerMeter: document.getElementById("battlePlayerMeter"),
-          enemyMeter: document.getElementById("battleEnemyMeter")
+          enemyMeter: document.getElementById("battleEnemyMeter"),
+          playerModelsId: "battlePlayerModels",
+          enemyModelsId: "battleEnemyModels"
         }, {
           player: "ทีมของคุณ",
           enemy: `Tower ชั้น ${stats.stage}`
@@ -10831,7 +11374,7 @@
         const enemyShieldUsed = combat.enemyInitialShieldHits - combat.enemyShieldRemaining;
         const playerHitSummary = getCombatHitSideSummary(combat, "player");
         const enemyHitSummary = getCombatHitSideSummary(combat, "enemy");
-        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE เพิ่มฮิตจริง +${formatNumber(playerHitSummary.extraHits)}/+${formatNumber(enemyHitSummary.extraHits)} • DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล DEF ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const combatText = `${combat.rounds} รอบ • การ์ดรอด ${combat.playerAlive}/${combat.playerCards.length} ต่อ ${combat.enemyAlive}/${combat.enemyCards.length} • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • DEF รวมเหลือ ${formatNumber(combat.playerRemainingDefense)} ต่อ ${formatNumber(combat.enemyRemainingDefense)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.gems += stats.gemReward;
           state.dust += stats.dustReward;
@@ -10840,7 +11383,7 @@
           state.battle.stage += 1;
           battleResult = {
             tone: "win",
-            text: `ชนะชั้น ${stats.stage}! DEF ศัตรูหมดก่อน • ${combatText} • รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust${ticketRewards.length ? ` • ส่ง ${ticketRewards.map(rewardLabel).join(" • ")} เข้ากล่องจดหมาย` : ""}`
+            text: `ชนะชั้น ${stats.stage}! การ์ดศัตรูถูกกำจัดครบทีม • ${combatText} • รับ ${formatNumber(stats.gemReward)} Gems และ ${formatNumber(stats.dustReward)} Dust${ticketRewards.length ? ` • ส่ง ${ticketRewards.map(rewardLabel).join(" • ")} เข้ากล่องจดหมาย` : ""}`
           };
         } else {
           const consolation = Math.max(100, Math.floor(stats.dustReward * .1));
@@ -10848,7 +11391,7 @@
           state.battle.losses += 1;
           battleResult = {
             tone: "lose",
-            text: `แพ้ชั้น ${stats.stage} เพราะ DEF ของเราหมดก่อน • ${combatText} • ได้ ${formatNumber(consolation)} Dust — เพิ่ม DEF, โล่ หรือจำนวนฮิตแล้วลองใหม่`
+            text: `แพ้ชั้น ${stats.stage} เพราะการ์ดฝ่ายเราถูกกำจัดครบทีม • ${combatText} • ได้ ${formatNumber(consolation)} Dust — เพิ่ม DEF, โล่ หรือจำนวนฮิตแล้วลองใหม่`
           };
         }
 
@@ -11809,14 +12352,38 @@
       return pool[(stage * 13 + 7) % pool.length];
     }
 
+
+    function getBattleEnemyTeam(stage, size = CONFIG.towerTeamSlots) {
+      if (!CARDS.length) return [];
+      const targetOrder = Math.min(10, Math.max(0, Math.floor((stage - 1) / 2)));
+      const candidates = CARDS.filter(card => getRarity(card).order >= targetOrder - 1 && getRarity(card).order <= targetOrder + 2);
+      const pool = candidates.length ? candidates : CARDS;
+      const result = [];
+      const used = new Set();
+      for (let index = 0; index < Math.max(1, Number(size) || 1); index += 1) {
+        let cursor = (stage * 13 + 7 + index * 17) % pool.length;
+        let card = pool[cursor];
+        let guard = 0;
+        while (card && used.has(String(card.id)) && guard < pool.length) {
+          cursor = (cursor + 1) % pool.length;
+          card = pool[cursor];
+          guard += 1;
+        }
+        if (!card) continue;
+        used.add(String(card.id));
+        result.push(card);
+      }
+      return result;
+    }
+
     function battleModelHTML(card, index, enemy, teamCount = null) {
       if (!card) return "";
       const rarity = getRarity(card);
       const image = getCardImage(card);
-      const count = Math.max(1, enemy ? 1 : Number(teamCount) || state.team.length);
+      const count = Math.max(1, Number(teamCount) || (enemy ? 1 : state.team.length));
       const center = (count - 1) / 2;
-      const tilt = enemy ? 3 : (index - center) * 5;
-      const lift = enemy ? 0 : Math.abs(index - center) * 5;
+      const tilt = enemy ? (index - center) * -5 : (index - center) * 5;
+      const lift = Math.abs(index - center) * 5;
       const tag = enemy ? "div" : "button";
       const action = enemy ? "" : ` data-action="open-card" data-card-id="${escapeHTML(card.id)}"`;
       return `
@@ -11830,11 +12397,11 @@
 
     function renderBattleModels(stats) {
       const teamCards = getTowerTeamIds().map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
-      const enemyCard = stats.enemyCard || getBattleEnemyCard(stats.stage);
+      const enemyTeam = stats.enemyTeam && stats.enemyTeam.length ? stats.enemyTeam : getBattleEnemyTeam(stats.stage);
       document.getElementById("battlePlayerModels").innerHTML = teamCards.length
         ? teamCards.map((card, index) => battleModelHTML(card, index, false, teamCards.length)).join("")
         : `<div class="empty-state" style="min-height:130px;padding:14px">ยังไม่มีการ์ดในทีมไต่หอ</div>`;
-      document.getElementById("battleEnemyModels").innerHTML = battleModelHTML(enemyCard, 0, true);
+      document.getElementById("battleEnemyModels").innerHTML = enemyTeam.map((card, index) => battleModelHTML(card, index, true, enemyTeam.length)).join("");
     }
 
     function renderBanner() {
@@ -12570,7 +13137,7 @@
             บัฟรวมหลัก: ATK ${signedPercent(abilitySummary.teamPowerRate)}${abilitySummary.teamPowerFlat ? ` +${formatNumber(abilitySummary.teamPowerFlat)}` : ""}
             • DEF ${signedPercent(abilitySummary.teamDefenseRate)}${abilitySummary.teamDefenseFlat ? ` +${formatNumber(abilitySummary.teamDefenseFlat)}` : ""}
             • ศัตรู ATK ${signedPercent(abilitySummary.enemyPowerRate)} / DEF ${signedPercent(abilitySummary.enemyDefenseRate)}
-            • โจมตี ${getCombatAttackHits(abilitySummary)} ฮิต • โล่ ${getCombatShieldHits(abilitySummary)} ฮิต • Luck ${signedPercent(abilitySummary.luckRate)}
+            • ฮิต/โล่คำนวณแยกตามการ์ดแต่ละใบ • Luck ${signedPercent(abilitySummary.luckRate)}
             ${abilitySummary.triggeredEffects.length ? ` • Active Skill แบบชาร์จ ${abilitySummary.triggeredEffects.length} เอฟเฟกต์` : ""}
           </div>
           <h3 class="team-ability-summary">คอมโบธาตุที่ทำงาน</h3>
@@ -12608,9 +13175,9 @@
       document.getElementById("battleEnemyPower").innerHTML = `<span>⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">🛡️ ${formatNumber(stats.enemyDefense)}</span>`;
       document.getElementById("battleEnemyName").textContent = `Tower ชั้น ${stats.stage}`;
       document.getElementById("battlePowerBreakdown").innerHTML =
-        `ATK การ์ด ${formatNumber(stats.baseAttack)} • DEF การ์ด ${formatNumber(stats.baseDefense)} • คอมโบ ATK +${formationPercent}% • สกิล ATK ${abilityPercent >= 0 ? "+" : ""}${abilityPercent}% / DEF ${defenseAbilityPercent >= 0 ? "+" : ""}${defenseAbilityPercent}% • Luck ${luckPercent >= 0 ? "+" : ""}${luckPercent}%${stats.support ? ` • Support ATK +${formatNumber(stats.supportPower)} DEF +${formatNumber(stats.supportDefense)}` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span><span class="combat-tag">ดาเมจต่อเทิร์นประมาณ ${formatNumber(stats.playerPreview.damage)}</span></div>`;
+        `ATK การ์ด ${formatNumber(stats.baseAttack)} • DEF การ์ด ${formatNumber(stats.baseDefense)} • คอมโบ ATK +${formationPercent}% • สกิล ATK ${abilityPercent >= 0 ? "+" : ""}${abilityPercent}% / DEF ${defenseAbilityPercent >= 0 ? "+" : ""}${defenseAbilityPercent}% • Luck ${luckPercent >= 0 ? "+" : ""}${luckPercent}%${stats.support ? ` • Support ATK +${formatNumber(stats.supportPower)} DEF +${formatNumber(stats.supportDefense)}` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ผู้โจมตีสุ่มรายใบ</span><span class="combat-tag shield">🛡️ โล่/ฮิตแยกต่อการ์ด</span><span class="combat-tag">เป้าหมายสุ่มจากการ์ดที่ยังมี DEF</span></div>`;
       document.getElementById("battleEnemyDetail").innerHTML =
-        `ศัตรูธาตุ ${elementLabel(stats.enemyElement)} • ${stats.matchup.text} • สกิลลดศัตรู ATK ${enemyAbilityPercent >= 0 ? "+" : ""}${enemyAbilityPercent}% / DEF ${enemyDefensePercent >= 0 ? "+" : ""}${enemyDefensePercent}%<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.enemyAttackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.enemyShieldHits} ฮิต</span><span class="combat-tag">ดาเมจต่อเทิร์นประมาณ ${formatNumber(stats.enemyPreview.damage)}</span></div>`;
+        `ศัตรูธาตุ ${elementLabel(stats.enemyElement)} • ${stats.matchup.text} • สกิลลดศัตรู ATK ${enemyAbilityPercent >= 0 ? "+" : ""}${enemyAbilityPercent}% / DEF ${enemyDefensePercent >= 0 ? "+" : ""}${enemyDefensePercent}%<div class="combat-tags"><span class="combat-tag hit">⚔️ ทีมศัตรู ${stats.enemyTeam.length} ใบ</span><span class="combat-tag shield">🛡️ สถานะแยกรายใบ</span><span class="combat-tag">การ์ด DEF 0 ออกจากพูลสุ่ม</span></div>`;
       const battleElementText = document.getElementById("battleElementText");
       if (battleElementText) battleElementText.textContent = `${elementLabel(stats.dominantElement)} ปะทะ ${elementLabel(stats.enemyElement)}: ${stats.matchup.label} (${elementSign}${elementPercent}% ATK)`;
       document.getElementById("battlePlayerMeter").style.width = `${Math.max(3, stats.effectiveDefense / maxDefense * 100)}%`;
@@ -12670,7 +13237,7 @@
           <h3>ธาตุทีม ARENA</h3>
           <p>ทีมนี้แยกจากทีมโชว์และทีมไต่หอโดยสมบูรณ์</p>
           <div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div>
-          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ ATK +${Math.round(summary.powerRate * 100)}% • ความสามารถ ATK ${signedPercent(abilitySummary.teamPowerRate)} / DEF ${signedPercent(abilitySummary.teamDefenseRate)} / Hit ${getCombatAttackHits(abilitySummary)} / Shield ${getCombatShieldHits(abilitySummary)} / Luck ${signedPercent(abilitySummary.luckRate)} / ศัตรู ATK ${signedPercent(abilitySummary.enemyPowerRate)} DEF ${signedPercent(abilitySummary.enemyDefenseRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
+          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ ATK +${Math.round(summary.powerRate * 100)}% • ความสามารถ ATK ${signedPercent(abilitySummary.teamPowerRate)} / DEF ${signedPercent(abilitySummary.teamDefenseRate)} / Hit/Shield แยกตามการ์ด / Luck ${signedPercent(abilitySummary.luckRate)} / ศัตรู ATK ${signedPercent(abilitySummary.enemyPowerRate)} DEF ${signedPercent(abilitySummary.enemyDefenseRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
         </div>
         <div><h3>คอมโบที่ทำงาน</h3><div class="combo-list">${comboHTML}</div><h3 class="team-ability-summary">ความสามารถที่ทำงาน</h3><div class="combo-list">${arenaAbilityHTML}</div></div>`;
       const powerText = document.getElementById("arenaTeamPowerText");
@@ -12699,13 +13266,13 @@
       const matchupPercent = Math.round(stats.matchup.modifier * 100);
       const matchupSign = matchupPercent > 0 ? "+" : "";
       document.getElementById("arenaPlayerPower").innerHTML = `<span>⚔️ ${formatNumber(stats.effectiveAttack)}</span><span class="combat-def">🛡️ ${formatNumber(stats.effectiveDefense)}</span>`;
-      document.getElementById("arenaPlayerDetail").innerHTML = `ATK ดิบ ${formatNumber(stats.rawPower)} • DEF ดิบ ${formatNumber(stats.rawDefense)} • คอมโบ ATK +${Math.round(stats.summary.powerRate * 100)}% • สกิล ATK ${signedPercent(stats.abilitySummary.teamPowerRate)} / DEF ${signedPercent(stats.abilitySummary.teamDefenseRate)} • Luck ${signedPercent(stats.luckRate)}${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span>${stats.playerPreview ? `<span class="combat-tag">ดาเมจต่อเทิร์นประมาณ ${formatNumber(stats.playerPreview.damage)}</span>` : ""}</div>`;
+      document.getElementById("arenaPlayerDetail").innerHTML = `ATK ดิบ ${formatNumber(stats.rawPower)} • DEF ดิบ ${formatNumber(stats.rawDefense)} • คอมโบ ATK +${Math.round(stats.summary.powerRate * 100)}% • สกิล ATK ${signedPercent(stats.abilitySummary.teamPowerRate)} / DEF ${signedPercent(stats.abilitySummary.teamDefenseRate)} • Luck ${signedPercent(stats.luckRate)}${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ สุ่มผู้โจมตีรายใบ</span><span class="combat-tag shield">🛡️ โล่/ฮิตแยกต่อการ์ด</span><span class="combat-tag">สุ่มเป้าหมายที่ยังมี DEF</span></div>`;
       document.getElementById("arenaEnemyName").textContent = currentArenaOpponent ? `${currentArenaOpponent.username} (${currentArenaOpponent.type === "player" ? "ผู้เล่น" : "AI"})` : "คู่ต่อสู้ลึกลับ";
       document.getElementById("arenaEnemyPower").innerHTML = currentArenaOpponent
         ? `<span>⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">🛡️ ${formatNumber(stats.enemyEffectiveDefense)}</span>`
         : "?";
       document.getElementById("arenaEnemyDetail").innerHTML = currentArenaOpponent
-        ? `ทีม ARENA • แต้ม ${formatNumber(currentArenaOpponent.points || 0)} • ธาตุหลัก ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.enemyAttackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.enemyShieldHits} ฮิต</span><span class="combat-tag">ดาเมจต่อเทิร์นประมาณ ${formatNumber(stats.enemyPreview.damage)}</span></div>`
+        ? `ทีม ARENA • แต้ม ${formatNumber(currentArenaOpponent.points || 0)} • ธาตุหลัก ${elementLabel(stats.enemyElement)} • ${stats.matchup.text}<div class="combat-tags"><span class="combat-tag hit">⚔️ ทีม ${stats.enemyTeam.length} ใบ</span><span class="combat-tag shield">🛡️ สถานะแยกรายใบ</span><span class="combat-tag">DEF 0 = K.O.</span></div>`
         : "ตัวตนและทีมจะถูกเปิดเผยเมื่อเริ่มต่อสู้";
       document.getElementById("arenaPlayerMeter").style.width = `${Math.max(3, stats.effectiveDefense / maxDefense * 100)}%`;
       document.getElementById("arenaEnemyMeter").style.width = currentArenaOpponent ? `${Math.max(3, stats.enemyEffectiveDefense / maxDefense * 100)}%` : "0%";
