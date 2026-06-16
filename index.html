@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-16-card-team-random-target-battle-v33">
+  <meta name="gacha-app-build" content="2026-06-16-fixed-formation-live-battle-v34">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -1593,6 +1593,267 @@
       .full-battle-hud { grid-template-columns: 1fr; }
       .full-battle-log { max-height: 125px; }
       .battle-arena.full-battle-active { min-height: 720px; }
+    }
+
+
+    /* เพิ่มโดยอลิซ: สนามต่อสู้แบบล็อกตำแหน่งรายใบตามภาพอ้างอิง */
+    .battle-arena.full-battle-active {
+      min-height: 850px;
+      padding-inline: clamp(14px, 2.4vw, 34px);
+      background:
+        radial-gradient(ellipse at 18% 58%, rgba(92,232,255,.14), transparent 30%),
+        radial-gradient(ellipse at 82% 58%, rgba(251,113,133,.13), transparent 30%),
+        linear-gradient(to bottom, rgba(47,91,145,.32) 0 24%, rgba(184,143,92,.15) 25% 68%, rgba(21,31,55,.86) 100%),
+        linear-gradient(145deg, #10162e, #090d1c);
+    }
+
+    .battle-arena.full-battle-active::after {
+      opacity: .34;
+      font-size: clamp(4rem, 11vw, 8rem);
+    }
+
+    .battle-arena.full-battle-active .battle-sides {
+      min-height: 500px;
+      gap: clamp(8px, 2vw, 24px);
+      align-items: stretch;
+    }
+
+    .battle-arena.full-battle-active .fighter {
+      position: relative;
+      min-height: 500px;
+      padding-top: 30px;
+    }
+
+    .battle-arena.full-battle-active .fighter > .fighter-label,
+    .battle-arena.full-battle-active .fighter > h3,
+    .battle-arena.full-battle-active .fighter > .fighter-power,
+    .battle-arena.full-battle-active .fighter > .power-breakdown,
+    .battle-arena.full-battle-active .fighter > .power-meter,
+    .battle-arena.full-battle-active .fighter > .combat-tags {
+      position: relative;
+      z-index: 30;
+    }
+
+    .battle-model-stack.combat-formation {
+      position: relative;
+      display: block;
+      width: 100%;
+      min-height: 430px;
+      height: 430px;
+      margin: 8px 0 4px;
+      padding: 0 !important;
+      perspective: 1100px;
+      overflow: visible;
+      transform: none;
+      isolation: isolate;
+    }
+
+    .combat-formation .battle-model-card.team-combat-unit {
+      --formation-scale: 1;
+      --attack-shift: 34px;
+      position: absolute;
+      z-index: var(--formation-z, 4);
+      left: var(--formation-x, 50%);
+      top: var(--formation-y, 50%);
+      width: clamp(78px, 8.2vw, 116px);
+      margin: 0;
+      transform: translate(-50%, -50%) scale(var(--formation-scale));
+      transform-origin: center center;
+      transition:
+        left .25s ease,
+        top .25s ease,
+        transform .24s cubic-bezier(.2,.8,.25,1),
+        filter .2s ease,
+        opacity .2s ease,
+        box-shadow .2s ease;
+    }
+
+    .combat-formation.enemy-formation .battle-model-card.team-combat-unit {
+      --attack-shift: -34px;
+    }
+
+    .combat-formation .battle-model-card.team-combat-unit:hover {
+      z-index: 40;
+      transform: translate(-50%, calc(-50% - 7px)) scale(calc(var(--formation-scale) + .05));
+    }
+
+    .combat-formation .battle-model-card.team-combat-unit.is-attacker {
+      z-index: 55;
+      transform: translate(calc(-50% + var(--attack-shift)), calc(-50% - 7px)) scale(calc(var(--formation-scale) + .12));
+      filter: brightness(1.22) drop-shadow(0 0 20px rgba(92,232,255,.92));
+      box-shadow: 0 0 0 3px rgba(92,232,255,.82), 0 22px 42px rgba(0,0,0,.54);
+    }
+
+    .combat-formation.enemy-formation .battle-model-card.team-combat-unit.is-attacker {
+      filter: brightness(1.22) drop-shadow(0 0 20px rgba(251,113,133,.92));
+      box-shadow: 0 0 0 3px rgba(251,113,133,.82), 0 22px 42px rgba(0,0,0,.54);
+    }
+
+    .combat-formation .battle-model-card.team-combat-unit.is-target {
+      z-index: 54;
+      transform: translate(-50%, -50%) scale(calc(var(--formation-scale) + .09));
+      filter: brightness(1.16) drop-shadow(0 0 20px rgba(255,209,102,.92));
+      box-shadow: 0 0 0 3px rgba(255,209,102,.86), 0 22px 42px rgba(0,0,0,.54);
+    }
+
+    .combat-formation .battle-model-card.team-combat-unit.is-defeated {
+      z-index: 1;
+      opacity: .22;
+      transform: translate(-50%, calc(-50% + 15px)) rotate(-4deg) scale(calc(var(--formation-scale) * .86));
+      filter: grayscale(1) brightness(.48);
+    }
+
+    .combat-formation.enemy-formation .battle-model-card.team-combat-unit.is-defeated {
+      transform: translate(-50%, calc(-50% + 15px)) rotate(4deg) scale(calc(var(--formation-scale) * .86));
+    }
+
+    .combat-formation .battle-model-card.team-combat-unit > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 18%;
+      border-radius: 11px;
+    }
+
+    .combat-formation .combat-unit-overlay {
+      top: -46px;
+      right: -10px;
+      bottom: auto;
+      left: -10px;
+      gap: 2px;
+      padding: 5px 6px;
+      border-color: rgba(255,255,255,.24);
+      background: rgba(3,5,13,.92);
+      box-shadow: 0 6px 20px rgba(0,0,0,.46);
+    }
+
+    .combat-formation .combat-unit-name {
+      font-size: .56rem;
+      text-align: center;
+    }
+
+    .combat-formation .combat-unit-stats {
+      font-size: .47rem;
+    }
+
+    .combat-formation .combat-unit-bar {
+      height: 5px;
+    }
+
+    .team-combat-unit .combat-unit-overlay span {
+      position: static;
+      inset: auto;
+      display: inline;
+      overflow: visible;
+      font-size: inherit;
+      font-weight: inherit;
+      text-align: inherit;
+      text-overflow: clip;
+      white-space: nowrap;
+    }
+
+    .combat-slot-badge {
+      position: absolute;
+      z-index: 15;
+      top: 5px;
+      right: auto;
+      bottom: auto;
+      left: 5px;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 50%;
+      color: #071019;
+      font-size: .58rem;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--cyan), #fff);
+      box-shadow: 0 4px 12px rgba(0,0,0,.34);
+      pointer-events: none;
+    }
+
+    .enemy-formation .combat-slot-badge {
+      color: #fff;
+      background: linear-gradient(135deg, #fb7185, #be123c);
+    }
+
+    .battle-target-line {
+      position: absolute;
+      z-index: 46;
+      height: 4px;
+      border-radius: 999px;
+      pointer-events: none;
+      transform-origin: left center;
+      background: linear-gradient(90deg, rgba(92,232,255,.15), #fff 48%, rgba(251,113,133,.95));
+      box-shadow: 0 0 10px #fff, 0 0 24px rgba(92,232,255,.72), 0 0 34px rgba(251,113,133,.54);
+      animation: battle-target-beam .52s ease-in-out infinite alternate;
+    }
+
+    .battle-target-line::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -7px;
+      width: 14px;
+      height: 14px;
+      border-top: 4px solid #fff;
+      border-right: 4px solid #fff;
+      transform: translateY(-50%) rotate(45deg);
+      filter: drop-shadow(0 0 5px rgba(255,255,255,.9));
+    }
+
+    @keyframes battle-target-beam {
+      from { opacity: .5; filter: brightness(.92); }
+      to { opacity: 1; filter: brightness(1.35); }
+    }
+
+    .battle-arena.full-battle-active.player-strike .fighter.player .battle-model-stack,
+    .battle-arena.full-battle-active.player-strike .fighter.enemy .battle-model-stack,
+    .battle-arena.full-battle-active.enemy-strike .fighter.player .battle-model-stack,
+    .battle-arena.full-battle-active.enemy-strike .fighter.enemy .battle-model-stack {
+      animation: none;
+    }
+
+    @media (max-width: 980px) {
+      .battle-arena.full-battle-active { min-height: 790px; }
+      .battle-arena.full-battle-active .battle-sides { min-height: 440px; }
+      .battle-arena.full-battle-active .fighter { min-height: 440px; }
+      .battle-model-stack.combat-formation { min-height: 380px; height: 380px; }
+      .combat-formation .battle-model-card.team-combat-unit { width: clamp(68px, 10vw, 92px); }
+      .combat-formation .combat-unit-overlay { top: -42px; right: -6px; left: -6px; }
+    }
+
+    @media (max-width: 680px) {
+      .battle-arena.full-battle-active {
+        min-height: 940px;
+        padding-inline: 8px;
+      }
+      .battle-arena.full-battle-active .battle-sides {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        min-height: 500px;
+      }
+      .battle-arena.full-battle-active .fighter {
+        min-height: 500px;
+      }
+      .battle-model-stack.combat-formation {
+        min-height: 430px;
+        height: 430px;
+      }
+      .combat-formation .battle-model-card.team-combat-unit {
+        width: clamp(58px, 18vw, 78px);
+      }
+      .combat-formation .combat-unit-overlay {
+        top: -39px;
+        right: -4px;
+        left: -4px;
+        padding: 4px;
+      }
+      .combat-formation .combat-unit-name { font-size: .48rem; }
+      .combat-formation .combat-unit-stats { font-size: .40rem; }
+      .combat-slot-badge { width: 18px; height: 18px; font-size: .49rem; }
+      .battle-target-line { height: 3px; }
     }
 
     .battle-impact {
@@ -9883,13 +10144,43 @@
       };
     }
 
+    const COMBAT_FORMATION_POSITIONS = Object.freeze({
+      player: Object.freeze([
+        Object.freeze({ x: 70, y: 18, z: 3, scale: .96 }),
+        Object.freeze({ x: 28, y: 24, z: 4, scale: .98 }),
+        Object.freeze({ x: 14, y: 54, z: 5, scale: 1.00 }),
+        Object.freeze({ x: 24, y: 82, z: 7, scale: 1.05 }),
+        Object.freeze({ x: 68, y: 76, z: 6, scale: 1.03 })
+      ]),
+      enemy: Object.freeze([
+        Object.freeze({ x: 30, y: 18, z: 3, scale: .96 }),
+        Object.freeze({ x: 72, y: 24, z: 4, scale: .98 }),
+        Object.freeze({ x: 86, y: 54, z: 5, scale: 1.00 }),
+        Object.freeze({ x: 76, y: 82, z: 7, scale: 1.05 }),
+        Object.freeze({ x: 32, y: 76, z: 6, scale: 1.03 })
+      ])
+    });
+
+    function getCombatFormationPosition(index, enemySide = false) {
+      const side = enemySide ? "enemy" : "player";
+      const positions = COMBAT_FORMATION_POSITIONS[side];
+      return positions[Math.max(0, Math.min(positions.length - 1, Number(index) || 0))] || positions[0];
+    }
+
     function combatSquadModelHTML(unit, index, count, enemySide = false) {
       const rarity = RARITIES[unit.rarity] || RARITIES.N;
-      const center = (Math.max(1, count) - 1) / 2;
-      const tilt = (index - center) * (enemySide ? -5 : 5);
-      const lift = Math.abs(index - center) * 5;
+      const position = getCombatFormationPosition(index, enemySide);
       const defenseRate = Math.max(0, Math.min(100, Number(unit.defense) / Math.max(1, Number(unit.maxDefense)) * 100));
-      return `<div class="battle-model-card team-combat-unit${unit.defeated ? " is-defeated" : ""}" data-combat-key="${escapeHTML(unit.key)}" data-attack-hits="${escapeHTML(unit.attackHits)}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`})}" aria-label="${escapeHTML(unit.name)}">
+      const formationVars = {
+        "--model-tilt": "0deg",
+        "--model-lift": "0px",
+        "--formation-x": `${position.x}%`,
+        "--formation-y": `${position.y}%`,
+        "--formation-z": String(position.z),
+        "--formation-scale": String(position.scale)
+      };
+      return `<div class="battle-model-card team-combat-unit${unit.defeated ? " is-defeated" : ""}" data-combat-key="${escapeHTML(unit.key)}" data-attack="${escapeHTML(unit.attack)}" data-attack-hits="${escapeHTML(unit.attackHits)}" data-formation-slot="${index + 1}" style="${rarityStyleVars(rarity, formationVars)}" aria-label="${escapeHTML(unit.name)}">
+        <span class="combat-slot-badge">${index + 1}</span>
         ${unit.image ? `<img src="${escapeHTML(unit.image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
         <div class="combat-unit-overlay">
           <div class="combat-unit-name">${escapeHTML(unit.name)}</div>
@@ -9903,7 +10194,14 @@
     function renderCombatSquadModels(containerId, units, enemySide = false) {
       const container = document.getElementById(containerId);
       if (!container) return;
-      container.innerHTML = abilityArray(units).map((unit, index) => combatSquadModelHTML(unit, index, units.length, enemySide)).join("");
+      container.classList.add("combat-formation");
+      container.classList.toggle("player-formation", !enemySide);
+      container.classList.toggle("enemy-formation", enemySide);
+      container.setAttribute("data-formation-side", enemySide ? "enemy" : "player");
+      container.innerHTML = abilityArray(units)
+        .slice(0, 5)
+        .map((unit, index) => combatSquadModelHTML(unit, index, units.length, enemySide))
+        .join("");
     }
 
     function findCombatUnitNode(stage, key) {
@@ -9915,9 +10213,12 @@
       const defense = Math.max(0, Number(state.defense) || 0);
       const maxDefense = Math.max(1, Number(state.maxDefense) || 1);
       const shieldHits = Math.max(0, Number(state.shieldHits) || 0);
-      const stats = node.querySelector(".combat-unit-stats");
+      const attack = Math.max(0, Number(state.attack ?? node.dataset.attack) || 0);
+      const attackHits = Math.max(1, Number(state.attackHits ?? node.dataset.attackHits) || 1);
+      const statRows = node.querySelectorAll(".combat-unit-stats");
       const bar = node.querySelector(".combat-unit-bar i");
-      if (stats) stats.innerHTML = `<span>DEF ${formatNumber(defense)}</span><span>🛡${formatNumber(shieldHits)} ⚔${formatNumber(state.attackHits || 1)}</span>`;
+      if (statRows[0]) statRows[0].innerHTML = `<span>ATK ${formatNumber(attack)}</span><span>⚔${formatNumber(attackHits)}</span>`;
+      if (statRows[1]) statRows[1].innerHTML = `<span>DEF ${formatNumber(defense)}</span><span>🛡${formatNumber(shieldHits)}</span>`;
       if (bar) bar.style.width = `${Math.max(0, Math.min(100, defense / maxDefense * 100))}%`;
       node.classList.toggle("is-defeated", defense <= 0 || Boolean(state.defeated));
     }
@@ -10008,6 +10309,33 @@
       window.setTimeout(() => floater.remove(), 650);
     }
 
+    function clearBattleTargetLine(stage) {
+      if (!stage) return;
+      stage.querySelectorAll(".battle-target-line").forEach(line => line.remove());
+    }
+
+    function showBattleTargetLine(stage, attackerNode, targetNode) {
+      if (!stage || !attackerNode || !targetNode) return null;
+      clearBattleTargetLine(stage);
+      const stageRect = stage.getBoundingClientRect();
+      const from = attackerNode.getBoundingClientRect();
+      const to = targetNode.getBoundingClientRect();
+      const x1 = from.left + from.width / 2 - stageRect.left;
+      const y1 = from.top + from.height / 2 - stageRect.top;
+      const x2 = to.left + to.width / 2 - stageRect.left;
+      const y2 = to.top + to.height / 2 - stageRect.top;
+      const distance = Math.hypot(x2 - x1, y2 - y1);
+      const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+      const line = document.createElement("div");
+      line.className = "battle-target-line";
+      line.style.left = `${x1}px`;
+      line.style.top = `${y1}px`;
+      line.style.width = `${Math.max(24, distance)}px`;
+      line.style.transform = `translateY(-50%) rotate(${angle}deg)`;
+      stage.appendChild(line);
+      return line;
+    }
+
     function setFullBattleHUDTurn(hud, turn, labels = {}) {
       if (!hud) return;
       const attackerSide = turn.side === "player" ? (labels.player || "ทีมของคุณ") : (labels.enemy || "ฝ่ายตรงข้าม");
@@ -10026,7 +10354,8 @@
       const playerLabel = labels.player || "ทีมของคุณ";
       const enemyLabel = labels.enemy || "ศัตรู";
       const hud = createFullBattleHUD(stage, { player: playerLabel, enemy: enemyLabel });
-      result.textContent = `${combat.playerFirst ? playerLabel : enemyLabel} ได้เริ่มก่อน • โหมดเต็มกำลังแสดงการต่อสู้ทีละฮิต`;
+      stage.classList.add("fixed-formation-battle");
+      result.textContent = `${combat.playerFirst ? playerLabel : enemyLabel} ได้เริ่มก่อน • จัดตำแหน่งการ์ดแบบสนาม 5 ช่องและแสดงการต่อสู้ทีละฮิต`;
       await fullBattleDelay(hud, Math.min(420, Math.max(80, phaseDuration)));
 
       for (const turn of combat.turns) {
@@ -10035,6 +10364,7 @@
         const targetNode = findCombatUnitNode(stage, turn.targetKey);
         if (attackerNode) attackerNode.classList.add("is-attacker");
         if (targetNode) targetNode.classList.add("is-target");
+        showBattleTargetLine(stage, attackerNode, targetNode);
         setFullBattleHUDTurn(hud, turn, { player: playerLabel, enemy: enemyLabel });
 
         const attackerSideLabel = turn.side === "player" ? playerLabel : enemyLabel;
@@ -10108,9 +10438,11 @@
         } else {
           await fullBattleDelay(hud, 150);
         }
+        clearBattleTargetLine(stage);
         if (turn.playerAlive <= 0 || turn.enemyAlive <= 0) break;
       }
 
+      clearBattleTargetLine(stage);
       stage.querySelectorAll(".team-combat-unit").forEach(node => node.classList.remove("is-attacker", "is-target", "hit-pulse"));
       hud.root.classList.add("finished");
       hud.headline.textContent = combat.winner === "player" ? `${playerLabel} ชนะการต่อสู้` : `${enemyLabel} ชนะการต่อสู้`;
