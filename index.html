@@ -1503,6 +1503,98 @@
     .combat-card-report-item b { display: block; color: #f8fafc; margin-bottom: 3px; }
     .combat-card-report-item.ko { border-color: rgba(251,113,133,.32); opacity: .7; }
 
+
+    /* เพิ่มโดยอลิซ: โหมดต่อสู้เต็ม — แสดงผู้โจมตี เป้าหมาย ดาเมจ และ Battle Log แบบสด */
+    .battle-arena.full-battle-active { min-height: 660px; }
+
+    .full-battle-hud {
+      position: relative;
+      z-index: 8;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(250px, .85fr);
+      gap: 10px;
+      margin-top: 16px;
+      padding: 11px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(3,5,13,.90), rgba(12,17,37,.82));
+      box-shadow: 0 16px 44px rgba(0,0,0,.32);
+      backdrop-filter: blur(14px);
+    }
+
+    .full-battle-hud.finished { border-color: rgba(86,227,159,.28); }
+    .full-battle-live { min-width: 0; display: grid; align-content: center; gap: 7px; padding: 9px; }
+    .full-battle-kicker { color: var(--cyan); font-size: .62rem; font-weight: 1000; letter-spacing: .16em; text-transform: uppercase; }
+    .full-battle-headline { margin: 0; font-size: clamp(1rem, 2.7vw, 1.55rem); line-height: 1.12; text-wrap: balance; }
+    .full-battle-detail { min-height: 1.5em; color: #cbd5e1; font-size: .76rem; line-height: 1.5; }
+    .full-battle-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+    .full-battle-badge { padding: 5px 8px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #e2e8f0; font-size: .64rem; font-weight: 1000; background: rgba(255,255,255,.045); }
+    .full-battle-badge.damage { color: #fecdd3; border-color: rgba(251,113,133,.30); }
+    .full-battle-badge.block { color: #ddd6fe; border-color: rgba(167,139,250,.34); }
+    .full-battle-badge.remaining { color: #bbf7d0; border-color: rgba(86,227,159,.30); }
+
+    .full-battle-controls { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+    .full-battle-speed {
+      min-height: 30px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 9px;
+      padding: 5px 9px;
+      color: #cbd5e1;
+      font-size: .63rem;
+      font-weight: 1000;
+      background: rgba(255,255,255,.045);
+    }
+    .full-battle-speed.active { color: #071019; border-color: transparent; background: linear-gradient(135deg, var(--cyan), var(--violet)); }
+    .full-battle-speed.skip { color: #fecdd3; border-color: rgba(251,113,133,.30); background: rgba(190,24,93,.18); }
+
+    .full-battle-log-wrap { min-width: 0; padding: 8px; border: 1px solid rgba(255,255,255,.08); border-radius: 13px; background: rgba(3,5,12,.38); }
+    .full-battle-log-title { margin-bottom: 6px; color: var(--gold); font-size: .65rem; font-weight: 1000; letter-spacing: .1em; text-transform: uppercase; }
+    .full-battle-log { max-height: 154px; overflow: auto; display: grid; gap: 5px; padding-right: 3px; scroll-behavior: smooth; }
+    .full-battle-log-entry { padding: 6px 7px; border-left: 3px solid var(--cyan); border-radius: 8px; color: #cbd5e1; font-size: .62rem; line-height: 1.45; background: rgba(255,255,255,.035); }
+    .full-battle-log-entry.enemy { border-left-color: var(--danger); }
+    .full-battle-log-entry.ko { color: #fecdd3; background: rgba(190,24,93,.10); }
+    .full-battle-log-entry b { color: #f8fafc; }
+
+    .combat-float {
+      position: absolute;
+      z-index: 60;
+      top: 18%;
+      left: 50%;
+      min-width: max-content;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: clamp(.76rem, 1.8vw, 1.05rem);
+      font-weight: 1000;
+      line-height: 1;
+      text-shadow: 0 2px 8px #000;
+      background: rgba(190,24,93,.82);
+      box-shadow: 0 0 22px rgba(251,113,133,.54);
+      transform: translate(-50%, 8px) scale(.82);
+      pointer-events: none;
+      animation: combat-float-up .58s ease-out forwards;
+    }
+    .combat-float.block { color: #f5f3ff; background: rgba(91,33,182,.86); box-shadow: 0 0 22px rgba(167,139,250,.60); }
+    .combat-float.ko { color: #fff; font-size: 1.22rem; background: rgba(127,29,29,.94); box-shadow: 0 0 28px rgba(251,113,133,.74); }
+    .battle-model-card.team-combat-unit.hit-pulse { animation: combat-card-hit .34s ease; }
+
+    @keyframes combat-float-up {
+      0% { opacity: 0; transform: translate(-50%, 12px) scale(.72); }
+      18% { opacity: 1; transform: translate(-50%, -2px) scale(1.08); }
+      100% { opacity: 0; transform: translate(-50%, -42px) scale(.94); }
+    }
+    @keyframes combat-card-hit {
+      0%,100% { filter: brightness(1); }
+      35% { filter: brightness(1.65) saturate(1.25); transform: translateX(5px) rotate(1deg); }
+      65% { transform: translateX(-4px) rotate(-1deg); }
+    }
+
+    @media (max-width: 820px) {
+      .full-battle-hud { grid-template-columns: 1fr; }
+      .full-battle-log { max-height: 125px; }
+      .battle-arena.full-battle-active { min-height: 720px; }
+    }
+
     .battle-impact {
       position: absolute;
       z-index: 4;
@@ -3875,7 +3967,7 @@
 
         <section id="battleView" class="hidden">
           <div class="section-title">
-            <div><h2>Battle Tower</h2><p>ต่อสู้แบบทีม 5 ต่อ 5 สุ่มการ์ดผู้โจมตีและเป้าหมายในแต่ละเทิร์น โดยแต่ละใบมี DEF โล่ และจำนวนฮิตแยกกัน</p></div>
+            <div><h2>Battle Tower</h2><p>ต่อสู้แบบทีม 5 ต่อ 5 ในโหมดเต็ม เห็นว่าใครโจมตีใคร ดาเมจแต่ละฮิต โล่ที่บล็อก DEF ที่เหลือ และ Battle Log แบบสด</p></div>
           </div>
 
           <!-- เพิ่มโดยอลิซ: ทีมไต่หอแยกต่างหาก + แสดงสกิลและบัฟที่ทำงาน -->
@@ -3955,7 +4047,7 @@
 
         <section id="arenaView" class="hidden">
           <div class="section-title">
-            <div><h2>ARENA</h2><p>จัดทีมอารีน่าแยก 5 ใบ แล้วสุ่มเจอทีม ARENA ของผู้เล่นในเซิร์ฟหรือทีม AI แบบไม่เปิดเผยก่อนเริ่ม</p></div>
+            <div><h2>ARENA</h2><p>จัดทีมอารีน่าแยก 5 ใบ แล้วชมการต่อสู้แบบเต็ม เห็นผู้โจมตี เป้าหมาย ดาเมจแต่ละฮิต โล่ และสถานะ K.O. แบบสด</p></div>
             <button class="btn" data-action="refresh-arena">รีเฟรชอันดับ</button>
           </div>
           <div class="battle-layout">
@@ -9613,8 +9705,9 @@
         const variance = actingSide === "player"
           ? playerVariance(round, turnIndex, attacker, target)
           : enemyVariance(round, turnIndex, attacker, target);
+        const targetDefenseBefore = Math.max(0, Number(target.defense) || 0);
+        const targetShieldBefore = Math.max(0, Number(target.shieldHits) || 0);
         const exchange = resolveCombatExchange(attacker.attack, target.defense, attacker.attackHits, target.shieldHits, variance);
-        target.shieldHits = Math.max(0, target.shieldHits - exchange.blockedHits);
 
         let damage = exchange.unblockedHits > 0 ? Math.max(1, Number(exchange.damage) || 0) : 0;
         const fatigueStart = Math.max(1, Number(CONFIG.combatFatigueStartRound || 18));
@@ -9622,8 +9715,37 @@
           const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxDefenseRate || .10), .01 + Math.max(0, round - fatigueStart) * .003);
           damage = Math.max(damage, target.maxDefense * fatigueRate);
         }
-        damage = Math.min(target.defense, damage);
-        target.defense = Math.max(0, target.defense - damage);
+        damage = Math.max(0, Math.round(Math.min(target.defense, damage)));
+
+        const hitCount = Math.max(1, Math.round(Number(exchange.hits) || 1));
+        const blockedCount = Math.max(0, Math.min(hitCount, Math.round(Number(exchange.blockedHits) || 0)));
+        const unblockedCount = Math.max(0, hitCount - blockedCount);
+        const baseHitDamage = unblockedCount ? Math.floor(damage / unblockedCount) : 0;
+        let damageRemainder = unblockedCount ? damage - baseHitDamage * unblockedCount : 0;
+        let runningDefense = targetDefenseBefore;
+        let runningShield = targetShieldBefore;
+        const hitDetails = Array.from({ length: hitCount }, (_, hitIndex) => {
+          const blocked = hitIndex < blockedCount;
+          let hitDamage = 0;
+          if (blocked) {
+            runningShield = Math.max(0, runningShield - 1);
+          } else {
+            hitDamage = baseHitDamage + (damageRemainder > 0 ? 1 : 0);
+            damageRemainder = Math.max(0, damageRemainder - 1);
+            hitDamage = Math.min(runningDefense, hitDamage);
+            runningDefense = Math.max(0, runningDefense - hitDamage);
+          }
+          return {
+            index: hitIndex + 1,
+            blocked,
+            damage: hitDamage,
+            defenseRemaining: runningDefense,
+            shieldRemaining: runningShield
+          };
+        });
+
+        target.shieldHits = Math.max(0, targetShieldBefore - blockedCount);
+        target.defense = Math.max(0, targetDefenseBefore - damage);
         target.defeated = target.defense <= 0;
         attacker.attacks += 1;
         attacker.totalHits += exchange.hits;
@@ -9641,9 +9763,14 @@
           targetId: target.id,
           targetName: target.name,
           targetDefeated: target.defeated,
+          attackerAttack: attacker.attack,
+          variance,
+          targetDefenseBefore,
+          targetShieldBefore,
           targetRemaining: target.defense,
           targetMaxDefense: target.maxDefense,
           targetShieldRemaining: target.shieldHits,
+          hitDetails,
           hits: exchange.hits,
           baseHits: attacker.attackHits,
           extraHits: 0,
@@ -9669,10 +9796,7 @@
         actingSide = actingSide === "player" ? "enemy" : "player";
       }
 
-      // กันไฟต์ยืดเยื้อเกินเพดาน: เข้าช่วง Sudden Break และสลับกำจัดการ์ด DEF ต่ำสุด
-      // จนกว่าฝ่ายหนึ่งจะถูก K.O. ครบทีม เพื่อให้ผลชนะ/แพ้ตรงกับกติกาทีมรายใบเสมอ
-      let suddenGuard = 0;
-      while (alive(playerCards).length && alive(enemyCards).length && suddenGuard < playerCards.length + enemyCards.length + 2) {
+      if (alive(playerCards).length && alive(enemyCards).length) {
         const attackerPool = actingSide === "player" ? alive(playerCards) : alive(enemyCards);
         const defenderPool = actingSide === "player" ? alive(enemyCards) : alive(playerCards);
         const attacker = choose(attackerPool);
@@ -9694,9 +9818,14 @@
           targetId: target.id,
           targetName: target.name,
           targetDefeated: true,
+          attackerAttack: attacker.attack,
+          variance: 1,
+          targetDefenseBefore: damage,
+          targetShieldBefore: target.shieldHits,
           targetRemaining: 0,
           targetMaxDefense: target.maxDefense,
           targetShieldRemaining: target.shieldHits,
+          hitDetails: [{ index: 1, blocked: false, damage, defenseRemaining: 0, shieldRemaining: target.shieldHits, suddenBreak: true }],
           hits: attacker.attackHits,
           baseHits: attacker.attackHits,
           extraHits: 0,
@@ -9718,9 +9847,6 @@
           playerAlive: alive(playerCards).length,
           enemyAlive: alive(enemyCards).length
         });
-        suddenGuard += 1;
-        if (!alive(defenderPool).length) break;
-        actingSide = actingSide === "player" ? "enemy" : "player";
       }
 
       const playerRemainingDefense = totalDefense(playerCards);
@@ -9732,10 +9858,10 @@
         playerFirst,
         turns,
         rounds: turns.length ? Math.max(...turns.map(turn => turn.round)) : 0,
-        playerCards,
-        enemyCards,
         playerInitialCards,
         enemyInitialCards,
+        playerCards,
+        enemyCards,
         playerAttack: totalAttack(playerCards),
         enemyAttack: totalAttack(enemyCards),
         playerMaxDefense: playerInitialDefense,
@@ -9767,7 +9893,8 @@
         ${unit.image ? `<img src="${escapeHTML(unit.image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
         <div class="combat-unit-overlay">
           <div class="combat-unit-name">${escapeHTML(unit.name)}</div>
-          <div class="combat-unit-stats"><span>DEF ${formatNumber(unit.defense)}</span><span>🛡${formatNumber(unit.shieldHits)} ⚔${formatNumber(unit.attackHits)}</span></div>
+          <div class="combat-unit-stats"><span>ATK ${formatNumber(unit.attack)}</span><span>⚔${formatNumber(unit.attackHits)}</span></div>
+          <div class="combat-unit-stats"><span>DEF ${formatNumber(unit.defense)}</span><span>🛡${formatNumber(unit.shieldHits)}</span></div>
           <div class="combat-unit-bar"><i style="width:${defenseRate}%"></i></div>
         </div>
       </div>`;
@@ -9808,29 +9935,160 @@
       if (display.enemyMeter) display.enemyMeter.style.width = `${Math.max(0, Math.min(100, enemyDefense / Math.max(1, combat.enemyMaxDefense) * 100))}%`;
     }
 
-    async function playCardTeamCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
-      renderCombatSquadModels(display.playerModelsId, combat.playerInitialCards || combat.playerCards, false);
-      renderCombatSquadModels(display.enemyModelsId, combat.enemyInitialCards || combat.enemyCards, true);
+    function createFullBattleHUD(stage, labels = {}) {
+      let root = stage.querySelector(".full-battle-hud");
+      if (!root) {
+        root = document.createElement("div");
+        root.className = "full-battle-hud";
+        const actions = stage.querySelector(".battle-actions");
+        if (actions) stage.insertBefore(root, actions);
+        else stage.appendChild(root);
+      }
+      root.classList.remove("finished");
+      root.innerHTML = `
+        <div class="full-battle-live">
+          <div class="full-battle-kicker">LIVE COMBAT • FULL MODE</div>
+          <h4 class="full-battle-headline">กำลังเตรียมสนามต่อสู้</h4>
+          <div class="full-battle-detail">${escapeHTML(labels.player || "ทีมของคุณ")} ปะทะ ${escapeHTML(labels.enemy || "ฝ่ายตรงข้าม")}</div>
+          <div class="full-battle-badges"></div>
+          <div class="full-battle-controls">
+            <button type="button" class="full-battle-speed active" data-speed="1">1×</button>
+            <button type="button" class="full-battle-speed" data-speed="2">2×</button>
+            <button type="button" class="full-battle-speed" data-speed="4">4×</button>
+            <button type="button" class="full-battle-speed skip" data-skip="true">ข้ามการเล่นภาพ</button>
+          </div>
+        </div>
+        <div class="full-battle-log-wrap">
+          <div class="full-battle-log-title">Battle Log</div>
+          <div class="full-battle-log"></div>
+        </div>`;
+      const controller = { speed: 1, skip: false };
+      root.querySelectorAll("[data-speed]").forEach(button => button.addEventListener("click", () => {
+        controller.speed = Math.max(1, Number(button.dataset.speed) || 1);
+        root.querySelectorAll("[data-speed]").forEach(item => item.classList.toggle("active", item === button));
+      }));
+      const skip = root.querySelector("[data-skip]");
+      if (skip) skip.addEventListener("click", () => {
+        controller.skip = true;
+        skip.textContent = "กำลังข้าม…";
+        skip.disabled = true;
+      });
+      stage.classList.add("full-battle-active");
+      return {
+        root,
+        headline: root.querySelector(".full-battle-headline"),
+        detail: root.querySelector(".full-battle-detail"),
+        badges: root.querySelector(".full-battle-badges"),
+        log: root.querySelector(".full-battle-log"),
+        controller
+      };
+    }
+
+    function fullBattleDelay(hud, milliseconds) {
+      if (!hud || hud.controller.skip) return Promise.resolve();
+      return wait(Math.max(16, Math.round(Number(milliseconds || 0) / Math.max(1, hud.controller.speed))));
+    }
+
+    function appendFullBattleLog(hud, turn) {
+      if (!hud || !hud.log) return;
+      const item = document.createElement("div");
+      item.className = `full-battle-log-entry ${turn.side === "enemy" ? "enemy" : ""} ${turn.targetDefeated ? "ko" : ""}`;
+      item.innerHTML = `<b>รอบ ${formatNumber(turn.round)} — ${escapeHTML(turn.attackerName)} → ${escapeHTML(turn.targetName)}</b><br>${formatNumber(turn.hits)} ฮิต • บล็อก ${formatNumber(turn.blockedHits)} • ดาเมจ ${formatNumber(turn.damage)} • DEF เหลือ ${formatNumber(turn.targetRemaining)}${turn.targetDefeated ? " • K.O." : ""}`;
+      hud.log.appendChild(item);
+      while (hud.log.children.length > 80) hud.log.firstElementChild.remove();
+      hud.log.scrollTop = hud.log.scrollHeight;
+    }
+
+    function showCombatFloat(node, text, tone = "damage") {
+      if (!node) return;
+      const floater = document.createElement("div");
+      floater.className = `combat-float ${tone}`;
+      floater.textContent = text;
+      node.appendChild(floater);
+      window.setTimeout(() => floater.remove(), 650);
+    }
+
+    function setFullBattleHUDTurn(hud, turn, labels = {}) {
+      if (!hud) return;
+      const attackerSide = turn.side === "player" ? (labels.player || "ทีมของคุณ") : (labels.enemy || "ฝ่ายตรงข้าม");
+      const defenderSide = turn.side === "player" ? (labels.enemy || "ฝ่ายตรงข้าม") : (labels.player || "ทีมของคุณ");
+      hud.headline.textContent = `${turn.attackerName} โจมตี ${turn.targetName}`;
+      hud.detail.textContent = `รอบ ${turn.round} • ${attackerSide} → ${defenderSide} • ATK ${formatNumber(turn.attackerAttack || 0)} • ${formatNumber(turn.hits)} ฮิต`;
+      hud.badges.innerHTML = `<span class="full-battle-badge damage">ดาเมจรวม ${formatNumber(turn.damage)}</span><span class="full-battle-badge block">โล่บล็อก ${formatNumber(turn.blockedHits)} ฮิต</span><span class="full-battle-badge remaining">DEF เป้าหมาย ${formatNumber(turn.targetDefenseBefore)} → ${formatNumber(turn.targetRemaining)}</span>${turn.targetDefeated ? '<span class="full-battle-badge damage">K.O.</span>' : ''}`;
+    }
+
+    async function playCardTeamCombat(stage, result, combat, display, labels = {}, phaseDuration = 420) {
+      const initialPlayerCards = abilityArray(combat.playerInitialCards).length ? combat.playerInitialCards : combat.playerCards;
+      const initialEnemyCards = abilityArray(combat.enemyInitialCards).length ? combat.enemyInitialCards : combat.enemyCards;
+      renderCombatSquadModels(display.playerModelsId, initialPlayerCards, false);
+      renderCombatSquadModels(display.enemyModelsId, initialEnemyCards, true);
       updateCardTeamBattleDisplay(display, combat);
       const playerLabel = labels.player || "ทีมของคุณ";
       const enemyLabel = labels.enemy || "ศัตรู";
-      result.textContent = `${combat.playerFirst ? playerLabel : enemyLabel} ได้เริ่มก่อน • สุ่มผู้โจมตีและเป้าหมายจากการ์ดที่ยังมี DEF`;
-      await wait(Math.min(240, Math.max(20, phaseDuration)));
+      const hud = createFullBattleHUD(stage, { player: playerLabel, enemy: enemyLabel });
+      result.textContent = `${combat.playerFirst ? playerLabel : enemyLabel} ได้เริ่มก่อน • โหมดเต็มกำลังแสดงการต่อสู้ทีละฮิต`;
+      await fullBattleDelay(hud, Math.min(420, Math.max(80, phaseDuration)));
 
       for (const turn of combat.turns) {
-        stage.querySelectorAll(".team-combat-unit").forEach(node => node.classList.remove("is-attacker", "is-target"));
+        stage.querySelectorAll(".team-combat-unit").forEach(node => node.classList.remove("is-attacker", "is-target", "hit-pulse"));
         const attackerNode = findCombatUnitNode(stage, turn.attackerKey);
         const targetNode = findCombatUnitNode(stage, turn.targetKey);
         if (attackerNode) attackerNode.classList.add("is-attacker");
         if (targetNode) targetNode.classList.add("is-target");
-        const attackerLabel = turn.side === "player" ? playerLabel : enemyLabel;
-        const defenderLabel = turn.side === "player" ? enemyLabel : playerLabel;
+        setFullBattleHUDTurn(hud, turn, { player: playerLabel, enemy: enemyLabel });
+
+        const attackerSideLabel = turn.side === "player" ? playerLabel : enemyLabel;
+        const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
         const strikeClass = turn.side === "player" ? "player-strike" : "enemy-strike";
-        const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
-        const koText = turn.targetDefeated ? ` • 💥 ${turn.targetName} ถูกกำจัด` : "";
-        result.textContent = `รอบ ${turn.round} • ${attackerLabel}: ${turn.attackerName} → ${defenderLabel}: ${turn.targetName} • ${turn.hits} ฮิต${blockText} • เสีย DEF ${formatNumber(turn.damage)} เหลือ ${formatNumber(turn.targetRemaining)}${koText}`;
-        const speed = turn.round > 6 ? Math.max(45, Math.floor(phaseDuration * .45)) : phaseDuration;
-        await playStrikeSequence(stage, strikeClass, turn.hits, speed);
+        result.textContent = `รอบ ${turn.round} • ${attackerSideLabel}: ${turn.attackerName} กำลังโจมตี ${defenderSideLabel}: ${turn.targetName}`;
+
+        const rawDetails = abilityArray(turn.hitDetails);
+        const details = rawDetails.length ? rawDetails : [{
+          index: 1,
+          blocked: Boolean(turn.blockedHits),
+          damage: turn.damage,
+          defenseRemaining: turn.targetRemaining,
+          shieldRemaining: turn.targetShieldRemaining
+        }];
+        const maxVisualHits = 12;
+        const visibleDetails = details.length <= maxVisualHits
+          ? details
+          : [...details.slice(0, maxVisualHits - 2), {
+              grouped: true,
+              indexStart: maxVisualHits - 1,
+              indexEnd: details.length,
+              blocked: false,
+              damage: details.slice(maxVisualHits - 2).reduce((sum, item) => sum + Math.max(0, Number(item.damage) || 0), 0),
+              defenseRemaining: details[details.length - 1].defenseRemaining,
+              shieldRemaining: details[details.length - 1].shieldRemaining
+            }];
+
+        for (const hit of visibleDetails) {
+          if (!hud.controller.skip) {
+            stage.classList.add(strikeClass);
+            if (targetNode) targetNode.classList.add("hit-pulse");
+          }
+          const hitLabel = hit.grouped ? `ฮิต ${hit.indexStart}-${hit.indexEnd}` : `ฮิต ${hit.index}/${turn.hits}`;
+          if (hit.blocked) {
+            showCombatFloat(targetNode, "BLOCK!", "block");
+            result.textContent = `${hitLabel} • ${turn.targetName} ใช้โล่ป้องกัน • โล่เหลือ ${formatNumber(hit.shieldRemaining)}`;
+          } else {
+            showCombatFloat(targetNode, `-${formatNumber(hit.damage)}`, "damage");
+            result.textContent = `${hitLabel} • ${turn.attackerName} สร้างดาเมจ ${formatNumber(hit.damage)} ใส่ ${turn.targetName} • DEF เหลือ ${formatNumber(hit.defenseRemaining)}`;
+          }
+          updateCombatUnitNode(targetNode, {
+            defense: hit.defenseRemaining,
+            maxDefense: turn.targetMaxDefense,
+            shieldHits: hit.shieldRemaining,
+            attackHits: targetNode ? Number(targetNode.dataset.attackHits || 1) : 1,
+            defeated: false
+          });
+          await fullBattleDelay(hud, Math.max(95, phaseDuration * .42));
+          stage.classList.remove(strikeClass);
+          if (targetNode) targetNode.classList.remove("hit-pulse");
+          await fullBattleDelay(hud, 45);
+        }
+
         updateCombatUnitNode(targetNode, {
           defense: turn.targetRemaining,
           maxDefense: turn.targetMaxDefense,
@@ -9839,10 +10097,25 @@
           defeated: turn.targetDefeated
         });
         updateCardTeamBattleDisplay(display, combat, turn);
-        if (turn.suddenBreak) result.textContent += " • Sudden Break!";
+        appendFullBattleLog(hud, turn);
+
+        const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
+        const koText = turn.targetDefeated ? ` • 💥 ${turn.targetName} ถูกกำจัด` : "";
+        result.textContent = `รอบ ${turn.round} จบ • ${turn.attackerName} → ${turn.targetName} • ${turn.hits} ฮิต${blockText} • ดาเมจ ${formatNumber(turn.damage)} • DEF เหลือ ${formatNumber(turn.targetRemaining)}${koText}${turn.suddenBreak ? " • Sudden Break!" : ""}`;
+        if (turn.targetDefeated) {
+          showCombatFloat(targetNode, "K.O.", "ko");
+          await fullBattleDelay(hud, 420);
+        } else {
+          await fullBattleDelay(hud, 150);
+        }
         if (turn.playerAlive <= 0 || turn.enemyAlive <= 0) break;
       }
-      stage.querySelectorAll(".team-combat-unit").forEach(node => node.classList.remove("is-attacker", "is-target"));
+
+      stage.querySelectorAll(".team-combat-unit").forEach(node => node.classList.remove("is-attacker", "is-target", "hit-pulse"));
+      hud.root.classList.add("finished");
+      hud.headline.textContent = combat.winner === "player" ? `${playerLabel} ชนะการต่อสู้` : `${enemyLabel} ชนะการต่อสู้`;
+      hud.detail.textContent = `จบใน ${formatNumber(combat.rounds)} รอบ • ฝ่ายเรารอด ${formatNumber(combat.playerAlive)}/${formatNumber(combat.playerCards.length)} • ฝ่ายตรงข้ามรอด ${formatNumber(combat.enemyAlive)}/${formatNumber(combat.enemyCards.length)}`;
+      hud.badges.innerHTML = `<span class="full-battle-badge damage">ดาเมจฝ่ายเรา ${formatNumber(combat.playerTotalDamage)}</span><span class="full-battle-badge damage">ดาเมจศัตรู ${formatNumber(combat.enemyTotalDamage)}</span><span class="full-battle-badge remaining">DEF เหลือ ${formatNumber(combat.playerRemainingDefense)} / ${formatNumber(combat.enemyRemainingDefense)}</span>`;
     }
 
     function updateTurnBattleDisplay(display, combat, turn = null) {
@@ -11039,7 +11312,7 @@
       const stage = document.getElementById("arenaBattleStage");
       const result = document.getElementById("arenaBattleResult");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 175;
+      const phaseDuration = reducedMotion ? 20 : 420;
       arenaAnimating = true;
       state.battle.energy -= 1;
       renderArena();
@@ -11054,9 +11327,8 @@
         snapshotMode: true,
         totalAttack: stats.enemyAttack,
         totalDefense: stats.enemyEffectiveDefense,
-        // ทีมผู้เล่นจริงมี hit/shield จากแผนที่ราย Card ID อยู่แล้ว จึงไม่กระจายค่ารวมซ้ำทุกใบ
-        fallbackAttackHits: 1,
-        fallbackShieldHits: 0
+        fallbackAttackHits: stats.enemyAttackHits,
+        fallbackShieldHits: stats.enemyShieldHits
       });
       const combat = buildCardTeamCombat({
         playerCards: playerSquad,
@@ -11321,7 +11593,7 @@
 
       const arena = document.querySelector("#battleView .battle-arena");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 175;
+      const phaseDuration = reducedMotion ? 20 : 420;
       battleAnimating = true;
       state.battle.energy -= 1;
       const playerSquad = buildScaledCombatSquad(getTowerTeamIds(), stats.abilitySummary, {
