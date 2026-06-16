@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-16-team-presets-battle-summary-tower-balance-v33">
+  <meta name="gacha-app-build" content="2026-06-16-team-presets-battle-summary-tower-balance-v33-konosuba-ui">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -3651,6 +3651,325 @@
       .battle-summary-team-grid { grid-template-columns: 1fr; }
     }
 
+
+
+    /* =====================================================================
+       [SECTION KONO-SUBA-UI-ASSETS]
+       ธีมภาพประกอบ KonoSuba — อัปโหลดไฟล์ทั้งหมดไว้ที่:
+       assets/ui/konosuba/
+
+       ไฟล์ที่โค้ดนี้ใช้งาน:
+       - logo_konosuba.png
+       - ui_topbar.png
+       - ui_currencybar.png
+       - ui_mainmenu_buttons.png
+       - ui_event_banner.png
+       - ui_gacha_banner.png
+       - ui_gacha_panel.png
+       - ui_shop_panel.png
+       - ui_character_detail.png
+       - ui_quest_panel.png
+       - ui_team_setup.png
+       - ui_popup_messages.png
+       - ui_system_icons.png
+       - ui_bottombar_loading.png
+       ===================================================================== */
+
+    body {
+      --konosuba-page-art: url("assets/ui/konosuba/ui_gacha_panel.png");
+      --konosuba-page-accent: #55d6ff;
+      --konosuba-page-accent-2: #f5b84b;
+      --konosuba-overlay-opacity: .11;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: .16;
+      background-image:
+        linear-gradient(135deg, rgba(3, 6, 16, .72), rgba(3, 6, 16, .94)),
+        var(--konosuba-page-art);
+      background-size: cover;
+      background-position: center;
+      filter: saturate(1.15) contrast(1.06);
+      transition: opacity .28s ease, background-image .28s ease;
+    }
+
+    .app-shell {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .topbar,
+    .side-panel,
+    .workspace,
+    .modal-panel,
+    .login-gate-card {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .topbar::before,
+    .side-panel::before,
+    .workspace::before,
+    .modal-panel::before,
+    .login-gate-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+    }
+
+    .topbar::before {
+      opacity: .24;
+      background-image:
+        linear-gradient(90deg, rgba(5,8,18,.86), rgba(5,8,18,.48), rgba(5,8,18,.86)),
+        url("assets/ui/konosuba/ui_topbar.png");
+    }
+
+    .resource-bar {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      border-radius: 17px;
+    }
+
+    .resource-bar::before {
+      content: "";
+      position: absolute;
+      inset: -14px;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .18;
+      background:
+        linear-gradient(90deg, rgba(5,8,18,.85), rgba(5,8,18,.38), rgba(5,8,18,.85)),
+        url("assets/ui/konosuba/ui_currencybar.png") center / cover no-repeat;
+      filter: saturate(1.15);
+    }
+
+    .brand-collab-logo {
+      width: clamp(112px, 12vw, 170px);
+      max-height: 58px;
+      object-fit: contain;
+      object-position: center;
+      filter: drop-shadow(0 5px 14px rgba(0,0,0,.42));
+    }
+
+    .banner {
+      background-image:
+        linear-gradient(90deg, rgba(6,8,18,.96), rgba(6,8,18,.50) 48%, rgba(6,8,18,.16)),
+        url("assets/ui/konosuba/ui_gacha_banner.png");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .banner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: .14;
+      background:
+        linear-gradient(135deg, transparent 20%, color-mix(in srgb, var(--konosuba-page-accent) 24%, transparent), transparent 70%),
+        url("assets/ui/konosuba/ui_event_banner.png") center / cover no-repeat;
+      mix-blend-mode: screen;
+    }
+
+    .banner-collab-lockup {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      margin-bottom: 4px;
+      padding: 7px 11px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 16px;
+      background: rgba(5,8,18,.62);
+      box-shadow: 0 10px 28px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+    }
+
+    .banner-collab-lockup img {
+      width: clamp(118px, 18vw, 210px);
+      max-height: 52px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,.48));
+    }
+
+    .banner-collab-lockup span {
+      color: #ffe7a6;
+      font-size: .67rem;
+      font-weight: 1000;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .side-panel::before {
+      opacity: .12;
+      background-image:
+        linear-gradient(to bottom, rgba(8,11,23,.78), rgba(8,11,23,.95)),
+        url("assets/ui/konosuba/ui_quest_panel.png");
+      background-position: center top;
+    }
+
+    .workspace::before {
+      opacity: var(--konosuba-overlay-opacity);
+      background-image:
+        linear-gradient(135deg, rgba(8,11,23,.52), rgba(8,11,23,.94) 72%),
+        var(--konosuba-page-art);
+      background-position: center top;
+      filter: saturate(1.2) contrast(1.05);
+      transition: background-image .25s ease, opacity .25s ease;
+    }
+
+    .workspace > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    #summonView,
+    #collectionView,
+    #teamView,
+    #battleView,
+    #arenaView,
+    #friendsView {
+      min-height: 300px;
+    }
+
+    #collectionView .card-grid,
+    #teamView .team-grid,
+    #battleView .battle-layout,
+    #arenaView .battle-layout,
+    #friendsView .friends-columns {
+      position: relative;
+      z-index: 1;
+    }
+
+    #battleView .battle-arena {
+      background-image:
+        radial-gradient(circle at 18% 28%, rgba(92,232,255,.20), transparent 32%),
+        radial-gradient(circle at 82% 26%, rgba(251,113,133,.18), transparent 32%),
+        linear-gradient(145deg, rgba(16,22,46,.84), rgba(9,13,28,.94)),
+        url("assets/ui/konosuba/ui_quest_panel.png");
+      background-size: cover;
+      background-position: center;
+    }
+
+    #arenaView .battle-arena {
+      background-image:
+        radial-gradient(circle at 18% 28%, rgba(255,209,102,.18), transparent 33%),
+        radial-gradient(circle at 82% 26%, rgba(244,114,182,.18), transparent 32%),
+        linear-gradient(145deg, rgba(16,22,46,.82), rgba(9,13,28,.94)),
+        url("assets/ui/konosuba/ui_event_banner.png");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .team-preset-panel,
+    .arena-team-zone,
+    .upgrade-status-panel,
+    .element-panel,
+    .battle-card,
+    .friend-card,
+    .mini-card,
+    .guide-card {
+      background-image:
+        linear-gradient(135deg, rgba(5,8,18,.88), rgba(5,8,18,.68)),
+        url("assets/ui/konosuba/ui_system_icons.png");
+      background-size: auto, 760px auto;
+      background-position: center, center;
+      background-repeat: no-repeat;
+    }
+
+    .btn,
+    .tab,
+    .utility-fab,
+    .account-button {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .btn::before,
+    .tab::before,
+    .utility-fab::before,
+    .account-button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .09;
+      background: url("assets/ui/konosuba/ui_mainmenu_buttons.png") center / 900px auto no-repeat;
+      mix-blend-mode: screen;
+    }
+
+    .modal-panel::before,
+    .login-gate-card::before {
+      opacity: .13;
+      background-image:
+        linear-gradient(135deg, rgba(5,8,18,.72), rgba(5,8,18,.94)),
+        url("assets/ui/konosuba/ui_popup_messages.png");
+    }
+
+    .bottom-nav {
+      position: fixed;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .bottom-nav::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .22;
+      background:
+        linear-gradient(90deg, rgba(5,8,18,.94), rgba(5,8,18,.62), rgba(5,8,18,.94)),
+        url("assets/ui/konosuba/ui_bottombar_loading.png") center / cover no-repeat;
+    }
+
+    .side-utility-dock {
+      position: fixed;
+      isolation: isolate;
+    }
+
+    .side-utility-dock::before {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .18;
+      border-radius: 26px;
+      background: url("assets/ui/konosuba/ui_system_icons.png") center / cover no-repeat;
+      filter: blur(.2px);
+    }
+
+    @media (max-width: 980px) {
+      .brand-collab-logo { display: none; }
+      .banner-collab-lockup span { display: none; }
+      body::after { opacity: .12; }
+    }
+
+    @media (max-width: 640px) {
+      .banner-collab-lockup { padding: 5px 8px; }
+      .banner-collab-lockup img { width: 130px; max-height: 42px; }
+      .workspace::before { opacity: .07; }
+      .side-panel::before { opacity: .07; }
+    }
+
   </style>
 </head>
 <body class="auth-locked">
@@ -3707,6 +4026,7 @@
           <p class="eyebrow">Collection Protocol</p>
           <h1>Anime Card Collection</h1>
         </div>
+        <img class="brand-collab-logo" src="assets/ui/konosuba/logo_konosuba.png" alt="KonoSuba collaboration" onerror="this.style.display='none'">
       </div>
       <button class="account-button" data-action="open-profile" aria-label="เปิดหน้าโปรไฟล์ผู้เล่น">
         <span class="account-avatar" id="accountAvatar">G</span>
@@ -3728,6 +4048,10 @@
         <section class="banner panel" aria-labelledby="bannerTitle">
           <div class="banner-media" id="bannerMedia"></div>
           <div class="banner-content">
+            <div class="banner-collab-lockup" aria-label="ธีมคอลแลป KonoSuba">
+              <img src="assets/ui/konosuba/logo_konosuba.png" alt="KonoSuba" onerror="this.parentElement.style.display='none'">
+              <span>Collaboration UI Theme</span>
+            </div>
             <span class="season-tag">LIVE BANNER</span>
             <h2 id="bannerTitle">Loading banner...</h2>
             <p class="banner-description" id="bannerDescription"></p>
@@ -7302,6 +7626,57 @@
     const BANNER_BY_ID = new Map(BANNERS.map(banner => [banner.id, banner]));
 
     let activeTab = "summon";
+
+    /* ================= [SECTION KONO-SUBA-UI-ASSET-MAP] =================
+       เปลี่ยนชื่อโฟลเดอร์หรือชื่อไฟล์ทั้งหมดจากจุดเดียวได้ตรงนี้
+       โฟลเดอร์แนะนำบน GitHub: assets/ui/konosuba/
+       =================================================================== */
+    const KONOSUBA_UI_ROOT = "assets/ui/konosuba";
+    const KONOSUBA_UI_ASSETS = Object.freeze({
+      logo: `${KONOSUBA_UI_ROOT}/logo_konosuba.png`,
+      topbar: `${KONOSUBA_UI_ROOT}/ui_topbar.png`,
+      currencyBar: `${KONOSUBA_UI_ROOT}/ui_currencybar.png`,
+      mainMenuButtons: `${KONOSUBA_UI_ROOT}/ui_mainmenu_buttons.png`,
+      eventBanner: `${KONOSUBA_UI_ROOT}/ui_event_banner.png`,
+      gachaBanner: `${KONOSUBA_UI_ROOT}/ui_gacha_banner.png`,
+      gachaPanel: `${KONOSUBA_UI_ROOT}/ui_gacha_panel.png`,
+      shopPanel: `${KONOSUBA_UI_ROOT}/ui_shop_panel.png`,
+      characterDetail: `${KONOSUBA_UI_ROOT}/ui_character_detail.png`,
+      questPanel: `${KONOSUBA_UI_ROOT}/ui_quest_panel.png`,
+      teamSetup: `${KONOSUBA_UI_ROOT}/ui_team_setup.png`,
+      popupMessages: `${KONOSUBA_UI_ROOT}/ui_popup_messages.png`,
+      systemIcons: `${KONOSUBA_UI_ROOT}/ui_system_icons.png`,
+      bottomBar: `${KONOSUBA_UI_ROOT}/ui_bottombar_loading.png`
+    });
+
+    const KONOSUBA_UI_PAGE_MAP = Object.freeze({
+      summon: { image: KONOSUBA_UI_ASSETS.gachaPanel, accent: "#55d6ff", accent2: "#f5b84b", opacity: ".12" },
+      collection: { image: KONOSUBA_UI_ASSETS.characterDetail, accent: "#c4a7ff", accent2: "#55d6ff", opacity: ".10" },
+      team: { image: KONOSUBA_UI_ASSETS.teamSetup, accent: "#65e8b1", accent2: "#f5d56a", opacity: ".11" },
+      battle: { image: KONOSUBA_UI_ASSETS.questPanel, accent: "#55d6ff", accent2: "#a78bfa", opacity: ".10" },
+      arena: { image: KONOSUBA_UI_ASSETS.eventBanner, accent: "#fb7185", accent2: "#f5b84b", opacity: ".11" },
+      friends: { image: KONOSUBA_UI_ASSETS.shopPanel, accent: "#f5d56a", accent2: "#f472b6", opacity: ".09" }
+    });
+
+    function applyKonoSubaUITheme(tab = "summon") {
+      const page = KONOSUBA_UI_PAGE_MAP[tab] || KONOSUBA_UI_PAGE_MAP.summon;
+      document.body.dataset.uiPage = tab;
+      document.body.style.setProperty("--konosuba-page-art", `url("${page.image}")`);
+      document.body.style.setProperty("--konosuba-page-accent", page.accent);
+      document.body.style.setProperty("--konosuba-page-accent-2", page.accent2);
+      document.body.style.setProperty("--konosuba-overlay-opacity", page.opacity);
+    }
+
+    function preloadKonoSubaUIAssets() {
+      Object.values(KONOSUBA_UI_ASSETS).forEach(source => {
+        const image = new Image();
+        image.decoding = "async";
+        image.src = source;
+      });
+    }
+
+    applyKonoSubaUITheme(activeTab);
+    window.setTimeout(preloadKonoSubaUIAssets, 0);
     let modalCardId = "";
     let cardDetailActiveTab = "stats";
     let toastTimer = 0;
@@ -12038,7 +12413,7 @@
       const media = (banner.images || []).find(Boolean) || banner.image || "";
       const source = resolveAsset(media, "banner");
       const mediaHTML = !source ? "" : isVideo(source)
-        ? `<video src="${escapeHTML(source)}" autoplay muted loop playsinline preload="metadata"></video>`
+        ? `<video src="${escapeHTML(source)}" poster="${escapeHTML(KONOSUBA_UI_ASSETS.gachaBanner)}" autoplay muted loop playsinline preload="metadata"></video>`
         : `<img src="${escapeHTML(source)}" alt="" fetchpriority="high">`;
 
       document.getElementById("bannerMedia").innerHTML = mediaHTML;
@@ -13358,6 +13733,7 @@
     }
 
     function renderTabs() {
+      applyKonoSubaUITheme(activeTab);
       document.querySelectorAll("[data-tab]").forEach(button => button.classList.toggle("active", button.dataset.tab === activeTab));
       document.getElementById("summonView").classList.toggle("hidden", activeTab !== "summon");
       document.getElementById("collectionView").classList.toggle("hidden", activeTab !== "collection");
