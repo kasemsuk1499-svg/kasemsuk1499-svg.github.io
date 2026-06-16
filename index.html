@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-15-active-skill-cutscene-hit-report-v32">
+  <meta name="gacha-app-build" content="2026-06-16-team-presets-battle-summary-tower-balance-v33">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -3524,6 +3524,133 @@
       #cardModal .stat-grid { grid-template-columns: 1fr 1fr; }
     }
 
+
+
+    /* เพิ่มโดยอลิซ: พรีเซ็ตทีม 30 ช่อง ใช้ร่วมกันทุกโหมด */
+    .team-preset-panel {
+      margin: 0 0 16px;
+      padding: 14px;
+      border: 1px solid rgba(92,232,255,.18);
+      border-radius: 21px;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(92,232,255,.10), transparent 34%),
+        radial-gradient(circle at 92% 0%, rgba(167,139,250,.10), transparent 36%),
+        rgba(255,255,255,.028);
+    }
+    .team-preset-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 11px;
+    }
+    .team-preset-head h3 { margin: 0 0 4px; font-size: 1rem; }
+    .team-preset-head p { margin: 0; color: var(--muted); font-size: .72rem; line-height: 1.5; }
+    .team-preset-count {
+      flex: 0 0 auto;
+      border: 1px solid rgba(92,232,255,.22);
+      border-radius: 999px;
+      padding: 6px 9px;
+      color: var(--cyan);
+      font-size: .68rem;
+      font-weight: 1000;
+      background: rgba(92,232,255,.07);
+    }
+    .team-preset-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 480px;
+      overflow: auto;
+      padding: 2px;
+    }
+    .team-preset-card {
+      min-width: 0;
+      padding: 9px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 15px;
+      background: rgba(3,5,12,.42);
+    }
+    .team-preset-card.empty { border-style: dashed; }
+    .team-preset-title-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .team-preset-title-row strong { min-width: 0; overflow: hidden; font-size: .7rem; text-overflow: ellipsis; white-space: nowrap; }
+    .team-preset-number { color: var(--gold); font-size: .6rem; font-weight: 1000; }
+    .team-preset-members { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; margin: 7px 0; }
+    .team-preset-member {
+      aspect-ratio: 1;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 7px;
+      color: var(--muted);
+      font-size: .56rem;
+      font-weight: 1000;
+      background: rgba(255,255,255,.035);
+    }
+    .team-preset-member img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .team-preset-meta { min-height: 2.6em; color: var(--muted); font-size: .58rem; line-height: 1.35; }
+    .team-preset-actions { display: grid; grid-template-columns: 1.25fr .8fr .8fr; gap: 4px; margin-top: 7px; }
+    .team-preset-actions .btn { min-height: 30px; padding: 5px 6px; border-radius: 9px; font-size: .58rem; }
+    .team-preset-save-empty { width: 100%; min-height: 78px; padding: 8px; font-size: .65rem; }
+
+    /* เพิ่มโดยอลิซ: ระดับความยากทาวเวอร์แบบอ่านง่าย */
+    .tower-difficulty-meter { height: 8px; overflow: hidden; margin-top: 10px; border-radius: 999px; background: rgba(255,255,255,.08); }
+    .tower-difficulty-meter i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--gold), var(--danger)); transition: width .2s ease; }
+    .tower-difficulty-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; color: var(--muted); font-size: .7rem; }
+    .tower-difficulty-label strong { color: var(--gold); }
+
+    /* เพิ่มโดยอลิซ: หน้าสรุปการต่อสู้ฉบับเต็ม */
+    .battle-summary-panel { width: min(1180px, 100%); }
+    .battle-summary-head { padding: 24px 62px 18px 24px; border-bottom: 1px solid var(--line); }
+    .battle-summary-head h2 { margin: 5px 0 6px; font-size: clamp(1.6rem, 4vw, 2.7rem); }
+    .battle-summary-head p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .battle-summary-body { display: grid; gap: 14px; padding: 18px; }
+    .battle-summary-result {
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 18px;
+      background: rgba(255,255,255,.035);
+    }
+    .battle-summary-result.win { border-color: rgba(86,227,159,.34); box-shadow: inset 4px 0 0 var(--green); }
+    .battle-summary-result.lose { border-color: rgba(251,113,133,.34); box-shadow: inset 4px 0 0 var(--danger); }
+    .battle-summary-result strong { display: block; font-size: 1.05rem; }
+    .battle-summary-result span { display: block; margin-top: 4px; color: var(--muted); font-size: .76rem; line-height: 1.5; }
+    .battle-summary-metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+    .battle-summary-metric { padding: 10px; border: 1px solid rgba(255,255,255,.09); border-radius: 13px; background: rgba(3,5,12,.36); }
+    .battle-summary-metric span { display: block; color: var(--muted); font-size: .6rem; font-weight: 900; }
+    .battle-summary-metric strong { display: block; margin-top: 4px; overflow: hidden; font-size: .86rem; text-overflow: ellipsis; white-space: nowrap; }
+    .battle-summary-section { padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.025); }
+    .battle-summary-section h3 { margin: 0 0 10px; font-size: .95rem; }
+    .battle-summary-team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .battle-summary-team { min-width: 0; padding: 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; background: rgba(3,5,12,.34); }
+    .battle-summary-team h4 { margin: 0 0 8px; font-size: .76rem; }
+    .battle-summary-card-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .battle-summary-card { width: 62px; min-width: 0; }
+    .battle-summary-card-art { width: 62px; aspect-ratio: 4/5; overflow: hidden; border: 1px solid rgba(255,255,255,.13); border-radius: 10px; background: #11162b; }
+    .battle-summary-card-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .battle-summary-card span { display: block; margin-top: 4px; overflow: hidden; font-size: .56rem; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+    .battle-turn-log { max-height: 460px; overflow: auto; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; }
+    .battle-turn-row { display: grid; grid-template-columns: 62px minmax(110px,.8fr) repeat(6,minmax(72px,.55fr)) minmax(150px,1.2fr); gap: 7px; align-items: center; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.06); font-size: .64rem; }
+    .battle-turn-row:last-child { border-bottom: 0; }
+    .battle-turn-row.header { position: sticky; top: 0; z-index: 2; color: var(--cyan); font-weight: 1000; background: #0a0e1d; }
+    .battle-turn-row.enemy { background: rgba(190,24,93,.055); }
+    .battle-turn-row.active { box-shadow: inset 3px 0 0 var(--violet); }
+    .battle-turn-skill { color: var(--gold); line-height: 1.35; }
+
+    @media (max-width: 1050px) {
+      .team-preset-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .battle-summary-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .battle-turn-row { min-width: 900px; }
+    }
+    @media (max-width: 640px) {
+      .team-preset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .team-preset-head { align-items: stretch; flex-direction: column; }
+      .team-preset-count { align-self: flex-start; }
+      .battle-summary-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .battle-summary-team-grid { grid-template-columns: 1fr; }
+    }
+
   </style>
 </head>
 <body class="auth-locked">
@@ -3741,6 +3868,7 @@
           <div class="section-title">
             <div><h2>ทีมโชว์</h2><p>ใส่ได้สูงสุด 5 ใบ การ์ดทุกใบในทีมสร้างรายได้แบบออฟไลน์</p></div>
           </div>
+          <div class="team-preset-panel" id="teamPresetPanel"></div>
           <div class="team-grid" id="teamGrid"></div>
           <!-- โน้ตจุดแก้ไขโดยอลิซ: แผงนี้แสดงธาตุหลัก คอมโบธาตุ และโบนัสทีมแบบเรียลไทม์ -->
           <div class="element-panel" id="teamElementPanel"></div>
@@ -3765,6 +3893,7 @@
               <div><h2>ทีมไต่หอ</h2><p>ทีมนี้แยกจากทีมโชว์และทีม ARENA โดยสมบูรณ์ เปลี่ยนการ์ดได้จากช่องด้านล่าง</p></div>
               <strong id="towerTeamPowerText">ATK 0 • DEF 0</strong>
             </div>
+            <div class="team-preset-panel" id="towerPresetPanel"></div>
             <div class="team-grid" id="towerTeamGrid"></div>
             <div class="element-panel" id="towerElementPanel"></div>
           </div>
@@ -3792,6 +3921,7 @@
               </div>
               <div class="battle-actions">
                 <button class="btn btn-primary" id="battleButton" data-action="battle">เริ่มต่อสู้</button>
+                <button class="btn" id="battleSummaryButton" data-action="open-battle-summary" data-summary-mode="tower" disabled>📊 สรุปฉบับเต็ม</button>
                 <div class="battle-result" id="battleResult">จัดทีมให้พร้อมแล้วท้าทายหอคอย</div>
               </div>
             </div>
@@ -3806,6 +3936,11 @@
                 <div class="battle-stat-row"><span>Gems</span><strong id="battleGemReward">0</strong></div>
                 <div class="battle-stat-row"><span>Dust</span><strong id="battleDustReward">0</strong></div>
                 <div class="tower-reward-list" id="battleTowerRewardText"></div>
+              </div>
+              <div class="battle-card">
+                <h3>ระดับความยากชั้นนี้</h3>
+                <div class="tower-difficulty-label"><span id="battleDifficultyDetail">กำลังประเมินจาก ATK / DEF และจำนวนเทิร์น</span><strong id="battleDifficultyText">สมดุล</strong></div>
+                <div class="tower-difficulty-meter"><i id="battleDifficultyMeter"></i></div>
               </div>
               <div class="battle-card">
                 <h3>เงื่อนไขชั้นพิเศษ</h3>
@@ -3862,6 +3997,7 @@
               </div>
               <div class="battle-actions">
                 <button class="btn btn-primary" id="arenaBattleButton" data-action="arena-battle">ใช้ดาบ 1 เล่มและสุ่มคู่ต่อสู้</button>
+                <button class="btn" id="arenaSummaryButton" data-action="open-battle-summary" data-summary-mode="arena" disabled>📊 สรุปฉบับเต็ม</button>
                 <div class="battle-result" id="arenaBattleResult">ชนะ +25 แต้ม • แพ้ -10 แต้ม</div>
               </div>
             </div>
@@ -3899,6 +4035,7 @@
               <div><h2>ทีม ARENA แยก</h2><p>ไม่กระทบทีมโชว์หรือทีมไต่หอ และทีมนี้จะถูกใช้เมื่อผู้เล่นคนอื่นสุ่มเจอคุณใน ARENA</p></div>
               <strong id="arenaTeamPowerText">ATK 0 • DEF 0</strong>
             </div>
+            <div class="team-preset-panel" id="arenaPresetPanel"></div>
             <div class="team-grid" id="arenaTeamGrid"></div>
             <div class="element-panel" id="arenaElementPanel"></div>
           </div>
@@ -4200,6 +4337,15 @@
     </div>
   </div>
 
+
+
+  <div class="modal hidden" id="battleSummaryModal" role="dialog" aria-modal="true" aria-label="สรุปการต่อสู้ฉบับเต็ม">
+    <div class="modal-panel battle-summary-panel">
+      <button class="close" data-action="close-battle-summary" aria-label="ปิด">x</button>
+      <div id="battleSummaryContent"></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <noscript><div style="padding:24px;color:white;background:#7f1d1d">เว็บนี้ต้องเปิด JavaScript จึงจะเล่นได้</div></noscript>
 
@@ -4268,6 +4414,8 @@
       dailyGems: 250000,
       maxLevel: 100,
       teamSlots: 5,
+      // เพิ่มโดยอลิซ: พรีเซ็ตทีมร่วม ใช้สลับทีมโชว์/ไต่หอ/ARENA ได้ทันที
+      teamPresetLimit: 30,
       powerGrowth: 0.015,
       incomeGrowth: 0.008,
       battleMaxEnergy: 50,
@@ -4322,13 +4470,20 @@
     */
     const TOWER_SCALE_CONFIG = Object.freeze({
       basePower: 14000,
+      // จุดอ้างอิงโดยประมาณ: F50 0.95M / F100 3.45M / F200 14.5M / F400 87M / F600 389M
+      // ช่วงต้นลดกำแพงพลังลง ส่วนช่วง EX/SC เพิ่มความชันเพื่อไม่ให้หอหมดความท้าทายเร็วเกินไป
       brackets: [
-        { through: 50, growth: 1.09750 },
-        { through: 100, growth: 1.024 },
-        { through: 200, growth: 1.0142 },
-        { through: 400, growth: 1.0085 },
-        { through: Infinity, growth: 1.0028 }
-      ]
+        { through: 50, growth: 1.0900 },
+        { through: 100, growth: 1.0260 },
+        { through: 200, growth: 1.0145 },
+        { through: 400, growth: 1.0090 },
+        { through: 600, growth: 1.0075 },
+        { through: Infinity, growth: 1.0045 }
+      ],
+      miniBossEvery: 10,
+      miniBossRate: 0.05,
+      majorBossEvery: 50,
+      majorBossRate: 0.12
     });
 
     // เพิ่มโดยอลิซ: กติกา ARENA และรางวัลรีอันดับวันจันทร์
@@ -7186,6 +7341,8 @@
     let activeSkillCutsceneToken = 0;
     let lastBattleCombat = null;
     let lastArenaCombat = null;
+    let lastBattleSummary = null;
+    let lastArenaSummary = null;
     // เพิ่มโดยอลิซ: สถานะเรียงลำดับคลังและหน้าต่างเลือกทีม
     let collectionSortMode = "power";
     let collectionSortDirection = "desc";
@@ -7261,6 +7418,8 @@
         // เพิ่มโดยอลิซ: เก็บลำดับครั้งแรกที่ได้การ์ด เพื่อใช้ปุ่ม “เรียงตามลำดับการได้”
         collectionOrder: starter.collectionOrder,
         team: starter.team,
+        // พรีเซ็ตทีมใช้ร่วมกันทั้ง 3 โหมด จำกัด 30 ช่อง
+        teamPresets: Array.from({ length: CONFIG.teamPresetLimit }, () => null),
         pity: {},
         recent: [],
         tickets: {
@@ -7916,6 +8075,7 @@
       next.team = Array.isArray(next.team)
         ? [...new Set(next.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.teamSlots)
         : [];
+      next.teamPresets = normalizeTeamPresets(next.teamPresets, next.owned);
       next.pity = next.pity && typeof next.pity === "object" ? next.pity : {};
       next.recent = Array.isArray(next.recent) ? next.recent.map(String).filter(id => CARD_BY_ID.has(id)).slice(0, CONFIG.recentPullLimit) : [];
       next.tickets = normalizeTicketInventory(next.tickets || next.inventory || {});
@@ -10111,7 +10271,13 @@
         remaining -= steps;
         currentFloor += steps;
       }
-      return Math.max(1, Math.floor(power));
+      const safeFloor = Math.max(1, Math.floor(Number(floor) || 1));
+      const isMajorBoss = safeFloor > 1 && safeFloor % Math.max(1, Number(TOWER_SCALE_CONFIG.majorBossEvery) || 50) === 0;
+      const isMiniBoss = !isMajorBoss && safeFloor > 1 && safeFloor % Math.max(1, Number(TOWER_SCALE_CONFIG.miniBossEvery) || 10) === 0;
+      const bossRate = isMajorBoss
+        ? Number(TOWER_SCALE_CONFIG.majorBossRate || 0)
+        : isMiniBoss ? Number(TOWER_SCALE_CONFIG.miniBossRate || 0) : 0;
+      return Math.max(1, Math.floor(power * (1 + bossRate)));
     }
 
     function getFirstLoginReward(day) {
@@ -10571,6 +10737,18 @@
           arenaResult = { tone: "lose", text: `แพ้ ${currentArenaOpponent.username} เพราะ DEF ของเราหมดก่อน • -${lost} แต้ม • ${combatText}` };
         }
 
+        lastArenaSummary = makeCombatSummary({
+          mode: "arena",
+          title: `ARENA ปะทะ ${currentArenaOpponent.username}`,
+          opponent: currentArenaOpponent.username,
+          combat,
+          outcomeText: won ? `ชนะ ${currentArenaOpponent.username}` : `แพ้ ${currentArenaOpponent.username}`,
+          rewardText: arenaResult.text,
+          playerLabel: "ทีม ARENA ของคุณ",
+          enemyLabel: currentArenaOpponent.username,
+          playerCards: battleSummaryOwnedTeam(state.arena.team),
+          enemyCards: abilityArray(stats.enemyTeam).map(battleSummaryCardSnapshot)
+        });
         saveState(true);
         renderAll();
         showToast(arenaResult.text);
@@ -10853,6 +11031,18 @@
           };
         }
 
+        lastBattleSummary = makeCombatSummary({
+          mode: "tower",
+          title: `Battle Tower ชั้น ${stats.stage}`,
+          opponent: `Tower ชั้น ${stats.stage}`,
+          combat,
+          outcomeText: won ? `ชนะ Battle Tower ชั้น ${stats.stage}` : `แพ้ Battle Tower ชั้น ${stats.stage}`,
+          rewardText: battleResult.text,
+          playerLabel: "ทีมไต่หอของคุณ",
+          enemyLabel: `Tower ชั้น ${stats.stage}`,
+          playerCards: battleSummaryOwnedTeam(getTowerTeamIds()),
+          enemyCards: [battleSummaryCardSnapshot(stats.enemyCard)]
+        });
         saveState(true);
         renderAll();
         showToast(battleResult.text);
@@ -11648,6 +11838,8 @@
         team.push(id);
       }
       battleResult = null;
+      lastBattleCombat = null;
+      lastBattleSummary = null;
       saveState(true);
       renderAll();
       if (modalCardId) renderCardDetail(modalCardId);
@@ -11664,6 +11856,8 @@
       }
       currentArenaOpponent = null;
       arenaResult = null;
+      lastArenaCombat = null;
+      lastArenaSummary = null;
       saveState(true);
       renderAll();
       if (modalCardId) renderCardDetail(modalCardId);
@@ -12436,8 +12630,10 @@
       if (mode === "arena") {
         currentArenaOpponent = null;
         arenaResult = null;
+        lastArenaCombat = null;
+        lastArenaSummary = null;
       }
-      if (mode === "tower") battleResult = null;
+      if (mode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
       saveState(true);
       renderAll();
       closeTeamPicker();
@@ -12454,8 +12650,10 @@
       if (safeMode === "arena") {
         currentArenaOpponent = null;
         arenaResult = null;
+        lastArenaCombat = null;
+        lastArenaSummary = null;
       }
-      if (safeMode === "tower") battleResult = null;
+      if (safeMode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
       saveState(true);
       renderAll();
       showToast("นำการ์ดออกจากทีมแล้ว");
@@ -12513,6 +12711,144 @@
       `;
     }
 
+
+
+    // ==================== TEAM PRESETS (สูงสุด 30 ช่อง) ====================
+    function normalizeTeamPresets(value, ownedMap = {}) {
+      const source = Array.isArray(value) ? value : [];
+      return Array.from({ length: CONFIG.teamPresetLimit }, (_, index) => {
+        const item = source[index];
+        if (!item || typeof item !== "object") return null;
+        const cards = [...new Set(abilityArray(item.cards || item.team).map(String))]
+          .filter(id => ownedMap[id] && CARD_BY_ID.has(id))
+          .slice(0, Math.max(CONFIG.teamSlots, CONFIG.towerTeamSlots, CONFIG.arenaTeamSlots));
+        if (!cards.length) return null;
+        return {
+          name: String(item.name || `พรีเซ็ต ${index + 1}`).trim().slice(0, 28) || `พรีเซ็ต ${index + 1}`,
+          cards,
+          createdAt: Math.max(0, Number(item.createdAt) || Date.now()),
+          updatedAt: Math.max(0, Number(item.updatedAt) || Date.now())
+        };
+      });
+    }
+
+    function teamPresetModeLabel(mode = "showcase") {
+      return mode === "tower" ? "ทีมไต่หอ" : mode === "arena" ? "ทีม ARENA" : "ทีมโชว์";
+    }
+
+    function getTeamPresetContainerId(mode = "showcase") {
+      return mode === "tower" ? "towerPresetPanel" : mode === "arena" ? "arenaPresetPanel" : "teamPresetPanel";
+    }
+
+    function teamPresetMemberHTML(cardId) {
+      const card = CARD_BY_ID.get(String(cardId || ""));
+      if (!card) return `<span class="team-preset-member">−</span>`;
+      const image = getCardImage(card);
+      return `<span class="team-preset-member" title="${escapeHTML(card.name)}">${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" decoding="async" onerror="this.parentElement.textContent='${escapeHTML(String(card.name || '?').slice(0, 1))}'">` : escapeHTML(String(card.name || "?").slice(0, 1))}</span>`;
+    }
+
+    function teamPresetCardHTML(preset, index, mode) {
+      const number = index + 1;
+      if (!preset) {
+        return `<div class="team-preset-card empty"><div class="team-preset-title-row"><strong>ช่องว่าง</strong><span class="team-preset-number">#${number}</span></div><button class="btn team-preset-save-empty" data-action="save-team-preset" data-preset-index="${index}" data-team-mode="${escapeHTML(mode)}">＋ บันทึกทีมปัจจุบัน</button></div>`;
+      }
+      const cards = abilityArray(preset.cards).map(String).filter(id => CARD_BY_ID.has(id));
+      const summary = getTeamElementSummary(cards);
+      const comboCount = abilityArray(summary.activeCombos).length;
+      const members = Array.from({ length: 5 }, (_, slot) => teamPresetMemberHTML(cards[slot])).join("");
+      return `
+        <div class="team-preset-card">
+          <div class="team-preset-title-row"><strong title="${escapeHTML(preset.name)}">${escapeHTML(preset.name)}</strong><span class="team-preset-number">#${number}</span></div>
+          <div class="team-preset-members">${members}</div>
+          <div class="team-preset-meta">${cards.length}/5 ใบ • ธาตุหลัก ${escapeHTML(elementLabel(summary.dominantElement))} • คอมโบ ${comboCount}</div>
+          <div class="team-preset-actions">
+            <button class="btn btn-primary" data-action="load-team-preset" data-preset-index="${index}" data-team-mode="${escapeHTML(mode)}">ใช้ทันที</button>
+            <button class="btn" data-action="save-team-preset" data-preset-index="${index}" data-team-mode="${escapeHTML(mode)}">ทับ</button>
+            <button class="btn" data-action="rename-team-preset" data-preset-index="${index}">ชื่อ</button>
+          </div>
+          <div class="team-preset-actions" style="grid-template-columns:1fr">
+            <button class="btn btn-danger" data-action="delete-team-preset" data-preset-index="${index}">ลบพรีเซ็ต</button>
+          </div>
+        </div>`;
+    }
+
+    function renderTeamPresets(mode = "showcase") {
+      const target = document.getElementById(getTeamPresetContainerId(mode));
+      if (!target) return;
+      if (!Array.isArray(state.teamPresets)) state.teamPresets = normalizeTeamPresets([], state.owned);
+      const used = state.teamPresets.filter(Boolean).length;
+      target.innerHTML = `
+        <div class="team-preset-head">
+          <div><h3>⚡ พรีเซ็ตจัดทีม — ${escapeHTML(teamPresetModeLabel(mode))}</h3><p>บันทึกคอมโบไว้สูงสุด ${CONFIG.teamPresetLimit} ชุด แล้วกด “ใช้ทันที” เพื่อเปลี่ยนทีมของโหมดนี้โดยไม่กระทบอีกสองโหมด</p></div>
+          <span class="team-preset-count">${used}/${CONFIG.teamPresetLimit} พรีเซ็ต</span>
+        </div>
+        <div class="team-preset-grid">${state.teamPresets.map((preset, index) => teamPresetCardHTML(preset, index, mode)).join("")}</div>`;
+    }
+
+    function renderAllTeamPresets() {
+      renderTeamPresets("showcase");
+      renderTeamPresets("tower");
+      renderTeamPresets("arena");
+    }
+
+    function saveTeamPreset(index, mode = "showcase") {
+      const safeIndex = Math.max(0, Math.min(CONFIG.teamPresetLimit - 1, Math.floor(Number(index) || 0)));
+      const team = getTeamArrayByMode(mode).map(String).filter(id => state.owned[id] && CARD_BY_ID.has(id));
+      if (!team.length) return showToast(`ต้องจัด ${teamPresetModeLabel(mode)} อย่างน้อย 1 ใบก่อนบันทึก`);
+      if (!Array.isArray(state.teamPresets)) state.teamPresets = normalizeTeamPresets([], state.owned);
+      const old = state.teamPresets[safeIndex];
+      state.teamPresets[safeIndex] = {
+        name: old && old.name ? old.name : `พรีเซ็ต ${safeIndex + 1}`,
+        cards: [...new Set(team)].slice(0, 5),
+        createdAt: old && old.createdAt ? old.createdAt : Date.now(),
+        updatedAt: Date.now()
+      };
+      saveState(true);
+      renderAllTeamPresets();
+      showToast(`บันทึก ${teamPresetModeLabel(mode)} ลงพรีเซ็ต #${safeIndex + 1} แล้ว`);
+    }
+
+    function loadTeamPreset(index, mode = "showcase") {
+      const safeIndex = Math.max(0, Math.min(CONFIG.teamPresetLimit - 1, Math.floor(Number(index) || 0)));
+      const preset = Array.isArray(state.teamPresets) ? state.teamPresets[safeIndex] : null;
+      if (!preset) return showToast("พรีเซ็ตช่องนี้ยังว่าง");
+      const limit = mode === "tower" ? CONFIG.towerTeamSlots : mode === "arena" ? CONFIG.arenaTeamSlots : CONFIG.teamSlots;
+      const cards = [...new Set(abilityArray(preset.cards).map(String))].filter(id => state.owned[id] && CARD_BY_ID.has(id)).slice(0, limit);
+      if (!cards.length) return showToast("การ์ดในพรีเซ็ตนี้ไม่อยู่ในคลังแล้ว");
+      updateIncome();
+      const team = getTeamArrayByMode(mode);
+      team.splice(0, team.length, ...cards);
+      if (mode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
+      if (mode === "arena") { currentArenaOpponent = null; arenaResult = null; lastArenaCombat = null; lastArenaSummary = null; }
+      saveState(true);
+      renderAll();
+      showToast(`เปลี่ยนเป็น “${preset.name}” ใน${teamPresetModeLabel(mode)}แล้ว`);
+    }
+
+    function renameTeamPreset(index) {
+      const safeIndex = Math.max(0, Math.min(CONFIG.teamPresetLimit - 1, Math.floor(Number(index) || 0)));
+      const preset = Array.isArray(state.teamPresets) ? state.teamPresets[safeIndex] : null;
+      if (!preset) return showToast("พรีเซ็ตช่องนี้ยังว่าง");
+      const nextName = window.prompt("ตั้งชื่อพรีเซ็ต (สูงสุด 28 ตัวอักษร)", preset.name || `พรีเซ็ต ${safeIndex + 1}`);
+      if (nextName === null) return;
+      preset.name = String(nextName).trim().slice(0, 28) || `พรีเซ็ต ${safeIndex + 1}`;
+      preset.updatedAt = Date.now();
+      saveState(true);
+      renderAllTeamPresets();
+    }
+
+    function deleteTeamPreset(index) {
+      const safeIndex = Math.max(0, Math.min(CONFIG.teamPresetLimit - 1, Math.floor(Number(index) || 0)));
+      const preset = Array.isArray(state.teamPresets) ? state.teamPresets[safeIndex] : null;
+      if (!preset) return;
+      if (!window.confirm(`ลบพรีเซ็ต “${preset.name}” ใช่ไหม?`)) return;
+      state.teamPresets[safeIndex] = null;
+      saveState(true);
+      renderAllTeamPresets();
+      showToast(`ลบพรีเซ็ต #${safeIndex + 1} แล้ว`);
+    }
+
+
     function renderTeam() {
       const grid = document.getElementById("teamGrid");
       const slots = [];
@@ -12521,6 +12857,7 @@
         slots.push(teamSlotHTML(card, index, "showcase"));
       }
       grid.innerHTML = slots.join("");
+      renderTeamPresets("showcase");
       renderTeamElementPanel();
       renderAllElementRulesGuide();
     }
@@ -12536,6 +12873,7 @@
         slots.push(teamSlotHTML(card, index, "tower"));
       }
       grid.innerHTML = slots.join("");
+      renderTeamPresets("tower");
 
       const summary = getTeamElementSummary(teamIds);
       const abilitySummary = stats && stats.abilitySummary ? stats.abilitySummary : getTeamAbilitySummary(teamIds, "tower");
@@ -12584,6 +12922,128 @@
           <div class="combo-list">${inactiveAbilityHTML}</div>
         </div>`;
     }
+
+
+
+    function battleSummaryCardSnapshot(cardLike) {
+      if (!cardLike) return null;
+      const source = CARD_BY_ID.get(String(cardLike.id || "")) || cardLike;
+      return {
+        id: String(source.id || ""),
+        name: String(source.name || "Unknown"),
+        rarity: String(source.rarity || "N"),
+        image: String(source.image ? resolveAsset(source.image, "card") : source.imageURL || source.photoURL || ""),
+        elements: source.elements || (source.element ? getCardElements(source) : []),
+        power: Math.max(0, Number(source.power || 0)),
+        defense: Math.max(0, Number(source.defense || 0))
+      };
+    }
+
+    function battleSummaryOwnedTeam(ids) {
+      return abilityArray(ids).map(id => {
+        const card = CARD_BY_ID.get(String(id));
+        if (!card) return null;
+        const snap = battleSummaryCardSnapshot(card);
+        snap.image = getCardImage(card);
+        snap.power = getCardPower(card);
+        snap.defense = getCardDefense(card);
+        return snap;
+      }).filter(Boolean);
+    }
+
+    function makeCombatSummary(options = {}) {
+      const combat = options.combat;
+      return {
+        mode: String(options.mode || "tower"),
+        title: String(options.title || "สรุปการต่อสู้"),
+        opponent: String(options.opponent || "ฝ่ายตรงข้าม"),
+        outcomeText: String(options.outcomeText || ""),
+        tone: combat && combat.winner === "player" ? "win" : "lose",
+        rewardText: String(options.rewardText || ""),
+        createdAt: Date.now(),
+        combat,
+        playerCards: abilityArray(options.playerCards).map(battleSummaryCardSnapshot).filter(Boolean),
+        enemyCards: abilityArray(options.enemyCards).map(battleSummaryCardSnapshot).filter(Boolean),
+        playerLabel: String(options.playerLabel || "ทีมของคุณ"),
+        enemyLabel: String(options.enemyLabel || options.opponent || "ฝ่ายตรงข้าม")
+      };
+    }
+
+    function battleSummaryTeamHTML(cards, title) {
+      const rows = cards.length ? cards.map(card => {
+        const image = String(card.image || "");
+        return `<div class="battle-summary-card"><div class="battle-summary-card-art">${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" onerror="this.remove()">` : ""}</div><span title="${escapeHTML(card.name)}">${escapeHTML(card.name)}</span></div>`;
+      }).join("") : `<span class="pill">ไม่มีข้อมูลการ์ด</span>`;
+      return `<div class="battle-summary-team"><h4>${escapeHTML(title)}</h4><div class="battle-summary-card-row">${rows}</div></div>`;
+    }
+
+    function renderBattleSummary(summary) {
+      const target = document.getElementById("battleSummaryContent");
+      if (!target) return;
+      if (!summary || !summary.combat) {
+        target.innerHTML = `<div class="battle-summary-head"><p class="eyebrow">Battle Report</p><h2>ยังไม่มีผลการต่อสู้</h2><p>จบการต่อสู้อย่างน้อย 1 ครั้ง แล้วกลับมาเปิดสรุปฉบับเต็ม</p></div>`;
+        return;
+      }
+      const combat = summary.combat;
+      const playerHits = getCombatHitSideSummary(combat, "player");
+      const enemyHits = getCombatHitSideSummary(combat, "enemy");
+      const playerShieldUsed = Math.max(0, combat.playerInitialShieldHits - combat.playerShieldRemaining);
+      const enemyShieldUsed = Math.max(0, combat.enemyInitialShieldHits - combat.enemyShieldRemaining);
+      const metrics = [
+        ["ผล", combat.winner === "player" ? "ชนะ" : "แพ้"],
+        ["จำนวนรอบ", `${formatNumber(combat.rounds)} รอบ`],
+        ["ผู้เริ่มก่อน", combat.playerFirst ? summary.playerLabel : summary.enemyLabel],
+        ["ดาเมจเรา", formatNumber(combat.playerTotalDamage)],
+        ["ดาเมจศัตรู", formatNumber(combat.enemyTotalDamage)],
+        ["ACTIVE", `${combat.playerTriggerActivations}/${combat.enemyTriggerActivations}`],
+        ["ฮิตรวม", `${formatNumber(playerHits.totalHits)}/${formatNumber(enemyHits.totalHits)}`],
+        ["ฮีล DEF", `${formatNumber(combat.playerTotalHealing)}/${formatNumber(combat.enemyTotalHealing)}`],
+        ["DEF เหลือ", `${formatNumber(combat.playerRemainingDefense)}/${formatNumber(combat.enemyRemainingDefense)}`],
+        ["โล่ใช้", `${playerShieldUsed}/${enemyShieldUsed} ฮิต`],
+        ["โบนัสฮิต ACTIVE", `+${playerHits.extraHits}/+${enemyHits.extraHits}`],
+        ["เวลา", new Date(summary.createdAt).toLocaleString("th-TH")]
+      ];
+      const turnRows = combat.turns.map((turn, index) => {
+        const attacker = turn.side === "player" ? summary.playerLabel : summary.enemyLabel;
+        const skills = turn.triggerActivated ? abilityArray(turn.triggeredSkills).join(" • ") : (turn.suddenBreak ? "Sudden Break" : "-");
+        return `<div class="battle-turn-row ${turn.side === "enemy" ? "enemy" : ""} ${turn.triggerActivated ? "active" : ""}"><span>#${index + 1} / R${turn.round}</span><strong>${escapeHTML(attacker)}</strong><span>${formatNumber(turn.hits)} ฮิต</span><span>${formatNumber(turn.blockedHits)} บล็อก</span><span>${formatNumber(turn.damage)}</span><span>+${formatNumber(turn.healDefense || 0)}</span><span>+${formatNumber(turn.shieldGain || 0)}</span><span>${formatNumber(turn.playerRemaining)}</span><span>${formatNumber(turn.enemyRemaining)}</span><span class="battle-turn-skill">${escapeHTML(skills)}</span></div>`;
+      }).join("");
+      target.innerHTML = `
+        <div class="battle-summary-head"><p class="eyebrow">${summary.mode === "arena" ? "Arena Battle Report" : "Tower Battle Report"}</p><h2>${escapeHTML(summary.title)}</h2><p>${escapeHTML(summary.playerLabel)} ปะทะ ${escapeHTML(summary.enemyLabel)}</p></div>
+        <div class="battle-summary-body">
+          <div class="battle-summary-result ${summary.tone}"><strong>${escapeHTML(summary.outcomeText || (combat.winner === "player" ? "ชัยชนะ" : "พ่ายแพ้"))}</strong><span>${escapeHTML(summary.rewardText || "สรุปข้อมูลจากการต่อสู้ล่าสุด")}</span></div>
+          <div class="battle-summary-metrics">${metrics.map(([label, value]) => `<div class="battle-summary-metric"><span>${escapeHTML(label)}</span><strong title="${escapeHTML(value)}">${escapeHTML(value)}</strong></div>`).join("")}</div>
+          <div class="battle-summary-section"><h3>สมาชิกทั้งสองฝ่าย</h3><div class="battle-summary-team-grid">${battleSummaryTeamHTML(summary.playerCards, summary.playerLabel)}${battleSummaryTeamHTML(summary.enemyCards, summary.enemyLabel)}</div></div>
+          <div class="battle-summary-section"><h3>สรุปฮิตและ ACTIVE Skill</h3>${combatHitReportHTML(combat, { player: summary.playerLabel, enemy: summary.enemyLabel })}</div>
+          <div class="battle-summary-section"><h3>ลำดับการต่อสู้ทุกเทิร์น</h3><div class="battle-turn-log"><div class="battle-turn-row header"><span>เทิร์น</span><span>ผู้โจมตี</span><span>ฮิต</span><span>โล่บล็อก</span><span>ดาเมจ</span><span>ฮีล</span><span>โล่เพิ่ม</span><span>DEF เรา</span><span>DEF ศัตรู</span><span>ACTIVE Skill</span></div>${turnRows}</div></div>
+        </div>`;
+    }
+
+    function openBattleSummary(mode = "tower") {
+      const summary = mode === "arena" ? lastArenaSummary : lastBattleSummary;
+      if (!summary) return showToast("ยังไม่มีสรุปการต่อสู้ของโหมดนี้");
+      renderBattleSummary(summary);
+      document.getElementById("battleSummaryModal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeBattleSummary() {
+      document.getElementById("battleSummaryModal").classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function getTowerDifficultyInfo(stats) {
+      const playerDamage = Math.max(1, Number(stats && stats.playerPreview && stats.playerPreview.damage || 1));
+      const enemyDamage = Math.max(1, Number(stats && stats.enemyPreview && stats.enemyPreview.damage || 1));
+      const turnsToWin = Math.max(1, Math.ceil(Number(stats.enemyDefense || 1) / playerDamage));
+      const turnsToLose = Math.max(1, Math.ceil(Number(stats.effectiveDefense || 1) / enemyDamage));
+      const ratio = turnsToWin / turnsToLose;
+      if (ratio <= .68) return { label: "ค่อนข้างง่าย", tone: "easy", percent: 28, detail: `คาดว่าชนะใน ${turnsToWin} เทิร์นโจมตี / แพ้ใน ${turnsToLose}` };
+      if (ratio <= 1.08) return { label: "สมดุล", tone: "balanced", percent: 52, detail: `คาดว่าชนะใน ${turnsToWin} เทิร์นโจมตี / แพ้ใน ${turnsToLose}` };
+      if (ratio <= 1.38) return { label: "ท้าทาย", tone: "hard", percent: 74, detail: `คาดว่าชนะใน ${turnsToWin} เทิร์นโจมตี / แพ้ใน ${turnsToLose}` };
+      return { label: "ยากมาก", tone: "extreme", percent: 96, detail: `คาดว่าชนะใน ${turnsToWin} เทิร์นโจมตี / แพ้ใน ${turnsToLose}` };
+    }
+
 
     function renderBattle() {
       const stats = getBattleStats();
@@ -12641,6 +13101,15 @@
       document.getElementById("battleRecordText").textContent = `${state.battle.wins} / ${state.battle.losses}`;
       document.getElementById("battleSupportText").textContent = supportText;
       document.getElementById("battleButton").disabled = battleAnimating || !getTowerTeamIds().length || !stats.restrictionStatus.ok || state.battle.energy < 1;
+      const summaryButton = document.getElementById("battleSummaryButton");
+      if (summaryButton) summaryButton.disabled = !lastBattleSummary;
+      const difficulty = getTowerDifficultyInfo(stats);
+      const difficultyText = document.getElementById("battleDifficultyText");
+      const difficultyDetail = document.getElementById("battleDifficultyDetail");
+      const difficultyMeter = document.getElementById("battleDifficultyMeter");
+      if (difficultyText) difficultyText.textContent = difficulty.label;
+      if (difficultyDetail) difficultyDetail.textContent = `${difficulty.detail}${stats.stage % 50 === 0 ? " • บอสใหญ่ +12%" : stats.stage % 10 === 0 ? " • บอสย่อย +5%" : ""}`;
+      if (difficultyMeter) difficultyMeter.style.width = `${difficulty.percent}%`;
       if (!battleAnimating) {
         result.textContent = battleResult ? battleResult.text : "จัดทีมไต่หอให้พร้อมแล้วท้าทายหอคอย";
         result.className = `battle-result ${battleResult ? battleResult.tone : ""}`;
@@ -12658,6 +13127,7 @@
         slots.push(teamSlotHTML(card, index, "arena"));
       }
       grid.innerHTML = slots.join("");
+      renderTeamPresets("arena");
       const summary = getArenaTeamSummary();
       const abilitySummary = getTeamAbilitySummary(state.arena.team, "arena");
       const comboHTML = summary.activeCombos.length
@@ -12729,6 +13199,8 @@
 
       const button = document.getElementById("arenaBattleButton");
       button.disabled = arenaAnimating || !state.arena.team.length || state.battle.energy < 1;
+      const summaryButton = document.getElementById("arenaSummaryButton");
+      if (summaryButton) summaryButton.disabled = !lastArenaSummary;
       const result = document.getElementById("arenaBattleResult");
       if (!arenaAnimating) {
         result.textContent = arenaResult ? arenaResult.text : `ชนะ +${ARENA_CONFIG.winPoints} แต้ม • แพ้ -${ARENA_CONFIG.losePoints} แต้ม`;
@@ -13578,6 +14050,7 @@
         if (event.target.id === "inventoryModal") closeInventory();
         if (event.target.id === "mailboxModal") closeMailbox();
         if (event.target.id === "itemSelectorModal") closeItemSelector();
+        if (event.target.id === "battleSummaryModal") closeBattleSummary();
         return;
       }
 
@@ -13623,6 +14096,12 @@
       if (action === "close-team-picker") closeTeamPicker();
       if (action === "assign-team-slot") assignCardToTeamSlot(cardId);
       if (action === "clear-team-slot") clearTeamSlot(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
+      if (action === "save-team-preset") saveTeamPreset(Number(target.dataset.presetIndex) || 0, target.dataset.teamMode || "showcase");
+      if (action === "load-team-preset") loadTeamPreset(Number(target.dataset.presetIndex) || 0, target.dataset.teamMode || "showcase");
+      if (action === "rename-team-preset") renameTeamPreset(Number(target.dataset.presetIndex) || 0);
+      if (action === "delete-team-preset") deleteTeamPreset(Number(target.dataset.presetIndex) || 0);
+      if (action === "open-battle-summary") openBattleSummary(target.dataset.summaryMode || "tower");
+      if (action === "close-battle-summary") closeBattleSummary();
       if (action === "set-sort-direction") {
         collectionSortDirection = target.dataset.direction === "asc" ? "asc" : "desc";
         renderCollection();
@@ -13741,6 +14220,7 @@
       else if (!document.getElementById("inventoryModal").classList.contains("hidden")) closeInventory();
       else if (!document.getElementById("mailboxModal").classList.contains("hidden")) closeMailbox();
       else if (!document.getElementById("updateNoticeModal").classList.contains("hidden")) closeUpdateNotice();
+      else if (!document.getElementById("battleSummaryModal").classList.contains("hidden")) closeBattleSummary();
       else if (!document.getElementById("teamPickerModal").classList.contains("hidden")) closeTeamPicker();
       else if (!document.getElementById("revealScreen").classList.contains("hidden")) closeReveal();
       else if (!document.getElementById("authModal").classList.contains("hidden")) closeAuthModal();
