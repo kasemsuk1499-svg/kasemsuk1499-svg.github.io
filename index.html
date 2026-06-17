@@ -4343,6 +4343,133 @@
     }
 
 
+    /* =====================================================================
+       [WHITE-THEME-TEXT-CONTRAST]
+       แก้สีข้อความบนธีมพื้นขาวให้ชัดขึ้น โดยแยกค่าสีของพื้นสว่างและพื้นมืด
+       ===================================================================== */
+    body { color-scheme: light; }
+
+    .topbar,
+    .side-panel,
+    .workspace,
+    .bottom-nav,
+    .side-utility-dock {
+      --text: #18344d;
+      --muted: #48637d;
+      --line: rgba(36, 66, 95, .20);
+    }
+
+    .topbar,
+    .side-panel,
+    .workspace,
+    .bottom-nav {
+      color: var(--konosuba-text);
+    }
+
+    /* หัวข้อใหญ่บนแบนเนอร์เดิมเป็นสีขาว จึงกลืนกับฉากธีมสว่าง */
+    .banner h2 {
+      color: #17344d;
+      text-shadow:
+        0 2px 0 rgba(255,255,255,.92),
+        0 8px 24px rgba(54, 100, 143, .18);
+    }
+
+    .topbar .eyebrow,
+    .side-panel .eyebrow,
+    .workspace .eyebrow,
+    .account-button .account-name > span {
+      color: #0b6f94;
+    }
+
+    /* สีตัวเลขสำคัญบนกล่องพื้นขาว */
+    .topbar .resource.gems strong { color: #087b9f; }
+    .topbar .resource.dust strong { color: #8a5a00; }
+    .topbar .resource.owned strong { color: #13724a; }
+    .banner .guarantee-copy span,
+    .workspace .battle-stat-row strong,
+    .workspace .tower-difficulty-label strong { color: #8a5a00; }
+    .workspace .team-preset-count,
+    .workspace .support-badge { color: #0b6f94; }
+
+    /* ข้อความที่เคยกำหนดเป็นสีขาว/ฟ้าอ่อนแบบตายตัวบนแผงพื้นสว่าง */
+    .workspace .guide-card summary,
+    .workspace .element-mini-note,
+    .workspace .upgrade-status-card small,
+    .workspace .team-slot-empty,
+    .workspace .team-slot-empty small {
+      color: #38546f !important;
+    }
+
+    .workspace .guide-card summary::after,
+    .workspace .team-slot-empty b { color: #0b6f94; }
+
+    .workspace .element-panel .element-chip {
+      color: #18344d;
+      text-shadow: 0 1px 0 rgba(255,255,255,.72);
+    }
+
+    .workspace .element-panel .element-chip small {
+      color: #38546f;
+    }
+
+    /* ช่องค้นหาเฉพาะสกิลเดิมมีพื้นหลังมืดจากธีมเก่า แต่ข้อความถูกเปลี่ยนเป็นสีเข้ม */
+    #abilitySearchInput,
+    #teamPickerAbilitySearch {
+      border-color: rgba(36, 66, 95, .22);
+      background: rgba(255,255,255,.80);
+      color: #18344d;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    #abilitySearchInput:focus,
+    #teamPickerAbilitySearch:focus {
+      border-color: rgba(11, 111, 148, .58);
+      box-shadow: 0 0 0 3px rgba(11,111,148,.10);
+    }
+
+    .field::placeholder,
+    input::placeholder,
+    textarea::placeholder {
+      color: #60788f;
+      opacity: 1;
+    }
+
+    select option {
+      color: #18344d;
+      background: #ffffff;
+    }
+
+    /* คงข้อความสีอ่อนไว้เฉพาะกล่องที่เป็นพื้นมืดจริง ๆ */
+    .workspace :is(
+      .game-card,
+      .team-slot-filled,
+      .combo-card,
+      .guide-row,
+      .card-visible-stat,
+      .team-preset-card,
+      .sort-direction-switch,
+      .battle-arena,
+      .battle-result
+    ),
+    .side-panel :is(.game-card, .card-visible-stat) {
+      --text: #f8f9ff;
+      --muted: #b8c5dd;
+      --line: rgba(255,255,255,.14);
+      color: var(--text);
+    }
+
+    .workspace .game-card .card-meta,
+    .workspace .team-slot-filled .team-slot-stat span,
+    .workspace .team-preset-card .team-preset-meta,
+    .workspace .team-preset-card .team-preset-member,
+    .workspace .sort-direction-switch .sort-direction-button,
+    .workspace .battle-arena .fighter-label,
+    .workspace .battle-arena .power-breakdown,
+    .workspace .battle-arena .battle-result {
+      color: var(--muted);
+    }
+
+
   </style>
 </head>
 <body class="auth-locked">
