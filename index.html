@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-19-promo-gallery-bgm-v40">
+  <meta name="gacha-app-build" content="2026-06-19-cost-rarity-balance-v41">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -619,8 +619,8 @@
     .rarity-jjkb { --fx-opacity: .22; --rarity-fx: linear-gradient(155deg, transparent 25%, rgba(59,130,246,.9), transparent 62%); }
     .rarity-jjkc { --fx-opacity: .24; --rarity-fx: radial-gradient(circle at 25% 20%, rgba(239,68,68,.86), transparent 42%); }
     .rarity-jjks { --fx-opacity: .25; --rarity-fx: linear-gradient(120deg, rgba(250,204,21,.75), transparent 35%, rgba(249,115,22,.72)); }
-    .rarity-ex { --fx-opacity: .28; --rarity-fx: linear-gradient(115deg, #22d3ee, transparent 28%, #f472b6 53%, transparent 72%, #facc15); }
-    .rarity-sc { --fx-opacity: .3; --rarity-fx: conic-gradient(from 180deg, #22d3ee, #a78bfa, #f472b6, #facc15, #22d3ee); }
+    .rarity-sc { --fx-opacity: .28; --rarity-fx: linear-gradient(115deg, #22d3ee, transparent 28%, #f472b6 53%, transparent 72%, #facc15); }
+    .rarity-ex { --fx-opacity: .32; --rarity-fx: conic-gradient(from 180deg, #22d3ee, #a78bfa, #f472b6, #facc15, #22d3ee); }
 
     .reveal-panel .rarity-sr::before,
     .reveal-panel .rarity-ssr::before,
@@ -5254,7 +5254,7 @@
     </div>
   </div>
 
-  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดระดับ SC">
+  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดระดับ Mystical (SC)">
     <video class="sc-cutscene-video" id="scCutsceneVideo" playsinline preload="auto"></video>
     <div class="sc-cutscene-shade" aria-hidden="true"></div>
     <button class="sc-skip" data-action="skip-sc-cutscene" aria-label="ข้ามคัทซีน SC">ข้ามคัทซีน · ESC</button>
@@ -5267,9 +5267,9 @@
 
     <div class="sc-cutscene-stage">
       <p class="sc-cutscene-kicker" id="scCutsceneRevealKicker">Supreme Convergence</p>
-      <h2 class="sc-cutscene-title" id="scCutsceneRevealTitle">SC ACQUIRED</h2>
+      <h2 class="sc-cutscene-title" id="scCutsceneRevealTitle">MYSTICAL ACQUIRED</h2>
       <div class="sc-cutscene-card" id="scCutsceneCard"></div>
-      <h3 class="sc-cutscene-name" id="scCutsceneName">SC Character</h3>
+      <h3 class="sc-cutscene-name" id="scCutsceneName">Mystical Character</h3>
       <p class="sc-cutscene-copy" id="scCutsceneCopy">การ์ดระดับสูงสุดปรากฏตัวแล้ว</p>
     </div>
   </div>
@@ -5694,18 +5694,19 @@
     */
     /* ===================== [SECTION 02 RARITY-COLORS] ===================== */
     const RARITIES = Object.freeze({
-      N:   { label: "N",   color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,     basePower: 1000,   baseIncome: 35,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015,  incomePerLevel: .008,  awakenMax: 13, awakenCopies: [1,1,1,2,2,3,3,4,5,6,7,8,10], powerBonus: .07, incomeBonus: .05 },
-      R:   { label: "R",   color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,    basePower: 2600,   baseIncome: 80,    maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016,  incomePerLevel: .0085, awakenMax: 11, awakenCopies: [1,1,2,2,3,3,4,5,6,7,8], powerBonus: .09, incomeBonus: .06 },
-      SR:  { label: "SR",  color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,    basePower: 7000,   baseIncome: 190,   maxLevel: 140, upgradeDustBase: 70,    upgradeDustGrowth: 1.040, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 9,  awakenCopies: [1,1,2,2,3,4,5,6,8], powerBonus: .12, incomeBonus: .08 },
-      SSR: { label: "SSR", color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,   basePower: 20000,  baseIncome: 500,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019,  incomePerLevel: .0095, awakenMax: 7,  awakenCopies: [1,1,2,3,4,5,7], powerBonus: .17, incomeBonus: .11 },
-      UR:  { label: "UR",  color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,  basePower: 65000,  baseIncome: 1500,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021,  incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
-      LR:  { label: "LR",  color: "#22d3ee", colors: ["#22d3ee", "#a78bfa", "#facc15"], gradient: "linear-gradient(135deg, #22d3ee, #a78bfa 48%, #facc15)", glow: "#22d3ee", textColor: "#04111a", order: 5, stars: 8,  dust: 9000,  basePower: 220000, baseIncome: 5200,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024,  incomePerLevel: .0115, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .38, incomeBonus: .25 },
-      EX:  { label: "EX",  color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 6, stars: 10, dust: 50000, basePower: 800000, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028,  incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 },
-      SC:  { label: "SC",  color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2000000, baseIncome: 30000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032,  incomePerLevel: .0215, awakenMax: 3,  awakenCopies: [1,1,2,3], powerBonus: .90, incomeBonus: .70 }
+      // สมดุลใหม่: ATK : HP : DEF ≈ 1 : 5 : 0.40 เพื่อให้การ์ดระดับเดียวกันสู้กันประมาณ 8–9 เทิร์นก่อนคิดสกิล/โล่
+      N:   { label: "N",         color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,      basePower: 1000,    baseHp: 5000,     baseDefense: 400,    baseIncome: 35,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015, incomePerLevel: .008,  awakenMax: 13, awakenCopies: [1,1,1,2,2,3,3,4,5,6,7,8,10], powerBonus: .07, incomeBonus: .05 },
+      R:   { label: "R",         color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,     basePower: 3000,    baseHp: 15000,    baseDefense: 1200,   baseIncome: 100,   maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016, incomePerLevel: .0085, awakenMax: 11, awakenCopies: [1,1,2,2,3,3,4,5,6,7,8], powerBonus: .09, incomeBonus: .06 },
+      SR:  { label: "SR",        color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,     basePower: 9000,    baseHp: 45000,    baseDefense: 3600,   baseIncome: 280,   maxLevel: 140, upgradeDustBase: 70,    upgradeDustGrowth: 1.040, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 9,  awakenCopies: [1,1,2,2,3,4,5,6,8], powerBonus: .12, incomeBonus: .08 },
+      SSR: { label: "SSR",       color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,    basePower: 27000,   baseHp: 135000,   baseDefense: 10800,  baseIncome: 800,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 7,  awakenCopies: [1,1,2,3,4,5,7], powerBonus: .17, incomeBonus: .11 },
+      UR:  { label: "UR",        color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,   basePower: 81000,   baseHp: 405000,   baseDefense: 32400,  baseIncome: 2300,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
+      LR:  { label: "Legends",   color: "#22d3ee", colors: ["#22d3ee", "#a78bfa", "#facc15"], gradient: "linear-gradient(135deg, #22d3ee, #a78bfa 48%, #facc15)", glow: "#22d3ee", textColor: "#04111a", order: 5, stars: 8,  dust: 9000,   basePower: 243000,  baseHp: 1215000,  baseDefense: 97200,  baseIncome: 6500,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .38, incomeBonus: .25 },
+      SC:  { label: "Mystical",  color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 6, stars: 10, dust: 50000,  basePower: 729000,  baseHp: 3645000,  baseDefense: 291600, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 },
+      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2187000, baseHp: 10935000, baseDefense: 874800, baseIncome: 50000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 3, awakenCopies: [1,1,2], powerBonus: .90, incomeBonus: .70 }
     });
 
     // เพิ่มโดยอลิซ: เรทแพ็คสุ่มในกระเป๋า แยกจากตู้กาชาและไม่สะสม pity
-    const ITEM_PACK_RATES = Object.freeze({ N: 49.5, R: 30, SR: 14, SSR: 5, UR: 1.2, LR: .37, EX: .01999, SC: .00001 });
+    const ITEM_PACK_RATES = Object.freeze({ N: 49.5, R: 30, SR: 14, SSR: 5, UR: 1.2, LR: .37, SC: .01999, EX: .00001 });
     const ITEM_INVENTORY_VERSION = 1;
 
     /*
@@ -5795,19 +5796,19 @@
       "SR": 13.83,
       "SSR": 10.8,
       "UR": 0.0498,
-      "LR": 0.001,
-      "EX": 0.01,
-      "SC": 0.0002
+      "LR": 0.091,
+      "EX": 0.0002,
+      "SC": 0.001
     },
-    "rateUpCards": {"2002": 3,"2003": 3
+    "rateUpCards": {"2002": 2,"2003": 2
     },
     "guarantee": {
       "enabled": true,
       "every": 50000,
       "rarityRates": {
-        "LR": 99.8,
-        "EX": 0.09,
-        "SC": 0.01
+        "LR": 99.9,
+        "SC": 0.09,
+        "EX": 0.01
       },
       "resetWhenPullRarities": [
         "LR",
@@ -5832,18 +5833,19 @@
       "SR": 10.0068,
       "SSR": 4.142,
       "UR": 0.0099,
-      "LR": 0.0002,
-      "EX": 0.001,
-      "SC": 0.0001
+      "LR": 0.0009,
+      "EX": 0.0001,
+      "SC": 0.0003
     },
     "rateUpCards": {},
     "guarantee": {
       "enabled": true,
       "every": 30000,
       "rarityRates": {
-        "UR": 80,
-        "LR": 19.9,
-        "EX": 0.1
+        "UR": 80.19,
+        "LR": 19.8,
+        "SC": 0.009,
+        "EX": 0.001
       },
       "resetWhenPullRarities": [
         "LR",
@@ -5868,9 +5870,9 @@
       "SR": 13.83,
       "SSR": 10.8,
       "UR": 0.0498,
-      "LR": 0.001,
-      "EX": 0.01,
-      "SC": 0.0002
+      "LR": 0.091,
+      "EX": 0.0002,
+      "SC": 0.001
     },
     "rateUpCards": {
     },
@@ -5878,8 +5880,9 @@
       "enabled": true,
       "every": 50000,
       "rarityRates": {
-        "LR": 99.8,
-        "EX": 0.2
+        "LR": 99.9,
+        "SC": 0.09,
+        "EX": 0.01
       },
       "resetWhenPullRarities": [
         "LR",
@@ -5934,6 +5937,10 @@
            { "type": "cardIncomeRate", "value": 0.15, "targetCardIds": [1001, 1041] },
            { "type": "nullifyCardAbilities", "targetSide": "enemy", "targetCardIds": [1041] },
            { "type": "ignoreAbilityConditions", "targetSide": "ally", "targetElements": ["ไฟ"], "targetRarities": ["LR"], "targetMatch": "any" },
+           { "type": "activeSkillCost", "value": -1, "targetSide": "ally", "excludeSelf": true },
+           { "type": "activeSkillCost", "value": -2, "targetSide": "ally", "targetCardIds": [1001, 1041] },
+           { "type": "activeSkillCost", "value": 1, "targetSide": "ally", "targetRarities": ["EX"] },
+           { "type": "activeSkillCost", "value": 2, "targetSide": "enemy", "targetElements": ["ไฟ"] },
            { "type": "nextAttackPowerRate", "value": 0.50, "condition": { "afterOwnAttacks": 3, "repeat": true } },
            { "type": "healHpRate", "value": 0.20, "condition": { "afterOwnAttacks": 3, "repeat": true } },
            { "type": "rarityPowerRate", "value": 0.18, "targetRarities": ["EX", "SC"] },
@@ -5970,6 +5977,10 @@
        - healingRate = ปรับอัตราฟื้น HP เช่น -0.50 = ฟื้นน้อยลง 50%, -1.00 = ห้ามฟื้น HP
        - shieldRecoveryRate = ปรับอัตราฟื้นโล่จาก Active Skill เช่น -1.00 = ห้ามฟื้นโล่ แต่ไม่ลบโล่เริ่มต้น
        - nextAttackHits แบบ Active รองรับค่าติดลบและ targetSide: "enemy" เพื่อให้ฮิตการโจมตีครั้งถัดไปของศัตรูลดลง
+       - activeSkillCost = ปรับคอส Active Skill (จำนวนครั้งที่ต้องโจมตีก่อนทำงาน): ค่าติดลบลดคอส / ค่าบวกเพิ่มคอส
+       - activeSkillCost ไม่ใส่ตัวกรอง = ทั้งฝ่าย; ใส่ targetCardIds / targetElements / targetRarities เพื่อเจาะจงได้
+       - ใส่ excludeSelf: true ร่วมกับ targetSide: "ally" เพื่อให้มีผลเฉพาะเพื่อนร่วมทีม ไม่รวมเจ้าของสกิล
+       - targetSide: "ally" = ทีมเรา, "self" = เจ้าของสกิล, "enemy" = ฝ่ายตรงข้าม; คอสสุดท้ายไม่ต่ำกว่า 1 และไม่เกินเพดานระบบ
        - restoreShieldHits แบบ Active รองรับค่าติดลบและ targetSide: "enemy" เพื่อลบโล่ปัจจุบันของศัตรู
        - การโจมตีหลายฮิตไม่ได้คูณ ATK ฟรี แต่แบ่ง ATK รวมเป็นหลายฮิตเพื่อเจาะโล่ได้ดีขึ้น
        - การ์ดแต่ละใบใส่ "hp": 620000 เพื่อกำหนด HP; ค่า defense เดิมในไฟล์นี้ถูกย้ายมาเป็น hp แล้ว
@@ -6021,7 +6032,8 @@
       NEXT_ATTACK_HITS: "nextAttackHits",
       INCREASE_MAX_HP_BASE_RATE: "increaseMaxHpBaseRate",
       INCREASE_ATTACK_RATE_STACK: "increaseAttackRateStack",
-      SELF_TRIGGER_REDUCTION: "selfTriggerReduction",
+      SELF_TRIGGER_REDUCTION: "selfTriggerReduction", // รองรับข้อมูลเก่า: value 1 = ลดคอสตัวเอง 1
+      ACTIVE_SKILL_COST: "activeSkillCost",
       RARITY_POWER_RATE: "rarityPowerRate",
       RARITY_HP_RATE: "rarityHpRate",
       RARITY_DEFENSE_RATE: "rarityDefenseRate",
@@ -6041,7 +6053,7 @@
     const CARD_ABILITY_MODES = Object.freeze(["team", "tower", "arena"]);
 
     /* ==================== [SECTION 05A SC-CUTSCENE] ====================
-       จุดปรับคัทซีนเฉพาะ “การ์ด SC แต่ละใบ”
+       จุดปรับคัทซีนเฉพาะ “การ์ด Mystical (รหัสภายใน SC) แต่ละใบ”
        ใส่ object ชื่อ scCutscene ไว้ในข้อมูลการ์ดใบนั้น เช่น
 
        "scCutscene": {
@@ -6061,7 +6073,7 @@
          "volume": 0.9,                             // ระดับเสียง 0.0 - 1.0
          "showCardAfterVideo": true,                // false = จบคลิปแล้วไปหน้าผลสุ่มทันที
          "revealKicker": "SUPREME CONVERGENCE",     // ข้อความเล็กตอนภาพการ์ดปิดท้าย
-         "revealTitle": "SC ACQUIRED",              // หัวเรื่องตอนภาพการ์ดปิดท้าย
+         "revealTitle": "MYSTICAL ACQUIRED",              // หัวเรื่องตอนภาพการ์ดปิดท้าย
          "revealText": "ข้อความใต้ชื่อการ์ด"            // ไม่ใส่ = ระบบสร้างให้อัตโนมัติ
        }
 
@@ -6138,13 +6150,13 @@
     "name": "Aqua",
     "rarity": "SC",
     "element": "น้ำ",
-    "power": 230000,
-    "hp": 140800,
-    "defense": 80400,
-    "incomePerSec": 5200,
-    "upgradeDustBase": 2800,
-    "upgradeDustGrowth": 1.084,
-    "awakenMax": 4,
+    "power": 707000,
+    "hp": 3536000,
+    "defense": 283000,
+    "incomePerSec": 17500,
+    "upgradeDustBase": 10000,
+    "upgradeDustGrowth": 1.092,
+    "awakenMax": 3,
     "icon": "",
     "image": "2002.png",
     "poster": "2002.png",
@@ -6167,7 +6179,7 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "Gods Requiem",
-      "revealTitle": "LR Aqua"
+      "revealTitle": "MYSTICAL · AQUA"
     },
       "abilities": [
       {
@@ -6187,7 +6199,7 @@
         "condition": {"anyCardIds":[2001,2003,2004]},
         "effects": [
           { "type": "healHpRate", "value": 0.15, "condition": { "afterOwnAttacks": 2, "repeat": true } },
-          { "type": "selfTriggerReduction", "value": 1, "condition": { "afterOwnAttacks": 2, "repeat": true } }
+          { "type": "activeSkillCost", "value": -1, "targetSide": "self", "condition": { "afterOwnAttacks": 2, "repeat": true } }
         ]
       }
     ]
@@ -6197,12 +6209,13 @@
     "name": "Megumin",
     "rarity": "SC",
     "element": "ไฟ",
-    "power": 840000,
-    "hp": 1660000,
-    "incomePerSec": 18000,
-    "upgradeDustBase": 12000,
+    "power": 707000,
+    "hp": 3536000,
+    "defense": 283000,
+    "incomePerSec": 17500,
+    "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
-    "awakenMax": 4,
+    "awakenMax": 3,
     "icon": "",
     "image": "2003.png",
     "poster": "2003.png",
@@ -6225,7 +6238,7 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "EXPLOSION!!!",
-      "revealTitle": "SC Megumin"
+      "revealTitle": "MYSTICAL · MEGUMIN"
     },
       "ability": {
         "name": "EXPLOSION",
@@ -6244,11 +6257,12 @@
     "name": "DEV.",
     "rarity": "SC",
     "element": "ความมืด",
-    "power": 2000000,
-    "hp": 2000000,
-    "incomePerSec": 30000,
-    "upgradeDustBase": 20000,
-    "upgradeDustGrowth": 1.112,
+    "power": 729000,
+    "hp": 3645000,
+    "defense": 292000,
+    "incomePerSec": 18000,
+    "upgradeDustBase": 10000,
+    "upgradeDustGrowth": 1.092,
     "awakenMax": 3,
     "icon": "",
     "image": "0.png",
@@ -6272,7 +6286,7 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "SYSTEM ACCESS GRANTED",
-      "revealTitle": "SC · DEV."
+      "revealTitle": "MYSTICAL · DEV."
     }
   },
   {
@@ -6280,11 +6294,12 @@
     "name": "CREATOR",
     "rarity": "SC",
     "element": "สายฟ้า",
-    "power": 2000000,
-        "hp": 2000000,
-    "incomePerSec": 30000,
-    "upgradeDustBase": 20000,
-    "upgradeDustGrowth": 1.112,
+    "power": 729000,
+        "hp": 3645000,
+        "defense": 292000,
+    "incomePerSec": 18000,
+    "upgradeDustBase": 10000,
+    "upgradeDustGrowth": 1.092,
     "awakenMax": 3,
     "icon": "",
     "image": "999.png",
@@ -6307,7 +6322,7 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "ORIGIN SIGNATURE",
-      "revealTitle": "SC · CREATOR"
+      "revealTitle": "MYSTICAL · CREATOR"
     }
   },
   {
@@ -6315,11 +6330,12 @@
     "name": "Great Magician",
     "rarity": "SC",
     "element": "ไร้ธาตุ",
-    "power": 2000000,
-        "hp": 2000000,
-    "incomePerSec": 30000,
-    "upgradeDustBase": 20000,
-    "upgradeDustGrowth": 1.112,
+    "power": 729000,
+        "hp": 3645000,
+        "defense": 292000,
+    "incomePerSec": 18000,
+    "upgradeDustBase": 10000,
+    "upgradeDustGrowth": 1.092,
     "awakenMax": 3,
     "icon": "",
     "image": "1000.png",
@@ -6342,7 +6358,7 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "THE GRAND ARCANA",
-      "revealTitle": "SC · GREAT MAGICIAN"
+      "revealTitle": "MYSTICAL · GREAT MAGICIAN"
     }
   },
   {
@@ -6350,11 +6366,12 @@
     "name": "MAMON",
     "rarity": "SC",
     "element": "น้ำแข็ง",
-    "power": 2000000,
-        "hp": 2000000,
-    "incomePerSec": 30000,
-    "upgradeDustBase": 20000,
-    "upgradeDustGrowth": 1.112,
+    "power": 729000,
+        "hp": 3645000,
+        "defense": 292000,
+    "incomePerSec": 18000,
+    "upgradeDustBase": 10000,
+    "upgradeDustGrowth": 1.092,
     "awakenMax": 3,
     "icon": "",
     "image": "2000.png",
@@ -6377,7 +6394,7 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "FORTUNE ANSWERS",
-      "revealTitle": "SC · MAMON"
+      "revealTitle": "MYSTICAL · MAMON"
     }
   },
   {
@@ -6388,11 +6405,12 @@
       "น้ำ",
       "เหล็ก"
     ],
-    "power": 800000,
-        "hp": 1600000,
-    "incomePerSec": 18000,
-    "upgradeDustBase": 10000,
-    "upgradeDustGrowth": 1.092,
+    "power": 2160000,
+        "hp": 10800000,
+        "defense": 864000,
+    "incomePerSec": 49400,
+    "upgradeDustBase": 20000,
+    "upgradeDustGrowth": 1.102,
     "awakenMax": 3,
     "icon": "",
     "image": "1041.png",
@@ -6407,11 +6425,12 @@
       "ความมืด",
       "มิติ"
     ],
-    "power": 800000,
-        "hp": 1600000,
-    "incomePerSec": 18000,
-    "upgradeDustBase": 10000,
-    "upgradeDustGrowth": 1.092,
+    "power": 2160000,
+        "hp": 10800000,
+        "defense": 864000,
+    "incomePerSec": 49400,
+    "upgradeDustBase": 20000,
+    "upgradeDustGrowth": 1.102,
     "awakenMax": 3,
     "icon": "",
     "image": "1042.png",
@@ -6426,11 +6445,12 @@
       "ไฟ",
       "ลม"
     ],
-    "power": 801000,
-        "hp": 1600000,
-    "incomePerSec": 18100,
-    "upgradeDustBase": 10100,
-    "upgradeDustGrowth": 1.092,
+    "power": 2163000,
+        "hp": 10814000,
+        "defense": 865000,
+    "incomePerSec": 49400,
+    "upgradeDustBase": 20000,
+    "upgradeDustGrowth": 1.102,
     "awakenMax": 3,
     "icon": "",
     "image": "1043.png",
@@ -6442,11 +6462,12 @@
     "name": "EX Frieren",
     "rarity": "EX",
     "element": "มิติ",
-    "power": 810000,
-        "hp": 1600000,
-    "incomePerSec": 18800,
-    "upgradeDustBase": 10000,
-    "upgradeDustGrowth": 1.092,
+    "power": 2187000,
+        "hp": 10935000,
+        "defense": 875000,
+    "incomePerSec": 50000,
+    "upgradeDustBase": 20000,
+    "upgradeDustGrowth": 1.102,
     "awakenMax": 3,
     "icon": "",
     "image": "38.png",
@@ -6458,11 +6479,12 @@
     "name": "EX Fern",
     "rarity": "EX",
     "element": "ความมืด",
-    "power": 810000,
-        "hp": 1600000,
-    "incomePerSec": 18800,
-    "upgradeDustBase": 10000,
-    "upgradeDustGrowth": 1.092,
+    "power": 2187000,
+        "hp": 10935000,
+        "defense": 875000,
+    "incomePerSec": 50000,
+    "upgradeDustBase": 20000,
+    "upgradeDustGrowth": 1.102,
     "awakenMax": 3,
     "icon": "",
     "image": "39.png",
@@ -6474,11 +6496,12 @@
     "name": "EX Stark",
     "rarity": "EX",
     "element": "ไฟ",
-    "power": 810000,
-        "hp": 1600000,
-    "incomePerSec": 18800,
-    "upgradeDustBase": 10000,
-    "upgradeDustGrowth": 1.092,
+    "power": 2187000,
+        "hp": 10935000,
+        "defense": 875000,
+    "incomePerSec": 50000,
+    "upgradeDustBase": 20000,
+    "upgradeDustGrowth": 1.102,
     "awakenMax": 3,
     "icon": "",
     "image": "40.png",
@@ -6490,11 +6513,12 @@
     "name": "EX Himmel",
     "rarity": "EX",
     "element": "แสง",
-    "power": 810000,
-        "hp": 1600000,
-    "incomePerSec": 18800,
-    "upgradeDustBase": 10000,
-    "upgradeDustGrowth": 1.092,
+    "power": 2187000,
+        "hp": 10935000,
+        "defense": 875000,
+    "incomePerSec": 50000,
+    "upgradeDustBase": 20000,
+    "upgradeDustGrowth": 1.102,
     "awakenMax": 3,
     "icon": "",
     "image": "41.png",
@@ -6506,9 +6530,10 @@
     "name": "Hana Kurusu",
     "rarity": "LR",
     "element": "น้ำ",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6533,11 +6558,12 @@
   {
     "id": 45,
     "name": "Riko Amanai",
-    "rarity": "LR",
+    "rarity": "UR",
     "element": "ไร้ธาตุ",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6558,11 +6584,12 @@
   {
     "id": 1,
     "name": "SABER.Artoria",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "แสง",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6581,11 +6608,12 @@
   {
     "id": 2,
     "name": "Sung Jinwoo",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "มิติ",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6604,11 +6632,12 @@
   {
     "id": 3,
     "name": "Frieren",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "ดิน",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6629,9 +6658,10 @@
     "name": "DEKU",
     "rarity": "LR",
     "element": "แสง",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6652,9 +6682,10 @@
     "name": "Kirito",
     "rarity": "LR",
     "element": "ลม",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6675,9 +6706,10 @@
     "name": "Monkey D. Luffy",
     "rarity": "LR",
     "element": "พืช",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6698,9 +6730,10 @@
     "name": "Satoru Gojo",
     "rarity": "LR",
     "element": "สายฟ้า",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6721,9 +6754,10 @@
     "name": "CID",
     "rarity": "LR",
     "element": "ความมืด",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6744,9 +6778,10 @@
     "name": "Kamado Tanjirou",
     "rarity": "LR",
     "element": "น้ำ",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6767,9 +6802,10 @@
     "name": "Uzumaki Naruto",
     "rarity": "LR",
     "element": "ดิน",
-    "power": 220000,
-        "hp": 600000,
-    "incomePerSec": 5200,
+    "power": 242000,
+        "hp": 1210000,
+        "defense": 96800,
+    "incomePerSec": 6470,
     "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
@@ -6790,10 +6826,11 @@
     "name": "Marulu Val Vol Yelvori",
     "rarity": "LR",
     "element": "น้ำแข็ง",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -6815,10 +6852,11 @@
     "name": "Yuka Okkotsu",
     "rarity": "LR",
     "element": "ลม",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -6840,10 +6878,11 @@
     "name": "Tsurugi Okkotsu",
     "rarity": "LR",
     "element": "ไฟ",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -6875,12 +6914,13 @@
   {
     "id": 1033,
     "name": "Kinji Hakari",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "มิติ",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -6902,10 +6942,11 @@
     "name": "Hajime Kashimo",
     "rarity": "LR",
     "element": "สายฟ้า",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -6924,12 +6965,13 @@
   {
     "id": 1023,
     "name": "Yuji Itadori",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "ความมืด",
-    "power": 230000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 3110,
+    "power": 250000,
+        "hp": 1251000,
+        "defense": 100000,
+    "incomePerSec": 6700,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -6963,10 +7005,11 @@
     "name": "Hiromi Higuruma",
     "rarity": "LR",
     "element": "เหล็ก",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -6987,10 +7030,11 @@
     "name": "Fumihiko Takaba",
     "rarity": "LR",
     "element": "ไร้ธาตุ",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7009,12 +7053,13 @@
   {
     "id": 1001,
     "name": "Satoru Gojo",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "แสง",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7047,12 +7092,13 @@
   {
     "id": 1002,
     "name": "Sukuna",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "แสง",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7088,10 +7134,11 @@
     "name": "Zenin Toji",
     "rarity": "LR",
     "element": "ความมืด",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7125,10 +7172,11 @@
     "name": "Maki",
     "rarity": "LR",
     "element": "ไร้ธาตุ",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7172,10 +7220,11 @@
     "name": "Okkotsu Yuta",
     "rarity": "LR",
     "element": "ไร้ธาตุ",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7197,10 +7246,11 @@
     "name": "Yuki Tsukumo",
     "rarity": "LR",
     "element": "มิติ",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7221,10 +7271,11 @@
     "name": "Suguru Geto",
     "rarity": "LR",
     "element": "มิติ",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7245,10 +7296,11 @@
     "name": "Kenjaku",
     "rarity": "LR",
     "element": "ความมืด",
-    "power": 221000,
-        "hp": 600000,
-    "incomePerSec": 5210,
-    "upgradeDustBase": 2810,
+    "power": 243000,
+        "hp": 1215000,
+        "defense": 97200,
+    "incomePerSec": 6500,
+    "upgradeDustBase": 2800,
     "upgradeDustGrowth": 1.078,
     "awakenMax": 4,
     "icon": "",
@@ -7270,11 +7322,12 @@
     "name": "Yuji Itadori",
     "rarity": "UR",
     "element": "สายฟ้า",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1009.png",
@@ -7295,11 +7348,12 @@
     "name": "Nobara Kugisaki",
     "rarity": "UR",
     "element": "น้ำแข็ง",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1010.png",
@@ -7319,11 +7373,12 @@
     "name": "Megumi Fushiguro",
     "rarity": "UR",
     "element": "ความมืด",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1011.png",
@@ -7345,11 +7400,12 @@
     "name": "Kento Nanami",
     "rarity": "UR",
     "element": "สายฟ้า",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1012.png",
@@ -7368,11 +7424,12 @@
     "name": "Toge Inumaki",
     "rarity": "UR",
     "element": "น้ำแข็ง",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1036.png",
@@ -7392,11 +7449,12 @@
     "name": "Panda",
     "rarity": "UR",
     "element": "เหล็ก",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1037.png",
@@ -7416,11 +7474,12 @@
     "name": "Aoi Todo",
     "rarity": "UR",
     "element": "สายฟ้า",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1013.png",
@@ -7444,11 +7503,12 @@
     "name": "Momo Nishimiya",
     "rarity": "UR",
     "element": "ลม",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1014.png",
@@ -7468,11 +7528,12 @@
     "name": "Mai Zenin",
     "rarity": "UR",
     "element": "เหล็ก",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1015.png",
@@ -7492,11 +7553,12 @@
     "name": "Maki Zenin",
     "rarity": "UR",
     "element": "ลม",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1016.png",
@@ -7518,11 +7580,12 @@
     "name": "Kasumi Miwa",
     "rarity": "UR",
     "element": "ดิน",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1017.png",
@@ -7542,11 +7605,12 @@
     "name": "Kokichi Muta",
     "rarity": "UR",
     "element": "ดิน",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1018.png",
@@ -7569,11 +7633,12 @@
     "name": "Mei Mei",
     "rarity": "UR",
     "element": "ไฟ",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1019.png",
@@ -7594,11 +7659,12 @@
     "name": "Utahime Iori",
     "rarity": "UR",
     "element": "ดิน",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1020.png",
@@ -7625,11 +7691,12 @@
     "name": "Sukuna",
     "rarity": "UR",
     "element": "เหล็ก",
-    "power": 65700,
-        "hp": 200000,
-    "incomePerSec": 1530,
-    "upgradeDustBase": 760,
-    "upgradeDustGrowth": 1.067,
+    "power": 81200,
+        "hp": 406000,
+        "defense": 32500,
+    "incomePerSec": 2310,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1035.png",
@@ -7654,11 +7721,12 @@
     "name": "Jogo",
     "rarity": "UR",
     "element": "ไฟ",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1024.png",
@@ -7680,11 +7748,12 @@
     "name": "Hanami",
     "rarity": "UR",
     "element": "พืช",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1025.png",
@@ -7706,11 +7775,12 @@
     "name": "Dagon",
     "rarity": "UR",
     "element": "น้ำ",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1026.png",
@@ -7732,11 +7802,12 @@
     "name": "Mahito",
     "rarity": "UR",
     "element": "พืช",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1027.png",
@@ -7759,11 +7830,12 @@
     "name": "Takako Uro",
     "rarity": "UR",
     "element": "มิติ",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1028.png",
@@ -7785,11 +7857,12 @@
     "name": "Ryu Ishigori",
     "rarity": "UR",
     "element": "แสง",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1029.png",
@@ -7811,11 +7884,12 @@
     "name": "Choso",
     "rarity": "UR",
     "element": "น้ำ",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1030.png",
@@ -7837,11 +7911,12 @@
     "name": "Naoya Zenin",
     "rarity": "UR",
     "element": "มิติ",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1031.png",
@@ -7863,11 +7938,12 @@
     "name": "Uraume",
     "rarity": "UR",
     "element": "น้ำแข็ง",
-    "power": 65500,
-        "hp": 200000,
-    "incomePerSec": 1510,
-    "upgradeDustBase": 755,
-    "upgradeDustGrowth": 1.067,
+    "power": 81000,
+        "hp": 405000,
+        "defense": 32400,
+    "incomePerSec": 2300,
+    "upgradeDustBase": 750,
+    "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
     "icon": "",
     "image": "1032.png",
@@ -7886,9 +7962,10 @@
     "name": "Kirara Hoshi",
     "rarity": "UR",
     "element": "มิติ",
-    "power": 65000,
-        "hp": 200000,
-    "incomePerSec": 1500,
+    "power": 80400,
+        "hp": 402000,
+        "defense": 32200,
+    "incomePerSec": 2280,
     "upgradeDustBase": 750,
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
@@ -7909,9 +7986,10 @@
     "name": "Shoko Ieiri",
     "rarity": "UR",
     "element": "พืช",
-    "power": 65000,
-        "hp": 200000,
-    "incomePerSec": 1500,
+    "power": 80400,
+        "hp": 402000,
+        "defense": 32200,
+    "incomePerSec": 2280,
     "upgradeDustBase": 750,
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
@@ -7933,9 +8011,10 @@
     "name": "Kaoruko Waguri(YukiSuit)",
     "rarity": "UR",
     "element": "น้ำแข็ง",
-    "power": 65000,
-        "hp": 200000,
-    "incomePerSec": 1500,
+    "power": 80400,
+        "hp": 402000,
+        "defense": 32200,
+    "incomePerSec": 2280,
     "upgradeDustBase": 750,
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
@@ -7957,9 +8036,10 @@
     "name": "Yuki Suou(WaguriSuit)",
     "rarity": "UR",
     "element": "น้ำแข็ง",
-    "power": 65000,
-        "hp": 200000,
-    "incomePerSec": 1500,
+    "power": 80400,
+        "hp": 402000,
+        "defense": 32200,
+    "incomePerSec": 2280,
     "upgradeDustBase": 750,
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
@@ -7981,9 +8061,10 @@
     "name": "Goku",
     "rarity": "UR",
     "element": "พืช",
-    "power": 65000,
-        "hp": 200000,
-    "incomePerSec": 1500,
+    "power": 80400,
+        "hp": 402000,
+        "defense": 32200,
+    "incomePerSec": 2280,
     "upgradeDustBase": 750,
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
@@ -8005,9 +8086,10 @@
     "name": "Zenitsu",
     "rarity": "UR",
     "element": "สายฟ้า",
-    "power": 65000,
-        "hp": 200000,
-    "incomePerSec": 1500,
+    "power": 80400,
+        "hp": 402000,
+        "defense": 32200,
+    "incomePerSec": 2280,
     "upgradeDustBase": 750,
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
@@ -8029,9 +8111,10 @@
     "name": "Roroa Zoro",
     "rarity": "UR",
     "element": "เหล็ก",
-    "power": 65000,
-        "hp": 200000,
-    "incomePerSec": 1500,
+    "power": 80400,
+        "hp": 402000,
+        "defense": 32200,
+    "incomePerSec": 2280,
     "upgradeDustBase": 750,
     "upgradeDustGrowth": 1.064,
     "awakenMax": 5,
@@ -8053,9 +8136,10 @@
     "name": "Yuki Suou",
     "rarity": "SSR",
     "element": "ไฟ",
-    "power": 21000,
-        "hp": 120000,
-    "incomePerSec": 510,
+    "power": 27800,
+        "hp": 139000,
+        "defense": 11100,
+    "incomePerSec": 824,
     "upgradeDustBase": 220,
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
@@ -8077,9 +8161,10 @@
     "name": "Saber Alter",
     "rarity": "SSR",
     "element": "ความมืด",
-    "power": 20000,
-        "hp": 120000,
-    "incomePerSec": 500,
+    "power": 27000,
+        "hp": 135000,
+        "defense": 10800,
+    "incomePerSec": 800,
     "upgradeDustBase": 220,
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
@@ -8101,9 +8186,10 @@
     "name": "Yuki Asuna",
     "rarity": "SSR",
     "element": "แสง",
-    "power": 20000,
-        "hp": 120000,
-    "incomePerSec": 500,
+    "power": 27000,
+        "hp": 135000,
+        "defense": 10800,
+    "incomePerSec": 800,
     "upgradeDustBase": 220,
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
@@ -8125,9 +8211,10 @@
     "name": "Sinobu",
     "rarity": "SSR",
     "element": "น้ำ",
-    "power": 20000,
-        "hp": 120000,
-    "incomePerSec": 500,
+    "power": 27000,
+        "hp": 135000,
+        "defense": 10800,
+    "incomePerSec": 800,
     "upgradeDustBase": 220,
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
@@ -8149,9 +8236,10 @@
     "name": "Nami",
     "rarity": "SSR",
     "element": "ลม",
-    "power": 20000,
-        "hp": 120000,
-    "incomePerSec": 500,
+    "power": 27000,
+        "hp": 135000,
+        "defense": 10800,
+    "incomePerSec": 800,
     "upgradeDustBase": 220,
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
@@ -8173,9 +8261,10 @@
     "name": "Waguri Kaoruko",
     "rarity": "SSR",
     "element": "ดิน",
-    "power": 20000,
-        "hp": 120000,
-    "incomePerSec": 500,
+    "power": 27000,
+        "hp": 135000,
+        "defense": 10800,
+    "incomePerSec": 800,
     "upgradeDustBase": 220,
     "upgradeDustGrowth": 1.052,
     "awakenMax": 7,
@@ -8197,9 +8286,10 @@
     "name": "Aria",
     "rarity": "SR",
     "element": "น้ำแข็ง",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8222,9 +8312,10 @@
     "name": "Inosuke",
     "rarity": "SR",
     "element": "พืช",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8247,9 +8338,10 @@
     "name": "Uraraka",
     "rarity": "SR",
     "element": "สายฟ้า",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8272,9 +8364,10 @@
     "name": "Sakura",
     "rarity": "SR",
     "element": "ดิน",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8297,9 +8390,10 @@
     "name": "Miku",
     "rarity": "SR",
     "element": "น้ำ",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8322,9 +8416,10 @@
     "name": "Zero Two",
     "rarity": "SR",
     "element": "ความมืด",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8347,9 +8442,10 @@
     "name": "Vegeta",
     "rarity": "SR",
     "element": "แสง",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8372,9 +8468,10 @@
     "name": "Itadori Yuji",
     "rarity": "SR",
     "element": "ลม",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8397,9 +8494,10 @@
     "name": "Asuka",
     "rarity": "SR",
     "element": "ไฟ",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8422,9 +8520,10 @@
     "name": "Stark",
     "rarity": "SR",
     "element": "เหล็ก",
-    "power": 7000,
-        "hp": 80000,
-    "incomePerSec": 190,
+    "power": 9000,
+        "hp": 45000,
+        "defense": 3600,
+    "incomePerSec": 280,
     "upgradeDustBase": 70,
     "upgradeDustGrowth": 1.04,
     "awakenMax": 9,
@@ -8447,9 +8546,10 @@
     "name": "Monkey D. Luffy",
     "rarity": "R",
     "element": "ไฟ",
-    "power": 2600,
+    "power": 3000,
         "hp": 15000,
-    "incomePerSec": 80,
+        "defense": 1200,
+    "incomePerSec": 100,
     "upgradeDustBase": 25,
     "upgradeDustGrowth": 1.032,
     "awakenMax": 11,
@@ -8471,9 +8571,10 @@
     "name": "Uzumaki Naruto",
     "rarity": "R",
     "element": "ลม",
-    "power": 2600,
+    "power": 3000,
         "hp": 15000,
-    "incomePerSec": 80,
+        "defense": 1200,
+    "incomePerSec": 100,
     "upgradeDustBase": 25,
     "upgradeDustGrowth": 1.032,
     "awakenMax": 11,
@@ -8495,9 +8596,10 @@
     "name": "Goku",
     "rarity": "R",
     "element": "แสง",
-    "power": 2600,
+    "power": 3000,
         "hp": 15000,
-    "incomePerSec": 80,
+        "defense": 1200,
+    "incomePerSec": 100,
     "upgradeDustBase": 25,
     "upgradeDustGrowth": 1.032,
     "awakenMax": 11,
@@ -8518,9 +8620,10 @@
     "name": "Ichigo Kurosaki",
     "rarity": "R",
     "element": "น้ำ",
-    "power": 2600,
+    "power": 3000,
         "hp": 15000,
-    "incomePerSec": 80,
+        "defense": 1200,
+    "incomePerSec": 100,
     "upgradeDustBase": 25,
     "upgradeDustGrowth": 1.032,
     "awakenMax": 11,
@@ -8542,7 +8645,8 @@
     "rarity": "N",
     "element": "ไร้ธาตุ",
     "power": 1000,
-        "hp": 10000,
+        "hp": 5000,
+        "defense": 400,
     "incomePerSec": 35,
     "upgradeDustBase": 10,
     "upgradeDustGrowth": 1.025,
@@ -8565,7 +8669,8 @@
     "rarity": "N",
     "element": "ไร้ธาตุ",
     "power": 1000,
-        "hp": 10000,
+        "hp": 5000,
+        "defense": 400,
     "incomePerSec": 35,
     "upgradeDustBase": 10,
     "upgradeDustGrowth": 1.025,
@@ -8588,7 +8693,8 @@
     "rarity": "N",
     "element": "ไร้ธาตุ",
     "power": 1000,
-        "hp": 10000,
+        "hp": 5000,
+        "defense": 400,
     "incomePerSec": 35,
     "upgradeDustBase": 10,
     "upgradeDustGrowth": 1.025,
@@ -9544,6 +9650,14 @@
       return RARITIES[card && card.rarity] || RARITIES.N;
     }
 
+    // ชื่อแสดงผลใหม่ โดยคงรหัส LR/SC ภายในไว้เพื่อให้เซฟ ตู้กาชา และข้อมูลการ์ดเก่ายังใช้ได้
+    function rarityDisplayName(rarityKey = "") {
+      const key = String(rarityKey || "").toUpperCase();
+      const rarity = RARITIES[key];
+      if (!rarity) return key || "N";
+      return rarity.label === key ? key : `${rarity.label} (${key})`;
+    }
+
     function getCardAwakenMax(card) {
       const rarity = getRarity(card || {});
       return Math.max(0, Math.floor(Number(rarity.awakenMax !== undefined ? rarity.awakenMax : rarity.stars) || 0));
@@ -9915,7 +10029,11 @@
       const side = normalizeAbilityTargetSide(effect && effect.targetSide);
       if (side === "self") return sourceCard ? [String(sourceCard.id)] : [];
       if (!targetContext || !Array.isArray(targetContext.cards)) return [];
-      return targetContext.cards.filter(card => cardMatchesAbilityTarget(card, effect)).map(card => String(card.id));
+      const sourceId = String(sourceCard && sourceCard.id || "");
+      return targetContext.cards
+        .filter(card => cardMatchesAbilityTarget(card, effect))
+        .filter(card => !(effect && effect.excludeSelf && String(card.id) === sourceId))
+        .map(card => String(card.id));
     }
 
     function addAbilityMapRate(map, keys, value) {
@@ -10316,6 +10434,8 @@
         elementDefenseRates: {},
         elementIncomeRates: {},
         selfTriggerReductions: {},
+        triggerCostChanges: {},
+        enemyTriggerCostSelectors: [],
         nullifiedCardIds: [...nullifiedCardIdSet],
         allyNullifiedCardIds: [...allyNullified],
         conditionIgnoredCardIds: [...conditionIgnoredCardIdSet],
@@ -10333,6 +10453,7 @@
       mergeExternalAbilityRateMap(summary.cardHpRates, options.externalCardHpRates, context);
       mergeExternalAbilityRateMap(summary.cardDefenseRates, options.externalCardDefenseRates, context);
       mergeExternalAbilityRateMap(summary.cardIncomeRates, options.externalCardIncomeRates, context);
+      mergeExternalAbilityRateMap(summary.triggerCostChanges, options.externalTriggerCostChanges, context);
 
       context.cards.forEach(sourceCard => {
         getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
@@ -10427,9 +10548,19 @@
               case CARD_ABILITY_EFFECT_TYPES.SELF_HP_RATE: addAbilityMapRate(summary.selfHpRates, [sourceId], value); break;
               case CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE: addAbilityMapRate(summary.selfDefenseRates, [sourceId], value); break;
               case CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE: addAbilityMapRate(summary.selfIncomeRates, [sourceId], value); break;
-              case CARD_ABILITY_EFFECT_TYPES.SELF_TRIGGER_REDUCTION:
-                addAbilityMapRate(summary.selfTriggerReductions, [sourceId], Math.max(0, Math.floor(value)));
+              case CARD_ABILITY_EFFECT_TYPES.SELF_TRIGGER_REDUCTION: {
+                const reduction = Math.max(0, Math.floor(value));
+                addAbilityMapRate(summary.selfTriggerReductions, [sourceId], reduction);
+                addAbilityMapRate(summary.triggerCostChanges, [sourceId], -reduction);
                 break;
+              }
+              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                const change = Math.round(value);
+                if (side === "enemy") summary.enemyTriggerCostSelectors.push({ sourceCard, ability, effect: { ...record, value: change } });
+                else addAbilityMapRate(summary.triggerCostChanges, resolveAbilityTargetCardIds(effect, sourceCard, context), change);
+                break;
+              }
               case CARD_ABILITY_EFFECT_TYPES.INCREASE_MAX_HP_BASE_RATE:
                 addAbilityMapRate(summary.selfHpRates, resolveAbilityTargetCardIds(effect, sourceCard, context), Math.max(0, value));
                 break;
@@ -10526,6 +10657,10 @@
       Object.keys(summary.gachaRarityRates).forEach(rarity => {
         summary.gachaRarityRates[rarity] = Math.max(-0.90, Math.min(5, Number(summary.gachaRarityRates[rarity]) || 0));
       });
+      const triggerCostCap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
+      Object.keys(summary.triggerCostChanges).forEach(id => {
+        summary.triggerCostChanges[id] = Math.max(-(triggerCostCap - 1), Math.min(triggerCostCap - 1, Math.round(Number(summary.triggerCostChanges[id]) || 0)));
+      });
       return summary;
     }
 
@@ -10543,7 +10678,8 @@
           externalCardPowerRates: resolveEnemyRateMap(enemyControl.enemyCardPowerSelectors, allyContext),
           externalCardHpRates: resolveEnemyRateMap(enemyControl.enemyCardHpSelectors, allyContext),
           externalCardDefenseRates: resolveEnemyRateMap(enemyControl.enemyCardDefenseSelectors, allyContext),
-          externalCardIncomeRates: resolveEnemyRateMap(enemyControl.enemyCardIncomeSelectors, allyContext)
+          externalCardIncomeRates: resolveEnemyRateMap(enemyControl.enemyCardIncomeSelectors, allyContext),
+          externalTriggerCostChanges: resolveEnemyRateMap(enemyControl.enemyTriggerCostSelectors, allyContext)
         }),
         enemy: getTeamAbilitySummary(enemyTeamIds, mode, {
           ...enemyOptions,
@@ -10552,7 +10688,8 @@
           externalCardPowerRates: resolveEnemyRateMap(allyControl.enemyCardPowerSelectors, enemyContext),
           externalCardHpRates: resolveEnemyRateMap(allyControl.enemyCardHpSelectors, enemyContext),
           externalCardDefenseRates: resolveEnemyRateMap(allyControl.enemyCardDefenseSelectors, enemyContext),
-          externalCardIncomeRates: resolveEnemyRateMap(allyControl.enemyCardIncomeSelectors, enemyContext)
+          externalCardIncomeRates: resolveEnemyRateMap(allyControl.enemyCardIncomeSelectors, enemyContext),
+          externalTriggerCostChanges: resolveEnemyRateMap(allyControl.enemyTriggerCostSelectors, enemyContext)
         })
       };
     }
@@ -10662,15 +10799,18 @@
 
     function gachaBonusSummaryText(summary) {
       const entries = Object.entries(summary && summary.rarityRateBonuses || {}).filter(([, value]) => Math.abs(Number(value) || 0) > 0.000001);
-      return entries.length ? entries.map(([rarity, value]) => `${rarity} ${signedPercent(value)}`).join(" / ") : "ไม่มีโบนัสเรทกาชา";
+      return entries.length ? entries.map(([rarity, value]) => `${rarityDisplayName(rarity)} ${signedPercent(value)}`).join(" / ") : "ไม่มีโบนัสเรทกาชา";
     }
 
     function abilityEffectText(effect) {
       const value = Number(effect && effect.value || 0);
-      const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).join("/") || "ทุกระดับ";
+      const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).map(rarityDisplayName).join("/") || "ทุกระดับ";
       const elementText = normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).map(elementLabel).join(" + ") || "ทุกธาตุ";
       const ids = normalizeAbilityCardIds(effect && (effect.targetCardIds || effect.cardIds));
-      const targetSideText = ({ ally: "ฝ่ายเรา", self: "การ์ดนี้", enemy: "ฝ่ายตรงข้าม" })[normalizeAbilityTargetSide(effect && effect.targetSide)] || "ฝ่ายเรา";
+      const normalizedTargetSide = normalizeAbilityTargetSide(effect && effect.targetSide);
+      const targetSideText = effect && effect.excludeSelf && normalizedTargetSide === "ally"
+        ? "เพื่อนร่วมทีม (ไม่รวมเจ้าของสกิล)"
+        : ({ ally: "ฝ่ายเรา", self: "การ์ดนี้", enemy: "ฝ่ายตรงข้าม" })[normalizedTargetSide] || "ฝ่ายเรา";
       const filterParts = [];
       if (ids.length) filterParts.push(`ID ${ids.join(", ")}`);
       if (normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).length) filterParts.push(`ธาตุ ${elementText}`);
@@ -10706,7 +10846,8 @@
         nextAttackHits: `เมื่อสกิลทำงาน จำนวนฮิตครั้งถัดไปของ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         increaseMaxHpBaseRate: `เพิ่ม HP สูงสุดและ HP ปัจจุบันจาก HP เบส ${signedPercent(Math.max(0, value))}`,
         increaseAttackRateStack: `สะสม ATK ถาวรระหว่างไฟต์ ${signedPercent(Math.max(0, value))} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
-        selfTriggerReduction: `ลดจำนวนครั้งเงื่อนไข Active Skill ของการ์ดนี้ ${Math.max(0, Math.floor(value))} ครั้ง`,
+        selfTriggerReduction: `ลดคอส Active Skill ของการ์ดนี้ ${Math.max(0, Math.floor(value))} ครั้ง`,
+        activeSkillCost: `คอส Active Skill ${targetText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ครั้ง`,
         rarityPowerRate: `ATK ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityHpRate: `HP ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityDefenseRate: `DEF ระดับ ${rarityText} ${signedPercent(value)}`,
@@ -10841,7 +10982,7 @@
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
       const rarity = getRarity(card);
-      const fallbackBase = Number(card.power || rarity.basePower || 0) * Number(CONFIG.hpBaseRatio || .64);
+      const fallbackBase = Number(rarity.baseHp !== undefined ? rarity.baseHp : Number(card.power || rarity.basePower || 0) * Number(CONFIG.hpBaseRatio || .64));
       const baseHp = Number(card.hp !== undefined ? card.hp : fallbackBase);
       const powerPerLevel = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
       const hpPerLevel = Number(rarity.hpPerLevel !== undefined ? rarity.hpPerLevel : powerPerLevel * Number(CONFIG.hpLevelGrowthScale || .88));
@@ -10854,7 +10995,7 @@
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
       const rarity = getRarity(card);
-      const fallbackBase = Number(card.power || rarity.basePower || 0) * Number(CONFIG.defenseBaseRatio || .32);
+      const fallbackBase = Number(rarity.baseDefense !== undefined ? rarity.baseDefense : Number(card.power || rarity.basePower || 0) * Number(CONFIG.defenseBaseRatio || .32));
       const baseDefense = Number(card.defense !== undefined ? card.defense : fallbackBase);
       const powerPerLevel = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
       const defensePerLevel = Number(rarity.defensePerLevel !== undefined ? rarity.defensePerLevel : powerPerLevel * Number(CONFIG.defenseLevelGrowthScale || .74));
@@ -10954,6 +11095,7 @@
           sourceCardName: String(item.sourceCardName || "Unknown Character"),
           sourceCardImage: String(item.sourceCardImage || ""),
           sourceCardRarity: String(item.sourceCardRarity || "N"),
+          sourceCardElements: normalizeAbilityElements(item.sourceCardElements).length ? normalizeAbilityElements(item.sourceCardElements) : ["ไร้ธาตุ"],
           cutscene: item.cutscene && typeof item.cutscene === "object" ? { ...item.cutscene } : {},
           afterOwnAttacks: Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Math.floor(Number(item.afterOwnAttacks) || 1))),
           repeat: item.repeat !== false,
@@ -10970,6 +11112,8 @@
           maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
           attackStackGain: Math.max(0, Number(item.attackStackGain || 0)),
           maxStacks: Math.max(0, Math.floor(Number(item.maxStacks || 0))),
+          triggerCostChanges: item.triggerCostChanges && typeof item.triggerCostChanges === "object" ? { ...item.triggerCostChanges } : {},
+          enemyTriggerCostRules: abilityArray(item.enemyTriggerCostRules).map(rule => ({ ...rule })),
           stacks: 0,
           requiresActivationKey: String(item.requiresActivationKey || ""),
           unlocked: !String(item.requiresActivationKey || ""),
@@ -11036,6 +11180,8 @@
             enemyShieldRecoveryRateChange: trigger.enemyShieldRecoveryRateChange,
             maxHpGain: trigger.maxHpGain,
             attackStackGain: trigger.attackStackGain,
+            triggerCostChanges: { ...trigger.triggerCostChanges },
+            enemyTriggerCostRules: abilityArray(trigger.enemyTriggerCostRules).map(rule => ({ ...rule })),
             currentStacks: trigger.stacks,
             maxStacks: trigger.maxStacks
           })),
@@ -11050,7 +11196,12 @@
           shieldRecoveryRateChange: fired.reduce((sum, trigger) => sum + trigger.shieldRecoveryRateChange, 0),
           enemyShieldRecoveryRateChange: fired.reduce((sum, trigger) => sum + trigger.enemyShieldRecoveryRateChange, 0),
           maxHpGain: fired.reduce((sum, trigger) => sum + trigger.maxHpGain, 0),
-          attackStackGain: stackable.reduce((sum, trigger) => sum + trigger.attackStackGain, 0)
+          attackStackGain: stackable.reduce((sum, trigger) => sum + trigger.attackStackGain, 0),
+          triggerCostChanges: fired.reduce((map, trigger) => {
+            Object.entries(trigger.triggerCostChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change));
+            return map;
+          }, {}),
+          enemyTriggerCostRules: fired.flatMap(trigger => abilityArray(trigger.enemyTriggerCostRules).map(rule => ({ ...rule })))
         };
       }
 
@@ -11084,6 +11235,31 @@
             trigger.armed = false;
           });
         }
+      }
+
+      function triggerMatchesCostRule(trigger, rule = {}) {
+        const checks = [];
+        const ids = normalizeAbilityCardIds(rule.ids);
+        const elements = normalizeAbilityElements(rule.elements);
+        const rarities = normalizeAbilityRarities(rule.rarities);
+        if (ids.length) checks.push(ids.includes(String(trigger.sourceCardId || "")));
+        if (elements.length) checks.push(elements.some(element => abilityArray(trigger.sourceCardElements).includes(element)));
+        if (rarities.length) checks.push(rarities.includes(String(trigger.sourceCardRarity || "").toUpperCase()));
+        if (!checks.length) return true;
+        return normalizeAbilityTargetMatch(rule.match) === "all" ? checks.every(Boolean) : checks.some(Boolean);
+      }
+
+      function applyActiveSkillCostChanges(fighter, directChanges = {}, rules = []) {
+        const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
+        fighter.activeTriggers.forEach(trigger => {
+          let change = Math.round(Number(directChanges && directChanges[String(trigger.sourceCardId || "")] || 0));
+          abilityArray(rules).forEach(rule => {
+            if (triggerMatchesCostRule(trigger, rule)) change += Math.round(Number(rule && rule.value) || 0);
+          });
+          if (!change) return;
+          trigger.afterOwnAttacks = Math.max(1, Math.min(cap, trigger.afterOwnAttacks + change));
+          if (!trigger.completed && trigger.unlocked) trigger.armed = trigger.charge >= trigger.afterOwnAttacks;
+        });
       }
 
       function applyShieldChange(fighter, rawChange) {
@@ -11183,6 +11359,8 @@
         if (attackStackGain > 0) attacker.attack += attackStackGain;
 
         finishTriggerCycle(attacker, activation);
+        applyActiveSkillCostChanges(attacker, activation.triggerCostChanges, []);
+        applyActiveSkillCostChanges(defender, {}, activation.enemyTriggerCostRules);
         const appliedHitChange = activeHits - baseHitsThisTurn;
         const triggeredDetails = allocateAppliedHitChanges(activation.details, appliedHitChange);
         turns.push({
@@ -11206,6 +11384,8 @@
           triggeredDetails,
           attackBonus: activation.attackBonus,
           attackStackGain,
+          triggerCostChanges: { ...activation.triggerCostChanges },
+          enemyTriggerCostRules: abilityArray(activation.enemyTriggerCostRules).map(rule => ({ ...rule })),
           maxHpGain,
           requestedHealHp,
           healingMultiplier,
@@ -11650,6 +11830,7 @@
       const id = getBattleItemId(item);
       if (side === "enemy") return false;
       if (side === "self") return id && sourceCard && id === String(sourceCard.id);
+      if (effect && effect.excludeSelf && id && sourceCard && id === String(sourceCard.id)) return false;
       const card = getBattleItemCard(item);
       return cardMatchesAbilityTarget(card, effect || {});
     }
@@ -11689,8 +11870,9 @@
             sourceCardName: String(record.sourceCard && record.sourceCard.name || "Unknown Character"),
             sourceCardImage: record.sourceCard ? getCardImage(record.sourceCard) : "",
             sourceCardRarity: String(record.sourceCard && record.sourceCard.rarity || "N"),
+            sourceCardElements: record.sourceCard ? getCardElements(record.sourceCard) : ["ไร้ธาตุ"],
             cutscene: getActiveSkillCutsceneConfig(record.ability, record.sourceCard),
-            afterOwnAttacks: Math.max(1, Number(record.trigger.afterOwnAttacks || 1) - Math.max(0, Number(summary.selfTriggerReductions && summary.selfTriggerReductions[String(record.sourceCard && record.sourceCard.id || "")] || 0))),
+            afterOwnAttacks: Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1) + Number(summary.triggerCostChanges && summary.triggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0))),
             repeat: record.trigger.repeat !== false,
             requiresActivationKey: String(record.requiresActivationKey || ""),
             attackBonus: 0,
@@ -11705,7 +11887,9 @@
             enemyShieldRecoveryRateChange: 0,
             maxHpGain: 0,
             attackStackGain: 0,
-            maxStacks: 0
+            maxStacks: 0,
+            triggerCostChanges: {},
+            enemyTriggerCostRules: []
           });
         }
         const group = grouped.get(key);
@@ -11755,6 +11939,18 @@
             group.attackStackGain += Math.max(0, targetPower * value);
             group.maxStacks = Math.max(group.maxStacks, Math.max(1, Math.floor(Number(effect.maxStacks) || 1)));
             break;
+          case CARD_ABILITY_EFFECT_TYPES.SELF_TRIGGER_REDUCTION:
+            addAbilityMapRate(group.triggerCostChanges, [String(record.sourceCard && record.sourceCard.id || "")], -Math.max(0, Math.floor(value)));
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST: {
+            const change = Math.round(value);
+            if (side === "enemy") {
+              group.enemyTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change });
+            } else {
+              targetItems.forEach(item => addAbilityMapRate(group.triggerCostChanges, [getBattleItemId(item)], change));
+            }
+            break;
+          }
           default:
             console.warn("Effect type is not supported by battle trigger runtime:", effect.type);
         }
@@ -11778,8 +11974,16 @@
         enemyShieldRecoveryRateChange: Math.max(-1, Math.min(5, Number(item.enemyShieldRecoveryRateChange || 0))),
         maxHpGain: Math.max(0, Math.min(teamHp * 10, Number(item.maxHpGain || 0))),
         attackStackGain: Math.max(0, Math.min(teamPower, Number(item.attackStackGain || 0))),
-        maxStacks: Math.max(0, Math.min(20, Math.floor(Number(item.maxStacks || 0))))
-      })).filter(item => item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.maxHpGain || item.attackStackGain);
+        maxStacks: Math.max(0, Math.min(20, Math.floor(Number(item.maxStacks || 0)))),
+        triggerCostChanges: Object.fromEntries(Object.entries(item.triggerCostChanges || {}).map(([id, change]) => [String(id), Math.round(Number(change) || 0)]).filter(([, change]) => change)),
+        enemyTriggerCostRules: abilityArray(item.enemyTriggerCostRules).map(rule => ({
+          ids: normalizeAbilityCardIds(rule && rule.ids),
+          elements: normalizeAbilityElements(rule && rule.elements),
+          rarities: normalizeAbilityRarities(rule && rule.rarities),
+          match: normalizeAbilityTargetMatch(rule && rule.match),
+          value: Math.round(Number(rule && rule.value) || 0)
+        })).filter(rule => rule.value)
+      })).filter(item => item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length);
     }
 
 
@@ -11880,7 +12084,7 @@
         <div class="support-card-box" style="${rarityStyleVars(rarity)}">
           <div class="support-card-art">${img}</div>
           <div>
-            <div class="support-card-title">${escapeHTML(supportCard.rarity || "?")} • ${escapeHTML(supportCard.name || "Support Card")}</div>
+            <div class="support-card-title">${escapeHTML(rarityDisplayName(supportCard.rarity || "?"))} • ${escapeHTML(supportCard.name || "Support Card")}</div>
             <div class="support-card-meta">ATK ${formatNumber(supportCard.power || 0)} • HP ${formatNumber(supportCard.hp || supportCard.defense || Number(supportCard.power || 0) * Number(CONFIG.hpBaseRatio || .64))} • DEF ${formatNumber(supportCard.hp ? supportCard.defense || 0 : Number(supportCard.power || 0) * Number(CONFIG.defenseBaseRatio || .32))} • Lv.${formatNumber(supportCard.level || 1)} • Awaken ${formatNumber(supportCard.awaken || 0)}</div>
           </div>
         </div>
@@ -11949,12 +12153,12 @@
       if (id.startsWith("pack:guarantee:")) {
         const rarity = id.split(":")[2];
         if (!RARITIES[rarity]) return null;
-        return { id, kind: "pack", rarity, icon: "🌟", name: `แพ็คการันตี ${rarity}`, description: `สุ่มการ์ดระดับ ${rarity} 1 ใบจากการ์ดทั้งหมดในระดับนี้`, color: getRarityTheme(RARITIES[rarity]).main };
+        return { id, kind: "pack", rarity, icon: "🌟", name: `แพ็คการันตี ${rarityDisplayName(rarity)}`, description: `สุ่มการ์ดระดับ ${rarityDisplayName(rarity)} 1 ใบจากการ์ดทั้งหมดในระดับนี้`, color: getRarityTheme(RARITIES[rarity]).main };
       }
       if (id.startsWith("selector:")) {
         const rarity = id.split(":")[1];
         if (!RARITIES[rarity]) return null;
-        return { id, kind: "selector", rarity, icon: "🎫", name: `ใบเลือกการ์ด ${rarity}`, description: `เลือกการ์ดระดับ ${rarity} ที่ต้องการได้ 1 ใบ`, color: getRarityTheme(RARITIES[rarity]).main };
+        return { id, kind: "selector", rarity, icon: "🎫", name: `ใบเลือกการ์ด ${rarityDisplayName(rarity)}`, description: `เลือกการ์ดระดับ ${rarityDisplayName(rarity)} ที่ต้องการได้ 1 ใบ`, color: getRarityTheme(RARITIES[rarity]).main };
       }
       return null;
     }
@@ -12796,8 +13000,8 @@
       if (item.type === "normal") return `แพ็คสุ่มการ์ดธรรมดา x${formatNumber(amount)}`;
       const rarity = RARITIES[item.rarity] ? item.rarity : "SR";
       return item.type === "selector"
-        ? `ใบเลือกการ์ดระดับ ${rarity} x${formatNumber(amount)}`
-        : `แพ็คการันตีระดับ ${rarity} x${formatNumber(amount)}`;
+        ? `ใบเลือกการ์ดระดับ ${rarityDisplayName(rarity)} x${formatNumber(amount)}`
+        : `แพ็คการันตีระดับ ${rarityDisplayName(rarity)} x${formatNumber(amount)}`;
     }
 
     function getTowerRewardPreview(floor) {
@@ -13391,7 +13595,7 @@
       const highRarityText = Object.entries(stats.rarityCounts || {})
         .filter(([rarity]) => (RARITIES[rarity] || RARITIES.N).order >= RARITIES.SR.order)
         .sort((a, b) => ((RARITIES[b[0]] || RARITIES.N).order) - ((RARITIES[a[0]] || RARITIES.N).order))
-        .map(([rarity, amount]) => `${rarity}×${amount}`)
+        .map(([rarity, amount]) => `${rarityDisplayName(rarity)}×${amount}`)
         .join(" • ");
       const parts = [`เปิด ${formatNumber(stats.total)} ใบสำเร็จ`, `ใหม่ ${formatNumber(stats.newCount)} ใบ`];
       if (highRarityText) parts.push(highRarityText);
@@ -13638,7 +13842,7 @@
       const meta = getItemMeta(itemId);
       if (!meta || meta.kind !== "selector" || getItemCount(itemId) < 1) return showToast("ไม่มีใบเลือกนี้แล้ว");
       activeSelectorItemId = itemId;
-      document.getElementById("itemSelectorTitle").textContent = `เลือกการ์ดระดับ ${meta.rarity}`;
+      document.getElementById("itemSelectorTitle").textContent = `เลือกการ์ดระดับ ${rarityDisplayName(meta.rarity)}`;
       document.getElementById("itemSelectorSubtitle").textContent = `มีใบเลือก ${formatNumber(getItemCount(itemId))} ใบ • เลือกแล้วจะได้รับการ์ดทันที`;
       const cards = CARDS.filter(card => card.rarity === meta.rarity);
       document.getElementById("itemSelectorGrid").innerHTML = cards.length ? cards.map(card => `<div>${cardHTML(card, { displayOnly: true })}<button class="btn btn-primary selector-pick" data-action="select-item-card" data-card-id="${escapeHTML(card.id)}">เลือก ${escapeHTML(card.name)}</button></div>`).join("") : `<div class="empty-state">ยังไม่มีการ์ดระดับนี้ในข้อมูลเกม</div>`;
@@ -13719,7 +13923,7 @@
           const progressText = document.getElementById("allInCost");
           if (progressText) {
             progressText.textContent = stoppedOnSC
-              ? `พบ SC ที่ใบ ${formatNumber(processed)} • หยุดสุ่มแล้ว`
+              ? `พบ ${rarityDisplayName("SC")} ที่ใบ ${formatNumber(processed)} • หยุดสุ่มแล้ว`
               : `เปิดแล้ว ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
           }
 
@@ -13732,7 +13936,7 @@
 
         const baseSummary = summarizePullStats(stats);
         const summary = stoppedOnSC
-          ? `${baseSummary} • หยุดอัตโนมัติเมื่อพบ SC • Gems คงเหลือ ${formatNumber(state.gems)}`
+          ? `${baseSummary} • หยุดอัตโนมัติเมื่อพบ ${rarityDisplayName("SC")} • Gems คงเหลือ ${formatNumber(state.gems)}`
           : baseSummary;
         const finish = () => showToast(summary);
 
@@ -14301,7 +14505,8 @@
       nextAttackHits: "ฮิต hit โจมตีครั้งถัดไป เพิ่มจำนวนโจมตี ลดจำนวนโจมตี แอคทีฟสกิล ฝ่ายตรงข้าม",
       increaseMaxHpBaseRate: "เพิ่ม hp สูงสุด max health เลือด พลังชีวิต ฮาคาริ jackpot",
       increaseAttackRateStack: "สะสม atk stack โจมตีถาวรระหว่างไฟต์ ลม",
-      selfTriggerReduction: "ลดเงื่อนไข ตีครบเร็วขึ้น active trigger น้ำ",
+      selfTriggerReduction: "ลดคอส ลดเงื่อนไข ตีครบเร็วขึ้น active trigger",
+      activeSkillCost: "คอส cost ลดคอส เพิ่มคอส active skill ทีมเรา ฝ่ายตรงข้าม เจาะจง",
       healHpRate: "ฮีล hp heal ฟื้นฟูเลือด พลังชีวิต เปอร์เซ็นต์",
       healHpFlat: "ฮีล hp heal ฟื้นฟูเลือด พลังชีวิต ค่าคงที่",
       luckRate: "โชค luck โชคต่อสู้ สุ่มค่าต่อสู้",
@@ -15677,7 +15882,7 @@
             <div style="margin-top:16px">
               <strong>ทีมโชว์</strong>
               <div class="profile-team">
-                ${team.length ? team.map(card => `<span class="pill">${escapeHTML(card.rarity || "?")} • ${escapeHTML(card.name || "Card")}</span>`).join("") : `<span class="pill">ยังไม่ได้จัดทีม</span>`}
+                ${team.length ? team.map(card => `<span class="pill">${escapeHTML(rarityDisplayName(card.rarity || "?"))} • ${escapeHTML(card.name || "Card")}</span>`).join("") : `<span class="pill">ยังไม่ได้จัดทีม</span>`}
               </div>
             </div>
             ${ownProfile ? `
@@ -15693,7 +15898,7 @@
                     <option value="">ยังไม่ตั้งการ์ดซัพพอร์ต</option>
                     ${ownedSupportOptions.map(id => {
                       const card = CARD_BY_ID.get(String(id));
-                      return `<option value="${escapeHTML(id)}" ${String(data.supportCardId || "") === String(id) ? "selected" : ""}>${escapeHTML(card.rarity)} • ${escapeHTML(card.name)} • Power ${formatNumber(getCardPower(card))}</option>`;
+                      return `<option value="${escapeHTML(id)}" ${String(data.supportCardId || "") === String(id) ? "selected" : ""}>${escapeHTML(rarityDisplayName(card.rarity))} • ${escapeHTML(card.name)} • Power ${formatNumber(getCardPower(card))}</option>`;
                     }).join("")}
                   </select>
                 </label>
@@ -15790,7 +15995,7 @@
         : {};
       return {
         kicker: String(custom.kicker || "ASTRAL CONVERGENCE"),
-        quote: String(custom.quote || `${card && card.name ? card.name : "SC"} ได้ตอบรับการอัญเชิญ`),
+        quote: String(custom.quote || `${card && card.name ? card.name : "Mystical"} ได้ตอบรับการอัญเชิญ`),
         subtitle: String(custom.subtitle || "A Supreme Card Has Answered"),
         video: resolveAsset(custom.video || (card && card.video), "card"),
         poster: resolveAsset(custom.poster || (card && (card.poster || card.image || card.icon)), "card"),
@@ -15805,7 +16010,7 @@
         volume: clampSCCutsceneNumber(custom.volume, 0.9, 0, 1),
         showCardAfterVideo: custom.showCardAfterVideo !== false,
         revealKicker: String(custom.revealKicker || "SUPREME CONVERGENCE"),
-        revealTitle: String(custom.revealTitle || "SC ACQUIRED"),
+        revealTitle: String(custom.revealTitle || "MYSTICAL ACQUIRED"),
         revealText: String(custom.revealText || "")
       };
     }
@@ -15968,8 +16173,8 @@
 
       const amount = Math.max(scResults.length, Math.floor(Number(totalSC) || 0));
       if (copyNode) copyNode.textContent = config.revealText || (amount > 1
-        ? `พลังระดับ SC ปรากฏ ${formatNumber(amount)} ใบในครั้งนี้`
-        : "การ์ดระดับ SC ได้ตอบรับการอัญเชิญของคุณ");
+        ? `พลังระดับ ${rarityDisplayName("SC")} ปรากฏ ${formatNumber(amount)} ใบในครั้งนี้`
+        : `การ์ดระดับ ${rarityDisplayName("SC")} ได้ตอบรับการอัญเชิญของคุณ`);
 
       screen.style.setProperty("--sc-accent", config.accent);
       screen.style.setProperty("--sc-accent-2", config.accent2);
