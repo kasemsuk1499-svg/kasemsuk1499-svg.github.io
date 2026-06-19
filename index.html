@@ -5428,7 +5428,7 @@
       UR:  { label: "UR",  color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,  basePower: 65000,  baseIncome: 1500,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021,  incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
       LR:  { label: "LR",  color: "#22d3ee", colors: ["#22d3ee", "#a78bfa", "#facc15"], gradient: "linear-gradient(135deg, #22d3ee, #a78bfa 48%, #facc15)", glow: "#22d3ee", textColor: "#04111a", order: 5, stars: 8,  dust: 9000,  basePower: 220000, baseIncome: 5200,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024,  incomePerLevel: .0115, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .38, incomeBonus: .25 },
       EX:  { label: "EX",  color: "#e879f9", colors: ["#22d3ee", "#e879f9", "#facc15", "#111827"], gradient: "linear-gradient(135deg, #22d3ee, #e879f9 42%, #facc15 72%, #111827)", glow: "#e879f9", textColor: "#14051f", order: 6, stars: 10, dust: 50000, basePower: 800000, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028,  incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 },
-      SC:  { label: "SC",  color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2000000, baseIncome: 30000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.092, powerPerLevel: .032,  incomePerLevel: .0215, awakenMax: 3,  awakenCopies: [1,1,1], powerBonus: .90, incomeBonus: .70 }
+      SC:  { label: "SC",  color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2000000, baseIncome: 30000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032,  incomePerLevel: .0215, awakenMax: 3,  awakenCopies: [1,1,2,3], powerBonus: .90, incomeBonus: .70 }
     });
 
     // เพิ่มโดยอลิซ: เรทแพ็คสุ่มในกระเป๋า แยกจากตู้กาชาและไม่สะสม pity
@@ -5823,6 +5823,113 @@
 
     /* ======================== [SECTION 06 CARD-DATA] ======================== */
     const CARDS = [
+  {
+    "id": 2002,
+    "name": "Aqua",
+    "rarity": "SC",
+    "element": "น้ำ",
+    "power": 230000,
+    "hp": 140800,
+    "defense": 80400,
+    "incomePerSec": 5200,
+    "upgradeDustBase": 2800,
+    "upgradeDustGrowth": 1.084,
+    "awakenMax": 4,
+    "icon": "",
+    "image": "2002.png",
+    "poster": "2002.png",
+    "video": "2002.mp4",
+    "overlay": "",
+    "scCutscene": {
+      "kicker": "Gods Requiem!!!",
+      "quote": "จงรับคำอวยพรจากพระเจ้าซ้ะเถอะ.. GOD REQUIEMMM!!!",
+      "subtitle": "Water God Blessing",
+      "video": "Aqauop.mp4",
+      "poster": "2002.png",
+      "accent": "#a78bfa",
+      "accent2": "#22d3ee",
+      "introMs": 4000,
+      "maxVideoMs": 30000,
+      "revealMs": 4000,
+      "objectFit": "cover",
+      "objectPosition": "center center",
+      "muted": false,
+      "volume": 0.5,
+      "showCardAfterVideo": true,
+      "revealKicker": "Gods Requiem",
+      "revealTitle": "LR Aqua"
+    },
+      "abilities": [
+      {
+        "name": "God Requiem",
+        "description": "เมื่อการ์ดใบนี้ ตีครบ 20 ครั้ง จะการโจมตีครั้งถัดไปจะได้รับ ; HPbase +20% และทำดาเมจ ลกเกราะฝ่ายตรงข้าม 40% ",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "afterOwnAttacks": 20, "repeat": true },
+        "effects": [
+          { "type": "increaseMaxHpBaseRate", "value": 0.2 },
+          { "type": "enemyDefenseRate", "value": -0.4 }
+        ]
+      },
+      {
+        "name": "Water Secreat",
+        "description": "เมื่อการ์ดใบนี้จับทีมคู่กับตัวละคร 'kasuma;megumin;darkness' ตัวตัวนึง ได้รับ ; ทุกครั้งที่ตี 3 ครั้ง จะฟื้นฟู HP+15% และลดคอสการใช้สกิลของตนเอง 1",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": {"anyCardIds":[2001,2003,2004]},
+        "effects": [
+          { "type": "healHpRate", "value": 0.15, "condition": { "afterOwnAttacks": 2, "repeat": true } },
+          { "type": "selfTriggerReduction", "value": 1, "condition": { "afterOwnAttacks": 2, "repeat": true } }
+        ]
+      }
+    ]
+  }, 
+  {
+    "id": 2003,
+    "name": "Megumin",
+    "rarity": "SC",
+    "element": "ไฟ",
+    "power": 840000,
+    "hp": 1660000,
+    "incomePerSec": 18000,
+    "upgradeDustBase": 12000,
+    "upgradeDustGrowth": 1.092,
+    "awakenMax": 4,
+    "icon": "",
+    "image": "2003.png",
+    "poster": "2003.png",
+    "video": "2003.mp4",
+    "overlay": "",
+    "scCutscene": {
+      "kicker": "EXPLOSION!!!",
+      "quote": "นามของข้ามีนามว่าเมกุมิน...จอมเวทระเบิดกัมปนาท!!!",
+      "subtitle": "The KOMA Mage",
+      "video": "Meguminop.mp4",
+      "poster": "2003.png",
+      "accent": "#a78bfa",
+      "accent2": "#22d3ee",
+      "introMs": 4000,
+      "maxVideoMs": 30000,
+      "revealMs": 4000,
+      "objectFit": "cover",
+      "objectPosition": "center center",
+      "muted": false,
+      "volume": 0.5,
+      "showCardAfterVideo": true,
+      "revealKicker": "EXPLOSION!!!",
+      "revealTitle": "SC Megumin"
+    },
+      "abilities": 
+      {
+        "name": "EXPLOSION",
+        "description": "เมื่อการ์ดใบนี้ ตีครบ 20 ครั้ง จะการโจมตีครั้งถัดไปจะได้รับ ; ATK+1000%/HP-99% และทำดาเมจ +40% ของพลังโจมตี ใช้งานได้ครั้งเดียว ",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "afterOwnAttacks": 20, "repeat": false },
+        "effects": [
+          { "type": "selfPowerRate", "value": 10.0 },
+          { "type": "selfHpRate", "value": -0.99 },
+          { "type": "nextAttackPowerRate", "value": 0.40 }
+        ]
+      }
+  }, 
   {
     "id": 0,
     "name": "DEV.",
@@ -9541,47 +9648,46 @@
     // ระบบเติมให้อัตโนมัติตาม “ธาตุหลัก” ของการ์ด และไม่ทับ ability/abilities เฉพาะตัวเดิม
     const ELEMENT_SIGNATURE_ABILITIES = Object.freeze({
       "ดิน": Object.freeze({
-        name: "แก่นพสุธา",
+        name: "ธาตุดิน",
         description: "DEF ของการ์ดนี้ +15% จากค่าเริ่มต้น",
         activeIn: ["tower", "arena"],
-        effects: [{ type: "selfHpRate", value: 0.15 }]
+        effects: [{ type: "selfDefenseRate", value: 0.15 }]
       }),
       "น้ำ": Object.freeze({
-        name: "กระแสผันเงื่อนไข",
-        description: "เงื่อนไข Active Skill ของการ์ดนี้ลดลง 1 ครั้ง และลด ATK ฝ่ายตรงข้าม 3%",
+        name: "ธาตุน้ำ",
+        description: "HP ของการ์ดนี้ +15% จากค่าเริ่มต้น",
         activeIn: ["tower", "arena"],
         effects: [
-          { type: "selfTriggerReduction", value: 1 },
-          { type: "enemyPowerRate", value: -0.03 }
+          { type: "selfHpRate", value: 0.15 }
         ]
       }),
       "ลม": Object.freeze({
-        name: "วายุทบกำลัง",
-        description: "ทุกการโจมตีครั้งที่ 4 เพิ่ม ATK ถาวรระหว่างไฟต์ 4% จาก ATK เริ่มต้น ซ้อนสูงสุด 5 ชั้น",
+        name: "ธาตุลม",
+        description: "ทุกการโจมตีครั้งที่ 3 เพิ่ม ATK ถาวรระหว่างไฟต์ 2% จาก ATK เริ่มต้น ซ้อนสูงสุด 5 ชั้น",
         activeIn: ["tower", "arena"],
-        effects: [{ type: "increaseAttackRateStack", value: 0.04, maxStacks: 5, condition: { afterOwnAttacks: 3, repeat: true } }]
+        effects: [{ type: "increaseAttackRateStack", value: 0.02, maxStacks: 5, condition: { afterOwnAttacks: 2, repeat: true } }]
       }),
       "ไฟ": Object.freeze({
-        name: "เพลิงปฐมกำลัง",
-        description: "ATK ของการ์ดนี้ +18% จากค่าเริ่มต้น",
+        name: "ธาตุไฟ",
+        description: "ATK ของการ์ดนี้ +15% จากค่าเริ่มต้น",
         activeIn: ["tower", "arena"],
-        effects: [{ type: "selfPowerRate", value: 0.18 }]
+        effects: [{ type: "selfPowerRate", value: 0.15 }]
       }),
       "เหล็ก": Object.freeze({
-        name: "เกราะจักรกล",
-        description: "เริ่มการต่อสู้ด้วยโล่เพิ่ม 2 ฮิต",
+        name: "ธาตุเหล็ก",
+        description: "HP/DEF ของการ์ดนี้ +8% จากค่าเริ่มต้น",
         activeIn: ["tower", "arena"],
-        effects: [{ type: "shieldHits", value: 2, targetSide: "self" }]
+        effects: [{ type: "selfDefenseRate", value: 0.08 },{ type: "selfHpRate", value: 0.08 }]
       }),
       "น้ำแข็ง": Object.freeze({
-        name: "ผลึกคืนเกราะ",
-        description: "ทุกการโจมตีครั้งที่ 4 ฟื้นโล่ 1 ฮิต",
+        name: "ธาตุน้ำแข็ง",
+        description: "DEF ของการ์ดนี้ +15% จากค่าเริ่มต้น",
         activeIn: ["tower", "arena"],
-        effects: [{ type: "restoreShieldHits", value: 1, targetSide: "self", condition: { afterOwnAttacks: 3, repeat: true } }]
+        effects: [{ type: "selfDefenseRate", value: 0.15 }]
       }),
       "พืช": Object.freeze({
-        name: "รากชีวิตนิรันดร์",
-        description: "DEF ของการ์ดนี้ +10% และทุกการโจมตีครั้งที่ 4 ฟื้น HP 5%",
+        name: "ธาตุพืช",
+        description: "HP ของการ์ดนี้ +10% และทุกการโจมตีครั้งที่ 4 ฟื้น HP 5%",
         activeIn: ["tower", "arena"],
         effects: [
           { type: "selfHpRate", value: 0.10 },
@@ -9589,25 +9695,25 @@
         ]
       }),
       "สายฟ้า": Object.freeze({
-        name: "อสนีเจาะเกราะ",
-        description: "โจมตีปกติเพิ่ม 1 ฮิต และทุกการโจมตีครั้งที่ 5 เพิ่มอีก 2 ฮิตเฉพาะครั้งนั้น",
+        name: "ธาตุสายฟ้า",
+        description: "ATK ของการ์ดนี้ +5% และทุกการโจมตีครั้งที่ 3 จะตี 2 ครั้ง",
         activeIn: ["tower", "arena"],
         effects: [
-          { type: "attackHits", value: 1, targetSide: "self" },
-          { type: "nextAttackHits", value: 2, targetSide: "self", condition: { afterOwnAttacks: 4, repeat: true } }
+          { type: "selfPowerRate", value: 0.05 },
+          { type: "nextAttackHits", value: 2, targetSide: "self", condition: { afterOwnAttacks: 2, repeat: true } }
         ]
       }),
       "ความมืด": Object.freeze({
-        name: "คำสาปกลืนพลัง",
-        description: "ลด ATK และ DEF ฝ่ายตรงข้ามอย่างละ 5%",
+        name: "ธาตุความมืด",
+        description: "ลด ATK และ DEF ฝ่ายตรงข้ามอย่างละ 2%",
         activeIn: ["tower", "arena"],
         effects: [
-          { type: "enemyPowerRate", value: -0.05 },
-          { type: "enemyHpRate", value: -0.05 }
+          { type: "enemyPowerRate", value: -0.02 },
+          { type: "enemyHpRate", value: -0.02 }
         ]
       }),
       "แสง": Object.freeze({
-        name: "พรแห่งรุ่งอรุณ",
+        name: "ธาตุแสง",
         description: "เพิ่ม ATK และ DEF ทั้งทีมอย่างละ 4%",
         activeIn: ["tower", "arena"],
         effects: [
@@ -9616,22 +9722,22 @@
         ]
       }),
       "มิติ": Object.freeze({
-        name: "มิติประสาน",
-        description: "เพิ่ม ATK และ DEF ทั้งทีมอย่างละ 5%",
+        name: "ธาตุมิติ",
+        description: "เพิ่ม ATK HP DEF ทั้งทีมอย่างละ 1.5%",
         activeIn: ["tower", "arena"],
         effects: [
-          { type: "teamPowerRate", value: 0.05 },
-          { type: "teamHpRate", value: 0.05 }
+          { type: "teamPowerRate", value: 0.015 },
+          { type: "teamHpRate", value: 0.015 },
+          { type: "teamDefenseRate", value: 0.015 }
         ]
       }),
       "ไร้ธาตุ": Object.freeze({
-        name: "สมดุลไร้ขอบเขต",
-        description: "รายได้ทีม +6%, ค่าโชคต่อสู้ +4% และน้ำหนักกาชา UR/LR/EX/SC +1%",
+        name: "ไร้ธาตุ",
+        description: "รายได้ทีม +6%, ค่าโชคต่อสู้ +4% ",
         activeIn: ["team", "tower", "arena"],
         effects: [
           { type: "teamIncomeRate", value: 0.06 },
-          { type: "luckRate", value: 0.04 },
-          { type: "gachaRarityRate", value: 0.01, targetRarities: ["UR", "LR", "EX", "SC"] }
+          { type: "luckRate", value: 0.04 }
         ]
       })
     });
