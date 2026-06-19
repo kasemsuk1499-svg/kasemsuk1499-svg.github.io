@@ -5507,6 +5507,43 @@
     /* ===================== [SECTION 04 GACHA-BANNERS] ====================== */
     const BANNERS = [
   {
+    "id": "eventKONO",
+    "name": "Konosuba Rate UP",
+    "description": "ตู้เพิ่มเรท ตัวละคร Konosuba",
+    "image": "",
+    "images": [
+      "assets/banners/KONOSUBAban.mp4"
+    ],
+    "singlePullCost": 30000,
+    "tenPullCost": 300000,
+    "rateOverrides": {
+      "N": 50.99,
+      "R": 25.3,
+      "SR": 13.83,
+      "SSR": 10.8,
+      "UR": 0.0498,
+      "LR": 0.001,
+      "EX": 0.01,
+      "SC": 0.0002
+    },
+    "rateUpCards": {"2002": 3,"2003": 3
+    },
+    "guarantee": {
+      "enabled": true,
+      "every": 50000,
+      "rarityRates": {
+        "LR": 99.8,
+        "EX": 0.09,
+        "SC": 0.01
+      },
+      "resetWhenPullRarities": [
+        "LR",
+        "EX",
+        "SC"
+      ]
+    }
+  }, 
+  {
     "id": "standard",
     "name": "Aether Heroes",
     "description": "ตู้มาตรฐาน รวมการ์ดทุกระดับ",
