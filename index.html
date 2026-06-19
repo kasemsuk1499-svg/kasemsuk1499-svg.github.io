@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-17-hit-shield-recovery-target-side-v39">
+  <meta name="gacha-app-build" content="2026-06-19-promo-gallery-bgm-v40">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -2992,6 +2992,218 @@
     .notice-tab { border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; color: var(--muted); font-weight: 1000; background: rgba(255,255,255,.035); }
     .notice-tab.active { color: #071019; border-color: transparent; background: linear-gradient(135deg, var(--cyan), var(--violet)); }
     .notice-page.hidden { display: none !important; }
+
+    /* เพิ่มโดยอลิซ: แกลเลอรีรูป/วิดีโอโปรโมตและอัปเดต — ไม่มีข้อความทับสื่อ */
+    .update-panel {
+      width: min(1120px, 100%);
+    }
+
+    .promo-gallery {
+      display: grid;
+      gap: 12px;
+    }
+
+    .promo-frame {
+      position: relative;
+      isolation: isolate;
+      min-height: 260px;
+      overflow: hidden;
+      border: 1px solid rgba(92,232,255,.32);
+      border-radius: 24px;
+      padding: 8px;
+      background:
+        linear-gradient(135deg, rgba(92,232,255,.14), rgba(167,139,250,.10) 48%, rgba(255,209,102,.10)),
+        rgba(3,5,12,.92);
+      box-shadow:
+        0 24px 70px rgba(0,0,0,.42),
+        inset 0 0 0 1px rgba(255,255,255,.05),
+        0 0 34px rgba(92,232,255,.10);
+    }
+
+    .promo-frame::before,
+    .promo-frame::after {
+      content: "";
+      position: absolute;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .promo-frame::before {
+      inset: 8px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      box-shadow: inset 0 0 28px rgba(0,0,0,.34);
+    }
+
+    .promo-frame::after {
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent, rgba(92,232,255,.42), transparent) top / 100% 2px no-repeat,
+        linear-gradient(90deg, transparent, rgba(167,139,250,.40), transparent) bottom / 100% 2px no-repeat;
+      opacity: .8;
+    }
+
+    .promo-stage {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 240px;
+      overflow: hidden;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 22% 18%, rgba(92,232,255,.16), transparent 34%),
+        radial-gradient(circle at 82% 18%, rgba(167,139,250,.16), transparent 34%),
+        #03050d;
+    }
+
+    .promo-stage img,
+    .promo-stage video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #03050d;
+    }
+
+    .promo-stage video { outline: none; }
+
+    .promo-empty {
+      min-height: 240px;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.65;
+    }
+
+    .promo-nav {
+      position: absolute;
+      z-index: 7;
+      top: 50%;
+      width: 46px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 16px;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 1000;
+      background: rgba(3,5,12,.68);
+      box-shadow: 0 10px 28px rgba(0,0,0,.34);
+      backdrop-filter: blur(10px);
+      transform: translateY(-50%);
+    }
+
+    .promo-nav:hover { border-color: rgba(92,232,255,.62); background: rgba(8,11,23,.88); }
+    .promo-nav.prev { left: 18px; }
+    .promo-nav.next { right: 18px; }
+
+    .promo-controls {
+      display: grid;
+      grid-template-columns: auto minmax(80px, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 16px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .promo-counter {
+      min-width: 62px;
+      color: var(--cyan);
+      font-size: .76rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    .promo-dots {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .promo-dot {
+      width: 9px;
+      height: 9px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0;
+      background: rgba(255,255,255,.22);
+      transition: width .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .promo-dot.active {
+      width: 28px;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+      box-shadow: 0 0 14px rgba(92,232,255,.34);
+    }
+
+    .promo-autoplay {
+      min-height: 34px;
+      padding: 6px 10px;
+      font-size: .69rem;
+    }
+
+    /* เพิ่มโดยอลิซ: เครื่องเล่นเพลงพื้นหลัง MP3 แบบลอย */
+    .bgm-player {
+      position: fixed;
+      z-index: 58;
+      left: 14px;
+      bottom: 84px;
+      display: grid;
+      grid-template-columns: auto minmax(74px, 118px) auto;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid rgba(92,232,255,.22);
+      border-radius: 18px;
+      background: rgba(8,11,23,.86);
+      box-shadow: 0 18px 42px rgba(0,0,0,.34), 0 0 24px rgba(92,232,255,.08);
+      backdrop-filter: blur(16px);
+    }
+
+    .bgm-toggle,
+    .bgm-next {
+      min-height: 38px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 12px;
+      color: var(--text);
+      font-weight: 1000;
+      background: rgba(255,255,255,.055);
+    }
+
+    .bgm-toggle {
+      min-width: 118px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 7px 10px;
+      font-size: .7rem;
+    }
+
+    .bgm-toggle.playing {
+      color: #071019;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+    }
+
+    .bgm-next { width: 38px; padding: 0; font-size: 1rem; }
+    .bgm-next.hidden { display: none !important; }
+
+    .bgm-volume {
+      width: 100%;
+      accent-color: var(--cyan);
+      cursor: pointer;
+    }
+
     .login-reward-page { display: grid; gap: 14px; }
     .login-reward-section { padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,.035); }
     .login-reward-section h3 { margin: 0 0 5px; }
@@ -3016,6 +3228,22 @@
     }
 
     @media (max-width: 560px) {
+      .promo-stage { min-height: 190px; }
+      .promo-nav { width: 38px; height: 48px; border-radius: 13px; }
+      .promo-nav.prev { left: 13px; }
+      .promo-nav.next { right: 13px; }
+      .promo-controls { grid-template-columns: 1fr auto; }
+      .promo-dots { grid-column: 1 / -1; grid-row: 2; }
+      .bgm-player {
+        left: 9px;
+        bottom: 78px;
+        grid-template-columns: auto 76px auto;
+        gap: 6px;
+        padding: 6px;
+        border-radius: 15px;
+      }
+      .bgm-toggle { min-width: 44px; width: 44px; padding: 0; }
+      .bgm-toggle .bgm-label { display: none; }
       .system-panel { padding: 16px; }
       .system-summary { grid-template-columns: 1fr; }
       .inventory-grid { grid-template-columns: 1fr; }
@@ -4612,7 +4840,7 @@
 
           <div class="mini-card">
             <strong>ประกาศอัพเดต</strong>
-            <p>เปิดดูรายละเอียดแพตช์ล่าสุด เอฟเฟกต์ และระบบที่เพิ่มเข้ามา</p>
+            <p>เปิดดูรูปหรือวิดีโอโปรโมตและอัปเดตแบบเต็มกรอบ</p>
             <button class="btn" data-action="open-update-notice">ดูประกาศ</button>
           </div>
           <div class="mini-card">
@@ -5108,27 +5336,26 @@
     </div>
   </div>
 
-  <div class="modal hidden update-notice" id="updateNoticeModal" role="dialog" aria-modal="true" aria-label="ประกาศและรางวัลล็อกอิน">
+  <div class="modal hidden update-notice" id="updateNoticeModal" role="dialog" aria-modal="true" aria-label="โปรโมต อัปเดต และรางวัลล็อกอิน">
     <div class="modal-panel update-panel">
       <button class="close" data-action="close-update-notice" aria-label="ปิด">x</button>
-      <div class="update-hero">
-        <span class="update-version">Patch Notice • 2026.06.13</span>
-        <h2>ศูนย์ประกาศและรางวัล</h2>
-        <p>ประกาศเกม โบนัสล็อกอินประจำวัน และกิจกรรมผู้เล่นใหม่ 7 วันถูกจัดไว้คนละหน้าอย่างชัดเจน รางวัลไอเทมจะส่งผ่านกล่องจดหมายก่อนเข้ากระเป๋า</p>
-      </div>
       <div class="notice-tabs" role="tablist">
-        <button class="notice-tab active" data-action="switch-notice-tab" data-notice-tab="news">📢 ประกาศเกม</button>
+        <button class="notice-tab active" data-action="switch-notice-tab" data-notice-tab="news">🎬 โปรโมต / อัปเดต</button>
         <button class="notice-tab" data-action="switch-notice-tab" data-notice-tab="rewards">🎁 รับรางวัลล็อกอิน</button>
       </div>
       <div class="update-body">
         <section class="notice-page" id="noticeNewsPage">
-          <div class="update-list">
-            <div class="update-item"><strong>🎒 กระเป๋าไอเทมแยก</strong><p>แพ็คสุ่ม ใบการันตี และใบเลือกการ์ดไม่ปะปนกับตู้กาชา ใช้จากกระเป๋าด้านข้างได้โดยตรง</p></div>
-            <div class="update-item"><strong>📬 กล่องจดหมายรางวัล</strong><p>รางวัลจากกิจกรรม ล็อกอิน ไต่หอ และ ARENA จะส่งเข้าจดหมาย ป้องกันของรางวัลตกหล่น</p></div>
-            <div class="update-item"><strong>🎁 ผู้เล่นใหม่ 7 วัน</strong><p>แยกจากล็อกอินประจำวัน รับได้วันละขั้นเพียงครั้งเดียวต่อไอดี เมื่อครบวันที่ 7 กิจกรรมจะสิ้นสุดถาวร</p></div>
-            <div class="update-item"><strong>☀️ ล็อกอินประจำวัน</strong><p>รับ Gems ประจำวันแยกต่างหาก ไม่ทำให้วันกิจกรรมผู้เล่นใหม่เดินโดยอัตโนมัติ</p></div>
-            <div class="update-item"><strong>🗼 รางวัล Battle Tower</strong><p>แพ็คการ์ดและใบเลือกรางวัล milestone จะถูกส่งเข้ากล่องจดหมาย แล้วค่อยรับเข้า Inventory</p></div>
-            <div class="update-item"><strong>🏆 รางวัล ARENA</strong><p>เมื่อสัปดาห์เปลี่ยน ระบบส่ง Gems, Dust และใบเลือกตามอันดับเข้ากล่องจดหมายของไอดีนั้น</p></div>
+          <div class="promo-gallery" id="promoGallery">
+            <div class="promo-frame">
+              <div class="promo-stage" id="promoStage" aria-live="polite"></div>
+              <button class="promo-nav prev" data-action="previous-promo-media" aria-label="สื่อก่อนหน้า">‹</button>
+              <button class="promo-nav next" data-action="next-promo-media" aria-label="สื่อถัดไป">›</button>
+            </div>
+            <div class="promo-controls">
+              <span class="promo-counter" id="promoCounter">0 / 0</span>
+              <div class="promo-dots" id="promoDots" aria-label="เลือกสื่อโปรโมต"></div>
+              <button class="btn promo-autoplay" id="promoAutoplayButton" data-action="toggle-promo-autoplay">⏸ เล่นอัตโนมัติ</button>
+            </div>
           </div>
         </section>
         <section class="notice-page login-reward-page hidden" id="noticeRewardPage">
@@ -5167,13 +5394,22 @@
   </div>
 
 
-
   <div class="modal hidden" id="battleSummaryModal" role="dialog" aria-modal="true" aria-label="สรุปการต่อสู้ฉบับเต็ม">
     <div class="modal-panel battle-summary-panel">
       <button class="close" data-action="close-battle-summary" aria-label="ปิด">x</button>
       <div id="battleSummaryContent"></div>
     </div>
   </div>
+
+  <!-- เพิ่มโดยอลิซ: เพลงพื้นหลัง MP3 ปรับไฟล์ได้จาก BGM_CONFIG -->
+  <div class="bgm-player" id="bgmPlayer" aria-label="เครื่องเล่นเพลงพื้นหลัง">
+    <button class="bgm-toggle" id="bgmToggleButton" data-action="toggle-bgm" aria-label="เปิดหรือปิดเพลงพื้นหลัง">
+      <span id="bgmIcon">♫</span><span class="bgm-label" id="bgmLabel">เพลงพื้นหลัง</span>
+    </button>
+    <input class="bgm-volume" id="bgmVolume" type="range" min="0" max="1" step="0.01" value="0.28" aria-label="ระดับเสียงเพลงพื้นหลัง">
+    <button class="bgm-next hidden" id="bgmNextButton" data-action="next-bgm" aria-label="เพลงถัดไป">›</button>
+  </div>
+  <audio id="backgroundMusic" preload="metadata"></audio>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <noscript><div style="padding:24px;color:white;background:#7f1d1d">เว็บนี้ต้องเปิด JavaScript จึงจะเล่นได้</div></noscript>
@@ -5404,10 +5640,47 @@
 
 
 
-    // เพิ่มโดยอลิซ: เปลี่ยน version เพื่อให้ประกาศแพตช์ใหม่เด้งอีกครั้งหลังเพิ่มระบบเปิดกาชาไว + การันตีแยกตู้
+    // เพิ่มโดยอลิซ: เปลี่ยน version เมื่ออยากให้หน้าต่างโปรโมตเด้งอีกครั้ง
     const UPDATE_NOTICE = Object.freeze({
-      version: "2026-06-14-turn-defense-combat-v13",
-      seenKey: "anime_card_update_notice_seen_v12"
+      version: "2026-06-19-promo-gallery-bgm-v1",
+      seenKey: "anime_card_update_notice_seen_v13"
+    });
+
+    /* ================= [SECTION PROMO-UPDATE-MEDIA] =================
+       ใส่รูป/วิดีโอหลายไฟล์ได้จากจุดเดียว
+       - ถ้าใส่แค่ชื่อไฟล์ เช่น "update_01.png" ระบบจะอ่านจาก assets/promos/
+       - ใช้ path เต็มในโปรเจกต์หรือ URL https:// ได้เช่นกัน
+       - รองรับรูป: png, jpg, jpeg, webp, gif, avif
+       - รองรับวิดีโอ: mp4, webm, ogg, mov, m4v
+       - duration ใช้กำหนดเวลารูปก่อนเลื่อนไปภาพถัดไป (มิลลิวินาที)
+       =============================================================== */
+    const UPDATE_PROMO_CONFIG = Object.freeze({
+      autoplay: true,
+      imageDuration: 6500,
+      media: Object.freeze([
+        { src: ","assets/banners/MEGUAQUA.png"", type: "image", duration: 6500 },
+        { src: ","assets/banners/AQUA1.png"", type: "image", duration: 6500 },
+        { src: ","assets/banners/MEGU1.png"", type: "image", duration: 6500 },
+        { src: "assets/banners/KONOSUBAban.mp4", type: "video", poster: "", controls: true }
+        // ตัวอย่างเพิ่มไฟล์:
+        // { src: "update_02.jpg", type: "image", duration: 8000 },
+        // { src: "update_03.mp4", type: "video", poster: "update_03_poster.jpg", controls: true }
+      ])
+    });
+
+    /* ===================== [SECTION BACKGROUND-MP3] =====================
+       ใส่ไฟล์ MP3 ที่ assets/audio/bgm.mp3 หรือแก้ path ด้านล่าง
+       เพิ่มหลายเพลงใน tracks ได้ ระบบจะมีปุ่มเปลี่ยนเพลงและเล่นต่ออัตโนมัติ
+       เบราว์เซอร์จะเริ่มเสียงหลังผู้เล่นคลิกหน้าเว็บครั้งแรกตามกฎ Autoplay
+       =================================================================== */
+    const BGM_CONFIG = Object.freeze({
+      tracks: Object.freeze([
+        "assets/audio/KONOmp1.mp3","assets/audio/KONOmp2.mp3","assets/audio/KONOmp3.mp3"
+        // "assets/audio/bgm_02.mp3"
+      ]),
+      volume: 0.28,
+      autoplay: true,
+      loopPlaylist: true
     });
 
     /*
@@ -8437,6 +8710,12 @@
     let teamPickerSortDirection = "desc";
     let teamPickerContext = { mode: "showcase", slotIndex: 0 };
     let activeNoticeTab = "news";
+    let activePromoIndex = 0;
+    let promoAutoplayTimer = 0;
+    let promoAutoplay = UPDATE_PROMO_CONFIG.autoplay !== false;
+    let bgmTrackIndex = 0;
+    let bgmEnabled = BGM_CONFIG.autoplay !== false;
+    let bgmResumeAfterVisibility = false;
     let activeSelectorItemId = "";
 
     // แก้โดยอลิซ: เริ่มจากค่าเริ่มต้นชั่วคราวเสมอ แล้วค่อยโหลด Cloud Save หลังล็อกอิน
@@ -15782,6 +16061,251 @@
 
 
 
+    function resolvePromoAsset(value) {
+      const source = String(value || "").trim();
+      if (!source) return "";
+      if (/^(https?:|data:|blob:)/i.test(source) || source.includes("/")) return source;
+      return `assets/promos/${source}`;
+    }
+
+    function getUpdatePromoItems() {
+      const rawItems = Array.isArray(UPDATE_PROMO_CONFIG.media) ? UPDATE_PROMO_CONFIG.media : [];
+      return rawItems.map((entry, index) => {
+        const item = typeof entry === "string" ? { src: entry } : Object.assign({}, entry || {});
+        const source = resolvePromoAsset(item.src || item.image || item.video);
+        if (!source) return null;
+        const type = String(item.type || "").toLowerCase() === "video" || isVideo(source) ? "video" : "image";
+        return {
+          id: String(item.id || `promo-${index + 1}`),
+          src: source,
+          type,
+          poster: resolvePromoAsset(item.poster || ""),
+          duration: Number(item.duration) > 0
+            ? Math.max(1200, Number(item.duration))
+            : (type === "video" ? 0 : Math.max(1200, Number(UPDATE_PROMO_CONFIG.imageDuration) || 6500)),
+          controls: item.controls !== false,
+          loop: item.loop === true
+        };
+      }).filter(Boolean);
+    }
+
+    function clearPromoAutoplayTimer() {
+      clearTimeout(promoAutoplayTimer);
+      promoAutoplayTimer = 0;
+    }
+
+    function pauseUpdatePromo() {
+      clearPromoAutoplayTimer();
+      const video = document.querySelector("#promoStage video");
+      if (video) video.pause();
+    }
+
+    function schedulePromoAutoplay(item) {
+      clearPromoAutoplayTimer();
+      const notice = document.getElementById("updateNoticeModal");
+      if (!promoAutoplay || activeNoticeTab !== "news" || !notice || notice.classList.contains("hidden")) return;
+      if (item && item.type === "video" && !item.duration) return;
+      const delay = item && item.type === "video" ? Math.max(3000, item.duration) : Math.max(1200, item && item.duration || UPDATE_PROMO_CONFIG.imageDuration || 6500);
+      promoAutoplayTimer = window.setTimeout(() => showUpdatePromo(activePromoIndex + 1), delay);
+    }
+
+    function renderPromoDots(items) {
+      const dots = document.getElementById("promoDots");
+      if (!dots) return;
+      dots.innerHTML = items.map((_, index) => `
+        <button class="promo-dot${index === activePromoIndex ? " active" : ""}" data-action="select-promo-media" data-promo-index="${index}" aria-label="เปิดสื่อโปรโมตลำดับ ${index + 1}"></button>
+      `).join("");
+    }
+
+    function updatePromoControls(items) {
+      const counter = document.getElementById("promoCounter");
+      const autoplayButton = document.getElementById("promoAutoplayButton");
+      if (counter) counter.textContent = items.length ? `${activePromoIndex + 1} / ${items.length}` : "0 / 0";
+      if (autoplayButton) autoplayButton.textContent = promoAutoplay ? "⏸ เล่นอัตโนมัติ" : "▶ เล่นอัตโนมัติ";
+      document.querySelectorAll(".promo-nav").forEach(button => button.disabled = items.length <= 1);
+      renderPromoDots(items);
+    }
+
+    function showUpdatePromo(index = 0) {
+      const stage = document.getElementById("promoStage");
+      if (!stage) return;
+      pauseUpdatePromo();
+      const items = getUpdatePromoItems();
+      if (!items.length) {
+        activePromoIndex = 0;
+        stage.innerHTML = `<div class="promo-empty">ยังไม่ได้ใส่สื่อโปรโมต<br>เพิ่มไฟล์ใน <b>UPDATE_PROMO_CONFIG.media</b></div>`;
+        updatePromoControls(items);
+        return;
+      }
+
+      activePromoIndex = ((Number(index) || 0) % items.length + items.length) % items.length;
+      const item = items[activePromoIndex];
+      if (item.type === "video") {
+        stage.innerHTML = `<video id="promoMediaVideo" src="${escapeHTML(item.src)}"${item.poster ? ` poster="${escapeHTML(item.poster)}"` : ""} autoplay muted playsinline preload="metadata"${item.controls ? " controls" : ""}${item.loop ? " loop" : ""}></video>`;
+        const video = document.getElementById("promoMediaVideo");
+        if (video) {
+          video.addEventListener("ended", () => {
+            if (promoAutoplay && !item.loop) showUpdatePromo(activePromoIndex + 1);
+          }, { once: true });
+          video.addEventListener("error", () => {
+            stage.innerHTML = `<div class="promo-empty">ไม่สามารถเปิดวิดีโอนี้ได้<br><b>${escapeHTML(item.src)}</b></div>`;
+          }, { once: true });
+          video.play().catch(() => {});
+        }
+      } else {
+        stage.innerHTML = `<img src="${escapeHTML(item.src)}" alt="" draggable="false">`;
+        const image = stage.querySelector("img");
+        if (image) image.addEventListener("error", () => {
+          stage.innerHTML = `<div class="promo-empty">ไม่สามารถเปิดรูปนี้ได้<br><b>${escapeHTML(item.src)}</b></div>`;
+        }, { once: true });
+      }
+      updatePromoControls(items);
+      schedulePromoAutoplay(item);
+    }
+
+    function togglePromoAutoplay() {
+      promoAutoplay = !promoAutoplay;
+      if (promoAutoplay) showUpdatePromo(activePromoIndex);
+      else {
+        clearPromoAutoplayTimer();
+        updatePromoControls(getUpdatePromoItems());
+      }
+    }
+
+    const BGM_PREFERENCES = {
+      get(key) {
+        try { return window.localStorage.getItem(`anime_card_bgm_${key}`); }
+        catch (_) { return null; }
+      },
+      set(key, value) {
+        try { window.localStorage.setItem(`anime_card_bgm_${key}`, String(value)); }
+        catch (_) {}
+      }
+    };
+
+    function getBGMTracks() {
+      return (Array.isArray(BGM_CONFIG.tracks) ? BGM_CONFIG.tracks : [])
+        .map(track => typeof track === "string" ? track : track && track.src)
+        .map(source => String(source || "").trim())
+        .filter(Boolean);
+    }
+
+    function updateBGMUI(message = "") {
+      const audio = document.getElementById("backgroundMusic");
+      const button = document.getElementById("bgmToggleButton");
+      const icon = document.getElementById("bgmIcon");
+      const label = document.getElementById("bgmLabel");
+      const next = document.getElementById("bgmNextButton");
+      const volume = document.getElementById("bgmVolume");
+      const playing = Boolean(audio && !audio.paused && !audio.ended);
+      if (button) button.classList.toggle("playing", playing);
+      if (icon) icon.textContent = playing ? "⏸" : "♫";
+      if (label) label.textContent = message || (playing ? "กำลังเล่น" : (bgmEnabled ? "เพลงพื้นหลัง" : "ปิดเพลง"));
+      if (next) next.classList.toggle("hidden", getBGMTracks().length <= 1);
+      if (volume && audio) volume.value = String(audio.volume);
+    }
+
+    function loadBGMTrack(index = 0, playAfter = false) {
+      const audio = document.getElementById("backgroundMusic");
+      const tracks = getBGMTracks();
+      if (!audio || !tracks.length) {
+        updateBGMUI("ยังไม่ได้ใส่ MP3");
+        return;
+      }
+      bgmTrackIndex = ((Number(index) || 0) % tracks.length + tracks.length) % tracks.length;
+      const source = tracks[bgmTrackIndex];
+      if (audio.getAttribute("src") !== source) {
+        audio.src = source;
+        audio.load();
+      }
+      audio.loop = tracks.length === 1 && BGM_CONFIG.loopPlaylist !== false;
+      if (playAfter && bgmEnabled) requestBGMPlay();
+      else updateBGMUI();
+    }
+
+    function requestBGMPlay() {
+      const audio = document.getElementById("backgroundMusic");
+      if (!audio || !bgmEnabled || !getBGMTracks().length) return;
+      const result = audio.play();
+      if (result && typeof result.then === "function") {
+        result.then(() => updateBGMUI()).catch(() => updateBGMUI("คลิกเพื่อเปิดเพลง"));
+      }
+    }
+
+    function toggleBGM() {
+      const audio = document.getElementById("backgroundMusic");
+      if (!audio || !getBGMTracks().length) {
+        updateBGMUI("ยังไม่ได้ใส่ MP3");
+        return;
+      }
+      if (!audio.paused) {
+        bgmEnabled = false;
+        audio.pause();
+      } else {
+        bgmEnabled = true;
+        requestBGMPlay();
+      }
+      BGM_PREFERENCES.set("enabled", bgmEnabled ? "1" : "0");
+      updateBGMUI();
+    }
+
+    function nextBGMTrack() {
+      const tracks = getBGMTracks();
+      if (tracks.length <= 1) return;
+      loadBGMTrack(bgmTrackIndex + 1, true);
+    }
+
+    function setBGMVolume(value) {
+      const audio = document.getElementById("backgroundMusic");
+      if (!audio) return;
+      audio.volume = Math.min(1, Math.max(0, Number(value) || 0));
+      BGM_PREFERENCES.set("volume", audio.volume);
+      updateBGMUI();
+    }
+
+    function handleBGMVisibilityChange() {
+      const audio = document.getElementById("backgroundMusic");
+      if (!audio) return;
+      if (document.hidden) {
+        bgmResumeAfterVisibility = bgmEnabled && !audio.paused;
+        if (bgmResumeAfterVisibility) audio.pause();
+      } else if (bgmResumeAfterVisibility && bgmEnabled) {
+        bgmResumeAfterVisibility = false;
+        requestBGMPlay();
+      }
+    }
+
+    function initializeBackgroundMusic() {
+      const audio = document.getElementById("backgroundMusic");
+      if (!audio) return;
+      const savedEnabled = BGM_PREFERENCES.get("enabled");
+      const savedVolumeRaw = BGM_PREFERENCES.get("volume");
+      const savedVolume = savedVolumeRaw === null ? Number.NaN : Number(savedVolumeRaw);
+      bgmEnabled = savedEnabled === null ? BGM_CONFIG.autoplay !== false : savedEnabled === "1";
+      audio.volume = Number.isFinite(savedVolume) ? Math.min(1, Math.max(0, savedVolume)) : Math.min(1, Math.max(0, Number(BGM_CONFIG.volume) || .28));
+
+      audio.addEventListener("play", () => updateBGMUI());
+      audio.addEventListener("pause", () => updateBGMUI());
+      audio.addEventListener("ended", () => {
+        const tracks = getBGMTracks();
+        if (tracks.length > 1 && BGM_CONFIG.loopPlaylist !== false) nextBGMTrack();
+      });
+      audio.addEventListener("error", () => updateBGMUI("ไม่พบไฟล์ MP3"));
+
+      loadBGMTrack(0, false);
+      updateBGMUI();
+      if (bgmEnabled) requestBGMPlay();
+
+      const unlockAudio = () => {
+        if (bgmEnabled && audio.paused) requestBGMPlay();
+        document.removeEventListener("pointerdown", unlockAudio, true);
+        document.removeEventListener("keydown", unlockAudio, true);
+      };
+      document.addEventListener("pointerdown", unlockAudio, true);
+      document.addEventListener("keydown", unlockAudio, true);
+    }
+
+
     function switchNoticeTab(tab = "news") {
       activeNoticeTab = tab === "rewards" ? "rewards" : "news";
       document.querySelectorAll("[data-notice-tab]").forEach(button => button.classList.toggle("active", button.dataset.noticeTab === activeNoticeTab));
@@ -15789,6 +16313,8 @@
       const rewards = document.getElementById("noticeRewardPage");
       if (news) news.classList.toggle("hidden", activeNoticeTab !== "news");
       if (rewards) rewards.classList.toggle("hidden", activeNoticeTab !== "rewards");
+      if (activeNoticeTab === "news") showUpdatePromo(activePromoIndex);
+      else pauseUpdatePromo();
       renderResources();
     }
 
@@ -15809,6 +16335,7 @@
       if (hideAgain && hideAgain.checked) {
         SAFE_STORAGE.setItem(UPDATE_NOTICE.seenKey, UPDATE_NOTICE.version);
       }
+      pauseUpdatePromo();
       notice.classList.add("hidden");
       restoreBodyScroll();
     }
@@ -15901,6 +16428,12 @@
       if (action === "close-item-selector") closeItemSelector();
       if (action === "select-item-card") selectCardFromItem(cardId);
       if (action === "switch-notice-tab") switchNoticeTab(target.dataset.noticeTab);
+      if (action === "previous-promo-media") showUpdatePromo(activePromoIndex - 1);
+      if (action === "next-promo-media") showUpdatePromo(activePromoIndex + 1);
+      if (action === "select-promo-media") showUpdatePromo(Number(target.dataset.promoIndex) || 0);
+      if (action === "toggle-promo-autoplay") togglePromoAutoplay();
+      if (action === "toggle-bgm") toggleBGM();
+      if (action === "next-bgm") nextBGMTrack();
       if (action === "open-update-rewards") openUpdateNotice(true, "rewards");
       if (action === "claim-income") claimIncome();
       if (action === "open-card") openCardModal(cardId);
@@ -16029,6 +16562,9 @@
       event.target.value = "";
     });
 
+    const bgmVolumeInput = document.getElementById("bgmVolume");
+    if (bgmVolumeInput) bgmVolumeInput.addEventListener("input", event => setBGMVolume(event.target.value));
+
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
       if (!document.getElementById("activeSkillCutscene").classList.contains("hidden")) finishActiveSkillCutscene();
@@ -16051,8 +16587,13 @@
     });
 
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) renderResources();
-      else {
+      handleBGMVisibilityChange();
+      if (!document.hidden) {
+        renderResources();
+        const notice = document.getElementById("updateNoticeModal");
+        if (notice && !notice.classList.contains("hidden") && activeNoticeTab === "news") showUpdatePromo(activePromoIndex);
+      } else {
+        pauseUpdatePromo();
         updateIncome();
         persistLocalState();
         scheduleCloudSave();
@@ -16076,6 +16617,7 @@
       setInterval(scheduleCloudSave, 60000);
 
       // Cloud Only: ไม่มีการย้ายเซฟเก่าจากเครื่อง
+      initializeBackgroundMusic();
       openUpdateNotice();
     } catch (error) {
       window.__showAnimeCardBootError(error && error.message ? error.message : error);
