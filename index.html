@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-19-cost-rarity-balance-v41">
+  <meta name="gacha-app-build" content="2026-06-19-arena-readability-summary-scroll-v42">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -4699,6 +4699,512 @@
       color: var(--muted);
     }
 
+
+  
+    /* =====================================================================
+       [ARENA-READABILITY-AND-SUMMARY-SCROLL-FIX]
+       แก้สีข้อความที่กลืนกับฉาก เพิ่มขนาดตัวอักษร และทำให้หน้าสรุปเลื่อนได้
+       ===================================================================== */
+
+    /* ---------- ARENA: ข้อความและค่าสเตตัสบนฉากสว่าง ---------- */
+    #arenaView .battle-arena {
+      color: #15344f;
+      background-image:
+        linear-gradient(180deg, rgba(235,248,255,.28), rgba(255,255,255,.08)),
+        url("assets/ui/konosuba/ui_event_banner.png");
+    }
+
+    #arenaView .fighter-label {
+      display: inline-flex;
+      width: fit-content;
+      max-width: 100%;
+      padding: 5px 9px;
+      border: 1px solid rgba(24,52,77,.14);
+      border-radius: 999px;
+      color: #36536d;
+      font-size: clamp(.78rem, 1.2vw, .9rem);
+      font-weight: 1000;
+      letter-spacing: .09em;
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 4px 14px rgba(38,83,120,.10);
+      text-shadow: 0 1px 0 rgba(255,255,255,.95);
+      backdrop-filter: blur(7px);
+    }
+
+    #arenaView .fighter.enemy .fighter-label { margin-left: auto; }
+
+    #arenaView .fighter h3 {
+      display: inline-block;
+      max-width: 100%;
+      margin: 9px 0 7px;
+      padding: 7px 11px;
+      border: 1px solid rgba(24,52,77,.14);
+      border-radius: 13px;
+      color: #15344f;
+      font-size: clamp(1.85rem, 4vw, 3.1rem);
+      line-height: 1.08;
+      background: rgba(255,255,255,.80);
+      box-shadow: 0 7px 20px rgba(38,83,120,.12);
+      text-shadow: 0 2px 0 rgba(255,255,255,.96);
+      backdrop-filter: blur(7px);
+    }
+
+    #arenaView .fighter.enemy h3 { color: #7d2241; }
+
+    #arenaView .fighter-power {
+      width: fit-content;
+      max-width: 100%;
+      gap: 7px 12px;
+      padding: 9px 12px;
+      border: 1px solid rgba(24,52,77,.16);
+      border-radius: 15px;
+      color: #087b9f;
+      font-size: clamp(2rem, 5vw, 3.55rem);
+      line-height: 1.05;
+      background: rgba(255,255,255,.84);
+      box-shadow: 0 8px 22px rgba(38,83,120,.13);
+      text-shadow: 0 1px 0 rgba(255,255,255,.95);
+      backdrop-filter: blur(8px);
+    }
+
+    #arenaView .fighter.enemy .fighter-power {
+      margin-left: auto;
+      color: #bd2451;
+    }
+
+    #arenaView .fighter-power > span:first-child {
+      color: #087b9f;
+    }
+
+    #arenaView .fighter.enemy .fighter-power > span:first-child {
+      color: #bd2451;
+    }
+
+    #arenaView .fighter-power .combat-def {
+      flex: 1 1 100%;
+      color: #6246ad;
+      font-size: clamp(.98rem, 1.65vw, 1.32rem);
+      font-weight: 1000;
+      line-height: 1.45;
+      white-space: normal;
+    }
+
+    #arenaView .fighter.enemy .fighter-power .combat-def { color: #8b315f; }
+
+    #arenaView .power-breakdown {
+      min-height: 0;
+      margin-top: 9px;
+      padding: 9px 11px;
+      border: 1px solid rgba(24,52,77,.13);
+      border-radius: 13px;
+      color: #294965;
+      font-size: clamp(.84rem, 1.25vw, .98rem);
+      font-weight: 750;
+      line-height: 1.65;
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 5px 16px rgba(38,83,120,.09);
+      backdrop-filter: blur(7px);
+    }
+
+    #arenaView .combat-tag {
+      border-color: rgba(24,52,77,.18);
+      color: #294965;
+      font-size: .76rem;
+      background: rgba(255,255,255,.84);
+      box-shadow: 0 4px 12px rgba(38,83,120,.08);
+    }
+
+    #arenaView .combat-tag.shield { color: #6246ad; border-color: rgba(98,70,173,.28); }
+    #arenaView .combat-tag.hit { color: #087b9f; border-color: rgba(8,123,159,.28); }
+
+    #arenaView .battle-actions .btn {
+      color: #18344d;
+      background: rgba(255,255,255,.90);
+      border-color: rgba(24,52,77,.17);
+      box-shadow: 0 7px 18px rgba(38,83,120,.11);
+    }
+
+    #arenaView .battle-actions .btn-primary {
+      color: #0b3c52;
+      background: linear-gradient(135deg, #9ce8ff, #d8f4ff 48%, #fff0a6);
+    }
+
+    #arenaView .battle-result {
+      border-color: rgba(255,255,255,.18);
+      color: #eef7ff;
+      font-size: clamp(.84rem, 1.2vw, .98rem);
+      font-weight: 850;
+      line-height: 1.55;
+      background: rgba(19,43,66,.86);
+      box-shadow: 0 8px 20px rgba(24,52,77,.16);
+      backdrop-filter: blur(8px);
+    }
+
+    #arenaView .battle-result.win { color: #bfffe0; }
+    #arenaView .battle-result.lose { color: #ffd0da; }
+
+    /* ---------- ARENA: แผงธาตุ คอมโบ และความสามารถ ---------- */
+    #arenaView .arena-team-zone {
+      border-color: rgba(36,66,95,.18);
+      background: rgba(247,252,255,.88);
+      box-shadow: 0 14px 32px rgba(66,111,150,.10), inset 0 1px 0 rgba(255,255,255,.96);
+    }
+
+    #arenaView .arena-team-zone .section-title h2,
+    #arenaView .arena-team-zone .section-title p {
+      color: #18344d;
+    }
+
+    #arenaView #arenaElementPanel {
+      color: #18344d;
+      border-color: rgba(36,66,95,.17);
+      background-image:
+        linear-gradient(180deg, rgba(252,254,255,.96), rgba(229,244,255,.91)),
+        url("assets/ui/konosuba/ui_system_icons.png");
+      box-shadow: 0 12px 28px rgba(66,111,150,.10), inset 0 1px 0 rgba(255,255,255,.96);
+    }
+
+    #arenaView #arenaElementPanel h3 {
+      color: #18344d;
+      font-size: 1.12rem;
+      line-height: 1.35;
+    }
+
+    #arenaView #arenaElementPanel p {
+      color: #38546f;
+      font-size: .88rem;
+      font-weight: 650;
+      line-height: 1.65;
+    }
+
+    #arenaView #arenaElementPanel .element-chip {
+      min-height: 34px;
+      color: #18344d;
+      font-size: .79rem;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 4px 13px rgba(66,111,150,.08);
+    }
+
+    #arenaView #arenaElementPanel .element-chip small {
+      color: #38546f;
+      font-size: .7rem;
+    }
+
+    #arenaView #arenaElementPanel .combo-list { gap: 9px; }
+
+    #arenaView #arenaElementPanel .combo-card {
+      min-height: 92px;
+      padding: 12px 13px;
+      border-color: rgba(36,66,95,.16);
+      color: #18344d;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 7px 18px rgba(66,111,150,.09), inset 0 1px 0 rgba(255,255,255,.96);
+    }
+
+    #arenaView #arenaElementPanel .combo-card strong {
+      color: #8a5600;
+      font-size: .88rem;
+      line-height: 1.42;
+    }
+
+    #arenaView #arenaElementPanel .combo-card span {
+      margin-top: 6px;
+      color: #294965;
+      font-size: .81rem;
+      font-weight: 650;
+      line-height: 1.58;
+    }
+
+    #arenaView #arenaElementPanel .combo-card.inactive-skill {
+      opacity: .82;
+      background: rgba(239,245,250,.90);
+    }
+
+    #arenaView #arenaElementPanel .combo-card.inactive-skill strong { color: #5a6e82; }
+
+    /* ---------- หน้าสรุปผล: เลื่อนทั้งหน้าต่างได้แน่นอน ---------- */
+    #battleSummaryModal {
+      display: block;
+      overflow-x: hidden;
+      overflow-y: auto !important;
+      padding: 12px;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #battleSummaryModal.hidden { display: none !important; }
+
+    #battleSummaryModal .battle-summary-panel {
+      width: min(1180px, 100%);
+      max-height: none !important;
+      min-height: 0;
+      margin: 0 auto 24px;
+      overflow: visible !important;
+      color: #f8fafc;
+      background:
+        linear-gradient(180deg, rgba(13,24,42,.975), rgba(8,15,28,.985)),
+        url("assets/ui/konosuba/ui_popup_messages.png") center / cover no-repeat;
+      border-color: rgba(126,163,199,.25);
+      box-shadow: 0 24px 70px rgba(0,0,0,.48);
+    }
+
+    #battleSummaryModal .battle-summary-panel::before {
+      opacity: .08;
+      background-image: url("assets/ui/konosuba/ui_popup_messages.png");
+    }
+
+    #battleSummaryModal .battle-summary-panel > .close {
+      position: sticky;
+      top: 10px;
+      display: grid;
+      margin: 10px 10px -52px auto;
+      border-color: rgba(255,255,255,.24);
+      color: #ffffff;
+      background: rgba(4,10,20,.90);
+      box-shadow: 0 8px 24px rgba(0,0,0,.38);
+      backdrop-filter: blur(10px);
+    }
+
+    #battleSummaryModal .battle-summary-head {
+      padding: 26px 68px 20px 24px;
+      border-color: rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(25,42,69,.54), rgba(13,24,42,.18));
+    }
+
+    #battleSummaryModal .battle-summary-head .eyebrow {
+      color: #78e8ff;
+      font-size: .76rem;
+    }
+
+    #battleSummaryModal .battle-summary-head h2 {
+      color: #ffffff;
+      font-size: clamp(1.85rem, 4vw, 3rem);
+      line-height: 1.1;
+      text-shadow: 0 3px 20px rgba(0,0,0,.34);
+    }
+
+    #battleSummaryModal .battle-summary-head p:not(.eyebrow) {
+      color: #c9d6e8;
+      font-size: .9rem;
+      line-height: 1.65;
+    }
+
+    #battleSummaryModal .battle-summary-body {
+      gap: 16px;
+      padding: 18px;
+    }
+
+    #battleSummaryModal .battle-summary-result {
+      padding: 16px 17px;
+      border-color: rgba(255,255,255,.14);
+      background: rgba(31,50,78,.66);
+    }
+
+    #battleSummaryModal .battle-summary-result strong {
+      color: #ffffff;
+      font-size: 1.13rem;
+      line-height: 1.4;
+    }
+
+    #battleSummaryModal .battle-summary-result span {
+      color: #d1dbea;
+      font-size: .86rem;
+      font-weight: 650;
+      line-height: 1.65;
+    }
+
+    #battleSummaryModal .battle-summary-metrics {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    #battleSummaryModal .battle-summary-metric {
+      min-height: 70px;
+      padding: 11px;
+      border-color: rgba(255,255,255,.12);
+      background: rgba(14,27,47,.88);
+    }
+
+    #battleSummaryModal .battle-summary-metric span {
+      color: #aebed4;
+      font-size: .7rem;
+      line-height: 1.35;
+    }
+
+    #battleSummaryModal .battle-summary-metric strong {
+      margin-top: 5px;
+      overflow: visible;
+      color: #ffffff;
+      font-size: .92rem;
+      line-height: 1.4;
+      text-overflow: clip;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    #battleSummaryModal .battle-summary-section {
+      padding: 15px;
+      border-color: rgba(255,255,255,.12);
+      background: rgba(21,36,59,.60);
+    }
+
+    #battleSummaryModal .battle-summary-section h3 {
+      color: #ffffff;
+      font-size: 1.08rem;
+      line-height: 1.4;
+    }
+
+    #battleSummaryModal .battle-summary-team {
+      padding: 12px;
+      border-color: rgba(255,255,255,.11);
+      background: rgba(8,18,33,.78);
+    }
+
+    #battleSummaryModal .battle-summary-team h4 {
+      color: #eaf4ff;
+      font-size: .87rem;
+    }
+
+    #battleSummaryModal .battle-summary-card {
+      width: 72px;
+    }
+
+    #battleSummaryModal .battle-summary-card-art {
+      width: 72px;
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 6px 15px rgba(0,0,0,.30);
+    }
+
+    #battleSummaryModal .battle-summary-card span {
+      color: #eef6ff;
+      font-size: .66rem;
+      line-height: 1.35;
+    }
+
+    /* รายงานฮิตภายในหน้าสรุป */
+    #battleSummaryModal .hit-report-total {
+      color: #e5fbff;
+      font-size: .84rem;
+      line-height: 1.65;
+      background: rgba(26,75,91,.46);
+    }
+
+    #battleSummaryModal .hit-report-side {
+      padding: 12px;
+      border-color: rgba(255,255,255,.12);
+      background: rgba(8,18,33,.78);
+    }
+
+    #battleSummaryModal .hit-report-side h4 {
+      font-size: .86rem;
+      line-height: 1.4;
+    }
+
+    #battleSummaryModal .hit-report-metric {
+      min-height: 55px;
+      padding: 8px;
+      background: rgba(255,255,255,.055);
+    }
+
+    #battleSummaryModal .hit-report-metric span {
+      color: #aebed4;
+      font-size: .66rem;
+      line-height: 1.35;
+    }
+
+    #battleSummaryModal .hit-report-metric strong {
+      color: #ffffff;
+      font-size: .8rem;
+      line-height: 1.4;
+    }
+
+    #battleSummaryModal .hit-report-skill {
+      color: #dbe7f8;
+      font-size: .72rem;
+      line-height: 1.58;
+      background: rgba(92,54,142,.20);
+    }
+
+    /* ตารางทุกเทิร์นยังเลื่อนแนวนอนได้ แต่ตัวหนังสือใหญ่ขึ้น */
+    #battleSummaryModal .battle-turn-log {
+      max-height: none;
+      overflow: auto;
+      border-color: rgba(255,255,255,.13);
+      background: rgba(5,13,25,.72);
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+
+    #battleSummaryModal .battle-turn-row {
+      min-width: 1040px;
+      grid-template-columns: 72px minmax(125px,.9fr) repeat(6,minmax(82px,.58fr)) minmax(175px,1.25fr);
+      gap: 8px;
+      padding: 10px 11px;
+      border-color: rgba(255,255,255,.08);
+      color: #dce7f5;
+      font-size: .75rem;
+      line-height: 1.45;
+    }
+
+    #battleSummaryModal .battle-turn-row strong { color: #ffffff; }
+
+    #battleSummaryModal .battle-turn-row.header {
+      top: 0;
+      color: #83ecff;
+      background: #091426;
+      box-shadow: 0 5px 12px rgba(0,0,0,.28);
+    }
+
+    #battleSummaryModal .battle-turn-row.enemy { background: rgba(154,37,75,.12); }
+    #battleSummaryModal .battle-turn-skill { color: #ffe08a; font-size: .73rem; }
+
+    /* แถบเลื่อนให้มองเห็นง่ายขึ้น */
+    #battleSummaryModal,
+    #battleSummaryModal .battle-turn-log {
+      scrollbar-width: auto;
+      scrollbar-color: #6fcfe9 rgba(7,15,28,.72);
+    }
+
+    #battleSummaryModal::-webkit-scrollbar,
+    #battleSummaryModal .battle-turn-log::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+
+    #battleSummaryModal::-webkit-scrollbar-track,
+    #battleSummaryModal .battle-turn-log::-webkit-scrollbar-track {
+      background: rgba(7,15,28,.72);
+      border-radius: 999px;
+    }
+
+    #battleSummaryModal::-webkit-scrollbar-thumb,
+    #battleSummaryModal .battle-turn-log::-webkit-scrollbar-thumb {
+      border: 3px solid rgba(7,15,28,.72);
+      border-radius: 999px;
+      background: #6fcfe9;
+    }
+
+    @media (max-width: 1050px) {
+      #battleSummaryModal .battle-summary-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      #arenaView .battle-arena { padding: 16px; }
+      #arenaView .fighter h3 { font-size: clamp(1.45rem, 7vw, 2.3rem); }
+      #arenaView .fighter-power { font-size: clamp(1.65rem, 8vw, 2.65rem); }
+      #arenaView .fighter-power .combat-def { font-size: .92rem; }
+      #arenaView .power-breakdown { font-size: .82rem; }
+
+      #battleSummaryModal { padding: 6px; }
+      #battleSummaryModal .battle-summary-panel { border-radius: 20px; margin-bottom: 12px; }
+      #battleSummaryModal .battle-summary-head { padding: 22px 56px 17px 17px; }
+      #battleSummaryModal .battle-summary-body { padding: 11px; }
+      #battleSummaryModal .battle-summary-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #battleSummaryModal .battle-summary-team-grid { grid-template-columns: 1fr; }
+      #battleSummaryModal .battle-summary-card { width: 62px; }
+      #battleSummaryModal .battle-summary-card-art { width: 62px; }
+    }
 
   </style>
 </head>
