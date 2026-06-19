@@ -8108,13 +8108,13 @@
     "image": "1016.png",
     "ability": {
       "name": "ผู้ไร้พรสวรรค์",
-      "description": " ATK+200% ;อเวกตัน 'โจมตี + 2 ฮิต';เลเวลตัน สกิลของตัวละคร'Naoya'ไร้ผล",
+      "description": " ATK+200% ;อเวกตัน เจาะโล่ + 1 ฮิต';เลเวลตัน สกิลของตัวละคร'Naoya'ไร้ผล",
       "activeIn": ["team", "tower", "arena"],
       "condition": { 
       },
       "effects": [
         { "type": "selfPowerRate", "value": 2.0 },
-        { "type": "attackHits", "value": 2, "condition": {"sourceMinAwaken": 5 } },
+        { "type": "attackHits", "value": 1, "condition": {"sourceMinAwaken": 5 } },
         { "type": "nullifyCardAbilities", "targetSide": "enemy", "targetCardIds": [1031], "condition": {"sourceMinLevel": 180 } }
       ]
     }
@@ -8135,7 +8135,7 @@
     "image": "1017.png",
     "ability": {
       "name": "อณาเขตแบบย่อ",
-      "description": "หากในทีมมีผู้ใช้ไสยเวทนอกจากตัวเอง ; โจมตี + 2 ฮิต",
+      "description": "หากในทีมมีผู้ใช้ไสยเวทนอกจากตัวเอง ; เจาะโล่ + 2 ฮิต",
       "activeIn": ["team", "tower", "arena"],
       "condition": { "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 42, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
       },
@@ -8160,7 +8160,7 @@
     "image": "1018.png",
     "ability": {
       "name": "MegaMARU!!!",
-      "description": "หากการ์ดใบนี้อเวกตัน/เลเวลตัน ; ตัวเองได้รับ ATK/HP +9000000และโจมตีเพิ่ม +5 ฮิต ;จะใส่ได้แค่ 4 ตัวละคร",
+      "description": "หากการ์ดใบนี้อเวกตันและเลเวลตัน ; ตัวเองได้รับ ATK/HP +9000000 และ เมื่อโจมตีครั้งที่ 5 จะตีเข้า 100% ทำงานครั้งเดียว;จะใส่ได้แค่ 4 ตัวละคร",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
          "maxTeamSize": 4, "sourceMinAwaken": 5, "sourceMinLevel": 180
@@ -8168,7 +8168,7 @@
       "effects": [
         { "type": "teamPowerFlat", "value": 9000000 },
         { "type": "teamHpFlat", "value": 9000000 },
-        { "type": "attackHits", "value": 5 }
+        { "type": "nextAttackHits", "value": 99, "condition": {"afterOwnAttacks": 4, "repeat": false } }
       ]
     }
   },
@@ -8214,7 +8214,7 @@
     "image": "1020.png",
     "ability": {
       "name": "อาณาเขตเสริมพลัง",
-      "description": "หากอเวกตัน/เลเวลตัน และมีผู้ใช้ไสยเวทในทีมนอกจากตัวเอง; เพื่อนร่วมทีที่เป็นผู้ใช้ไสยเวทเพิ่ม ATK/HP +40% ;คำสาปในทีม ATK/HP -90%;ฝั่งตรงข้าม -40%",
+      "description": "หากอเวกตันและเลเวลตัน และมีผู้ใช้ไสยเวทในทีมนอกจากตัวเอง; เพื่อนร่วมทีที่เป็นผู้ใช้ไสยเวทเพิ่ม ATK/HP +40% ;คำสาปในทีม ATK/HP -90%;ฝั่งตรงข้าม -40%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "sourceMinAwaken": 5, "sourceMinLevel": 180,
@@ -8246,7 +8246,7 @@
     "image": "1035.png",
     "ability": {
       "name": "อารามสงฆ์ซ่อนมาร",
-      "description": "หากอเวกตัน/เลเวลตัน และมีคนเดียวในทีมจะเก่งขึ้น 7000% และโจมตีและเพิ่มโล่อย่างละ 8",
+      "description": "หากอเวกตันและเลเวลตัน และมีคนเดียวในทีมจะเก่งขึ้น 7000% โจมตี 8 ครั้งและเพิ่มโล่ 8",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "sourceMinAwaken": 5, "sourceMinLevel": 180,
@@ -8276,14 +8276,14 @@
     "image": "1024.png",
     "ability": {
       "name": "ฝาโลงภูผาเหล็ก",
-      "description": "หากอเวกตัน/เลเวลตัน สมาชิกทีมที่มีธาตุไฟได้รับ ATK+30% และทีมโจมตีเพิ่ม +3 ฮิต ",
+      "description": "หากอเวกตันและเลเวลตัน สมาชิกทีมที่มีธาตุไฟได้รับ ATK+20% และเจาะโล่เพิ่ม +1 ฮิต ",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "sourceMinAwaken": 5, "sourceMinLevel": 180
       },
       "effects": [
-        { "type": "elementPowerRate", "value": 0.30, "targetElements": ["ไฟ"] },
-        { "type": "attackHits", "value": 3}
+        { "type": "elementPowerRate", "value": 0.20, "targetElements": ["ไฟ"] },
+        { "type": "attackHits", "value": 3, "targetElements": ["ไฟ"]}
       ]
     }
   },
@@ -8303,14 +8303,14 @@
     "image": "1025.png",
     "ability": {
       "name": "พงไพรดอกไม้",
-      "description": "หากอเวกตัน/เลเวลตัน สมาชิกทีมที่มีธาตุพืชได้รับ ATK+30% และทีมโจมตีเพิ่ม +3 ฮิต ",
+      "description": "หากอเวกตันและเลเวลตัน สมาชิกทีมที่มีธาตุพืชได้รับ ATK+20% และได้เจาะโล่เพิ่ม +1 ฮิต ",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "sourceMinAwaken": 5, "sourceMinLevel": 180
       },
       "effects": [
-        { "type": "elementPowerRate", "value": 0.30, "targetElements": ["พืช"] },
-        { "type": "attackHits", "value": 3}
+        { "type": "elementPowerRate", "value": 0.20, "targetElements": ["พืช"] },
+        { "type": "attackHits", "value": 1, "targetElements": ["พืช"]}
       ]
     }
   },
@@ -8330,14 +8330,14 @@
     "image": "1026.png",
     "ability": {
       "name": "มหาสมุทร",
-      "description": "หากอเวกตัน/เลเวลตัน สมาชิกทีมที่มีธาตุน้ำได้รับ ATK+30% และทีมโจมตีเพิ่ม +3 ฮิต ",
+      "description": "หากอเวกตันและเลเวลตัน สมาชิกทีมที่มีธาตุน้ำได้รับ ATK+20% และทีมเจาะโล่ +1 ฮิต ",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "sourceMinAwaken": 5, "sourceMinLevel": 180
       },
       "effects": [
-        { "type": "elementPowerRate", "value": 0.30, "targetElements": ["น้ำ"] },
-        { "type": "attackHits", "value": 3}
+        { "type": "elementPowerRate", "value": 0.20, "targetElements": ["น้ำ"] },
+        { "type": "attackHits", "value": 1, "targetElements": ["น้ำ"]}
       ]
     }
   },
@@ -8357,7 +8357,7 @@
     "image": "1027.png",
     "ability": {
       "name": "ธรรมชาติแปรผัน",
-      "description": "เมื่อจัดเข้าทีมที่มีคำสาปอยู่ ทีมได้รับ ATK+15%/HP+15%; หากอเวกตัน/เลเวลตัน ทีมได้รับโจมตีเพิ่ม +3 ฮิต ",
+      "description": "เมื่อจัดเข้าทีมที่มีคำสาปอยู่ ทีมได้รับ ATK+15%/HP+15%; หากอเวกตัน/เลเวลตัน เมื่อตีครบ 3 ครั้ง จะได้รับฟื้นฟูเลือด 15% ",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "anyCardIds": [1026, 1025, 1024, 1035, 1002, 1042, 1041, 1023]
@@ -8365,7 +8365,7 @@
       "effects": [
         { "type": "teamPowerRate", "value": 0.15 },
         { "type": "teamHpRate", "value": 0.15 },
-        { "type": "attackHits", "value": 3, "condition": { "sourceMinAwaken": 5, "sourceMinLevel": 180 } }
+        { "type": "increaseMaxHpBaseRate", "value": 0.15, "condition": { "afterOwnAttacks":2,"sourceMinAwaken": 5, "sourceMinLevel": 180 } }
       ]
     }
   },
@@ -8385,14 +8385,14 @@
     "image": "1028.png",
     "ability": {
       "name": "พื้นที่ไร้จำกัด..ท้องฟ้าคืออณาเขตของข้า",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ตัวเองได้รับ HP +900%; หากอเวกตัน/เลเวลตัน ทีมได้รับโล่เพิ่ม +5 ",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ตัวเองได้รับ HP +90%; หากอเวกตัน/เลเวลตัน ทีมได้รับโล่เพิ่ม +2 ",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1029, 42, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
       },
       "effects": [
-        { "type": "selfHpRate", "value": 9.0 },
-        { "type": "shieldHits", "value": 5, "condition": { "sourceMinAwaken": 5, "sourceMinLevel": 180 } }
+        { "type": "selfHpRate", "value": 0.9 },
+        { "type": "shieldHits", "value": 2, "condition": { "sourceMinAwaken": 5, "sourceMinLevel": 180 } }
       ]
     }
   },
@@ -8412,14 +8412,14 @@
     "image": "1029.png",
     "ability": {
       "name": "ไสยเวททะลุทะลวง",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ตัวเองได้รับ ATK +800%; หากอเวกตัน/เลเวลตัน ทีมโจมตีเพิ่ม +3 ฮิต",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ตัวเองได้รับ ATK +80%; หากอเวกตัน/เลเวลตัน เจาะโล่ 3 ฮิต",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 42, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
       },
       "effects": [
-        { "type": "selfPowerRate", "value": 8.0 },
-        { "type": "attackHits", "value": 3, "condition": { "sourceMinAwaken": 5, "sourceMinLevel": 180 } }
+        { "type": "selfPowerRate", "value": 0.8 },
+        { "type": "attackHits", "value": 2, "condition": { "sourceMinAwaken": 5, "sourceMinLevel": 180 } }
       ]
     }
   },
@@ -8439,7 +8439,7 @@
     "image": "1030.png",
     "ability": {
       "name": "เจาะโลหิต",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ทีมได้รับ ATK +18%; หากมีผู้ใช้ไสยเวทชื่อ 'Yuji' อยู่ด้วย ทีมโจมตีเพิ่ม +2 ฮิต",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง ทีมได้รับ HP +18%; หากมีผู้ใช้ไสยเวทชื่อ 'Yuji' อยู่ด้วย เจาะโล่เพิ่ม +2 ฮิต",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 42, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26]
@@ -8466,14 +8466,14 @@
     "image": "1031.png",
     "ability": {
       "name": "24fps...",
-      "description": "เมื่อจัดทีมเพียงการ์ดใบนี้ใบเดียว จะได้รับ ATK/HP +3000%, โจมตีหลายฮิตและมีโล่สูงสุด",
+      "description": "เมื่อจัดทีมเพียงการ์ดใบนี้ใบเดียว จะได้รับ ATK/HP +3000%, เจาะโล่ 7 ฮิตและ มีโล่+7",
       "activeIn": ["team", "tower", "arena"],
       "condition": { "leaderOnly": true, "maxTeamSize": 1 },
       "effects": [
         { "type": "selfPowerRate", "value": 30.0 },
         { "type": "selfHpRate", "value": 30.0 },
-        { "type": "attackHits", "value": 7 },
-        { "type": "shieldHits", "value": 6 }
+        { "type": "attackHits", "value": 6 },
+        { "type": "shieldHits", "value": 7 }
       ]
     }
   },
@@ -8493,11 +8493,11 @@
     "image": "1032.png",
     "ability": {
       "name": "เหมันนิรันด์กาล...",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวท 'Sukuna' อยู่, ทีมฝ่ายตรงข้าม HP-15%",
-      "activeIn": ["team", "tower", "arena"],
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวท 'Sukuna' อยู่, ทีมฝ่ายตรงข้าม DEF-40%",
+      "activeIn": ["tower", "arena"],
       "condition": {"anyCardIds": [1035, 1042, 1002] },
       "effects": [ 
-        { "type": "enemyHpRate", "value": -0.15 }
+        { "type": "enemyDefenseRate", "value": -0.15 }
       ]
         }
   },
@@ -8515,16 +8515,38 @@
     "awakenMax": 5,
     "icon": "",
     "image": "43.png",
-    "ability": {
-      "name": "หมู่ดาวซ่อนแอบ",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวท 'Kinji Hakari' อยู่, ทีมได้โล่+3",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"requiredCardIds": [1033] },
+  "abilities": [
+    {
+      "name": "รางดาวซ่อนแอบ",
+      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวท 'Kinji Hakari' ; ทุกครั้งที่ตีครบ 3 ครั้ง จะทำฝ่ายตรงข้าม จะถูกเพิ่มคอสในการใช้สกิลเพิ่มขึ้น 2 ครั้ง และลดคอสสกิลแอคทีฟของ 'Kinji Hakari' ลง 1 ครั้ง ทุกครั้งที่สกิลนี้ทำงาน",
+      "activeIn": [
+        "tower",
+        "arena"
+      ],
       "effects": [
-        { "type": "shieldHits", "value": 3 }
-      ]
+        {
+          "type": "activeSkillCost",
+          "value": 2,
+          "targetSide": "enemy",
+        },
+        {
+          "type": "activeSkillCost",
+          "value": -1,
+          "targetCardIds": [
+            1033
+          ]
         }
-  },
+      ],
+      "condition": {
+        "requiredCardIds": [
+          1033
+        ],
+        "afterOwnAttacks": 2,
+        "repeat": true
+      }
+    }
+  ]
+},
   {
     "id": 42,
     "name": "Shoko Ieiri",
@@ -8541,9 +8563,9 @@
     "image": "42.png",
     "ability": {
       "name": "ไสยเวทย้อนกลับ...",
-      "description": "เมื่อจัดเข้าทีมที่มีผู้ใช้ไสยเวทอยู่นอกจากตัวเอง; ทีมได้รับ HP+5000000;เมื่ออเวกตัน/เลเวลตัน ได้รับความสามารถเพิ่ม ;เมื่อตีครบ 4 ครั้ง ฟื้นฟู +5000000",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"anyCardIds": [43, 44, 45, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 7, 26] },
+      "description": "เมื่อจัดเข้าทีม; ทีมได้รับ HP+5000000;เมื่ออเวกตัน/เลเวลตัน ได้รับความสามารถเพิ่ม ;เมื่อตีครบ 4 ครั้ง ฟื้นฟู +5000000",
+      "activeIn": ["tower", "arena"],
+      "condition": {},
       "effects": [
         { "type": "teamHpFlat", "value": 5000000 },
         { "type": "healHpFlat", "value": 5000000, "condition": { "sourceMinLevel": 180, "sourceMinAwaken": 5, "afterOwnAttacks": 3, "repeat": true } }
@@ -8591,11 +8613,11 @@
     "image": "37.png",
     "ability": {
       "name": "คัพCที่ขยำได้ดีกว่าคัพDที่ขยำไม่ได้เป็นไหนๆ...",
-      "description": "หากจัดทีมน้ำแข็งครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+70% ,รายได้รวม +20%",
+      "description": "หากจัดทีมน้ำแข็งครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "น้ำแข็ง":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamHpRate", "value": 0.7 },
+        { "type": "teamHpRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.20 }
       ]
         }
@@ -8616,11 +8638,11 @@
     "image": "11.png",
     "ability": {
       "name": "S2...",
-      "description": "หากจัดทีมพืชครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+70% ,รายได้รวม +20%",
+      "description": "หากจัดทีมพืชครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "พืช":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.7 },
+        { "type": "teamPowerRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.20 }
       ]
         }
@@ -8641,11 +8663,11 @@
     "image": "12.png",
     "ability": {
       "name": "ปราณสายฟ้ากระบวนท่าที่ 1...",
-      "description": "หากจัดทีมสายฟ้าครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+70% ,รายได้รวม +20%",
+      "description": "หากจัดทีมสายฟ้าครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "สายฟ้า":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.7 },
+        { "type": "teamPowerRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.20 }
       ]
         }
@@ -8666,11 +8688,11 @@
     "image": "13.png",
     "ability": {
       "name": "ตรีสหกโลกธาตุรวมเป็น1...",
-      "description": "หากจัดทีมเหล็กครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+70% ,รายได้รวม +20%",
+      "description": "หากจัดทีมเหล็กครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "เหล็ก":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamHpRate", "value": 0.7 },
+        { "type": "teamHpRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.20 }
       ]
         }
@@ -8691,11 +8713,11 @@
     "image": "36.png",
     "ability": {
       "name": "พี่ชายมายบราเทอร์...",
-      "description": "หากจัดทีมไฟครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+70% ,รายได้รวม +20%",
+      "description": "หากจัดทีมไฟครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "ไฟ":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.7 },
+        { "type": "teamPowerRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.20 }
       ]
         }
@@ -8716,11 +8738,11 @@
     "image": "14.png",
     "ability": {
       "name": "จงลิ้มรสดาบฉันซ้ะ...",
-      "description": "หากจัดทีมความมืดครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+60% ,รายได้รวม +25%",
+      "description": "หากจัดทีมความมืดครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +25%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "ความมืด":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamHpRate", "value": 0.6 },
+        { "type": "teamHpRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.25 }
       ]
         }
@@ -8741,11 +8763,11 @@
     "image": "15.png",
     "ability": {
       "name": "ประกายแสงแห่งหวัง...",
-      "description": "หากจัดทีมแสงครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+60% ,รายได้รวม +25%",
+      "description": "หากจัดทีมแสงครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +25%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "แสง":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.6 },
+        { "type": "teamPowerRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.25 }
       ]
         }
@@ -8766,11 +8788,11 @@
     "image": "16.png",
     "ability": {
       "name": "ลิ้มรสพิษของฉันไหม...",
-      "description": "หากจัดทีมน้ำครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+70% ,รายได้รวม +20%",
+      "description": "หากจัดทีมน้ำครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "น้ำ":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamHpRate", "value": 0.7 },
+        { "type": "teamHpRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.2 }
       ]
         }
@@ -8791,11 +8813,11 @@
     "image": "17.png",
     "ability": {
       "name": "เงินอยู่ในอากาศ...",
-      "description": "หากจัดทีมลมครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+70% ,รายได้รวม +20%",
+      "description": "หากจัดทีมลมครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"minElementCount": { "ลม":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.7 },
+        { "type": "teamPowerRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.2 }
       ]
         }
@@ -8816,11 +8838,11 @@
     "image": "18.png",
     "ability": {
       "name": "เค้กชิ้นนี้ซื้อที่ไหนคะ...",
-      "description": "หากจัดทีมดินครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+70% ,รายได้รวม +20%",
+      "description": "หากจัดทีมดินครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +20%",
       "activeIn": ["team", "tower", "arena"],
       "condition": { "minElementCount": { "ดิน":5}, "leaderOnly": true},
       "effects": [
-        { "type": "teamHpRate", "value": 0.7 },
+        { "type": "teamHpRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.2 }
       ]
         }
@@ -8867,7 +8889,7 @@
     "image": "20.png",
     "ability": {
       "name": "ลูกน้องของข้าตามข้ามา...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุพืชได้รับ ATK/HP +40%,และฮิต+1",
+      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุพืชได้รับ ATK/HP +40%,และได้เจาะโล่+1",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinAwaken": 9, "minElementCount": { "พืช":2}, "leaderOnly": true},
       "effects": [
@@ -8893,7 +8915,7 @@
     "image": "21.png",
     "ability": {
       "name": "ไม่มีอะไรต้องกังวล...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุสายฟ้าได้รับ ATK/HP +40%,และฮิต+1",
+      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุสายฟ้าได้รับ ATK/HP +40%,และได้เจาะโล่+1",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinAwaken": 9, "minElementCount": { "สายฟ้า":2}, "leaderOnly": true},
       "effects": [
@@ -8997,7 +9019,7 @@
     "image": "25.png",
     "ability": {
       "name": "แกมันกระจอก...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุแสงได้รับ ATK/HP +40%,และฮิต+1",
+      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุแสงได้รับ ATK/HP +40%,และเจาะโล่+1",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinAwaken": 9, "minElementCount": { "แสง":2}, "leaderOnly": true},
       "effects": [
@@ -9023,7 +9045,7 @@
     "image": "26.png",
     "ability": {
       "name": "เฮเทคเคน!!!",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุลมได้รับ ATK/HP +40%,และฮิต+1",
+      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุลมได้รับ ATK/HP +40%,และเจาะโล่+1",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinAwaken": 9, "minElementCount": { "ลม":2}, "leaderOnly": true},
       "effects": [
@@ -9049,7 +9071,7 @@
     "image": "27.png",
     "ability": {
       "name": "ไปซ้ะให้พ้น...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุไฟได้รับ ATK/HP +40%,และฮิต+1",
+      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุไฟได้รับ ATK/HP +40%,และเจาะโล่+1",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinAwaken": 9, "minElementCount": { "ไฟ":2}, "leaderOnly": true},
       "effects": [
@@ -9199,11 +9221,11 @@
     "image": "33.png",
     "ability": {
       "name": "ทหารเรือปกป้องประชาชน...",
-      "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ได้โล่ +1",
+      "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ได้โล่ +2",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinLevel": 100, "sourceMinAwaken": 13},
       "effects": [
-        { "type": "shieldHits", "value": 1 }
+        { "type": "shieldHits", "value": 2 }
       ]
         }
   },
@@ -9223,7 +9245,7 @@
     "image": "34.png",
     "ability": {
       "name": "ความจริงมีเพียง1เดียว...",
-      "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ได้ฮิต +1",
+      "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ได้เจาะโล่ +1",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinLevel": 100, "sourceMinAwaken": 13},
       "effects": [
@@ -9247,12 +9269,12 @@
     "image": "35.png",
     "ability": {
       "name": "จงตื่น...ตัวฉัน",
-      "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ค่าโชค +10%,เรทกาชา ระดับ SR/SSR +5%",
+      "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ค่าโชค +5%,เรทกาชา ระดับ SR/SSR +5%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinLevel": 100, "sourceMinAwaken": 13},
       "effects": [
         { "type": "gachaRarityRate", "value": 0.05, "targetRarities": ["SR", "SSR"] },
-        { "type": "luckRate", "value": .10 }
+        { "type": "luckRate", "value": .05 }
       ]
         }
   }
