@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-19-arena-readability-summary-scroll-v42">
+  <meta name="gacha-app-build" content="2026-06-19-critical-rate-targeting-v43">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -6033,6 +6033,11 @@
       defenseAwakenGrowthScale: 0.70,
       combatDefenseWeight: 1.00,
       combatMinimumDamageRate: 0.05,
+      // เพิ่มโดยอลิซ: ระบบคริติคอลแทนค่าโชคเดิม
+      // ค่า 0.05 = โอกาสคริติคอลพื้นฐาน 5% และคริติคอลสร้างดาเมจ x1.5
+      combatBaseCriticalRate: 0.05,
+      combatMaxCriticalRate: 1.00,
+      combatCriticalDamageMultiplier: 1.50,
       combatMultiHitPenalty: 0.025,
       combatMultiHitMinEfficiency: 0.82,
       combatMaxAttackHits: 99,
@@ -6470,7 +6475,7 @@
            { "type": "enemyPowerRate", "value": -0.10 },
            { "type": "enemyHpRate", "value": -0.10 },
            { "type": "enemyDefenseRate", "value": -0.08 },
-           { "type": "luckRate", "value": 0.12 },
+           { "type": "criticalRate", "value": 0.12 },
            { "type": "gachaRarityRate", "value": 0.15, "targetRarities": ["UR", "LR", "EX", "SC"] },
            { "type": "selfPowerRate", "value": 0.25 },
            { "type": "selfHpRate", "value": 0.25 },
@@ -6529,7 +6534,12 @@
        - การโจมตีหลายฮิตไม่ได้คูณ ATK ฟรี แต่แบ่ง ATK รวมเป็นหลายฮิตเพื่อเจาะโล่ได้ดีขึ้น
        - การ์ดแต่ละใบใส่ "hp": 620000 เพื่อกำหนด HP; ค่า defense เดิมในไฟล์นี้ถูกย้ายมาเป็น hp แล้ว
        - ใส่ "defense": 180000 เพื่อกำหนด DEF ใหม่; หากไม่ใส่ ระบบสร้าง DEF จาก ATK อัตโนมัติ
-       - luckRate เพิ่มโอกาสสุ่มค่าต่อสู้ฝั่งเรา ไม่แก้เรทกาชา
+       - criticalRate เพิ่ม/ลดอัตราคริติคอลแบบเปอร์เซ็นต์พอยต์ เช่น 0.20 = +20%, -0.10 = -10%
+       - criticalRate รองรับ targetSide: "ally" / "self" / "enemy" และเลือกกลุ่มด้วย targetCardIds / targetElements / targetRarities
+       - ตัวอย่างทั้งทีม: { "type": "criticalRate", "value": 0.20, "targetSide": "ally" }
+       - ตัวอย่างเฉพาะตัวเอง: { "type": "criticalRate", "value": 0.30, "targetSide": "self" }
+       - ตัวอย่างลดคริศัตรูธาตุไฟ: { "type": "criticalRate", "value": -0.25, "targetSide": "enemy", "targetElements": ["ไฟ"] }
+       - luckRate เดิมยังอ่านได้เพื่อรองรับข้อมูลเก่า แต่จะทำงานเป็น criticalRate แทนและไม่สุ่มแกว่งดาเมจอีกต่อไป
        - gachaRarityRate เพิ่ม “น้ำหนักสุ่ม” ของระดับที่กำหนด เช่น 0.15 = น้ำหนักระดับนั้น +15% แล้วระบบคำนวณเปอร์เซ็นต์จริงใหม่
        - effect แต่ละรายการใส่ condition ของตัวเองเพิ่มได้
        - cardPowerRate/cardHpRate/cardDefenseRate/cardIncomeRate ใช้ targetCardIds เพื่อเพิ่มค่าสเตตัสเฉพาะ ID ที่กำหนด
@@ -6554,7 +6564,8 @@
       ENEMY_POWER_RATE: "enemyPowerRate",
       ENEMY_HP_RATE: "enemyHpRate",
       ENEMY_DEFENSE_RATE: "enemyDefenseRate",
-      LUCK_RATE: "luckRate",
+      CRITICAL_RATE: "criticalRate",
+      LUCK_RATE: "luckRate", // รองรับข้อมูลเก่า: ทำงานเป็นอัตราคริติคอล
       GACHA_RARITY_RATE: "gachaRarityRate",
       SELF_POWER_RATE: "selfPowerRate",
       SELF_HP_RATE: "selfHpRate",
@@ -7115,11 +7126,11 @@
     "image": "45.png",
     "ability": {
       "name": "เทพแห่งดวงดาว",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; โชคในการต่อสู้+20% เรทกาชา EX/SC +25% รายได้+30%",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; อัตราคริติคอล +20% เรทกาชา EX/SC +25% รายได้+30%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
       "effects": [
-        { "type": "luckRate", "value": 0.2 },
+        { "type": "criticalRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.25 },
         { "type": "gachaRarityRate", "value": 0.30, "targetRarities": ["EX", "SC"] }
       ]
@@ -7585,11 +7596,11 @@
     "image": "1022.png",
     "ability": {
       "name": "ไม่ว่าอะไรก็จะเป็นเรื่องตลกไปหมด5555",
-      "description": "หากอเวกตัน/เลเวลตัน จะได้รับความสามารถ; เพิ่มโชคในการต่อสู้ +90% และเพิ่มเรทกาชา SC/EX 50%",
+      "description": "หากอเวกตัน/เลเวลตัน จะได้รับความสามารถ; เพิ่มอัตราคริติคอล +90% และเพิ่มเรทกาชา SC/EX 50%",
       "activeIn": ["team", "tower", "arena"],
       "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 220 },
       "effects": [
-        { "type": "luckRate", "value": 0.9 },
+        { "type": "criticalRate", "value": 0.9 },
         { "type": "gachaRarityRate", "value": 0.5, "targetRarities": ["EX", "SC"],"condition": { "mode": "team" } }
       ]
     }
@@ -8029,7 +8040,7 @@
     "image": "1013.png",
     "ability": {
       "name": "มายบราเทอร์",
-      "description": "เพิ่มโชคในการต่อสู้ 10%, เมื่อจัดทีมกับ 'Itadori Yuji'ระดับ UR ในทีมแค่ 2 คน; ATK/HP +2000% /โจมตีและโล่เพิ่มอย่างละ +4",
+      "description": "เพิ่มอัตราคริติคอล 10%, เมื่อจัดทีมกับ 'Itadori Yuji'ระดับ UR ในทีมแค่ 2 คน; ATK/HP +2000% /โจมตีและโล่เพิ่มอย่างละ +4",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"requiredCardIds": [1009], "maxTeamSize": 2
       },
@@ -8038,7 +8049,7 @@
         { "type": "teamHpRate", "value": 20.0 },
         { "type": "shieldHits", "value": 4 },
         { "type": "attackHits", "value": 4 },
-        { "type": "luckRate", "value": 0.10 }
+        { "type": "criticalRate", "value": 0.10 }
       ]
     }
   },
@@ -8058,11 +8069,11 @@
     "image": "1014.png",
     "ability": {
       "name": "ลัคกี้...",
-      "description": "เพิ่มโชคในการต่อสู้ 25%, เพิ่มเรทกาชา ;UR/LR/EX +14%",
+      "description": "เพิ่มอัตราคริติคอล 25%, เพิ่มเรทกาชา ;UR/LR/EX +14%",
       "activeIn": ["team", "tower"],
       "condition": { "mode": "tower"},
       "effects": [
-        { "type": "luckRate", "value": 0.25 },
+        { "type": "criticalRate", "value": 0.25 },
         { "type": "gachaRarityRate", "value": 0.14, "targetRarities": ["UR", "LR", "EX"] }
       ]
     }
@@ -9269,12 +9280,12 @@
     "image": "35.png",
     "ability": {
       "name": "จงตื่น...ตัวฉัน",
-      "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม ค่าโชค +5%,เรทกาชา ระดับ SR/SSR +5%",
+      "description": "หากการ์ดนี้เลเวล 100/อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีม อัตราคริติคอล +5%,เรทกาชา ระดับ SR/SSR +5%",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinLevel": 100, "sourceMinAwaken": 13},
       "effects": [
         { "type": "gachaRarityRate", "value": 0.05, "targetRarities": ["SR", "SSR"] },
-        { "type": "luckRate", "value": .05 }
+        { "type": "criticalRate", "value": .05 }
       ]
         }
   }
@@ -10732,11 +10743,11 @@
       }),
       "ไร้ธาตุ": Object.freeze({
         name: "ไร้ธาตุ",
-        description: "รายได้ทีม +6%, ค่าโชคต่อสู้ +4% ",
+        description: "รายได้ทีม +6%, อัตราคริติคอล +4% ",
         activeIn: ["team", "tower", "arena"],
         effects: [
           { type: "teamIncomeRate", value: 0.06 },
-          { type: "luckRate", value: 0.04 }
+          { type: "criticalRate", value: 0.04 }
         ]
       })
     });
@@ -10965,7 +10976,9 @@
         enemyPowerRate: 0,
         enemyHpRate: 0,
         enemyDefenseRate: 0,
-        luckRate: 0,
+        criticalRate: Math.max(0, Number(CONFIG.combatBaseCriticalRate) || 0),
+        cardCriticalRates: {},
+        enemyCriticalRateSelectors: [],
         gachaRarityRates: {},
         teamPowerFlat: 0,
         teamHpFlat: 0,
@@ -11018,6 +11031,7 @@
       mergeExternalAbilityRateMap(summary.cardPowerRates, options.externalCardPowerRates, context);
       mergeExternalAbilityRateMap(summary.cardHpRates, options.externalCardHpRates, context);
       mergeExternalAbilityRateMap(summary.cardDefenseRates, options.externalCardDefenseRates, context);
+      mergeExternalAbilityRateMap(summary.cardCriticalRates, options.externalCardCriticalRates, context);
       mergeExternalAbilityRateMap(summary.cardIncomeRates, options.externalCardIncomeRates, context);
       mergeExternalAbilityRateMap(summary.triggerCostChanges, options.externalTriggerCostChanges, context);
 
@@ -11078,7 +11092,13 @@
               case CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE: summary.enemyPowerRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE: summary.enemyHpRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE: summary.enemyDefenseRate += value; break;
-              case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE: summary.luckRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE:
+              case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                if (side === "enemy") summary.enemyCriticalRateSelectors.push({ sourceCard, ability, effect: record });
+                else addAbilityMapRate(summary.cardCriticalRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                break;
+              }
               case CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE:
                 addAbilityMapRate(summary.gachaRarityRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
                 break;
@@ -11209,6 +11229,9 @@
       summary.enemyPowerRate = Math.max(-0.90, summary.enemyPowerRate);
       summary.enemyHpRate = Math.max(-0.90, summary.enemyHpRate);
       summary.enemyDefenseRate = Math.max(-0.90, summary.enemyDefenseRate);
+      Object.keys(summary.cardCriticalRates).forEach(id => {
+        summary.cardCriticalRates[id] = Math.max(-1, Math.min(1, Number(summary.cardCriticalRates[id]) || 0));
+      });
       const maxAttackHitDelta = Math.max(0, Number(CONFIG.combatMaxAttackHits || 1) - 1);
       const maxShieldHitDelta = Math.max(0, Number(CONFIG.combatMaxShieldHits || 0));
       summary.attackHits = Math.max(-maxAttackHitDelta, Math.min(maxAttackHitDelta, Math.round(summary.attackHits)));
@@ -11219,7 +11242,7 @@
       summary.enemyHealingRate = Math.max(-1, Math.min(5, Number(summary.enemyHealingRate) || 0));
       summary.shieldRecoveryRate = Math.max(-1, Math.min(5, Number(summary.shieldRecoveryRate) || 0));
       summary.enemyShieldRecoveryRate = Math.max(-1, Math.min(5, Number(summary.enemyShieldRecoveryRate) || 0));
-      summary.luckRate = Math.max(-0.75, Math.min(2, summary.luckRate));
+      summary.criticalRate = getTeamCriticalRate(context.cards, summary, false);
       Object.keys(summary.gachaRarityRates).forEach(rarity => {
         summary.gachaRarityRates[rarity] = Math.max(-0.90, Math.min(5, Number(summary.gachaRarityRates[rarity]) || 0));
       });
@@ -11244,6 +11267,7 @@
           externalCardPowerRates: resolveEnemyRateMap(enemyControl.enemyCardPowerSelectors, allyContext),
           externalCardHpRates: resolveEnemyRateMap(enemyControl.enemyCardHpSelectors, allyContext),
           externalCardDefenseRates: resolveEnemyRateMap(enemyControl.enemyCardDefenseSelectors, allyContext),
+          externalCardCriticalRates: resolveEnemyRateMap(enemyControl.enemyCriticalRateSelectors, allyContext),
           externalCardIncomeRates: resolveEnemyRateMap(enemyControl.enemyCardIncomeSelectors, allyContext),
           externalTriggerCostChanges: resolveEnemyRateMap(enemyControl.enemyTriggerCostSelectors, allyContext)
         }),
@@ -11254,6 +11278,7 @@
           externalCardPowerRates: resolveEnemyRateMap(allyControl.enemyCardPowerSelectors, enemyContext),
           externalCardHpRates: resolveEnemyRateMap(allyControl.enemyCardHpSelectors, enemyContext),
           externalCardDefenseRates: resolveEnemyRateMap(allyControl.enemyCardDefenseSelectors, enemyContext),
+          externalCardCriticalRates: resolveEnemyRateMap(allyControl.enemyCriticalRateSelectors, enemyContext),
           externalCardIncomeRates: resolveEnemyRateMap(allyControl.enemyCardIncomeSelectors, enemyContext),
           externalTriggerCostChanges: resolveEnemyRateMap(allyControl.enemyTriggerCostSelectors, enemyContext)
         })
@@ -11348,6 +11373,43 @@
       return getCardIncome(card) * Math.max(0, 1 + rate);
     }
 
+    function clampCriticalRate(value) {
+      const cap = Math.max(0, Math.min(1, Number(CONFIG.combatMaxCriticalRate ?? 1)));
+      return Math.max(0, Math.min(cap, Number(value) || 0));
+    }
+
+    function getAbilityAdjustedCardCriticalRate(card, abilitySummary = {}) {
+      const base = Math.max(0, Number(CONFIG.combatBaseCriticalRate) || 0);
+      if (!card) return clampCriticalRate(base);
+      return clampCriticalRate(base + Number(abilitySummary.cardCriticalRates && abilitySummary.cardCriticalRates[String(card.id)] || 0));
+    }
+
+    function getTeamCriticalRate(team = [], abilitySummary = {}, snapshotMode = false) {
+      const items = abilityArray(team).filter(Boolean);
+      const base = clampCriticalRate(CONFIG.combatBaseCriticalRate);
+      if (!items.length) return base;
+      let totalPower = 0;
+      let weightedRate = 0;
+      items.forEach(item => {
+        const id = String(item && typeof item === "object" ? item.id || "" : item || "");
+        const card = CARD_BY_ID.get(id) || (item && typeof item === "object" ? item : null);
+        if (!card) return;
+        const power = snapshotMode && item && typeof item === "object"
+          ? Math.max(1, getSnapshotAdjustedStat(item, abilitySummary, "power"))
+          : Math.max(1, getAbilityAdjustedCardPower(card, abilitySummary));
+        const rate = clampCriticalRate(base + Number(abilitySummary.cardCriticalRates && abilitySummary.cardCriticalRates[id] || 0));
+        totalPower += power;
+        weightedRate += power * rate;
+      });
+      return totalPower > 0 ? clampCriticalRate(weightedRate / totalPower) : base;
+    }
+
+    function getEnemyTargetCriticalSummary(selectors = [], targetTeam = [], mode = "arena") {
+      const ids = abilityArray(targetTeam).map(item => String(item && typeof item === "object" ? item.id || "" : item || "")).filter(Boolean);
+      const context = buildAbilityContext(ids, mode);
+      return { cardCriticalRates: resolveEnemyRateMap(selectors, context) };
+    }
+
     function signedPercent(value) {
       const percent = Math.round(Number(value || 0) * 1000) / 10;
       return `${percent > 0 ? "+" : ""}${percent}%`;
@@ -11390,7 +11452,8 @@
         enemyPowerRate: `ATK ฝ่ายตรงข้าม ${signedPercent(value)}`,
         enemyHpRate: `HP ฝ่ายตรงข้าม ${signedPercent(value)}`,
         enemyDefenseRate: `DEF ฝ่ายตรงข้าม ${signedPercent(value)}`,
-        luckRate: `ค่าโชค ${signedPercent(value)}`,
+        criticalRate: `อัตราคริติคอล ${targetText} ${signedPercent(value)}`,
+        luckRate: `อัตราคริติคอล ${targetText} ${signedPercent(value)} (ข้อมูลเก่า)`,
         gachaRarityRate: `น้ำหนักกาชาระดับ ${rarityText} ${signedPercent(value)}`,
         selfPowerRate: `ATK ของการ์ดนี้ ${signedPercent(value)}`,
         selfHpRate: `HP ของการ์ดนี้ ${signedPercent(value)}`,
@@ -11522,13 +11585,8 @@
         </div>`;
     }
 
-    function getLuckRollMultiplier(luckRate = 0, baseMin = .90, baseSpread = .22) {
-      const luck = Math.max(-.75, Math.min(2, Number(luckRate || 0)));
-      const baseRoll = baseMin + Math.random() * baseSpread;
-      const luckRoll = luck >= 0
-        ? 1 + luck * (.35 + Math.random() * .65)
-        : Math.max(.2, 1 + luck * (.25 + Math.random() * .45));
-      return baseRoll * luckRoll;
+    function rollCriticalHit(criticalRate = 0) {
+      return Math.random() < clampCriticalRate(criticalRate);
     }
 
     function getCardPower(card) {
@@ -11675,6 +11733,8 @@
           enemyHealingRateChange: clampRate(item.enemyHealingRateChange),
           shieldRecoveryRateChange: clampRate(item.shieldRecoveryRateChange),
           enemyShieldRecoveryRateChange: clampRate(item.enemyShieldRecoveryRateChange),
+          criticalRateChange: Math.max(-1, Math.min(1, Number(item.criticalRateChange) || 0)),
+          enemyCriticalRateChange: Math.max(-1, Math.min(1, Number(item.enemyCriticalRateChange) || 0)),
           maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
           attackStackGain: Math.max(0, Number(item.attackStackGain || 0)),
           maxStacks: Math.max(0, Math.floor(Number(item.maxStacks || 0))),
@@ -11698,6 +11758,8 @@
         const shieldHits = applyCombatShieldHitModifier(Number(options[`${prefix}ShieldHits`]) || 0, 0);
         const healingRate = clampRate(options[`${prefix}HealingRate`]);
         const shieldRecoveryRate = clampRate(options[`${prefix}ShieldRecoveryRate`]);
+        const criticalRate = clampCriticalRate(options[`${prefix}CriticalRate`] ?? CONFIG.combatBaseCriticalRate);
+        const criticalDamageMultiplier = Math.max(1, Number(options[`${prefix}CriticalDamageMultiplier`] || CONFIG.combatCriticalDamageMultiplier || 1.5));
         return {
           initialAttack,
           attack: initialAttack,
@@ -11712,10 +11774,14 @@
           shieldRecoveryRate,
           initialHealingRate: healingRate,
           initialShieldRecoveryRate: shieldRecoveryRate,
+          criticalRate,
+          initialCriticalRate: criticalRate,
+          criticalDamageMultiplier,
           pendingAttackHits: 0,
           activeTriggers: normalizeTriggers(options[`${prefix}ActiveTriggers`]),
           totalDamage: 0,
           totalHealing: 0,
+          totalCriticalHits: 0,
           totalTriggerActivations: 0
         };
       }
@@ -11744,6 +11810,8 @@
             enemyHealingRateChange: trigger.enemyHealingRateChange,
             shieldRecoveryRateChange: trigger.shieldRecoveryRateChange,
             enemyShieldRecoveryRateChange: trigger.enemyShieldRecoveryRateChange,
+            criticalRateChange: trigger.criticalRateChange,
+            enemyCriticalRateChange: trigger.enemyCriticalRateChange,
             maxHpGain: trigger.maxHpGain,
             attackStackGain: trigger.attackStackGain,
             triggerCostChanges: { ...trigger.triggerCostChanges },
@@ -11761,6 +11829,8 @@
           enemyHealingRateChange: fired.reduce((sum, trigger) => sum + trigger.enemyHealingRateChange, 0),
           shieldRecoveryRateChange: fired.reduce((sum, trigger) => sum + trigger.shieldRecoveryRateChange, 0),
           enemyShieldRecoveryRateChange: fired.reduce((sum, trigger) => sum + trigger.enemyShieldRecoveryRateChange, 0),
+          criticalRateChange: fired.reduce((sum, trigger) => sum + trigger.criticalRateChange, 0),
+          enemyCriticalRateChange: fired.reduce((sum, trigger) => sum + trigger.enemyCriticalRateChange, 0),
           maxHpGain: fired.reduce((sum, trigger) => sum + trigger.maxHpGain, 0),
           attackStackGain: stackable.reduce((sum, trigger) => sum + trigger.attackStackGain, 0),
           triggerCostChanges: fired.reduce((map, trigger) => {
@@ -11884,6 +11954,8 @@
         defender.healingRate = clampRate(defender.healingRate + activation.enemyHealingRateChange);
         attacker.shieldRecoveryRate = clampRate(attacker.shieldRecoveryRate + activation.shieldRecoveryRateChange);
         defender.shieldRecoveryRate = clampRate(defender.shieldRecoveryRate + activation.enemyShieldRecoveryRateChange);
+        attacker.criticalRate = clampCriticalRate(attacker.criticalRate + activation.criticalRateChange);
+        defender.criticalRate = clampCriticalRate(defender.criticalRate + activation.enemyCriticalRateChange);
 
         const selfShieldChange = applyShieldChange(attacker, activation.restoreShieldHits);
         const enemyShieldChange = applyShieldChange(defender, activation.enemyShieldHitsChange);
@@ -11895,7 +11967,10 @@
         const activeHits = applyCombatAttackHitModifier(baseHitsThisTurn, activation.extraHits);
         const attackStackGain = Math.max(0, Number(activation.attackStackGain || 0));
         const activeAttack = Math.max(1, attacker.attack + activation.attackBonus + attackStackGain);
-        const exchange = resolveCombatExchange(activeAttack, defender.defense, activeHits, defender.shieldHits, variance);
+        const critical = rollCriticalHit(attacker.criticalRate);
+        const criticalMultiplier = critical ? attacker.criticalDamageMultiplier : 1;
+        const exchange = resolveCombatExchange(activeAttack, defender.defense, activeHits, defender.shieldHits, variance * criticalMultiplier);
+        if (critical) attacker.totalCriticalHits += 1;
         defender.shieldHits = Math.max(0, defender.shieldHits - exchange.blockedHits);
 
         let damage = exchange.unblockedHits > 0 ? Math.max(1, Number(exchange.damage || 0)) : 0;
@@ -11944,6 +12019,9 @@
           blockedHits: exchange.blockedHits,
           unblockedHits: exchange.unblockedHits,
           damage,
+          critical,
+          criticalRate: attacker.criticalRate,
+          criticalMultiplier,
           defenderDefense: defender.defense,
           triggerActivated: activation.fired.length > 0,
           triggeredSkills: activation.names,
@@ -11966,6 +12044,8 @@
           enemyHealingRate: defender.healingRate,
           shieldRecoveryRate: attacker.shieldRecoveryRate,
           enemyShieldRecoveryRate: defender.shieldRecoveryRate,
+          criticalRateChange: activation.criticalRateChange,
+          enemyCriticalRateChange: activation.enemyCriticalRateChange,
           playerRemaining: player.hp,
           enemyRemaining: enemy.hp,
           playerShieldRemaining: player.shieldHits,
@@ -11989,7 +12069,7 @@
         turns.push({
           round, side: actingSide, hits, baseHits: hits, passiveBaseHits: attacker.attackHits, pendingHitChange,
           activeHitChange: 0, extraHits: 0, hitReduction: 0, requestedExtraHits: 0, enemyNextAttackHits: 0,
-          blockedHits: 0, unblockedHits: hits, damage, defenderDefense: defender.defense, suddenBreak: true,
+          blockedHits: 0, unblockedHits: hits, damage, critical: false, criticalRate: attacker.criticalRate, criticalMultiplier: 1, defenderDefense: defender.defense, suddenBreak: true,
           triggerActivated: false, triggeredSkills: [], triggeredDetails: [], attackBonus: 0, healHp: 0,
           shieldChange: 0, enemyShieldChange: 0, shieldGain: 0, shieldLoss: 0,
           playerRemaining: player.hp, enemyRemaining: enemy.hp,
@@ -12020,12 +12100,19 @@
         enemyHealingRate: enemy.healingRate,
         playerInitialShieldRecoveryRate: player.initialShieldRecoveryRate,
         enemyInitialShieldRecoveryRate: enemy.initialShieldRecoveryRate,
+        playerInitialCriticalRate: player.initialCriticalRate,
+        enemyInitialCriticalRate: enemy.initialCriticalRate,
+        playerCriticalRate: player.criticalRate,
+        enemyCriticalRate: enemy.criticalRate,
+        criticalDamageMultiplier: Math.max(player.criticalDamageMultiplier, enemy.criticalDamageMultiplier),
         playerShieldRecoveryRate: player.shieldRecoveryRate,
         enemyShieldRecoveryRate: enemy.shieldRecoveryRate,
         playerTotalDamage: player.totalDamage,
         enemyTotalDamage: enemy.totalDamage,
         playerTotalHealing: player.totalHealing,
         enemyTotalHealing: enemy.totalHealing,
+        playerTotalCriticalHits: player.totalCriticalHits,
+        enemyTotalCriticalHits: enemy.totalCriticalHits,
         playerTriggerActivations: player.totalTriggerActivations,
         enemyTriggerActivations: enemy.totalTriggerActivations
       };
@@ -12128,6 +12215,8 @@
       if (Number(detail.enemyHealingRateChange || 0)) chips.push(`ฟื้น HP ศัตรู ${signedPercent(detail.enemyHealingRateChange)}`);
       if (Number(detail.shieldRecoveryRateChange || 0)) chips.push(`ฟื้นโล่ฝ่ายตน ${signedPercent(detail.shieldRecoveryRateChange)}`);
       if (Number(detail.enemyShieldRecoveryRateChange || 0)) chips.push(`ฟื้นโล่ศัตรู ${signedPercent(detail.enemyShieldRecoveryRateChange)}`);
+      if (Number(detail.criticalRateChange || 0)) chips.push(`คริติคอลฝ่ายตน ${signedPercent(detail.criticalRateChange)}`);
+      if (Number(detail.enemyCriticalRateChange || 0)) chips.push(`คริติคอลศัตรู ${signedPercent(detail.enemyCriticalRateChange)}`);
       if (Number(turn.blockedHits || 0)) chips.push(`ศัตรูบล็อก ${formatNumber(turn.blockedHits)} ฮิต`);
       chips.push(`ผ่านโล่ ${formatNumber(turn.unblockedHits || 0)} ฮิต`);
       return chips.map(text => `<span class="active-skill-effect-chip">${escapeHTML(text)}</span>`).join("");
@@ -12270,6 +12359,7 @@
         receivedPendingHitChange: turns.reduce((sum, turn) => sum + Number(turn.pendingHitChange || 0), 0),
         blockedHits: turns.reduce((sum, turn) => sum + Math.max(0, Number(turn.blockedHits || 0)), 0),
         unblockedHits: turns.reduce((sum, turn) => sum + Math.max(0, Number(turn.unblockedHits || 0)), 0),
+        criticalAttacks: turns.filter(turn => turn.critical).length,
         activeTurns: turns.filter(turn => turn.triggerActivated).length,
         maxHits: turns.reduce((max, turn) => Math.max(max, Math.max(0, Number(turn.hits || 0))), 0),
         skills: [...skills.values()]
@@ -12288,6 +12378,7 @@
             <div class="hit-report-metric"><span>ฮิตรวม</span><strong>${formatNumber(summary.totalHits)}</strong></div>
             <div class="hit-report-metric"><span>ฮิตพื้นฐาน</span><strong>${formatNumber(summary.baseHits)}</strong></div>
             <div class="hit-report-metric"><span>เทิร์น ACTIVE</span><strong>${formatNumber(summary.activeTurns)}</strong></div>
+            <div class="hit-report-metric"><span>คริติคอล</span><strong>${formatNumber(summary.criticalAttacks)} ครั้ง</strong></div>
             <div class="hit-report-metric"><span>ผ่านโล่</span><strong>${formatNumber(summary.unblockedHits)}</strong></div>
             <div class="hit-report-metric"><span>ถูกบล็อก</span><strong>${formatNumber(summary.blockedHits)}</strong></div>
             <div class="hit-report-metric"><span>ACTIVE เพิ่มจริง</span><strong>+${formatNumber(summary.extraHits)}</strong></div>
@@ -12299,7 +12390,7 @@
         </div>`;
       const totalHits = player.totalHits + enemy.totalHits;
       const totalBlocked = player.blockedHits + enemy.blockedHits;
-      return `<div class="hit-report-total">ทั้งไฟต์โจมตีรวม ${formatNumber(player.attacks + enemy.attacks)} ครั้ง • ${formatNumber(totalHits)} ฮิต • ผ่านโล่ ${formatNumber(player.unblockedHits + enemy.unblockedHits)} • ถูกบล็อก ${formatNumber(totalBlocked)} • ACTIVE เพิ่มจริง +${formatNumber(player.extraHits + enemy.extraHits)} / ลดจริง -${formatNumber(player.hitReduction + enemy.hitReduction)} ฮิต</div><div class="hit-report-grid">${sideHTML(player, labels.player || "ทีมของคุณ")}${sideHTML(enemy, labels.enemy || "ฝ่ายตรงข้าม", true)}</div>`;
+      return `<div class="hit-report-total">ทั้งไฟต์โจมตีรวม ${formatNumber(player.attacks + enemy.attacks)} ครั้ง • คริติคอล ${formatNumber(player.criticalAttacks)}/${formatNumber(enemy.criticalAttacks)} ครั้ง • ${formatNumber(totalHits)} ฮิต • ผ่านโล่ ${formatNumber(player.unblockedHits + enemy.unblockedHits)} • ถูกบล็อก ${formatNumber(totalBlocked)} • ACTIVE เพิ่มจริง +${formatNumber(player.extraHits + enemy.extraHits)} / ลดจริง -${formatNumber(player.hitReduction + enemy.hitReduction)} ฮิต</div><div class="hit-report-grid">${sideHTML(player, labels.player || "ทีมของคุณ")}${sideHTML(enemy, labels.enemy || "ฝ่ายตรงข้าม", true)}</div>`;
     }
 
     function renderCombatHitReport(targetId, combat, labels = {}) {
@@ -12322,9 +12413,10 @@
         const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
         const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
         const activeText = turn.triggerActivated
-          ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.enemyNextAttackHits ? ` • ฮิตครั้งถัดไปศัตรู ${turn.enemyNextAttackHits >= 0 ? "+" : ""}${formatNumber(turn.enemyNextAttackHits)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}${turn.enemyShieldChange ? ` • โล่ศัตรู ${turn.enemyShieldChange >= 0 ? "+" : ""}${formatNumber(turn.enemyShieldChange)}` : ""}`
+          ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.enemyNextAttackHits ? ` • ฮิตครั้งถัดไปศัตรู ${turn.enemyNextAttackHits >= 0 ? "+" : ""}${formatNumber(turn.enemyNextAttackHits)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}${turn.enemyShieldChange ? ` • โล่ศัตรู ${turn.enemyShieldChange >= 0 ? "+" : ""}${formatNumber(turn.enemyShieldChange)}` : ""}${turn.criticalRateChange ? ` • คริฝ่ายตน ${signedPercent(turn.criticalRateChange)}` : ""}${turn.enemyCriticalRateChange ? ` • คริศัตรู ${signedPercent(turn.enemyCriticalRateChange)}` : ""}`
           : "";
-        result.textContent = `รอบ ${turn.round} • ${attackerLabel} โจมตี ${turn.hits} ฮิต${blockText}${activeText} • ${defenderLabel} เสีย HP ${formatNumber(turn.damage)} เหลือ ${formatNumber(remaining)}`;
+        const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
+        result.textContent = `รอบ ${turn.round} • ${attackerLabel} โจมตี ${turn.hits} ฮิต${criticalText}${blockText}${activeText} • ${defenderLabel} เสีย HP ${formatNumber(turn.damage)} เหลือ ${formatNumber(remaining)}`;
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
             await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
@@ -12462,6 +12554,9 @@
             enemyHealingRateChange: 0,
             shieldRecoveryRateChange: 0,
             enemyShieldRecoveryRateChange: 0,
+            criticalRateWeightedChange: 0,
+            criticalRateChange: 0,
+            enemyCriticalRateChange: 0,
             maxHpGain: 0,
             attackStackGain: 0,
             maxStacks: 0,
@@ -12509,6 +12604,11 @@
             if (side === "enemy") group.enemyShieldRecoveryRateChange += value;
             else group.shieldRecoveryRateChange += value;
             break;
+          case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE:
+            if (side === "enemy") group.enemyCriticalRateChange += value;
+            else group.criticalRateWeightedChange += targetPower * value;
+            break;
           case CARD_ABILITY_EFFECT_TYPES.INCREASE_MAX_HP_BASE_RATE:
             group.maxHpGain += Math.max(0, targetHp * value);
             break;
@@ -12549,6 +12649,8 @@
         enemyHealingRateChange: Math.max(-1, Math.min(5, Number(item.enemyHealingRateChange || 0))),
         shieldRecoveryRateChange: Math.max(-1, Math.min(5, Number(item.shieldRecoveryRateChange || 0))),
         enemyShieldRecoveryRateChange: Math.max(-1, Math.min(5, Number(item.enemyShieldRecoveryRateChange || 0))),
+        criticalRateChange: Math.max(-1, Math.min(1, teamPower > 0 ? Number(item.criticalRateWeightedChange || 0) / teamPower : 0)),
+        enemyCriticalRateChange: Math.max(-1, Math.min(1, Number(item.enemyCriticalRateChange || 0))),
         maxHpGain: Math.max(0, Math.min(teamHp * 10, Number(item.maxHpGain || 0))),
         attackStackGain: Math.max(0, Math.min(teamPower, Number(item.attackStackGain || 0))),
         maxStacks: Math.max(0, Math.min(20, Math.floor(Number(item.maxStacks || 0)))),
@@ -12560,7 +12662,7 @@
           match: normalizeAbilityTargetMatch(rule && rule.match),
           value: Math.round(Number(rule && rule.value) || 0)
         })).filter(rule => rule.value)
-      })).filter(item => item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length);
+      })).filter(item => item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length);
     }
 
 
@@ -13397,6 +13499,11 @@
       const enemyShieldHits = enemy ? applyCombatShieldHitModifier(enemyBaseShieldHits, abilitySummary.enemyShieldHits) : 0;
       const enemyHealingRate = getCombatHealingRate(enemyAbilitySummary, abilitySummary.enemyHealingRate);
       const enemyShieldRecoveryRate = getCombatShieldRecoveryRate(enemyAbilitySummary, abilitySummary.enemyShieldRecoveryRate);
+      const criticalRate = getTeamCriticalRate(teamIds, abilitySummary, false);
+      const enemyCriticalBaseSummary = enemyTeamIds.length
+        ? enemyAbilitySummary
+        : { ...enemyAbilitySummary, ...getEnemyTargetCriticalSummary(abilitySummary.enemyCriticalRateSelectors, enemyTeam, "arena") };
+      const enemyCriticalRate = enemy ? getTeamCriticalRate(enemyTeam, enemyCriticalBaseSummary, true) : clampCriticalRate(CONFIG.combatBaseCriticalRate);
       const playerPreview = enemy ? resolveCombatExchange(effectiveAttack, enemyEffectiveDefense, attackHits, enemyShieldHits, 1) : null;
       const enemyPreview = enemy ? resolveCombatExchange(enemyAttack, effectiveDefense, enemyAttackHits, shieldHits, 1) : null;
       const totalCombatPower = calculateCombatPower(effectiveAttack, effectiveHp, effectiveDefense, attackHits, shieldHits);
@@ -13409,9 +13516,10 @@
         enemyBasePower, enemyBaseHp, enemyBaseDefense,
         enemyEffectivePower: enemyAttack, enemyAttack, enemyEffectiveHp, enemyEffectiveDefense, enemyCombatPower,
         enemyAttackHits, enemyShieldHits, enemyHealingRate, enemyShieldRecoveryRate,
+        criticalRate, enemyCriticalRate,
         playerActiveTriggers: buildTeamBattleTriggerConfigs(teamIds, abilitySummary, false),
         enemyActiveTriggers: buildTeamBattleTriggerConfigs(enemyTeam, enemyAbilitySummary, true),
-        playerPreview, enemyPreview, matchup, luckRate: abilitySummary.luckRate
+        playerPreview, enemyPreview, matchup
       };
     }
 
@@ -13503,9 +13611,13 @@
         enemyShieldHits: stats.enemyShieldHits,
         enemyHealingRate: stats.enemyHealingRate,
         enemyShieldRecoveryRate: stats.enemyShieldRecoveryRate,
+        playerCriticalRate: stats.criticalRate,
+        enemyCriticalRate: stats.enemyCriticalRate,
+        playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
+        enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         playerActiveTriggers: stats.playerActiveTriggers,
         enemyActiveTriggers: stats.enemyActiveTriggers,
-        playerVariance: () => getLuckRollMultiplier(stats.luckRate, .91, .18),
+        playerVariance: () => .91 + Math.random() * .18,
         enemyVariance: () => .91 + Math.random() * .18
       });
       // เก็บค่าพลังรวมไว้ให้แสดงด้านบนตลอดระหว่างแอนิเมชันต่อสู้ ARENA
@@ -13531,7 +13643,7 @@
         const enemyShieldUsed = Math.max(0, combat.enemyInitialShieldHits - combat.enemyShieldRemaining);
         const playerHitSummary = getCombatHitSideSummary(combat, "player");
         const enemyHitSummary = getCombatHitSideSummary(combat, "enemy");
-        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE ปรับฮิต +${formatNumber(playerHitSummary.extraHits)}/-${formatNumber(playerHitSummary.hitReduction)} ต่อ +${formatNumber(enemyHitSummary.extraHits)}/-${formatNumber(enemyHitSummary.hitReduction)} • HP เหลือ ${formatNumber(combat.playerRemainingHp)} ต่อ ${formatNumber(combat.enemyRemainingHp)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล HP ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE ปรับฮิต +${formatNumber(playerHitSummary.extraHits)}/-${formatNumber(playerHitSummary.hitReduction)} ต่อ +${formatNumber(enemyHitSummary.extraHits)}/-${formatNumber(enemyHitSummary.hitReduction)} • HP เหลือ ${formatNumber(combat.playerRemainingHp)} ต่อ ${formatNumber(combat.enemyRemainingHp)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล HP ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • คริติคอล ${formatNumber(playerHitSummary.criticalAttacks)}/${formatNumber(enemyHitSummary.criticalAttacks)} ครั้ง • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.arena.points += ARENA_CONFIG.winPoints;
           state.arena.wins += 1;
@@ -13764,6 +13876,9 @@
       const enemyShieldHits = applyCombatShieldHitModifier(Math.min(3, Math.floor((stage - 1) / 150)), abilitySummary.enemyShieldHits);
       const enemyHealingRate = getCombatHealingRate({}, abilitySummary.enemyHealingRate);
       const enemyShieldRecoveryRate = getCombatShieldRecoveryRate({}, abilitySummary.enemyShieldRecoveryRate);
+      const criticalRate = getTeamCriticalRate(towerTeam, abilitySummary, false);
+      const enemyCriticalSummary = getEnemyTargetCriticalSummary(abilitySummary.enemyCriticalRateSelectors, [enemyCard], "tower");
+      const enemyCriticalRate = getTeamCriticalRate([enemyCard], enemyCriticalSummary, false);
       const playerPreview = resolveCombatExchange(effectiveAttack, enemyDefense, attackHits, enemyShieldHits, 1);
       const enemyPreview = resolveCombatExchange(enemyAttack, effectiveDefense, enemyAttackHits, shieldHits, 1);
       const totalCombatPower = calculateCombatPower(effectiveAttack, effectiveHp, effectiveDefense, attackHits, shieldHits);
@@ -13772,7 +13887,7 @@
         stage, basePower, baseAttack: basePower, baseHp, baseDefense, abilitySummary, elementSummary,
         dominantElement: elementSummary.dominantElement, enemyCard, enemyElement, matchup,
         formationRate, formationPower, abilityPowerRate, abilityPower,
-        abilityHpRate, abilityHp, abilityDefenseRate, abilityDefense, luckRate: abilitySummary.luckRate,
+        abilityHpRate, abilityHp, abilityDefenseRate, abilityDefense, criticalRate, enemyCriticalRate,
         support, supportCard, supportSourcePower, supportSourceHp, supportSourceDefense, supportPower, supportHp, supportDefense,
         towerRestriction, restrictionStatus, preElementPower, elementPower,
         effectivePower: effectiveAttack, effectiveAttack, effectiveHp, effectiveDefense, totalCombatPower,
@@ -13818,9 +13933,13 @@
         enemyShieldHits: stats.enemyShieldHits,
         enemyHealingRate: stats.enemyHealingRate,
         enemyShieldRecoveryRate: stats.enemyShieldRecoveryRate,
+        playerCriticalRate: stats.criticalRate,
+        enemyCriticalRate: stats.enemyCriticalRate,
+        playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
+        enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         playerActiveTriggers: stats.activeTriggers,
         enemyActiveTriggers: [],
-        playerVariance: () => getLuckRollMultiplier(stats.luckRate, .90, .22),
+        playerVariance: () => .90 + Math.random() * .20,
         enemyVariance: () => .90 + Math.random() * .20
       });
       const won = combat.winner === "player";
@@ -13846,7 +13965,7 @@
         const enemyShieldUsed = Math.max(0, combat.enemyInitialShieldHits - combat.enemyShieldRemaining);
         const playerHitSummary = getCombatHitSideSummary(combat, "player");
         const enemyHitSummary = getCombatHitSideSummary(combat, "enemy");
-        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE ปรับฮิต +${formatNumber(playerHitSummary.extraHits)}/-${formatNumber(playerHitSummary.hitReduction)} ต่อ +${formatNumber(enemyHitSummary.extraHits)}/-${formatNumber(enemyHitSummary.hitReduction)} • HP เหลือ ${formatNumber(combat.playerRemainingHp)} ต่อ ${formatNumber(combat.enemyRemainingHp)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล HP ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE ปรับฮิต +${formatNumber(playerHitSummary.extraHits)}/-${formatNumber(playerHitSummary.hitReduction)} ต่อ +${formatNumber(enemyHitSummary.extraHits)}/-${formatNumber(enemyHitSummary.hitReduction)} • HP เหลือ ${formatNumber(combat.playerRemainingHp)} ต่อ ${formatNumber(combat.enemyRemainingHp)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล HP ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • คริติคอล ${formatNumber(playerHitSummary.criticalAttacks)}/${formatNumber(enemyHitSummary.criticalAttacks)} ครั้ง • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.gems += stats.gemReward;
           state.dust += stats.dustReward;
@@ -15089,7 +15208,8 @@
       activeSkillCost: "คอส cost ลดคอส เพิ่มคอส active skill ทีมเรา ฝ่ายตรงข้าม เจาะจง",
       healHpRate: "ฮีล hp heal ฟื้นฟูเลือด พลังชีวิต เปอร์เซ็นต์",
       healHpFlat: "ฮีล hp heal ฟื้นฟูเลือด พลังชีวิต ค่าคงที่",
-      luckRate: "โชค luck โชคต่อสู้ สุ่มค่าต่อสู้",
+      criticalRate: "คริติคอล critical crit อัตราคริ เพิ่มคริ ลดคริ ตัวเอง ทีม ฝ่ายตรงข้าม เจาะจง โชค luck",
+      luckRate: "คริติคอล critical crit ค่าโชคเดิม legacy",
       gachaRarityRate: "กาชา gacha เรทกาชา rate up เพิ่มเรท ระดับการ์ด",
       nullifyCardAbilities: "ยกเลิกสกิล ลบสกิล ปิดสกิล ความสามารถไร้ผล nullify",
       ignoreAbilityConditions: "ยกเลิกเงื่อนไข ไม่สนเงื่อนไข ปลดเงื่อนไข ignore condition"
@@ -15527,7 +15647,7 @@
       const incomePercent = Math.round(summary.incomeRate * 100);
       const abilityPowerPercent = Math.round(abilitySummary.teamPowerRate * 100);
       const abilityIncomePercent = Math.round(abilitySummary.teamIncomeRate * 100);
-      const luckPercent = Math.round(abilitySummary.luckRate * 100);
+      const criticalPercent = Math.round(abilitySummary.criticalRate * 100);
       const activeElementChips = summary.uniqueElements.length
         ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element])).join("")
         : `<span class="element-chip" style="${elementStyleVars("ไร้ธาตุ")}">ยังไม่มีธาตุ</span>`;
@@ -15553,7 +15673,7 @@
       panel.innerHTML = `
         <div>
           <h3>ธาตุหลักทีม: ${escapeHTML(elementLabel(summary.dominantElement))}</h3>
-          <p>${escapeHTML(summary.dominantReason)} • คอมโบธาตุ: Power +${powerPercent}% / Income +${incomePercent}% • ความสามารถ: Power ${signedPercent(abilitySummary.teamPowerRate)} / Income ${signedPercent(abilitySummary.teamIncomeRate)} / Luck ${signedPercent(abilitySummary.luckRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
+          <p>${escapeHTML(summary.dominantReason)} • คอมโบธาตุ: Power +${powerPercent}% / Income +${incomePercent}% • ความสามารถ: Power ${signedPercent(abilitySummary.teamPowerRate)} / Income ${signedPercent(abilitySummary.teamIncomeRate)} / CRIT ${signedPercent(abilitySummary.criticalRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
           <div class="element-chip-row">${activeElementChips}</div>
           <p class="element-mini-note">รองรับหลายธาตุ เช่น ["ไฟ", "สายฟ้า"] หรือ "ไฟ, สายฟ้า" • รายชื่อที่อ่านได้: ${THAI_ELEMENTS.map(element => `${getElementEmoji(element)} ${element}`).map(escapeHTML).join(" / ")}</p>
         </div>
@@ -15774,7 +15894,7 @@
             • HP ${signedPercent(abilitySummary.teamHpRate)}${abilitySummary.teamHpFlat ? ` +${formatNumber(abilitySummary.teamHpFlat)}` : ""}
             • DEF ${signedPercent(abilitySummary.teamDefenseRate)}${abilitySummary.teamDefenseFlat ? ` +${formatNumber(abilitySummary.teamDefenseFlat)}` : ""}
             • ศัตรู ATK ${signedPercent(abilitySummary.enemyPowerRate)} / HP ${signedPercent(abilitySummary.enemyHpRate)} / DEF ${signedPercent(abilitySummary.enemyDefenseRate)}
-            • โจมตี ${hits} ฮิต • โล่ ${shields} ฮิต • Luck ${signedPercent(abilitySummary.luckRate)}
+            • โจมตี ${hits} ฮิต • โล่ ${shields} ฮิต • CRIT ${signedPercent(abilitySummary.criticalRate)}
             ${abilitySummary.triggeredEffects.length ? ` • Active Skill แบบชาร์จ ${abilitySummary.triggeredEffects.length} เอฟเฟกต์` : ""}
           </div>
           <h3 class="team-ability-summary">คอมโบธาตุที่ทำงาน</h3>
@@ -15921,7 +16041,7 @@
       const abilityPercent = Math.round(stats.abilityPowerRate * 100);
       const hpAbilityPercent = Math.round(stats.abilityHpRate * 100);
       const defenseAbilityPercent = Math.round(stats.abilityDefenseRate * 100);
-      const luckPercent = Math.round(stats.luckRate * 100);
+      const criticalPercent = Math.round(stats.criticalRate * 100);
       const enemyAbilityPercent = Math.round(stats.abilitySummary.enemyPowerRate * 100);
       const enemyHpPercent = Math.round(stats.abilitySummary.enemyHpRate * 100);
       const enemyDefensePercent = Math.round(stats.abilitySummary.enemyDefenseRate * 100);
@@ -15939,7 +16059,7 @@
       document.getElementById("battleEnemyPower").innerHTML = `<span>⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.enemyHp)} • 🛡️ DEF ${formatNumber(stats.enemyDefense)} • รวม ${formatNumber(stats.enemyCombatPower)}</span>`;
       document.getElementById("battleEnemyName").textContent = `Tower ชั้น ${stats.stage}`;
       document.getElementById("battlePowerBreakdown").innerHTML =
-        `ATK การ์ด ${formatNumber(stats.baseAttack)} • HP การ์ด ${formatNumber(stats.baseHp)} • DEF การ์ด ${formatNumber(stats.baseDefense)} • คอมโบ ATK +${formationPercent}% • สกิล ATK ${abilityPercent >= 0 ? "+" : ""}${abilityPercent}% / HP ${hpAbilityPercent >= 0 ? "+" : ""}${hpAbilityPercent}% / DEF ${defenseAbilityPercent >= 0 ? "+" : ""}${defenseAbilityPercent}% • Luck ${luckPercent >= 0 ? "+" : ""}${luckPercent}%${stats.support ? ` • Support ATK +${formatNumber(stats.supportPower)} HP +${formatNumber(stats.supportHp)} DEF +${formatNumber(stats.supportDefense)}` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span><span class="combat-tag">ดาเมจหลังโล่/DEF ประมาณ ${formatNumber(stats.playerPreview.damage)}</span></div>`;
+        `ATK การ์ด ${formatNumber(stats.baseAttack)} • HP การ์ด ${formatNumber(stats.baseHp)} • DEF การ์ด ${formatNumber(stats.baseDefense)} • คอมโบ ATK +${formationPercent}% • สกิล ATK ${abilityPercent >= 0 ? "+" : ""}${abilityPercent}% / HP ${hpAbilityPercent >= 0 ? "+" : ""}${hpAbilityPercent}% / DEF ${defenseAbilityPercent >= 0 ? "+" : ""}${defenseAbilityPercent}% • CRIT ${criticalPercent >= 0 ? "+" : ""}${criticalPercent}% / ศัตรู ${signedPercent(stats.enemyCriticalRate)}${stats.support ? ` • Support ATK +${formatNumber(stats.supportPower)} HP +${formatNumber(stats.supportHp)} DEF +${formatNumber(stats.supportDefense)}` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span><span class="combat-tag">ดาเมจหลังโล่/DEF ประมาณ ${formatNumber(stats.playerPreview.damage)}</span></div>`;
       document.getElementById("battleEnemyDetail").innerHTML =
         `ศัตรูธาตุ ${elementLabel(stats.enemyElement)} • ${stats.matchup.text} • สกิลปรับศัตรู ATK ${enemyAbilityPercent >= 0 ? "+" : ""}${enemyAbilityPercent}% / HP ${enemyHpPercent >= 0 ? "+" : ""}${enemyHpPercent}% / DEF ${enemyDefensePercent >= 0 ? "+" : ""}${enemyDefensePercent}%<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.enemyAttackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.enemyShieldHits} ฮิต</span><span class="combat-tag">ดาเมจหลังโล่/DEF ประมาณ ${formatNumber(stats.enemyPreview.damage)}</span></div>`;
       const battleElementText = document.getElementById("battleElementText");
@@ -16011,7 +16131,7 @@
           <h3>ธาตุทีม ARENA</h3>
           <p>ทีมนี้แยกจากทีมโชว์และทีมไต่หอโดยสมบูรณ์ • AI จะเทียบพลังรวม ส่วนผู้เล่นจริงจะเทียบเฉพาะแต้ม ARENA</p>
           <div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div>
-          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ ATK +${Math.round(summary.powerRate * 100)}% • ความสามารถ ATK ${signedPercent(abilitySummary.teamPowerRate)} / HP ${signedPercent(abilitySummary.teamHpRate)} / DEF ${signedPercent(abilitySummary.teamDefenseRate)} / Hit ${getCombatAttackHits(abilitySummary)} / Shield ${getCombatShieldHits(abilitySummary)} / Luck ${signedPercent(abilitySummary.luckRate)} / ศัตรู ATK ${signedPercent(abilitySummary.enemyPowerRate)} HP ${signedPercent(abilitySummary.enemyHpRate)} DEF ${signedPercent(abilitySummary.enemyDefenseRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
+          <p class="element-mini-note">ธาตุหลัก: ${elementLabel(summary.dominantElement)} • ${escapeHTML(summary.dominantReason)} • คอมโบ ATK +${Math.round(summary.powerRate * 100)}% • ความสามารถ ATK ${signedPercent(abilitySummary.teamPowerRate)} / HP ${signedPercent(abilitySummary.teamHpRate)} / DEF ${signedPercent(abilitySummary.teamDefenseRate)} / Hit ${getCombatAttackHits(abilitySummary)} / Shield ${getCombatShieldHits(abilitySummary)} / CRIT ${signedPercent(abilitySummary.criticalRate)} / ศัตรู ATK ${signedPercent(abilitySummary.enemyPowerRate)} HP ${signedPercent(abilitySummary.enemyHpRate)} DEF ${signedPercent(abilitySummary.enemyDefenseRate)} • Gacha ${escapeHTML(gachaBonusSummaryText({ rarityRateBonuses: abilitySummary.gachaRarityRates }))}</p>
         </div>
         <div><h3>คอมโบที่ทำงาน</h3><div class="combo-list">${comboHTML}</div><h3 class="team-ability-summary">ความสามารถที่ทำงาน</h3><div class="combo-list">${arenaAbilityHTML}</div></div>`;
       const powerText = document.getElementById("arenaTeamPowerText");
@@ -16040,7 +16160,7 @@
       const matchupPercent = Math.round(stats.matchup.modifier * 100);
       const matchupSign = matchupPercent > 0 ? "+" : "";
       document.getElementById("arenaPlayerPower").innerHTML = `<span class="combat-total-top">✨ พลังรวม ${formatNumber(stats.totalCombatPower)}</span><span class="combat-atk">⚔️ ${formatNumber(stats.effectiveAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.effectiveHp)} • 🛡️ DEF ${formatNumber(stats.effectiveDefense)}</span>`;
-      document.getElementById("arenaPlayerDetail").innerHTML = `ATK ดิบ ${formatNumber(stats.rawPower)} • HP ดิบ ${formatNumber(stats.rawHp)} • DEF ดิบ ${formatNumber(stats.rawDefense)} • คอมโบ ATK +${Math.round(stats.summary.powerRate * 100)}% • สกิล ATK ${signedPercent(stats.abilitySummary.teamPowerRate)} / HP ${signedPercent(stats.abilitySummary.teamHpRate)} / DEF ${signedPercent(stats.abilitySummary.teamDefenseRate)} • Luck ${signedPercent(stats.luckRate)}${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span>${stats.playerPreview ? `<span class="combat-tag">ดาเมจหลังโล่/DEF ประมาณ ${formatNumber(stats.playerPreview.damage)}</span>` : ""}</div>`;
+      document.getElementById("arenaPlayerDetail").innerHTML = `ATK ดิบ ${formatNumber(stats.rawPower)} • HP ดิบ ${formatNumber(stats.rawHp)} • DEF ดิบ ${formatNumber(stats.rawDefense)} • คอมโบ ATK +${Math.round(stats.summary.powerRate * 100)}% • สกิล ATK ${signedPercent(stats.abilitySummary.teamPowerRate)} / HP ${signedPercent(stats.abilitySummary.teamHpRate)} / DEF ${signedPercent(stats.abilitySummary.teamDefenseRate)} • CRIT ${signedPercent(stats.criticalRate)} / ศัตรู ${signedPercent(stats.enemyCriticalRate)}${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span>${stats.playerPreview ? `<span class="combat-tag">ดาเมจหลังโล่/DEF ประมาณ ${formatNumber(stats.playerPreview.damage)}</span>` : ""}</div>`;
       document.getElementById("arenaEnemyName").textContent = currentArenaOpponent ? `${currentArenaOpponent.username} (${currentArenaOpponent.type === "player" ? "ผู้เล่น" : "AI"})` : "คู่ต่อสู้ลึกลับ";
       document.getElementById("arenaEnemyPower").innerHTML = currentArenaOpponent
         ? `<span class="combat-total-top">✨ พลังรวม ${formatNumber(stats.enemyCombatPower)}</span><span class="combat-atk">⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.enemyEffectiveHp)} • 🛡️ DEF ${formatNumber(stats.enemyEffectiveDefense)}</span>`
