@@ -5944,11 +5944,13 @@
 
   <script>
     window.__animeCardBooted = false;
+    window.__animeCardBootErrorShown = false;
     window.__showAnimeCardBootError = function(message) {
       var panel = document.getElementById("bootError");
       var text = document.getElementById("bootErrorText");
       if (text) text.textContent = String(message || "Unknown startup error");
       if (panel) panel.className = "boot-error";
+      window.__animeCardBootErrorShown = true;
     };
     window.addEventListener("error", function(event) {
       if (!window.__animeCardBooted) {
@@ -5962,7 +5964,9 @@
       }
     });
     window.setTimeout(function() {
-      if (!window.__animeCardBooted) window.__showAnimeCardBootError("เกมใช้เวลาเริ่มทำงานนานเกินไป");
+      if (!window.__animeCardBooted && !window.__animeCardBootErrorShown) {
+        window.__showAnimeCardBootError("เกมใช้เวลาเริ่มทำงานนานเกินไป");
+      }
     }, 8000);
   </script>
   <script>
@@ -11335,40 +11339,40 @@
 
     function getAbilityAdjustedCardPower(card, abilitySummary) {
       const summary = abilitySummary || getTeamAbilitySummary();
-      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementPowerRates[element] || 0), 0);
-      const rate = Number(summary.selfPowerRates[String(card.id)] || 0)
-        + Number(summary.cardPowerRates[String(card.id)] || 0)
-        + Number(summary.rarityPowerRates[card.rarity] || 0)
+      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementPowerRates && summary.elementPowerRates[element] || 0), 0);
+      const rate = Number(summary.selfPowerRates && summary.selfPowerRates[String(card.id)] || 0)
+        + Number(summary.cardPowerRates && summary.cardPowerRates[String(card.id)] || 0)
+        + Number(summary.rarityPowerRates && summary.rarityPowerRates[card.rarity] || 0)
         + elementRate;
       return getCardPower(card) * Math.max(0, 1 + rate);
     }
 
     function getAbilityAdjustedCardHp(card, abilitySummary) {
       const summary = abilitySummary || getTeamAbilitySummary();
-      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementHpRates[element] || 0), 0);
-      const rate = Number(summary.selfHpRates[String(card.id)] || 0)
-        + Number(summary.cardHpRates[String(card.id)] || 0)
-        + Number(summary.rarityHpRates[card.rarity] || 0)
+      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementHpRates && summary.elementHpRates[element] || 0), 0);
+      const rate = Number(summary.selfHpRates && summary.selfHpRates[String(card.id)] || 0)
+        + Number(summary.cardHpRates && summary.cardHpRates[String(card.id)] || 0)
+        + Number(summary.rarityHpRates && summary.rarityHpRates[card.rarity] || 0)
         + elementRate;
       return getCardHp(card) * Math.max(0, 1 + rate);
     }
 
     function getAbilityAdjustedCardDefense(card, abilitySummary) {
       const summary = abilitySummary || getTeamAbilitySummary();
-      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementDefenseRates[element] || 0), 0);
-      const rate = Number(summary.selfDefenseRates[String(card.id)] || 0)
-        + Number(summary.cardDefenseRates[String(card.id)] || 0)
-        + Number(summary.rarityDefenseRates[card.rarity] || 0)
+      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementDefenseRates && summary.elementDefenseRates[element] || 0), 0);
+      const rate = Number(summary.selfDefenseRates && summary.selfDefenseRates[String(card.id)] || 0)
+        + Number(summary.cardDefenseRates && summary.cardDefenseRates[String(card.id)] || 0)
+        + Number(summary.rarityDefenseRates && summary.rarityDefenseRates[card.rarity] || 0)
         + elementRate;
       return getCardDefense(card) * Math.max(0, 1 + rate);
     }
 
     function getAbilityAdjustedCardIncome(card, abilitySummary) {
       const summary = abilitySummary || getTeamAbilitySummary();
-      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementIncomeRates[element] || 0), 0);
-      const rate = Number(summary.selfIncomeRates[String(card.id)] || 0)
-        + Number(summary.cardIncomeRates[String(card.id)] || 0)
-        + Number(summary.rarityIncomeRates[card.rarity] || 0)
+      const elementRate = getCardElements(card).reduce((sum, element) => sum + Number(summary.elementIncomeRates && summary.elementIncomeRates[element] || 0), 0);
+      const rate = Number(summary.selfIncomeRates && summary.selfIncomeRates[String(card.id)] || 0)
+        + Number(summary.cardIncomeRates && summary.cardIncomeRates[String(card.id)] || 0)
+        + Number(summary.rarityIncomeRates && summary.rarityIncomeRates[card.rarity] || 0)
         + elementRate;
       return getCardIncome(card) * Math.max(0, 1 + rate);
     }
