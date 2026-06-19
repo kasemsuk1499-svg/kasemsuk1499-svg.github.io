@@ -4772,11 +4772,33 @@
       color: #bd2451;
     }
 
-    #arenaView .fighter-power > span:first-child {
+    /* ค่าพลังรวมให้อยู่บรรทัดบนสุดของกล่องสเตตัส */
+    #arenaView .fighter-power .combat-total-top {
+      flex: 1 1 100%;
+      display: block;
+      order: -1;
+      padding-bottom: 7px;
+      margin-bottom: 2px;
+      border-bottom: 1px solid rgba(138,86,0,.20);
+      color: #9a5c00;
+      font-size: clamp(1.3rem, 2.4vw, 2rem);
+      font-weight: 1000;
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      text-shadow: 0 1px 0 rgba(255,255,255,.98), 0 0 14px rgba(255,193,7,.18);
+      white-space: normal;
+    }
+
+    #arenaView .fighter.enemy .fighter-power .combat-total-top {
+      color: #9b315c;
+      border-bottom-color: rgba(155,49,92,.20);
+    }
+
+    #arenaView .fighter-power .combat-atk {
       color: #087b9f;
     }
 
-    #arenaView .fighter.enemy .fighter-power > span:first-child {
+    #arenaView .fighter.enemy .fighter-power .combat-atk {
       color: #bd2451;
     }
 
@@ -11993,8 +12015,19 @@
       const enemyHp = Math.max(0, Number(turn ? turn.enemyRemaining : combat.enemyMaxHp));
       const playerShield = Math.max(0, Number(turn ? turn.playerShieldRemaining : combat.playerInitialShieldHits));
       const enemyShield = Math.max(0, Number(turn ? turn.enemyShieldRemaining : combat.enemyInitialShieldHits));
-      if (display.playerPower) display.playerPower.innerHTML = `<span>⚔️ ${formatNumber(combat.playerAttack)}</span><span class="combat-def">❤️ ${formatNumber(playerHp)}/${formatNumber(combat.playerMaxHp)} • 🛡️ DEF ${formatNumber(combat.playerDefense)}${playerShield ? ` • โล่ ${playerShield}` : ""}</span>`;
-      if (display.enemyPower) display.enemyPower.innerHTML = `<span>⚔️ ${formatNumber(combat.enemyAttack)}</span><span class="combat-def">❤️ ${formatNumber(enemyHp)}/${formatNumber(combat.enemyMaxHp)} • 🛡️ DEF ${formatNumber(combat.enemyDefense)}${enemyShield ? ` • โล่ ${enemyShield}` : ""}</span>`;
+      const isArenaDisplay = display.playerPower && display.playerPower.id === "arenaPlayerPower";
+      if (display.playerPower) {
+        const totalTop = isArenaDisplay && Number.isFinite(Number(combat.playerCombatPower))
+          ? `<span class="combat-total-top">✨ พลังรวม ${formatNumber(combat.playerCombatPower)}</span>`
+          : "";
+        display.playerPower.innerHTML = `${totalTop}<span class="${isArenaDisplay ? "combat-atk" : ""}">⚔️ ${formatNumber(combat.playerAttack)}</span><span class="combat-def">❤️ ${formatNumber(playerHp)}/${formatNumber(combat.playerMaxHp)} • 🛡️ DEF ${formatNumber(combat.playerDefense)}${playerShield ? ` • โล่ ${playerShield}` : ""}</span>`;
+      }
+      if (display.enemyPower) {
+        const totalTop = isArenaDisplay && Number.isFinite(Number(combat.enemyCombatPower))
+          ? `<span class="combat-total-top">✨ พลังรวม ${formatNumber(combat.enemyCombatPower)}</span>`
+          : "";
+        display.enemyPower.innerHTML = `${totalTop}<span class="${isArenaDisplay ? "combat-atk" : ""}">⚔️ ${formatNumber(combat.enemyAttack)}</span><span class="combat-def">❤️ ${formatNumber(enemyHp)}/${formatNumber(combat.enemyMaxHp)} • 🛡️ DEF ${formatNumber(combat.enemyDefense)}${enemyShield ? ` • โล่ ${enemyShield}` : ""}</span>`;
+      }
       if (display.playerMeter) display.playerMeter.style.width = `${Math.max(0, Math.min(100, playerHp / combat.playerMaxHp * 100))}%`;
       if (display.enemyMeter) display.enemyMeter.style.width = `${Math.max(0, Math.min(100, enemyHp / combat.enemyMaxHp * 100))}%`;
     }
@@ -13453,6 +13486,9 @@
         playerVariance: () => getLuckRollMultiplier(stats.luckRate, .91, .18),
         enemyVariance: () => .91 + Math.random() * .18
       });
+      // เก็บค่าพลังรวมไว้ให้แสดงด้านบนตลอดระหว่างแอนิเมชันต่อสู้ ARENA
+      combat.playerCombatPower = stats.totalCombatPower;
+      combat.enemyCombatPower = stats.enemyCombatPower;
       const won = combat.winner === "player";
       result.className = "battle-result";
 
@@ -15981,11 +16017,11 @@
       const maxHp = Math.max(1, stats.effectiveHp, stats.enemyEffectiveHp || 0);
       const matchupPercent = Math.round(stats.matchup.modifier * 100);
       const matchupSign = matchupPercent > 0 ? "+" : "";
-      document.getElementById("arenaPlayerPower").innerHTML = `<span>⚔️ ${formatNumber(stats.effectiveAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.effectiveHp)} • 🛡️ DEF ${formatNumber(stats.effectiveDefense)} • รวม ${formatNumber(stats.totalCombatPower)}</span>`;
+      document.getElementById("arenaPlayerPower").innerHTML = `<span class="combat-total-top">✨ พลังรวม ${formatNumber(stats.totalCombatPower)}</span><span class="combat-atk">⚔️ ${formatNumber(stats.effectiveAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.effectiveHp)} • 🛡️ DEF ${formatNumber(stats.effectiveDefense)}</span>`;
       document.getElementById("arenaPlayerDetail").innerHTML = `ATK ดิบ ${formatNumber(stats.rawPower)} • HP ดิบ ${formatNumber(stats.rawHp)} • DEF ดิบ ${formatNumber(stats.rawDefense)} • คอมโบ ATK +${Math.round(stats.summary.powerRate * 100)}% • สกิล ATK ${signedPercent(stats.abilitySummary.teamPowerRate)} / HP ${signedPercent(stats.abilitySummary.teamHpRate)} / DEF ${signedPercent(stats.abilitySummary.teamDefenseRate)} • Luck ${signedPercent(stats.luckRate)}${currentArenaOpponent ? ` • ธาตุ ${matchupSign}${matchupPercent}%` : ""}<div class="combat-tags"><span class="combat-tag hit">⚔️ ${stats.attackHits} ฮิต</span><span class="combat-tag shield">🛡️ โล่ ${stats.shieldHits} ฮิต</span>${stats.playerPreview ? `<span class="combat-tag">ดาเมจหลังโล่/DEF ประมาณ ${formatNumber(stats.playerPreview.damage)}</span>` : ""}</div>`;
       document.getElementById("arenaEnemyName").textContent = currentArenaOpponent ? `${currentArenaOpponent.username} (${currentArenaOpponent.type === "player" ? "ผู้เล่น" : "AI"})` : "คู่ต่อสู้ลึกลับ";
       document.getElementById("arenaEnemyPower").innerHTML = currentArenaOpponent
-        ? `<span>⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.enemyEffectiveHp)} • 🛡️ DEF ${formatNumber(stats.enemyEffectiveDefense)} • รวม ${formatNumber(stats.enemyCombatPower)}</span>`
+        ? `<span class="combat-total-top">✨ พลังรวม ${formatNumber(stats.enemyCombatPower)}</span><span class="combat-atk">⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.enemyEffectiveHp)} • 🛡️ DEF ${formatNumber(stats.enemyEffectiveDefense)}</span>`
         : "?";
       const matchRuleText = currentArenaOpponent && currentArenaOpponent.type === "player"
         ? `จับคู่จากแต้มต่างกัน ${formatNumber(currentArenaOpponent.pointDifference || Math.abs(Number(currentArenaOpponent.points || 0) - Number(state.arena.points || 0)))} แต้ม`
