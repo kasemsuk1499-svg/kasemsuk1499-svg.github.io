@@ -7831,7 +7831,71 @@
     "awakenMax": 4,
     "icon": "",
     "image": "1005.png",
-"ability": [ { "name": "ริกะจัง", "description": "เมื่อจัดทีมไม่เกิน 4 ตัวละคร การ์ดใบนี้จะได้รับ ATK และ HP เพิ่มขึ้น 90% และทุกครั้งที่โจมตีครบ 3 ครั้ง จะฟื้นฟู HP ของตัวเอง 5%", "activeIn": ["team", "tower", "arena"], "condition": { "maxTeamSize": 4 }, "effects": [ { "type": "healHpRate", "value": 0.05, "targetSide": "ally", "condition": { "afterOwnAttacks": 2, "repeat": true } }, { "type": "selfHpRate", "value": 0.90 }, { "type": "selfPowerRate", "value": 0.90 } ] }, { "name": "ริกะบีม", "description": "เมื่อจัดทีมไม่เกิน 4 ตัวละคร หลังจากการ์ดใบนี้โจมตีครบ 20 ครั้ง การโจมตีครั้งที่ 21 จะยิงลำแสงทะลุทะลวง ได้รับ ATK เพิ่มเติม 20,000,000 และเพิ่มจำนวนฮิต 99 ทำงานครั้งเดียวต่อการต่อสู้", "activeIn": ["team", "tower", "arena"], "condition": { "maxTeamSize": 4 }, "effects": [ { "type": "nextAttackPowerFlat", "value": 20000000, "targetSide": "self", "condition": { "afterOwnAttacks": 20, "repeat": false } }, { "type": "nextAttackHits", "value": 99, "targetSide": "self", "condition": { "afterOwnAttacks": 20, "repeat": false } } ] } ]
+        "ability": [
+  {
+    "name": "ริกะจัง",
+    "description": "เมื่อจัดทีมไม่เกิน 4 ตัวละคร การ์ดใบนี้จะได้รับ ATK และ HP เพิ่มขึ้น 90% และทุกครั้งที่โจมตีครบ 3 ครั้ง จะฟื้นฟู HP ของตัวเอง 5%",
+    "activeIn": [
+      "team",
+      "tower",
+      "arena"
+    ],
+    "condition": {
+      "maxTeamSize": 4
+    },
+    "effects": [
+      {
+        "type": "healHpRate",
+        "value": 0.05,
+        "targetSide": "ally",
+        "condition": {
+          "afterOwnAttacks": 2,
+          "repeat": true
+        }
+      },
+      {
+        "type": "selfHpRate",
+        "value": 0.90
+      },
+      {
+        "type": "selfPowerRate",
+        "value": 0.90
+      }
+    ]
+  },
+  {
+    "name": "ริกะบีม",
+    "description": "เมื่อจัดทีมไม่เกิน 4 ตัวละคร หลังจากการ์ดใบนี้โจมตีครบ 20 ครั้ง การโจมตีครั้งที่ 21 จะยิงลำแสงทะลุทะลวง ได้รับ ATK เพิ่มเติม 20,000,000 และเพิ่มจำนวนฮิตอีก 99 ฮิต ทำงานครั้งเดียวต่อการต่อสู้",
+    "activeIn": [
+      "team",
+      "tower",
+      "arena"
+    ],
+    "condition": {
+      "maxTeamSize": 4
+    },
+    "effects": [
+      {
+        "type": "nextAttackPowerFlat",
+        "value": 20000000,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 20,
+          "repeat": false
+        }
+      },
+      {
+        "type": "nextAttackHits",
+        "value": 99,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 20,
+          "repeat": false
+        }
+      }
+      ]
+      }
+     ]
   },
   {
     "id": 1006,
@@ -7873,8 +7937,113 @@
     "awakenMax": 4,
     "icon": "",
     "image": "1007.png",
-    "ability":[ { "name": "วิชาควบคุมคำสาป", "description": "เมื่อการ์ดใบนี้เป็นลีดเดอร์ การ์ดคำสาปทุกใบในทีมฝ่ายตรงข้ามจะถูกลด ATK, HP และ DEF ลง 50% ส่วนการ์ดคำสาปในทีมฝ่ายเราจะได้รับ ATK, HP และ DEF เพิ่มขึ้น 20%", "activeIn": [ "team", "tower", "arena" ], "condition": { "leaderOnly": true }, "effects": [ { "type": "cardPowerRate", "value": -0.5, "targetSide": "enemy", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardHpRate", "value": -0.5, "targetSide": "enemy", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardDefenseRate", "value": -0.5, "targetSide": "enemy", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardPowerRate", "value": 0.2, "targetSide": "ally", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardHpRate", "value": 0.2, "targetSide": "ally", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardDefenseRate", "value": 0.2, "targetSide": "ally", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] } ] } ]
-},
+         "ability": [
+  {
+    "name": "วิชาควบคุมคำสาป",
+    "description": "เมื่อการ์ดใบนี้เป็นลีดเดอร์ การ์ดคำสาปทุกใบในทีมฝ่ายตรงข้ามจะถูกลด ATK, HP และ DEF ลง 50% ส่วนการ์ดคำสาปในทีมฝ่ายเราจะได้รับ ATK, HP และ DEF เพิ่มขึ้น 20%",
+    "activeIn": [
+      "team",
+      "tower",
+      "arena"
+    ],
+    "condition": {
+      "leaderOnly": true
+    },
+    "effects": [
+      {
+        "type": "cardPowerRate",
+        "value": -0.50,
+        "targetSide": "enemy",
+        "targetCardIds": [
+          1002,
+          1024,
+          1025,
+          1026,
+          1027,
+          1030,
+          1035,
+          1042
+        ]
+      },
+      {
+        "type": "cardHpRate",
+        "value": -0.50,
+        "targetSide": "enemy",
+        "targetCardIds": [
+          1002,
+          1024,
+          1025,
+          1026,
+          1027,
+          1030,
+          1035,
+          1042
+        ]
+      },
+      {
+        "type": "cardDefenseRate",
+        "value": -0.50,
+        "targetSide": "enemy",
+        "targetCardIds": [
+          1002,
+          1024,
+          1025,
+          1026,
+          1027,
+          1030,
+          1035,
+          1042
+        ]
+      },
+      {
+        "type": "cardPowerRate",
+        "value": 0.20,
+        "targetSide": "ally",
+        "targetCardIds": [
+          1002,
+          1024,
+          1025,
+          1026,
+          1027,
+          1030,
+          1035,
+          1042
+        ]
+      },
+      {
+        "type": "cardHpRate",
+        "value": 0.20,
+        "targetSide": "ally",
+        "targetCardIds": [
+          1002,
+          1024,
+          1025,
+          1026,
+          1027,
+          1030,
+          1035,
+          1042
+        ]
+      },
+      {
+        "type": "cardDefenseRate",
+        "value": 0.20,
+        "targetSide": "ally",
+        "targetCardIds": [
+          1002,
+          1024,
+          1025,
+          1026,
+          1027,
+          1030,
+          1035,
+          1042
+        ]
+      }
+      ]
+      }
+     ]
+    },
   {
     "id": 1008,
     "name": "Kenjaku",
