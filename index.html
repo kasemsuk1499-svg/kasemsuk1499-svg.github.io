@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-19-critical-rate-targeting-v43">
+  <meta name="gacha-app-build" content="2026-06-20-on-own-attack-v46">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -6044,8 +6044,8 @@
       combatCriticalDamageMultiplier: 1.50,
       combatMultiHitPenalty: 0.025,
       combatMultiHitMinEfficiency: 0.82,
-      combatMaxAttackHits: 99,
-      combatMaxShieldHits: 99,
+      combatMaxAttackHits: 999,
+      combatMaxShieldHits: 999,
       // ต่อสู้ผลัดกันตีจน HP ฝ่ายใดฝ่ายหนึ่งหมด
       combatMaxTurns: 120,
       combatFatigueStartRound: 18,
@@ -6056,11 +6056,17 @@
       totalPowerHitWeight: 0.03,
       totalPowerShieldWeight: 0.025,
       // เพดานระบบ Active Skill แบบชาร์จจำนวนครั้งโจมตี
-      combatMaxTriggerChargeAttacks: 99,
-      combatMaxTriggeredAttackRate: 5.00,
-      combatMaxTriggeredHealRate: 1.00,
-      combatMaxTriggeredExtraHits: 20,
-      combatMaxTriggeredShieldHits: 20
+      combatMaxTriggerChargeAttacks: 9999,
+      combatMaxTriggeredAttackRate: 9999,
+      combatMaxTriggeredHealRate: 9999,
+      combatMaxTriggeredExtraHits: 9999,
+      combatMaxTriggeredShieldHits: 9999,
+      // ระบบป้องกันขั้นสุดท้าย: หลบก่อน DEF, บล็อกหลัง DEF, แล้วคูณ damageTakenRate เป็นขั้นสุดท้าย
+      combatBlockDamageMultiplier: 0.50,
+      combatMaxBlockRate: 1.00,
+      combatMaxDodgeRate: 1.00,
+      combatMinDamageTakenRate: -1.00,
+      combatMaxDamageTakenRate: 9999
     });
 
     // เพิ่มโดยอลิซ: รางวัลล็อกอินเฉพาะ 7 วันแรก (นับวันรับ ไม่บังคับให้ต่อเนื่อง)
@@ -6490,10 +6496,10 @@
            { "type": "cardIncomeRate", "value": 0.15, "targetCardIds": [1001, 1041] },
            { "type": "nullifyCardAbilities", "targetSide": "enemy", "targetCardIds": [1041] },
            { "type": "ignoreAbilityConditions", "targetSide": "ally", "targetElements": ["ไฟ"], "targetRarities": ["LR"], "targetMatch": "any" },
-           { "type": "activeSkillCost", "value": -1, "targetSide": "ally", "excludeSelf": true },
-           { "type": "activeSkillCost", "value": -2, "targetSide": "ally", "targetCardIds": [1001, 1041] },
-           { "type": "activeSkillCost", "value": 1, "targetSide": "ally", "targetRarities": ["EX"] },
-           { "type": "activeSkillCost", "value": 2, "targetSide": "enemy", "targetElements": ["ไฟ"] },
+           { "type": "activeSkillCostCycle", "value": -1, "targetSide": "ally", "excludeSelf": true },
+           { "type": "activeSkillCostCycle", "value": -2, "targetSide": "ally", "targetCardIds": [1001, 1041] },
+           { "type": "activeSkillCostCycle", "value": 1, "targetSide": "ally", "targetRarities": ["EX"] },
+           { "type": "activeSkillCostCycle", "value": 2, "targetSide": "enemy", "targetElements": ["ไฟ"] },
            { "type": "nextAttackPowerRate", "value": 0.50, "condition": { "afterOwnAttacks": 3, "repeat": true } },
            { "type": "healHpRate", "value": 0.20, "condition": { "afterOwnAttacks": 3, "repeat": true } },
            { "type": "rarityPowerRate", "value": 0.18, "targetRarities": ["EX", "SC"] },
@@ -6530,8 +6536,13 @@
        - healingRate = ปรับอัตราฟื้น HP เช่น -0.50 = ฟื้นน้อยลง 50%, -1.00 = ห้ามฟื้น HP
        - shieldRecoveryRate = ปรับอัตราฟื้นโล่จาก Active Skill เช่น -1.00 = ห้ามฟื้นโล่ แต่ไม่ลบโล่เริ่มต้น
        - nextAttackHits แบบ Active รองรับค่าติดลบและ targetSide: "enemy" เพื่อให้ฮิตการโจมตีครั้งถัดไปของศัตรูลดลง
-       - activeSkillCost = ปรับคอส Active Skill (จำนวนครั้งที่ต้องโจมตีก่อนทำงาน): ค่าติดลบลดคอส / ค่าบวกเพิ่มคอส
-       - activeSkillCost ไม่ใส่ตัวกรอง = ทั้งฝ่าย; ใส่ targetCardIds / targetElements / targetRarities เพื่อเจาะจงได้
+       - activeSkillCostCycle = ปรับคอสเฉพาะรอบปัจจุบัน: ค่าติดลบลดคอส / ค่าบวกเพิ่มคอส; เมื่อ Active ทำงานจะคืนคอสฐานทันที
+       - activeSkillCostPermanent = ปรับคอสถาวรตลอดการต่อสู้ และมีผลกับรอบถัดไปทุกครั้ง
+       - activeSkillCost เดิมยังรองรับเป็น alias ของ activeSkillCostCycle เพื่อไม่ให้การ์ดเก่าพัง
+       - เอฟเฟกต์คอสไม่ใส่ตัวกรอง = ทั้งฝ่าย; ใส่ targetCardIds / targetElements / targetRarities เพื่อเจาะจงได้
+       - blockRate = โอกาสบล็อกของการ์ดเป้าหมาย; เมื่อสำเร็จลดดาเมจส่วนของการ์ดนั้น 50% หลังโล่/คริติคอล/DEF
+       - damageTakenRate = ตัวคูณดาเมจรับขั้นสุดท้าย; -0.20 = รับลดลง 20%, +0.20 = รับเพิ่มขึ้น 20%
+       - dodgeRate = โอกาสหลบของการ์ดเป้าหมาย; ส่วนดาเมจตามสัดส่วน HP ของการ์ดที่หลบจะหายไปก่อนคำนวณ DEF
        - ใส่ excludeSelf: true ร่วมกับ targetSide: "ally" เพื่อให้มีผลเฉพาะเพื่อนร่วมทีม ไม่รวมเจ้าของสกิล
        - targetSide: "ally" = ทีมเรา, "self" = เจ้าของสกิล, "enemy" = ฝ่ายตรงข้าม; คอสสุดท้ายไม่ต่ำกว่า 1 และไม่เกินเพดานระบบ
        - restoreShieldHits แบบ Active รองรับค่าติดลบและ targetSide: "enemy" เพื่อลบโล่ปัจจุบันของศัตรู
@@ -6543,6 +6554,7 @@
        - ตัวอย่างทั้งทีม: { "type": "criticalRate", "value": 0.20, "targetSide": "ally" }
        - ตัวอย่างเฉพาะตัวเอง: { "type": "criticalRate", "value": 0.30, "targetSide": "self" }
        - ตัวอย่างลดคริศัตรูธาตุไฟ: { "type": "criticalRate", "value": -0.25, "targetSide": "enemy", "targetElements": ["ไฟ"] }
+       - nextAttackCriticalRate เพิ่ม/ลดอัตราคริติคอลเฉพาะการโจมตีที่ Active ทำงาน; value 1.00 = +100% และใช้แล้วล้างทันที
        - luckRate เดิมยังอ่านได้เพื่อรองรับข้อมูลเก่า แต่จะทำงานเป็น criticalRate แทนและไม่สุ่มแกว่งดาเมจอีกต่อไป
        - gachaRarityRate เพิ่ม “น้ำหนักสุ่ม” ของระดับที่กำหนด เช่น 0.15 = น้ำหนักระดับนั้น +15% แล้วระบบคำนวณเปอร์เซ็นต์จริงใหม่
        - effect แต่ละรายการใส่ condition ของตัวเองเพิ่มได้
@@ -6551,6 +6563,7 @@
        - ignoreAbilityConditions เลือกเป้าหมายด้วย targetCardIds / targetElements / targetRarities และ targetMatch: "any"/"all" ได้
        - condition: { "afterOwnAttacks": 3, "repeat": true } = ตีปกติครบ 3 ครั้ง แล้วเอฟเฟกต์ทำงานในการโจมตีครั้งถัดไป จากนั้นรีเซ็ตวนลูป
        - nextAttackPowerRate/nextAttackPowerFlat เพิ่ม ATK เฉพาะการโจมตีที่ Active แล้วกลับเป็นค่าปกติทันที
+       - nextAttackCriticalRate เพิ่ม/ลดเรทคริติคอลเฉพาะการโจมตีที่ Active ทำงาน โดยไม่เปลี่ยน criticalRate ถาวร
        - healHpRate/healHpFlat ฟื้น HP ปัจจุบันหลังโจมตีที่ Active โดยไม่เพิ่ม HP สูงสุด
        - สกิล nullify มีลำดับควบคุมสูงสุด จึงไม่ถูก nullify ซ้อน เพื่อให้ผลลัพธ์ไม่วนลูป
        - minAnyElementCount: { "ดิน": 5, "เหล็ก": 5 } = ดินครบ 5 ใบ หรือเหล็กครบ 5 ใบ อย่างใดอย่างหนึ่ง
@@ -6583,6 +6596,7 @@
       IGNORE_ABILITY_CONDITIONS: "ignoreAbilityConditions",
       NEXT_ATTACK_POWER_RATE: "nextAttackPowerRate",
       NEXT_ATTACK_POWER_FLAT: "nextAttackPowerFlat",
+      NEXT_ATTACK_CRITICAL_RATE: "nextAttackCriticalRate",
       HEAL_HP_RATE: "healHpRate",
       HEAL_HP_FLAT: "healHpFlat",
       HEALING_RATE: "healingRate",
@@ -6591,8 +6605,13 @@
       NEXT_ATTACK_HITS: "nextAttackHits",
       INCREASE_MAX_HP_BASE_RATE: "increaseMaxHpBaseRate",
       INCREASE_ATTACK_RATE_STACK: "increaseAttackRateStack",
-      SELF_TRIGGER_REDUCTION: "selfTriggerReduction", // รองรับข้อมูลเก่า: value 1 = ลดคอสตัวเอง 1
-      ACTIVE_SKILL_COST: "activeSkillCost",
+      SELF_TRIGGER_REDUCTION: "selfTriggerReduction", // รองรับข้อมูลเก่า: ทำงานเป็นคอสชั่วคราวรอบปัจจุบัน
+      ACTIVE_SKILL_COST: "activeSkillCost", // legacy alias -> activeSkillCostCycle
+      ACTIVE_SKILL_COST_CYCLE: "activeSkillCostCycle",
+      ACTIVE_SKILL_COST_PERMANENT: "activeSkillCostPermanent",
+      BLOCK_RATE: "blockRate",
+      DAMAGE_TAKEN_RATE: "damageTakenRate",
+      DODGE_RATE: "dodgeRate",
       RARITY_POWER_RATE: "rarityPowerRate",
       RARITY_HP_RATE: "rarityHpRate",
       RARITY_DEFENSE_RATE: "rarityDefenseRate",
@@ -6758,7 +6777,7 @@
         "condition": {"anyCardIds":[2001,2003,2004]},
         "effects": [
           { "type": "healHpRate", "value": 0.15, "condition": { "afterOwnAttacks": 2, "repeat": true } },
-          { "type": "activeSkillCost", "value": -1, "targetSide": "self", "condition": { "afterOwnAttacks": 2, "repeat": true } }
+          { "type": "activeSkillCostCycle", "value": -1, "targetSide": "self", "condition": { "afterOwnAttacks": 2, "repeat": true } }
         ]
       }
     ]
@@ -7626,24 +7645,36 @@
     "abilities": [
       {
         "name": "ดวงตาเรียวคุกันและไร้ขีดจำกัดล่าง",
-        "description": "เพื่มรายได้กับทีม +30% ;เมื่ออเวกตัน จะได้รับ ATK+500% HP+800% และโล่ +15 ;หากเลเวลตัน/อเวกตัน เมื่อตีครบ 3 ครั้งจะได้โล่เพิ่ม +2",
+        "description": "เพื่มรายได้กับทีม +30% อัตราหลบหลีก 100% เป็นเวลา 10 เทิร์น ;เมื่ออเวกตัน จะได้รับ ATK+200% HP+200% และโล่ +5 ;หากเลเวลตันและอเวกตัน เมื่อตีครบ 3 ครั้งจะได้โล่เพิ่ม +1",
         "activeIn": ["team", "tower", "arena"],
         "condition": {},
         "effects": [
-                  { "type": "teamIncomeRate", "value": 0.3, "condition": { "mode": "team" } },                 
-                  { "type": "selfPowerRate", "value": 5.0, "condition": { "sourceMinAwaken": 4 } },
-         { "type": "selfHpRate", "value": 8.0, "condition": { "sourceMinAwaken": 4 } },
-         { "type": "shieldHits", "value": 15, "condition": { "sourceMinAwaken": 4 } },
-         { "type": "restoreShieldHits", "value": 2, "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 220, "afterOwnAttacks": 2, "repeat": true } }
+                  { "type": "teamIncomeRate", "value": 0.3, "condition": { "mode": "team" } },
+                  { "type": "dodgeRate", "value": 1,"targetSide": "self"},
+                  { "type": "dodgeRate", "value": -1,"targetSide": "self", "condition": { "afterOwnAttacks": 10, "repeat": false } },                   
+         { "type": "selfPowerRate", "value": 2.0, "condition": { "sourceMinAwaken": 4 } },
+         { "type": "selfHpRate", "value": 2.0, "condition": { "sourceMinAwaken": 4 } },
+         { "type": "shieldHits", "value": 5, "condition": { "sourceMinAwaken": 4 } },
+         { "type": "restoreShieldHits", "value": 1, "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 220, "afterOwnAttacks": 2, "repeat": true } }
         ]
       },
       {
-        "name": "มุราซากิ",
-        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 10 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 5000% ใช้งานได้ครั้งเดียว",
+        "name": "ไสยเวทย้อนกลับ",
+        "description": "ทุกครั้งที่การ์ดใบนี้โจมตี จะฟื้นฟู HP ของตัวเอง 10% และลดคอส Active Skill ของตัวเอง 1 สำหรับรอบปัจจุบัน เมื่อ Active ทำงานจะเริ่มรอบใหม่จากคอสฐาน และการโจมตีครั้งนั้นยังลดคอสรอบใหม่ 1 ตามปกติ",
         "activeIn": ["team", "tower", "arena"],
         "condition": {},
         "effects": [
-          { "type": "nextAttackPowerRate", "value": 50.0, "condition": { "afterOwnAttacks": 10, "repeat": false } }
+         { "type": "activeSkillCostCycle", "value": -1, "targetSide": "self", "condition": { "onOwnAttack": true } },
+         { "type": "healHpRate", "value": 0.1, "targetSide": "self", "condition": { "onOwnAttack": true } } 
+                ]
+      },
+      {
+        "name": "มุราซากิ",
+        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 30 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 5000% ใช้งานได้ครั้งเดียว",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": {},
+        "effects": [
+          { "type": "nextAttackPowerRate", "value": 50.0, "condition": { "afterOwnAttacks": 50, "repeat": false } }
         ]
       }
     ]
@@ -7665,25 +7696,35 @@
     "abilities": [
       {
         "name": "ราชาคำสาป",
-        "description": "การ์ดใบนี้อยู่เดี่ยวได้ หรือจัดทีมร่วมกับ 'Uraume' เท่านั้น หากมีสมาชิกคนอื่น สกิลนี้จะไม่ทำงาน",
+        "description": "การ์ดใบนี้อยู่เดี่ยวได้ หรือจัดทีมร่วมกับ 'Uraume' เท่านั้น หากมีสมาชิกคนอื่น สกิลจะไม่ทำงาน",
         "activeIn": ["team", "tower", "arena"],
         "condition": { "allowedTeammateCardIds": [1032] },
         "effects": [
-                   { "type": "teamPowerRate", "value": 10.0 },
-         { "type": "teamHpRate", "value": 10.0 },
-         { "type": "shieldHits", "value": 10 },
-         { "type": "attackHits", "value": 7 },
-         { "type": "restoreShieldHits", "value": 2, "condition": { "afterOwnAttacks": 4, "repeat": true } }
+           { "type": "teamPowerRate", "value": 2.0 },
+         { "type": "teamHpRate", "value": 2.0 },
+         { "type": "shieldHits", "value": 5 },
+         { "type": "attackHits", "value": 5 },
+         { "type": "restoreShieldHits", "value": 1, "condition": { "afterOwnAttacks": 3, "repeat": true } }
         ]
       },
       {
-        "name": "ตัดสะบั้น",
-        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 8 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 2000% จำนวน 18 ฮิต ใช้ได้ครั้งเดียวต่อการต่อสู้",
+        "name": "ไสยเวทย้อนกลับ",
+        "description": "ทุกครั้งที่การ์ดใบนี้โจมตี จะฟื้นฟู HP ของตัวเอง 10% และลดคอส Active Skill ของตัวเอง 1 สำหรับรอบปัจจุบัน เมื่อ Active ทำงานจะเริ่มรอบใหม่จากคอสฐาน และการโจมตีครั้งนั้นยังลดคอสรอบใหม่ 1 ตามปกติ",
         "activeIn": ["team", "tower", "arena"],
         "condition": { "allowedTeammateCardIds": [1032] },
         "effects": [
-          { "type": "nextAttackPowerRate", "value": 20.0, "condition": { "afterOwnAttacks": 8, "repeat": false } },
-                    { "type": "nextAttackHits", "value": 18, "condition": { "afterOwnAttacks": 8, "repeat": false } }
+         { "type": "activeSkillCostCycle", "value": -1, "targetSide": "self", "condition": { "onOwnAttack": true } },
+         { "type": "healHpRate", "value": 0.1, "targetSide": "self", "condition": { "onOwnAttack": true } }
+        ]
+      },
+      {
+        "name": "ผ่าโลก",
+        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 30 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 2000% จำนวน 88 ฮิต ใช้ได้ครั้งเดียวต่อการต่อสู้",
+        "activeIn": ["team", "tower", "arena"],
+        "condition": { "allowedTeammateCardIds": [1032] },
+        "effects": [
+          { "type": "nextAttackPowerRate", "value": 20.0, "condition": { "afterOwnAttacks": 30, "repeat": false } },
+          { "type": "nextAttackHits", "value": 82, "condition": { "afterOwnAttacks": 30, "repeat": false } }
         ]
       }
     ]
@@ -7705,13 +7746,14 @@
     "abilities": [
       {
         "name": "นักล่าพ่อมด",
-        "description": "เมื่ออเวกตัน/เลเวล 150 การ์ดใบนี้ได้รับความสามารถ ; ลด ATK/HP 50% ของฝ่าตรงข้าม และโจมตีเพิ่ม 4 ฮิต",
+        "description": "เมื่ออเวกตันและเลเวล 150 การ์ดใบนี้ได้รับความสามารถ ; ลดพลังโจมตีและป้องกันลง 40% ของฝ่ายตรงข้าม และเพิ่มอัตตราคริติคอล 40% และเพิ่มโจมตีเข้าเป้า 50%",
         "activeIn": ["team", "tower", "arena"],
         "condition": { "sourceMinLevel": 150, "sourceMinAwaken": 4 },
         "effects": [
-          { "type": "attackHits", "value": 4 },
-          { "type": "enemyHpRate", "value": -0.5 },
-          { "type": "enemyHpRate", "value": -0.5 }
+          { "type": "criticalRate", "value": 0.4 ,"targetSide": "self" },
+          { "type": "dodgeRate", "value": -0.5 ,"targetSide": "enemy" },
+          { "type": "enemyDefenseRate", "value": -0.4 },
+          { "type": "enemyPowerRate", "value": -0.4 }
         ]
       },
       {
@@ -7743,11 +7785,12 @@
     "abilities": [
       {
         "name": "ผู้มีพรสวรรค์",
-        "description": "เมื่ออเวกตัน/เลเวล 150 การ์ดใบนี้ได้รับความสามารถ ; ATK/HP+220% และโจมตีเพิ่ม 6 ฮิต",
+        "description": "เมื่ออเวกตันและเลเวล 150 การ์ดใบนี้ได้รับความสามารถ ; ATK/HP+220% และ เพิ่มอัตตราคริติคอล 25% และอัตราหลบหลีก 20%",
         "activeIn": ["team", "tower", "arena"],
         "condition": { "sourceMinLevel": 150, "sourceMinAwaken": 4 },
         "effects": [
-          { "type": "attackHits", "value": 6 },
+          { "type": "criticalRate", "value": 0.25, "targetSide": "self" },
+          { "type": "dodgeRate", "value": 0.20, "targetSide": "self" },
           { "type": "selfHpRate", "value": 2.2 },
           { "type": "selfPowerRate", "value": 2.2 }
         ]
@@ -7777,7 +7820,7 @@
   {
     "id": 1005,
     "name": "Okkotsu Yuta",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "ไร้ธาตุ",
     "power": 243000,
         "hp": 1215000,
@@ -7788,17 +7831,7 @@
     "awakenMax": 4,
     "icon": "",
     "image": "1005.png",
-    "ability": {
-      "name": "ริกะจัง",
-      "description": "เมื่อการ์ดนี้อยู่ในทีมหากใส่ 4 ตัวละครหรือต่ำกว่าจะได้รับเอฟเฟค; ตัวเองจะได้รับ ATK/HP+90% และเมื่อตีครบ 6 ครั้ง จะได้รับฟื้นฟู +5% ",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": { "maxTeamSize": 4 },
-      "effects": [
-        { "type": "healHpRate", "value": 0.05, "condition": { "afterOwnAttacks": 5, "repeat": true } },
-        { "type": "selfHpRate", "value": 0.9 },
-        { "type": "selfPowerRate", "value": 0.9 }
-      ]
-    }
+"ability": [ { "name": "ริกะจัง", "description": "เมื่อจัดทีมไม่เกิน 4 ตัวละคร การ์ดใบนี้จะได้รับ ATK และ HP เพิ่มขึ้น 90% และทุกครั้งที่โจมตีครบ 3 ครั้ง จะฟื้นฟู HP ของตัวเอง 5%", "activeIn": ["team", "tower", "arena"], "condition": { "maxTeamSize": 4 }, "effects": [ { "type": "healHpRate", "value": 0.05, "targetSide": "ally", "condition": { "afterOwnAttacks": 2, "repeat": true } }, { "type": "selfHpRate", "value": 0.90 }, { "type": "selfPowerRate", "value": 0.90 } ] }, { "name": "ริกะบีม", "description": "เมื่อจัดทีมไม่เกิน 4 ตัวละคร หลังจากการ์ดใบนี้โจมตีครบ 20 ครั้ง การโจมตีครั้งที่ 21 จะยิงลำแสงทะลุทะลวง ได้รับ ATK เพิ่มเติม 20,000,000 และเพิ่มจำนวนฮิต 99 ทำงานครั้งเดียวต่อการต่อสู้", "activeIn": ["team", "tower", "arena"], "condition": { "maxTeamSize": 4 }, "effects": [ { "type": "nextAttackPowerFlat", "value": 20000000, "targetSide": "self", "condition": { "afterOwnAttacks": 20, "repeat": false } }, { "type": "nextAttackHits", "value": 99, "targetSide": "self", "condition": { "afterOwnAttacks": 20, "repeat": false } } ] } ]
   },
   {
     "id": 1006,
@@ -7816,11 +7849,12 @@
     "image": "1006.png",
     "ability": {
       "name": "นายชอบผู้หญิงแบบไหนล่ะ",
-      "description": "เมื่อการ์ดนี้อยู่ในทีม ทั้งทีมจะได้รับ HP+100% และเมื่อตีครบ 5 ครั้ง ได้รับโล่ +2 ;ทำงานเฉพาะโหมด Tower",
+      "description": "เมื่อการ์ดนี้อยู่ในทีม ทั้งทีมจะได้รับ HP+100% และเมื่อตีครบ 5 ครั้ง ได้รับโล่ +3 และลดคอสสกิล 2 ครั้งให้พันธมิตรทุกคน ;ทำงานเฉพาะโหมด Tower",
       "activeIn": ["tower"],
-      "condition": { "mode": "tower" },
+      "condition": {},
       "effects": [
-        { "type": "restoreShieldHits", "value": 2, "condition": { "afterOwnAttacks": 5, "repeat": true } },
+        { "type": "restoreShieldHits", "value": 3, "targetSide": "ally", "condition": { "afterOwnAttacks": 4, "repeat": true } },
+        { "type": "activeSkillCostCycle", "value": -2, "targetSide": "ally" , "excludeSelf": true,"condition": { "afterOwnAttacks": 4, "repeat": true } },
         { "type": "teamHpRate", "value": 1 }
       ]
     }
@@ -7839,21 +7873,12 @@
     "awakenMax": 4,
     "icon": "",
     "image": "1007.png",
-    "ability": {
-      "name": "ผู้ใช้คุุณไสยต้องปกป้องคนอ่อนแอ",
-      "description": "หากการ์ดใบนี้จัดทีมกับการ์ดที่มีชื่อ 'Gojo' ; ATK+20%/HP+35%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": { "anyCardIds": [1041, 1001, 7] },
-      "effects": [
-        { "type": "teamPowerRate", "value": 0.2 },
-        { "type": "teamHpRate", "value": 0.35 }
-      ]
-    }
-  },
+    "ability":[ { "name": "วิชาควบคุมคำสาป", "description": "เมื่อการ์ดใบนี้เป็นลีดเดอร์ การ์ดคำสาปทุกใบในทีมฝ่ายตรงข้ามจะถูกลด ATK, HP และ DEF ลง 50% ส่วนการ์ดคำสาปในทีมฝ่ายเราจะได้รับ ATK, HP และ DEF เพิ่มขึ้น 20%", "activeIn": [ "team", "tower", "arena" ], "condition": { "leaderOnly": true }, "effects": [ { "type": "cardPowerRate", "value": -0.5, "targetSide": "enemy", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardHpRate", "value": -0.5, "targetSide": "enemy", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardDefenseRate", "value": -0.5, "targetSide": "enemy", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardPowerRate", "value": 0.2, "targetSide": "ally", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardHpRate", "value": 0.2, "targetSide": "ally", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] }, { "type": "cardDefenseRate", "value": 0.2, "targetSide": "ally", "targetCardIds": [ 1002, 1024, 1025, 1026, 1027, 1030, 1035, 1042 ] } ] } ]
+},
   {
     "id": 1008,
     "name": "Kenjaku",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "ความมืด",
     "power": 243000,
         "hp": 1215000,
@@ -7866,12 +7891,12 @@
     "image": "1008.png",
     "ability": {
       "name": "กลยุทธ์ของคำสาปฉันเหนือกว่า",
-      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับคำสาปหรือนักสาปแช่งที่ไม่ใช่การ์ด'Sukuna' ; ATK/HP+10%และยกเลิกเงื่อนไขสกิลของคำสาปหรือนักสาปแช่งในทีมทั้งหมด",
+      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับคำสาปหรือนักสาปแช่งที่ไม่ใช่การ์ด'Sukuna' ; ATK/HP-10%และยกเลิกเงื่อนไขสกิลของคำสาปหรือนักสาปแช่งในทีมทั้งหมด",
       "activeIn": ["team", "tower", "arena"],
       "condition": { "leaderOnly": true, "anyCardIds": [ 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032] },
       "effects": [
-        { "type": "teamPowerRate", "value": 0.1 },
-        { "type": "teamHpRate", "value": 0.1 },
+        { "type": "teamPowerRate", "value": -0.1 },
+        { "type": "teamHpRate", "value": -0.1 },
         { "type": "ignoreAbilityConditions", "targetSide": "ally", "targetCardIds": [1034, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032], "targetMatch": "any" }
       ]
     }
@@ -7892,16 +7917,37 @@
     "image": "1009.png",
     "ability": {
       "name": "ภาชนะของสุคุนะ",
-      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'Nobara Kugisaki'UR หรือ 'megimi fushiguro'UR หรือ 'gojo stouru'LR หรือ 'Todo aoi'; ATK+25%และโจมตี+4โล่+4 ",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": { "anyCardIds": [1010,1011,1001,1013], "leaderOnly": "true" },
+      "description": "หากการ์ดใบนี้จัดทีมกับ'Nobara Kugisaki'UR หรือ 'megimi fushiguro'UR หรือ 'gojo stouru'LR หรือ 'Todo aoi'; คริติคอลเรท+15% และ ทุกการโจมตี 4 ครั้ง จะติดคริติคอล 100% ในการโจมตีครั้งถัดไป ",
+    "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
       "effects": [
-        { "type": "teamPowerRate", "value": 0.25 },
-        { "type": "attackHits", "value": 4 },
-        { "type": "shieldHits", "value": 4 }
-      ]
+        {
+          "type": "criticalRate",
+          "value": 0.15
+        },
+        {
+          "type": "nextAttackCriticalRate",
+          "value": 1,
+          "targetSide": "self",
+          "condition": {
+            "afterOwnAttacks": 4,
+            "repeat": true
+          }
+        }
+      ],
+      "condition": {
+        "anyCardIds": [
+          1010,
+          1011,
+          7,
+          1013
+        ]
+      }
     }
-  },
+},
   {
     "id": 1010,
     "name": "Nobara Kugisaki",
@@ -7918,12 +7964,23 @@
     "image": "1010.png",
     "ability": {
       "name": "เสียงสั่นพ้อง",
-      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'yuji itadori'UR;'megimi fushiguro'UR;'gojo stouru'LR; ATK+45%และโจมตีเพิ่ม 7 ฮิต ",
+      "description": " เมื่อเริ่มต้นจะลดพลังป้องกันฝ่ายตรงข้ามลง 10% ; หากการ์ดใบนี้ถูกจัดรวมกับ 'Gojo'Legends;Yuji'UR และ Megumi'UR ทุกครั้งที่ตี3ครั้งจะเพิ่มคอสการใช้สกิลให้ฝั่งตรงข้าม 1",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "leaderOnly": true, "requiredCardIds": [1009,1011,1001] },
+      "condition": {},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.45 },
-        { "type": "attackHits", "value": 7 }
+        {
+          "type": "enemyDefenseRate",
+          "value": -0.2
+        },
+        {
+          "type": "activeSkillCostCycle",
+          "value": 1,
+          "targetSide": "enemy",
+          "condition": { "requiredCardIds": [1009, 1011, 1001],
+            "afterOwnAttacks": 2,
+            "repeat": true
+          }
+        }
       ]
     }
   },
@@ -7942,15 +7999,19 @@
     "icon": "",
     "image": "1011.png",
     "ability": {
-      "name": "ปี1โตเกียว",
-      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์และ เมื่อจัดทีมกับ ;'yuji itadori'UR;'nobara kigisaki'UR;'gojo stouru'LR; ATK/HP+35%และโจมตีและโล่เพิ่มขึ้น +4 ",
+      "name": "สวนแห่ง10เงา",
+      "description": "หากการ์ดใบนี้เป็นหลีดเดอร์ เมื่อตีครบ 7 ครั้ง ; กางอาณาเขตสวนแห่งเงา การโจมตี 10 ครั้งหลังจากนี้ จะเข้าเป้า 100% ทำงานครั้งเดียวต่อการต่อสู้",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "leaderOnly": true, "requiredCardIds": [1009,1010,1001] },
+      "condition": { "leaderOnly": true, "afterOwnAttacks": 6, "repeat": false },
       "effects": [
-        { "type": "teamPowerRate", "value": 0.35 },
-        { "type": "teamHpRate", "value": 0.35 },
-        { "type": "attackHits", "value": 4 },
-        { "type": "shieldHits", "value": 4 }
+        { "type": "attackHits",
+      "value": 99,
+      "persistentAfterActivation": true,
+      "maxStacks": 10,
+      "condition": {
+        "afterOwnAttacks": 0,
+        "repeat": true }
+        }
       ]
     }
   },
@@ -7970,9 +8031,9 @@
     "image": "1012.png",
     "ability": {
       "name": "ได้เวลาโอทีแล้ว...",
-      "description": "เมื่อตีครบ 10 ครั้ง ตีครั้งต่อไปจะบวก ATK+5400000 ",
+      "description": "เมื่อตีครบ 3 ครั้ง ตีครั้งต่อไปจะบวก ATK+5400000 ",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "afterOwnAttacks": 10, "repeat": true },
+      "condition": { "afterOwnAttacks": 3, "repeat": true },
       "effects": [
         { "type": "nextAttackPowerFlat", "value": 5400000 }
       ]
@@ -7994,12 +8055,20 @@
     "image": "1036.png",
     "ability": {
       "name": "หยุดซ้ะ",
-      "description": "ลด HP ฝั่งตรงข้าม 35%  เมื่อใส่ 'panda'UR;'maki'UR;'yuta'LR ในทีม",
-      "activeIn": ["team", "tower"],
-      "condition": {"requiredCardIds": [1037, 1016, 1005]
-      },
+      "description": "ลด DEF ฝั่งตรงข้าม 10% ; เมื่อใส่ 'panda'UR;'maki'UR;'yuta'LR ในทีม ทุกครั้งที่ตีครบ 3 ครั้ง จะเพิ่มคอส Active skill ให้ฝั่งตรงข้าม +1",
+      "activeIn": ["team", "tower","arena"],
+      "condition": {},
       "effects": [
-        { "type": "enemyHpRate", "value": -0.35 }
+        { "type": "enemyDefenseRate", "value": -0.1 },
+        {
+          "type": "activeSkillCostCycle",
+          "value": 1,
+          "targetSide": "enemy",
+          "condition": {
+            "afterOwnAttacks": 2,
+            "repeat": true, "requiredCardIds": [1037, 1016, 1005]
+          }
+        }
       ]
     }
   },
@@ -8018,15 +8087,28 @@
     "icon": "",
     "image": "1037.png",
     "ability": {
-      "name": "ชิกิกามิที่พูดได้",
-      "description": "เพิ่มรายได้ +60% เมื่อใส่ 'inumaki'UR;'maki'UR;'yuta'LR ในทีม",
-      "activeIn": ["team"],
-      "condition": {"requiredCardIds": [1036, 1016, 1005]
-      },
-      "effects": [
-        { "type": "teamIncomeRate", "value": 0.60 }
-      ]
+  "name": "ชิกิกามิที่พูดได้",
+  "description": "เพิ่มรายได้ของทีม 30% และเมื่อจัด Inumaki UR, Maki UR และ Yuta LR อยู่ในทีม ทุกครั้งที่การ์ดใบนี้โจมตีครบ 2 ครั้ง จะฟื้นฟูโล่ให้ฝ่ายพันธมิตร 1 ฮิต สูงสุด 8 ฮิต",
+  "activeIn": ["team", "tower", "arena"],
+  "condition": {},
+  "effects": [
+    {
+      "type": "teamIncomeRate",
+      "value": 0.30
+    },
+    {
+      "type": "restoreShieldHits",
+      "value": 1,
+      "targetSide": "ally",
+      "maxStacks": 8,
+      "condition": {
+        "afterOwnAttacks": 1,
+        "repeat": true,
+        "requiredCardIds": [1036, 1016, 1005]
+      }
     }
+  ]
+}
   },
   {
     "id": 1013,
@@ -8044,16 +8126,20 @@
     "image": "1013.png",
     "ability": {
       "name": "มายบราเทอร์",
-      "description": "เพิ่มอัตราคริติคอล 10%, เมื่อจัดทีมกับ 'Itadori Yuji'ระดับ UR ในทีมแค่ 2 คน; ATK/HP +2000% /โจมตีและโล่เพิ่มอย่างละ +4",
+      "description": "เพิ่มอัตราคริติคอล 20%; เมื่อจัดทีมกับ 'Itadori Yuji'ระดับ UR ในทีมแค่ 2 คน; ATK/HP +200% โจมตีและโล่เพิ่มอย่างละ +4",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"requiredCardIds": [1009], "maxTeamSize": 2
+      "condition": {
       },
       "effects": [
-        { "type": "teamPowerRate", "value": 20.0 },
-        { "type": "teamHpRate", "value": 20.0 },
-        { "type": "shieldHits", "value": 4 },
-        { "type": "attackHits", "value": 4 },
-        { "type": "criticalRate", "value": 0.10 }
+        { "type": "teamPowerRate", "value": 2.0,"condition": {"requiredCardIds": [1009], "maxTeamSize": 2
+      } },
+        { "type": "teamHpRate", "value": 2.0,"condition": {"requiredCardIds": [1009], "maxTeamSize": 2
+      } },
+        { "type": "shieldHits", "value": 4,"condition": {"requiredCardIds": [1009], "maxTeamSize": 2
+      } },
+        { "type": "attackHits", "value": 4,"condition": {"requiredCardIds": [1009], "maxTeamSize": 2
+      } },
+        { "type": "criticalRate", "value": 0.20 }
       ]
     }
   },
@@ -8072,13 +8158,21 @@
     "icon": "",
     "image": "1014.png",
     "ability": {
-      "name": "ลัคกี้...",
-      "description": "เพิ่มอัตราคริติคอล 25%, เพิ่มเรทกาชา ;UR/LR/EX +14%",
-      "activeIn": ["team", "tower"],
-      "condition": { "mode": "tower"},
+      "name": "ทอร์นาโด",
+      "description": "เพิ่มอัตราคริติคอล 25% ทุกครั้งที่การ์ดใบนี้ตีครบ 3 ครั้ง จะเพิ่ม ATK+5% ให้ผู้ใช้ไสยเวทในทีม (สูงสุด 5 ครั้ง)",
+      "activeIn": ["team", "tower","arena"],
+      "condition": { },
       "effects": [
         { "type": "criticalRate", "value": 0.25 },
-        { "type": "gachaRarityRate", "value": 0.14, "targetRarities": ["UR", "LR", "EX"] }
+        { "type": "increaseAttackRateStack",
+          "value": 0.05,
+          "targetSide": "ally",
+          "targetCardIds":[43, 44, 45, 1001, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 42, 1021, 1022, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1036, 1037, 1038, 1039, 1040, 1041, 1043, 7, 26],
+          "condition": {
+            "afterOwnAttacks": 2,
+            "repeat": true
+          },
+          "maxStacks": 5 }
       ]
     }
   },
@@ -8261,15 +8355,15 @@
     "image": "1035.png",
     "ability": {
       "name": "อารามสงฆ์ซ่อนมาร",
-      "description": "หากอเวกตันและเลเวลตัน และมีคนเดียวในทีมจะเก่งขึ้น 7000% โจมตี 8 ครั้งและเพิ่มโล่ 8",
+      "description": "หากอเวกตันและเลเวลตัน และมีคนเดียวในทีมจะเก่งขึ้น 300% โจมตี 8 ครั้งและเพิ่มโล่ 8",
       "activeIn": ["team", "tower", "arena"],
       "condition": {
         "sourceMinAwaken": 5, "sourceMinLevel": 180,
                 "maxTeamSize": 1, "leaderOnly": true
       },
       "effects": [
-        { "type": "selfPowerRate", "value": 70.0 },
-        { "type": "selfHpRate", "value": 70.0 },
+        { "type": "selfPowerRate", "value": 3.0 },
+        { "type": "selfHpRate", "value": 3.0 },
         { "type": "attackHits", "value": 7 },
         { "type": "shieldHits", "value": 8 }
       ]
@@ -8481,12 +8575,12 @@
     "image": "1031.png",
     "ability": {
       "name": "24fps...",
-      "description": "เมื่อจัดทีมเพียงการ์ดใบนี้ใบเดียว จะได้รับ ATK/HP +3000%, เจาะโล่ 7 ฮิตและ มีโล่+7",
+      "description": "เมื่อจัดทีมเพียงการ์ดใบนี้ใบเดียว จะได้รับ ATK/HP +1000%, เจาะโล่ 7 ฮิตและ มีโล่+7",
       "activeIn": ["team", "tower", "arena"],
       "condition": { "leaderOnly": true, "maxTeamSize": 1 },
       "effects": [
-        { "type": "selfPowerRate", "value": 30.0 },
-        { "type": "selfHpRate", "value": 30.0 },
+        { "type": "selfPowerRate", "value": 10.0 },
+        { "type": "selfHpRate", "value": 10.0 },
         { "type": "attackHits", "value": 6 },
         { "type": "shieldHits", "value": 7 }
       ]
@@ -8540,12 +8634,12 @@
       ],
       "effects": [
         {
-          "type": "activeSkillCost",
+          "type": "activeSkillCostCycle",
           "value": 2,
           "targetSide": "enemy",
         },
         {
-          "type": "activeSkillCost",
+          "type": "activeSkillCostCycle",
           "value": -1,
           "targetCardIds": [
             1033
@@ -10551,11 +10645,24 @@
     }
 
     // เงื่อนไข Active Skill แบบทั่วไป:
-    // condition: { afterOwnAttacks: 3, repeat: true }
-    // ตีปกติครบ 3 ครั้ง แล้วเอฟเฟกต์จะทำงานในการโจมตีครั้งถัดไป จากนั้นรีเซ็ตและวนใหม่
+    // 1) condition: { afterOwnAttacks: 3, repeat: true }
+    //    ตีปกติครบ 3 ครั้ง แล้วเอฟเฟกต์จะทำงานในการโจมตีครั้งถัดไป จากนั้นรีเซ็ตและวนใหม่
+    // 2) condition: { onOwnAttack: true }
+    //    เอฟเฟกต์ทำงานทุกครั้งที่เจ้าของสกิลโจมตี ตั้งแต่การโจมตีครั้งแรก
     function normalizeBattleTriggerRule(condition = {}) {
       const raw = condition && typeof condition === "object" ? condition : {};
       const nested = raw.battleTrigger && typeof raw.battleTrigger === "object" ? raw.battleTrigger : raw;
+      const onOwnAttack = nested.onOwnAttack === true
+        || nested.triggerOnOwnAttack === true
+        || String(nested.triggerOn || "").trim().toLowerCase() === "ownattack";
+      if (onOwnAttack) {
+        return {
+          onOwnAttack: true,
+          afterOwnAttacks: 0,
+          repeat: true,
+          triggerOn: "ownAttack"
+        };
+      }
       const amount = Math.floor(Number(
         nested.afterOwnAttacks !== undefined ? nested.afterOwnAttacks
           : nested.triggerEveryOwnAttacks !== undefined ? nested.triggerEveryOwnAttacks
@@ -10564,6 +10671,7 @@
       if (amount < 1) return null;
       const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
       return {
+        onOwnAttack: false,
         afterOwnAttacks: Math.min(cap, amount),
         repeat: nested.repeat !== false,
         triggerOn: "nextAttack"
@@ -10574,6 +10682,8 @@
       const source = condition && typeof condition === "object" ? condition : {};
       const result = { ...source };
       delete result.battleTrigger;
+      delete result.onOwnAttack;
+      delete result.triggerOnOwnAttack;
       delete result.afterOwnAttacks;
       delete result.triggerEveryOwnAttacks;
       delete result.ownAttacksBeforeTrigger;
@@ -10983,6 +11093,12 @@
         criticalRate: Math.max(0, Number(CONFIG.combatBaseCriticalRate) || 0),
         cardCriticalRates: {},
         enemyCriticalRateSelectors: [],
+        cardBlockRates: {},
+        enemyBlockRateSelectors: [],
+        cardDamageTakenRates: {},
+        enemyDamageTakenRateSelectors: [],
+        cardDodgeRates: {},
+        enemyDodgeRateSelectors: [],
         gachaRarityRates: {},
         teamPowerFlat: 0,
         teamHpFlat: 0,
@@ -11019,6 +11135,8 @@
         selfTriggerReductions: {},
         triggerCostChanges: {},
         enemyTriggerCostSelectors: [],
+        permanentTriggerCostChanges: {},
+        enemyPermanentTriggerCostSelectors: [],
         nullifiedCardIds: [...nullifiedCardIdSet],
         allyNullifiedCardIds: [...allyNullified],
         conditionIgnoredCardIds: [...conditionIgnoredCardIdSet],
@@ -11036,8 +11154,12 @@
       mergeExternalAbilityRateMap(summary.cardHpRates, options.externalCardHpRates, context);
       mergeExternalAbilityRateMap(summary.cardDefenseRates, options.externalCardDefenseRates, context);
       mergeExternalAbilityRateMap(summary.cardCriticalRates, options.externalCardCriticalRates, context);
+      mergeExternalAbilityRateMap(summary.cardBlockRates, options.externalCardBlockRates, context);
+      mergeExternalAbilityRateMap(summary.cardDamageTakenRates, options.externalCardDamageTakenRates, context);
+      mergeExternalAbilityRateMap(summary.cardDodgeRates, options.externalCardDodgeRates, context);
       mergeExternalAbilityRateMap(summary.cardIncomeRates, options.externalCardIncomeRates, context);
       mergeExternalAbilityRateMap(summary.triggerCostChanges, options.externalTriggerCostChanges, context);
+      mergeExternalAbilityRateMap(summary.permanentTriggerCostChanges, options.externalPermanentTriggerCostChanges, context);
 
       context.cards.forEach(sourceCard => {
         getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
@@ -11103,6 +11225,24 @@
                 else addAbilityMapRate(summary.cardCriticalRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
                 break;
               }
+              case CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                if (side === "enemy") summary.enemyBlockRateSelectors.push({ sourceCard, ability, effect: record });
+                else addAbilityMapRate(summary.cardBlockRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                break;
+              }
+              case CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                if (side === "enemy") summary.enemyDamageTakenRateSelectors.push({ sourceCard, ability, effect: record });
+                else addAbilityMapRate(summary.cardDamageTakenRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                break;
+              }
+              case CARD_ABILITY_EFFECT_TYPES.DODGE_RATE: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                if (side === "enemy") summary.enemyDodgeRateSelectors.push({ sourceCard, ability, effect: record });
+                else addAbilityMapRate(summary.cardDodgeRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                break;
+              }
               case CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE:
                 addAbilityMapRate(summary.gachaRarityRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
                 break;
@@ -11144,11 +11284,19 @@
                 addAbilityMapRate(summary.triggerCostChanges, [sourceId], -reduction);
                 break;
               }
-              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST: {
+              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST:
+              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 const change = Math.round(value);
                 if (side === "enemy") summary.enemyTriggerCostSelectors.push({ sourceCard, ability, effect: { ...record, value: change } });
                 else addAbilityMapRate(summary.triggerCostChanges, resolveAbilityTargetCardIds(effect, sourceCard, context), change);
+                break;
+              }
+              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                const change = Math.round(value);
+                if (side === "enemy") summary.enemyPermanentTriggerCostSelectors.push({ sourceCard, ability, effect: { ...record, value: change } });
+                else addAbilityMapRate(summary.permanentTriggerCostChanges, resolveAbilityTargetCardIds(effect, sourceCard, context), change);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.INCREASE_MAX_HP_BASE_RATE:
@@ -11183,6 +11331,7 @@
                 break;
               case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE:
               case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_FLAT:
+              case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_CRITICAL_RATE:
               case CARD_ABILITY_EFFECT_TYPES.HEAL_HP_RATE:
               case CARD_ABILITY_EFFECT_TYPES.HEAL_HP_FLAT:
               case CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS:
@@ -11236,6 +11385,15 @@
       Object.keys(summary.cardCriticalRates).forEach(id => {
         summary.cardCriticalRates[id] = Math.max(-1, Math.min(1, Number(summary.cardCriticalRates[id]) || 0));
       });
+      Object.keys(summary.cardBlockRates).forEach(id => {
+        summary.cardBlockRates[id] = Math.max(-1, Math.min(1, Number(summary.cardBlockRates[id]) || 0));
+      });
+      Object.keys(summary.cardDodgeRates).forEach(id => {
+        summary.cardDodgeRates[id] = Math.max(-1, Math.min(1, Number(summary.cardDodgeRates[id]) || 0));
+      });
+      Object.keys(summary.cardDamageTakenRates).forEach(id => {
+        summary.cardDamageTakenRates[id] = Math.max(Number(CONFIG.combatMinDamageTakenRate || -1), Math.min(Number(CONFIG.combatMaxDamageTakenRate || 5), Number(summary.cardDamageTakenRates[id]) || 0));
+      });
       const maxAttackHitDelta = Math.max(0, Number(CONFIG.combatMaxAttackHits || 1) - 1);
       const maxShieldHitDelta = Math.max(0, Number(CONFIG.combatMaxShieldHits || 0));
       summary.attackHits = Math.max(-maxAttackHitDelta, Math.min(maxAttackHitDelta, Math.round(summary.attackHits)));
@@ -11253,6 +11411,9 @@
       const triggerCostCap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
       Object.keys(summary.triggerCostChanges).forEach(id => {
         summary.triggerCostChanges[id] = Math.max(-(triggerCostCap - 1), Math.min(triggerCostCap - 1, Math.round(Number(summary.triggerCostChanges[id]) || 0)));
+      });
+      Object.keys(summary.permanentTriggerCostChanges).forEach(id => {
+        summary.permanentTriggerCostChanges[id] = Math.max(-(triggerCostCap - 1), Math.min(triggerCostCap - 1, Math.round(Number(summary.permanentTriggerCostChanges[id]) || 0)));
       });
       return summary;
     }
@@ -11272,8 +11433,12 @@
           externalCardHpRates: resolveEnemyRateMap(enemyControl.enemyCardHpSelectors, allyContext),
           externalCardDefenseRates: resolveEnemyRateMap(enemyControl.enemyCardDefenseSelectors, allyContext),
           externalCardCriticalRates: resolveEnemyRateMap(enemyControl.enemyCriticalRateSelectors, allyContext),
+          externalCardBlockRates: resolveEnemyRateMap(enemyControl.enemyBlockRateSelectors, allyContext),
+          externalCardDamageTakenRates: resolveEnemyRateMap(enemyControl.enemyDamageTakenRateSelectors, allyContext),
+          externalCardDodgeRates: resolveEnemyRateMap(enemyControl.enemyDodgeRateSelectors, allyContext),
           externalCardIncomeRates: resolveEnemyRateMap(enemyControl.enemyCardIncomeSelectors, allyContext),
-          externalTriggerCostChanges: resolveEnemyRateMap(enemyControl.enemyTriggerCostSelectors, allyContext)
+          externalTriggerCostChanges: resolveEnemyRateMap(enemyControl.enemyTriggerCostSelectors, allyContext),
+          externalPermanentTriggerCostChanges: resolveEnemyRateMap(enemyControl.enemyPermanentTriggerCostSelectors, allyContext)
         }),
         enemy: getTeamAbilitySummary(enemyTeamIds, mode, {
           ...enemyOptions,
@@ -11283,8 +11448,12 @@
           externalCardHpRates: resolveEnemyRateMap(allyControl.enemyCardHpSelectors, enemyContext),
           externalCardDefenseRates: resolveEnemyRateMap(allyControl.enemyCardDefenseSelectors, enemyContext),
           externalCardCriticalRates: resolveEnemyRateMap(allyControl.enemyCriticalRateSelectors, enemyContext),
+          externalCardBlockRates: resolveEnemyRateMap(allyControl.enemyBlockRateSelectors, enemyContext),
+          externalCardDamageTakenRates: resolveEnemyRateMap(allyControl.enemyDamageTakenRateSelectors, enemyContext),
+          externalCardDodgeRates: resolveEnemyRateMap(allyControl.enemyDodgeRateSelectors, enemyContext),
           externalCardIncomeRates: resolveEnemyRateMap(allyControl.enemyCardIncomeSelectors, enemyContext),
-          externalTriggerCostChanges: resolveEnemyRateMap(allyControl.enemyTriggerCostSelectors, enemyContext)
+          externalTriggerCostChanges: resolveEnemyRateMap(allyControl.enemyTriggerCostSelectors, enemyContext),
+          externalPermanentTriggerCostChanges: resolveEnemyRateMap(allyControl.enemyPermanentTriggerCostSelectors, enemyContext)
         })
       };
     }
@@ -11414,6 +11583,56 @@
       return { cardCriticalRates: resolveEnemyRateMap(selectors, context) };
     }
 
+    function getEnemyTargetDefensiveSummary(sourceSummary = {}, targetTeam = [], mode = "arena") {
+      const ids = abilityArray(targetTeam).map(item => String(item && typeof item === "object" ? item.id || "" : item || "")).filter(Boolean);
+      const context = buildAbilityContext(ids, mode);
+      return {
+        cardBlockRates: resolveEnemyRateMap(sourceSummary.enemyBlockRateSelectors, context),
+        cardDamageTakenRates: resolveEnemyRateMap(sourceSummary.enemyDamageTakenRateSelectors, context),
+        cardDodgeRates: resolveEnemyRateMap(sourceSummary.enemyDodgeRateSelectors, context)
+      };
+    }
+
+    function clampBlockRate(value) {
+      return Math.max(0, Math.min(Number(CONFIG.combatMaxBlockRate || 1), Number(value) || 0));
+    }
+
+    function clampDodgeRate(value) {
+      return Math.max(0, Math.min(Number(CONFIG.combatMaxDodgeRate || 1), Number(value) || 0));
+    }
+
+    function clampDamageTakenRate(value) {
+      return Math.max(Number(CONFIG.combatMinDamageTakenRate || -1), Math.min(Number(CONFIG.combatMaxDamageTakenRate || 5), Number(value) || 0));
+    }
+
+    function getAbilityAdjustedCardBlockRate(card, abilitySummary = {}) {
+      return card ? clampBlockRate(abilitySummary.cardBlockRates && abilitySummary.cardBlockRates[String(card.id)]) : 0;
+    }
+
+    function getAbilityAdjustedCardDodgeRate(card, abilitySummary = {}) {
+      return card ? clampDodgeRate(abilitySummary.cardDodgeRates && abilitySummary.cardDodgeRates[String(card.id)]) : 0;
+    }
+
+    function getAbilityAdjustedCardDamageTakenRate(card, abilitySummary = {}) {
+      return card ? clampDamageTakenRate(abilitySummary.cardDamageTakenRates && abilitySummary.cardDamageTakenRates[String(card.id)]) : 0;
+    }
+
+    function buildBattleDefenseMembers(team = [], abilitySummary = {}, snapshotMode = false) {
+      return abilityArray(team).filter(Boolean).map(item => {
+        const id = getBattleItemId(item);
+        const card = getBattleItemCard(item);
+        if (!id || !card) return null;
+        return {
+          id,
+          name: String(item && typeof item === "object" && item.name || card.name || `ID ${id}`),
+          hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
+          blockRate: getAbilityAdjustedCardBlockRate(card, abilitySummary),
+          dodgeRate: getAbilityAdjustedCardDodgeRate(card, abilitySummary),
+          damageTakenRate: getAbilityAdjustedCardDamageTakenRate(card, abilitySummary)
+        };
+      }).filter(Boolean);
+    }
+
     function signedPercent(value) {
       const percent = Math.round(Number(value || 0) * 1000) / 10;
       return `${percent > 0 ? "+" : ""}${percent}%`;
@@ -11471,6 +11690,10 @@
         ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
         nextAttackPowerRate: `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
         nextAttackPowerFlat: `โจมตีครั้งที่สกิลทำงาน ATK +${formatNumber(value)}`,
+        nextAttackCriticalRate: `โจมตีครั้งที่สกิลทำงาน คริติคอล ${signedPercent(Math.max(-1, Math.min(1, value)))} (ชั่วคราว)`,
+        blockRate: `อัตราบล็อก ${targetText} ${signedPercent(value)} (บล็อกแล้วดาเมจส่วนตัวลด 50%)`,
+        damageTakenRate: `ดาเมจที่ได้รับขั้นสุดท้าย ${targetText} ${signedPercent(value)}`,
+        dodgeRate: `อัตราหลบหลีก ${targetText} ${signedPercent(value)}`,
         healHpRate: `เมื่อสกิลทำงาน ฟื้น HP ${signedPercent(Math.max(0, value))}`,
         healHpFlat: `เมื่อสกิลทำงาน ฟื้น HP ${formatNumber(value)}`,
         healingRate: `อัตราฟื้น HP ${targetSideText} ${signedPercent(value)}`,
@@ -11479,8 +11702,10 @@
         nextAttackHits: `เมื่อสกิลทำงาน จำนวนฮิตครั้งถัดไปของ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         increaseMaxHpBaseRate: `เพิ่ม HP สูงสุดและ HP ปัจจุบันจาก HP เบส ${signedPercent(Math.max(0, value))}`,
         increaseAttackRateStack: `สะสม ATK ถาวรระหว่างไฟต์ ${signedPercent(Math.max(0, value))} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
-        selfTriggerReduction: `ลดคอส Active Skill ของการ์ดนี้ ${Math.max(0, Math.floor(value))} ครั้ง`,
-        activeSkillCost: `คอส Active Skill ${targetText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ครั้ง`,
+        selfTriggerReduction: `ลดคอส Active Skill รอบปัจจุบันของการ์ดนี้ ${Math.max(0, Math.floor(value))} ครั้ง`,
+        activeSkillCost: `คอส Active Skill รอบปัจจุบัน ${targetText} ${value > 0 ? "+" : ""}${Math.round(value)} ครั้ง`,
+        activeSkillCostCycle: `คอส Active Skill รอบปัจจุบัน ${targetText} ${value > 0 ? "+" : ""}${Math.round(value)} ครั้ง (ใช้แล้วรีเซ็ต)`,
+        activeSkillCostPermanent: `คอส Active Skill ถาวรระหว่างไฟต์ ${targetText} ${value > 0 ? "+" : ""}${Math.round(value)} ครั้ง`,
         rarityPowerRate: `ATK ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityHpRate: `HP ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityDefenseRate: `DEF ระดับ ${rarityText} ${signedPercent(value)}`,
@@ -11532,7 +11757,11 @@
       const anyIds = normalizeAbilityCardIds(condition.anyCardIds);
       if (anyIds.length) parts.push(`มีการ์ดอย่างน้อยหนึ่งใบจาก ID ${anyIds.join(", ")}`);
       const battleTrigger = normalizeBattleTriggerRule(condition);
-      if (battleTrigger) parts.push(`ฝ่ายเจ้าของสกิลโจมตีครบ ${battleTrigger.afterOwnAttacks} ครั้ง → ทำงานในการโจมตีครั้งถัดไป${battleTrigger.repeat ? " และวนลูป" : " ครั้งเดียว"}`);
+      if (battleTrigger && battleTrigger.onOwnAttack) {
+        parts.push("ทำงานทุกครั้งที่เจ้าของสกิลโจมตี ตั้งแต่การโจมตีครั้งแรก");
+      } else if (battleTrigger) {
+        parts.push(`ฝ่ายเจ้าของสกิลโจมตีครบ ${battleTrigger.afterOwnAttacks} ครั้ง → ทำงานในการโจมตีครั้งถัดไป${battleTrigger.repeat ? " และวนลูป" : " ครั้งเดียว"}`);
+      }
       return parts.length ? parts.join(" • ") : "เพียงจัดการ์ดนี้อยู่ในทีม";
     }
 
@@ -11670,13 +11899,14 @@
       return Math.max(-1, Math.min(5, Number(abilitySummary.shieldRecoveryRate || 0) + Number(opposingModifier || 0)));
     }
 
-    function resolveCombatExchange(attackerAttack, defenderDefense, attackHits = 1, shieldHits = 0, variance = 1) {
+    function resolveCombatExchange(attackerAttack, defenderDefense, attackHits = 1, shieldHits = 0, variance = 1, defenseOptions = {}) {
       const attack = Math.max(1, Number(attackerAttack || 0) * Math.max(.2, Number(variance) || 1));
       const defense = Math.max(0, Number(defenderDefense || 0));
       const hits = Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(attackHits) || 1)));
       const shields = Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(shieldHits) || 0)));
 
-      // ลำดับใหม่: โล่บล็อกจำนวนฮิตก่อนเสมอ แล้วจึงนำเฉพาะ ATK ของฮิตที่ผ่านโล่ไปหัก DEF
+      // 1) โล่ตัดจำนวนฮิตก่อน 2) หลบตามสัดส่วน HP ของแต่ละการ์ดก่อน DEF
+      // 3) คิด DEF เฉพาะส่วนที่ไม่หลบ 4) บล็อกลด 50% 5) damageTakenRate เป็นตัวคูณขั้นสุดท้าย
       const blockedHits = Math.min(hits, shields);
       const unblockedHits = Math.max(0, hits - blockedHits);
       const unblockedRate = unblockedHits / hits;
@@ -11684,28 +11914,55 @@
         Number(CONFIG.combatMultiHitMinEfficiency || .82),
         1 - Math.max(0, hits - 1) * Number(CONFIG.combatMultiHitPenalty || .025)
       );
-      const attackAfterShield = unblockedHits > 0
-        ? attack * unblockedRate * multiHitEfficiency
-        : 0;
-      const defenseApplied = unblockedHits > 0
-        ? defense * Number(CONFIG.combatDefenseWeight || 1)
-        : 0;
-      const damage = unblockedHits > 0
-        ? Math.max(1, attackAfterShield - defenseApplied)
-        : 0;
+      const attackAfterShield = unblockedHits > 0 ? attack * unblockedRate * multiHitEfficiency : 0;
+      const rawMembers = abilityArray(defenseOptions && defenseOptions.members).filter(Boolean);
+      const members = rawMembers.length ? rawMembers : [{ id: "team", name: "ทีม", hp: 1, blockRate: 0, dodgeRate: 0, damageTakenRate: 0 }];
+      const totalMemberHp = Math.max(1, members.reduce((sum, member) => sum + Math.max(0, Number(member.hp) || 0), 0));
+      const rollDefensiveEffects = defenseOptions.rollDefensiveEffects !== false;
+      const memberResults = [];
+      let defenseApplied = 0;
+      let damageBeforeBlock = 0;
+      let damageAfterBlock = 0;
+      let damage = 0;
+      let dodgedHpRate = 0;
+      let blockDamageReduced = 0;
 
+      if (unblockedHits > 0) {
+        members.forEach(member => {
+          const hpShare = Math.max(0, Number(member.hp) || 0) / totalMemberHp;
+          const dodgeRate = clampDodgeRate(member.dodgeRate);
+          const blockRate = clampBlockRate(member.blockRate);
+          const damageTakenRate = clampDamageTakenRate(member.damageTakenRate);
+          const dodged = rollDefensiveEffects && dodgeRate > 0 && Math.random() < dodgeRate;
+          const attackShare = attackAfterShield * hpShare;
+          const defenseShare = defense * Number(CONFIG.combatDefenseWeight || 1) * hpShare;
+          if (dodged) {
+            dodgedHpRate += hpShare;
+            memberResults.push({ ...member, hpShare, dodgeRate, blockRate, damageTakenRate, dodged: true, blocked: false, attackShare, defenseShare: 0, damageBeforeBlock: 0, damageAfterBlock: 0, finalDamage: 0 });
+            return;
+          }
+          defenseApplied += defenseShare;
+          const beforeBlock = Math.max(0, attackShare - defenseShare);
+          const blocked = rollDefensiveEffects && beforeBlock > 0 && blockRate > 0 && Math.random() < blockRate;
+          const afterBlock = blocked ? beforeBlock * Number(CONFIG.combatBlockDamageMultiplier || .5) : beforeBlock;
+          const finalDamage = afterBlock * Math.max(0, 1 + damageTakenRate);
+          damageBeforeBlock += beforeBlock;
+          damageAfterBlock += afterBlock;
+          damage += finalDamage;
+          if (blocked) blockDamageReduced += Math.max(0, beforeBlock - afterBlock);
+          memberResults.push({ ...member, hpShare, dodgeRate, blockRate, damageTakenRate, dodged: false, blocked, attackShare, defenseShare, damageBeforeBlock: beforeBlock, damageAfterBlock: afterBlock, finalDamage });
+        });
+      }
+
+      const anyHitLanded = unblockedHits > 0 && memberResults.some(member => !member.dodged);
+      if (anyHitLanded && damage <= 0) damage = 1;
       return {
-        attack,
-        defense,
-        hits,
-        shields,
-        blockedHits,
-        unblockedHits,
-        unblockedRate,
-        multiHitEfficiency,
-        attackAfterShield,
-        defenseApplied,
-        damage
+        attack, defense, hits, shields, blockedHits, unblockedHits, unblockedRate, multiHitEfficiency,
+        attackAfterShield, defenseApplied, damageBeforeBlock, damageAfterBlock, damage,
+        dodgedHpRate: Math.max(0, Math.min(1, dodgedHpRate)),
+        dodgedMembers: memberResults.filter(member => member.dodged),
+        blockedMembers: memberResults.filter(member => member.blocked),
+        blockDamageReduced, memberResults
       };
     }
 
@@ -11713,6 +11970,7 @@
     // โล่เป็นจำนวนฮิตรวมต่อหนึ่งการต่อสู้ ไม่รีเซ็ตทุกเทิร์น
     function buildTurnBasedCombat(options = {}) {
       const clampRate = value => Math.max(-1, Math.min(5, Number(value) || 0));
+      const clampTemporaryCriticalRate = value => Math.max(-1, Math.min(1, Number(value) || 0));
       const clampPendingHits = value => Math.max(-(Number(CONFIG.combatMaxAttackHits || 1) - 1), Math.min(Number(CONFIG.combatMaxAttackHits || 1) - 1, Math.round(Number(value) || 0)));
 
       function normalizeTriggers(value) {
@@ -11725,8 +11983,15 @@
           sourceCardRarity: String(item.sourceCardRarity || "N"),
           sourceCardElements: normalizeAbilityElements(item.sourceCardElements).length ? normalizeAbilityElements(item.sourceCardElements) : ["ไร้ธาตุ"],
           cutscene: item.cutscene && typeof item.cutscene === "object" ? { ...item.cutscene } : {},
-          afterOwnAttacks: Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Math.floor(Number(item.afterOwnAttacks) || 1))),
-          repeat: item.repeat !== false,
+          onOwnAttack: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack"),
+          triggerOn: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack") ? "ownAttack" : "nextAttack",
+          baseAfterOwnAttacks: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack")
+            ? 0
+            : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Math.floor(Number(item.baseAfterOwnAttacks ?? item.afterOwnAttacks) || 1))),
+          permanentCostChange: Math.round(Number(item.permanentCostChange) || 0),
+          cycleCostChange: Math.round(Number(item.cycleCostChange) || 0),
+          afterOwnAttacks: 0,
+          repeat: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack") ? true : item.repeat !== false,
           attackBonus: Number(item.attackBonus || 0),
           healHp: Math.max(0, Number(item.healHp || 0)),
           extraHits: Math.round(Number(item.extraHits || 0)),
@@ -11739,19 +12004,44 @@
           enemyShieldRecoveryRateChange: clampRate(item.enemyShieldRecoveryRateChange),
           criticalRateChange: Math.max(-1, Math.min(1, Number(item.criticalRateChange) || 0)),
           enemyCriticalRateChange: Math.max(-1, Math.min(1, Number(item.enemyCriticalRateChange) || 0)),
+          nextAttackCriticalRate: clampTemporaryCriticalRate(item.nextAttackCriticalRate),
+          enemyNextAttackCriticalRate: clampTemporaryCriticalRate(item.enemyNextAttackCriticalRate),
           maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
           attackStackGain: Math.max(0, Number(item.attackStackGain || 0)),
           maxStacks: Math.max(0, Math.floor(Number(item.maxStacks || 0))),
           triggerCostChanges: item.triggerCostChanges && typeof item.triggerCostChanges === "object" ? { ...item.triggerCostChanges } : {},
           enemyTriggerCostRules: abilityArray(item.enemyTriggerCostRules).map(rule => ({ ...rule })),
+          permanentTriggerCostChanges: item.permanentTriggerCostChanges && typeof item.permanentTriggerCostChanges === "object" ? { ...item.permanentTriggerCostChanges } : {},
+          enemyPermanentTriggerCostRules: abilityArray(item.enemyPermanentTriggerCostRules).map(rule => ({ ...rule })),
+          blockRateChanges: item.blockRateChanges && typeof item.blockRateChanges === "object" ? { ...item.blockRateChanges } : {},
+          enemyBlockRateRules: abilityArray(item.enemyBlockRateRules).map(rule => ({ ...rule })),
+          damageTakenRateChanges: item.damageTakenRateChanges && typeof item.damageTakenRateChanges === "object" ? { ...item.damageTakenRateChanges } : {},
+          enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule })),
+          dodgeRateChanges: item.dodgeRateChanges && typeof item.dodgeRateChanges === "object" ? { ...item.dodgeRateChanges } : {},
+          enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule })),
           stacks: 0,
           requiresActivationKey: String(item.requiresActivationKey || ""),
           unlocked: !String(item.requiresActivationKey || ""),
           charge: 0,
-          armed: false,
+          armed: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack"),
           completed: false,
           activations: 0
-        }));
+        })).map(trigger => {
+          const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
+          trigger.permanentCostChange = Math.max(-(cap - 1), Math.min(cap - 1, trigger.permanentCostChange));
+          trigger.cycleCostChange = Math.max(-(cap - 1), Math.min(cap - 1, trigger.cycleCostChange));
+          if (trigger.onOwnAttack) {
+            trigger.baseAfterOwnAttacks = 0;
+            trigger.afterOwnAttacks = 0;
+            trigger.permanentCostChange = 0;
+            trigger.cycleCostChange = 0;
+            trigger.charge = 0;
+            trigger.armed = true;
+          } else {
+            trigger.afterOwnAttacks = Math.max(1, Math.min(cap, trigger.baseAfterOwnAttacks + trigger.permanentCostChange + trigger.cycleCostChange));
+          }
+          return trigger;
+        });
       }
 
       function makeFighter(prefix) {
@@ -11782,10 +12072,23 @@
           initialCriticalRate: criticalRate,
           criticalDamageMultiplier,
           pendingAttackHits: 0,
+          pendingCriticalRateChange: 0,
+          members: abilityArray(options[`${prefix}Members`]).filter(Boolean).map(member => ({
+            id: String(member.id || ""),
+            name: String(member.name || member.id || "Unknown"),
+            hp: Math.max(1, Number(member.hp) || 1),
+            blockRate: clampBlockRate(member.blockRate),
+            dodgeRate: clampDodgeRate(member.dodgeRate),
+            damageTakenRate: clampDamageTakenRate(member.damageTakenRate)
+          })),
           activeTriggers: normalizeTriggers(options[`${prefix}ActiveTriggers`]),
           totalDamage: 0,
           totalHealing: 0,
           totalCriticalHits: 0,
+          totalBlocks: 0,
+          totalDodges: 0,
+          totalBlockedDamage: 0,
+          totalDodgedHpRate: 0,
           totalTriggerActivations: 0
         };
       }
@@ -11816,10 +12119,20 @@
             enemyShieldRecoveryRateChange: trigger.enemyShieldRecoveryRateChange,
             criticalRateChange: trigger.criticalRateChange,
             enemyCriticalRateChange: trigger.enemyCriticalRateChange,
+            nextAttackCriticalRate: trigger.nextAttackCriticalRate,
+            enemyNextAttackCriticalRate: trigger.enemyNextAttackCriticalRate,
             maxHpGain: trigger.maxHpGain,
             attackStackGain: trigger.attackStackGain,
             triggerCostChanges: { ...trigger.triggerCostChanges },
             enemyTriggerCostRules: abilityArray(trigger.enemyTriggerCostRules).map(rule => ({ ...rule })),
+            permanentTriggerCostChanges: { ...trigger.permanentTriggerCostChanges },
+            enemyPermanentTriggerCostRules: abilityArray(trigger.enemyPermanentTriggerCostRules).map(rule => ({ ...rule })),
+            blockRateChanges: { ...trigger.blockRateChanges },
+            enemyBlockRateRules: abilityArray(trigger.enemyBlockRateRules).map(rule => ({ ...rule })),
+            damageTakenRateChanges: { ...trigger.damageTakenRateChanges },
+            enemyDamageTakenRateRules: abilityArray(trigger.enemyDamageTakenRateRules).map(rule => ({ ...rule })),
+            dodgeRateChanges: { ...trigger.dodgeRateChanges },
+            enemyDodgeRateRules: abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule })),
             currentStacks: trigger.stacks,
             maxStacks: trigger.maxStacks
           })),
@@ -11835,13 +12148,23 @@
           enemyShieldRecoveryRateChange: fired.reduce((sum, trigger) => sum + trigger.enemyShieldRecoveryRateChange, 0),
           criticalRateChange: fired.reduce((sum, trigger) => sum + trigger.criticalRateChange, 0),
           enemyCriticalRateChange: fired.reduce((sum, trigger) => sum + trigger.enemyCriticalRateChange, 0),
+          nextAttackCriticalRate: clampTemporaryCriticalRate(fired.reduce((sum, trigger) => sum + trigger.nextAttackCriticalRate, 0)),
+          enemyNextAttackCriticalRate: clampTemporaryCriticalRate(fired.reduce((sum, trigger) => sum + trigger.enemyNextAttackCriticalRate, 0)),
           maxHpGain: fired.reduce((sum, trigger) => sum + trigger.maxHpGain, 0),
           attackStackGain: stackable.reduce((sum, trigger) => sum + trigger.attackStackGain, 0),
           triggerCostChanges: fired.reduce((map, trigger) => {
             Object.entries(trigger.triggerCostChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change));
             return map;
           }, {}),
-          enemyTriggerCostRules: fired.flatMap(trigger => abilityArray(trigger.enemyTriggerCostRules).map(rule => ({ ...rule })))
+          enemyTriggerCostRules: fired.flatMap(trigger => abilityArray(trigger.enemyTriggerCostRules).map(rule => ({ ...rule }))),
+          permanentTriggerCostChanges: fired.reduce((map, trigger) => { Object.entries(trigger.permanentTriggerCostChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
+          enemyPermanentTriggerCostRules: fired.flatMap(trigger => abilityArray(trigger.enemyPermanentTriggerCostRules).map(rule => ({ ...rule }))),
+          blockRateChanges: fired.reduce((map, trigger) => { Object.entries(trigger.blockRateChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
+          enemyBlockRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyBlockRateRules).map(rule => ({ ...rule }))),
+          damageTakenRateChanges: fired.reduce((map, trigger) => { Object.entries(trigger.damageTakenRateChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
+          enemyDamageTakenRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDamageTakenRateRules).map(rule => ({ ...rule }))),
+          dodgeRateChanges: fired.reduce((map, trigger) => { Object.entries(trigger.dodgeRateChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
+          enemyDodgeRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule })))
         };
       }
 
@@ -11856,9 +12179,24 @@
               trigger.stacks += 1;
               if (trigger.maxStacks && trigger.stacks >= trigger.maxStacks) trigger.completed = true;
             }
+            if (trigger.onOwnAttack) {
+              const reachedStackLimit = trigger.attackStackGain > 0 && trigger.maxStacks && trigger.stacks >= trigger.maxStacks;
+              trigger.charge = 0;
+              trigger.completed = Boolean(reachedStackLimit);
+              trigger.armed = !trigger.completed;
+              return;
+            }
             trigger.charge = 0;
             trigger.armed = false;
+            // คอสชั่วคราวมีผลเฉพาะรอบที่เพิ่งใช้ Active; รอบใหม่คืนฐาน + คอสถาวร
+            trigger.cycleCostChange = 0;
+            trigger.afterOwnAttacks = Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), trigger.baseAfterOwnAttacks + trigger.permanentCostChange));
             if (!trigger.repeat) trigger.completed = true;
+            return;
+          }
+          if (trigger.onOwnAttack) {
+            trigger.charge = 0;
+            trigger.armed = true;
             return;
           }
           if (!trigger.armed) {
@@ -11889,16 +12227,42 @@
         return normalizeAbilityTargetMatch(rule.match) === "all" ? checks.every(Boolean) : checks.some(Boolean);
       }
 
-      function applyActiveSkillCostChanges(fighter, directChanges = {}, rules = []) {
+      function applyActiveSkillCostChanges(fighter, directChanges = {}, rules = [], permanent = false) {
         const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
         fighter.activeTriggers.forEach(trigger => {
+          // onOwnAttack เป็นทริกเกอร์ทุกการโจมตี จึงไม่มีคอสให้เพิ่ม/ลด
+          if (trigger.onOwnAttack) return;
           let change = Math.round(Number(directChanges && directChanges[String(trigger.sourceCardId || "")] || 0));
           abilityArray(rules).forEach(rule => {
             if (triggerMatchesCostRule(trigger, rule)) change += Math.round(Number(rule && rule.value) || 0);
           });
           if (!change) return;
-          trigger.afterOwnAttacks = Math.max(1, Math.min(cap, trigger.afterOwnAttacks + change));
+          if (permanent) trigger.permanentCostChange = Math.max(-(cap - 1), Math.min(cap - 1, trigger.permanentCostChange + change));
+          else trigger.cycleCostChange = Math.max(-(cap - 1), Math.min(cap - 1, trigger.cycleCostChange + change));
+          trigger.afterOwnAttacks = Math.max(1, Math.min(cap, trigger.baseAfterOwnAttacks + trigger.permanentCostChange + trigger.cycleCostChange));
           if (!trigger.completed && trigger.unlocked) trigger.armed = trigger.charge >= trigger.afterOwnAttacks;
+        });
+      }
+
+      function memberMatchesRateRule(member, rule = {}) {
+        const checks = [];
+        const ids = normalizeAbilityCardIds(rule.ids);
+        const elements = normalizeAbilityElements(rule.elements);
+        const rarities = normalizeAbilityRarities(rule.rarities);
+        if (ids.length) checks.push(ids.includes(String(member.id || "")));
+        const card = CARD_BY_ID.get(String(member.id || ""));
+        if (elements.length) checks.push(card ? elements.some(element => getCardElements(card).includes(element)) : false);
+        if (rarities.length) checks.push(card ? rarities.includes(String(card.rarity || "").toUpperCase()) : false);
+        if (!checks.length) return true;
+        return normalizeAbilityTargetMatch(rule.match) === "all" ? checks.every(Boolean) : checks.some(Boolean);
+      }
+
+      function applyMemberRateChanges(fighter, field, directChanges = {}, rules = [], clampFn = value => value) {
+        fighter.members.forEach(member => {
+          let change = Number(directChanges && directChanges[String(member.id || "")] || 0);
+          abilityArray(rules).forEach(rule => { if (memberMatchesRateRule(member, rule)) change += Number(rule && rule.value || 0); });
+          if (!change) return;
+          member[field] = clampFn(Number(member[field] || 0) + change);
         });
       }
 
@@ -11960,10 +12324,19 @@
         defender.shieldRecoveryRate = clampRate(defender.shieldRecoveryRate + activation.enemyShieldRecoveryRateChange);
         attacker.criticalRate = clampCriticalRate(attacker.criticalRate + activation.criticalRateChange);
         defender.criticalRate = clampCriticalRate(defender.criticalRate + activation.enemyCriticalRateChange);
+        defender.pendingCriticalRateChange = clampTemporaryCriticalRate(
+          defender.pendingCriticalRateChange + activation.enemyNextAttackCriticalRate
+        );
 
         const selfShieldChange = applyShieldChange(attacker, activation.restoreShieldHits);
         const enemyShieldChange = applyShieldChange(defender, activation.enemyShieldHitsChange);
         defender.pendingAttackHits = clampPendingHits(defender.pendingAttackHits + activation.enemyNextAttackHits);
+        applyMemberRateChanges(attacker, "blockRate", activation.blockRateChanges, [], clampBlockRate);
+        applyMemberRateChanges(defender, "blockRate", {}, activation.enemyBlockRateRules, clampBlockRate);
+        applyMemberRateChanges(attacker, "damageTakenRate", activation.damageTakenRateChanges, [], clampDamageTakenRate);
+        applyMemberRateChanges(defender, "damageTakenRate", {}, activation.enemyDamageTakenRateRules, clampDamageTakenRate);
+        applyMemberRateChanges(attacker, "dodgeRate", activation.dodgeRateChanges, [], clampDodgeRate);
+        applyMemberRateChanges(defender, "dodgeRate", {}, activation.enemyDodgeRateRules, clampDodgeRate);
 
         const pendingHitChange = clampPendingHits(attacker.pendingAttackHits);
         attacker.pendingAttackHits = 0;
@@ -11971,10 +12344,20 @@
         const activeHits = applyCombatAttackHitModifier(baseHitsThisTurn, activation.extraHits);
         const attackStackGain = Math.max(0, Number(activation.attackStackGain || 0));
         const activeAttack = Math.max(1, attacker.attack + activation.attackBonus + attackStackGain);
-        const critical = rollCriticalHit(attacker.criticalRate);
+        const pendingCriticalRateChange = clampTemporaryCriticalRate(attacker.pendingCriticalRateChange);
+        attacker.pendingCriticalRateChange = 0;
+        const nextAttackCriticalRateChange = clampTemporaryCriticalRate(
+          pendingCriticalRateChange + activation.nextAttackCriticalRate
+        );
+        const effectiveCriticalRate = clampCriticalRate(attacker.criticalRate + nextAttackCriticalRateChange);
+        const critical = rollCriticalHit(effectiveCriticalRate);
         const criticalMultiplier = critical ? attacker.criticalDamageMultiplier : 1;
-        const exchange = resolveCombatExchange(activeAttack, defender.defense, activeHits, defender.shieldHits, variance * criticalMultiplier);
+        const exchange = resolveCombatExchange(activeAttack, defender.defense, activeHits, defender.shieldHits, variance * criticalMultiplier, { members: defender.members, rollDefensiveEffects: true });
         if (critical) attacker.totalCriticalHits += 1;
+        defender.totalBlocks += exchange.blockedMembers.length;
+        defender.totalDodges += exchange.dodgedMembers.length;
+        defender.totalBlockedDamage += exchange.blockDamageReduced;
+        defender.totalDodgedHpRate += exchange.dodgedHpRate;
         defender.shieldHits = Math.max(0, defender.shieldHits - exchange.blockedHits);
 
         let damage = exchange.unblockedHits > 0 ? Math.max(1, Number(exchange.damage || 0)) : 0;
@@ -12004,8 +12387,10 @@
         if (attackStackGain > 0) attacker.attack += attackStackGain;
 
         finishTriggerCycle(attacker, activation);
-        applyActiveSkillCostChanges(attacker, activation.triggerCostChanges, []);
-        applyActiveSkillCostChanges(defender, {}, activation.enemyTriggerCostRules);
+        applyActiveSkillCostChanges(attacker, activation.permanentTriggerCostChanges, [], true);
+        applyActiveSkillCostChanges(defender, {}, activation.enemyPermanentTriggerCostRules, true);
+        applyActiveSkillCostChanges(attacker, activation.triggerCostChanges, [], false);
+        applyActiveSkillCostChanges(defender, {}, activation.enemyTriggerCostRules, false);
         const appliedHitChange = activeHits - baseHitsThisTurn;
         const triggeredDetails = allocateAppliedHitChanges(activation.details, appliedHitChange);
         turns.push({
@@ -12024,7 +12409,10 @@
           unblockedHits: exchange.unblockedHits,
           damage,
           critical,
-          criticalRate: attacker.criticalRate,
+          criticalRate: effectiveCriticalRate,
+          baseCriticalRate: attacker.criticalRate,
+          nextAttackCriticalRateChange,
+          enemyNextAttackCriticalRate: activation.enemyNextAttackCriticalRate,
           criticalMultiplier,
           defenderDefense: defender.defense,
           triggerActivated: activation.fired.length > 0,
@@ -12034,6 +12422,14 @@
           attackStackGain,
           triggerCostChanges: { ...activation.triggerCostChanges },
           enemyTriggerCostRules: abilityArray(activation.enemyTriggerCostRules).map(rule => ({ ...rule })),
+          permanentTriggerCostChanges: { ...activation.permanentTriggerCostChanges },
+          enemyPermanentTriggerCostRules: abilityArray(activation.enemyPermanentTriggerCostRules).map(rule => ({ ...rule })),
+          dodgedMembers: exchange.dodgedMembers.map(member => ({ id: member.id, name: member.name, hpShare: member.hpShare })),
+          blockedMembers: exchange.blockedMembers.map(member => ({ id: member.id, name: member.name, finalDamage: member.finalDamage })),
+          dodgedHpRate: exchange.dodgedHpRate,
+          blockDamageReduced: exchange.blockDamageReduced,
+          damageBeforeBlock: exchange.damageBeforeBlock,
+          damageAfterBlock: exchange.damageAfterBlock,
           maxHpGain,
           requestedHealHp,
           healingMultiplier,
@@ -12050,6 +12446,8 @@
           enemyShieldRecoveryRate: defender.shieldRecoveryRate,
           criticalRateChange: activation.criticalRateChange,
           enemyCriticalRateChange: activation.enemyCriticalRateChange,
+          nextAttackCriticalRate: activation.nextAttackCriticalRate,
+          enemyNextAttackCriticalRate: activation.enemyNextAttackCriticalRate,
           playerRemaining: player.hp,
           enemyRemaining: enemy.hp,
           playerShieldRemaining: player.shieldHits,
@@ -12117,6 +12515,12 @@
         enemyTotalHealing: enemy.totalHealing,
         playerTotalCriticalHits: player.totalCriticalHits,
         enemyTotalCriticalHits: enemy.totalCriticalHits,
+        playerTotalBlocks: player.totalBlocks,
+        enemyTotalBlocks: enemy.totalBlocks,
+        playerTotalDodges: player.totalDodges,
+        enemyTotalDodges: enemy.totalDodges,
+        playerTotalBlockedDamage: player.totalBlockedDamage,
+        enemyTotalBlockedDamage: enemy.totalBlockedDamage,
         playerTriggerActivations: player.totalTriggerActivations,
         enemyTriggerActivations: enemy.totalTriggerActivations
       };
@@ -12221,6 +12625,8 @@
       if (Number(detail.enemyShieldRecoveryRateChange || 0)) chips.push(`ฟื้นโล่ศัตรู ${signedPercent(detail.enemyShieldRecoveryRateChange)}`);
       if (Number(detail.criticalRateChange || 0)) chips.push(`คริติคอลฝ่ายตน ${signedPercent(detail.criticalRateChange)}`);
       if (Number(detail.enemyCriticalRateChange || 0)) chips.push(`คริติคอลศัตรู ${signedPercent(detail.enemyCriticalRateChange)}`);
+      if (Number(detail.nextAttackCriticalRate || 0)) chips.push(`คริติคอลชั่วคราวเทิร์นนี้ ${signedPercent(detail.nextAttackCriticalRate)}`);
+      if (Number(detail.enemyNextAttackCriticalRate || 0)) chips.push(`คริติคอลครั้งถัดไปศัตรู ${signedPercent(detail.enemyNextAttackCriticalRate)}`);
       if (Number(turn.blockedHits || 0)) chips.push(`ศัตรูบล็อก ${formatNumber(turn.blockedHits)} ฮิต`);
       chips.push(`ผ่านโล่ ${formatNumber(turn.unblockedHits || 0)} ฮิต`);
       return chips.map(text => `<span class="active-skill-effect-chip">${escapeHTML(text)}</span>`).join("");
@@ -12417,7 +12823,7 @@
         const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
         const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
         const activeText = turn.triggerActivated
-          ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.enemyNextAttackHits ? ` • ฮิตครั้งถัดไปศัตรู ${turn.enemyNextAttackHits >= 0 ? "+" : ""}${formatNumber(turn.enemyNextAttackHits)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}${turn.enemyShieldChange ? ` • โล่ศัตรู ${turn.enemyShieldChange >= 0 ? "+" : ""}${formatNumber(turn.enemyShieldChange)}` : ""}${turn.criticalRateChange ? ` • คริฝ่ายตน ${signedPercent(turn.criticalRateChange)}` : ""}${turn.enemyCriticalRateChange ? ` • คริศัตรู ${signedPercent(turn.enemyCriticalRateChange)}` : ""}`
+          ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.enemyNextAttackHits ? ` • ฮิตครั้งถัดไปศัตรู ${turn.enemyNextAttackHits >= 0 ? "+" : ""}${formatNumber(turn.enemyNextAttackHits)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}${turn.enemyShieldChange ? ` • โล่ศัตรู ${turn.enemyShieldChange >= 0 ? "+" : ""}${formatNumber(turn.enemyShieldChange)}` : ""}${turn.criticalRateChange ? ` • คริฝ่ายตน ${signedPercent(turn.criticalRateChange)}` : ""}${turn.enemyCriticalRateChange ? ` • คริศัตรู ${signedPercent(turn.enemyCriticalRateChange)}` : ""}${turn.nextAttackCriticalRateChange ? ` • คริชั่วคราว ${signedPercent(turn.nextAttackCriticalRateChange)}` : ""}${turn.enemyNextAttackCriticalRate ? ` • คริครั้งถัดไปศัตรู ${signedPercent(turn.enemyNextAttackCriticalRate)}` : ""}`
           : "";
         const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
         result.textContent = `รอบ ${turn.round} • ${attackerLabel} โจมตี ${turn.hits} ฮิต${criticalText}${blockText}${activeText} • ${defenderLabel} เสีย HP ${formatNumber(turn.damage)} เหลือ ${formatNumber(remaining)}`;
@@ -12544,9 +12950,20 @@
             sourceCardImage: record.sourceCard ? getCardImage(record.sourceCard) : "",
             sourceCardRarity: String(record.sourceCard && record.sourceCard.rarity || "N"),
             sourceCardElements: record.sourceCard ? getCardElements(record.sourceCard) : ["ไร้ธาตุ"],
-            cutscene: getActiveSkillCutsceneConfig(record.ability, record.sourceCard),
-            afterOwnAttacks: Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1) + Number(summary.triggerCostChanges && summary.triggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0))),
-            repeat: record.trigger.repeat !== false,
+            cutscene: record.trigger.onOwnAttack
+              ? { ...getActiveSkillCutsceneConfig(record.ability, record.sourceCard), enabled: false }
+              : getActiveSkillCutsceneConfig(record.ability, record.sourceCard),
+            onOwnAttack: Boolean(record.trigger.onOwnAttack),
+            triggerOn: record.trigger.onOwnAttack ? "ownAttack" : "nextAttack",
+            baseAfterOwnAttacks: record.trigger.onOwnAttack
+              ? 0
+              : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1))),
+            permanentCostChange: Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0),
+            cycleCostChange: Number(summary.triggerCostChanges && summary.triggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0),
+            afterOwnAttacks: record.trigger.onOwnAttack
+              ? 0
+              : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0))),
+            repeat: record.trigger.onOwnAttack ? true : record.trigger.repeat !== false,
             requiresActivationKey: String(record.requiresActivationKey || ""),
             attackBonus: 0,
             healHp: 0,
@@ -12561,11 +12978,21 @@
             criticalRateWeightedChange: 0,
             criticalRateChange: 0,
             enemyCriticalRateChange: 0,
+            nextAttackCriticalRate: 0,
+            enemyNextAttackCriticalRate: 0,
             maxHpGain: 0,
             attackStackGain: 0,
             maxStacks: 0,
             triggerCostChanges: {},
-            enemyTriggerCostRules: []
+            enemyTriggerCostRules: [],
+            permanentTriggerCostChanges: {},
+            enemyPermanentTriggerCostRules: [],
+            blockRateChanges: {},
+            enemyBlockRateRules: [],
+            damageTakenRateChanges: {},
+            enemyDamageTakenRateRules: [],
+            dodgeRateChanges: {},
+            enemyDodgeRateRules: []
           });
         }
         const group = grouped.get(key);
@@ -12608,6 +13035,22 @@
             if (side === "enemy") group.enemyShieldRecoveryRateChange += value;
             else group.shieldRecoveryRateChange += value;
             break;
+          case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_CRITICAL_RATE:
+            if (side === "enemy") group.enemyNextAttackCriticalRate += value;
+            else group.nextAttackCriticalRate += value;
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE:
+            if (side === "enemy") group.enemyBlockRateRules.push({ ...getAbilityTargetFilter(effect), value });
+            else targetItems.forEach(item => addAbilityMapRate(group.blockRateChanges, [getBattleItemId(item)], value));
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE:
+            if (side === "enemy") group.enemyDamageTakenRateRules.push({ ...getAbilityTargetFilter(effect), value });
+            else targetItems.forEach(item => addAbilityMapRate(group.damageTakenRateChanges, [getBattleItemId(item)], value));
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.DODGE_RATE:
+            if (side === "enemy") group.enemyDodgeRateRules.push({ ...getAbilityTargetFilter(effect), value });
+            else targetItems.forEach(item => addAbilityMapRate(group.dodgeRateChanges, [getBattleItemId(item)], value));
+            break;
           case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE:
           case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE:
             if (side === "enemy") group.enemyCriticalRateChange += value;
@@ -12623,13 +13066,17 @@
           case CARD_ABILITY_EFFECT_TYPES.SELF_TRIGGER_REDUCTION:
             addAbilityMapRate(group.triggerCostChanges, [String(record.sourceCard && record.sourceCard.id || "")], -Math.max(0, Math.floor(value)));
             break;
-          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST: {
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST:
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE: {
             const change = Math.round(value);
-            if (side === "enemy") {
-              group.enemyTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change });
-            } else {
-              targetItems.forEach(item => addAbilityMapRate(group.triggerCostChanges, [getBattleItemId(item)], change));
-            }
+            if (side === "enemy") group.enemyTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change });
+            else targetItems.forEach(item => addAbilityMapRate(group.triggerCostChanges, [getBattleItemId(item)], change));
+            break;
+          }
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT: {
+            const change = Math.round(value);
+            if (side === "enemy") group.enemyPermanentTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change });
+            else targetItems.forEach(item => addAbilityMapRate(group.permanentTriggerCostChanges, [getBattleItemId(item)], change));
             break;
           }
           default:
@@ -12655,18 +13102,22 @@
         enemyShieldRecoveryRateChange: Math.max(-1, Math.min(5, Number(item.enemyShieldRecoveryRateChange || 0))),
         criticalRateChange: Math.max(-1, Math.min(1, teamPower > 0 ? Number(item.criticalRateWeightedChange || 0) / teamPower : 0)),
         enemyCriticalRateChange: Math.max(-1, Math.min(1, Number(item.enemyCriticalRateChange || 0))),
+        nextAttackCriticalRate: Math.max(-1, Math.min(1, Number(item.nextAttackCriticalRate || 0))),
+        enemyNextAttackCriticalRate: Math.max(-1, Math.min(1, Number(item.enemyNextAttackCriticalRate || 0))),
         maxHpGain: Math.max(0, Math.min(teamHp * 10, Number(item.maxHpGain || 0))),
         attackStackGain: Math.max(0, Math.min(teamPower, Number(item.attackStackGain || 0))),
         maxStacks: Math.max(0, Math.min(20, Math.floor(Number(item.maxStacks || 0)))),
         triggerCostChanges: Object.fromEntries(Object.entries(item.triggerCostChanges || {}).map(([id, change]) => [String(id), Math.round(Number(change) || 0)]).filter(([, change]) => change)),
-        enemyTriggerCostRules: abilityArray(item.enemyTriggerCostRules).map(rule => ({
-          ids: normalizeAbilityCardIds(rule && rule.ids),
-          elements: normalizeAbilityElements(rule && rule.elements),
-          rarities: normalizeAbilityRarities(rule && rule.rarities),
-          match: normalizeAbilityTargetMatch(rule && rule.match),
-          value: Math.round(Number(rule && rule.value) || 0)
-        })).filter(rule => rule.value)
-      })).filter(item => item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length);
+        enemyTriggerCostRules: abilityArray(item.enemyTriggerCostRules).map(rule => ({ ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), match: normalizeAbilityTargetMatch(rule && rule.match), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
+        permanentTriggerCostChanges: Object.fromEntries(Object.entries(item.permanentTriggerCostChanges || {}).map(([id, change]) => [String(id), Math.round(Number(change) || 0)]).filter(([, change]) => change)),
+        enemyPermanentTriggerCostRules: abilityArray(item.enemyPermanentTriggerCostRules).map(rule => ({ ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), match: normalizeAbilityTargetMatch(rule && rule.match), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
+        blockRateChanges: Object.fromEntries(Object.entries(item.blockRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Math.min(1, Number(change) || 0))]).filter(([, change]) => change)),
+        enemyBlockRateRules: abilityArray(item.enemyBlockRateRules).map(rule => ({ ...rule, value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value),
+        damageTakenRateChanges: Object.fromEntries(Object.entries(item.damageTakenRateChanges || {}).map(([id, change]) => [String(id), clampDamageTakenRate(change)]).filter(([, change]) => change)),
+        enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule, value: clampDamageTakenRate(rule && rule.value) })).filter(rule => rule.value),
+        dodgeRateChanges: Object.fromEntries(Object.entries(item.dodgeRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Math.min(1, Number(change) || 0))]).filter(([, change]) => change)),
+        enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value)
+      })).filter(item => item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length);
     }
 
 
@@ -13508,6 +13959,10 @@
         ? enemyAbilitySummary
         : { ...enemyAbilitySummary, ...getEnemyTargetCriticalSummary(abilitySummary.enemyCriticalRateSelectors, enemyTeam, "arena") };
       const enemyCriticalRate = enemy ? getTeamCriticalRate(enemyTeam, enemyCriticalBaseSummary, true) : clampCriticalRate(CONFIG.combatBaseCriticalRate);
+      const playerMembers = buildBattleDefenseMembers(teamIds, abilitySummary, false);
+      const enemyDefensiveSummary = enemyTeamIds.length ? enemyAbilitySummary : { ...enemyAbilitySummary, ...getEnemyTargetDefensiveSummary(abilitySummary, enemyTeam, "arena") };
+      const enemyMembers = buildBattleDefenseMembers(enemyTeam, enemyDefensiveSummary, true);
+      if (enemy && !enemyMembers.length) enemyMembers.push({ id: "arena-ai", name: enemy.username || "ARENA AI", hp: Math.max(1, enemyEffectiveHp), blockRate: 0, dodgeRate: 0, damageTakenRate: 0 });
       const playerPreview = enemy ? resolveCombatExchange(effectiveAttack, enemyEffectiveDefense, attackHits, enemyShieldHits, 1) : null;
       const enemyPreview = enemy ? resolveCombatExchange(enemyAttack, effectiveDefense, enemyAttackHits, shieldHits, 1) : null;
       const totalCombatPower = calculateCombatPower(effectiveAttack, effectiveHp, effectiveDefense, attackHits, shieldHits);
@@ -13520,7 +13975,7 @@
         enemyBasePower, enemyBaseHp, enemyBaseDefense,
         enemyEffectivePower: enemyAttack, enemyAttack, enemyEffectiveHp, enemyEffectiveDefense, enemyCombatPower,
         enemyAttackHits, enemyShieldHits, enemyHealingRate, enemyShieldRecoveryRate,
-        criticalRate, enemyCriticalRate,
+        criticalRate, enemyCriticalRate, playerMembers, enemyMembers,
         playerActiveTriggers: buildTeamBattleTriggerConfigs(teamIds, abilitySummary, false),
         enemyActiveTriggers: buildTeamBattleTriggerConfigs(enemyTeam, enemyAbilitySummary, true),
         playerPreview, enemyPreview, matchup
@@ -13617,6 +14072,8 @@
         enemyShieldRecoveryRate: stats.enemyShieldRecoveryRate,
         playerCriticalRate: stats.criticalRate,
         enemyCriticalRate: stats.enemyCriticalRate,
+        playerMembers: stats.playerMembers,
+        enemyMembers: stats.enemyMembers,
         playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         playerActiveTriggers: stats.playerActiveTriggers,
@@ -13647,7 +14104,7 @@
         const enemyShieldUsed = Math.max(0, combat.enemyInitialShieldHits - combat.enemyShieldRemaining);
         const playerHitSummary = getCombatHitSideSummary(combat, "player");
         const enemyHitSummary = getCombatHitSideSummary(combat, "enemy");
-        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE ปรับฮิต +${formatNumber(playerHitSummary.extraHits)}/-${formatNumber(playerHitSummary.hitReduction)} ต่อ +${formatNumber(enemyHitSummary.extraHits)}/-${formatNumber(enemyHitSummary.hitReduction)} • HP เหลือ ${formatNumber(combat.playerRemainingHp)} ต่อ ${formatNumber(combat.enemyRemainingHp)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล HP ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • คริติคอล ${formatNumber(playerHitSummary.criticalAttacks)}/${formatNumber(enemyHitSummary.criticalAttacks)} ครั้ง • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE ปรับฮิต +${formatNumber(playerHitSummary.extraHits)}/-${formatNumber(playerHitSummary.hitReduction)} ต่อ +${formatNumber(enemyHitSummary.extraHits)}/-${formatNumber(enemyHitSummary.hitReduction)} • HP เหลือ ${formatNumber(combat.playerRemainingHp)} ต่อ ${formatNumber(combat.enemyRemainingHp)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล HP ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • คริติคอล ${formatNumber(playerHitSummary.criticalAttacks)}/${formatNumber(enemyHitSummary.criticalAttacks)} ครั้ง • บล็อก ${formatNumber(combat.playerTotalBlocks)}/${formatNumber(combat.enemyTotalBlocks)} • หลบ ${formatNumber(combat.playerTotalDodges)}/${formatNumber(combat.enemyTotalDodges)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.arena.points += ARENA_CONFIG.winPoints;
           state.arena.wins += 1;
@@ -13882,7 +14339,10 @@
       const enemyShieldRecoveryRate = getCombatShieldRecoveryRate({}, abilitySummary.enemyShieldRecoveryRate);
       const criticalRate = getTeamCriticalRate(towerTeam, abilitySummary, false);
       const enemyCriticalSummary = getEnemyTargetCriticalSummary(abilitySummary.enemyCriticalRateSelectors, [enemyCard], "tower");
+      const enemyDefensiveSummary = getEnemyTargetDefensiveSummary(abilitySummary, [enemyCard], "tower");
       const enemyCriticalRate = getTeamCriticalRate([enemyCard], enemyCriticalSummary, false);
+      const playerMembers = buildBattleDefenseMembers(towerTeam, abilitySummary, false);
+      const enemyMembers = buildBattleDefenseMembers([enemyCard], enemyDefensiveSummary, false);
       const playerPreview = resolveCombatExchange(effectiveAttack, enemyDefense, attackHits, enemyShieldHits, 1);
       const enemyPreview = resolveCombatExchange(enemyAttack, effectiveDefense, enemyAttackHits, shieldHits, 1);
       const totalCombatPower = calculateCombatPower(effectiveAttack, effectiveHp, effectiveDefense, attackHits, shieldHits);
@@ -13891,7 +14351,7 @@
         stage, basePower, baseAttack: basePower, baseHp, baseDefense, abilitySummary, elementSummary,
         dominantElement: elementSummary.dominantElement, enemyCard, enemyElement, matchup,
         formationRate, formationPower, abilityPowerRate, abilityPower,
-        abilityHpRate, abilityHp, abilityDefenseRate, abilityDefense, criticalRate, enemyCriticalRate,
+        abilityHpRate, abilityHp, abilityDefenseRate, abilityDefense, criticalRate, enemyCriticalRate, playerMembers, enemyMembers,
         support, supportCard, supportSourcePower, supportSourceHp, supportSourceDefense, supportPower, supportHp, supportDefense,
         towerRestriction, restrictionStatus, preElementPower, elementPower,
         effectivePower: effectiveAttack, effectiveAttack, effectiveHp, effectiveDefense, totalCombatPower,
@@ -13939,6 +14399,8 @@
         enemyShieldRecoveryRate: stats.enemyShieldRecoveryRate,
         playerCriticalRate: stats.criticalRate,
         enemyCriticalRate: stats.enemyCriticalRate,
+        playerMembers: stats.playerMembers,
+        enemyMembers: stats.enemyMembers,
         playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         playerActiveTriggers: stats.activeTriggers,
@@ -13969,7 +14431,7 @@
         const enemyShieldUsed = Math.max(0, combat.enemyInitialShieldHits - combat.enemyShieldRemaining);
         const playerHitSummary = getCombatHitSideSummary(combat, "player");
         const enemyHitSummary = getCombatHitSideSummary(combat, "enemy");
-        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE ปรับฮิต +${formatNumber(playerHitSummary.extraHits)}/-${formatNumber(playerHitSummary.hitReduction)} ต่อ +${formatNumber(enemyHitSummary.extraHits)}/-${formatNumber(enemyHitSummary.hitReduction)} • HP เหลือ ${formatNumber(combat.playerRemainingHp)} ต่อ ${formatNumber(combat.enemyRemainingHp)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล HP ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • คริติคอล ${formatNumber(playerHitSummary.criticalAttacks)}/${formatNumber(enemyHitSummary.criticalAttacks)} ครั้ง • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
+        const combatText = `${combat.rounds} รอบ • ฮิตรวม ${formatNumber(playerHitSummary.totalHits)}/${formatNumber(enemyHitSummary.totalHits)} (ผ่านโล่ ${formatNumber(playerHitSummary.unblockedHits)}/${formatNumber(enemyHitSummary.unblockedHits)}) • ACTIVE ปรับฮิต +${formatNumber(playerHitSummary.extraHits)}/-${formatNumber(playerHitSummary.hitReduction)} ต่อ +${formatNumber(enemyHitSummary.extraHits)}/-${formatNumber(enemyHitSummary.hitReduction)} • HP เหลือ ${formatNumber(combat.playerRemainingHp)} ต่อ ${formatNumber(combat.enemyRemainingHp)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} ต่อ ${formatNumber(combat.enemyTotalDamage)} • ฮีล HP ${formatNumber(combat.playerTotalHealing)} ต่อ ${formatNumber(combat.enemyTotalHealing)} • คริติคอล ${formatNumber(playerHitSummary.criticalAttacks)}/${formatNumber(enemyHitSummary.criticalAttacks)} ครั้ง • บล็อก ${formatNumber(combat.playerTotalBlocks)}/${formatNumber(combat.enemyTotalBlocks)} • หลบ ${formatNumber(combat.playerTotalDodges)}/${formatNumber(combat.enemyTotalDodges)} • Active ${combat.playerTriggerActivations}/${combat.enemyTriggerActivations} ครั้ง • โล่ใช้ ${playerShieldUsed}/${enemyShieldUsed} ฮิต`;
         if (won) {
           state.gems += stats.gemReward;
           state.dust += stats.dustReward;
@@ -15178,6 +15640,7 @@
       elementPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk ธาตุ",
       nextAttackPowerRate: "atk attack power พลังโจมตี โจมตีครั้งถัดไป แอคทีฟสกิล",
       nextAttackPowerFlat: "atk attack power พลังโจมตี โจมตีครั้งถัดไป ค่าคงที่ แอคทีฟสกิล",
+      nextAttackCriticalRate: "คริติคอล critical crit 100% การโจมตีครั้งถัดไป ชั่วคราว แอคทีฟสกิล guaranteed",
       teamPowerFlat: "atk attack power พลังโจมตี โจมตี ค่าคงที่ ทั้งทีม",
       enemyPowerRate: "ลด atk ลดพลังโจมตี ศัตรู ฝ่ายตรงข้าม ดีบัฟ enemy",
       teamHpRate: "hp health เลือด พลังชีวิต บัฟ hp ทั้งทีม",
@@ -15208,7 +15671,12 @@
       nextAttackHits: "ฮิต hit โจมตีครั้งถัดไป เพิ่มจำนวนโจมตี ลดจำนวนโจมตี แอคทีฟสกิล ฝ่ายตรงข้าม",
       increaseMaxHpBaseRate: "เพิ่ม hp สูงสุด max health เลือด พลังชีวิต ฮาคาริ jackpot",
       increaseAttackRateStack: "สะสม atk stack โจมตีถาวรระหว่างไฟต์ ลม",
-      selfTriggerReduction: "ลดคอส ลดเงื่อนไข ตีครบเร็วขึ้น active trigger",
+      selfTriggerReduction: "ลดคอสชั่วคราว ลดเงื่อนไข ตีครบเร็วขึ้น active trigger",
+      activeSkillCostCycle: "ลดเพิ่มคอสชั่วคราว รอบปัจจุบัน รีเซ็ตหลังแอคทีฟ active cost reset",
+      activeSkillCostPermanent: "ลดเพิ่มคอสถาวร ตลอดการต่อสู้ permanent active cost",
+      blockRate: "บล็อก block ลดดาเมจ 50 เปอร์เซ็นต์",
+      damageTakenRate: "ลดเพิ่มความเสียหาย ดาเมจรับ ขั้นสุดท้าย damage taken",
+      dodgeRate: "หลบหลีก dodge miss เข้าเป้า ลดอัตราหลบ",
       activeSkillCost: "คอส cost ลดคอส เพิ่มคอส active skill ทีมเรา ฝ่ายตรงข้าม เจาะจง",
       healHpRate: "ฮีล hp heal ฟื้นฟูเลือด พลังชีวิต เปอร์เซ็นต์",
       healHpFlat: "ฮีล hp heal ฟื้นฟูเลือด พลังชีวิต ค่าคงที่",
