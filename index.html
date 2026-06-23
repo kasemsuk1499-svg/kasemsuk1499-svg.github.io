@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-20-on-own-attack-v46">
+  <meta name="gacha-app-build" content="2026-06-23-multi-ability-normalizer-v47">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -7831,7 +7831,7 @@
     "awakenMax": 4,
     "icon": "",
     "image": "1005.png",
-        "ability": [
+        "abilities": [
   {
     "name": "ริกะจัง",
     "description": "เมื่อจัดทีมไม่เกิน 4 ตัวละคร การ์ดใบนี้จะได้รับ ATK และ HP เพิ่มขึ้น 90% และทุกครั้งที่โจมตีครบ 3 ครั้ง จะฟื้นฟู HP ของตัวเอง 5%",
@@ -7847,7 +7847,7 @@
       {
         "type": "healHpRate",
         "value": 0.05,
-        "targetSide": "ally",
+        "targetSide": "self",
         "condition": {
           "afterOwnAttacks": 2,
           "repeat": true
@@ -7937,7 +7937,7 @@
     "awakenMax": 4,
     "icon": "",
     "image": "1007.png",
-         "ability": [
+         "abilities": [
   {
     "name": "วิชาควบคุมคำสาป",
     "description": "เมื่อการ์ดใบนี้เป็นลีดเดอร์ การ์ดคำสาปทุกใบในทีมฝ่ายตรงข้ามจะถูกลด ATK, HP และ DEF ลง 50% ส่วนการ์ดคำสาปในทีมฝ่ายเราจะได้รับ ATK, HP และ DEF เพิ่มขึ้น 20%",
@@ -11047,10 +11047,29 @@
       };
     }
 
+    // รองรับข้อมูลสกิลทั้งรูปแบบใหม่ abilities: [...] และรูปแบบเก่า ability: {...}/ability: [...]
+    // รวมถึงอาร์เรย์ที่ถูกซ้อนโดยไม่ตั้งใจ เพื่อไม่ให้การ์ดหลายสกิลหายทั้งชุด
+    function flattenCardAbilityDefinitions(value, output = []) {
+      if (Array.isArray(value)) {
+        value.forEach(item => flattenCardAbilityDefinitions(item, output));
+      } else if (value && typeof value === "object") {
+        output.push(value);
+      }
+      return output;
+    }
+
     function getCardAbilities(card) {
       if (!card) return [];
-      const source = Array.isArray(card.abilities) ? card.abilities : (card.ability ? [card.ability] : []);
-      const uniqueAbilities = source.filter(item => item && typeof item === "object");
+      const source = [
+        ...flattenCardAbilityDefinitions(card.abilities),
+        ...flattenCardAbilityDefinitions(card.ability)
+      ];
+      const seen = new Set();
+      const uniqueAbilities = source.filter(item => {
+        if (!item || typeof item !== "object" || seen.has(item)) return false;
+        seen.add(item);
+        return true;
+      });
       const elementAbility = getElementSignatureAbility(card);
       return elementAbility ? [...uniqueAbilities, elementAbility] : uniqueAbilities;
     }
