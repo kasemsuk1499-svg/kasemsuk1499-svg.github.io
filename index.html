@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-23-multi-ability-normalizer-v47">
+  <meta name="gacha-app-build" content="2026-06-23-copy-steal-resistance-v48">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -6065,6 +6065,7 @@
       combatBlockDamageMultiplier: 0.50,
       combatMaxBlockRate: 1.00,
       combatMaxDodgeRate: 1.00,
+      combatMaxStatusResistanceRate: 1.00,
       combatMinDamageTakenRate: -1.00,
       combatMaxDamageTakenRate: 9999
     });
@@ -6572,6 +6573,56 @@
        - allowedTeammateCardIds: [1032] = การ์ดเจ้าของสกิลอยู่เดี่ยวได้ หรืออยู่ร่วมกับ ID ที่กำหนดเท่านั้น; ไม่ได้บังคับว่าต้องใส่การ์ดนั้น
        - activeIn: team/showcase = ทีมโชว์/รายได้/โบนัสกาชาจากทีมโชว์, tower/battle = ไต่หอ, arena/pvp = อารีน่า/โบนัสกาชาจากทีมอารีน่า
        - ไม่มี ability ก็เล่นได้ตามปกติ ไม่ต้องแก้ข้อมูลการ์ดเก่า
+
+       ระบบคัดลอก / ขโมย / ต้านสถานะ (เพิ่ม 2026-06-23)
+       -----------------------------------------------------
+       1) คัดลอกสกิลแบบสุ่มจากศัตรูมาให้เจ้าของสกิล
+          { "type":"copyAbilities", "targetSide":"enemy", "targetSelection":"random",
+            "targetCount":1, "abilitySelection":"random", "abilityCount":1, "successRate":0.70 }
+
+       2) ขโมยสกิลแบบเจาะจงจาก ID 1033 (เป้าหมายจะเสียสกิลนั้นตลอดไฟต์)
+          { "type":"stealAbilities", "targetSide":"enemy", "targetSelection":"specific",
+            "targetCardIds":[1033], "abilityNames":["พนันลั่นลาง"], "successRate":0.60 }
+
+       3) คัดลอกสกิลจากทุกคนในทีมตรงข้ามให้ทุกคนในทีมเรา
+          { "type":"copyAbilities", "targetSide":"enemy", "targetSelection":"all",
+            "abilitySelection":"random", "abilityCount":1,
+            "recipientSide":"ally", "recipientSelection":"all", "successRate":0.50 }
+
+       4) ต้านสถานะเฉพาะเจ้าของสกิล 50%
+          { "type":"statusResistance", "value":0.50, "targetSide":"self",
+            "resistCategories":["cost","transfer","abilityControl","statReduction"] }
+
+       5) ต้านเฉพาะสกิลขโมย/คัดลอกทั้งทีม 80%
+          { "type":"statusResistance", "value":0.80, "targetSide":"ally",
+            "targetSelection":"all", "resistEffectTypes":["copyAbilities","stealAbilities"] }
+
+       6) ต้านเอฟเฟกต์ทั้งสนาม 40% (ใช้กับ enemyPowerRate / enemyHpRate / enemyDefenseRate ฯลฯ)
+          { "type":"statusResistance", "value":0.40, "targetSide":"ally",
+            "targetSelection":"all", "scope":"field", "resistCategories":["statReduction","cost","abilityControl"] }
+
+       คีย์เลือกเป้าหมายของ copyAbilities / stealAbilities
+       - targetSide: "enemy" / "ally" / "self" = ฝั่งต้นทางที่จะถูกคัดลอกหรือขโมย
+       - targetSelection: "random" / "specific" / "all"
+       - targetCount = จำนวนตัวละครเมื่อใช้ random
+       - targetCardIds / targetElements / targetRarities / targetMatch ใช้เจาะจงต้นทาง
+       - abilitySelection: "random" / "specific" / "all"
+       - abilityCount = จำนวนสกิลเมื่อใช้ random
+       - abilityNames / abilityIndexes (เริ่มที่ 0) / abilityNumbers (เริ่มที่ 1) / abilityEffectTypes
+       - recipientSide: "self" (ค่าเริ่มต้น) / "ally" / "enemy"
+       - recipientSelection + recipientCardIds / recipientElements / recipientRarities ใช้เลือกผู้รับสกิล
+       - successRate รองรับ 0.70 หรือ 70 (ระบบแปลงเป็น 70% ให้อัตโนมัติ)
+       - includeTransferAbilities:true เมื่อต้องการอนุญาตให้คัดลอกสกิล copy/steal ต่อกัน (ปิดไว้ป้องกันลูป)
+
+       คีย์ของ statusResistance
+       - value / successRate / resistRate = อัตราต้านสำเร็จ
+       - resistEffectTypes = ระบุ type ที่ต้องการต้านโดยตรง
+       - resistCategories: "all", "cost", "transfer", "abilityControl", "statReduction",
+         "hitReduction", "healingReduction", "shieldReduction"
+       - resistAbilityNames = ต้านเฉพาะชื่อสกิลที่กำหนด
+       - resistSourceCardIds = ต้านเฉพาะสกิลที่มาจากการ์ด ID ที่กำหนด
+       - scope:"field" = มีสิทธิ์ยกเลิกเอฟเฟกต์ที่กระทบทั้งสนาม
+       - resistBeneficial:true = ให้ต้านเอฟเฟกต์บวกด้วย (ค่าเริ่มต้นต้านเฉพาะผลเสีย/ควบคุม)
        ===================================================================== */
     const CARD_ABILITY_EFFECT_TYPES = Object.freeze({
       TEAM_POWER_RATE: "teamPowerRate",
@@ -6592,6 +6643,9 @@
       CARD_HP_RATE: "cardHpRate",
       CARD_DEFENSE_RATE: "cardDefenseRate",
       CARD_INCOME_RATE: "cardIncomeRate",
+      COPY_ABILITIES: "copyAbilities",
+      STEAL_ABILITIES: "stealAbilities",
+      STATUS_RESISTANCE: "statusResistance",
       NULLIFY_CARD_ABILITIES: "nullifyCardAbilities",
       IGNORE_ABILITY_CONDITIONS: "ignoreAbilityConditions",
       NEXT_ATTACK_POWER_RATE: "nextAttackPowerRate",
@@ -10802,11 +10856,11 @@
     }
 
     function isNullifyAbilityEffect(effect) {
-      return Boolean(effect && effect.type === CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES);
+      return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES);
     }
 
     function isIgnoreConditionAbilityEffect(effect) {
-      return Boolean(effect && effect.type === CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS);
+      return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS);
     }
 
     function isAbilityControlEffect(effect) {
@@ -10896,6 +10950,448 @@
         .map(card => String(card.id));
     }
 
+
+    // ================= [ABILITY TRANSFER + STATUS RESISTANCE] =================
+    function normalizeAbilityEffectType(value) {
+      const type = String(value || "").trim();
+      const aliases = {
+        copyAbility: CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES,
+        copySkill: CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES,
+        stealAbility: CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES,
+        stealSkill: CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES,
+        statusResist: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE,
+        statusResistanceRate: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE
+      };
+      return aliases[type] || type;
+    }
+
+    function isCopyAbilityEffect(effect) {
+      return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES);
+    }
+
+    function isStealAbilityEffect(effect) {
+      return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES);
+    }
+
+    function isAbilityTransferEffect(effect) {
+      return isCopyAbilityEffect(effect) || isStealAbilityEffect(effect);
+    }
+
+    function isStatusResistanceEffect(effect) {
+      return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE);
+    }
+
+    function normalizeAbilityChance(value, fallback = 1) {
+      let number = Number(value);
+      if (!Number.isFinite(number)) number = Number(fallback);
+      if (!Number.isFinite(number)) number = 1;
+      if (number > 1) number /= 100;
+      return Math.max(0, Math.min(1, number));
+    }
+
+    function normalizeAbilityStringList(value) {
+      return [...new Set(abilityArray(value)
+        .flatMap(item => String(item || "").split(/\s*(?:,|\||\+|\/|&|•)\s*/))
+        .map(item => String(item || "").trim())
+        .filter(Boolean))];
+    }
+
+    function normalizeAbilitySelectionMode(value, fallback = "random") {
+      const mode = String(value || fallback).trim().toLowerCase();
+      if (["all", "everyone", "ทุกคน", "ทั้งหมด"].includes(mode)) return "all";
+      if (["specific", "selected", "เจาะจง", "กำหนด"].includes(mode)) return "specific";
+      return "random";
+    }
+
+    function deterministicAbilityHash(value) {
+      let hash = 2166136261;
+      const text = String(value || "");
+      for (let index = 0; index < text.length; index += 1) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return hash >>> 0;
+    }
+
+    function deterministicAbilityRoll(seed, key = "") {
+      let value = deterministicAbilityHash(`${seed}|${key}`) || 1;
+      value ^= value << 13;
+      value ^= value >>> 17;
+      value ^= value << 5;
+      return (value >>> 0) / 4294967296;
+    }
+
+    function deterministicAbilityShuffle(items, seed, key = "") {
+      return abilityArray(items)
+        .map((item, index) => ({ item, order: deterministicAbilityRoll(seed, `${key}:${index}`) }))
+        .sort((a, b) => a.order - b.order)
+        .map(entry => entry.item);
+    }
+
+    function selectAbilityItems(items, mode, count, seed, key = "") {
+      const list = abilityArray(items).filter(Boolean);
+      const normalizedMode = normalizeAbilitySelectionMode(mode, "random");
+      if (normalizedMode === "all") return list;
+      const safeCount = Math.max(1, Math.min(list.length || 1, Math.floor(Number(count) || 1)));
+      if (normalizedMode === "specific") return list.slice(0, safeCount);
+      return deterministicAbilityShuffle(list, seed, key).slice(0, safeCount);
+    }
+
+    function makeAbilityResolutionSeed(mode, allyIds = [], enemyIds = [], explicit = "") {
+      if (String(explicit || "").trim()) return String(explicit);
+      const safeMode = String(mode || "team").toLowerCase();
+      const battleMarker = safeMode === "tower"
+        ? Number(state && state.battle && state.battle.stage || 1)
+        : safeMode === "arena"
+          ? `${Number(state && state.arena && state.arena.points || 0)}:${Number(state && state.arena && state.arena.wins || 0)}:${Number(state && state.arena && state.arena.losses || 0)}`
+          : "team";
+      return `${safeMode}|${abilityArray(allyIds).join(",")}|${abilityArray(enemyIds).join(",")}|${battleMarker}`;
+    }
+
+    function getAbilityEffectResistanceCategory(effect = {}) {
+      const type = normalizeAbilityEffectType(effect.type);
+      const value = Number(effect.value || 0);
+      if ([CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES, CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES].includes(type)) return "transfer";
+      if ([CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES, CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS].includes(type)) return "abilityControl";
+      if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT].includes(type)) return "cost";
+      if ([CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.LUCK_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE, CARD_ABILITY_EFFECT_TYPES.DODGE_RATE].includes(type) && value < 0) return "hitReduction";
+      if ([CARD_ABILITY_EFFECT_TYPES.HEALING_RATE, CARD_ABILITY_EFFECT_TYPES.HEAL_HP_RATE, CARD_ABILITY_EFFECT_TYPES.HEAL_HP_FLAT].includes(type) && value < 0) return "healingReduction";
+      if ([CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS, CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS, CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE].includes(type) && value < 0) return "shieldReduction";
+      if ([
+        CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.TEAM_HP_RATE, CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE, CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE,
+        CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.SELF_HP_RATE, CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE, CARD_ABILITY_EFFECT_TYPES.CARD_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.CARD_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.RARITY_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.RARITY_HP_RATE, CARD_ABILITY_EFFECT_TYPES.RARITY_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.RARITY_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.ELEMENT_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.ELEMENT_HP_RATE, CARD_ABILITY_EFFECT_TYPES.ELEMENT_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.ELEMENT_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_HP_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT,
+        CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_FLAT
+      ].includes(type) && value < 0) return "statReduction";
+      if (type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE && value > 0) return "statReduction";
+      return "other";
+    }
+
+    function isHarmfulAbilityEffect(effect = {}) {
+      if (effect.forceResistanceCheck === true) return true;
+      const type = normalizeAbilityEffectType(effect.type);
+      const value = Number(effect.value || 0);
+      if ([CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES, CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES, CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES, CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS].includes(type)) return true;
+      if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT].includes(type)) return value > 0;
+      if (type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE) return value > 0;
+      if ([
+        CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.TEAM_HP_RATE, CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE, CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE,
+        CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.SELF_HP_RATE, CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE, CARD_ABILITY_EFFECT_TYPES.CARD_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.CARD_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.RARITY_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.RARITY_HP_RATE, CARD_ABILITY_EFFECT_TYPES.RARITY_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.RARITY_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.ELEMENT_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.ELEMENT_HP_RATE, CARD_ABILITY_EFFECT_TYPES.ELEMENT_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.ELEMENT_INCOME_RATE,
+        CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_HP_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT,
+        CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS, CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS,
+        CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.LUCK_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_CRITICAL_RATE,
+        CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE, CARD_ABILITY_EFFECT_TYPES.DODGE_RATE,
+        CARD_ABILITY_EFFECT_TYPES.HEALING_RATE, CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE,
+        CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_FLAT
+      ].includes(type)) return value < 0;
+      return false;
+    }
+
+    function makeStatusResistanceRule(effect = {}, meta = {}) {
+      const rawRate = effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value ?? 0;
+      const scopeRaw = String(effect.scope || effect.resistanceScope || "target").trim().toLowerCase();
+      return {
+        rate: normalizeAbilityChance(rawRate, 0),
+        effectTypes: normalizeAbilityStringList(effect.resistEffectTypes || effect.statusEffectTypes || effect.effectTypes).map(normalizeAbilityEffectType),
+        categories: normalizeAbilityStringList(effect.resistCategories || effect.categories).map(item => String(item).trim()),
+        abilityNames: normalizeAbilityStringList(effect.resistAbilityNames || effect.abilityNames),
+        sourceCardIds: normalizeAbilityCardIds(effect.resistSourceCardIds || effect.sourceCardIds),
+        scope: ["field", "battlefield", "สนาม", "ทั้งสนาม"].includes(scopeRaw) ? "field" : "target",
+        resistBeneficial: effect.resistBeneficial === true,
+        sourceCardId: String(meta.sourceCard && meta.sourceCard.id || ""),
+        sourceAbilityName: String(meta.ability && meta.ability.name || ""),
+        key: String(meta.key || "")
+      };
+    }
+
+    function cloneStatusResistanceRuleMap(source = {}) {
+      const result = {};
+      Object.entries(source && typeof source === "object" ? source : {}).forEach(([id, rules]) => {
+        result[String(id)] = abilityArray(rules).filter(Boolean).map(rule => ({ ...rule }));
+      });
+      return result;
+    }
+
+    function addStatusResistanceRule(map, cardId, rule) {
+      const id = String(cardId || "");
+      if (!id || !rule || !(Number(rule.rate) > 0)) return;
+      if (!map[id]) map[id] = [];
+      map[id].push({ ...rule });
+    }
+
+    function statusResistanceRuleMatches(rule = {}, effect = {}) {
+      const effectType = normalizeAbilityEffectType(effect.type);
+      const category = getAbilityEffectResistanceCategory(effect);
+      const effectTypes = abilityArray(rule.effectTypes).map(normalizeAbilityEffectType);
+      const categories = abilityArray(rule.categories).map(item => String(item || "").trim());
+      const abilityNames = abilityArray(rule.abilityNames).map(item => String(item || "").trim().toLowerCase());
+      const sourceCardIds = normalizeAbilityCardIds(rule.sourceCardIds);
+      if (!rule.resistBeneficial && !isHarmfulAbilityEffect(effect)) return false;
+      if (effectTypes.length && !effectTypes.includes(effectType)) return false;
+      if (categories.length && !categories.includes("all") && !categories.includes(category)) return false;
+      if (abilityNames.length && !abilityNames.includes(String(effect._sourceAbilityName || "").trim().toLowerCase())) return false;
+      if (sourceCardIds.length && !sourceCardIds.includes(String(effect._sourceCardId || ""))) return false;
+      return true;
+    }
+
+    function getStatusResistanceRate(rules, effect = {}, scope = "target") {
+      const cap = Math.max(0, Math.min(1, Number(CONFIG.combatMaxStatusResistanceRate ?? 1)));
+      const total = abilityArray(rules)
+        .filter(rule => (scope !== "field" || String(rule && rule.scope || "target") === "field"))
+        .filter(rule => statusResistanceRuleMatches(rule, effect))
+        .reduce((sum, rule) => sum + normalizeAbilityChance(rule && rule.rate, 0), 0);
+      return Math.max(0, Math.min(cap, total));
+    }
+
+    function shouldAbilityEffectBeResisted(rules, effect, seed, key, scope = "target") {
+      const rate = getStatusResistanceRate(rules, effect, scope);
+      return { resisted: rate > 0 && deterministicAbilityRoll(seed, key) < rate, rate };
+    }
+
+    function resolveAbilityTargetCardIdsWithResistance(effect, sourceCard, targetContext, resistanceByCardId, seed, key, resistedEffects = []) {
+      const ids = resolveAbilityTargetCardIds(effect, sourceCard, targetContext);
+      return ids.filter((id, index) => {
+        const check = shouldAbilityEffectBeResisted(resistanceByCardId && resistanceByCardId[String(id)], effect, seed, `${key}:target:${id}:${index}`);
+        if (!check.resisted) return true;
+        resistedEffects.push({
+          targetCardId: String(id),
+          sourceCardId: String(effect && effect._sourceCardId || sourceCard && sourceCard.id || ""),
+          abilityName: String(effect && effect._sourceAbilityName || ""),
+          effectType: normalizeAbilityEffectType(effect && effect.type),
+          resistanceRate: check.rate,
+          scope: "target"
+        });
+        return false;
+      });
+    }
+
+    function buildPrefixedAbilityTargetEffect(effect = {}, prefix = "recipient") {
+      const upper = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+      return {
+        targetCardIds: effect[`${prefix}CardIds`] ?? effect[`${prefix}Ids`],
+        targetElements: effect[`${prefix}Elements`],
+        targetRarities: effect[`${prefix}Rarities`],
+        targetMatch: effect[`${prefix}Match`] ?? effect.targetMatch,
+        excludeSelf: effect[`exclude${upper}Self`] === true
+      };
+    }
+
+    function cloneRuntimeAbility(ability, meta = {}) {
+      return {
+        ...ability,
+        name: `${meta.actionLabel || "คัดลอก"}: ${String(ability && ability.name || "ความสามารถพิเศษ")}`,
+        description: `[${meta.actionLabel || "คัดลอก"}จาก ${meta.donorName || "เป้าหมาย"}] ${String(ability && ability.description || "")}`.trim(),
+        condition: ability && ability.condition && typeof ability.condition === "object" ? { ...ability.condition } : ability && ability.condition,
+        effects: abilityArray(ability && ability.effects).map(effect => effect && typeof effect === "object"
+          ? { ...effect, condition: effect.condition && typeof effect.condition === "object" ? { ...effect.condition } : effect.condition }
+          : effect),
+        _runtimeTransferred: true,
+        _runtimeTransferType: String(meta.transferType || "copy"),
+        _runtimeTransferredFromCardId: String(meta.donorCardId || ""),
+        _runtimeTransferredFromAbilityKey: String(meta.donorAbilityKey || "")
+      };
+    }
+
+    function abilityEntryMatchesTransferFilters(entry, effect = {}) {
+      const names = normalizeAbilityStringList(effect.abilityNames).map(item => item.toLowerCase());
+      const indexes = new Set(abilityArray(effect.abilityIndexes).map(item => String(item)));
+      const numbers = new Set(abilityArray(effect.abilityNumbers).map(item => String(Math.max(0, Math.floor(Number(item) || 0) - 1))));
+      const effectTypes = normalizeAbilityStringList(effect.abilityEffectTypes).map(normalizeAbilityEffectType);
+      const ability = entry && entry.ability;
+      if (!ability) return false;
+      const checks = [];
+      if (names.length) checks.push(names.includes(String(ability.name || "").trim().toLowerCase()));
+      if (indexes.size) checks.push(indexes.has(String(entry.abilityIndex)));
+      if (numbers.size) checks.push(numbers.has(String(entry.abilityIndex)));
+      if (effectTypes.length) {
+        const types = abilityArray(ability.effects).map(item => normalizeAbilityEffectType(item && item.type));
+        checks.push(effectTypes.some(type => types.includes(type)));
+      }
+      if (!checks.length) return true;
+      return normalizeAbilityTargetMatch(effect.abilityMatch) === "all" ? checks.every(Boolean) : checks.some(Boolean);
+    }
+
+    function abilityEntryCanBeTransferred(entry, effect = {}) {
+      if (!entry || !entry.ability) return false;
+      const hasTransferEffect = abilityArray(entry.ability.effects).some(isAbilityTransferEffect);
+      if (hasTransferEffect && effect.includeTransferAbilities !== true) return false;
+      return abilityEntryMatchesTransferFilters(entry, effect);
+    }
+
+    function resolveEnemyStatusResistanceSelectors(selectors, targetContext) {
+      const byCardId = {};
+      const fieldRules = [];
+      abilityArray(selectors).forEach((item, index) => {
+        if (!item || !item.effect) return;
+        const effect = { ...item.effect, targetSide: "ally" };
+        const rule = makeStatusResistanceRule(effect, { sourceCard: item.sourceCard, ability: item.ability, key: item.key || `external-resist-${index}` });
+        const ids = resolveAbilityTargetCardIds(effect, item.sourceCard, targetContext);
+        ids.forEach(id => addStatusResistanceRule(byCardId, id, rule));
+        if (rule.scope === "field" && ids.length) fieldRules.push(rule);
+      });
+      return { byCardId, fieldRules };
+    }
+
+    function mergeStatusResistanceRuleMaps(base = {}, extra = {}) {
+      const result = cloneStatusResistanceRuleMap(base);
+      Object.entries(extra && typeof extra === "object" ? extra : {}).forEach(([id, rules]) => {
+        abilityArray(rules).forEach(rule => addStatusResistanceRule(result, id, rule));
+      });
+      return result;
+    }
+
+    function resolvePairedAbilityTransfers(allyControl, enemyControl, allyOptions = {}, enemyOptions = {}, seed = "") {
+      const sides = {
+        ally: {
+          name: "ally",
+          summary: allyControl,
+          options: allyOptions,
+          additions: Object.fromEntries(Object.entries(allyOptions.additionalAbilitiesByCardId || {}).map(([id, list]) => [String(id), abilityArray(list).slice()])),
+          disabled: new Set(abilityArray(allyOptions.disabledAbilityKeys).map(String))
+        },
+        enemy: {
+          name: "enemy",
+          summary: enemyControl,
+          options: enemyOptions,
+          additions: Object.fromEntries(Object.entries(enemyOptions.additionalAbilitiesByCardId || {}).map(([id, list]) => [String(id), abilityArray(list).slice()])),
+          disabled: new Set(abilityArray(enemyOptions.disabledAbilityKeys).map(String))
+        }
+      };
+      const results = [];
+      const ordered = [
+        ...abilityArray(allyControl && allyControl.abilityTransferEffects).map(item => ({ ...item, sourceSide: "ally" })),
+        ...abilityArray(enemyControl && enemyControl.abilityTransferEffects).map(item => ({ ...item, sourceSide: "enemy" }))
+      ].sort((a, b) => String(a.key || "").localeCompare(String(b.key || "")));
+
+      ordered.forEach((record, transferIndex) => {
+        const sourceSide = sides[record.sourceSide];
+        const oppositeSide = sides[record.sourceSide === "ally" ? "enemy" : "ally"];
+        const effect = record.effect || {};
+        const transferType = isStealAbilityEffect(effect) ? "steal" : "copy";
+        const sourceCardId = String(record.sourceCard && record.sourceCard.id || "");
+        const targetSideName = normalizeAbilityTargetSide(effect.targetSide) === "enemy"
+          ? oppositeSide.name
+          : sourceSide.name;
+        const donorSide = sides[targetSideName];
+        let donorCards = donorSide.summary.context.cards.filter(card => cardMatchesAbilityTarget(card, effect));
+        if (normalizeAbilityTargetSide(effect.targetSide) === "self") donorCards = donorCards.filter(card => String(card.id) === sourceCardId);
+        if (effect.excludeSelf) donorCards = donorCards.filter(card => String(card.id) !== sourceCardId);
+        const hasSpecificDonorFilter = normalizeAbilityCardIds(effect.targetCardIds || effect.cardIds).length > 0
+          || normalizeAbilityElements(effect.targetElements || effect.elements).length > 0
+          || normalizeAbilityRarities(effect.targetRarities || effect.rarities).length > 0;
+        const donorMode = normalizeAbilitySelectionMode(effect.targetSelection, hasSpecificDonorFilter ? "specific" : "random");
+        donorCards = selectAbilityItems(donorCards, donorMode, effect.targetCount || (donorMode === "specific" ? donorCards.length : 1), seed, `${record.key}:donors`);
+
+        const recipientSideRaw = String(effect.recipientSide || "self").trim().toLowerCase();
+        const recipientSideName = ["enemy", "opponent", "foe", "ฝ่ายตรงข้าม"].includes(recipientSideRaw)
+          ? oppositeSide.name
+          : sourceSide.name;
+        const recipientSide = sides[recipientSideName];
+        let recipientCards;
+        if (["self", "source", "ตนเอง", "ตัวเอง", ""].includes(recipientSideRaw)) {
+          recipientCards = sourceSide.summary.context.cards.filter(card => String(card.id) === sourceCardId);
+        } else {
+          const recipientFilter = buildPrefixedAbilityTargetEffect(effect, "recipient");
+          recipientCards = recipientSide.summary.context.cards.filter(card => cardMatchesAbilityTarget(card, recipientFilter));
+          if (recipientFilter.excludeSelf) recipientCards = recipientCards.filter(card => String(card.id) !== sourceCardId);
+          const hasRecipientFilter = normalizeAbilityCardIds(recipientFilter.targetCardIds).length > 0
+            || normalizeAbilityElements(recipientFilter.targetElements).length > 0
+            || normalizeAbilityRarities(recipientFilter.targetRarities).length > 0;
+          const recipientMode = normalizeAbilitySelectionMode(effect.recipientSelection, hasRecipientFilter ? "specific" : "random");
+          recipientCards = selectAbilityItems(recipientCards, recipientMode, effect.recipientCount || (recipientMode === "specific" ? recipientCards.length : 1), seed, `${record.key}:recipients`);
+        }
+
+        const explicitRate = effect.successRate ?? effect.copyRate ?? effect.stealRate ?? effect.chance ?? effect.rate
+          ?? (effect._hasExplicitValue ? effect.value : 1);
+        const successRate = normalizeAbilityChance(explicitRate, 1);
+        donorCards.forEach((donorCard, donorIndex) => {
+          const donorId = String(donorCard.id);
+          const donorRules = donorSide.summary.statusResistanceByCardId && donorSide.summary.statusResistanceByCardId[donorId];
+          const resistance = shouldAbilityEffectBeResisted(donorRules, effect, seed, `${record.key}:donor-resist:${donorId}:${donorIndex}`);
+          if (resistance.resisted) {
+            results.push({ status: "resisted", transferType, sourceSide: record.sourceSide, sourceCardId, donorSide: donorSide.name, donorCardId: donorId, recipientCardIds: recipientCards.map(card => String(card.id)), effectType: normalizeAbilityEffectType(effect.type), resistanceRate: resistance.rate });
+            return;
+          }
+
+          const donorEntries = getCardAbilities(donorCard).map((ability, abilityIndex) => ({
+            ability,
+            abilityIndex,
+            runtimeKey: `${donorId}:${abilityIndex}`
+          })).filter(entry => !donorSide.disabled.has(entry.runtimeKey) && abilityEntryCanBeTransferred(entry, effect));
+          const hasSpecificAbilityFilter = normalizeAbilityStringList(effect.abilityNames).length > 0
+            || abilityArray(effect.abilityIndexes).length > 0
+            || abilityArray(effect.abilityNumbers).length > 0
+            || normalizeAbilityStringList(effect.abilityEffectTypes).length > 0;
+          const abilityMode = normalizeAbilitySelectionMode(effect.abilitySelection, hasSpecificAbilityFilter ? "specific" : "random");
+          const selectedEntries = selectAbilityItems(donorEntries, abilityMode, effect.abilityCount || (abilityMode === "specific" ? donorEntries.length : 1), seed, `${record.key}:abilities:${donorId}`);
+          if (!selectedEntries.length || !recipientCards.length) {
+            results.push({ status: "no-target", transferType, sourceSide: record.sourceSide, sourceCardId, donorSide: donorSide.name, donorCardId: donorId, recipientCardIds: recipientCards.map(card => String(card.id)), effectType: normalizeAbilityEffectType(effect.type) });
+            return;
+          }
+
+          selectedEntries.forEach((entry, abilityPickIndex) => {
+            const succeeded = deterministicAbilityRoll(seed, `${record.key}:success:${donorId}:${entry.runtimeKey}:${abilityPickIndex}`) < successRate;
+            if (!succeeded) {
+              results.push({ status: "failed", transferType, sourceSide: record.sourceSide, sourceCardId, donorSide: donorSide.name, donorCardId: donorId, donorAbilityKey: entry.runtimeKey, abilityName: String(entry.ability.name || ""), successRate, recipientCardIds: recipientCards.map(card => String(card.id)) });
+              return;
+            }
+
+            recipientCards.forEach((recipientCard, recipientIndex) => {
+              const recipientId = String(recipientCard.id);
+              if (!recipientSide.additions[recipientId]) recipientSide.additions[recipientId] = [];
+              const runtimeKey = `${recipientId}:transfer:${record.key}:${donorId}:${entry.abilityIndex}:${recipientIndex}`;
+              recipientSide.additions[recipientId].push({
+                runtimeKey,
+                ability: cloneRuntimeAbility(entry.ability, {
+                  actionLabel: transferType === "steal" ? "ขโมย" : "คัดลอก",
+                  transferType,
+                  donorName: donorCard.name,
+                  donorCardId: donorId,
+                  donorAbilityKey: entry.runtimeKey
+                })
+              });
+            });
+            if (transferType === "steal") donorSide.disabled.add(entry.runtimeKey);
+            results.push({ status: "success", transferType, sourceSide: record.sourceSide, sourceCardId, donorSide: donorSide.name, donorCardId: donorId, donorAbilityKey: entry.runtimeKey, abilityName: String(entry.ability.name || ""), successRate, recipientSide: recipientSide.name, recipientCardIds: recipientCards.map(card => String(card.id)) });
+          });
+        });
+      });
+
+      return {
+        ally: { additionalAbilitiesByCardId: sides.ally.additions, disabledAbilityKeys: [...sides.ally.disabled] },
+        enemy: { additionalAbilitiesByCardId: sides.enemy.additions, disabledAbilityKeys: [...sides.enemy.disabled] },
+        results
+      };
+    }
+
+    function resolveOutgoingFieldEffects(sourceSummary, targetSummary, seed, label = "field") {
+      const records = abilityArray(sourceSummary && sourceSummary.enemyFieldEffects);
+      if (!records.length) return sourceSummary;
+      const fields = ["enemyPowerRate", "enemyHpRate", "enemyDefenseRate", "enemyAttackHits", "enemyShieldHits", "enemyHealingRate", "enemyShieldRecoveryRate"];
+      fields.forEach(field => { sourceSummary[field] = 0; });
+      records.forEach((record, index) => {
+        const effect = record.effect || {};
+        const check = shouldAbilityEffectBeResisted(targetSummary && targetSummary.fieldStatusResistanceRules, effect, seed, `${label}:${record.key || index}`, "field");
+        if (check.resisted) {
+          if (targetSummary && Array.isArray(targetSummary.resistedEffects)) {
+            targetSummary.resistedEffects.push({ targetCardId: "*", sourceCardId: String(effect._sourceCardId || ""), abilityName: String(effect._sourceAbilityName || ""), effectType: normalizeAbilityEffectType(effect.type), resistanceRate: check.rate, scope: "field" });
+          }
+          return;
+        }
+        if (fields.includes(record.field)) sourceSummary[record.field] += Number(effect.value || 0);
+      });
+      return sourceSummary;
+    }
+    // ========================================================================
+
     function addAbilityMapRate(map, keys, value) {
       abilityArray(keys).forEach(key => {
         const safeKey = String(key || "");
@@ -10916,23 +11412,35 @@
       });
     }
 
-    function resolveEnemySelectorIds(selectors, targetContext) {
+    function resolveEnemySelectorIds(selectors, targetContext, options = {}) {
       const result = new Set();
-      abilityArray(selectors).forEach(item => {
+      abilityArray(selectors).forEach((item, index) => {
         if (!item || !item.effect) return;
-        resolveAbilityTargetCardIds({ ...item.effect, targetSide: "ally" }, item.sourceCard, targetContext)
-          .forEach(id => result.add(String(id)));
+        const effect = { ...item.effect, targetSide: "ally" };
+        resolveAbilityTargetCardIdsWithResistance(
+          effect, item.sourceCard, targetContext,
+          options.statusResistanceByCardId || {},
+          options.seed || "enemy-selector",
+          item.key || `${item.sourceCard && item.sourceCard.id || "enemy"}:${index}`,
+          options.resistedEffects || []
+        ).forEach(id => result.add(String(id)));
       });
       return [...result];
     }
 
-    function resolveEnemyRateMap(selectors, targetContext) {
+    function resolveEnemyRateMap(selectors, targetContext, options = {}) {
       const result = {};
-      abilityArray(selectors).forEach(item => {
+      abilityArray(selectors).forEach((item, index) => {
         if (!item || !item.effect) return;
         const value = Number(item.effect.value || 0);
-        resolveAbilityTargetCardIds({ ...item.effect, targetSide: "ally" }, item.sourceCard, targetContext)
-          .forEach(id => addAbilityMapRate(result, [id], value));
+        const effect = { ...item.effect, targetSide: "ally" };
+        resolveAbilityTargetCardIdsWithResistance(
+          effect, item.sourceCard, targetContext,
+          options.statusResistanceByCardId || {},
+          options.seed || "enemy-rate",
+          item.key || `${item.sourceCard && item.sourceCard.id || "enemy"}:${index}`,
+          options.resistedEffects || []
+        ).forEach(id => addAbilityMapRate(result, [id], value));
       });
       return result;
     }
@@ -11074,6 +11582,31 @@
       return elementAbility ? [...uniqueAbilities, elementAbility] : uniqueAbilities;
     }
 
+
+    function getRuntimeCardAbilityEntries(card, options = {}) {
+      if (!card) return [];
+      const cardId = String(card.id || "");
+      const disabled = new Set(abilityArray(options.disabledAbilityKeys).map(String));
+      const baseEntries = getCardAbilities(card).map((ability, abilityIndex) => ({
+        ability,
+        abilityIndex,
+        runtimeKey: `${cardId}:${abilityIndex}`,
+        transferred: false
+      }));
+      const extras = abilityArray(options.additionalAbilitiesByCardId && options.additionalAbilitiesByCardId[cardId])
+        .map((item, index) => {
+          const ability = item && item.ability ? item.ability : item;
+          if (!ability || typeof ability !== "object") return null;
+          return {
+            ability,
+            abilityIndex: `transfer-${index}`,
+            runtimeKey: String(item && item.runtimeKey || `${cardId}:transfer:${index}`),
+            transferred: true
+          };
+        }).filter(Boolean);
+      return [...baseEntries, ...extras].filter(entry => !disabled.has(String(entry.runtimeKey)));
+    }
+
     function normalizeAbilityMode(value) {
       const mode = String(value || "").trim().toLowerCase();
       if (["team", "showcase", "show", "display"].includes(mode)) return "team";
@@ -11207,8 +11740,9 @@
       return true;
     }
 
-    function getTeamAbilitySummary(teamIds = state.team, mode = "team", options = {}) {
+    function getTeamAbilitySummaryCore(teamIds = state.team, mode = "team", options = {}) {
       const context = buildAbilityContext(teamIds, mode, options);
+      const resolutionSeed = String(options.abilityResolutionSeed || makeAbilityResolutionSeed(mode, context.ids, [], ""));
       const externalNullified = new Set(normalizeAbilityCardIds(options.externalNullifiedCardIds));
       const externalConditionIgnored = new Set(normalizeAbilityCardIds(options.externalConditionIgnoredCardIds));
       const allyNullified = new Set();
@@ -11217,10 +11751,53 @@
       const enemyIgnoreConditionSelectors = [];
       const nullifyEffects = [];
       const ignoreConditionEffects = [];
+      const statusResistanceByCardId = cloneStatusResistanceRuleMap(options.externalStatusResistanceRulesByCardId || {});
+      const fieldStatusResistanceRules = abilityArray(options.externalFieldStatusResistanceRules).filter(Boolean).map(rule => ({ ...rule }));
+      const enemyStatusResistanceSelectors = [];
+      const resistedEffects = abilityArray(options.resistedEffects).filter(Boolean).map(item => ({ ...item }));
+
+      // Priority pass 0: ต้านสถานะทำงานก่อน nullify/ignore เพื่อตัดวงจรควบคุมซ้อนกัน
+      context.cards.forEach(sourceCard => {
+        getRuntimeCardAbilityEntries(sourceCard, options).forEach(({ ability, abilityIndex, runtimeKey }) => {
+          const modes = getAbilityModes(ability);
+          const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
+          const baseActive = modes.includes(context.mode)
+            && isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard);
+          if (!baseActive) return;
+          abilityArray(ability.effects).forEach((rawEffect, effectIndex) => {
+            if (!rawEffect || typeof rawEffect !== "object" || !isStatusResistanceEffect(rawEffect)) return;
+            if (!isAbilityConditionMet(getStaticAbilityCondition(rawEffect.condition || {}), context, sourceCard)) return;
+            const effect = {
+              ...rawEffect,
+              type: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE,
+              _sourceCardId: String(sourceCard.id),
+              _sourceAbilityName: String(ability.name || ""),
+              _runtimeEffectKey: `${runtimeKey}:${effectIndex}`
+            };
+            const targetSide = normalizeAbilityTargetSide(effect.targetSide);
+            if (targetSide === "enemy") {
+              enemyStatusResistanceSelectors.push({ key: effect._runtimeEffectKey, sourceCard, ability, effect });
+              return;
+            }
+            let targetCards = resolveAbilityTargetCardIds(effect, sourceCard, context)
+              .map(id => context.cards.find(card => String(card.id) === String(id)))
+              .filter(Boolean);
+            const selectionMode = normalizeAbilitySelectionMode(effect.targetSelection, "all");
+            targetCards = selectAbilityItems(targetCards, selectionMode, effect.targetCount || (selectionMode === "specific" ? targetCards.length : 1), resolutionSeed, `${effect._runtimeEffectKey}:resistance-targets`);
+            const rule = makeStatusResistanceRule(effect, { sourceCard, ability, key: effect._runtimeEffectKey });
+            targetCards.forEach(card => addStatusResistanceRule(statusResistanceByCardId, card.id, rule));
+            if (rule.scope === "field" && targetCards.length) fieldStatusResistanceRules.push(rule);
+          });
+        });
+      });
+
+      const resolveLocalTargets = (effect, sourceCard, key) => resolveAbilityTargetCardIdsWithResistance(
+        effect, sourceCard, context, statusResistanceByCardId, resolutionSeed, key, resistedEffects
+      );
 
       // Control pass 1: nullify ทำงานก่อนเอฟเฟกต์ทั่วไปและไม่ถูก nullify ซ้อน
       context.cards.forEach(sourceCard => {
-        getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
+        getRuntimeCardAbilityEntries(sourceCard, options).forEach(({ ability, abilityIndex, runtimeKey }) => {
           const modes = getAbilityModes(ability);
           const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
           const baseActive = !abilityTrigger
@@ -11234,9 +11811,9 @@
             if (targetSide === "enemy") {
               enemyNullifySelectors.push({ sourceCard, ability, effect });
             } else {
-              resolveAbilityTargetCardIds(effect, sourceCard, context).forEach(id => allyNullified.add(String(id)));
+              resolveLocalTargets({ ...effect, _sourceCardId: String(sourceCard.id), _sourceAbilityName: String(ability.name || "") }, sourceCard, `${runtimeKey}:${effectIndex}:nullify`).forEach(id => allyNullified.add(String(id)));
             }
-            nullifyEffects.push({ key: `${sourceCard.id}:${abilityIndex}:${effectIndex}`, sourceCard, ability, effect: { ...effect, targetSide } });
+            nullifyEffects.push({ key: `${runtimeKey}:${effectIndex}`, sourceCard, ability, effect: { ...effect, targetSide } });
           });
         });
       });
@@ -11246,7 +11823,7 @@
       // Control pass 2: เลือกการ์ดที่ไม่ต้องผ่านเงื่อนไขด้วย ID / ธาตุ / ระดับ
       context.cards.forEach(sourceCard => {
         if (preliminaryNullified.has(String(sourceCard.id))) return;
-        getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
+        getRuntimeCardAbilityEntries(sourceCard, options).forEach(({ ability, abilityIndex, runtimeKey }) => {
           const modes = getAbilityModes(ability);
           const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
           const baseActive = !abilityTrigger
@@ -11260,9 +11837,9 @@
             if (targetSide === "enemy") {
               enemyIgnoreConditionSelectors.push({ sourceCard, ability, effect });
             } else {
-              resolveAbilityTargetCardIds(effect, sourceCard, context).forEach(id => allyConditionIgnored.add(String(id)));
+              resolveLocalTargets({ ...effect, _sourceCardId: String(sourceCard.id), _sourceAbilityName: String(ability.name || "") }, sourceCard, `${runtimeKey}:${effectIndex}:ignore`).forEach(id => allyConditionIgnored.add(String(id)));
             }
-            ignoreConditionEffects.push({ key: `${sourceCard.id}:${abilityIndex}:${effectIndex}`, sourceCard, ability, effect: { ...effect, targetSide } });
+            ignoreConditionEffects.push({ key: `${runtimeKey}:${effectIndex}`, sourceCard, ability, effect: { ...effect, targetSide } });
           });
         });
       });
@@ -11331,8 +11908,16 @@
         allyConditionIgnoredCardIds: [...allyConditionIgnored],
         enemyNullifySelectors,
         enemyIgnoreConditionSelectors,
+        enemyStatusResistanceSelectors,
         nullifyEffects,
         ignoreConditionEffects,
+        statusResistanceByCardId,
+        fieldStatusResistanceRules,
+        resistedEffects,
+        abilityResolutionSeed: resolutionSeed,
+        abilityTransferEffects: [],
+        transferResults: abilityArray(options.transferResults).filter(Boolean).map(item => ({ ...item })),
+        enemyFieldEffects: [],
         triggeredEffects: [],
         activeAbilities: [],
         inactiveAbilities: []
@@ -11350,7 +11935,7 @@
       mergeExternalAbilityRateMap(summary.permanentTriggerCostChanges, options.externalPermanentTriggerCostChanges, context);
 
       context.cards.forEach(sourceCard => {
-        getCardAbilities(sourceCard).forEach((ability, abilityIndex) => {
+        getRuntimeCardAbilityEntries(sourceCard, options).forEach(({ ability, abilityIndex, runtimeKey }) => {
           const modes = getAbilityModes(ability);
           const sourceId = String(sourceCard.id);
           const sourceNullified = nullifiedCardIdSet.has(sourceId);
@@ -11368,24 +11953,44 @@
             const ownEffectTrigger = normalizeBattleTriggerRule(effect.condition || {});
             const persistentAfterActivation = Boolean(effect.persistentAfterActivation && abilityTrigger);
             const effectTrigger = persistentAfterActivation ? ownEffectTrigger : (ownEffectTrigger || abilityTrigger);
-            const parentActivationKey = abilityTrigger ? `${sourceCard.id}:${abilityIndex}:${JSON.stringify(abilityTrigger)}` : "";
+            const parentActivationKey = abilityTrigger ? `${runtimeKey}:${JSON.stringify(abilityTrigger)}` : "";
             const conditionActive = baseConditionActive
               && (sourceIgnoresConditions || isAbilityConditionMet(getStaticAbilityCondition(effect.condition || {}), context, sourceCard));
             const effectActive = conditionActive && (nullifyControl || !sourceNullified);
+            const effectType = normalizeAbilityEffectType(effect.type);
             const value = Number(effect.value || 0);
-            const record = { ...effect, value };
+            const record = {
+              ...effect,
+              type: effectType,
+              value,
+              _hasExplicitValue: Object.prototype.hasOwnProperty.call(effect, "value"),
+              _sourceCardId: String(sourceCard.id),
+              _sourceAbilityName: String(ability.name || ""),
+              _runtimeEffectKey: `${runtimeKey}:${effectIndex}`
+            };
             if (!effectActive) {
               inactiveEffects.push(record);
               return;
             }
 
+            // transfer และ status resistance เป็นผลก่อนเริ่มไฟต์ เพื่อให้สกิลที่ได้มาถูกแปลงเป็น Passive/Active ได้ครบชุด
+            if (isAbilityTransferEffect(record)) {
+              summary.abilityTransferEffects.push({ key: record._runtimeEffectKey, sourceCard, ability, abilityIndex, effectIndex, effect: record, trigger: effectTrigger || null });
+              activeEffects.push({ ...record, preBattleResolved: true });
+              return;
+            }
+            if (isStatusResistanceEffect(record)) {
+              activeEffects.push(record);
+              return;
+            }
+
             // Active Skill แบบนับจำนวนครั้งโจมตี: เก็บไว้ให้ battle engine ประมวลผล ไม่ใช้เป็น Passive ทันที
-            if (effectTrigger && !isAbilityControlEffect(effect)) {
+            if (effectTrigger && !isAbilityControlEffect(record)) {
               const runtimeRecord = {
-                key: `${sourceCard.id}:${abilityIndex}:${effectIndex}`,
+                key: `${runtimeKey}:${effectIndex}`,
                 triggerKey: persistentAfterActivation
-                  ? `${sourceCard.id}:${abilityIndex}:persistent:${JSON.stringify(effectTrigger)}`
-                  : `${sourceCard.id}:${abilityIndex}:${JSON.stringify(effectTrigger)}`,
+                  ? `${runtimeKey}:persistent:${JSON.stringify(effectTrigger)}`
+                  : `${runtimeKey}:${JSON.stringify(effectTrigger)}`,
                 requiresActivationKey: persistentAfterActivation ? parentActivationKey : "",
                 sourceCard,
                 ability,
@@ -11398,37 +12003,37 @@
             }
 
             activeEffects.push(record);
-            switch (effect.type) {
+            switch (effectType) {
               case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE: summary.teamPowerRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_HP_RATE: summary.teamHpRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_RATE: summary.teamDefenseRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_RATE: summary.teamIncomeRate += value; break;
-              case CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE: summary.enemyPowerRate += value; break;
-              case CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE: summary.enemyHpRate += value; break;
-              case CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE: summary.enemyDefenseRate += value; break;
+              case CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE: summary.enemyPowerRate += value; summary.enemyFieldEffects.push({ key: record._runtimeEffectKey, field: "enemyPowerRate", sourceCard, ability, effect: record }); break;
+              case CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE: summary.enemyHpRate += value; summary.enemyFieldEffects.push({ key: record._runtimeEffectKey, field: "enemyHpRate", sourceCard, ability, effect: record }); break;
+              case CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE: summary.enemyDefenseRate += value; summary.enemyFieldEffects.push({ key: record._runtimeEffectKey, field: "enemyDefenseRate", sourceCard, ability, effect: record }); break;
               case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE:
               case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 if (side === "enemy") summary.enemyCriticalRateSelectors.push({ sourceCard, ability, effect: record });
-                else addAbilityMapRate(summary.cardCriticalRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                else addAbilityMapRate(summary.cardCriticalRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 if (side === "enemy") summary.enemyBlockRateSelectors.push({ sourceCard, ability, effect: record });
-                else addAbilityMapRate(summary.cardBlockRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                else addAbilityMapRate(summary.cardBlockRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 if (side === "enemy") summary.enemyDamageTakenRateSelectors.push({ sourceCard, ability, effect: record });
-                else addAbilityMapRate(summary.cardDamageTakenRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                else addAbilityMapRate(summary.cardDamageTakenRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.DODGE_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 if (side === "enemy") summary.enemyDodgeRateSelectors.push({ sourceCard, ability, effect: record });
-                else addAbilityMapRate(summary.cardDodgeRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                else addAbilityMapRate(summary.cardDodgeRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE:
@@ -11439,26 +12044,34 @@
               case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_FLAT: summary.teamDefenseFlat += value; break;
               case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
-                if (side === "enemy") summary.enemyShieldHits += value;
-                else summary.shieldHits += value;
+                if (side === "enemy") {
+                  summary.enemyShieldHits += value;
+                  summary.enemyFieldEffects.push({ key: record._runtimeEffectKey, field: "enemyShieldHits", sourceCard, ability, effect: record });
+                } else summary.shieldHits += value;
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
-                if (side === "enemy") summary.enemyAttackHits += value;
-                else summary.attackHits += value;
+                if (side === "enemy") {
+                  summary.enemyAttackHits += value;
+                  summary.enemyFieldEffects.push({ key: record._runtimeEffectKey, field: "enemyAttackHits", sourceCard, ability, effect: record });
+                } else summary.attackHits += value;
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.HEALING_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
-                if (side === "enemy") summary.enemyHealingRate += value;
-                else summary.healingRate += value;
+                if (side === "enemy") {
+                  summary.enemyHealingRate += value;
+                  summary.enemyFieldEffects.push({ key: record._runtimeEffectKey, field: "enemyHealingRate", sourceCard, ability, effect: record });
+                } else summary.healingRate += value;
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
-                if (side === "enemy") summary.enemyShieldRecoveryRate += value;
-                else summary.shieldRecoveryRate += value;
+                if (side === "enemy") {
+                  summary.enemyShieldRecoveryRate += value;
+                  summary.enemyFieldEffects.push({ key: record._runtimeEffectKey, field: "enemyShieldRecoveryRate", sourceCard, ability, effect: record });
+                } else summary.shieldRecoveryRate += value;
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT: summary.teamIncomeFlat += value; break;
@@ -11477,43 +12090,46 @@
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 const change = Math.round(value);
                 if (side === "enemy") summary.enemyTriggerCostSelectors.push({ sourceCard, ability, effect: { ...record, value: change } });
-                else addAbilityMapRate(summary.triggerCostChanges, resolveAbilityTargetCardIds(effect, sourceCard, context), change);
+                else addAbilityMapRate(summary.triggerCostChanges, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), change);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 const change = Math.round(value);
                 if (side === "enemy") summary.enemyPermanentTriggerCostSelectors.push({ sourceCard, ability, effect: { ...record, value: change } });
-                else addAbilityMapRate(summary.permanentTriggerCostChanges, resolveAbilityTargetCardIds(effect, sourceCard, context), change);
+                else addAbilityMapRate(summary.permanentTriggerCostChanges, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), change);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.INCREASE_MAX_HP_BASE_RATE:
-                addAbilityMapRate(summary.selfHpRates, resolveAbilityTargetCardIds(effect, sourceCard, context), Math.max(0, value));
+                addAbilityMapRate(summary.selfHpRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), Math.max(0, value));
                 break;
               case CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 if (side === "enemy") summary.enemyCardPowerSelectors.push({ sourceCard, ability, effect: record });
-                else addAbilityMapRate(summary.cardPowerRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                else addAbilityMapRate(summary.cardPowerRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 if (side === "enemy") summary.enemyCardHpSelectors.push({ sourceCard, ability, effect: record });
-                else addAbilityMapRate(summary.cardHpRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                else addAbilityMapRate(summary.cardHpRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.CARD_DEFENSE_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 if (side === "enemy") summary.enemyCardDefenseSelectors.push({ sourceCard, ability, effect: record });
-                else addAbilityMapRate(summary.cardDefenseRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                else addAbilityMapRate(summary.cardDefenseRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.CARD_INCOME_RATE: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 if (side === "enemy") summary.enemyCardIncomeSelectors.push({ sourceCard, ability, effect: record });
-                else addAbilityMapRate(summary.cardIncomeRates, resolveAbilityTargetCardIds(effect, sourceCard, context), value);
+                else addAbilityMapRate(summary.cardIncomeRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
+              case CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES:
+              case CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES:
+              case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE:
               case CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES:
               case CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS:
                 break;
@@ -11544,12 +12160,12 @@
               case CARD_ABILITY_EFFECT_TYPES.ELEMENT_INCOME_RATE:
                 addAbilityMapRate(summary.elementIncomeRates, normalizeAbilityElements(effect.targetElements || effect.elements), value); break;
               default:
-                console.warn("Unknown card ability effect type:", effect.type, sourceCard.name);
+                console.warn("Unknown card ability effect type:", effectType, sourceCard.name);
             }
           });
 
           const entry = {
-            key: `${sourceCard.id}:${abilityIndex}`,
+            key: runtimeKey,
             sourceCard,
             ability,
             modes,
@@ -11606,44 +12222,129 @@
       return summary;
     }
 
-    function getPairedAbilitySummaries(allyTeamIds, enemyTeamIds, mode = "arena", allyOptions = {}, enemyOptions = {}) {
-      const allyControl = getTeamAbilitySummary(allyTeamIds, mode, allyOptions);
-      const enemyControl = getTeamAbilitySummary(enemyTeamIds, mode, enemyOptions);
-      const allyContext = allyControl.context;
-      const enemyContext = enemyControl.context;
+    // Wrapper สำหรับโหมดทีมเดียว: resolve copy/steal ภายในทีมก่อนคืน summary
+    function getTeamAbilitySummary(teamIds = state.team, mode = "team", options = {}) {
+      if (options && options._skipAbilityTransferResolution) {
+        return getTeamAbilitySummaryCore(teamIds, mode, options);
+      }
+      const seed = makeAbilityResolutionSeed(mode, teamIds, [], options.abilityResolutionSeed || "");
+      const baseOptions = { ...options, abilityResolutionSeed: `${seed}:single`, _skipAbilityTransferResolution: true };
+      const base = getTeamAbilitySummaryCore(teamIds, mode, baseOptions);
+      if (!abilityArray(base.abilityTransferEffects).length) return base;
+      const empty = getTeamAbilitySummaryCore([], mode, { abilityResolutionSeed: `${seed}:empty`, _skipAbilityTransferResolution: true });
+      const transfer = resolvePairedAbilityTransfers(base, empty, baseOptions, {}, seed);
+      const hasChanges = Object.keys(transfer.ally.additionalAbilitiesByCardId || {}).length > 0
+        || abilityArray(transfer.ally.disabledAbilityKeys).length > 0;
+      if (!hasChanges) {
+        base.transferResults = transfer.results;
+        return base;
+      }
+      return getTeamAbilitySummaryCore(teamIds, mode, {
+        ...baseOptions,
+        ...transfer.ally,
+        transferResults: transfer.results,
+        _skipAbilityTransferResolution: true
+      });
+    }
 
-      return {
-        ally: getTeamAbilitySummary(allyTeamIds, mode, {
-          ...allyOptions,
-          externalNullifiedCardIds: resolveEnemySelectorIds(enemyControl.enemyNullifySelectors, allyContext),
-          externalConditionIgnoredCardIds: resolveEnemySelectorIds(enemyControl.enemyIgnoreConditionSelectors, allyContext),
-          externalCardPowerRates: resolveEnemyRateMap(enemyControl.enemyCardPowerSelectors, allyContext),
-          externalCardHpRates: resolveEnemyRateMap(enemyControl.enemyCardHpSelectors, allyContext),
-          externalCardDefenseRates: resolveEnemyRateMap(enemyControl.enemyCardDefenseSelectors, allyContext),
-          externalCardCriticalRates: resolveEnemyRateMap(enemyControl.enemyCriticalRateSelectors, allyContext),
-          externalCardBlockRates: resolveEnemyRateMap(enemyControl.enemyBlockRateSelectors, allyContext),
-          externalCardDamageTakenRates: resolveEnemyRateMap(enemyControl.enemyDamageTakenRateSelectors, allyContext),
-          externalCardDodgeRates: resolveEnemyRateMap(enemyControl.enemyDodgeRateSelectors, allyContext),
-          externalCardIncomeRates: resolveEnemyRateMap(enemyControl.enemyCardIncomeSelectors, allyContext),
-          externalTriggerCostChanges: resolveEnemyRateMap(enemyControl.enemyTriggerCostSelectors, allyContext),
-          externalPermanentTriggerCostChanges: resolveEnemyRateMap(enemyControl.enemyPermanentTriggerCostSelectors, allyContext)
-        }),
-        enemy: getTeamAbilitySummary(enemyTeamIds, mode, {
-          ...enemyOptions,
-          externalNullifiedCardIds: resolveEnemySelectorIds(allyControl.enemyNullifySelectors, enemyContext),
-          externalConditionIgnoredCardIds: resolveEnemySelectorIds(allyControl.enemyIgnoreConditionSelectors, enemyContext),
-          externalCardPowerRates: resolveEnemyRateMap(allyControl.enemyCardPowerSelectors, enemyContext),
-          externalCardHpRates: resolveEnemyRateMap(allyControl.enemyCardHpSelectors, enemyContext),
-          externalCardDefenseRates: resolveEnemyRateMap(allyControl.enemyCardDefenseSelectors, enemyContext),
-          externalCardCriticalRates: resolveEnemyRateMap(allyControl.enemyCriticalRateSelectors, enemyContext),
-          externalCardBlockRates: resolveEnemyRateMap(allyControl.enemyBlockRateSelectors, enemyContext),
-          externalCardDamageTakenRates: resolveEnemyRateMap(allyControl.enemyDamageTakenRateSelectors, enemyContext),
-          externalCardDodgeRates: resolveEnemyRateMap(allyControl.enemyDodgeRateSelectors, enemyContext),
-          externalCardIncomeRates: resolveEnemyRateMap(allyControl.enemyCardIncomeSelectors, enemyContext),
-          externalTriggerCostChanges: resolveEnemyRateMap(allyControl.enemyTriggerCostSelectors, enemyContext),
-          externalPermanentTriggerCostChanges: resolveEnemyRateMap(allyControl.enemyPermanentTriggerCostSelectors, enemyContext)
-        })
+    function getPairedAbilitySummaries(allyTeamIds, enemyTeamIds, mode = "arena", allyOptions = {}, enemyOptions = {}) {
+      const seed = makeAbilityResolutionSeed(mode, allyTeamIds, enemyTeamIds, allyOptions.abilityResolutionSeed || enemyOptions.abilityResolutionSeed || "");
+      const allySeed = `${seed}:ally`;
+      const enemySeed = `${seed}:enemy`;
+
+      // Pass 1: อ่านสกิลดั้งเดิม + ต้านสถานะ เพื่อใช้ตัดสิน copy/steal โดยไม่ให้เกิดลูป
+      const allyControl = getTeamAbilitySummaryCore(allyTeamIds, mode, { ...allyOptions, abilityResolutionSeed: allySeed });
+      const enemyControl = getTeamAbilitySummaryCore(enemyTeamIds, mode, { ...enemyOptions, abilityResolutionSeed: enemySeed });
+      const transfer = resolvePairedAbilityTransfers(allyControl, enemyControl, allyOptions, enemyOptions, seed);
+
+      const allyTransferOptions = {
+        ...allyOptions,
+        ...transfer.ally,
+        abilityResolutionSeed: allySeed,
+        transferResults: transfer.results
       };
+      const enemyTransferOptions = {
+        ...enemyOptions,
+        ...transfer.enemy,
+        abilityResolutionSeed: enemySeed,
+        transferResults: transfer.results
+      };
+
+      // Pass 2: หลัง copy/steal แล้ว อ่านสกิลต้านสถานะที่อาจถูกคัดลอกมาใหม่
+      const allyLocal = getTeamAbilitySummaryCore(allyTeamIds, mode, allyTransferOptions);
+      const enemyLocal = getTeamAbilitySummaryCore(enemyTeamIds, mode, enemyTransferOptions);
+      const allyContext = allyLocal.context;
+      const enemyContext = enemyLocal.context;
+      const allyGrantedResistance = resolveEnemyStatusResistanceSelectors(enemyLocal.enemyStatusResistanceSelectors, allyContext);
+      const enemyGrantedResistance = resolveEnemyStatusResistanceSelectors(allyLocal.enemyStatusResistanceSelectors, enemyContext);
+
+      const allyProbe = getTeamAbilitySummaryCore(allyTeamIds, mode, {
+        ...allyTransferOptions,
+        externalStatusResistanceRulesByCardId: mergeStatusResistanceRuleMaps(allyOptions.externalStatusResistanceRulesByCardId, allyGrantedResistance.byCardId),
+        externalFieldStatusResistanceRules: [...abilityArray(allyOptions.externalFieldStatusResistanceRules), ...allyGrantedResistance.fieldRules]
+      });
+      const enemyProbe = getTeamAbilitySummaryCore(enemyTeamIds, mode, {
+        ...enemyTransferOptions,
+        externalStatusResistanceRulesByCardId: mergeStatusResistanceRuleMaps(enemyOptions.externalStatusResistanceRulesByCardId, enemyGrantedResistance.byCardId),
+        externalFieldStatusResistanceRules: [...abilityArray(enemyOptions.externalFieldStatusResistanceRules), ...enemyGrantedResistance.fieldRules]
+      });
+
+      const allyResisted = [];
+      const enemyResisted = [];
+      const allyCrossOptions = {
+        statusResistanceByCardId: allyProbe.statusResistanceByCardId,
+        seed: `${seed}:incoming-to-ally`,
+        resistedEffects: allyResisted
+      };
+      const enemyCrossOptions = {
+        statusResistanceByCardId: enemyProbe.statusResistanceByCardId,
+        seed: `${seed}:incoming-to-enemy`,
+        resistedEffects: enemyResisted
+      };
+
+      // Pass 3: ใช้ผลต้านสถานะกรอง nullify / cost / ลดค่าสเตตัส / เอฟเฟกต์เจาะจงทุกชนิด
+      const ally = getTeamAbilitySummaryCore(allyTeamIds, mode, {
+        ...allyTransferOptions,
+        externalStatusResistanceRulesByCardId: allyProbe.statusResistanceByCardId,
+        externalFieldStatusResistanceRules: allyProbe.fieldStatusResistanceRules,
+        externalNullifiedCardIds: resolveEnemySelectorIds(enemyLocal.enemyNullifySelectors, allyContext, allyCrossOptions),
+        externalConditionIgnoredCardIds: resolveEnemySelectorIds(enemyLocal.enemyIgnoreConditionSelectors, allyContext, allyCrossOptions),
+        externalCardPowerRates: resolveEnemyRateMap(enemyLocal.enemyCardPowerSelectors, allyContext, allyCrossOptions),
+        externalCardHpRates: resolveEnemyRateMap(enemyLocal.enemyCardHpSelectors, allyContext, allyCrossOptions),
+        externalCardDefenseRates: resolveEnemyRateMap(enemyLocal.enemyCardDefenseSelectors, allyContext, allyCrossOptions),
+        externalCardCriticalRates: resolveEnemyRateMap(enemyLocal.enemyCriticalRateSelectors, allyContext, allyCrossOptions),
+        externalCardBlockRates: resolveEnemyRateMap(enemyLocal.enemyBlockRateSelectors, allyContext, allyCrossOptions),
+        externalCardDamageTakenRates: resolveEnemyRateMap(enemyLocal.enemyDamageTakenRateSelectors, allyContext, allyCrossOptions),
+        externalCardDodgeRates: resolveEnemyRateMap(enemyLocal.enemyDodgeRateSelectors, allyContext, allyCrossOptions),
+        externalCardIncomeRates: resolveEnemyRateMap(enemyLocal.enemyCardIncomeSelectors, allyContext, allyCrossOptions),
+        externalTriggerCostChanges: resolveEnemyRateMap(enemyLocal.enemyTriggerCostSelectors, allyContext, allyCrossOptions),
+        externalPermanentTriggerCostChanges: resolveEnemyRateMap(enemyLocal.enemyPermanentTriggerCostSelectors, allyContext, allyCrossOptions),
+        resistedEffects: allyResisted
+      });
+
+      const enemy = getTeamAbilitySummaryCore(enemyTeamIds, mode, {
+        ...enemyTransferOptions,
+        externalStatusResistanceRulesByCardId: enemyProbe.statusResistanceByCardId,
+        externalFieldStatusResistanceRules: enemyProbe.fieldStatusResistanceRules,
+        externalNullifiedCardIds: resolveEnemySelectorIds(allyLocal.enemyNullifySelectors, enemyContext, enemyCrossOptions),
+        externalConditionIgnoredCardIds: resolveEnemySelectorIds(allyLocal.enemyIgnoreConditionSelectors, enemyContext, enemyCrossOptions),
+        externalCardPowerRates: resolveEnemyRateMap(allyLocal.enemyCardPowerSelectors, enemyContext, enemyCrossOptions),
+        externalCardHpRates: resolveEnemyRateMap(allyLocal.enemyCardHpSelectors, enemyContext, enemyCrossOptions),
+        externalCardDefenseRates: resolveEnemyRateMap(allyLocal.enemyCardDefenseSelectors, enemyContext, enemyCrossOptions),
+        externalCardCriticalRates: resolveEnemyRateMap(allyLocal.enemyCriticalRateSelectors, enemyContext, enemyCrossOptions),
+        externalCardBlockRates: resolveEnemyRateMap(allyLocal.enemyBlockRateSelectors, enemyContext, enemyCrossOptions),
+        externalCardDamageTakenRates: resolveEnemyRateMap(allyLocal.enemyDamageTakenRateSelectors, enemyContext, enemyCrossOptions),
+        externalCardDodgeRates: resolveEnemyRateMap(allyLocal.enemyDodgeRateSelectors, enemyContext, enemyCrossOptions),
+        externalCardIncomeRates: resolveEnemyRateMap(allyLocal.enemyCardIncomeSelectors, enemyContext, enemyCrossOptions),
+        externalTriggerCostChanges: resolveEnemyRateMap(allyLocal.enemyTriggerCostSelectors, enemyContext, enemyCrossOptions),
+        externalPermanentTriggerCostChanges: resolveEnemyRateMap(allyLocal.enemyPermanentTriggerCostSelectors, enemyContext, enemyCrossOptions),
+        resistedEffects: enemyResisted
+      });
+
+      // เอฟเฟกต์ทั้งสนาม เช่น enemyPowerRate ใช้กฎ scope:"field"
+      resolveOutgoingFieldEffects(ally, enemy, `${seed}:ally-field`, "ally-field");
+      resolveOutgoingFieldEffects(enemy, ally, `${seed}:enemy-field`, "enemy-field");
+      return { ally, enemy, transferResults: transfer.results };
     }
 
     // เพิ่มโดยอลิซ: รวมโบนัสเรทกาชาจากทีมโชว์และทีม ARENA ตาม activeIn โดยไม่นับสกิลเดิมซ้ำสองครั้ง
@@ -11816,7 +12517,8 @@
           hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
           blockRate: getAbilityAdjustedCardBlockRate(card, abilitySummary),
           dodgeRate: getAbilityAdjustedCardDodgeRate(card, abilitySummary),
-          damageTakenRate: getAbilityAdjustedCardDamageTakenRate(card, abilitySummary)
+          damageTakenRate: getAbilityAdjustedCardDamageTakenRate(card, abilitySummary),
+          statusResistanceRules: abilityArray(abilitySummary.statusResistanceByCardId && abilitySummary.statusResistanceByCardId[String(id)]).map(rule => ({ ...rule }))
         };
       }).filter(Boolean);
     }
@@ -11842,6 +12544,7 @@
     }
 
     function abilityEffectText(effect) {
+      const effectType = normalizeAbilityEffectType(effect && effect.type);
       const value = Number(effect && effect.value || 0);
       const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).map(rarityDisplayName).join("/") || "ทุกระดับ";
       const elementText = normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).map(elementLabel).join(" + ") || "ทุกธาตุ";
@@ -11874,6 +12577,9 @@
         cardHpRate: `HP ${targetText} ${signedPercent(value)}`,
         cardDefenseRate: `DEF ${targetText} ${signedPercent(value)}`,
         cardIncomeRate: `รายได้ ${targetText} ${signedPercent(value)}`,
+        copyAbilities: `คัดลอกสกิลจาก ${targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.copyRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}`,
+        stealAbilities: `ขโมยสกิลจาก ${targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}`,
+        statusResistance: `ต้านสถานะ ${targetText} ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value), 0))}${String(effect && (effect.scope || "")).toLowerCase() === "field" ? " • ทั้งสนาม" : ""}`,
         nullifyCardAbilities: `ยกเลิกความสามารถ ${targetText}`,
         ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
         nextAttackPowerRate: `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
@@ -11909,7 +12615,7 @@
         attackHits: `จำนวนฮิต ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         teamIncomeFlat: `รายได้ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}/s`
       };
-      return labels[effect && effect.type] || `${effect && effect.type || "effect"}: ${value}`;
+      return labels[effectType] || `${effectType || "effect"}: ${value}`;
     }
 
     function abilityConditionText(condition = {}) {
@@ -12267,7 +12973,8 @@
             hp: Math.max(1, Number(member.hp) || 1),
             blockRate: clampBlockRate(member.blockRate),
             dodgeRate: clampDodgeRate(member.dodgeRate),
-            damageTakenRate: clampDamageTakenRate(member.damageTakenRate)
+            damageTakenRate: clampDamageTakenRate(member.damageTakenRate),
+            statusResistanceRules: abilityArray(member.statusResistanceRules).map(rule => ({ ...rule }))
           })),
           activeTriggers: normalizeTriggers(options[`${prefix}ActiveTriggers`]),
           totalDamage: 0,
@@ -12421,8 +13128,12 @@
           // onOwnAttack เป็นทริกเกอร์ทุกการโจมตี จึงไม่มีคอสให้เพิ่ม/ลด
           if (trigger.onOwnAttack) return;
           let change = Math.round(Number(directChanges && directChanges[String(trigger.sourceCardId || "")] || 0));
-          abilityArray(rules).forEach(rule => {
-            if (triggerMatchesCostRule(trigger, rule)) change += Math.round(Number(rule && rule.value) || 0);
+          abilityArray(rules).forEach((rule, ruleIndex) => {
+            if (!triggerMatchesCostRule(trigger, rule)) return;
+            const member = fighter.members.find(item => String(item.id) === String(trigger.sourceCardId || ""));
+            const effect = { type: normalizeAbilityEffectType(rule && rule.effectType || (permanent ? CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT : CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE)), value: Number(rule && rule.value || 0) };
+            const resistance = shouldAbilityEffectBeResisted(member && member.statusResistanceRules, effect, `${options.statusResolutionSeed || "runtime"}`, `${rule && rule.resistanceKey || "cost"}:${trigger.sourceCardId}:${trigger.activations}:${ruleIndex}`);
+            if (!resistance.resisted) change += Math.round(Number(rule && rule.value) || 0);
           });
           if (!change) return;
           if (permanent) trigger.permanentCostChange = Math.max(-(cap - 1), Math.min(cap - 1, trigger.permanentCostChange + change));
@@ -12448,7 +13159,12 @@
       function applyMemberRateChanges(fighter, field, directChanges = {}, rules = [], clampFn = value => value) {
         fighter.members.forEach(member => {
           let change = Number(directChanges && directChanges[String(member.id || "")] || 0);
-          abilityArray(rules).forEach(rule => { if (memberMatchesRateRule(member, rule)) change += Number(rule && rule.value || 0); });
+          abilityArray(rules).forEach((rule, ruleIndex) => {
+            if (!memberMatchesRateRule(member, rule)) return;
+            const effect = { type: normalizeAbilityEffectType(rule && rule.effectType || field), value: Number(rule && rule.value || 0) };
+            const resistance = shouldAbilityEffectBeResisted(member.statusResistanceRules, effect, `${options.statusResolutionSeed || "runtime"}`, `${rule && rule.resistanceKey || field}:${member.id}:${ruleIndex}`);
+            if (!resistance.resisted) change += Number(rule && rule.value || 0);
+          });
           if (!change) return;
           member[field] = clampFn(Number(member[field] || 0) + change);
         });
@@ -13184,7 +13900,7 @@
           });
         }
         const group = grouped.get(key);
-        switch (effect.type) {
+        switch (normalizeAbilityEffectType(effect.type)) {
           case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE:
           case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE:
           case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
@@ -13228,15 +13944,15 @@
             else group.nextAttackCriticalRate += value;
             break;
           case CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE:
-            if (side === "enemy") group.enemyBlockRateRules.push({ ...getAbilityTargetFilter(effect), value });
+            if (side === "enemy") group.enemyBlockRateRules.push({ ...getAbilityTargetFilter(effect), value, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
             else targetItems.forEach(item => addAbilityMapRate(group.blockRateChanges, [getBattleItemId(item)], value));
             break;
           case CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE:
-            if (side === "enemy") group.enemyDamageTakenRateRules.push({ ...getAbilityTargetFilter(effect), value });
+            if (side === "enemy") group.enemyDamageTakenRateRules.push({ ...getAbilityTargetFilter(effect), value, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
             else targetItems.forEach(item => addAbilityMapRate(group.damageTakenRateChanges, [getBattleItemId(item)], value));
             break;
           case CARD_ABILITY_EFFECT_TYPES.DODGE_RATE:
-            if (side === "enemy") group.enemyDodgeRateRules.push({ ...getAbilityTargetFilter(effect), value });
+            if (side === "enemy") group.enemyDodgeRateRules.push({ ...getAbilityTargetFilter(effect), value, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
             else targetItems.forEach(item => addAbilityMapRate(group.dodgeRateChanges, [getBattleItemId(item)], value));
             break;
           case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE:
@@ -13257,13 +13973,13 @@
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST:
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE: {
             const change = Math.round(value);
-            if (side === "enemy") group.enemyTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change });
+            if (side === "enemy") group.enemyTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
             else targetItems.forEach(item => addAbilityMapRate(group.triggerCostChanges, [getBattleItemId(item)], change));
             break;
           }
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT: {
             const change = Math.round(value);
-            if (side === "enemy") group.enemyPermanentTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change });
+            if (side === "enemy") group.enemyPermanentTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
             else targetItems.forEach(item => addAbilityMapRate(group.permanentTriggerCostChanges, [getBattleItemId(item)], change));
             break;
           }
@@ -13296,15 +14012,15 @@
         attackStackGain: Math.max(0, Math.min(teamPower, Number(item.attackStackGain || 0))),
         maxStacks: Math.max(0, Math.min(20, Math.floor(Number(item.maxStacks || 0)))),
         triggerCostChanges: Object.fromEntries(Object.entries(item.triggerCostChanges || {}).map(([id, change]) => [String(id), Math.round(Number(change) || 0)]).filter(([, change]) => change)),
-        enemyTriggerCostRules: abilityArray(item.enemyTriggerCostRules).map(rule => ({ ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), match: normalizeAbilityTargetMatch(rule && rule.match), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
+        enemyTriggerCostRules: abilityArray(item.enemyTriggerCostRules).map(rule => ({ ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), match: normalizeAbilityTargetMatch(rule && rule.match), value: Math.round(Number(rule && rule.value) || 0), effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE), resistanceKey: String(rule && rule.resistanceKey || "") })).filter(rule => rule.value),
         permanentTriggerCostChanges: Object.fromEntries(Object.entries(item.permanentTriggerCostChanges || {}).map(([id, change]) => [String(id), Math.round(Number(change) || 0)]).filter(([, change]) => change)),
-        enemyPermanentTriggerCostRules: abilityArray(item.enemyPermanentTriggerCostRules).map(rule => ({ ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), match: normalizeAbilityTargetMatch(rule && rule.match), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
+        enemyPermanentTriggerCostRules: abilityArray(item.enemyPermanentTriggerCostRules).map(rule => ({ ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), match: normalizeAbilityTargetMatch(rule && rule.match), value: Math.round(Number(rule && rule.value) || 0), effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT), resistanceKey: String(rule && rule.resistanceKey || "") })).filter(rule => rule.value),
         blockRateChanges: Object.fromEntries(Object.entries(item.blockRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Math.min(1, Number(change) || 0))]).filter(([, change]) => change)),
-        enemyBlockRateRules: abilityArray(item.enemyBlockRateRules).map(rule => ({ ...rule, value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value),
+        enemyBlockRateRules: abilityArray(item.enemyBlockRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value),
         damageTakenRateChanges: Object.fromEntries(Object.entries(item.damageTakenRateChanges || {}).map(([id, change]) => [String(id), clampDamageTakenRate(change)]).filter(([, change]) => change)),
-        enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule, value: clampDamageTakenRate(rule && rule.value) })).filter(rule => rule.value),
+        enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: clampDamageTakenRate(rule && rule.value) })).filter(rule => rule.value),
         dodgeRateChanges: Object.fromEntries(Object.entries(item.dodgeRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Math.min(1, Number(change) || 0))]).filter(([, change]) => change)),
-        enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value)
+        enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DODGE_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value)
       })).filter(item => item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length);
     }
 
@@ -14266,6 +14982,7 @@
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         playerActiveTriggers: stats.playerActiveTriggers,
         enemyActiveTriggers: stats.enemyActiveTriggers,
+        statusResolutionSeed: makeAbilityResolutionSeed("arena", state.arena && state.arena.team || [], stats.enemyTeam && stats.enemyTeam.map(item => item.id) || [], ""),
         playerVariance: () => .91 + Math.random() * .18,
         enemyVariance: () => .91 + Math.random() * .18
       });
@@ -14593,6 +15310,7 @@
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         playerActiveTriggers: stats.activeTriggers,
         enemyActiveTriggers: [],
+        statusResolutionSeed: makeAbilityResolutionSeed("tower", getTowerTeamIds(), [stats.enemyCard && stats.enemyCard.id], ""),
         playerVariance: () => .90 + Math.random() * .20,
         enemyVariance: () => .90 + Math.random() * .20
       });
