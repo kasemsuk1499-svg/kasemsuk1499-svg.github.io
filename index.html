@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-23-copy-steal-resistance-v48">
+  <meta name="gacha-app-build" content="2026-06-24-transfer-lifetime-v49">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -6066,6 +6066,10 @@
       combatMaxBlockRate: 1.00,
       combatMaxDodgeRate: 1.00,
       combatMaxStatusResistanceRate: 1.00,
+      combatMaxCopiedAbilities: 99,
+      combatMaxCopiedAbilityDurationAttacks: 9999,
+      combatMaxCopiedAbilityDurationTurns: 9999,
+      combatMaxCopiedAbilityUses: 9999,
       combatMinDamageTakenRate: -1.00,
       combatMaxDamageTakenRate: 9999
     });
@@ -6613,6 +6617,13 @@
        - recipientSelection + recipientCardIds / recipientElements / recipientRarities ใช้เลือกผู้รับสกิล
        - successRate รองรับ 0.70 หรือ 70 (ระบบแปลงเป็น 70% ให้อัตโนมัติ)
        - includeTransferAbilities:true เมื่อต้องการอนุญาตให้คัดลอกสกิล copy/steal ต่อกัน (ปิดไว้ป้องกันลูป)
+       - targetSide:"both" = สุ่มต้นทางรวมจากฝ่ายตนเองและฝ่ายตรงข้าม
+       - copiedAbilityDurationAttacks = หมดอายุหลังผู้รับโจมตีครบตามจำนวน
+       - copiedAbilityDurationTurns = หมดอายุหลังผ่านจำนวนเทิร์นรวม
+       - copiedAbilityMaxUses = จำกัดจำนวนครั้งที่สกิลคัดลอกเปิดใช้
+       - copiedAbilityExpireOnUse:true = ไม่จำกัดเวลา แต่ใช้สำเร็จครั้งเดียวแล้วหาย ต้องคัดลอกใหม่
+       - replacePreviousCopy:true = คัดลอกใหม่แล้วลบสกิลคัดลอกเดิมของผู้รับ
+       - maxCopiedAbilities = จำนวนสกิลคัดลอกสูงสุดที่ถือพร้อมกัน
 
        คีย์ของ statusResistance
        - value / successRate / resistRate = อัตราต้านสำเร็จ
@@ -7914,6 +7925,39 @@
       {
         "type": "selfPowerRate",
         "value": 0.90
+      }
+    ]
+  },
+     {
+    "name": "อาคมก็อปปี้",
+    "description": "เมื่อโจมตีครบ 10 ครั้ง ยูตะจะสุ่มคัดลอกสกิล 1 สกิลจากการ์ดทั้งสนาม สามารถถือสกิลคัดลอกได้เพียง 1 สกิล สกิลจะคงอยู่โดยไม่จำกัดเวลาและหายทันทีหลังเปิดใช้ จากนั้นจึงเริ่มสะสมการโจมตี 10 ครั้งใหม่",
+    "activeIn": [
+      "tower",
+      "arena"
+    ],
+    "condition": {
+      "maxTeamSize": 4
+    },
+    "effects": [
+      {
+        "type": "copyAbilities",
+        "targetSide": "both",
+        "condition": {
+          "afterOwnAttacks": 9,
+          "repeat": true
+        },
+        "targetSelection": "random",
+        "targetCount": 1,
+        "successRate": 1,
+        "abilitySelection": "random",
+        "abilityCount": 1,
+        "recipientSide": "self",
+        "copiedAbilityMaxUses": 1,
+        "copiedAbilityExpireOnUse": true,
+        "replacePreviousCopy": false,
+        "maxCopiedAbilities": 1,
+        "pauseCopyChargeWhileStocked": true,
+        "resetCopyChargeOnCopiedAbilityExpire": true
       }
     ]
   },
@@ -10851,6 +10895,12 @@
       return "ally";
     }
 
+    function normalizeAbilityTransferSide(value) {
+      const side = String(value || "ally").trim().toLowerCase();
+      if (["both", "either", "all-sides", "สองฝ่าย", "ทั้งสองฝ่าย", "ฝ่ายตนเองหรือฝ่ายตรงข้าม"].includes(side)) return "both";
+      return normalizeAbilityTargetSide(side);
+    }
+
     function normalizeAbilityTargetMatch(value) {
       return String(value || "any").trim().toLowerCase() === "all" ? "all" : "any";
     }
@@ -10979,6 +11029,40 @@
 
     function isStatusResistanceEffect(effect) {
       return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE);
+    }
+
+    function hasAbilityTransferLifetimeControl(effect = {}) {
+      return [
+        "copiedAbilityDurationAttacks", "transferredAbilityDurationAttacks",
+        "copiedAbilityDurationTurns", "transferredAbilityDurationTurns",
+        "copiedAbilityMaxUses", "transferredAbilityMaxUses",
+        "copiedAbilityExpireOnUse", "transferredAbilityExpireOnUse",
+        "replacePreviousCopy", "replacePreviousTransfer",
+        "maxCopiedAbilities", "maxTransferredAbilities"
+      ].some(key => Object.prototype.hasOwnProperty.call(effect || {}, key));
+    }
+
+    function normalizeCopiedAbilityLifetime(effect = {}) {
+      const attackCap = Math.max(1, Math.floor(Number(CONFIG.combatMaxCopiedAbilityDurationAttacks || 9999)));
+      const turnCap = Math.max(1, Math.floor(Number(CONFIG.combatMaxCopiedAbilityDurationTurns || 9999)));
+      const useCap = Math.max(1, Math.floor(Number(CONFIG.combatMaxCopiedAbilityUses || 9999)));
+      const copyCap = Math.max(1, Math.floor(Number(CONFIG.combatMaxCopiedAbilities || 99)));
+      const positiveInt = (value, cap) => {
+        const number = Math.floor(Number(value) || 0);
+        return number > 0 ? Math.min(cap, number) : 0;
+      };
+      const expireOnUse = effect.copiedAbilityExpireOnUse === true || effect.transferredAbilityExpireOnUse === true;
+      const maxUses = expireOnUse
+        ? 1
+        : positiveInt(effect.copiedAbilityMaxUses ?? effect.transferredAbilityMaxUses, useCap);
+      return {
+        durationAttacks: positiveInt(effect.copiedAbilityDurationAttacks ?? effect.transferredAbilityDurationAttacks, attackCap),
+        durationTurns: positiveInt(effect.copiedAbilityDurationTurns ?? effect.transferredAbilityDurationTurns, turnCap),
+        maxUses,
+        expireOnUse,
+        replacePreviousCopy: effect.replacePreviousCopy === true || effect.replacePreviousTransfer === true,
+        maxCopiedAbilities: positiveInt(effect.maxCopiedAbilities ?? effect.maxTransferredAbilities, copyCap)
+      };
     }
 
     function normalizeAbilityChance(value, fallback = 1) {
@@ -11196,7 +11280,9 @@
         _runtimeTransferred: true,
         _runtimeTransferType: String(meta.transferType || "copy"),
         _runtimeTransferredFromCardId: String(meta.donorCardId || ""),
-        _runtimeTransferredFromAbilityKey: String(meta.donorAbilityKey || "")
+        _runtimeTransferredFromAbilityKey: String(meta.donorAbilityKey || ""),
+        _runtimeTransferSourceKey: String(meta.sourceTransferKey || ""),
+        _runtimeTransferLifetime: meta.lifetime && typeof meta.lifetime === "object" ? { ...meta.lifetime } : {}
       };
     }
 
@@ -11277,18 +11363,31 @@
         const effect = record.effect || {};
         const transferType = isStealAbilityEffect(effect) ? "steal" : "copy";
         const sourceCardId = String(record.sourceCard && record.sourceCard.id || "");
-        const targetSideName = normalizeAbilityTargetSide(effect.targetSide) === "enemy"
-          ? oppositeSide.name
-          : sourceSide.name;
-        const donorSide = sides[targetSideName];
-        let donorCards = donorSide.summary.context.cards.filter(card => cardMatchesAbilityTarget(card, effect));
-        if (normalizeAbilityTargetSide(effect.targetSide) === "self") donorCards = donorCards.filter(card => String(card.id) === sourceCardId);
-        if (effect.excludeSelf) donorCards = donorCards.filter(card => String(card.id) !== sourceCardId);
+        const transferTargetSide = normalizeAbilityTransferSide(effect.targetSide);
+        let donorCandidates = [];
+        if (transferTargetSide === "both") {
+          donorCandidates = [
+            ...sourceSide.summary.context.cards.map(card => ({ card, side: sourceSide })),
+            ...oppositeSide.summary.context.cards.map(card => ({ card, side: oppositeSide }))
+          ];
+        } else {
+          const selectedSide = transferTargetSide === "enemy" ? oppositeSide : sourceSide;
+          donorCandidates = selectedSide.summary.context.cards.map(card => ({ card, side: selectedSide }));
+        }
+        donorCandidates = donorCandidates.filter(item => cardMatchesAbilityTarget(item.card, effect));
+        donorCandidates = donorCandidates.filter(item => {
+          const donorId = String(item.card && item.card.id || "");
+          return getCardAbilities(item.card).map((ability, abilityIndex) => ({ ability, abilityIndex, runtimeKey: `${donorId}:${abilityIndex}` }))
+            .filter(entry => !item.side.disabled.has(entry.runtimeKey))
+            .some(entry => abilityEntryCanBeTransferred(entry, effect));
+        });
+        if (transferTargetSide === "self") donorCandidates = donorCandidates.filter(item => item.side.name === sourceSide.name && String(item.card.id) === sourceCardId);
+        if (effect.excludeSelf) donorCandidates = donorCandidates.filter(item => !(item.side.name === sourceSide.name && String(item.card.id) === sourceCardId));
         const hasSpecificDonorFilter = normalizeAbilityCardIds(effect.targetCardIds || effect.cardIds).length > 0
           || normalizeAbilityElements(effect.targetElements || effect.elements).length > 0
           || normalizeAbilityRarities(effect.targetRarities || effect.rarities).length > 0;
         const donorMode = normalizeAbilitySelectionMode(effect.targetSelection, hasSpecificDonorFilter ? "specific" : "random");
-        donorCards = selectAbilityItems(donorCards, donorMode, effect.targetCount || (donorMode === "specific" ? donorCards.length : 1), seed, `${record.key}:donors`);
+        donorCandidates = selectAbilityItems(donorCandidates, donorMode, effect.targetCount || (donorMode === "specific" ? donorCandidates.length : 1), seed, `${record.key}:donors`);
 
         const recipientSideRaw = String(effect.recipientSide || "self").trim().toLowerCase();
         const recipientSideName = ["enemy", "opponent", "foe", "ฝ่ายตรงข้าม"].includes(recipientSideRaw)
@@ -11312,7 +11411,9 @@
         const explicitRate = effect.successRate ?? effect.copyRate ?? effect.stealRate ?? effect.chance ?? effect.rate
           ?? (effect._hasExplicitValue ? effect.value : 1);
         const successRate = normalizeAbilityChance(explicitRate, 1);
-        donorCards.forEach((donorCard, donorIndex) => {
+        donorCandidates.forEach((donorItem, donorIndex) => {
+          const donorCard = donorItem.card;
+          const donorSide = donorItem.side;
           const donorId = String(donorCard.id);
           const donorRules = donorSide.summary.statusResistanceByCardId && donorSide.summary.statusResistanceByCardId[donorId];
           const resistance = shouldAbilityEffectBeResisted(donorRules, effect, seed, `${record.key}:donor-resist:${donorId}:${donorIndex}`);
@@ -11355,7 +11456,9 @@
                   transferType,
                   donorName: donorCard.name,
                   donorCardId: donorId,
-                  donorAbilityKey: entry.runtimeKey
+                  donorAbilityKey: entry.runtimeKey,
+                  sourceTransferKey: String(record.key || ""),
+                  lifetime: normalizeCopiedAbilityLifetime(effect)
                 })
               });
             });
@@ -11973,10 +12076,33 @@
               return;
             }
 
-            // transfer และ status resistance เป็นผลก่อนเริ่มไฟต์ เพื่อให้สกิลที่ได้มาถูกแปลงเป็น Passive/Active ได้ครบชุด
+            // transfer ที่มี Trigger หรือมีการกำหนดอายุ จะทำงานใน battle runtime จริง
+            // ส่วน transfer แบบ Passive ที่ไม่กำหนดอายุยังคง resolve ก่อนเริ่มไฟต์เพื่อรองรับข้อมูลเดิม
             if (isAbilityTransferEffect(record)) {
-              summary.abilityTransferEffects.push({ key: record._runtimeEffectKey, sourceCard, ability, abilityIndex, effectIndex, effect: record, trigger: effectTrigger || null });
-              activeEffects.push({ ...record, preBattleResolved: true });
+              if (effectTrigger || hasAbilityTransferLifetimeControl(record)) {
+                const runtimeTransferTrigger = effectTrigger || {
+                  onBattleStart: true,
+                  onOwnAttack: false,
+                  afterOwnAttacks: 0,
+                  repeat: false,
+                  triggerOn: "battleStart"
+                };
+                summary.triggeredEffects.push({
+                  key: `${runtimeKey}:${effectIndex}`,
+                  triggerKey: `${runtimeKey}:transfer:${effectIndex}:${JSON.stringify(runtimeTransferTrigger)}`,
+                  requiresActivationKey: "",
+                  abilityRuntimeKey: runtimeKey,
+                  sourceCard,
+                  ability,
+                  effect: record,
+                  trigger: runtimeTransferTrigger,
+                  runtimeTransfer: true
+                });
+                activeEffects.push({ ...record, runtimeTriggered: true, runtimeTransfer: true, trigger: runtimeTransferTrigger });
+              } else {
+                summary.abilityTransferEffects.push({ key: record._runtimeEffectKey, sourceCard, ability, abilityIndex, effectIndex, effect: record, trigger: null });
+                activeEffects.push({ ...record, preBattleResolved: true });
+              }
               return;
             }
             if (isStatusResistanceEffect(record)) {
@@ -11992,6 +12118,7 @@
                   ? `${runtimeKey}:persistent:${JSON.stringify(effectTrigger)}`
                   : `${runtimeKey}:${JSON.stringify(effectTrigger)}`,
                 requiresActivationKey: persistentAfterActivation ? parentActivationKey : "",
+                abilityRuntimeKey: runtimeKey,
                 sourceCard,
                 ability,
                 effect: record,
@@ -12514,11 +12641,56 @@
         return {
           id,
           name: String(item && typeof item === "object" && item.name || card.name || `ID ${id}`),
+          power: Math.max(0, getBattleItemStat(item, abilitySummary, "power", snapshotMode)),
           hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
+          defense: Math.max(0, getBattleItemStat(item, abilitySummary, "defense", snapshotMode)),
+          rarity: String(card.rarity || item && item.rarity || "N"),
+          elements: getCardElements(card),
+          level: Math.max(1, Math.floor(Number(item && item.level || getOwned(id) && getOwned(id).level || 1))),
+          awaken: Math.max(0, Math.floor(Number(item && item.awaken || item && item.duplicateRank || getOwned(id) && getOwned(id).duplicateRank || 0))),
           blockRate: getAbilityAdjustedCardBlockRate(card, abilitySummary),
           dodgeRate: getAbilityAdjustedCardDodgeRate(card, abilitySummary),
           damageTakenRate: getAbilityAdjustedCardDamageTakenRate(card, abilitySummary),
           statusResistanceRules: abilityArray(abilitySummary.statusResistanceByCardId && abilitySummary.statusResistanceByCardId[String(id)]).map(rule => ({ ...rule }))
+        };
+      }).filter(Boolean);
+    }
+
+    function buildBattleAbilityRoster(team = [], abilitySummary = {}, snapshotMode = false) {
+      return abilityArray(team).filter(Boolean).map(item => {
+        const id = getBattleItemId(item);
+        const card = getBattleItemCard(item);
+        if (!id || !card) return null;
+        const level = Math.max(1, Math.floor(Number(item && item.level || getOwned(id) && getOwned(id).level || 1)));
+        const awaken = Math.max(0, Math.floor(Number(item && item.awaken || item && item.duplicateRank || getOwned(id) && getOwned(id).duplicateRank || 0)));
+        return {
+          id,
+          name: String(item && typeof item === "object" && item.name || card.name || `ID ${id}`),
+          rarity: String(card.rarity || item && item.rarity || "N"),
+          elements: getCardElements(card),
+          power: Math.max(0, getBattleItemStat(item, abilitySummary, "power", snapshotMode)),
+          hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
+          defense: Math.max(0, getBattleItemStat(item, abilitySummary, "defense", snapshotMode)),
+          level,
+          awaken,
+          card,
+          snapshot: {
+            id,
+            name: String(item && typeof item === "object" && item.name || card.name || `ID ${id}`),
+            rarity: String(card.rarity || item && item.rarity || "N"),
+            elements: getCardElements(card),
+            power: Math.max(0, getBattleItemStat(item, abilitySummary, "power", snapshotMode)),
+            hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
+            defense: Math.max(0, getBattleItemStat(item, abilitySummary, "defense", snapshotMode)),
+            level,
+            awaken
+          },
+          abilities: getCardAbilities(card).map(ability => ({
+            ...ability,
+            activeIn: abilityArray(ability && ability.activeIn).map(String),
+            condition: ability && ability.condition && typeof ability.condition === "object" ? { ...ability.condition } : {},
+            effects: abilityArray(ability && ability.effects).map(effect => effect && typeof effect === "object" ? { ...effect, condition: effect.condition && typeof effect.condition === "object" ? { ...effect.condition } : undefined } : effect)
+          }))
         };
       }).filter(Boolean);
     }
@@ -12577,8 +12749,8 @@
         cardHpRate: `HP ${targetText} ${signedPercent(value)}`,
         cardDefenseRate: `DEF ${targetText} ${signedPercent(value)}`,
         cardIncomeRate: `รายได้ ${targetText} ${signedPercent(value)}`,
-        copyAbilities: `คัดลอกสกิลจาก ${targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.copyRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}`,
-        stealAbilities: `ขโมยสกิลจาก ${targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}`,
+        copyAbilities: `คัดลอกสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.copyRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
+        stealAbilities: `ขโมยสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         statusResistance: `ต้านสถานะ ${targetText} ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value), 0))}${String(effect && (effect.scope || "")).toLowerCase() === "field" ? " • ทั้งสนาม" : ""}`,
         nullifyCardAbilities: `ยกเลิกความสามารถ ${targetText}`,
         ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
@@ -12867,6 +13039,13 @@
       const clampTemporaryCriticalRate = value => Math.max(-1, Math.min(1, Number(value) || 0));
       const clampPendingHits = value => Math.max(-(Number(CONFIG.combatMaxAttackHits || 1) - 1), Math.min(Number(CONFIG.combatMaxAttackHits || 1) - 1, Math.round(Number(value) || 0)));
 
+      function runtimeTriggerMode(item = {}) {
+        const raw = String(item.triggerOn || "").trim().toLowerCase();
+        if (item.onBattleStart || raw === "battlestart" || raw === "battle_start" || raw === "start") return "battleStart";
+        if (item.onOwnAttack || raw === "ownattack") return "ownAttack";
+        return "nextAttack";
+      }
+
       function normalizeTriggers(value) {
         return abilityArray(value).filter(Boolean).map((item, index) => ({
           key: String(item.key || `trigger-${index}`),
@@ -12877,15 +13056,16 @@
           sourceCardRarity: String(item.sourceCardRarity || "N"),
           sourceCardElements: normalizeAbilityElements(item.sourceCardElements).length ? normalizeAbilityElements(item.sourceCardElements) : ["ไร้ธาตุ"],
           cutscene: item.cutscene && typeof item.cutscene === "object" ? { ...item.cutscene } : {},
-          onOwnAttack: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack"),
-          triggerOn: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack") ? "ownAttack" : "nextAttack",
-          baseAfterOwnAttacks: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack")
+          onBattleStart: runtimeTriggerMode(item) === "battleStart",
+          onOwnAttack: runtimeTriggerMode(item) === "ownAttack",
+          triggerOn: runtimeTriggerMode(item),
+          baseAfterOwnAttacks: runtimeTriggerMode(item) !== "nextAttack"
             ? 0
             : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Math.floor(Number(item.baseAfterOwnAttacks ?? item.afterOwnAttacks) || 1))),
           permanentCostChange: Math.round(Number(item.permanentCostChange) || 0),
           cycleCostChange: Math.round(Number(item.cycleCostChange) || 0),
           afterOwnAttacks: 0,
-          repeat: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack") ? true : item.repeat !== false,
+          repeat: runtimeTriggerMode(item) === "ownAttack" ? true : runtimeTriggerMode(item) === "battleStart" ? false : item.repeat !== false,
           attackBonus: Number(item.attackBonus || 0),
           healHp: Math.max(0, Number(item.healHp || 0)),
           extraHits: Math.round(Number(item.extraHits || 0)),
@@ -12913,18 +13093,29 @@
           enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule })),
           dodgeRateChanges: item.dodgeRateChanges && typeof item.dodgeRateChanges === "object" ? { ...item.dodgeRateChanges } : {},
           enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule })),
+          abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} })),
+          copiedInstanceId: String(item.copiedInstanceId || ""),
+          sourceAbilityRuntimeKey: String(item.sourceAbilityRuntimeKey || ""),
+          transferDepth: Math.max(0, Math.floor(Number(item.transferDepth || 0))),
           stacks: 0,
           requiresActivationKey: String(item.requiresActivationKey || ""),
           unlocked: !String(item.requiresActivationKey || ""),
           charge: 0,
-          armed: Boolean(item.onOwnAttack || String(item.triggerOn || "").trim().toLowerCase() === "ownattack"),
+          armed: runtimeTriggerMode(item) !== "nextAttack",
           completed: false,
           activations: 0
         })).map(trigger => {
           const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
           trigger.permanentCostChange = Math.max(-(cap - 1), Math.min(cap - 1, trigger.permanentCostChange));
           trigger.cycleCostChange = Math.max(-(cap - 1), Math.min(cap - 1, trigger.cycleCostChange));
-          if (trigger.onOwnAttack) {
+          if (trigger.onBattleStart) {
+            trigger.baseAfterOwnAttacks = 0;
+            trigger.afterOwnAttacks = 0;
+            trigger.permanentCostChange = 0;
+            trigger.cycleCostChange = 0;
+            trigger.charge = 0;
+            trigger.armed = true;
+          } else if (trigger.onOwnAttack) {
             trigger.baseAfterOwnAttacks = 0;
             trigger.afterOwnAttacks = 0;
             trigger.permanentCostChange = 0;
@@ -12970,13 +13161,33 @@
           members: abilityArray(options[`${prefix}Members`]).filter(Boolean).map(member => ({
             id: String(member.id || ""),
             name: String(member.name || member.id || "Unknown"),
+            power: Math.max(0, Number(member.power) || 0),
             hp: Math.max(1, Number(member.hp) || 1),
+            defense: Math.max(0, Number(member.defense) || 0),
+            rarity: String(member.rarity || "N"),
+            elements: normalizeAbilityElements(member.elements || member.element),
+            level: Math.max(1, Math.floor(Number(member.level) || 1)),
+            awaken: Math.max(0, Math.floor(Number(member.awaken) || 0)),
             blockRate: clampBlockRate(member.blockRate),
             dodgeRate: clampDodgeRate(member.dodgeRate),
             damageTakenRate: clampDamageTakenRate(member.damageTakenRate),
             statusResistanceRules: abilityArray(member.statusResistanceRules).map(rule => ({ ...rule }))
           })),
           activeTriggers: normalizeTriggers(options[`${prefix}ActiveTriggers`]),
+          abilityRoster: abilityArray(options[`${prefix}AbilityRoster`]).filter(Boolean).map(item => ({
+            ...item,
+            id: String(item.id || ""),
+            elements: normalizeAbilityElements(item.elements || item.element),
+            abilities: abilityArray(item.abilities).filter(Boolean).map(ability => ({
+              ...ability,
+              condition: ability && ability.condition && typeof ability.condition === "object" ? { ...ability.condition } : ability && ability.condition,
+              effects: abilityArray(ability && ability.effects).map(effect => effect && typeof effect === "object" ? { ...effect, condition: effect.condition && typeof effect.condition === "object" ? { ...effect.condition } : effect.condition } : effect)
+            }))
+          })),
+          copiedAbilityInstances: [],
+          disabledAbilityKeys: new Set(),
+          copiedTransferEvents: [],
+          attackCount: 0,
           totalDamage: 0,
           totalHealing: 0,
           totalCriticalHits: 0,
@@ -12986,6 +13197,462 @@
           totalDodgedHpRate: 0,
           totalTriggerActivations: 0
         };
+      }
+
+
+      function runtimeRosterItem(fighter, cardId) {
+        return abilityArray(fighter && fighter.abilityRoster).find(item => String(item && item.id || "") === String(cardId || "")) || null;
+      }
+
+      function runtimeMember(fighter, cardId) {
+        return abilityArray(fighter && fighter.members).find(item => String(item && item.id || "") === String(cardId || "")) || null;
+      }
+
+      function runtimeAbilityContext(fighter) {
+        const ids = abilityArray(fighter && fighter.abilityRoster).map(item => String(item && item.id || "")).filter(Boolean);
+        const progressByCardId = {};
+        abilityArray(fighter && fighter.abilityRoster).forEach(item => {
+          const id = String(item && item.id || "");
+          if (!id) return;
+          progressByCardId[id] = {
+            level: Math.max(1, Math.floor(Number(item.level) || 1)),
+            awaken: Math.max(0, Math.floor(Number(item.awaken) || 0))
+          };
+        });
+        return buildAbilityContext(ids, String(options.mode || "arena"), { progressByCardId });
+      }
+
+      function runtimeCardMatches(item, effect = {}) {
+        if (!item) return false;
+        const card = item.card || CARD_BY_ID.get(String(item.id || "")) || {
+          id: item.id,
+          name: item.name,
+          rarity: item.rarity,
+          element: item.elements
+        };
+        return cardMatchesAbilityTarget(card, effect);
+      }
+
+      function runtimeSelectRoster(fighter, effect, sourceCardId, sideMode, seed, key) {
+        let list = abilityArray(fighter && fighter.abilityRoster).filter(item => runtimeCardMatches(item, effect));
+        if (sideMode === "self") list = list.filter(item => String(item.id) === String(sourceCardId));
+        if (effect && effect.excludeSelf) list = list.filter(item => String(item.id) !== String(sourceCardId));
+        const hasFilters = normalizeAbilityCardIds(effect && (effect.targetCardIds || effect.cardIds)).length
+          || normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).length
+          || normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).length;
+        const mode = normalizeAbilitySelectionMode(effect && effect.targetSelection, hasFilters ? "specific" : "random");
+        return selectAbilityItems(list, mode, effect && effect.targetCount || (mode === "specific" ? list.length : 1), seed, key);
+      }
+
+      function runtimeRecipientRoster(sourceFighter, oppositeFighter, effect, sourceCardId, seed, key) {
+        const raw = String(effect && effect.recipientSide || "self").trim().toLowerCase();
+        if (["self", "source", "ตนเอง", "ตัวเอง", ""].includes(raw)) {
+          return { fighter: sourceFighter, opponent: oppositeFighter, items: abilityArray(sourceFighter.abilityRoster).filter(item => String(item.id) === String(sourceCardId)) };
+        }
+        const recipientFighter = ["enemy", "opponent", "foe", "ฝ่ายตรงข้าม"].includes(raw) ? oppositeFighter : sourceFighter;
+        const recipientOpponent = recipientFighter === sourceFighter ? oppositeFighter : sourceFighter;
+        const filter = buildPrefixedAbilityTargetEffect(effect, "recipient");
+        let list = abilityArray(recipientFighter.abilityRoster).filter(item => runtimeCardMatches(item, filter));
+        if (filter.excludeSelf) list = list.filter(item => String(item.id) !== String(sourceCardId));
+        const hasFilters = normalizeAbilityCardIds(filter.targetCardIds).length || normalizeAbilityElements(filter.targetElements).length || normalizeAbilityRarities(filter.targetRarities).length;
+        const mode = normalizeAbilitySelectionMode(effect && effect.recipientSelection, hasFilters ? "specific" : "random");
+        list = selectAbilityItems(list, mode, effect && effect.recipientCount || (mode === "specific" ? list.length : 1), seed, key);
+        return { fighter: recipientFighter, opponent: recipientOpponent, items: list };
+      }
+
+      function runtimeAbilityEntries(fighter, rosterItem, effect = {}) {
+        const cardId = String(rosterItem && rosterItem.id || "");
+        const base = abilityArray(rosterItem && rosterItem.abilities).map((ability, abilityIndex) => ({
+          ability,
+          abilityIndex,
+          runtimeKey: `${cardId}:${abilityIndex}`
+        }));
+        const copied = abilityArray(fighter && fighter.copiedAbilityInstances)
+          .filter(instance => !instance.expired && String(instance.recipientCardId) === cardId)
+          .map((instance, index) => ({ ability: instance.ability, abilityIndex: `copied-${index}`, runtimeKey: String(instance.runtimeAbilityKey || instance.id) }));
+        return [...base, ...copied]
+          .filter(entry => !fighter.disabledAbilityKeys.has(String(entry.runtimeKey)))
+          .filter(entry => abilityEntryCanBeTransferred(entry, effect));
+      }
+
+      function runtimeTargetMembers(fighter, sourceCardId, effect = {}) {
+        const side = normalizeAbilityTargetSide(effect.targetSide);
+        let members = abilityArray(fighter && fighter.members).filter(member => {
+          const roster = runtimeRosterItem(fighter, member.id);
+          return runtimeCardMatches(roster || member, effect);
+        });
+        if (side === "self") members = members.filter(member => String(member.id) === String(sourceCardId));
+        if (effect.excludeSelf) members = members.filter(member => String(member.id) !== String(sourceCardId));
+        return members;
+      }
+
+      function runtimeMemberStatTotal(fighter, members, stat) {
+        const list = abilityArray(members);
+        if (!list.length) return stat === "hp" ? fighter.initialMaxHp : stat === "defense" ? fighter.defense : fighter.initialAttack;
+        return list.reduce((sum, member) => sum + Math.max(0, Number(member && member[stat]) || 0), 0);
+      }
+
+      function pushRuntimeRevert(instance, fn) {
+        if (instance && typeof fn === "function") instance.revertOps.push(fn);
+      }
+
+      function changeRuntimeNumber(target, key, delta, instance, clampFn = value => value) {
+        if (!target || !Number.isFinite(Number(delta)) || !Number(delta)) return 0;
+        const before = Number(target[key]) || 0;
+        const after = clampFn(before + Number(delta));
+        const applied = after - before;
+        target[key] = after;
+        if (applied && instance) pushRuntimeRevert(instance, () => { target[key] = clampFn((Number(target[key]) || 0) - applied); });
+        return applied;
+      }
+
+      function changeRuntimeMaxHp(fighter, delta, instance) {
+        const applied = changeRuntimeNumber(fighter, "maxHp", delta, instance, value => Math.max(1, value));
+        if (applied > 0) fighter.hp += applied;
+        if (applied < 0) fighter.hp = Math.max(1, Math.min(fighter.hp, fighter.maxHp));
+        if (applied && instance) {
+          const originalRevert = instance.revertOps.pop();
+          pushRuntimeRevert(instance, () => {
+            if (originalRevert) originalRevert();
+            fighter.hp = Math.max(1, Math.min(fighter.hp, fighter.maxHp));
+          });
+        }
+        return applied;
+      }
+
+      function applyRuntimePassiveEffect(owner, opponent, sourceCardId, effect = {}, instance = null, direction = 1) {
+        const type = normalizeAbilityEffectType(effect.type);
+        if (!type || isAbilityTransferEffect(effect)) return;
+        const value = Number(effect.value || 0) * Number(direction || 1);
+        const side = normalizeAbilityTargetSide(effect.targetSide);
+        const localTarget = side === "enemy" ? opponent : owner;
+        const localOpponent = localTarget === owner ? opponent : owner;
+        const sourceIdForTarget = localTarget === owner ? sourceCardId : "";
+        const members = runtimeTargetMembers(localTarget, sourceIdForTarget, { ...effect, targetSide: side === "enemy" ? "ally" : effect.targetSide });
+        const powerBase = runtimeMemberStatTotal(localTarget, members, "power");
+        const hpBase = runtimeMemberStatTotal(localTarget, members, "hp");
+        const defenseBase = runtimeMemberStatTotal(localTarget, members, "defense");
+        const weightedRate = localTarget.initialAttack > 0 ? powerBase / localTarget.initialAttack : 1;
+
+        switch (type) {
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE: changeRuntimeNumber(owner, "attack", owner.initialAttack * value, instance, n => Math.max(1, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE: changeRuntimeNumber(opponent, "attack", opponent.initialAttack * value, instance, n => Math.max(1, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.RARITY_POWER_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.ELEMENT_POWER_RATE: changeRuntimeNumber(localTarget, "attack", powerBase * value, instance, n => Math.max(1, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT: changeRuntimeNumber(owner, "attack", value, instance, n => Math.max(1, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_HP_RATE: changeRuntimeMaxHp(owner, owner.initialMaxHp * value, instance); break;
+          case CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE: changeRuntimeMaxHp(opponent, opponent.initialMaxHp * value, instance); break;
+          case CARD_ABILITY_EFFECT_TYPES.SELF_HP_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.RARITY_HP_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.ELEMENT_HP_RATE: changeRuntimeMaxHp(localTarget, hpBase * value, instance); break;
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_HP_FLAT: changeRuntimeMaxHp(owner, value, instance); break;
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_RATE: changeRuntimeNumber(owner, "defense", owner.defense * value, instance, n => Math.max(0, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE: changeRuntimeNumber(opponent, "defense", opponent.defense * value, instance, n => Math.max(0, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.CARD_DEFENSE_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.RARITY_DEFENSE_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.ELEMENT_DEFENSE_RATE: changeRuntimeNumber(localTarget, "defense", defenseBase * value, instance, n => Math.max(0, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_FLAT: changeRuntimeNumber(owner, "defense", value, instance, n => Math.max(0, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS: changeRuntimeNumber(localTarget, "attackHits", Math.round(value), instance, n => applyCombatAttackHitModifier(0, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS: changeRuntimeNumber(localTarget, "shieldHits", Math.round(value), instance, n => applyCombatShieldHitModifier(0, n)); break;
+          case CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS: applyShieldChange(localTarget, Math.round(value)); break;
+          case CARD_ABILITY_EFFECT_TYPES.HEAL_HP_RATE: {
+            const amount = Math.max(0, localTarget.maxHp * value * Math.max(0, 1 + localTarget.healingRate));
+            localTarget.hp = Math.min(localTarget.maxHp, localTarget.hp + amount);
+            localTarget.totalHealing += amount;
+            break;
+          }
+          case CARD_ABILITY_EFFECT_TYPES.HEAL_HP_FLAT: {
+            const amount = Math.max(0, value * Math.max(0, 1 + localTarget.healingRate));
+            localTarget.hp = Math.min(localTarget.maxHp, localTarget.hp + amount);
+            localTarget.totalHealing += amount;
+            break;
+          }
+          case CARD_ABILITY_EFFECT_TYPES.HEALING_RATE: changeRuntimeNumber(localTarget, "healingRate", value, instance, clampRate); break;
+          case CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE: changeRuntimeNumber(localTarget, "shieldRecoveryRate", value, instance, clampRate); break;
+          case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE: changeRuntimeNumber(localTarget, "criticalRate", value * weightedRate, instance, clampCriticalRate); break;
+          case CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.DODGE_RATE:
+          case CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE: {
+            const field = type === CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE ? "blockRate" : type === CARD_ABILITY_EFFECT_TYPES.DODGE_RATE ? "dodgeRate" : "damageTakenRate";
+            const clamp = field === "blockRate" ? clampBlockRate : field === "dodgeRate" ? clampDodgeRate : clampDamageTakenRate;
+            members.forEach(member => changeRuntimeNumber(member, field, value, instance, clamp));
+            break;
+          }
+          case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE: {
+            const rule = makeStatusResistanceRule(effect, {
+              sourceCard: runtimeRosterItem(owner, sourceCardId) && runtimeRosterItem(owner, sourceCardId).card,
+              ability: { name: String(effect._sourceAbilityName || "คัดลอก") },
+              key: String(effect._runtimeEffectKey || "runtime-copy-resistance")
+            });
+            members.forEach(member => {
+              member.statusResistanceRules.push(rule);
+              pushRuntimeRevert(instance, () => {
+                const index = member.statusResistanceRules.indexOf(rule);
+                if (index >= 0) member.statusResistanceRules.splice(index, 1);
+              });
+            });
+            break;
+          }
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST:
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE:
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT: {
+            const permanent = type === CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT;
+            localTarget.activeTriggers.forEach(trigger => {
+              if (!members.some(member => String(member.id) === String(trigger.sourceCardId))) return;
+              const key = permanent ? "permanentCostChange" : "cycleCostChange";
+              const before = Number(trigger[key]) || 0;
+              trigger[key] = before + Math.round(value);
+              if (!trigger.onOwnAttack && !trigger.onBattleStart) trigger.afterOwnAttacks = Math.max(1, trigger.baseAfterOwnAttacks + trigger.permanentCostChange + trigger.cycleCostChange);
+              pushRuntimeRevert(instance, () => {
+                trigger[key] = before;
+                if (!trigger.onOwnAttack && !trigger.onBattleStart) trigger.afterOwnAttacks = Math.max(1, trigger.baseAfterOwnAttacks + trigger.permanentCostChange + trigger.cycleCostChange);
+              });
+            });
+            break;
+          }
+          default:
+            break;
+        }
+      }
+
+      function copiedAbilityConditionRecords(fighter, recipientItem, ability, runtimeAbilityKey, transferEffect) {
+        const mode = String(options.mode || "arena");
+        if (!getAbilityModes(ability).includes(mode)) return { passiveEffects: [], triggeredRecords: [] };
+        const context = runtimeAbilityContext(fighter);
+        const sourceCard = recipientItem.card || CARD_BY_ID.get(String(recipientItem.id || ""));
+        if (!sourceCard) return { passiveEffects: [], triggeredRecords: [] };
+        const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
+        const baseActive = isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard);
+        if (!baseActive) return { passiveEffects: [], triggeredRecords: [] };
+        const passiveEffects = [];
+        const triggeredRecords = [];
+        abilityArray(ability.effects).forEach((rawEffect, effectIndex) => {
+          if (!rawEffect || typeof rawEffect !== "object") return;
+          const effect = { ...rawEffect, type: normalizeAbilityEffectType(rawEffect.type), _sourceCardId: String(sourceCard.id), _sourceAbilityName: String(ability.name || ""), _runtimeEffectKey: `${runtimeAbilityKey}:${effectIndex}` };
+          if (isAbilityTransferEffect(effect) && transferEffect.includeTransferAbilities !== true) return;
+          if (!isAbilityConditionMet(getStaticAbilityCondition(effect.condition || {}), context, sourceCard)) return;
+          const ownTrigger = normalizeBattleTriggerRule(effect.condition || {});
+          const persistentAfterActivation = Boolean(effect.persistentAfterActivation && abilityTrigger);
+          const trigger = persistentAfterActivation ? ownTrigger : (ownTrigger || abilityTrigger);
+          if (trigger) {
+            triggeredRecords.push({
+              key: `${runtimeAbilityKey}:${effectIndex}`,
+              triggerKey: persistentAfterActivation ? `${runtimeAbilityKey}:persistent:${JSON.stringify(trigger)}` : `${runtimeAbilityKey}:${JSON.stringify(trigger)}`,
+              requiresActivationKey: persistentAfterActivation ? `${runtimeAbilityKey}:${JSON.stringify(abilityTrigger)}` : "",
+              abilityRuntimeKey: runtimeAbilityKey,
+              sourceCard,
+              ability,
+              effect,
+              trigger
+            });
+          } else {
+            passiveEffects.push(effect);
+          }
+        });
+        return { passiveEffects, triggeredRecords };
+      }
+
+      function expireCopiedAbilityInstance(fighter, instance, reason = "expired") {
+        if (!fighter || !instance || instance.expired) return;
+        instance.expired = true;
+        abilityArray(instance.revertOps).slice().reverse().forEach(fn => { try { fn(); } catch (error) { console.warn("Copied ability revert failed", error); } });
+        fighter.activeTriggers = fighter.activeTriggers.filter(trigger => String(trigger.copiedInstanceId || "") !== String(instance.id));
+        fighter.copiedAbilityInstances = fighter.copiedAbilityInstances.filter(item => item !== instance);
+        const event = { status: "expired", reason, instanceId: instance.id, abilityName: String(instance.ability && instance.ability.name || ""), recipientCardId: instance.recipientCardId };
+        fighter.copiedTransferEvents.push(event);
+        runtimeTransferEvents.push(event);
+      }
+
+      function compileCopiedAbilityInstance(fighter, opponent, recipientItem, instance, transferEffect) {
+        const runtimeAbilityKey = String(instance.runtimeAbilityKey);
+        const records = copiedAbilityConditionRecords(fighter, recipientItem, instance.ability, runtimeAbilityKey, transferEffect);
+        records.passiveEffects.forEach(effect => applyRuntimePassiveEffect(fighter, opponent, recipientItem.id, effect, instance, 1));
+        if (records.triggeredRecords.length) {
+          const miniSummary = {
+            triggeredEffects: records.triggeredRecords,
+            permanentTriggerCostChanges: {},
+            triggerCostChanges: {}
+          };
+          const teamItems = abilityArray(fighter.abilityRoster).map(item => item.snapshot || item.card || item.id);
+          const configs = buildTeamBattleTriggerConfigs(teamItems, miniSummary, true).map(config => ({
+            ...config,
+            copiedInstanceId: instance.id,
+            sourceAbilityRuntimeKey: runtimeAbilityKey,
+            transferDepth: instance.transferDepth
+          }));
+          const normalized = normalizeTriggers(configs);
+          fighter.activeTriggers.push(...normalized);
+          instance.triggerKeys.push(...normalized.map(trigger => trigger.key));
+          instance.hasActiveTriggers = normalized.length > 0;
+        }
+      }
+
+      function grantRuntimeTransferredAbility(fighter, opponent, recipientItem, ability, meta, transferEffect, turnIndex) {
+        const lifetime = normalizeCopiedAbilityLifetime(transferEffect);
+        const recipientId = String(recipientItem && recipientItem.id || "");
+        if (!recipientId || !ability) return null;
+        if (lifetime.replacePreviousCopy) {
+          abilityArray(fighter.copiedAbilityInstances)
+            .filter(instance => String(instance.recipientCardId) === recipientId)
+            .slice()
+            .forEach(instance => expireCopiedAbilityInstance(fighter, instance, "replaced"));
+        }
+        if (lifetime.maxCopiedAbilities > 0) {
+          let existing = abilityArray(fighter.copiedAbilityInstances).filter(instance => String(instance.recipientCardId) === recipientId && !instance.expired);
+          while (existing.length >= lifetime.maxCopiedAbilities) {
+            expireCopiedAbilityInstance(fighter, existing.shift(), "capacity");
+            existing = abilityArray(fighter.copiedAbilityInstances).filter(instance => String(instance.recipientCardId) === recipientId && !instance.expired);
+          }
+        }
+        const instanceId = `copied:${runtimeTransferEvents.length}:${turnIndex}:${recipientId}:${meta.donorCardId}:${meta.donorAbilityKey}`;
+        const runtimeAbilityKey = `${recipientId}:runtime:${instanceId}`;
+        const cloned = cloneRuntimeAbility(ability, {
+          actionLabel: meta.transferType === "steal" ? "ขโมย" : "คัดลอก",
+          transferType: meta.transferType,
+          donorName: meta.donorName,
+          donorCardId: meta.donorCardId,
+          donorAbilityKey: meta.donorAbilityKey,
+          sourceTransferKey: meta.sourceTransferKey,
+          lifetime
+        });
+        const instance = {
+          id: instanceId,
+          runtimeAbilityKey,
+          recipientCardId: recipientId,
+          donorCardId: String(meta.donorCardId || ""),
+          donorAbilityKey: String(meta.donorAbilityKey || ""),
+          sourceTransferKey: String(meta.sourceTransferKey || ""),
+          transferType: String(meta.transferType || "copy"),
+          transferDepth: Math.max(0, Math.floor(Number(meta.transferDepth || 0))) + 1,
+          ability: cloned,
+          lifetime,
+          uses: 0,
+          attacksElapsed: 0,
+          turnsElapsed: 0,
+          grantedTurnIndex: turnIndex,
+          revertOps: [],
+          triggerKeys: [],
+          hasActiveTriggers: false,
+          expired: false
+        };
+        fighter.copiedAbilityInstances.push(instance);
+        compileCopiedAbilityInstance(fighter, opponent, recipientItem, instance, transferEffect);
+        return instance;
+      }
+
+      function removeStolenOriginalAbility(fighter, opponent, rosterItem, entry, transferEffect) {
+        const runtimeKey = String(entry.runtimeKey || "");
+        fighter.disabledAbilityKeys.add(runtimeKey);
+        fighter.activeTriggers = fighter.activeTriggers.filter(trigger => String(trigger.sourceAbilityRuntimeKey || "") !== runtimeKey);
+        const context = runtimeAbilityContext(fighter);
+        const sourceCard = rosterItem.card || CARD_BY_ID.get(String(rosterItem.id || ""));
+        const ability = entry.ability;
+        if (!sourceCard || !ability || !getAbilityModes(ability).includes(String(options.mode || "arena"))) return;
+        if (!isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard)) return;
+        const parentTrigger = normalizeBattleTriggerRule(ability.condition || {});
+        abilityArray(ability.effects).forEach(rawEffect => {
+          if (!rawEffect || typeof rawEffect !== "object") return;
+          if (normalizeBattleTriggerRule(rawEffect.condition || {}) || parentTrigger) return;
+          if (!isAbilityConditionMet(getStaticAbilityCondition(rawEffect.condition || {}), context, sourceCard)) return;
+          applyRuntimePassiveEffect(fighter, opponent, rosterItem.id, { ...rawEffect, _sourceAbilityName: ability.name }, null, -1);
+        });
+      }
+
+      function processRuntimeAbilityTransfers(sourceFighter, oppositeFighter, transferRecords, turnIndex, actingSide) {
+        const events = [];
+        abilityArray(transferRecords).forEach((record, transferIndex) => {
+          const effect = record && record.effect ? record.effect : record || {};
+          const sourceCardId = String(record && record.sourceCardId || effect._sourceCardId || "");
+          const sourceKey = String(record && record.key || effect._runtimeEffectKey || `runtime-transfer-${transferIndex}`);
+          const targetMode = normalizeAbilityTransferSide(effect.targetSide);
+          let donorPairs = [];
+          if (targetMode === "both") {
+            donorPairs = [
+              ...abilityArray(sourceFighter.abilityRoster).map(item => ({ fighter: sourceFighter, opponent: oppositeFighter, item })),
+              ...abilityArray(oppositeFighter.abilityRoster).map(item => ({ fighter: oppositeFighter, opponent: sourceFighter, item }))
+            ];
+          } else {
+            const donorFighter = targetMode === "enemy" ? oppositeFighter : sourceFighter;
+            const donorOpponent = donorFighter === sourceFighter ? oppositeFighter : sourceFighter;
+            donorPairs = abilityArray(donorFighter.abilityRoster).map(item => ({ fighter: donorFighter, opponent: donorOpponent, item }));
+          }
+          donorPairs = donorPairs.filter(pair => runtimeCardMatches(pair.item, effect));
+          donorPairs = donorPairs.filter(pair => runtimeAbilityEntries(pair.fighter, pair.item, effect).length > 0);
+          if (targetMode === "self") donorPairs = donorPairs.filter(pair => pair.fighter === sourceFighter && String(pair.item.id) === sourceCardId);
+          if (effect.excludeSelf) donorPairs = donorPairs.filter(pair => !(pair.fighter === sourceFighter && String(pair.item.id) === sourceCardId));
+          const donorMode = normalizeAbilitySelectionMode(effect.targetSelection, "random");
+          const seed = `${options.statusResolutionSeed || "runtime"}|${actingSide}|${turnIndex}|${sourceKey}`;
+          donorPairs = selectAbilityItems(donorPairs, donorMode, effect.targetCount || (donorMode === "specific" ? donorPairs.length : 1), seed, `${sourceKey}:donors`);
+          const recipient = runtimeRecipientRoster(sourceFighter, oppositeFighter, effect, sourceCardId, seed, `${sourceKey}:recipients`);
+          const successRate = normalizeAbilityChance(effect.successRate ?? effect.copyRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? 1, 1);
+          donorPairs.forEach((pair, donorIndex) => {
+            const donorId = String(pair.item.id || "");
+            const donorRules = abilityArray(runtimeMember(pair.fighter, donorId) && runtimeMember(pair.fighter, donorId).statusResistanceRules);
+            const resistance = shouldAbilityEffectBeResisted(donorRules, effect, seed, `${sourceKey}:resist:${donorId}:${donorIndex}`);
+            if (resistance.resisted) {
+              events.push({ status: "resisted", transferType: isStealAbilityEffect(effect) ? "steal" : "copy", donorCardId: donorId, sourceCardId, resistanceRate: resistance.rate });
+              return;
+            }
+            const entries = runtimeAbilityEntries(pair.fighter, pair.item, effect);
+            const abilityMode = normalizeAbilitySelectionMode(effect.abilitySelection, "random");
+            const selected = selectAbilityItems(entries, abilityMode, effect.abilityCount || (abilityMode === "specific" ? entries.length : 1), seed, `${sourceKey}:abilities:${donorId}`);
+            selected.forEach((entry, abilityIndex) => {
+              const success = deterministicAbilityRoll(seed, `${sourceKey}:success:${donorId}:${entry.runtimeKey}:${abilityIndex}`) < successRate;
+              if (!success) {
+                events.push({ status: "failed", transferType: isStealAbilityEffect(effect) ? "steal" : "copy", donorCardId: donorId, sourceCardId, abilityName: String(entry.ability && entry.ability.name || ""), successRate });
+                return;
+              }
+              recipient.items.forEach(recipientItem => {
+                const instance = grantRuntimeTransferredAbility(recipient.fighter, recipient.opponent, recipientItem, entry.ability, {
+                  transferType: isStealAbilityEffect(effect) ? "steal" : "copy",
+                  donorName: pair.item.name,
+                  donorCardId: donorId,
+                  donorAbilityKey: entry.runtimeKey,
+                  sourceTransferKey: sourceKey,
+                  transferDepth: Number(record && record.transferDepth || 0)
+                }, effect, turnIndex);
+                if (instance) events.push({ status: "success", transferType: instance.transferType, donorCardId: donorId, recipientCardId: String(recipientItem.id), abilityName: String(entry.ability && entry.ability.name || ""), instanceId: instance.id, lifetime: { ...instance.lifetime } });
+              });
+              if (isStealAbilityEffect(effect)) removeStolenOriginalAbility(pair.fighter, pair.opponent, pair.item, entry, effect);
+            });
+          });
+        });
+        sourceFighter.copiedTransferEvents.push(...events);
+        runtimeTransferEvents.push(...events);
+        return events;
+      }
+
+      function consumeCopiedAbilityUses(fighter, activation) {
+        const used = new Set(abilityArray(activation && activation.fired).map(trigger => String(trigger.copiedInstanceId || "")).filter(Boolean));
+        used.forEach(instanceId => {
+          const instance = abilityArray(fighter.copiedAbilityInstances).find(item => String(item.id) === instanceId);
+          if (!instance || instance.expired) return;
+          instance.uses += 1;
+          if (instance.lifetime.maxUses > 0 && instance.uses >= instance.lifetime.maxUses) expireCopiedAbilityInstance(fighter, instance, "uses");
+        });
+      }
+
+      function ageCopiedAbilityInstances(playerFighter, enemyFighter, attacker, turnIndex) {
+        [playerFighter, enemyFighter].forEach(fighter => {
+          abilityArray(fighter.copiedAbilityInstances).slice().forEach(instance => {
+            if (instance.expired || turnIndex <= instance.grantedTurnIndex) return;
+            if (instance.lifetime.durationTurns > 0) {
+              instance.turnsElapsed += 1;
+              if (instance.turnsElapsed >= instance.lifetime.durationTurns) expireCopiedAbilityInstance(fighter, instance, "turns");
+            }
+          });
+        });
+        attacker.attackCount += 1;
+        abilityArray(attacker.copiedAbilityInstances).slice().forEach(instance => {
+          if (instance.expired || turnIndex <= instance.grantedTurnIndex || instance.lifetime.durationAttacks <= 0) return;
+          instance.attacksElapsed += 1;
+          if (instance.attacksElapsed >= instance.lifetime.durationAttacks) expireCopiedAbilityInstance(attacker, instance, "attacks");
+        });
       }
 
       function prepareTriggerActivation(fighter) {
@@ -13028,6 +13695,8 @@
             enemyDamageTakenRateRules: abilityArray(trigger.enemyDamageTakenRateRules).map(rule => ({ ...rule })),
             dodgeRateChanges: { ...trigger.dodgeRateChanges },
             enemyDodgeRateRules: abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule })),
+            abilityTransfers: abilityArray(trigger.abilityTransfers).map(record => ({ ...record, transferDepth: trigger.transferDepth })),
+            copiedInstanceId: String(trigger.copiedInstanceId || ""),
             currentStacks: trigger.stacks,
             maxStacks: trigger.maxStacks
           })),
@@ -13059,7 +13728,8 @@
           damageTakenRateChanges: fired.reduce((map, trigger) => { Object.entries(trigger.damageTakenRateChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
           enemyDamageTakenRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDamageTakenRateRules).map(rule => ({ ...rule }))),
           dodgeRateChanges: fired.reduce((map, trigger) => { Object.entries(trigger.dodgeRateChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
-          enemyDodgeRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule })))
+          enemyDodgeRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule }))),
+          abilityTransfers: fired.flatMap(trigger => abilityArray(trigger.abilityTransfers).map(record => ({ ...record, transferDepth: trigger.transferDepth })))
         };
       }
 
@@ -13073,6 +13743,12 @@
             if (trigger.attackStackGain > 0 && (!trigger.maxStacks || trigger.stacks < trigger.maxStacks)) {
               trigger.stacks += 1;
               if (trigger.maxStacks && trigger.stacks >= trigger.maxStacks) trigger.completed = true;
+            }
+            if (trigger.onBattleStart) {
+              trigger.charge = 0;
+              trigger.armed = false;
+              trigger.completed = true;
+              return;
             }
             if (trigger.onOwnAttack) {
               const reachedStackLimit = trigger.attackStackGain > 0 && trigger.maxStacks && trigger.stacks >= trigger.maxStacks;
@@ -13089,6 +13765,7 @@
             if (!trigger.repeat) trigger.completed = true;
             return;
           }
+          if (trigger.onBattleStart) return;
           if (trigger.onOwnAttack) {
             trigger.charge = 0;
             trigger.armed = true;
@@ -13206,6 +13883,7 @@
         });
       }
 
+      const runtimeTransferEvents = [];
       const player = makeFighter("player");
       const enemy = makeFighter("enemy");
       const playerVariance = typeof options.playerVariance === "function" ? options.playerVariance : () => 1;
@@ -13221,6 +13899,7 @@
         const defender = actingSide === "player" ? enemy : player;
         const variance = actingSide === "player" ? playerVariance(round, turnIndex) : enemyVariance(round, turnIndex);
         const activation = prepareTriggerActivation(attacker);
+        const transferEvents = processRuntimeAbilityTransfers(attacker, defender, activation.abilityTransfers, turnIndex, actingSide);
 
         attacker.healingRate = clampRate(attacker.healingRate + activation.healingRateChange);
         defender.healingRate = clampRate(defender.healingRate + activation.enemyHealingRateChange);
@@ -13291,6 +13970,7 @@
         if (attackStackGain > 0) attacker.attack += attackStackGain;
 
         finishTriggerCycle(attacker, activation);
+        consumeCopiedAbilityUses(attacker, activation);
         applyActiveSkillCostChanges(attacker, activation.permanentTriggerCostChanges, [], true);
         applyActiveSkillCostChanges(defender, {}, activation.enemyPermanentTriggerCostRules, true);
         applyActiveSkillCostChanges(attacker, activation.triggerCostChanges, [], false);
@@ -13322,6 +14002,7 @@
           triggerActivated: activation.fired.length > 0,
           triggeredSkills: activation.names,
           triggeredDetails,
+          transferEvents,
           attackBonus: activation.attackBonus,
           attackStackGain,
           triggerCostChanges: { ...activation.triggerCostChanges },
@@ -13357,6 +14038,7 @@
           playerShieldRemaining: player.shieldHits,
           enemyShieldRemaining: enemy.shieldHits
         });
+        ageCopiedAbilityInstances(player, enemy, attacker, turnIndex);
 
         if (defender.hp <= 0) break;
         actingSide = actingSide === "player" ? "enemy" : "player";
@@ -13426,7 +14108,10 @@
         playerTotalBlockedDamage: player.totalBlockedDamage,
         enemyTotalBlockedDamage: enemy.totalBlockedDamage,
         playerTriggerActivations: player.totalTriggerActivations,
-        enemyTriggerActivations: enemy.totalTriggerActivations
+        enemyTriggerActivations: enemy.totalTriggerActivations,
+        copiedAbilityEvents: runtimeTransferEvents,
+        playerCopiedAbilitiesRemaining: player.copiedAbilityInstances.map(instance => ({ id: instance.id, abilityName: String(instance.ability && instance.ability.name || ""), recipientCardId: instance.recipientCardId, uses: instance.uses, attacksElapsed: instance.attacksElapsed, turnsElapsed: instance.turnsElapsed, lifetime: { ...instance.lifetime } })),
+        enemyCopiedAbilitiesRemaining: enemy.copiedAbilityInstances.map(instance => ({ id: instance.id, abilityName: String(instance.ability && instance.ability.name || ""), recipientCardId: instance.recipientCardId, uses: instance.uses, attacksElapsed: instance.attacksElapsed, turnsElapsed: instance.turnsElapsed, lifetime: { ...instance.lifetime } }))
       };
     }
 
@@ -13869,6 +14554,8 @@
               : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0))),
             repeat: record.trigger.onOwnAttack ? true : record.trigger.repeat !== false,
             requiresActivationKey: String(record.requiresActivationKey || ""),
+            sourceAbilityRuntimeKey: String(record.abilityRuntimeKey || ""),
+            abilityTransfers: [],
             attackBonus: 0,
             healHp: 0,
             extraHits: 0,
@@ -13983,6 +14670,16 @@
             else targetItems.forEach(item => addAbilityMapRate(group.permanentTriggerCostChanges, [getBattleItemId(item)], change));
             break;
           }
+          case CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES:
+          case CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES:
+            group.abilityTransfers.push({
+              key: String(record.key || record._runtimeEffectKey || ""),
+              sourceCardId: String(record.sourceCard && record.sourceCard.id || effect._sourceCardId || ""),
+              sourceAbilityName: String(record.ability && record.ability.name || effect._sourceAbilityName || ""),
+              sourceAbilityRuntimeKey: String(record.abilityRuntimeKey || ""),
+              effect: { ...effect }
+            });
+            break;
           default:
             console.warn("Effect type is not supported by battle trigger runtime:", effect.type);
         }
@@ -14020,8 +14717,9 @@
         damageTakenRateChanges: Object.fromEntries(Object.entries(item.damageTakenRateChanges || {}).map(([id, change]) => [String(id), clampDamageTakenRate(change)]).filter(([, change]) => change)),
         enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: clampDamageTakenRate(rule && rule.value) })).filter(rule => rule.value),
         dodgeRateChanges: Object.fromEntries(Object.entries(item.dodgeRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Math.min(1, Number(change) || 0))]).filter(([, change]) => change)),
-        enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DODGE_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value)
-      })).filter(item => item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length);
+        enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DODGE_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value),
+        abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} }))
+      })).filter(item => abilityArray(item.abilityTransfers).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length);
     }
 
 
@@ -14882,6 +15580,8 @@
         criticalRate, enemyCriticalRate, playerMembers, enemyMembers,
         playerActiveTriggers: buildTeamBattleTriggerConfigs(teamIds, abilitySummary, false),
         enemyActiveTriggers: buildTeamBattleTriggerConfigs(enemyTeam, enemyAbilitySummary, true),
+        playerAbilityRoster: buildBattleAbilityRoster(teamIds, abilitySummary, false),
+        enemyAbilityRoster: buildBattleAbilityRoster(enemyTeam, enemyAbilitySummary, true),
         playerPreview, enemyPreview, matchup
       };
     }
@@ -14980,8 +15680,11 @@
         enemyMembers: stats.enemyMembers,
         playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
+        mode: "arena",
         playerActiveTriggers: stats.playerActiveTriggers,
         enemyActiveTriggers: stats.enemyActiveTriggers,
+        playerAbilityRoster: stats.playerAbilityRoster,
+        enemyAbilityRoster: stats.enemyAbilityRoster,
         statusResolutionSeed: makeAbilityResolutionSeed("arena", state.arena && state.arena.team || [], stats.enemyTeam && stats.enemyTeam.map(item => item.id) || [], ""),
         playerVariance: () => .91 + Math.random() * .18,
         enemyVariance: () => .91 + Math.random() * .18
@@ -15264,6 +15967,8 @@
         attackHits, shieldHits, healingRate, shieldRecoveryRate,
         enemyAttackHits, enemyShieldHits, enemyHealingRate, enemyShieldRecoveryRate,
         activeTriggers: buildTeamBattleTriggerConfigs(towerTeam, abilitySummary, false),
+        playerAbilityRoster: buildBattleAbilityRoster(towerTeam, abilitySummary, false),
+        enemyAbilityRoster: buildBattleAbilityRoster([enemyCard], getTeamAbilitySummary([], "tower"), true),
         playerPreview, enemyPreview,
         gemReward: 15000 + stage * 5000,
         dustReward: 1000 + stage * 750,
@@ -15308,8 +16013,11 @@
         enemyMembers: stats.enemyMembers,
         playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
+        mode: "tower",
         playerActiveTriggers: stats.activeTriggers,
         enemyActiveTriggers: [],
+        playerAbilityRoster: stats.playerAbilityRoster,
+        enemyAbilityRoster: stats.enemyAbilityRoster,
         statusResolutionSeed: makeAbilityResolutionSeed("tower", getTowerTeamIds(), [stats.enemyCard && stats.enemyCard.id], ""),
         playerVariance: () => .90 + Math.random() * .20,
         enemyVariance: () => .90 + Math.random() * .20
