@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-24-transfer-lifetime-v49">
+  <meta name="gacha-app-build" content="2026-06-24-cristal-dust-ai-v51">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -162,6 +162,7 @@
     }
 
     .resource.gems strong { color: var(--cyan); }
+    .resource.cristal strong { color: #f0abfc; text-shadow: 0 0 16px rgba(240,171,252,.30); }
     .resource.dust strong { color: var(--gold); }
     .resource.owned strong { color: var(--green); }
 
@@ -344,7 +345,7 @@
       background: rgba(255,209,102,.075);
     }
 
-    /* เพิ่มโดยอลิซ: ปุ่มเทหน้าตักจะคำนวณจำนวนสูงสุดจาก Gems ปัจจุบัน */
+    /* เพิ่มโดยอลิซ: ปุ่มเทหน้าตักจะคำนวณจำนวนสูงสุดจาก Cristal ปัจจุบัน */
     .btn-all-in {
       border-color: rgba(244,114,182,.38);
       background: linear-gradient(135deg, rgba(88,28,135,.86), rgba(190,24,93,.72));
@@ -398,6 +399,35 @@
 
     .mini-card p { margin: 6px 0 12px; color: var(--muted); font-size: .86rem; line-height: 1.55; }
     .mini-card .btn { width: 100%; }
+
+    /* เพิ่มโดยอลิซ v50: ศูนย์แลก Gems เป็น Cristal / Dust */
+    .exchange-center {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .exchange-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .exchange-row .field { min-width: 0; width: 100%; }
+    .exchange-row .btn { width: auto; min-width: 118px; }
+    .exchange-status {
+      display: grid;
+      gap: 4px;
+      padding: 9px 10px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: .68rem;
+      line-height: 1.5;
+      background: rgba(3,5,12,.30);
+    }
+    .exchange-status strong { color: var(--gold); }
+    .exchange-status .cristal-note { color: #f0abfc; }
+
     .progress-line {
       height: 7px;
       margin-top: 10px;
@@ -4613,6 +4643,7 @@
 
     /* สีตัวเลขสำคัญบนกล่องพื้นขาว */
     .topbar .resource.gems strong { color: #087b9f; }
+    .topbar .resource.cristal strong { color: #9d3bb5; }
     .topbar .resource.dust strong { color: #8a5a00; }
     .topbar .resource.owned strong { color: #13724a; }
     .banner .guarantee-copy span,
@@ -5294,7 +5325,8 @@
         </span>
       </button>
       <div class="resource-bar" aria-label="ทรัพยากรผู้เล่น">
-        <div class="resource gems"><span>Gems</span><strong id="gemsText">0</strong></div>
+        <div class="resource gems"><span>Gems / เงิน</span><strong id="gemsText">0</strong></div>
+        <div class="resource cristal"><span>Cristal</span><strong id="crystalsText">0</strong></div>
         <div class="resource dust"><span>Dust</span><strong id="dustText">0</strong></div>
         <div class="resource owned"><span>Items</span><strong id="ticketsText">0</strong></div>
         <div class="resource owned"><span>Collection</span><strong id="ownedText">0/0</strong></div>
@@ -5316,18 +5348,18 @@
             <div class="rates" id="ratePills"></div>
             <div class="summon-actions">
               <button class="btn btn-primary" data-action="pull" data-times="1">
-                เปิด 1 ใบ <span class="cost" id="singleCost">0 Gems</span>
+                เปิด 1 ใบ <span class="cost" id="singleCost">3 Cristal</span>
               </button>
               <button class="btn btn-gold" data-action="pull" data-times="10">
-                เปิด 10 ใบ <span class="cost" id="tenCost">0 Gems</span>
+                เปิด 10 ใบ <span class="cost" id="tenCost">30 Cristal</span>
               </button>
               <button class="btn" data-action="pull" data-times="50" title="เปิดแบบเร็วอัตโนมัติ">
-                เปิด 50 ใบ <span class="cost" id="fiftyCost">0 Gems</span>
+                เปิด 50 ใบ <span class="cost" id="fiftyCost">150 Cristal</span>
               </button>
               <button class="btn" data-action="pull" data-times="100" title="เปิดแบบเร็วอัตโนมัติ">
-                เปิด 100 ใบ <span class="cost" id="hundredCost">0 Gems</span>
+                เปิด 100 ใบ <span class="cost" id="hundredCost">300 Cristal</span>
               </button>
-              <button class="btn btn-all-in" data-action="pull-all-in" id="allInPullButton" title="ใช้ Gems ที่มีเพื่อเปิดจำนวนสูงสุด และสรุปผลแบบเร็ว">
+              <button class="btn btn-all-in" data-action="pull-all-in" id="allInPullButton" title="ใช้ Cristal ที่มีเปิดต่อเนื่องจนหมด โดยรอคัทซีนจบก่อนเปิดต่อ">
                 เทหน้าตัก <span class="cost" id="allInCost">กำลังคำนวณ...</span>
               </button>
               <select class="field" id="bannerSelect" aria-label="เลือกตู้กาชา"></select>
@@ -5375,6 +5407,24 @@
             <strong>รายได้จากทีมโชว์</strong>
             <p>การ์ดในทีมจะสะสม Gems แม้ระหว่างที่ไม่ได้กดเปิดแพ็ก</p>
             <button class="btn btn-gold" data-action="claim-income">รับ <span id="bankText">0</span> Gems</button>
+          </div>
+          <div class="mini-card">
+            <strong>💱 ศูนย์แลกสกุลเงิน</strong>
+            <p>Gems เป็นเงินหลัก ต้องแลกเป็น Cristal เพื่อเปิดกาชา หรือแลกเป็น Dust เพื่ออัปเลเวล</p>
+            <div class="exchange-center">
+              <div class="exchange-row">
+                <input class="field" id="crystalExchangeAmount" type="number" min="1" step="1" value="1" aria-label="จำนวน Cristal ที่ต้องการแลก">
+                <button class="btn btn-primary" data-action="exchange-cristal">แลก Cristal</button>
+              </div>
+              <div class="exchange-row">
+                <input class="field" id="dustExchangeGemAmount" type="number" min="10" step="10" value="1000000" aria-label="จำนวน Gems ที่ต้องการใช้แลก Dust">
+                <button class="btn btn-gold" data-action="exchange-dust">แลก Dust</button>
+              </div>
+              <div class="exchange-status" id="currencyExchangeStatus">
+                <span class="cristal-note">1 Cristal = 1,000,000 Gems • เปิด 1 ครั้งใช้ 3 Cristal</span>
+                <span>Dust: 10 Gems = 1 Dust • ไม่จำกัดจำนวนแลก</span>
+              </div>
+            </div>
           </div>
           <div class="side-stats">
             <div class="side-stat"><span>Income / sec</span><strong id="incomeText">0</strong></div>
@@ -6005,7 +6055,15 @@
       oldActiveUserKey: "simple_gacha_active_user_v5_stable",
       oldBannerKey: "simple_gacha_active_banner_v5_stable",
       startingGems: 250000,
+      startingCrystals: 0,
       startingDust: 300,
+      // เพิ่มโดยอลิซ v50: Gems เป็นเงินหลัก แลกสกุลก่อนใช้งาน
+      crystalGemCost: 1000000,
+      crystalDailyLimit: 3000000,
+      gachaCrystalCostPerPull: 3,
+      // แก้โดยอลิซ v51: ผู้เล่นยืนยันอัตราแลก Dust โดยคำนึงถึงรายได้ของ EX ที่สูงกว่า SC
+      // ใช้ 10 Gems แลก 1 Dust และไม่จำกัดจำนวนแลกต่อวัน
+      dustGemCost: 2,
       starterSRSelector: 1,
       starterTeamSize: 5,
       dailyGems: 250000,
@@ -6352,8 +6410,8 @@
     "images": [
       "assets/banners/KONOSUBAban.mp4"
     ],
-    "singlePullCost": 30000,
-    "tenPullCost": 300000,
+    "singlePullCost": 3,
+    "tenPullCost": 30,
     "rateOverrides": {
       "N": 50.99,
       "R": 25.3,
@@ -6368,7 +6426,7 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 50000,
+      "every": 100000,
       "rarityRates": {
         "LR": 99.9,
         "SC": 0.09,
@@ -6389,8 +6447,8 @@
     "images": [
       "assets/banners/ST1.mp4"
     ],
-    "singlePullCost": 20000,
-    "tenPullCost": 200000,
+    "singlePullCost": 3,
+    "tenPullCost": 30,
     "rateOverrides": {
       "N": 55,
       "R": 30.84,
@@ -6404,7 +6462,7 @@
     "rateUpCards": {},
     "guarantee": {
       "enabled": true,
-      "every": 30000,
+      "every": 10000,
       "rarityRates": {
         "UR": 80.19,
         "LR": 19.8,
@@ -6426,8 +6484,8 @@
     "images": [
       "assets/banners/LR1.mp4"
     ],
-    "singlePullCost": 30000,
-    "tenPullCost": 300000,
+    "singlePullCost": 3,
+    "tenPullCost": 30,
     "rateOverrides": {
       "N": 50.99,
       "R": 25.3,
@@ -6442,7 +6500,7 @@
     },
     "guarantee": {
       "enabled": true,
-      "every": 50000,
+      "every": 100000,
       "rarityRates": {
         "LR": 99.9,
         "SC": 0.09,
@@ -9816,9 +9874,14 @@
     function defaultState() {
       const starter = makeStarterLoadout();
       return {
-        version: 2,
+        version: 3,
         gems: CONFIG.startingGems,
+        crystals: CONFIG.startingCrystals,
         dust: CONFIG.startingDust,
+        currencyExchange: {
+          date: "",
+          crystalsExchanged: 0
+        },
         incomeBank: 0,
         lastIncomeAt: Date.now(),
         lastDaily: "",
@@ -10440,7 +10503,15 @@
       if (raw && raw.lastDailyRewardDate && !raw.lastDaily) next.lastDaily = raw.lastDailyRewardDate;
       if (raw && raw.gachaGuaranteeCounters && !raw.pity) next.pity = raw.gachaGuaranteeCounters;
       next.gems = Math.max(0, Number(next.gems) || 0);
+      next.crystals = Math.max(0, Math.floor(Number(next.crystals) || 0));
       next.dust = Math.max(0, Number(next.dust) || 0);
+      next.currencyExchange = Object.assign(defaultState().currencyExchange, next.currencyExchange || {});
+      next.currencyExchange.date = String(next.currencyExchange.date || "");
+      // ย้ายเซฟ v50: crystalGemSpent เคยเก็บ Gems ที่ใช้แลก จึงแปลงกลับเป็นจำนวน Cristal ที่แลกแล้ว
+      const legacyCrystalGemSpent = Math.max(0, Math.floor(Number(next.currencyExchange.crystalGemSpent) || 0));
+      const migratedCrystalCount = Math.floor(legacyCrystalGemSpent / Math.max(1, Math.floor(Number(CONFIG.crystalGemCost) || 1)));
+      next.currencyExchange.crystalsExchanged = Math.max(0, Math.floor(Number(next.currencyExchange.crystalsExchanged) || migratedCrystalCount));
+      delete next.currencyExchange.crystalGemSpent;
       next.incomeBank = Math.max(0, Number(next.incomeBank) || 0);
       next.lastIncomeAt = Number(next.lastIncomeAt) || Date.now();
       next.firstLoginRewards = Object.assign(defaultState().firstLoginRewards, next.firstLoginRewards || {});
@@ -15377,8 +15448,9 @@
           hp: Math.max(1, Math.floor(aiHp / slotCount * variance)),
           defense: Math.max(0, Math.floor(aiDefense / slotCount * variance)),
           elements: getCardElements(card),
-          level: 1,
-          awaken: 0
+          // AI ใช้เงื่อนไขความสามารถเต็มรูปแบบ แต่ค่าสเตตัสยังถูกสเกลให้ใกล้ผู้เล่น
+          level: getCardMaxLevel(card),
+          awaken: getCardAwakenMax(card)
         };
       });
       const rawSnapshotAttack = Math.max(1, cards.reduce((sum, item) => sum + Number(item.power || 0), 0));
@@ -15506,10 +15578,8 @@
       const summary = getArenaTeamSummary();
       const enemy = opponent || null;
       const enemyTeam = enemy && Array.isArray(enemy.arenaTeam) ? enemy.arenaTeam : [];
-      // AI ใช้ค่าสเตตัสที่ปรับจากพลังรวมโดยตรง เพื่อไม่ให้สกิลสุ่มทำให้หลุดช่วงพลังที่จับคู่ไว้
-      const enemyTeamIds = String(enemy && enemy.type || "") === "ai"
-        ? []
-        : enemyTeam.map(item => String(item && item.id || "")).filter(id => CARD_BY_ID.has(id));
+      // เพิ่มโดยอลิซ v50: ทั้งผู้เล่นจริงและ AI ใช้ความสามารถของการ์ดครบทุกใบ
+      const enemyTeamIds = enemyTeam.map(item => String(item && item.id || "")).filter(id => CARD_BY_ID.has(id));
       const paired = enemyTeamIds.length
         ? getPairedAbilitySummaries(teamIds, enemyTeamIds, "arena", {}, { progressByCardId: snapshotProgressByCardId(enemyTeam) })
         : { ally: getTeamAbilitySummary(teamIds, "arena"), enemy: getTeamAbilitySummary([], "arena") };
@@ -15893,7 +15963,21 @@
       updateBattleEnergy();
       const stage = Math.max(1, Number(state.battle.stage) || 1);
       const towerTeam = getTowerTeamIds();
-      const abilitySummary = getTeamAbilitySummary(towerTeam, "tower");
+      const enemyCard = getBattleEnemyCard(stage);
+      const enemyId = enemyCard ? String(enemyCard.id) : "";
+      const enemyProgressByCardId = enemyId ? {
+        [enemyId]: {
+          level: getCardMaxLevel(enemyCard),
+          duplicateRank: getCardAwakenMax(enemyCard),
+          awaken: getCardAwakenMax(enemyCard)
+        }
+      } : {};
+      // เพิ่มโดยอลิซ v50: ประมวลผลสกิลสองฝั่งพร้อมกัน เพื่อให้ AI หอใช้ Passive / Active / ต้าน / copy / steal ได้จริง
+      const paired = enemyId
+        ? getPairedAbilitySummaries(towerTeam, [enemyId], "tower", {}, { progressByCardId: enemyProgressByCardId })
+        : { ally: getTeamAbilitySummary(towerTeam, "tower"), enemy: getTeamAbilitySummary([], "tower") };
+      const abilitySummary = paired.ally;
+      const enemyAbilitySummary = paired.enemy;
       const basePower = getRawTeamPower(towerTeam, "tower", abilitySummary) + abilitySummary.teamPowerFlat;
       const baseHp = getRawTeamHp(towerTeam, "tower", abilitySummary) + abilitySummary.teamHpFlat;
       const baseDefense = getRawTeamDefense(towerTeam, "tower", abilitySummary) + abilitySummary.teamDefenseFlat;
@@ -15920,44 +16004,60 @@
       const supportPower = Math.min(rawSupportPower, supportPowerCapBase * CONFIG.friendSupportCapRate);
       const supportHp = Math.min(rawSupportHp, supportHpCapBase * CONFIG.friendSupportCapRate);
       const supportDefense = Math.min(rawSupportDefense, supportDefenseCapBase * CONFIG.friendSupportCapRate);
-      const enemyCard = getBattleEnemyCard(stage);
       const enemyElement = getCardElements(enemyCard);
       const matchup = getElementMatchup(elementSummary.dominantElement, enemyElement);
       const towerRestriction = getTowerRestriction(stage);
       const restrictionStatus = getTeamRestrictionStatus(towerRestriction, towerTeam);
       const preElementPower = basePower + formationPower + abilityPower + supportPower;
       const elementPower = preElementPower * matchup.modifier;
-      const effectiveAttack = Math.max(0, preElementPower + elementPower);
-      const effectiveHp = Math.max(1, baseHp + abilityHp + supportHp);
-      const effectiveDefense = Math.max(0, baseDefense + abilityDefense + supportDefense);
+      const effectiveAttack = Math.max(0, (preElementPower + elementPower) * (1 + enemyAbilitySummary.enemyPowerRate));
+      const effectiveHp = Math.max(1, (baseHp + abilityHp + supportHp) * (1 + enemyAbilitySummary.enemyHpRate));
+      const effectiveDefense = Math.max(0, (baseDefense + abilityDefense + supportDefense) * (1 + enemyAbilitySummary.enemyDefenseRate));
+
       const enemyBase = getTowerEnemyPower(stage);
-      const enemyAttack = Math.max(1, enemyBase * (1 + abilitySummary.enemyPowerRate));
-      // ค่า DEF เดิมของศัตรูถูกย้ายมาเป็น HP ส่วน DEF ใหม่ใช้หักล้าง ATK โดยตรง
       const enemyHpRatio = Math.min(.78, .56 + Math.floor((stage - 1) / 100) * .025);
       const enemyDefenseRatio = Math.min(.48, .26 + Math.floor((stage - 1) / 100) * .018);
-      const enemyHp = Math.max(1, enemyBase * enemyHpRatio * (1 + abilitySummary.enemyHpRate));
-      const enemyDefense = Math.max(0, enemyBase * enemyDefenseRatio * (1 + abilitySummary.enemyDefenseRate));
-      const attackHits = getCombatAttackHits(abilitySummary);
-      const shieldHits = getCombatShieldHits(abilitySummary);
-      const healingRate = getCombatHealingRate(abilitySummary);
-      const shieldRecoveryRate = getCombatShieldRecoveryRate(abilitySummary);
-      const enemyAttackHits = applyCombatAttackHitModifier(1 + Math.min(3, Math.floor((stage - 1) / 100)), abilitySummary.enemyAttackHits);
-      const enemyShieldHits = applyCombatShieldHitModifier(Math.min(3, Math.floor((stage - 1) / 150)), abilitySummary.enemyShieldHits);
-      const enemyHealingRate = getCombatHealingRate({}, abilitySummary.enemyHealingRate);
-      const enemyShieldRecoveryRate = getCombatShieldRecoveryRate({}, abilitySummary.enemyShieldRecoveryRate);
+      const enemyRawAttack = enemyBase + enemyAbilitySummary.teamPowerFlat;
+      const enemyRawHp = enemyBase * enemyHpRatio + enemyAbilitySummary.teamHpFlat;
+      const enemyRawDefense = enemyBase * enemyDefenseRatio + enemyAbilitySummary.teamDefenseFlat;
+      const enemyAttack = Math.max(1, enemyRawAttack * (1 + enemyAbilitySummary.teamPowerRate) * (1 + abilitySummary.enemyPowerRate));
+      const enemyHp = Math.max(1, enemyRawHp * (1 + enemyAbilitySummary.teamHpRate) * (1 + abilitySummary.enemyHpRate));
+      const enemyDefense = Math.max(0, enemyRawDefense * (1 + enemyAbilitySummary.teamDefenseRate) * (1 + abilitySummary.enemyDefenseRate));
+
+      const attackHits = getCombatAttackHits(abilitySummary, enemyAbilitySummary.enemyAttackHits);
+      const shieldHits = getCombatShieldHits(abilitySummary, enemyAbilitySummary.enemyShieldHits);
+      const healingRate = getCombatHealingRate(abilitySummary, enemyAbilitySummary.enemyHealingRate);
+      const shieldRecoveryRate = getCombatShieldRecoveryRate(abilitySummary, enemyAbilitySummary.enemyShieldRecoveryRate);
+      const enemyStageAttackHits = 1 + Math.min(3, Math.floor((stage - 1) / 100));
+      const enemyStageShieldHits = Math.min(3, Math.floor((stage - 1) / 150));
+      const enemyAttackHits = applyCombatAttackHitModifier(Math.max(enemyStageAttackHits, getCombatAttackHits(enemyAbilitySummary)), abilitySummary.enemyAttackHits);
+      const enemyShieldHits = applyCombatShieldHitModifier(Math.max(enemyStageShieldHits, getCombatShieldHits(enemyAbilitySummary)), abilitySummary.enemyShieldHits);
+      const enemyHealingRate = getCombatHealingRate(enemyAbilitySummary, abilitySummary.enemyHealingRate);
+      const enemyShieldRecoveryRate = getCombatShieldRecoveryRate(enemyAbilitySummary, abilitySummary.enemyShieldRecoveryRate);
       const criticalRate = getTeamCriticalRate(towerTeam, abilitySummary, false);
-      const enemyCriticalSummary = getEnemyTargetCriticalSummary(abilitySummary.enemyCriticalRateSelectors, [enemyCard], "tower");
-      const enemyDefensiveSummary = getEnemyTargetDefensiveSummary(abilitySummary, [enemyCard], "tower");
-      const enemyCriticalRate = getTeamCriticalRate([enemyCard], enemyCriticalSummary, false);
+      const enemyCriticalRate = getTeamCriticalRate([enemyCard], enemyAbilitySummary, true);
       const playerMembers = buildBattleDefenseMembers(towerTeam, abilitySummary, false);
-      const enemyMembers = buildBattleDefenseMembers([enemyCard], enemyDefensiveSummary, false);
+      const enemySnapshot = enemyCard ? {
+        id: enemyId,
+        name: enemyCard.name,
+        rarity: enemyCard.rarity,
+        elements: getCardElements(enemyCard),
+        power: enemyAttack,
+        hp: enemyHp,
+        defense: enemyDefense,
+        level: getCardMaxLevel(enemyCard),
+        awaken: getCardAwakenMax(enemyCard)
+      } : null;
+      const enemyTeam = enemySnapshot ? [enemySnapshot] : [];
+      const enemyMembers = buildBattleDefenseMembers(enemyTeam, enemyAbilitySummary, true);
+      if (enemyCard && !enemyMembers.length) enemyMembers.push({ id: enemyId, name: enemyCard.name, hp: enemyHp, blockRate: 0, dodgeRate: 0, damageTakenRate: 0 });
       const playerPreview = resolveCombatExchange(effectiveAttack, enemyDefense, attackHits, enemyShieldHits, 1);
       const enemyPreview = resolveCombatExchange(enemyAttack, effectiveDefense, enemyAttackHits, shieldHits, 1);
       const totalCombatPower = calculateCombatPower(effectiveAttack, effectiveHp, effectiveDefense, attackHits, shieldHits);
       const enemyCombatPower = calculateCombatPower(enemyAttack, enemyHp, enemyDefense, enemyAttackHits, enemyShieldHits);
       return {
-        stage, basePower, baseAttack: basePower, baseHp, baseDefense, abilitySummary, elementSummary,
-        dominantElement: elementSummary.dominantElement, enemyCard, enemyElement, matchup,
+        stage, basePower, baseAttack: basePower, baseHp, baseDefense, abilitySummary, enemyAbilitySummary, elementSummary,
+        dominantElement: elementSummary.dominantElement, enemyCard, enemyTeam, enemyElement, matchup,
         formationRate, formationPower, abilityPowerRate, abilityPower,
         abilityHpRate, abilityHp, abilityDefenseRate, abilityDefense, criticalRate, enemyCriticalRate, playerMembers, enemyMembers,
         support, supportCard, supportSourcePower, supportSourceHp, supportSourceDefense, supportPower, supportHp, supportDefense,
@@ -15967,8 +16067,9 @@
         attackHits, shieldHits, healingRate, shieldRecoveryRate,
         enemyAttackHits, enemyShieldHits, enemyHealingRate, enemyShieldRecoveryRate,
         activeTriggers: buildTeamBattleTriggerConfigs(towerTeam, abilitySummary, false),
+        enemyActiveTriggers: buildTeamBattleTriggerConfigs(enemyTeam, enemyAbilitySummary, true),
         playerAbilityRoster: buildBattleAbilityRoster(towerTeam, abilitySummary, false),
-        enemyAbilityRoster: buildBattleAbilityRoster([enemyCard], getTeamAbilitySummary([], "tower"), true),
+        enemyAbilityRoster: buildBattleAbilityRoster(enemyTeam, enemyAbilitySummary, true),
         playerPreview, enemyPreview,
         gemReward: 15000 + stage * 5000,
         dustReward: 1000 + stage * 750,
@@ -16015,7 +16116,7 @@
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         mode: "tower",
         playerActiveTriggers: stats.activeTriggers,
-        enemyActiveTriggers: [],
+        enemyActiveTriggers: stats.enemyActiveTriggers,
         playerAbilityRoster: stats.playerAbilityRoster,
         enemyAbilityRoster: stats.enemyAbilityRoster,
         statusResolutionSeed: makeAbilityResolutionSeed("tower", getTowerTeamIds(), [stats.enemyCard && stats.enemyCard.id], ""),
@@ -16389,31 +16490,17 @@
     }
 
     function getPullCost(times) {
-      const banner = getActiveBanner();
       const count = Math.max(1, Math.floor(Number(times) || 1));
-      const tenSets = Math.floor(count / 10);
-      const singles = count % 10;
-      return (tenSets * Number(banner.tenPullCost || 0)) + (singles * Number(banner.singlePullCost || 0));
+      return count * Math.max(1, Math.floor(Number(CONFIG.gachaCrystalCostPerPull) || 3));
     }
 
-    // เพิ่มโดยอลิซ: คำนวณจำนวนเปิดสูงสุด โดยเลือกแพ็ค x10 เมื่อคุ้มกว่าการเปิดเดี่ยว
-    function getAllInPullPlan(gems = state.gems, banner = getActiveBanner()) {
-      const available = Math.max(0, Math.floor(Number(gems) || 0));
-      const singleCost = Math.floor(Number(banner && banner.singlePullCost) || 0);
-      const tenCost = Math.floor(Number(banner && banner.tenPullCost) || 0);
-      if (available <= 0 || singleCost <= 0 || tenCost <= 0) return { count: 0, cost: 0, remaining: available };
-
-      let count = 0;
-      if (tenCost <= singleCost * 10) {
-        const tenSets = Math.floor(available / tenCost);
-        const remainder = available - (tenSets * tenCost);
-        count = (tenSets * 10) + Math.min(9, Math.floor(remainder / singleCost));
-      } else {
-        count = Math.floor(available / singleCost);
-      }
-
-      const cost = count > 0 ? getPullCost(count) : 0;
-      return { count, cost, remaining: Math.max(0, available - cost) };
+    // เพิ่มโดยอลิซ v50: เทหน้าตักคำนวณจาก Cristal เท่านั้น
+    function getAllInPullPlan(crystals = state.crystals) {
+      const available = Math.max(0, Math.floor(Number(crystals) || 0));
+      const perPull = Math.max(1, Math.floor(Number(CONFIG.gachaCrystalCostPerPull) || 3));
+      const count = Math.floor(available / perPull);
+      const cost = count * perPull;
+      return { count, cost, remaining: Math.max(0, available - cost), perPull };
     }
 
     function renderAllInButton() {
@@ -16429,8 +16516,8 @@
       costText.textContent = allInPullBusy
         ? "กำลังเปิดและประมวลผล..."
         : plan.count > 0
-          ? `${formatNumber(plan.count)} ใบ • ${formatNumber(plan.cost)} Gems`
-          : "Gems ไม่พอ";
+          ? `${formatNumber(plan.count)} ใบ • ${formatNumber(plan.cost)} Cristal`
+          : "Cristal ไม่พอ";
     }
 
     // เพิ่มโดยอลิซ: หลังเปิดกาชาให้วาดเฉพาะส่วนที่เปลี่ยนจริง ไม่ renderAll() ทั้งเว็บ จึงเปิดได้ไวขึ้นมาก
@@ -16645,9 +16732,9 @@
       updateIncome();
       const count = Math.max(1, Math.floor(Number(times) || 1));
       const cost = getPullCost(count);
-      if (state.gems < cost) return showToast("Gems ไม่พอ รับโบนัสรายวันหรือรายได้จากทีมก่อน");
+      if (state.crystals < cost) return showToast(`Cristal ไม่พอ • ต้องใช้ ${formatNumber(cost)} Cristal (เปิด 1 ครั้งใช้ ${CONFIG.gachaCrystalCostPerPull} Cristal)`);
 
-      state.gems -= cost;
+      state.crystals -= cost;
       const results = pullCards(count);
       state.recent = results.slice(0, CONFIG.recentPullLimit).map(result => String(result.card.id));
       saveState(true);
@@ -16658,69 +16745,71 @@
       presentPullResults(results, useFastSummary);
     }
 
-    // เพิ่มโดยอลิซ: เทหน้าตักแบบแบ่งประมวลผลเป็นชุด ลดโอกาสหน้าเว็บค้างเมื่อ Gems เยอะ
-    // อัปเดต: เมื่อสุ่มพบ SC จะหยุดทันที ไม่สุ่ม/ไม่หัก Gems ของใบที่เหลือ และเริ่มคัทซีน SC
+    // เพิ่มโดยอลิซ v50: เทหน้าตักใช้ Cristal และเปิดต่อจน Cristal หมด
+    // เมื่อพบ SC จะหยุดคิวสุ่มชั่วคราว เล่นคัทซีนให้จบก่อน แล้วจึงเปิดต่อ
+    // หากผู้เล่นกดข้าม finishSCCutscene() จะ resolve ทันทีและคิวจะไหลต่อทันที
+    function playSCCutsceneAsync(results = [], totalSC = 0) {
+      return new Promise(resolve => {
+        if (!playSCCutscene(results, resolve, totalSC)) resolve();
+      });
+    }
+
     async function openAllInPack() {
       if (allInPullBusy) return;
       updateIncome();
       const plan = getAllInPullPlan();
-      if (plan.count < 1 || plan.cost < 1) return showToast("Gems ไม่พอสำหรับเปิดกาชา");
+      if (plan.count < 1 || plan.cost < 1) return showToast(`Cristal ไม่พอ • เปิด 1 ครั้งใช้ ${CONFIG.gachaCrystalCostPerPull} Cristal`);
 
       allInPullBusy = true;
       renderAllInButton();
       const stats = createPullSummaryStats();
       const recentIds = [];
-      const scResults = [];
       let remaining = plan.count;
       let processed = 0;
-      let stoppedOnSC = false;
+      let scCutsceneCount = 0;
 
       try {
-        while (remaining > 0 && !stoppedOnSC) {
+        while (remaining > 0) {
           const chunkSize = Math.min(250, remaining);
-
-          // pullCards จะตัดลูปภายในก้อนทันทีที่เจอ SC จึงไม่มีผลสุ่มใบอื่นแอบตามหลัง SC
+          // ตัดก้อนทันทีเมื่อเจอ SC เพื่อไม่ให้ระบบสุ่มใบถัดไประหว่างคัทซีน
           const chunkResults = pullCards(chunkSize, { stopOnRarity: "SC" });
           const actualPulled = chunkResults.length;
           if (actualPulled < 1) break;
 
-          // หักเฉพาะจำนวนที่สุ่มจริง ใบที่ยังไม่ถูกสุ่มหลังเจอ SC จะไม่เสีย Gems
-          state.gems -= getPullCost(actualPulled);
+          const actualCost = getPullCost(actualPulled);
+          if (state.crystals < actualCost) break;
+          state.crystals -= actualCost;
           addPullResultsToSummary(stats, chunkResults);
 
           for (const result of chunkResults) {
             if (recentIds.length < CONFIG.recentPullLimit) recentIds.push(String(result.card.id));
-            if (result.card && result.card.rarity === "SC") {
-              scResults.push(result);
-              stoppedOnSC = true;
-              break;
-            }
           }
 
           remaining = Math.max(0, remaining - actualPulled);
           processed += actualPulled;
+          state.recent = recentIds;
+          saveState(true);
+          renderAfterPull();
+
+          const scResult = chunkResults.find(result => result && result.card && result.card.rarity === "SC");
           const progressText = document.getElementById("allInCost");
-          if (progressText) {
-            progressText.textContent = stoppedOnSC
-              ? `พบ ${rarityDisplayName("SC")} ที่ใบ ${formatNumber(processed)} • หยุดสุ่มแล้ว`
-              : `เปิดแล้ว ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
+          if (scResult) {
+            scCutsceneCount += 1;
+            if (progressText) progressText.textContent = `พบ ${rarityDisplayName("SC")} ใบที่ ${formatNumber(processed)} • รอคัทซีนจบแล้วจะเปิดต่อ ${formatNumber(remaining)} ใบ`;
+            await playSCCutsceneAsync([scResult], 1);
+            if (progressText && remaining > 0) progressText.textContent = `คัทซีนจบ • กำลังเปิดต่อ ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
+          } else if (progressText) {
+            progressText.textContent = `เปิดแล้ว ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
           }
 
-          if (remaining > 0 && !stoppedOnSC) await new Promise(resolve => requestAnimationFrame(resolve));
+          if (remaining > 0) await new Promise(resolve => requestAnimationFrame(resolve));
         }
 
         state.recent = recentIds;
         saveState(true);
         renderAfterPull();
-
-        const baseSummary = summarizePullStats(stats);
-        const summary = stoppedOnSC
-          ? `${baseSummary} • หยุดอัตโนมัติเมื่อพบ ${rarityDisplayName("SC")} • Gems คงเหลือ ${formatNumber(state.gems)}`
-          : baseSummary;
-        const finish = () => showToast(summary);
-
-        // หลังหยุดลูปแล้วจึงเล่นคัทซีนทันที โดยมี SC เพียงใบที่เป็นจุดหยุดเท่านั้น
-        if (!playSCCutscene(scResults, finish, scResults.length)) finish();
+        const extra = scCutsceneCount > 0 ? ` • เล่นคัทซีน SC ${formatNumber(scCutsceneCount)} ครั้ง` : "";
+        showToast(`${summarizePullStats(stats)}${extra} • Cristal คงเหลือ ${formatNumber(state.crystals)}`);
       } catch (error) {
         console.error("All-in summon failed", error);
         state.recent = recentIds;
@@ -16736,6 +16825,100 @@
     function getLocalDateKey() {
       const date = new Date();
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function getCurrencyExchangeState() {
+      const today = getLocalDateKey();
+      if (!state.currencyExchange || typeof state.currencyExchange !== "object") {
+        state.currencyExchange = { date: today, crystalsExchanged: 0 };
+      }
+      if (String(state.currencyExchange.date || "") !== today) {
+        state.currencyExchange.date = today;
+        state.currencyExchange.crystalsExchanged = 0;
+      }
+      // รองรับเซฟ v50 ที่ยังมี crystalGemSpent หลงเหลืออยู่
+      if (!Number.isFinite(Number(state.currencyExchange.crystalsExchanged)) && Number.isFinite(Number(state.currencyExchange.crystalGemSpent))) {
+        state.currencyExchange.crystalsExchanged = Math.floor(
+          Math.max(0, Number(state.currencyExchange.crystalGemSpent) || 0) / Math.max(1, Math.floor(Number(CONFIG.crystalGemCost) || 1))
+        );
+      }
+      state.currencyExchange.crystalsExchanged = Math.max(0, Math.floor(Number(state.currencyExchange.crystalsExchanged) || 0));
+      delete state.currencyExchange.crystalGemSpent;
+      return state.currencyExchange;
+    }
+
+    function getCrystalExchangeRemaining() {
+      const exchange = getCurrencyExchangeState();
+      const maxCrystals = Math.max(0, Math.floor(Number(CONFIG.crystalDailyLimit) || 0));
+      const exchangedCrystals = Math.max(0, Math.floor(Number(exchange.crystalsExchanged) || 0));
+      return {
+        remainingCrystals: Math.max(0, maxCrystals - exchangedCrystals),
+        exchangedCrystals,
+        maxCrystals
+      };
+    }
+
+    function getRarityMaxLevelDustCost(rarityKey = "SC") {
+      const rarity = RARITIES[String(rarityKey || "SC").toUpperCase()] || RARITIES.SC;
+      const maxLevel = Math.max(1, Math.floor(Number(rarity.maxLevel) || 1));
+      const base = Math.max(0, Number(rarity.upgradeDustBase) || 0);
+      const growth = Math.max(1, Number(rarity.upgradeDustGrowth) || 1);
+      let total = 0;
+      for (let level = 1; level < maxLevel; level += 1) total += Math.ceil(base * Math.pow(growth, level - 1));
+      return total;
+    }
+
+    function exchangeGemsForCristal() {
+      updateIncome();
+      const input = document.getElementById("crystalExchangeAmount");
+      const requested = Math.max(1, Math.floor(Number(input && input.value) || 1));
+      const remaining = getCrystalExchangeRemaining();
+      const amount = Math.min(requested, remaining.remainingCrystals);
+      if (amount < 1) return showToast("วันนี้แลก Cristal ครบลิมิตแล้ว • รีเซ็ตหลังเที่ยงคืน");
+      const gemCost = amount * Math.max(1, Math.floor(Number(CONFIG.crystalGemCost) || 1));
+      if (state.gems < gemCost) return showToast(`Gems ไม่พอ • ต้องใช้ ${formatNumber(gemCost)} Gems เพื่อแลก ${formatNumber(amount)} Cristal`);
+      state.gems -= gemCost;
+      state.crystals += amount;
+      const exchange = getCurrencyExchangeState();
+      exchange.crystalsExchanged += amount;
+      saveState(true);
+      renderAll();
+      showToast(`แลก ${formatNumber(amount)} Cristal สำเร็จ • ใช้ ${formatNumber(gemCost)} Gems`);
+    }
+
+    function exchangeGemsForDust() {
+      updateIncome();
+      const input = document.getElementById("dustExchangeGemAmount");
+      const gemCostPerDust = Math.max(1, Math.floor(Number(CONFIG.dustGemCost) || 10));
+      const requestedGems = Math.max(0, Math.floor(Number(input && input.value) || 0));
+      const dust = Math.floor(requestedGems / gemCostPerDust);
+      if (dust < 1) return showToast(`ต้องใช้ขั้นต่ำ ${formatNumber(gemCostPerDust)} Gems เพื่อแลก 1 Dust`);
+      const gemsUsed = dust * gemCostPerDust;
+      if (state.gems < gemsUsed) return showToast(`Gems ไม่พอ • ต้องใช้ ${formatNumber(gemsUsed)} Gems`);
+      state.gems -= gemsUsed;
+      state.dust += dust;
+      if (input) input.value = String(gemsUsed);
+      saveState(true);
+      renderAll();
+      showToast(`แลก ${formatNumber(gemsUsed)} Gems เป็น ${formatNumber(dust)} Dust สำเร็จ`);
+    }
+
+    function renderCurrencyExchange() {
+      const info = getCrystalExchangeRemaining();
+      const status = document.getElementById("currencyExchangeStatus");
+      const crystalInput = document.getElementById("crystalExchangeAmount");
+      const dustInput = document.getElementById("dustExchangeGemAmount");
+      const scCost = getRarityMaxLevelDustCost("SC");
+      const exCost = getRarityMaxLevelDustCost("EX");
+      if (crystalInput) {
+        crystalInput.max = String(Math.max(1, info.remainingCrystals));
+        if (Number(crystalInput.value) > info.remainingCrystals && info.remainingCrystals > 0) crystalInput.value = String(info.remainingCrystals);
+      }
+      if (dustInput) dustInput.max = String(Math.max(1, Math.floor(Number(state.gems) || 0)));
+      if (status) status.innerHTML = `
+        <span class="cristal-note">1 Cristal = ${formatNumber(CONFIG.crystalGemCost)} Gems • วันนี้แลกได้อีก <strong>${formatNumber(info.remainingCrystals)}</strong>/${formatNumber(info.maxCrystals)} Cristal</span>
+        <span>กาชา 1 ครั้ง = ${formatNumber(CONFIG.gachaCrystalCostPerPull)} Cristal • Dust: ${formatNumber(CONFIG.dustGemCost)} Gems = 1 Dust (ไม่จำกัด)</span>
+        <span>ต้นทุนอัปเต็มโดยประมาณ: SC <strong>${formatNumber(scCost)} Dust</strong> • EX <strong>${formatNumber(exCost)} Dust</strong> (EX มีรายได้สูงกว่า SC)</span>`;
     }
 
     function claimDaily() {
@@ -17081,12 +17264,12 @@
       document.getElementById("bannerMedia").innerHTML = mediaHTML;
       document.getElementById("bannerTitle").textContent = banner.name;
       document.getElementById("bannerDescription").textContent = banner.description || "เปิดแพ็กเพื่อสะสมการ์ดและสร้างทีมที่แข็งแกร่งที่สุด";
-      document.getElementById("singleCost").textContent = `${formatNumber(getPullCost(1))} Gems`;
-      document.getElementById("tenCost").textContent = `${formatNumber(getPullCost(10))} Gems`;
+      document.getElementById("singleCost").textContent = `${formatNumber(getPullCost(1))} Cristal`;
+      document.getElementById("tenCost").textContent = `${formatNumber(getPullCost(10))} Cristal`;
       const fiftyCost = document.getElementById("fiftyCost");
       const hundredCost = document.getElementById("hundredCost");
-      if (fiftyCost) fiftyCost.textContent = `${formatNumber(getPullCost(50))} Gems`;
-      if (hundredCost) hundredCost.textContent = `${formatNumber(getPullCost(100))} Gems`;
+      if (fiftyCost) fiftyCost.textContent = `${formatNumber(getPullCost(50))} Cristal`;
+      if (hundredCost) hundredCost.textContent = `${formatNumber(getPullCost(100))} Cristal`;
       renderGuaranteeStatus();
       const effectiveRateInfo = getEffectiveBannerRates(banner);
       const ratePills = Object.entries(effectiveRateInfo.percentages)
@@ -17136,7 +17319,10 @@
       const todayClaimed = state.lastDaily === getLocalDateKey();
 
       document.getElementById("gemsText").textContent = formatNumber(state.gems);
+      const crystalsText = document.getElementById("crystalsText");
+      if (crystalsText) crystalsText.textContent = formatNumber(state.crystals);
       document.getElementById("dustText").textContent = formatNumber(state.dust);
+      renderCurrencyExchange();
       renderAllInButton();
       document.getElementById("ticketsText").textContent = formatNumber(getTotalTicketCount());
       document.getElementById("ownedText").textContent = `${uniqueOwned}/${CARDS.length}`;
@@ -19427,6 +19613,8 @@
       if (action === "next-bgm") nextBGMTrack();
       if (action === "open-update-rewards") openUpdateNotice(true, "rewards");
       if (action === "claim-income") claimIncome();
+      if (action === "exchange-cristal") exchangeGemsForCristal();
+      if (action === "exchange-dust") exchangeGemsForDust();
       if (action === "open-card") openCardModal(cardId);
       if (action === "open-picker-card-detail") openCardModal(cardId);
       if (action === "switch-card-detail-tab") {
