@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-24-cristal-income-clock-v52">
+  <meta name="gacha-app-build" content="2026-06-24-daily-monthly-rewards-v53">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -3240,6 +3240,63 @@
     .login-reward-section > p { margin: 0 0 12px; color: var(--muted); font-size: .78rem; line-height: 1.55; }
     .login-reward-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
     .login-reward-status span { color: #cbd5e1; font-size: .74rem; line-height: 1.45; }
+
+    /* เพิ่มโดยอลิซ v53: ภารกิจรายวันและล็อกอินเสาร์ประจำเดือน */
+    .daily-mission-grid,
+    .monthly-saturday-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+      margin-top: 10px;
+    }
+    .daily-mission-item,
+    .monthly-saturday-item {
+      min-width: 0;
+      padding: 11px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 15px;
+      background: rgba(3,5,12,.34);
+    }
+    .daily-mission-item strong,
+    .monthly-saturday-item strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #f8fafc;
+      font-size: .76rem;
+      line-height: 1.35;
+    }
+    .daily-mission-item span,
+    .monthly-saturday-item span {
+      display: block;
+      color: var(--muted);
+      font-size: .66rem;
+      line-height: 1.5;
+    }
+    .daily-mission-item.complete {
+      border-color: rgba(86,227,159,.38);
+      background: rgba(5,150,105,.10);
+    }
+    .daily-mission-item.complete strong { color: #bbf7d0; }
+    .monthly-saturday-item.claimed {
+      border-color: rgba(86,227,159,.40);
+      background: linear-gradient(135deg, rgba(86,227,159,.18), rgba(92,232,255,.08));
+    }
+    .monthly-saturday-item.available {
+      border-color: rgba(255,209,102,.55);
+      box-shadow: 0 0 20px rgba(255,209,102,.10);
+    }
+    .monthly-saturday-item.locked { opacity: .58; }
+    .monthly-saturday-item .reward-name { color: var(--gold); font-weight: 1000; }
+    .reward-total-note {
+      margin-top: 10px;
+      padding: 9px 10px;
+      border: 1px solid rgba(240,171,252,.22);
+      border-radius: 12px;
+      color: #f5d0fe;
+      font-size: .7rem;
+      line-height: 1.5;
+      background: rgba(126,34,206,.08);
+    }
     .new-player-complete { padding: 18px; border: 1px solid rgba(86,227,159,.28); border-radius: 18px; color: var(--green); text-align: center; background: rgba(22,163,74,.10); }
     .selector-item-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); max-height: 66vh; overflow: auto; padding: 2px; }
     .selector-item-grid .game-card { cursor: default; }
@@ -3280,6 +3337,7 @@
       .selector-item-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .login-reward-status { align-items: stretch; flex-direction: column; }
       .login-reward-status .btn { width: 100%; }
+      .daily-mission-grid, .monthly-saturday-grid { grid-template-columns: 1fr; }
     }
 
     .toast {
@@ -5938,6 +5996,25 @@
         </section>
         <section class="notice-page login-reward-page hidden" id="noticeRewardPage">
           <div class="login-reward-section">
+            <h3>✅ ภารกิจรายวัน — รวม 300 Cristal</h3>
+            <p>ภารกิจทั้งหมดทำได้แน่นอนจากระบบพื้นฐาน ไม่มีเงื่อนไขชนะ และไม่ต้องใช้ Cristal เพื่อทำภารกิจ</p>
+            <div class="daily-mission-grid" id="dailyMissionGrid"></div>
+            <div class="reward-total-note">ทำครบทั้ง 3 ภารกิจ รับ <strong>300 Cristal</strong> ต่อวัน • รีเซ็ตหลังเที่ยงคืน</div>
+            <div class="login-reward-status">
+              <span id="dailyMissionStatus">กำลังตรวจสอบ...</span>
+              <button class="btn btn-primary" id="dailyMissionClaimButton" data-action="claim-daily-missions">รับ 300 Cristal</button>
+            </div>
+          </div>
+          <div class="login-reward-section">
+            <h3>🗓️ รางวัลล็อกอินรายเดือน — เสาร์พิเศษ</h3>
+            <p>รางวัลปลดล็อกตามวันเสาร์ที่ 1–5 ของเดือน และรับย้อนหลังได้ภายในเดือนเดียวกัน เดือนที่มีเสาร์ 5 ครั้งจะได้ใบเลือก EX เพิ่ม</p>
+            <div class="monthly-saturday-grid" id="monthlySaturdayRewardGrid"></div>
+            <div class="login-reward-status">
+              <span id="monthlySaturdayStatus">กำลังตรวจสอบ...</span>
+              <button class="btn btn-gold" id="monthlySaturdayClaimButton" data-action="claim-monthly-saturday">รับรางวัลเสาร์ประจำเดือน</button>
+            </div>
+          </div>
+          <div class="login-reward-section">
             <h3>☀️ โบนัสล็อกอินประจำวัน</h3>
             <p>รับได้ทุกวันหลังเที่ยงคืน รางวัลนี้แยกจากกิจกรรมผู้เล่นใหม่ 7 วัน</p>
             <div class="login-reward-status">
@@ -6141,6 +6218,23 @@
       { day: 5, type: "selector", rarity: "LR", amount: 2 },
       { day: 6, type: "selector", rarity: "LR", amount: 2 },
       { day: 7, type: "selector", rarity: "EX", amount: 1 }
+    ]);
+
+    // เพิ่มโดยอลิซ v53: ทุกภารกิจทำได้ด้วยระบบพื้นฐาน ไม่บังคับใช้ Cristal หรือชนะการต่อสู้
+    const DAILY_MISSION_REWARD_CRISTALS = 300;
+    const DAILY_MISSIONS = Object.freeze([
+      { id: "login", title: "เข้าเกมวันนี้", description: "ล็อกอินเข้าเกม 1 ครั้ง", target: 1 },
+      { id: "income", title: "รับรายได้สะสม", description: "กดรับรายได้จากทีม 1 ครั้ง", target: 1 },
+      { id: "collection", title: "เยี่ยมชมคลังการ์ด", description: "เปิดหน้าคอลเล็กชั่น 1 ครั้ง", target: 1 }
+    ]);
+
+    // ปลดล็อกตามลำดับวันเสาร์ของเดือน รับย้อนหลังได้จนถึงวันสุดท้ายของเดือน
+    const MONTHLY_SATURDAY_REWARDS = Object.freeze([
+      { week: 1, type: "selector", rarity: "UR", amount: 5, label: "ใบเลือก UR x5" },
+      { week: 2, type: "guarantee", rarity: "LR", amount: 5, label: "ใบสุ่ม LR x5" },
+      { week: 3, type: "guarantee", rarity: "SC", amount: 3, label: "ใบสุ่ม SC x3" },
+      { week: 4, type: "selector", rarity: "SC", amount: 1, label: "ใบเลือก SC x1" },
+      { week: 5, type: "selector", rarity: "EX", amount: 1, label: "ใบเลือก EX x1" }
     ]);
 
     /*
@@ -9895,6 +9989,15 @@
           lastClaimDate: "",
           completed: false
         },
+        dailyMissions: {
+          date: "",
+          progress: { login: 0, income: 0, collection: 0 },
+          claimed: false
+        },
+        monthlyLogin: {
+          month: "",
+          claimedSaturdayWeeks: []
+        },
         activeBannerId: BANNERS[0] ? BANNERS[0].id : "",
         owned: starter.owned,
         // เพิ่มโดยอลิซ: เก็บลำดับครั้งแรกที่ได้การ์ด เพื่อใช้ปุ่ม “เรียงตามลำดับการได้”
@@ -10616,6 +10719,33 @@
       next.arena.weekKey = String(next.arena.weekKey || getArenaWeekKey());
       next.arena.rewardedWeeks = next.arena.rewardedWeeks && typeof next.arena.rewardedWeeks === "object" ? next.arena.rewardedWeeks : {};
       next.arena.lastWeeklyReward = next.arena.lastWeeklyReward || null;
+
+      // เพิ่มโดยอลิซ v53: รีเซ็ตภารกิจตามวันที่จริงและนับล็อกอินเป็นภารกิจแรกอัตโนมัติ
+      const todayKey = getLocalDateKey();
+      const monthKey = todayKey.slice(0, 7);
+      next.dailyMissions = Object.assign(defaultState().dailyMissions, next.dailyMissions || {});
+      next.dailyMissions.progress = Object.assign({ login: 0, income: 0, collection: 0 }, next.dailyMissions.progress || {});
+      if (String(next.dailyMissions.date || "") !== todayKey) {
+        next.dailyMissions.date = todayKey;
+        next.dailyMissions.progress = { login: 1, income: 0, collection: 0 };
+        next.dailyMissions.claimed = false;
+      } else {
+        next.dailyMissions.progress.login = 1;
+        DAILY_MISSIONS.forEach(mission => {
+          next.dailyMissions.progress[mission.id] = Math.max(0, Math.min(mission.target, Math.floor(Number(next.dailyMissions.progress[mission.id]) || 0)));
+        });
+        next.dailyMissions.claimed = Boolean(next.dailyMissions.claimed);
+      }
+
+      next.monthlyLogin = Object.assign(defaultState().monthlyLogin, next.monthlyLogin || {});
+      if (String(next.monthlyLogin.month || "") !== monthKey) {
+        next.monthlyLogin.month = monthKey;
+        next.monthlyLogin.claimedSaturdayWeeks = [];
+      }
+      next.monthlyLogin.claimedSaturdayWeeks = [...new Set((Array.isArray(next.monthlyLogin.claimedSaturdayWeeks) ? next.monthlyLogin.claimedSaturdayWeeks : [])
+        .map(value => Math.floor(Number(value) || 0))
+        .filter(value => value >= 1 && value <= 5))];
+
       if (!BANNER_BY_ID.has(next.activeBannerId)) next.activeBannerId = BANNERS[0] ? BANNERS[0].id : "";
       return next;
     }
@@ -16864,6 +16994,185 @@
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     }
 
+    function getLocalMonthKey(date = new Date()) {
+      const value = date instanceof Date ? date : new Date(date);
+      return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function getSaturdaysInMonth(date = new Date()) {
+      const value = date instanceof Date ? date : new Date(date);
+      const year = value.getFullYear();
+      const month = value.getMonth();
+      const rows = [];
+      const cursor = new Date(year, month, 1);
+      while (cursor.getMonth() === month) {
+        if (cursor.getDay() === 6) rows.push(new Date(year, month, cursor.getDate()));
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      return rows;
+    }
+
+    function formatShortThaiDate(date) {
+      return new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short" }).format(date);
+    }
+
+    function ensureDailyMissionState() {
+      const today = getLocalDateKey();
+      if (!state.dailyMissions || typeof state.dailyMissions !== "object" || String(state.dailyMissions.date || "") !== today) {
+        state.dailyMissions = { date: today, progress: { login: 1, income: 0, collection: 0 }, claimed: false };
+      }
+      state.dailyMissions.progress = Object.assign({ login: 1, income: 0, collection: 0 }, state.dailyMissions.progress || {});
+      state.dailyMissions.progress.login = 1;
+      state.dailyMissions.claimed = Boolean(state.dailyMissions.claimed);
+      return state.dailyMissions;
+    }
+
+    function markDailyMissionProgress(missionId, amount = 1, persist = true) {
+      const mission = DAILY_MISSIONS.find(item => item.id === String(missionId || ""));
+      if (!mission) return false;
+      const daily = ensureDailyMissionState();
+      const before = Math.max(0, Number(daily.progress[mission.id]) || 0);
+      const after = Math.min(mission.target, before + Math.max(0, Number(amount) || 0));
+      if (after === before) return false;
+      daily.progress[mission.id] = after;
+      if (persist) saveState(true);
+      renderDailyMonthlyRewards();
+      return true;
+    }
+
+    function isDailyMissionSetComplete() {
+      const daily = ensureDailyMissionState();
+      return DAILY_MISSIONS.every(mission => (Number(daily.progress[mission.id]) || 0) >= mission.target);
+    }
+
+    function claimDailyMissionReward() {
+      const daily = ensureDailyMissionState();
+      if (daily.claimed) return showToast("รับรางวัลภารกิจรายวันแล้ว กลับมาใหม่หลังเที่ยงคืน");
+      if (!isDailyMissionSetComplete()) return showToast("ยังทำภารกิจรายวันไม่ครบทั้ง 3 ภารกิจ");
+      state.crystals = Math.max(0, Math.floor(Number(state.crystals) || 0)) + DAILY_MISSION_REWARD_CRISTALS;
+      daily.claimed = true;
+      saveState(true);
+      renderAll();
+      showToast(`รับ ${formatNumber(DAILY_MISSION_REWARD_CRISTALS)} Cristal จากภารกิจรายวันแล้ว`);
+    }
+
+    function ensureMonthlyLoginState() {
+      const month = getLocalMonthKey();
+      if (!state.monthlyLogin || typeof state.monthlyLogin !== "object" || String(state.monthlyLogin.month || "") !== month) {
+        state.monthlyLogin = { month, claimedSaturdayWeeks: [] };
+      }
+      state.monthlyLogin.claimedSaturdayWeeks = [...new Set((Array.isArray(state.monthlyLogin.claimedSaturdayWeeks) ? state.monthlyLogin.claimedSaturdayWeeks : [])
+        .map(value => Math.floor(Number(value) || 0))
+        .filter(value => value >= 1 && value <= 5))];
+      return state.monthlyLogin;
+    }
+
+    function getUnlockedSaturdayWeeks() {
+      const now = new Date();
+      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+      return getSaturdaysInMonth(now).filter(date => date.getTime() <= todayEnd).length;
+    }
+
+    function getNextClaimableSaturdayWeek() {
+      const monthly = ensureMonthlyLoginState();
+      const unlocked = getUnlockedSaturdayWeeks();
+      for (let week = 1; week <= unlocked; week += 1) {
+        if (!monthly.claimedSaturdayWeeks.includes(week)) return week;
+      }
+      return 0;
+    }
+
+    function monthlySaturdayRewardLabel(reward) {
+      return reward ? reward.label : "-";
+    }
+
+    function claimMonthlySaturdayReward() {
+      const monthly = ensureMonthlyLoginState();
+      const saturdays = getSaturdaysInMonth();
+      const week = getNextClaimableSaturdayWeek();
+      if (!week) {
+        const allClaimed = monthly.claimedSaturdayWeeks.length >= saturdays.length;
+        return showToast(allClaimed ? "รับรางวัลวันเสาร์ของเดือนนี้ครบแล้ว" : "รางวัลวันเสาร์ถัดไปยังไม่ปลดล็อก");
+      }
+      const reward = MONTHLY_SATURDAY_REWARDS[week - 1];
+      if (!reward || week > saturdays.length) return showToast("ไม่พบรางวัลวันเสาร์ของเดือนนี้");
+      const itemId = rewardItemId(reward.type, reward.rarity);
+      const mail = createSystemMail({
+        uniqueKey: `monthly-saturday-${monthly.month}-${week}`,
+        title: `รางวัลล็อกอิน ${monthly.month} • เสาร์ที่ ${week}`,
+        message: `${monthlySaturdayRewardLabel(reward)} ถูกส่งเข้ากล่องจดหมายแล้ว`,
+        source: "monthly-login",
+        rewards: [{ type: "item", itemId, amount: reward.amount }]
+      });
+      if (!mail && !monthly.claimedSaturdayWeeks.includes(week)) {
+        // รองรับกรณีจดหมายมีอยู่แล้วจากการบันทึกก่อนหน้า
+        monthly.claimedSaturdayWeeks.push(week);
+      } else if (mail) {
+        monthly.claimedSaturdayWeeks.push(week);
+      }
+      monthly.claimedSaturdayWeeks = [...new Set(monthly.claimedSaturdayWeeks)].sort((a, b) => a - b);
+      saveState(true);
+      renderAll();
+      switchNoticeTab("rewards");
+      showToast(`${monthlySaturdayRewardLabel(reward)} ถูกส่งเข้ากล่องจดหมายแล้ว`);
+    }
+
+    function renderDailyMonthlyRewards() {
+      const daily = ensureDailyMissionState();
+      const missionGrid = document.getElementById("dailyMissionGrid");
+      if (missionGrid) {
+        missionGrid.innerHTML = DAILY_MISSIONS.map(mission => {
+          const progress = Math.min(mission.target, Math.max(0, Number(daily.progress[mission.id]) || 0));
+          const complete = progress >= mission.target;
+          return `<div class="daily-mission-item ${complete ? "complete" : ""}"><strong>${complete ? "✅" : "⬜"} ${escapeHTML(mission.title)}</strong><span>${escapeHTML(mission.description)} • ${formatNumber(progress)}/${formatNumber(mission.target)}</span></div>`;
+        }).join("");
+      }
+      const missionStatus = document.getElementById("dailyMissionStatus");
+      const missionButton = document.getElementById("dailyMissionClaimButton");
+      const completedCount = DAILY_MISSIONS.filter(mission => (Number(daily.progress[mission.id]) || 0) >= mission.target).length;
+      if (missionStatus) missionStatus.textContent = daily.claimed
+        ? "รับ 300 Cristal วันนี้แล้ว กลับมาใหม่หลังเที่ยงคืน"
+        : isDailyMissionSetComplete()
+          ? "ทำครบแล้ว พร้อมรับ 300 Cristal"
+          : `สำเร็จ ${completedCount}/${DAILY_MISSIONS.length} ภารกิจ`;
+      if (missionButton) {
+        missionButton.disabled = daily.claimed || !isDailyMissionSetComplete();
+        missionButton.textContent = daily.claimed ? "รับแล้ววันนี้" : "รับ 300 Cristal";
+      }
+
+      const monthly = ensureMonthlyLoginState();
+      const saturdays = getSaturdaysInMonth();
+      const unlocked = getUnlockedSaturdayWeeks();
+      const claimableWeek = getNextClaimableSaturdayWeek();
+      const monthlyGrid = document.getElementById("monthlySaturdayRewardGrid");
+      if (monthlyGrid) {
+        monthlyGrid.innerHTML = saturdays.map((date, index) => {
+          const week = index + 1;
+          const reward = MONTHLY_SATURDAY_REWARDS[index];
+          const claimed = monthly.claimedSaturdayWeeks.includes(week);
+          const available = week <= unlocked && !claimed;
+          const locked = week > unlocked;
+          return `<div class="monthly-saturday-item ${claimed ? "claimed" : available ? "available" : locked ? "locked" : ""}"><strong>${claimed ? "✅" : available ? "🎁" : "🔒"} เสาร์ที่ ${week} • ${escapeHTML(formatShortThaiDate(date))}</strong><span class="reward-name">${escapeHTML(monthlySaturdayRewardLabel(reward))}</span><span>${claimed ? "รับแล้ว" : available ? "ปลดล็อกแล้ว รับได้ถึงสิ้นเดือน" : "ยังไม่ถึงวันปลดล็อก"}</span></div>`;
+        }).join("");
+      }
+      const monthlyStatus = document.getElementById("monthlySaturdayStatus");
+      const monthlyButton = document.getElementById("monthlySaturdayClaimButton");
+      if (monthlyStatus) {
+        if (claimableWeek) monthlyStatus.textContent = `เสาร์ที่ ${claimableWeek} ปลดล็อกแล้ว • ${monthlySaturdayRewardLabel(MONTHLY_SATURDAY_REWARDS[claimableWeek - 1])}`;
+        else if (monthly.claimedSaturdayWeeks.length >= saturdays.length) monthlyStatus.textContent = "รับรางวัลเสาร์ของเดือนนี้ครบแล้ว";
+        else {
+          const nextWeek = Math.min(saturdays.length, unlocked + 1);
+          monthlyStatus.textContent = saturdays[nextWeek - 1]
+            ? `รางวัลถัดไปปลดล็อก ${formatShortThaiDate(saturdays[nextWeek - 1])}`
+            : "รอเริ่มเดือนถัดไป";
+        }
+      }
+      if (monthlyButton) {
+        monthlyButton.disabled = !claimableWeek;
+        monthlyButton.textContent = claimableWeek ? `รับรางวัลเสาร์ที่ ${claimableWeek}` : "ยังไม่มีรางวัลที่รับได้";
+      }
+    }
+
     function getCurrencyExchangeState() {
       const today = getLocalDateKey();
       if (!state.currencyExchange || typeof state.currencyExchange !== "object") {
@@ -17005,6 +17314,7 @@
       if (reward < 1) return showToast("ยังไม่มีรายได้สะสม");
       state.gems += reward;
       state.incomeBank -= reward;
+      markDailyMissionProgress("income", 1, false);
       saveState(true);
       renderAll();
       showToast(`รับ ${formatNumber(reward)} Gems แล้ว`);
@@ -17382,8 +17692,8 @@
       document.getElementById("teamBankText").textContent = `${formatNumber(state.incomeBank)} Gems`;
       const newcomerClaimedToday = state.firstLoginRewards.lastClaimDate === getLocalDateKey();
       document.getElementById("dailyText").textContent = todayClaimed
-        ? (state.firstLoginRewards.completed ? "รับโบนัสประจำวันแล้ว • กิจกรรมผู้เล่นใหม่ครบแล้ว" : "รับโบนัสประจำวันแล้ว • กิจกรรมผู้เล่นใหม่แยกรับอีกส่วน")
-        : `โบนัสประจำวัน ${formatNumber(CONFIG.dailyGems)} Gems • กิจกรรมผู้เล่นใหม่แยกต่างหาก`;
+        ? `ภารกิจรายวันรับได้ ${formatNumber(DAILY_MISSION_REWARD_CRISTALS)} Cristal • โบนัสล็อกอินวันนี้รับแล้ว`
+        : `ภารกิจรายวัน ${formatNumber(DAILY_MISSION_REWARD_CRISTALS)} Cristal • โบนัสล็อกอิน ${formatNumber(CONFIG.dailyGems)} Gems • เสาร์มีรางวัลรายเดือน`;
       document.getElementById("dailyButton").disabled = false;
       document.getElementById("dailyButton").textContent = "เปิดหน้ารับรางวัล";
       const grids = [document.getElementById("firstLoginRewardGrid"), document.getElementById("noticeFirstLoginRewardGrid")].filter(Boolean);
@@ -17410,6 +17720,7 @@
       const firstComplete = document.getElementById("newPlayerRewardComplete");
       if (firstSection) firstSection.classList.toggle("hidden", state.firstLoginRewards.completed);
       if (firstComplete) firstComplete.classList.toggle("hidden", !state.firstLoginRewards.completed);
+      renderDailyMonthlyRewards();
       renderUtilityDock();
       if (!document.getElementById("inventoryModal").classList.contains("hidden")) renderInventory();
       if (!document.getElementById("mailboxModal").classList.contains("hidden")) renderMailbox();
@@ -19616,6 +19927,7 @@
 
       if (target.dataset.tab) {
         activeTab = target.dataset.tab;
+        if (activeTab === "collection") markDailyMissionProgress("collection");
         renderTabs();
         if (activeTab === "friends") refreshFriends();
         if (activeTab === "arena") refreshArenaData();
@@ -19631,6 +19943,8 @@
       if (action === "pull-guarantee-ticket") openPackWithBestGuaranteeTicket();
       if (action === "use-selector") useSelectorTicket(cardId);
       if (action === "daily") claimDaily();
+      if (action === "claim-daily-missions") claimDailyMissionReward();
+      if (action === "claim-monthly-saturday") claimMonthlySaturdayReward();
       if (action === "claim-first-login") claimFirstLoginReward();
       if (action === "open-inventory") openInventory();
       if (action === "close-inventory") closeInventory();
