@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-24-cristal-dust-ai-v51">
+  <meta name="gacha-app-build" content="2026-06-24-cristal-income-clock-v52">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -9824,6 +9824,11 @@
     let bgmResumeAfterVisibility = false;
     let activeSelectorItemId = "";
 
+    // แก้โดยอลิซ v52: นาฬิการายได้แบบ Runtime แยกจาก state.lastIncomeAt
+    // ป้องกันการวาด UI / แลกหรือใช้ Cristal / Cloud Save ทำให้เวลารายได้ถูกนับย้อนหลังซ้ำ
+    let incomeClockStateRef = null;
+    let incomeRuntimeAt = Date.now();
+
     // แก้โดยอลิซ: เริ่มจากค่าเริ่มต้นชั่วคราวเสมอ แล้วค่อยโหลด Cloud Save หลังล็อกอิน
     // ไม่อ่านเซฟจากเครื่องอีกแล้ว เพื่อกันข้อมูลเก่าถูกดึงกลับเข้าระบบ
     let state = loadState();
@@ -10159,6 +10164,8 @@
 
     async function writeCloudSave(extra = {}) {
       if (!cloudReady || !activeCloudUid || !activeCloudUsername) return false;
+      // ทำยอดรายได้ให้เป็นปัจจุบันก่อนสร้าง Cloud payload และห้ามอิงจำนวนครั้งที่ UI render
+      updateIncome();
       const now = Date.now();
       if (!state.profile || typeof state.profile !== "object") state.profile = {};
       state.profile.username = activeCloudUsername;
@@ -16338,11 +16345,41 @@
       showToast("เลือก Friend Support แล้ว");
     }
 
-    function updateIncome() {
+    // ผูกนาฬิการายได้กับออบเจ็กต์เซฟปัจจุบันเพียงครั้งเดียว
+    // เมื่อเพิ่งโหลด Cloud/นำเข้าเซฟ จะคิดรายได้ออฟไลน์จาก lastIncomeAt หนึ่งครั้ง แล้วใช้ Runtime clock ต่อ
+    function ensureIncomeClockBound(applyOffline = true) {
       const now = Date.now();
-      const seconds = Math.max(0, Math.min((now - state.lastIncomeAt) / 1000, 60 * 60 * 24 * 7));
-      state.incomeBank += getTeamIncome() * seconds;
+      if (incomeClockStateRef === state && Number.isFinite(incomeRuntimeAt)) return false;
+
+      const savedAt = Number(state && state.lastIncomeAt);
+      const offlineSeconds = applyOffline && Number.isFinite(savedAt)
+        ? Math.max(0, Math.min((now - savedAt) / 1000, 60 * 60 * 24 * 7))
+        : 0;
+
+      // อัปเดตหมุดเวลาก่อนคำนวณ เพื่อไม่ให้ UI render ซ้ำหรือการเปลี่ยน Cristal นับช่วงเดิมซ้ำ
+      incomeClockStateRef = state;
+      incomeRuntimeAt = now;
       state.lastIncomeAt = now;
+
+      if (offlineSeconds > 0) {
+        state.incomeBank = Math.max(0, Number(state.incomeBank) || 0) + getTeamIncome() * offlineSeconds;
+      }
+      return offlineSeconds > 0;
+    }
+
+    function updateIncome() {
+      ensureIncomeClockBound(true);
+      const now = Date.now();
+      const seconds = Math.max(0, Math.min((now - incomeRuntimeAt) / 1000, 60 * 60 * 24 * 7));
+
+      // เลื่อนหมุดเวลาก่อนเพิ่มเงิน ทุกการเรียกซ้ำในเฟรมเดียวกันจึงได้เวลาใกล้ 0 แทนการบวกย้อนหลังซ้ำ
+      incomeRuntimeAt = now;
+      state.lastIncomeAt = now;
+      if (seconds <= 0) return 0;
+
+      const earned = Math.max(0, getTeamIncome()) * seconds;
+      state.incomeBank = Math.max(0, Number(state.incomeBank) || 0) + earned;
+      return earned;
     }
 
     function weightedKey(map, fallback) {
@@ -17307,7 +17344,9 @@
     }
 
     function renderResources() {
-      updateIncome();
+      // การวาด UI ห้ามเป็นตัวเดินเวลารายได้อีกต่อไป
+      // ใช้เพียงผูกเซฟใหม่และคิด Offline Income ครั้งแรกเท่านั้น
+      ensureIncomeClockBound(true);
       const uniqueOwned = Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length;
       const teamIncome = getTeamIncome();
       const teamPower = getTeamPower();
@@ -19787,6 +19826,8 @@
       document.getElementById("bootError").classList.add("hidden");
       initFirebase();
       setInterval(() => {
+        // เดินรายได้เพียงจุดเดียวต่อวินาที ไม่ผูกกับจำนวนครั้งที่หน้าเว็บถูก render
+        updateIncome();
         renderResources();
         ensureArenaWeekCurrent();
         if (activeTab === "battle") renderBattle();
