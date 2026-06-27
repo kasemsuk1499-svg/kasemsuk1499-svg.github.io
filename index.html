@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-27-domain-runtime-v54">
-  <title>Anime Card Collection</title>
+  <meta name="gacha-app-build" content="2026-06-27-dev-control-v55">
+  <title>Anime Card Collection · DEV Control v55</title>
   <style>
     :root {
       color-scheme: dark;
@@ -7067,180 +7067,196 @@
     "video": "0.mp4",
     "overlay": "overlay.mp4",
     "scCutscene": {
-      "kicker": "SYSTEM OVERRIDE",
-      "quote": "ไร้เมตตา เมื่อพระเจ้าลงสนาม",
-      "subtitle": "Developer Authority",
-      "video": "DEVop.mp4",
-      "poster": "",
-      "accent": "#a78bfa",
-      "accent2": "#22d3ee",
-      "introMs": 3000,
-      "maxVideoMs": 14000,
-      "revealMs": 3000,
-      "objectFit": "cover",
-      "objectPosition": "center center",
-      "muted": false,
-      "volume": 0.5,
-      "showCardAfterVideo": true,
-      "revealKicker": "SYSTEM ACCESS GRANTED",
-      "revealTitle": "MYSTICAL · DEV.",
-"ability": [
-  {
-    "name": "ROOT ACCESS",
-    "description": "ต้านสถานะของตนเอง +900%; ศัตรูทั้งหมดถูกลดต้านสถานะ 300%, ลดการฟื้น HP/โล่ 50%, ได้รับดาเมจเพิ่ม 50% และคอสสกิลแอคทีฟเพิ่มถาวร 2 หน่วย",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      {
-        "type": "statusResistance",
-        "value": 9,
-        "targetSide": "self"
-      },
-      {
-        "type": "statusResistance",
-        "value": -3,
-        "targetSide": "enemy",
-        "targetSelection": "all",
-        "scope": "field"
-      },
-      {
-        "type": "healingRate",
-        "value": -0.5,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "shieldRecoveryRate",
-        "value": -0.5,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "damageTakenRate",
-        "value": 0.5,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "activeSkillCostPermanent",
-        "value": 2,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      }
-    ]
-  },
-  {
-    "name": "GLOBAL NERF",
-    "description": "ลด ATK, คริติคอล, หลบหลีก และบล็อคเรทของศัตรูทั้งหมด 50%",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      {
-        "type": "enemyPowerRate",
-        "value": -0.5
-      },
-      {
-        "type": "criticalRate",
-        "value": -0.5,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "dodgeRate",
-        "value": -0.5,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "blockRate",
-        "value": -0.5,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      }
-    ]
-  },
-  {
-    "name": "MAINTENANCE MODE",
-    "description": "ทุกครั้งที่โจมตีครบ 9 ครั้ง จะทำลายโล่ศัตรูทั้งหมด 9 ฮิต เพิ่มคอสสกิลรอบปัจจุบัน 3 หน่วย และทำให้ความสามารถของศัตรูทุกใบไร้ผลในการทำงานครั้งถัดไป",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {
-      "afterOwnAttacks": 8,
-      "repeat": true
+        "kicker": "SYSTEM OVERRIDE",
+        "quote": "ไร้เมตตา เมื่อพระเจ้าลงสนาม",
+        "subtitle": "Developer Authority",
+        "video": "DEVop.mp4",
+        "poster": "",
+        "accent": "#a78bfa",
+        "accent2": "#22d3ee",
+        "introMs": 3000,
+        "maxVideoMs": 14000,
+        "revealMs": 3000,
+        "objectFit": "cover",
+        "objectPosition": "center center",
+        "muted": false,
+        "volume": 0.5,
+        "showCardAfterVideo": true,
+        "revealKicker": "SYSTEM ACCESS GRANTED",
+        "revealTitle": "MYSTICAL · DEV."
     },
-    "effects": [
-      {
-        "type": "shieldHits",
-        "value": -9,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "activeSkillCostCycle",
-        "value": 3,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "nullifyCardAbilities",
-        "targetSide": "enemy",
-        "targetSelection": "all",
-        "durationTriggers": 1
-      }
+    "ability": [
+        {
+            "name": "ROOT ACCESS",
+            "description": "ต้านสถานะของตนเอง +900%; ศัตรูทั้งหมดถูกลดต้านสถานะ 300%, ลดการฟื้น HP/โล่ 50%, ได้รับดาเมจเพิ่ม 50% และคอสสกิลแอคทีฟเพิ่มถาวร 2 หน่วย",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "statusResistance",
+                    "value": 9,
+                    "targetSide": "self"
+                },
+                {
+                    "type": "statusResistance",
+                    "value": -3,
+                    "targetSide": "enemy",
+                    "targetSelection": "all",
+                    "scope": "field"
+                },
+                {
+                    "type": "healingRate",
+                    "value": -0.5,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "shieldRecoveryRate",
+                    "value": -0.5,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "damageTakenRate",
+                    "value": 0.5,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "activeSkillCostPermanent",
+                    "value": 2,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                }
+            ]
+        },
+        {
+            "name": "GLOBAL NERF",
+            "description": "ลด ATK, คริติคอล, หลบหลีก และบล็อคเรทของศัตรูทั้งหมด 50%",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "enemyPowerRate",
+                    "value": -0.5
+                },
+                {
+                    "type": "criticalRate",
+                    "value": -0.5,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "dodgeRate",
+                    "value": -0.5,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "blockRate",
+                    "value": -0.5,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                }
+            ]
+        },
+        {
+            "name": "MAINTENANCE MODE",
+            "description": "ทุกครั้งที่โจมตีครบ 9 ครั้ง จะทำลายโล่ศัตรูทั้งหมด 9 ฮิต เพิ่มคอสสกิลรอบปัจจุบัน 3 หน่วย และทำให้ความสามารถของศัตรูทุกใบไร้ผลในการทำงานครั้งถัดไป",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {
+                "afterOwnAttacks": 8,
+                "repeat": true
+            },
+            "effects": [
+                {
+                    "type": "shieldHits",
+                    "value": -9,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "activeSkillCostCycle",
+                    "value": 3,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "nullifyCardAbilities",
+                    "targetSide": "enemy",
+                    "targetSelection": "all",
+                    "durationTriggers": 1
+                }
+            ]
+        },
+        {
+            "name": "SYSTEM RESET: DELETE ALL",
+            "description": "เมื่อโจมตีครบ 18 ครั้ง จะลบโล่ศัตรูทั้งหมด ลดต้านสถานะ 900% ห้ามฟื้น HP และโล่ พร้อมทำให้ความสามารถของศัตรูทุกใบไร้ผล 2 ครั้ง ทำงานครั้งเดียวต่อไฟต์",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {
+                "afterOwnAttacks": 17,
+                "repeat": false
+            },
+            "effects": [
+                {
+                    "type": "shieldHits",
+                    "value": -999,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "statusResistance",
+                    "value": -9,
+                    "targetSide": "enemy",
+                    "targetSelection": "all",
+                    "scope": "field"
+                },
+                {
+                    "type": "healingRate",
+                    "value": -1,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "shieldRecoveryRate",
+                    "value": -1,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "nullifyCardAbilities",
+                    "targetSide": "enemy",
+                    "targetSelection": "all",
+                    "durationTriggers": 2
+                }
+            ]
+        }
     ]
-  },
-  {
-    "name": "SYSTEM RESET: DELETE ALL",
-    "description": "เมื่อโจมตีครบ 18 ครั้ง จะลบโล่ศัตรูทั้งหมด ลดต้านสถานะ 900% ห้ามฟื้น HP และโล่ พร้อมทำให้ความสามารถของศัตรูทุกใบไร้ผล 2 ครั้ง ทำงานครั้งเดียวต่อไฟต์",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {
-      "afterOwnAttacks": 17,
-      "repeat": false
-    },
-    "effects": [
-      {
-        "type": "shieldHits",
-        "value": -999,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "statusResistance",
-        "value": -9,
-        "targetSide": "enemy",
-        "targetSelection": "all",
-        "scope": "field"
-      },
-      {
-        "type": "healingRate",
-        "value": -1,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "shieldRecoveryRate",
-        "value": -1,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "nullifyCardAbilities",
-        "targetSide": "enemy",
-        "targetSelection": "all",
-        "durationTriggers": 2
-      }
-    ]
-  }
-]
-    }
-  },
+},
   {
     "id": 999,
     "name": "CREATOR",
     "rarity": "SC",
     "element": "สายฟ้า",
     "power": 729000,
-        "hp": 3645000,
-        "defense": 292000,
+    "hp": 3645000,
+    "defense": 292000,
     "incomePerSec": 18000,
     "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
@@ -7250,157 +7266,221 @@
     "video": "999.mp4",
     "poster": "999.png",
     "scCutscene": {
-      "kicker": "THE FIRST STROKE",
-      "quote": "ลองชิมสายฟ้าของผู้คิดค้นหน่อยไหมม..",
-      "subtitle": "Creative Overdrive",
-      "video": "CREATORop.mp4",
-      "poster": "",
-      "accent": "#f472b6",
-      "accent2": "#facc15",
-      "introMs": 3000,
-      "maxVideoMs": 14000,
-      "revealMs": 3000,
-      "objectFit": "cover",
-      "objectPosition": "center center",
-      "muted": false,
-      "volume": 0.5,
-      "showCardAfterVideo": true,
-      "revealKicker": "ORIGIN SIGNATURE",
-      "revealTitle": "MYSTICAL · CREATOR",
-"ability": [
-  {
-    "name": "บัญญัติที่ 1: พลังแห่งเลข 9",
-    "description": "ATK +900%",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      { "type": "selfPowerRate", "value": 9 }
-    ]
-  },
-  {
-    "name": "บัญญัติที่ 2: ชีพจร 999",
-    "description": "HP +900%",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      { "type": "selfHpRate", "value": 9 }
-    ]
-  },
-  {
-    "name": "บัญญัติที่ 3: เกราะนพชั้น",
-    "description": "DEF +900% และได้รับโล่ 9 ฮิต",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      { "type": "selfDefenseRate", "value": 9 },
-      { "type": "shieldHits", "value": 9, "targetSide": "self" }
-    ]
-  },
-  {
-    "name": "บัญญัติที่ 4: เนตรสายฟ้า 99",
-    "description": "อัตราคริติคอล +99%",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      { "type": "criticalRate", "value": 0.99, "targetSide": "self" }
-    ]
-  },
-  {
-    "name": "บัญญัติที่ 5: ก้าวย่างเก้าสายฟ้า",
-    "description": "อัตราหลบหลีก +90%",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      { "type": "dodgeRate", "value": 0.9, "targetSide": "self" }
-    ]
-  },
-  {
-    "name": "บัญญัติที่ 6: สิทธิ์ของผู้สร้าง",
-    "description": "ต้านสถานะ +900%",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      { "type": "statusResistance", "value": 9, "targetSide": "self" }
-    ]
-  },
-  {
-    "name": "บัญญัติที่ 7: พรแห่งผู้สร้าง",
-    "description": "ATK ของทั้งทีม +90%",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      { "type": "teamPowerRate", "value": 0.9 }
-    ]
-  },
-  {
-    "name": "บัญญัติที่ 8: วงจรฟื้นคืนลำดับเก้า",
-    "description": "ทุกการโจมตีครั้งที่ 9 ฟื้นฟู HP 9,000,000 และฟื้นโล่ 9 ฮิต",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {},
-    "effects": [
-      {
-        "type": "healHpFlat",
-        "value": 9000000,
-        "targetSide": "self",
-        "condition": {
-          "afterOwnAttacks": 8,
-          "repeat": true
-        }
-      },
-      {
-        "type": "restoreShieldHits",
-        "value": 9,
-        "targetSide": "self",
-        "condition": {
-          "afterOwnAttacks": 8,
-          "repeat": true
-        }
-      }
-    ]
-  },
-  {
-    "name": "บัญญัติที่ 9: CREATOR CODE 9999",
-    "description": "เมื่อโจมตีครบ 9 ครั้ง การโจมตีครั้งถัดไปจะทำลายโล่ศัตรู 9 ฮิต สร้างดาเมจเพิ่มขึ้น 9999% โจมตีเพิ่ม 9 ฮิต และติดคริติคอล 100%",
-    "activeIn": ["team", "tower", "arena"],
-    "condition": {
-      "afterOwnAttacks": 9,
-      "repeat": true
+        "kicker": "THE FIRST STROKE",
+        "quote": "ลองชิมสายฟ้าของผู้คิดค้นหน่อยไหมม..",
+        "subtitle": "Creative Overdrive",
+        "video": "CREATORop.mp4",
+        "poster": "",
+        "accent": "#f472b6",
+        "accent2": "#facc15",
+        "introMs": 3000,
+        "maxVideoMs": 14000,
+        "revealMs": 3000,
+        "objectFit": "cover",
+        "objectPosition": "center center",
+        "muted": false,
+        "volume": 0.5,
+        "showCardAfterVideo": true,
+        "revealKicker": "ORIGIN SIGNATURE",
+        "revealTitle": "MYSTICAL · CREATOR"
     },
-    "effects": [
-      {
-        "type": "shieldHits",
-        "value": -9,
-        "targetSide": "enemy",
-        "targetSelection": "all"
-      },
-      {
-        "type": "nextAttackPowerRate",
-        "value": 99.99,
-        "targetSide": "self"
-      },
-      {
-        "type": "nextAttackHits",
-        "value": 9,
-        "targetSide": "self"
-      },
-      {
-        "type": "nextAttackCriticalRate",
-        "value": 1,
-        "targetSide": "self"
-      }
+    "ability": [
+        {
+            "name": "บัญญัติที่ 1: พลังแห่งเลข 9",
+            "description": "ATK +900%",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "selfPowerRate",
+                    "value": 9
+                }
+            ]
+        },
+        {
+            "name": "บัญญัติที่ 2: ชีพจร 999",
+            "description": "HP +900%",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "selfHpRate",
+                    "value": 9
+                }
+            ]
+        },
+        {
+            "name": "บัญญัติที่ 3: เกราะนพชั้น",
+            "description": "DEF +900% และได้รับโล่ 9 ฮิต",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "selfDefenseRate",
+                    "value": 9
+                },
+                {
+                    "type": "shieldHits",
+                    "value": 9,
+                    "targetSide": "self"
+                }
+            ]
+        },
+        {
+            "name": "บัญญัติที่ 4: เนตรสายฟ้า 99",
+            "description": "อัตราคริติคอล +99%",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "criticalRate",
+                    "value": 0.99,
+                    "targetSide": "self"
+                }
+            ]
+        },
+        {
+            "name": "บัญญัติที่ 5: ก้าวย่างเก้าสายฟ้า",
+            "description": "อัตราหลบหลีก +90%",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "dodgeRate",
+                    "value": 0.9,
+                    "targetSide": "self"
+                }
+            ]
+        },
+        {
+            "name": "บัญญัติที่ 6: สิทธิ์ของผู้สร้าง",
+            "description": "ต้านสถานะ +900%",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "statusResistance",
+                    "value": 9,
+                    "targetSide": "self"
+                }
+            ]
+        },
+        {
+            "name": "บัญญัติที่ 7: พรแห่งผู้สร้าง",
+            "description": "ATK ของทั้งทีม +90%",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "teamPowerRate",
+                    "value": 0.9
+                }
+            ]
+        },
+        {
+            "name": "บัญญัติที่ 8: วงจรฟื้นคืนลำดับเก้า",
+            "description": "ทุกการโจมตีครั้งที่ 9 ฟื้นฟู HP 9,000,000 และฟื้นโล่ 9 ฮิต",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "healHpFlat",
+                    "value": 9000000,
+                    "targetSide": "self",
+                    "condition": {
+                        "afterOwnAttacks": 8,
+                        "repeat": true
+                    }
+                },
+                {
+                    "type": "restoreShieldHits",
+                    "value": 9,
+                    "targetSide": "self",
+                    "condition": {
+                        "afterOwnAttacks": 8,
+                        "repeat": true
+                    }
+                }
+            ]
+        },
+        {
+            "name": "บัญญัติที่ 9: CREATOR CODE 9999",
+            "description": "เมื่อโจมตีครบ 9 ครั้ง การโจมตีครั้งถัดไปจะทำลายโล่ศัตรู 9 ฮิต สร้างดาเมจเพิ่มขึ้น 9999% โจมตีเพิ่ม 9 ฮิต และติดคริติคอล 100%",
+            "activeIn": [
+                "team",
+                "tower",
+                "arena"
+            ],
+            "condition": {
+                "afterOwnAttacks": 9,
+                "repeat": true
+            },
+            "effects": [
+                {
+                    "type": "shieldHits",
+                    "value": -9,
+                    "targetSide": "enemy",
+                    "targetSelection": "all"
+                },
+                {
+                    "type": "nextAttackPowerRate",
+                    "value": 99.99,
+                    "targetSide": "self"
+                },
+                {
+                    "type": "nextAttackHits",
+                    "value": 9,
+                    "targetSide": "self"
+                },
+                {
+                    "type": "nextAttackCriticalRate",
+                    "value": 1,
+                    "targetSide": "self"
+                }
+            ]
+        }
     ]
-  }
-]
-    }
-  },
+},
   {
     "id": 1000,
     "name": "Great Magician",
     "rarity": "SC",
     "element": "ไร้ธาตุ",
     "power": 729000,
-        "hp": 3645000,
-        "defense": 292000,
+    "hp": 3645000,
+    "defense": 292000,
     "incomePerSec": 18000,
     "upgradeDustBase": 10000,
     "upgradeDustGrowth": 1.092,
@@ -7410,73 +7490,83 @@
     "video": "1000.mp4",
     "poster": "1000.png",
     "scCutscene": {
-      "kicker": "ARCANA · ZERO",
-      "quote": "เวทมนตร์ที่แท้จริง ไม่เคยยอมจำนนต่อความเป็นไปไม่ได้",
-      "subtitle": "Grand Arcana",
-      "video": "GMop.mp4",
-      "poster": "",
-      "accent": "#8b5cf6",
-      "accent2": "#67e8f9",
-      "introMs": 3000,
-      "maxVideoMs": 14000,
-      "revealMs": 3000,
-      "objectFit": "cover",
-      "objectPosition": "center center",
-      "muted": false,
-      "volume": 0.5,
-      "showCardAfterVideo": true,
-      "revealKicker": "THE GRAND ARCANA",
-      "revealTitle": "MYSTICAL · GREAT MAGICIAN",
-"ability": [
-  {
-    "name": "คลังมหาเวทไร้ขอบเขต",
-    "description": "รายได้ของตนเอง +500% รายได้ทั้งทีม +200% และเพิ่มรายได้คงที่ให้ทีม 5,000 ต่อวินาที",
-    "activeIn": ["team"],
-    "condition": {},
-    "effects": [
-      {
-        "type": "selfIncomeRate",
-        "value": 5
-      },
-      {
-        "type": "teamIncomeRate",
-        "value": 2
-      },
-      {
-        "type": "teamIncomeFlat",
-        "value": 5000
-      }
-    ]
-  },
-  {
-    "name": "มหาเวทบิดเบือนความน่าจะเป็น",
-    "description": "เมื่ออเวกตันและเลเวลตัน จะเพิ่มน้ำหนักเรทกาชาระดับ LR +50%, EX +100% และ SC +150%",
-    "activeIn": ["team"],
-    "condition": {
-      "sourceMinAwaken": 4,
-      "sourceMinLevel": 220
+        "kicker": "ARCANA · ZERO",
+        "quote": "เวทมนตร์ที่แท้จริง ไม่เคยยอมจำนนต่อความเป็นไปไม่ได้",
+        "subtitle": "Grand Arcana",
+        "video": "GMop.mp4",
+        "poster": "",
+        "accent": "#8b5cf6",
+        "accent2": "#67e8f9",
+        "introMs": 3000,
+        "maxVideoMs": 14000,
+        "revealMs": 3000,
+        "objectFit": "cover",
+        "objectPosition": "center center",
+        "muted": false,
+        "volume": 0.5,
+        "showCardAfterVideo": true,
+        "revealKicker": "THE GRAND ARCANA",
+        "revealTitle": "MYSTICAL · GREAT MAGICIAN"
     },
-    "effects": [
-      {
-        "type": "gachaRarityRate",
-        "value": 0.5,
-        "targetRarities": ["LR"]
-      },
-      {
-        "type": "gachaRarityRate",
-        "value": 1,
-        "targetRarities": ["EX"]
-      },
-      {
-        "type": "gachaRarityRate",
-        "value": 1.5,
-        "targetRarities": ["SC"]
-      }
+    "ability": [
+        {
+            "name": "คลังมหาเวทไร้ขอบเขต",
+            "description": "รายได้ของตนเอง +500% รายได้ทั้งทีม +200% และเพิ่มรายได้คงที่ให้ทีม 5,000 ต่อวินาที",
+            "activeIn": [
+                "team"
+            ],
+            "condition": {},
+            "effects": [
+                {
+                    "type": "selfIncomeRate",
+                    "value": 5
+                },
+                {
+                    "type": "teamIncomeRate",
+                    "value": 2
+                },
+                {
+                    "type": "teamIncomeFlat",
+                    "value": 5000
+                }
+            ]
+        },
+        {
+            "name": "มหาเวทบิดเบือนความน่าจะเป็น",
+            "description": "เมื่ออเวกตันและเลเวลตัน จะเพิ่มน้ำหนักเรทกาชาระดับ LR +50%, EX +100% และ SC +150%",
+            "activeIn": [
+                "team"
+            ],
+            "condition": {
+                "sourceMinAwaken": 3,
+                "sourceMinLevel": 250
+            },
+            "effects": [
+                {
+                    "type": "gachaRarityRate",
+                    "value": 0.5,
+                    "targetRarities": [
+                        "LR"
+                    ]
+                },
+                {
+                    "type": "gachaRarityRate",
+                    "value": 1,
+                    "targetRarities": [
+                        "EX"
+                    ]
+                },
+                {
+                    "type": "gachaRarityRate",
+                    "value": 1.5,
+                    "targetRarities": [
+                        "SC"
+                    ]
+                }
+            ]
+        }
     ]
-  }
-]
-    }
-  },
+},
   {
     "id": 2000,
     "name": "MAMON",
@@ -12651,6 +12741,11 @@
       return [...new Set(abilityArray(value).map(item => String(item)).filter(Boolean))];
     }
 
+    // รองรับ Card ID 0: ห้ามใช้ value || "" เพราะเลข 0 จะถูกมองว่าไม่มีค่า
+    function cardIdString(value) {
+      return value === null || value === undefined || value === "" ? "" : String(value);
+    }
+
     // เงื่อนไขทีมแบบ whitelist: เจ้าของสกิลอยู่เดี่ยวได้ และสมาชิกคนอื่นต้องเป็น ID ที่อนุญาตเท่านั้น
     // รองรับชื่อคีย์หลัก allowedTeammateCardIds และ alias เพื่อแก้ข้อมูลได้ยืดหยุ่น
     function getAllowedTeammateCardIds(condition = {}) {
@@ -12781,7 +12876,7 @@
       const side = normalizeAbilityTargetSide(effect && effect.targetSide);
       if (side === "self") return sourceCard ? [String(sourceCard.id)] : [];
       if (!targetContext || !Array.isArray(targetContext.cards)) return [];
-      const sourceId = String(sourceCard && sourceCard.id || "");
+      const sourceId = cardIdString(sourceCard && sourceCard.id);
       return targetContext.cards
         .filter(card => cardMatchesAbilityTarget(card, effect))
         .filter(card => !(effect && effect.excludeSelf && String(card.id) === sourceId))
@@ -12982,7 +13077,7 @@
         sourceCardIds: normalizeAbilityCardIds(effect.resistSourceCardIds || effect.sourceCardIds),
         scope: ["field", "battlefield", "สนาม", "ทั้งสนาม"].includes(scopeRaw) ? "field" : "target",
         resistBeneficial: effect.resistBeneficial === true,
-        sourceCardId: String(meta.sourceCard && meta.sourceCard.id || ""),
+        sourceCardId: cardIdString(meta.sourceCard && meta.sourceCard.id),
         sourceAbilityName: String(meta.ability && meta.ability.name || ""),
         key: String(meta.key || "")
       };
@@ -12997,7 +13092,7 @@
     }
 
     function addStatusResistanceRule(map, cardId, rule) {
-      const id = String(cardId || "");
+      const id = cardIdString(cardId);
       if (!id || !rule || !Number(rule.rate)) return;
       if (!map[id]) map[id] = [];
       map[id].push({ ...rule });
@@ -13039,7 +13134,7 @@
         if (!check.resisted) return true;
         resistedEffects.push({
           targetCardId: String(id),
-          sourceCardId: String(effect && effect._sourceCardId || sourceCard && sourceCard.id || ""),
+          sourceCardId: cardIdString(effect && effect._sourceCardId !== undefined ? effect._sourceCardId : sourceCard && sourceCard.id),
           abilityName: String(effect && effect._sourceAbilityName || ""),
           effectType: normalizeAbilityEffectType(effect && effect.type),
           resistanceRate: check.rate,
@@ -13154,7 +13249,7 @@
         const oppositeSide = sides[record.sourceSide === "ally" ? "enemy" : "ally"];
         const effect = record.effect || {};
         const transferType = isStealAbilityEffect(effect) ? "steal" : "copy";
-        const sourceCardId = String(record.sourceCard && record.sourceCard.id || "");
+        const sourceCardId = cardIdString(record.sourceCard && record.sourceCard.id);
         const transferTargetSide = normalizeAbilityTransferSide(effect.targetSide);
         let donorCandidates = [];
         if (transferTargetSide === "both") {
@@ -13168,7 +13263,7 @@
         }
         donorCandidates = donorCandidates.filter(item => cardMatchesAbilityTarget(item.card, effect));
         donorCandidates = donorCandidates.filter(item => {
-          const donorId = String(item.card && item.card.id || "");
+          const donorId = cardIdString(item.card && item.card.id);
           return getCardAbilities(item.card).map((ability, abilityIndex) => ({ ability, abilityIndex, runtimeKey: `${donorId}:${abilityIndex}` }))
             .filter(entry => !item.side.disabled.has(entry.runtimeKey))
             .some(entry => abilityEntryCanBeTransferred(entry, effect));
@@ -13343,17 +13438,7 @@
     // เพิ่มโดยอลิซ: สกิลเอกลักษณ์ประจำธาตุ
     // ระบบเติมให้อัตโนมัติตาม “ธาตุหลัก” ของการ์ด และไม่ทับ ability/abilities เฉพาะตัวเดิม
  
-    function getElementSignatureAbility(card) {
-      const element = getCardElement(card);
-      const template = ELEMENT_SIGNATURE_ABILITIES[element];
-      if (!template) return null;
-      return {
-        ...template,
-        systemGenerated: false,
-        elementSignature: element,
-        effects: abilityArray(template.effects).map(effect => ({ ...effect, condition: effect.condition ? { ...effect.condition } : undefined }))
-      };
-    }
+
 
     // รองรับข้อมูลสกิลทั้งรูปแบบใหม่ abilities: [...] และรูปแบบเก่า ability: {...}/ability: [...]
     // รวมถึงอาร์เรย์ที่ถูกซ้อนโดยไม่ตั้งใจ เพื่อไม่ให้การ์ดหลายสกิลหายทั้งชุด
@@ -13364,6 +13449,11 @@
         output.push(value);
       }
       return output;
+    }
+
+    // Fallback: ไฟล์นี้ไม่มีระบบสกิลประจำธาตุแยกต่างหาก จึงคืน null เพื่อไม่ให้ Battle Engine หยุดทำงาน
+    function getElementSignatureAbility(card) {
+      return null;
     }
 
     function getCardAbilities(card) {
@@ -13385,7 +13475,7 @@
 
     function getRuntimeCardAbilityEntries(card, options = {}) {
       if (!card) return [];
-      const cardId = String(card.id || "");
+      const cardId = cardIdString(card.id);
       const disabled = new Set(abilityArray(options.disabledAbilityKeys).map(String));
       const baseEntries = getCardAbilities(card).map((ability, abilityIndex) => ({
         ability,
@@ -14864,7 +14954,7 @@
           pendingAttackHits: 0,
           pendingCriticalRateChange: 0,
           members: abilityArray(options[`${prefix}Members`]).filter(Boolean).map(member => ({
-            id: String(member.id || ""),
+            id: cardIdString(member.id),
             name: String(member.name || member.id || "Unknown"),
             power: Math.max(0, Number(member.power) || 0),
             hp: Math.max(1, Number(member.hp) || 1),
@@ -14881,7 +14971,7 @@
           activeTriggers: normalizeTriggers(options[`${prefix}ActiveTriggers`]),
           abilityRoster: abilityArray(options[`${prefix}AbilityRoster`]).filter(Boolean).map(item => ({
             ...item,
-            id: String(item.id || ""),
+            id: cardIdString(item.id),
             elements: normalizeAbilityElements(item.elements || item.element),
             abilities: abilityArray(item.abilities).filter(Boolean).map(ability => ({
               ...ability,
@@ -14910,18 +15000,18 @@
 
 
       function runtimeRosterItem(fighter, cardId) {
-        return abilityArray(fighter && fighter.abilityRoster).find(item => String(item && item.id || "") === String(cardId || "")) || null;
+        return abilityArray(fighter && fighter.abilityRoster).find(item => cardIdString(item && item.id) === cardIdString(cardId)) || null;
       }
 
       function runtimeMember(fighter, cardId) {
-        return abilityArray(fighter && fighter.members).find(item => String(item && item.id || "") === String(cardId || "")) || null;
+        return abilityArray(fighter && fighter.members).find(item => cardIdString(item && item.id) === cardIdString(cardId)) || null;
       }
 
       function runtimeAbilityContext(fighter) {
-        const ids = abilityArray(fighter && fighter.abilityRoster).map(item => String(item && item.id || "")).filter(Boolean);
+        const ids = abilityArray(fighter && fighter.abilityRoster).map(item => cardIdString(item && item.id)).filter(Boolean);
         const progressByCardId = {};
         abilityArray(fighter && fighter.abilityRoster).forEach(item => {
-          const id = String(item && item.id || "");
+          const id = cardIdString(item && item.id);
           if (!id) return;
           progressByCardId[id] = {
             level: Math.max(1, Math.floor(Number(item.level) || 1)),
@@ -14933,7 +15023,7 @@
 
       function runtimeCardMatches(item, effect = {}) {
         if (!item) return false;
-        const card = item.card || CARD_BY_ID.get(String(item.id || "")) || {
+        const card = item.card || CARD_BY_ID.get(cardIdString(item.id)) || {
           id: item.id,
           name: item.name,
           rarity: item.rarity,
@@ -15265,7 +15355,7 @@
         fighter.disabledAbilityKeys.add(runtimeKey);
         fighter.activeTriggers = fighter.activeTriggers.filter(trigger => String(trigger.sourceAbilityRuntimeKey || "") !== runtimeKey);
         const context = runtimeAbilityContext(fighter);
-        const sourceCard = rosterItem.card || CARD_BY_ID.get(String(rosterItem.id || ""));
+        const sourceCard = rosterItem.card || CARD_BY_ID.get(cardIdString(rosterItem.id));
         const ability = entry.ability;
         if (!sourceCard || !ability || !getAbilityModes(ability).includes(String(options.mode || "arena"))) return;
         if (!isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard)) return;
@@ -15306,7 +15396,7 @@
           const recipient = runtimeRecipientRoster(sourceFighter, oppositeFighter, effect, sourceCardId, seed, `${sourceKey}:recipients`);
           const successRate = normalizeAbilityChance(effect.successRate ?? effect.copyRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? 1, 1);
           donorPairs.forEach((pair, donorIndex) => {
-            const donorId = String(pair.item.id || "");
+            const donorId = cardIdString(pair.item.id);
             const donorRules = abilityArray(runtimeMember(pair.fighter, donorId) && runtimeMember(pair.fighter, donorId).statusResistanceRules);
             const resistance = shouldAbilityEffectBeResisted(donorRules, effect, seed, `${sourceKey}:resist:${donorId}:${donorIndex}`);
             if (resistance.resisted) {
@@ -15596,7 +15686,7 @@
             targets = abilityArray(targetFighter.abilityRoster).filter(item => runtimeCardMatches(item, effect));
           }
           targets.forEach(item => {
-            const cardId = String(item.id || "");
+            const cardId = cardIdString(item.id);
             const member = runtimeMember(targetFighter, cardId);
             const resisted = shouldAbilityEffectBeResisted(
               member && member.statusResistanceRules,
@@ -15688,8 +15778,8 @@
         const ids = normalizeAbilityCardIds(rule.ids);
         const elements = normalizeAbilityElements(rule.elements);
         const rarities = normalizeAbilityRarities(rule.rarities);
-        if (ids.length) checks.push(ids.includes(String(member.id || "")));
-        const card = CARD_BY_ID.get(String(member.id || ""));
+        if (ids.length) checks.push(ids.includes(cardIdString(member.id)));
+        const card = CARD_BY_ID.get(cardIdString(member.id));
         if (elements.length) checks.push(card ? elements.some(element => getCardElements(card).includes(element)) : false);
         if (rarities.length) checks.push(card ? rarities.includes(String(card.rarity || "").toUpperCase()) : false);
         if (!checks.length) return true;
@@ -15698,7 +15788,7 @@
 
       function applyMemberRateChanges(fighter, field, directChanges = {}, rules = [], clampFn = value => value) {
         fighter.members.forEach(member => {
-          let change = Number(directChanges && directChanges[String(member.id || "")] || 0);
+          let change = Number(directChanges && directChanges[cardIdString(member.id)] || 0);
           abilityArray(rules).forEach((rule, ruleIndex) => {
             if (!memberMatchesRateRule(member, rule)) return;
             const effect = { type: normalizeAbilityEffectType(rule && rule.effectType || field), value: Number(rule && rule.value || 0) };
@@ -16356,7 +16446,7 @@
     }
 
     function getBattleItemCard(item) {
-      if (!item) return null;
+      if (item === null || item === undefined || item === "") return null;
       if (typeof item === "object" && item.id !== undefined) return CARD_BY_ID.get(String(item.id)) || item;
       return CARD_BY_ID.get(String(item)) || null;
     }
@@ -16410,7 +16500,7 @@
           grouped.set(key, {
             key,
             name: String(record.ability && record.ability.name || record.sourceCard && record.sourceCard.name || "Active Skill"),
-            sourceCardId: String(record.sourceCard && record.sourceCard.id || ""),
+            sourceCardId: cardIdString(record.sourceCard && record.sourceCard.id),
             sourceCardName: String(record.sourceCard && record.sourceCard.name || "Unknown Character"),
             sourceCardImage: record.sourceCard ? getCardImage(record.sourceCard) : "",
             sourceCardRarity: String(record.sourceCard && record.sourceCard.rarity || "N"),
@@ -16423,11 +16513,11 @@
             baseAfterOwnAttacks: record.trigger.onOwnAttack
               ? 0
               : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1))),
-            permanentCostChange: Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0),
-            cycleCostChange: Number(summary.triggerCostChanges && summary.triggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0),
+            permanentCostChange: Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0),
+            cycleCostChange: Number(summary.triggerCostChanges && summary.triggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0),
             afterOwnAttacks: record.trigger.onOwnAttack
               ? 0
-              : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0))),
+              : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0))),
             repeat: record.trigger.onOwnAttack ? true : record.trigger.repeat !== false,
             requiresActivationKey: String(record.requiresActivationKey || ""),
             requiredDomainId: String(record.trigger && record.trigger.requiredDomainId || ""),
@@ -16544,7 +16634,7 @@
             group.maxStacks = Math.max(group.maxStacks, Math.max(1, Math.floor(Number(effect.maxStacks) || 1)));
             break;
           case CARD_ABILITY_EFFECT_TYPES.SELF_TRIGGER_REDUCTION:
-            addAbilityMapRate(group.triggerCostChanges, [String(record.sourceCard && record.sourceCard.id || "")], -Math.max(0, Math.floor(value)));
+            addAbilityMapRate(group.triggerCostChanges, [cardIdString(record.sourceCard && record.sourceCard.id)], -Math.max(0, Math.floor(value)));
             break;
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST:
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE: {
@@ -16672,7 +16762,7 @@
     }
 
     function makeSupportCardSnapshot(cardId = getProfileSupportCardId()) {
-      const card = CARD_BY_ID.get(String(cardId || ""));
+      const card = CARD_BY_ID.get(cardIdString(cardId));
       if (!card || !getOwned(card.id)) return null;
       const owned = getOwned(card.id) || {};
       return {
@@ -16735,7 +16825,7 @@
     }
 
     async function setOwnSupportCard(cardId = "") {
-      const id = String(cardId || "");
+      const id = cardIdString(cardId);
       if (id && (!CARD_BY_ID.has(id) || !getOwned(id))) return showToast("ตั้งซัพพอร์ตได้เฉพาะการ์ดที่มีอยู่ในคลัง");
       state.profile.supportCardId = id;
       state.profile.updatedAt = Date.now();
@@ -17055,7 +17145,7 @@
     }
 
     function getSnapshotAdjustedStat(item, abilitySummary, stat = "power") {
-      const card = CARD_BY_ID.get(String(item && item.id || ""));
+      const card = CARD_BY_ID.get(cardIdString(item && item.id));
       const base = getSnapshotBaseStat(item, stat);
       if (!card) return base;
       const summary = abilitySummary || {};
@@ -17415,7 +17505,7 @@
       const enemy = opponent || null;
       const enemyTeam = enemy && Array.isArray(enemy.arenaTeam) ? enemy.arenaTeam : [];
       // เพิ่มโดยอลิซ v50: ทั้งผู้เล่นจริงและ AI ใช้ความสามารถของการ์ดครบทุกใบ
-      const enemyTeamIds = enemyTeam.map(item => String(item && item.id || "")).filter(id => CARD_BY_ID.has(id));
+      const enemyTeamIds = enemyTeam.map(item => cardIdString(item && item.id)).filter(id => CARD_BY_ID.has(id));
       const paired = enemyTeamIds.length
         ? getPairedAbilitySummaries(teamIds, enemyTeamIds, "arena", {}, { progressByCardId: snapshotProgressByCardId(enemyTeam) })
         : { ally: getTeamAbilitySummary(teamIds, "arena"), enemy: getTeamAbilitySummary([], "arena") };
@@ -17493,7 +17583,7 @@
     }
 
         function arenaSnapshotModelHTML(item, index = 0, enemy = true) {
-      const card = CARD_BY_ID.get(String(item && item.id || ""));
+      const card = CARD_BY_ID.get(cardIdString(item && item.id));
       const rarity = card ? getRarity(card) : (RARITIES[item && item.rarity] || RARITIES.N);
       const image = card ? getCardImage(card) : "";
       const name = item && item.name || (card && card.name) || "Unknown";
@@ -19426,7 +19516,7 @@
     }
 
     function getCardAcquiredOrder(card) {
-      const id = String(card && card.id || "");
+      const id = cardIdString(card && card.id);
       const order = Array.isArray(state.collectionOrder) ? state.collectionOrder : [];
       const index = order.indexOf(id);
       if (index >= 0) return index + 1;
@@ -19635,7 +19725,7 @@
     }
 
     function getCardAbilitySearchText(card) {
-      const id = String(card && card.id || "");
+      const id = cardIdString(card && card.id);
       if (CARD_ABILITY_SEARCH_CACHE.has(id)) return CARD_ABILITY_SEARCH_CACHE.get(id);
       const parts = [];
       getCardAbilities(card).forEach(ability => collectAbilitySearchParts(ability, parts));
@@ -19645,7 +19735,7 @@
     }
 
     function getCardSearchText(card) {
-      const id = String(card && card.id || "");
+      const id = cardIdString(card && card.id);
       if (CARD_SEARCH_CACHE.has(id)) return CARD_SEARCH_CACHE.get(id);
       const baseParts = [
         card.id, `id ${card.id}`, `#${card.id}`, card.name, card.rarity,
@@ -19820,7 +19910,7 @@
     }
 
     function getCardTeamMembership(cardId) {
-      const id = String(cardId || "");
+      const id = cardIdString(cardId);
       const showcaseIndex = state.team.indexOf(id);
       const towerIndex = getTowerTeamIds().indexOf(id);
       const arenaTeam = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
@@ -19908,7 +19998,7 @@
     }
 
     function assignCardToTeamSlot(cardId) {
-      const id = String(cardId || "");
+      const id = cardIdString(cardId);
       if (!getOwned(id) || !CARD_BY_ID.has(id)) return showToast("เลือกได้เฉพาะการ์ดที่มีอยู่ในคลัง");
       const mode = teamPickerContext.mode;
       const limit = mode === "arena" ? CONFIG.arenaTeamSlots : mode === "tower" ? CONFIG.towerTeamSlots : CONFIG.teamSlots;
@@ -20042,7 +20132,7 @@
     }
 
     function teamPresetMemberHTML(cardId) {
-      const card = CARD_BY_ID.get(String(cardId || ""));
+      const card = CARD_BY_ID.get(cardIdString(cardId));
       if (!card) return `<span class="team-preset-member">−</span>`;
       const image = getCardImage(card);
       return `<span class="team-preset-member" title="${escapeHTML(card.name)}">${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" decoding="async" onerror="this.parentElement.textContent='${escapeHTML(String(card.name || '?').slice(0, 1))}'">` : escapeHTML(String(card.name || "?").slice(0, 1))}</span>`;
@@ -20232,9 +20322,9 @@
 
         function battleSummaryCardSnapshot(cardLike) {
       if (!cardLike) return null;
-      const source = CARD_BY_ID.get(String(cardLike.id || "")) || cardLike;
+      const source = CARD_BY_ID.get(cardIdString(cardLike.id)) || cardLike;
       return {
-        id: String(source.id || ""),
+        id: cardIdString(source.id),
         name: String(source.name || "Unknown"),
         rarity: String(source.rarity || "N"),
         image: String(source.image ? resolveAsset(source.image, "card") : source.imageURL || source.photoURL || ""),
