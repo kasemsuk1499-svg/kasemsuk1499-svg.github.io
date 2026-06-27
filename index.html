@@ -6358,10 +6358,11 @@
       autoplay: true,
       imageDuration: 6500,
       media: Object.freeze([
-        { src: "assets/banners/MEGUAQUA.png", type: "image", duration: 6500 },
-        { src: "assets/banners/AQUA1.png", type: "image", duration: 6500 },
-        { src: "assets/banners/MEGU1.png", type: "image", duration: 6500 },
-        { src: "assets/banners/KONOSUBAban.mp4", type: "video", poster: "", controls: true }
+        { src: "assets/banners/PG1.png", type: "image", duration: 10000 },
+        { src: "assets/banners/PG2.png", type: "image", duration: 10000 },
+        { src: "assets/banners/PG3.png", type: "image", duration: 10000 },
+        { src: "assets/banners/PG4.png", type: "image", duration: 10000 },
+        { src: "assets/banners/PG5.png", type: "image", duration: 10000 }
         // ตัวอย่างเพิ่มไฟล์:
         // { src: "update_02.jpg", type: "image", duration: 8000 },
         // { src: "update_03.mp4", type: "video", poster: "update_03_poster.jpg", controls: true }
@@ -6790,10 +6791,40 @@
     const CARD_ABILITY_EFFECT_TYPES = Object.freeze({
       TEAM_POWER_RATE: "teamPowerRate",
       TEAM_HP_RATE: "teamHpRate",
+      // Stack Runtime v57: ชนิดกลาง ใช้ targetSide self / ally / enemy / both
+      POWER_RATE_STACK: "powerRateStack",
+      HP_RATE_STACK: "hpRateStack",
+      DEFENSE_RATE_STACK: "defenseRateStack",
+      INCOME_RATE_STACK: "incomeRateStack",
+      POWER_FLAT_STACK: "powerFlatStack",
+      HP_FLAT_STACK: "hpFlatStack",
+      DEFENSE_FLAT_STACK: "defenseFlatStack",
+      INCOME_FLAT_STACK: "incomeFlatStack",
+      CRITICAL_RATE_STACK: "criticalRateStack",
+      DODGE_RATE_STACK: "dodgeRateStack",
+      BLOCK_RATE_STACK: "blockRateStack",
+      DAMAGE_TAKEN_RATE_STACK: "damageTakenRateStack",
+      HEALING_RATE_STACK: "healingRateStack",
+      SHIELD_RECOVERY_RATE_STACK: "shieldRecoveryRateStack",
+      STATUS_RESISTANCE_STACK: "statusResistanceStack",
+      ATTACK_HITS_STACK: "attackHitsStack",
+      SHIELD_HITS_STACK: "shieldHitsStack",
+      ACTIVE_SKILL_COST_CYCLE_STACK: "activeSkillCostCycleStack",
+      ACTIVE_SKILL_COST_PERMANENT_STACK: "activeSkillCostPermanentStack",
+
+      // Alias เดิมเพื่อให้การ์ดเก่ายังทำงาน
       TEAM_POWER_RATE_STACK: "teamPowerRateStack",
+      ENEMY_POWER_RATE_STACK: "enemyPowerRateStack",
+      SELF_POWER_RATE_STACK: "selfPowerRateStack",
       TEAM_HP_RATE_STACK: "teamHpRateStack",
       ENEMY_HP_RATE_STACK: "enemyHpRateStack",
+      SELF_HP_RATE_STACK: "selfHpRateStack",
+      TEAM_DEFENSE_RATE_STACK: "teamDefenseRateStack",
       ENEMY_DEFENSE_RATE_STACK: "enemyDefenseRateStack",
+      SELF_DEFENSE_RATE_STACK: "selfDefenseRateStack",
+      TEAM_INCOME_RATE_STACK: "teamIncomeRateStack",
+      ENEMY_INCOME_RATE_STACK: "enemyIncomeRateStack",
+      SELF_INCOME_RATE_STACK: "selfIncomeRateStack",
       TEAM_DEFENSE_RATE: "teamDefenseRate",
       TEAM_INCOME_RATE: "teamIncomeRate",
       ENEMY_POWER_RATE: "enemyPowerRate",
@@ -6850,12 +6881,39 @@
       TEAM_INCOME_FLAT: "teamIncomeFlat"
     });
 
-    // เอฟเฟกต์สแต็กหลายค่าสำหรับ Active/OnOwnAttack ใช้ตัวนับร่วมผ่าน stackKey
+    // เอฟเฟกต์สแต็กกลาง: ทุกชนิดใช้ maxStacks + stackKey และเลือกฝ่ายด้วย targetSide
     const CARD_ABILITY_STACK_EFFECT_TYPES = new Set([
+      CARD_ABILITY_EFFECT_TYPES.POWER_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.HP_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.DEFENSE_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.INCOME_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.POWER_FLAT_STACK,
+      CARD_ABILITY_EFFECT_TYPES.HP_FLAT_STACK,
+      CARD_ABILITY_EFFECT_TYPES.DEFENSE_FLAT_STACK,
+      CARD_ABILITY_EFFECT_TYPES.INCOME_FLAT_STACK,
+      CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.DODGE_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.HEALING_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS_STACK,
+      CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS_STACK,
+      CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK,
       CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE_STACK,
       CARD_ABILITY_EFFECT_TYPES.TEAM_HP_RATE_STACK,
       CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE_STACK,
-      CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE_STACK
+      CARD_ABILITY_EFFECT_TYPES.SELF_HP_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.ENEMY_INCOME_RATE_STACK,
+      CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE_STACK
     ]);
 
     const CARD_ABILITY_MODES = Object.freeze(["team", "tower", "arena"]);
@@ -6993,29 +7051,6 @@
       }
     ]
   },
-  {
-    "name": "ไฟร์เยอร์เจลเวลิน",
-    "description": "ทุกครั้งที่ตัวละครนี้โจมตี จะทำให้ศัตรูได้รับความเสียหายเพิ่มขึ้น 5% สูงสุด 10 แสต็ก",
-    "activeIn": [
-      "team",
-      "tower",
-      "arena"
-    ],
-    "effects": [
-      {
-        "type": "damageTakenRate",
-        "value": 0.05,
-        "targetSide": "enemy",
-        "maxStacks": 10,
-        "stackKey": "fire_javelin_damage_taken",
-        "condition": {
-          "onOwnAttack": true
-        }
-      }
-    ]
-  }
-]
-},
 {
   "id": 2007,
   "name": "วิส",
@@ -13155,6 +13190,32 @@
       return aliases[type] || type;
     }
 
+    // รวม alias เก่าเข้าชนิด Stack กลาง เพื่อให้เขียนโค้ดได้ทั้งแบบเดิมและแบบใหม่
+    function normalizeAbilityStackEffect(effect = {}) {
+      const rawType = normalizeAbilityEffectType(effect && effect.type);
+      const aliases = {
+        teamPowerRateStack: [CARD_ABILITY_EFFECT_TYPES.POWER_RATE_STACK, "ally"],
+        enemyPowerRateStack: [CARD_ABILITY_EFFECT_TYPES.POWER_RATE_STACK, "enemy"],
+        selfPowerRateStack: [CARD_ABILITY_EFFECT_TYPES.POWER_RATE_STACK, "self"],
+        teamHpRateStack: [CARD_ABILITY_EFFECT_TYPES.HP_RATE_STACK, "ally"],
+        enemyHpRateStack: [CARD_ABILITY_EFFECT_TYPES.HP_RATE_STACK, "enemy"],
+        selfHpRateStack: [CARD_ABILITY_EFFECT_TYPES.HP_RATE_STACK, "self"],
+        teamDefenseRateStack: [CARD_ABILITY_EFFECT_TYPES.DEFENSE_RATE_STACK, "ally"],
+        enemyDefenseRateStack: [CARD_ABILITY_EFFECT_TYPES.DEFENSE_RATE_STACK, "enemy"],
+        selfDefenseRateStack: [CARD_ABILITY_EFFECT_TYPES.DEFENSE_RATE_STACK, "self"],
+        teamIncomeRateStack: [CARD_ABILITY_EFFECT_TYPES.INCOME_RATE_STACK, "ally"],
+        enemyIncomeRateStack: [CARD_ABILITY_EFFECT_TYPES.INCOME_RATE_STACK, "enemy"],
+        selfIncomeRateStack: [CARD_ABILITY_EFFECT_TYPES.INCOME_RATE_STACK, "self"]
+      };
+      const alias = aliases[rawType];
+      const targetSide = String(effect && effect.targetSide || alias && alias[1] || "ally").trim().toLowerCase();
+      return {
+        ...effect,
+        type: alias ? alias[0] : rawType,
+        targetSide: ["self", "ally", "enemy", "both"].includes(targetSide) ? targetSide : "ally"
+      };
+    }
+
     function isCopyAbilityEffect(effect) {
       return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES);
     }
@@ -13275,6 +13336,15 @@
     function getAbilityEffectResistanceCategory(effect = {}) {
       const type = normalizeAbilityEffectType(effect.type);
       const value = Number(effect.value || 0);
+      if (CARD_ABILITY_STACK_EFFECT_TYPES.has(type)) {
+        const stack = normalizeAbilityStackEffect(effect);
+        if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE_STACK, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK].includes(stack.type)) return "cost";
+        if ([CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS_STACK, CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE_STACK, CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE_STACK, CARD_ABILITY_EFFECT_TYPES.DODGE_RATE_STACK].includes(stack.type) && value < 0) return "hitReduction";
+        if (stack.type === CARD_ABILITY_EFFECT_TYPES.HEALING_RATE_STACK && value < 0) return "healingReduction";
+        if ([CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS_STACK, CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE_STACK].includes(stack.type) && value < 0) return "shieldReduction";
+        if (stack.type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE_STACK && value > 0) return "statReduction";
+        if (value < 0) return "statReduction";
+      }
       if ([CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES, CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES].includes(type)) return "transfer";
       if ([CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES, CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS].includes(type)) return "abilityControl";
       if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT].includes(type)) return "cost";
@@ -13301,6 +13371,12 @@
       if (effect.forceResistanceCheck === true) return true;
       const type = normalizeAbilityEffectType(effect.type);
       const value = Number(effect.value || 0);
+      if (CARD_ABILITY_STACK_EFFECT_TYPES.has(type)) {
+        const stack = normalizeAbilityStackEffect(effect);
+        if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE_STACK, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK].includes(stack.type)) return value > 0;
+        if (stack.type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE_STACK) return value > 0;
+        return value < 0;
+      }
       if ([CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES, CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES, CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES, CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS].includes(type)) return true;
       if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT].includes(type)) return value > 0;
       if (type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE) return value > 0;
@@ -14818,6 +14894,14 @@
         nextAttackHits: `เมื่อสกิลทำงาน จำนวนฮิตครั้งถัดไปของ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         increaseMaxHpBaseRate: `เพิ่ม HP สูงสุดและ HP ปัจจุบันจาก HP เบส ${signedPercent(Math.max(0, value))}`,
         increaseAttackRateStack: `สะสม ATK ถาวรระหว่างไฟต์ ${signedPercent(Math.max(0, value))} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        powerRateStack: `สะสม ATK ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        hpRateStack: `สะสม HP ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        defenseRateStack: `สะสม DEF ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        incomeRateStack: `สะสมรายได้ ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        criticalRateStack: `สะสมคริติคอล ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        dodgeRateStack: `สะสมหลบหลีก ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        blockRateStack: `สะสมบล็อก ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        damageTakenRateStack: `สะสมดาเมจที่ได้รับ ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         selfTriggerReduction: `ลดคอส Active Skill รอบปัจจุบันของการ์ดนี้ ${Math.max(0, Math.floor(value))} ครั้ง`,
         activeSkillCost: `คอส Active Skill รอบปัจจุบัน ${targetText} ${value > 0 ? "+" : ""}${Math.round(value)} ครั้ง`,
         activeSkillCostCycle: `คอส Active Skill รอบปัจจุบัน ${targetText} ${value > 0 ? "+" : ""}${Math.round(value)} ครั้ง (ใช้แล้วรีเซ็ต)`,
@@ -15214,6 +15298,10 @@
           initialShieldRecoveryRate: shieldRecoveryRate,
           criticalRate,
           initialCriticalRate: criticalRate,
+          initialIncomeRate: 0,
+          incomeRate: 0,
+          initialIncomeFlat: 0,
+          incomeFlat: 0,
           criticalDamageMultiplier,
           pendingAttackHits: 0,
           pendingCriticalRateChange: 0,
@@ -15383,55 +15471,166 @@
         return applied;
       }
 
-      // ใช้ 1 ชั้นของเอฟเฟกต์สแต็ก โดยคำนวณจากค่าสถานะเริ่มต้นเสมอ
-      // จึงได้ 5% × 8 = 40% ตรงตัว ไม่เกิดการทบต้นผิดจากคำอธิบายสกิล
+      // ใช้ 1 ชั้นของเอฟเฟกต์สแต็ก โดยอ้างอิงค่าสถานะตอนเริ่มไฟต์เสมอ
+      // รองรับ ATK / HP / DEF / Income / CRIT / Dodge / Block / Damage Taken /
+      // Healing / Shield Recovery / Status Resistance / Hit / Shield / Active Cost
+      // และเลือกฝ่าย self / ally / enemy / both พร้อมตัวกรอง ID ธาตุ และระดับ
       function applyRuntimeStackEffects(owner, opponent, effects, turnIndex) {
         const events = [];
         abilityArray(effects).forEach((rawEffect, effectIndex) => {
           if (!rawEffect || typeof rawEffect !== "object") return;
-          const type = normalizeAbilityEffectType(rawEffect.type);
-          if (!CARD_ABILITY_STACK_EFFECT_TYPES.has(type)) return;
-          const value = Number(rawEffect.value || 0);
+          const effect = normalizeAbilityStackEffect(rawEffect);
+          const type = effect.type;
+          if (!CARD_ABILITY_STACK_EFFECT_TYPES.has(normalizeAbilityEffectType(rawEffect.type)) && !CARD_ABILITY_STACK_EFFECT_TYPES.has(type)) return;
+          const value = Number(effect.value || 0);
           if (!value) return;
-          let target = owner;
-          let field = "";
-          let applied = 0;
-          switch (type) {
-            case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE_STACK:
-              target = owner;
-              field = "attack";
-              applied = changeRuntimeNumber(owner, "attack", owner.initialAttack * value, null, n => Math.max(1, n));
-              break;
-            case CARD_ABILITY_EFFECT_TYPES.TEAM_HP_RATE_STACK:
-              target = owner;
-              field = "maxHp";
-              applied = changeRuntimeMaxHp(owner, owner.initialMaxHp * value, null);
-              break;
-            case CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE_STACK:
-              target = opponent;
-              field = "maxHp";
-              applied = changeRuntimeMaxHp(opponent, opponent.initialMaxHp * value, null);
-              break;
-            case CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE_STACK:
-              target = opponent;
-              field = "defense";
-              applied = changeRuntimeNumber(opponent, "defense", Number(opponent.initialDefense || 0) * value, null, n => Math.max(0, n));
-              break;
-            default:
+
+          const rawSide = String(effect.targetSide || "ally").trim().toLowerCase();
+          const targetPairs = rawSide === "both"
+            ? [{ fighter: owner, side: "ally" }, { fighter: opponent, side: "enemy" }]
+            : rawSide === "enemy"
+              ? [{ fighter: opponent, side: "enemy" }]
+              : [{ fighter: owner, side: rawSide === "self" ? "self" : "ally" }];
+
+          targetPairs.forEach(({ fighter: target, side }) => {
+            const sourceCardId = target === owner ? String(effect.sourceCardId || effect._sourceCardId || "") : "";
+            const memberEffect = { ...effect, targetSide: side === "self" ? "self" : "ally" };
+            let members = runtimeTargetMembers(target, sourceCardId, memberEffect);
+            const filter = getAbilityTargetFilter(effect);
+            const hasFilters = filter.ids.length || filter.elements.length || filter.rarities.length;
+            if (!members.length && !hasFilters && side !== "self") members = abilityArray(target.members);
+
+            const resisted = [];
+            if (target === opponent && isHarmfulAbilityEffect(effect) && members.length) {
+              members = members.filter(member => {
+                const check = shouldAbilityEffectBeResisted(
+                  member.statusResistanceRules,
+                  { ...effect, forceResistanceCheck: true },
+                  `${options.statusResolutionSeed || "runtime-stack"}`,
+                  `${effect._runtimeEffectKey || effect.stackKey || type}:${member.id}:${turnIndex}:${effectIndex}`
+                );
+                if (check.resisted) resisted.push({ id: String(member.id), rate: check.rate });
+                return !check.resisted;
+              });
+            }
+            if ((hasFilters && !members.length) || (resisted.length && !members.length)) {
+              events.push({ type, value, applied: 0, field: "resisted", target: side, resisted, stackKey: String(effect.stackKey || "sharedStack"), turnIndex });
               return;
-          }
-          events.push({
-            type,
-            value,
-            applied,
-            field,
-            target: target === owner ? "self" : "enemy",
-            stackKey: String(rawEffect.stackKey || "sharedStack"),
-            stack: Math.max(1, Math.floor(Number(rawEffect.nextStack || 1))),
-            maxStacks: Math.max(1, Math.floor(Number(rawEffect.maxStacks || 1))),
-            sourceCardId: String(rawEffect.sourceCardId || ""),
-            sourceAbilityName: String(rawEffect.sourceAbilityName || ""),
-            turnIndex
+            }
+
+            const powerBase = members.length ? runtimeMemberStatTotal(target, members, "power") : target.initialAttack;
+            const hpBase = members.length ? runtimeMemberStatTotal(target, members, "hp") : target.initialMaxHp;
+            const defenseBase = members.length ? runtimeMemberStatTotal(target, members, "defense") : Number(target.initialDefense || 0);
+            const weightedRate = target.initialAttack > 0 ? powerBase / target.initialAttack : 1;
+            let field = "";
+            let applied = 0;
+
+            switch (type) {
+              case CARD_ABILITY_EFFECT_TYPES.POWER_RATE_STACK:
+                field = "attack";
+                applied = changeRuntimeNumber(target, "attack", powerBase * value, null, n => Math.max(1, n));
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.HP_RATE_STACK:
+                field = "maxHp";
+                applied = changeRuntimeMaxHp(target, hpBase * value, null);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.DEFENSE_RATE_STACK:
+                field = "defense";
+                applied = changeRuntimeNumber(target, "defense", defenseBase * value, null, n => Math.max(0, n));
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.INCOME_RATE_STACK:
+                field = "incomeRate";
+                applied = changeRuntimeNumber(target, "incomeRate", value, null, n => Math.max(-0.99, n));
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.POWER_FLAT_STACK:
+                field = "attack";
+                applied = changeRuntimeNumber(target, "attack", value, null, n => Math.max(1, n));
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.HP_FLAT_STACK:
+                field = "maxHp";
+                applied = changeRuntimeMaxHp(target, value, null);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.DEFENSE_FLAT_STACK:
+                field = "defense";
+                applied = changeRuntimeNumber(target, "defense", value, null, n => Math.max(0, n));
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.INCOME_FLAT_STACK:
+                field = "incomeFlat";
+                applied = changeRuntimeNumber(target, "incomeFlat", value, null);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE_STACK:
+                field = "criticalRate";
+                applied = changeRuntimeNumber(target, "criticalRate", value * weightedRate, null, clampCriticalRate);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.DODGE_RATE_STACK:
+              case CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE_STACK:
+              case CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE_STACK: {
+                field = type === CARD_ABILITY_EFFECT_TYPES.DODGE_RATE_STACK ? "dodgeRate"
+                  : type === CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE_STACK ? "blockRate" : "damageTakenRate";
+                const clamp = field === "dodgeRate" ? clampDodgeRate : field === "blockRate" ? clampBlockRate : clampDamageTakenRate;
+                members.forEach(member => { applied += changeRuntimeNumber(member, field, value, null, clamp); });
+                break;
+              }
+              case CARD_ABILITY_EFFECT_TYPES.HEALING_RATE_STACK:
+                field = "healingRate";
+                applied = changeRuntimeNumber(target, "healingRate", value, null, clampRate);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE_STACK:
+                field = "shieldRecoveryRate";
+                applied = changeRuntimeNumber(target, "shieldRecoveryRate", value, null, clampRate);
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE_STACK: {
+                field = "statusResistance";
+                const rule = makeStatusResistanceRule({ ...effect, type: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE, value }, {
+                  sourceCard: runtimeRosterItem(owner, sourceCardId) && runtimeRosterItem(owner, sourceCardId).card,
+                  ability: { name: String(effect.sourceAbilityName || effect._sourceAbilityName || "Stack Skill") },
+                  key: String(effect._runtimeEffectKey || `${effect.stackKey || "stack"}:${turnIndex}`)
+                });
+                members.forEach(member => { member.statusResistanceRules.push({ ...rule }); applied += Number(rule.rate || 0); });
+                break;
+              }
+              case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS_STACK:
+                field = "attackHits";
+                applied = changeRuntimeNumber(target, "attackHits", Math.round(value), null, n => applyCombatAttackHitModifier(0, n));
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS_STACK:
+                field = "shieldHits";
+                applied = changeRuntimeNumber(target, "shieldHits", Math.round(value), null, n => applyCombatShieldHitModifier(0, n));
+                break;
+              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE_STACK:
+              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK: {
+                field = type === CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK ? "permanentCostChange" : "cycleCostChange";
+                const memberIds = new Set(members.map(member => String(member.id)));
+                const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
+                target.activeTriggers.forEach(trigger => {
+                  if (memberIds.size && !memberIds.has(String(trigger.sourceCardId))) return;
+                  if (trigger.onOwnAttack || trigger.onBattleStart) return;
+                  const before = Number(trigger[field]) || 0;
+                  trigger[field] = Math.max(-(cap - 1), Math.min(cap - 1, before + Math.round(value)));
+                  trigger.afterOwnAttacks = Math.max(1, trigger.baseAfterOwnAttacks + trigger.permanentCostChange + trigger.cycleCostChange);
+                  applied += trigger[field] - before;
+                });
+                break;
+              }
+              default:
+                return;
+            }
+
+            events.push({
+              type,
+              value,
+              applied,
+              field,
+              target: side,
+              targetCardIds: members.map(member => String(member.id)),
+              resisted,
+              stackKey: String(effect.stackKey || "sharedStack"),
+              stack: Math.max(1, Math.floor(Number(effect.nextStack || 1))),
+              maxStacks: Math.max(1, Math.floor(Number(effect.maxStacks || 1))),
+              sourceCardId: String(effect.sourceCardId || effect._sourceCardId || ""),
+              sourceAbilityName: String(effect.sourceAbilityName || effect._sourceAbilityName || ""),
+              turnIndex
+            });
           });
         });
         return events;
@@ -16821,7 +17020,9 @@
         .map(record => String(record.triggerKey || record.key)));
       abilityArray(summary.triggeredEffects).forEach(record => {
         if (!record || !record.effect || !record.trigger) return;
-        const effect = record.effect;
+        const rawEffect = record.effect;
+        const rawEffectType = normalizeAbilityEffectType(rawEffect.type);
+        const effect = CARD_ABILITY_STACK_EFFECT_TYPES.has(rawEffectType) ? normalizeAbilityStackEffect(rawEffect) : rawEffect;
         const selected = items.filter(item => battleItemMatchesTarget(item, effect, record.sourceCard));
         const filter = getAbilityTargetFilter(effect);
         const hasFilters = filter.ids.length || filter.elements.length || filter.rarities.length;
@@ -16970,14 +17171,32 @@
           case CARD_ABILITY_EFFECT_TYPES.INCREASE_MAX_HP_BASE_RATE:
             group.maxHpGain += Math.max(0, targetHp * value);
             break;
-          case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE_STACK:
-          case CARD_ABILITY_EFFECT_TYPES.TEAM_HP_RATE_STACK:
-          case CARD_ABILITY_EFFECT_TYPES.ENEMY_HP_RATE_STACK:
-          case CARD_ABILITY_EFFECT_TYPES.ENEMY_DEFENSE_RATE_STACK: {
+          case CARD_ABILITY_EFFECT_TYPES.POWER_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.HP_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.DEFENSE_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.INCOME_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.POWER_FLAT_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.HP_FLAT_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.DEFENSE_FLAT_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.INCOME_FLAT_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.DODGE_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.HEALING_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE_STACK:
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK: {
             const effectMaxStacks = Math.max(1, Math.min(99, Math.floor(Number(effect.maxStacks) || 1)));
             group.stackEffects.push({
+              ...effect,
               type: effectType,
               value,
+              sourceCardId: cardIdString(record.sourceCard && record.sourceCard.id),
+              sourceAbilityName: String(record.ability && record.ability.name || ""),
               stackKey: String(effect.stackKey || stackKey || group.stackKey || "sharedStack"),
               maxStacks: effectMaxStacks,
               _runtimeEffectKey: String(record.key || effect._runtimeEffectKey || "")
@@ -17055,13 +17274,15 @@
         enemyNextAttackCriticalRate: Math.max(-1, Math.min(1, Number(item.enemyNextAttackCriticalRate || 0))),
         maxHpGain: Math.max(0, Math.min(teamHp * 10, Number(item.maxHpGain || 0))),
         attackStackGain: Math.max(0, Math.min(teamPower, Number(item.attackStackGain || 0))),
-        stackEffects: abilityArray(item.stackEffects).map(effect => ({
-          ...effect,
-          type: normalizeAbilityEffectType(effect && effect.type),
-          value: Number(effect && effect.value || 0),
-          stackKey: String(effect && effect.stackKey || item.stackKey || "sharedStack"),
-          maxStacks: Math.max(1, Math.min(99, Math.floor(Number(effect && effect.maxStacks || item.maxStacks || 1))))
-        })).filter(effect => CARD_ABILITY_STACK_EFFECT_TYPES.has(effect.type) && effect.value),
+        stackEffects: abilityArray(item.stackEffects).map(effect => {
+          const normalized = normalizeAbilityStackEffect(effect || {});
+          return {
+            ...normalized,
+            value: Number(normalized.value || 0),
+            stackKey: String(normalized.stackKey || item.stackKey || "sharedStack"),
+            maxStacks: Math.max(1, Math.min(99, Math.floor(Number(normalized.maxStacks || item.maxStacks || 1))))
+          };
+        }).filter(effect => CARD_ABILITY_STACK_EFFECT_TYPES.has(effect.type) && effect.value),
         stackKey: String(item.stackKey || ""),
         maxStacks: Math.max(0, Math.min(99, Math.floor(Number(item.maxStacks || 0)))),
         triggerCostChanges: Object.fromEntries(Object.entries(item.triggerCostChanges || {}).map(([id, change]) => [String(id), Math.round(Number(change) || 0)]).filter(([, change]) => change)),
