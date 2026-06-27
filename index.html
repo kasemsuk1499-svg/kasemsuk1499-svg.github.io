@@ -7053,6 +7053,27 @@
         }
       }
     ]
+  },
+  {
+    "name": "ไฟร์เยอร์เจลเวลิน",
+    "description": "ทุกครั้งที่ตัวละครนี้โจมตี จะทำให้ศัตรูได้รับความเสียหายเพิ่มขึ้น 5% สูงสุด 10 แสต็ก",
+    "activeIn": [
+      "team",
+      "tower",
+      "arena"
+    ],
+    "effects": [
+      {
+        "type": "damageTakenRate",
+        "value": 0.05,
+        "targetSide": "enemy",
+        "maxStacks": 10,
+        "stackKey": "fire_javelin_damage_taken",
+        "condition": {
+          "onOwnAttack": true
+        }
+      }
+    ]
   }
 ]
 },
