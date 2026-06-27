@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-27-full-stack-runtime-v57-checked">
-  <title>Anime Card Collection · Full Stack Runtime v57 Checked</title>
+  <meta name="gacha-app-build" content="2026-06-27-unlimited-runtime-v58">
+  <title>Anime Card Collection · Unlimited Runtime v58</title>
   <style>
     :root {
       color-scheme: dark;
@@ -6175,12 +6175,14 @@
       // เพิ่มโดยอลิซ: ระบบคริติคอลแทนค่าโชคเดิม
       // ค่า 0.05 = โอกาสคริติคอลพื้นฐาน 5% และคริติคอลสร้างดาเมจ x1.5
       combatBaseCriticalRate: 0.05,
-      combatMaxCriticalRate: 999,
+      // Unlimited Runtime v58: ไม่มีเพดานค่าบวกของสกิล/สแต็ก
+      // ค่าเรทเกิน 100% จะถูกเก็บเป็นแต้มสำรอง แต่การสุ่มหนึ่งครั้งยังเป็นเหตุการณ์ 0–100% ตามคณิตศาสตร์
+      combatMaxCriticalRate: Number.POSITIVE_INFINITY,
       combatCriticalDamageMultiplier: 2,
       combatMultiHitPenalty: 0.025,
       combatMultiHitMinEfficiency: 0.82,
-      combatMaxAttackHits: 9999,
-      combatMaxShieldHits: 9999,
+      combatMaxAttackHits: Number.POSITIVE_INFINITY,
+      combatMaxShieldHits: Number.POSITIVE_INFINITY,
       // ต่อสู้ผลัดกันตีจน HP ฝ่ายใดฝ่ายหนึ่งหมด
       combatMaxTurns: 900,
       combatFatigueStartRound: 18,
@@ -6191,22 +6193,22 @@
       totalPowerHitWeight: 0.03,
       totalPowerShieldWeight: 0.025,
       // เพดานระบบ Active Skill แบบชาร์จจำนวนครั้งโจมตี
-      combatMaxTriggerChargeAttacks: 9999,
-      combatMaxTriggeredAttackRate: 9999,
-      combatMaxTriggeredHealRate: 9999,
-      combatMaxTriggeredExtraHits: 9999,
-      combatMaxTriggeredShieldHits: 9999,
+      combatMaxTriggerChargeAttacks: Number.POSITIVE_INFINITY,
+      combatMaxTriggeredAttackRate: Number.POSITIVE_INFINITY,
+      combatMaxTriggeredHealRate: Number.POSITIVE_INFINITY,
+      combatMaxTriggeredExtraHits: Number.POSITIVE_INFINITY,
+      combatMaxTriggeredShieldHits: Number.POSITIVE_INFINITY,
       // ระบบป้องกันขั้นสุดท้าย: หลบก่อน DEF, บล็อกหลัง DEF, แล้วคูณ damageTakenRate เป็นขั้นสุดท้าย
       combatBlockDamageMultiplier: 0.50,
-      combatMaxBlockRate: 999.00,
-      combatMaxDodgeRate: 999.00,
-      combatMaxStatusResistanceRate: 999.00,
-      combatMaxCopiedAbilities: 999,
-      combatMaxCopiedAbilityDurationAttacks: 9999,
-      combatMaxCopiedAbilityDurationTurns: 9999,
-      combatMaxCopiedAbilityUses: 9999,
+      combatMaxBlockRate: Number.POSITIVE_INFINITY,
+      combatMaxDodgeRate: Number.POSITIVE_INFINITY,
+      combatMaxStatusResistanceRate: Number.POSITIVE_INFINITY,
+      combatMaxCopiedAbilities: Number.POSITIVE_INFINITY,
+      combatMaxCopiedAbilityDurationAttacks: Number.POSITIVE_INFINITY,
+      combatMaxCopiedAbilityDurationTurns: Number.POSITIVE_INFINITY,
+      combatMaxCopiedAbilityUses: Number.POSITIVE_INFINITY,
       combatMinDamageTakenRate: -1.00,
-      combatMaxDamageTakenRate: 9999
+      combatMaxDamageTakenRate: Number.POSITIVE_INFINITY
     });
 
     // เพิ่มโดยอลิซ: รางวัลล็อกอินเฉพาะ 7 วันแรก (นับวันรับ ไม่บังคับให้ต่อเนื่อง)
@@ -6791,7 +6793,7 @@
     const CARD_ABILITY_EFFECT_TYPES = Object.freeze({
       TEAM_POWER_RATE: "teamPowerRate",
       TEAM_HP_RATE: "teamHpRate",
-      // Stack Runtime v57: ชนิดกลาง ใช้ targetSide self / ally / enemy / both
+      // Unlimited Runtime v58: ชนิดกลาง ใช้ targetSide self / ally / enemy / both และไม่มีเพดานค่าบวก
       POWER_RATE_STACK: "powerRateStack",
       HP_RATE_STACK: "hpRateStack",
       DEFENSE_RATE_STACK: "defenseRateStack",
@@ -13452,12 +13454,12 @@
     }
 
     function getStatusResistanceRate(rules, effect = {}, scope = "target") {
-      const cap = Math.max(0, Math.min(1, Number(CONFIG.combatMaxStatusResistanceRate ?? 1)));
       const total = abilityArray(rules)
         .filter(rule => (scope !== "field" || String(rule && rule.scope || "target") === "field"))
         .filter(rule => statusResistanceRuleMatches(rule, effect))
         .reduce((sum, rule) => sum + (Number(rule && rule.rate) || 0), 0);
-      return Math.max(0, Math.min(cap, total));
+      // Unlimited v58: เก็บค่าต้านสำรองได้ไม่จำกัด; ตอนสุ่ม ค่า >= 1 คือการต้านสำเร็จแน่นอน
+      return Math.max(0, total);
     }
 
     function shouldAbilityEffectBeResisted(rules, effect, seed, key, scope = "target") {
@@ -14452,37 +14454,34 @@
       summary.enemyHpRate = Math.max(-0.90, summary.enemyHpRate);
       summary.enemyDefenseRate = Math.max(-0.90, summary.enemyDefenseRate);
       Object.keys(summary.cardCriticalRates).forEach(id => {
-        summary.cardCriticalRates[id] = Math.max(-1, Math.min(1, Number(summary.cardCriticalRates[id]) || 0));
+        summary.cardCriticalRates[id] = Math.max(-1, Number(summary.cardCriticalRates[id]) || 0);
       });
       Object.keys(summary.cardBlockRates).forEach(id => {
-        summary.cardBlockRates[id] = Math.max(-1, Math.min(1, Number(summary.cardBlockRates[id]) || 0));
+        summary.cardBlockRates[id] = Math.max(-1, Number(summary.cardBlockRates[id]) || 0);
       });
       Object.keys(summary.cardDodgeRates).forEach(id => {
-        summary.cardDodgeRates[id] = Math.max(-1, Math.min(1, Number(summary.cardDodgeRates[id]) || 0));
+        summary.cardDodgeRates[id] = Math.max(-1, Number(summary.cardDodgeRates[id]) || 0);
       });
       Object.keys(summary.cardDamageTakenRates).forEach(id => {
-        summary.cardDamageTakenRates[id] = Math.max(Number(CONFIG.combatMinDamageTakenRate || -1), Math.min(Number(CONFIG.combatMaxDamageTakenRate || 5), Number(summary.cardDamageTakenRates[id]) || 0));
+        summary.cardDamageTakenRates[id] = Math.max(Number(CONFIG.combatMinDamageTakenRate || -1), Number(summary.cardDamageTakenRates[id]) || 0);
       });
-      const maxAttackHitDelta = Math.max(0, Number(CONFIG.combatMaxAttackHits || 1) - 1);
-      const maxShieldHitDelta = Math.max(0, Number(CONFIG.combatMaxShieldHits || 0));
-      summary.attackHits = Math.max(-maxAttackHitDelta, Math.min(maxAttackHitDelta, Math.round(summary.attackHits)));
-      summary.shieldHits = Math.max(-maxShieldHitDelta, Math.min(maxShieldHitDelta, Math.round(summary.shieldHits)));
-      summary.enemyAttackHits = Math.max(-maxAttackHitDelta, Math.min(maxAttackHitDelta, Math.round(summary.enemyAttackHits)));
-      summary.enemyShieldHits = Math.max(-maxShieldHitDelta, Math.min(maxShieldHitDelta, Math.round(summary.enemyShieldHits)));
-      summary.healingRate = Math.max(-1, Math.min(5, Number(summary.healingRate) || 0));
-      summary.enemyHealingRate = Math.max(-1, Math.min(5, Number(summary.enemyHealingRate) || 0));
-      summary.shieldRecoveryRate = Math.max(-1, Math.min(5, Number(summary.shieldRecoveryRate) || 0));
-      summary.enemyShieldRecoveryRate = Math.max(-1, Math.min(5, Number(summary.enemyShieldRecoveryRate) || 0));
+      summary.attackHits = Math.round(Number(summary.attackHits) || 0);
+      summary.shieldHits = Math.round(Number(summary.shieldHits) || 0);
+      summary.enemyAttackHits = Math.round(Number(summary.enemyAttackHits) || 0);
+      summary.enemyShieldHits = Math.round(Number(summary.enemyShieldHits) || 0);
+      summary.healingRate = Math.max(-1, Number(summary.healingRate) || 0);
+      summary.enemyHealingRate = Math.max(-1, Number(summary.enemyHealingRate) || 0);
+      summary.shieldRecoveryRate = Math.max(-1, Number(summary.shieldRecoveryRate) || 0);
+      summary.enemyShieldRecoveryRate = Math.max(-1, Number(summary.enemyShieldRecoveryRate) || 0);
       summary.criticalRate = getTeamCriticalRate(context.cards, summary, false);
       Object.keys(summary.gachaRarityRates).forEach(rarity => {
-        summary.gachaRarityRates[rarity] = Math.max(-0.90, Math.min(5, Number(summary.gachaRarityRates[rarity]) || 0));
+        summary.gachaRarityRates[rarity] = Math.max(-0.90, Number(summary.gachaRarityRates[rarity]) || 0);
       });
-      const triggerCostCap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
       Object.keys(summary.triggerCostChanges).forEach(id => {
-        summary.triggerCostChanges[id] = Math.max(-(triggerCostCap - 1), Math.min(triggerCostCap - 1, Math.round(Number(summary.triggerCostChanges[id]) || 0)));
+        summary.triggerCostChanges[id] = Math.round(Number(summary.triggerCostChanges[id]) || 0);
       });
       Object.keys(summary.permanentTriggerCostChanges).forEach(id => {
-        summary.permanentTriggerCostChanges[id] = Math.max(-(triggerCostCap - 1), Math.min(triggerCostCap - 1, Math.round(Number(summary.permanentTriggerCostChanges[id]) || 0)));
+        summary.permanentTriggerCostChanges[id] = Math.round(Number(summary.permanentTriggerCostChanges[id]) || 0);
       });
       return summary;
     }
@@ -14629,7 +14628,7 @@
             const uniqueKey = `${entry.key}:${effectIndex}`;
             if (seenEffects.has(uniqueKey)) return;
             seenEffects.add(uniqueKey);
-            const value = Math.max(-0.90, Math.min(5, Number(effect.value) || 0));
+            const value = Math.max(-0.90, Number(effect.value) || 0);
             const rarities = normalizeAbilityRarities(effect.targetRarities || effect.rarities);
             addAbilityMapRate(summary.rarityRateBonuses, rarities, value);
             summary.activeEffects.push({ sourceCard: entry.sourceCard, ability: entry.ability, effect: { ...effect, value }, mode: scope.mode });
@@ -14638,7 +14637,7 @@
       });
 
       Object.keys(summary.rarityRateBonuses).forEach(rarity => {
-        summary.rarityRateBonuses[rarity] = Math.max(-0.90, Math.min(5, Number(summary.rarityRateBonuses[rarity]) || 0));
+        summary.rarityRateBonuses[rarity] = Math.max(-0.90, Number(summary.rarityRateBonuses[rarity]) || 0);
       });
       return summary;
     }
@@ -14701,8 +14700,8 @@
     }
 
     function clampCriticalRate(value) {
-      const cap = Math.max(0, Math.min(1, Number(CONFIG.combatMaxCriticalRate ?? 1)));
-      return Math.max(0, Math.min(cap, Number(value) || 0));
+      // Unlimited v58: ค่าเกิน 100% เก็บเป็นแต้มสำรองได้; ตอนสุ่มค่า >= 1 คือคริติคอลแน่นอน
+      return Math.max(0, Number(value) || 0);
     }
 
     function getAbilityAdjustedCardCriticalRate(card, abilitySummary = {}) {
@@ -14748,15 +14747,15 @@
     }
 
     function clampBlockRate(value) {
-      return Math.max(0, Math.min(Number(CONFIG.combatMaxBlockRate || 1), Number(value) || 0));
+      return Math.max(0, Number(value) || 0);
     }
 
     function clampDodgeRate(value) {
-      return Math.max(0, Math.min(Number(CONFIG.combatMaxDodgeRate || 1), Number(value) || 0));
+      return Math.max(0, Number(value) || 0);
     }
 
     function clampDamageTakenRate(value) {
-      return Math.max(Number(CONFIG.combatMinDamageTakenRate || -1), Math.min(Number(CONFIG.combatMaxDamageTakenRate || 5), Number(value) || 0));
+      return Math.max(Number(CONFIG.combatMinDamageTakenRate || -1), Number(value) || 0);
     }
 
     function getAbilityAdjustedCardBlockRate(card, abilitySummary = {}) {
@@ -14894,7 +14893,7 @@
         ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
         nextAttackPowerRate: `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
         nextAttackPowerFlat: `โจมตีครั้งที่สกิลทำงาน ATK +${formatNumber(value)}`,
-        nextAttackCriticalRate: `โจมตีครั้งที่สกิลทำงาน คริติคอล ${signedPercent(Math.max(-1, Math.min(1, value)))} (ชั่วคราว)`,
+        nextAttackCriticalRate: `โจมตีครั้งที่สกิลทำงาน คริติคอล ${signedPercent(Math.max(-1, value))} (ชั่วคราว)`,
         blockRate: `อัตราบล็อก ${targetText} ${signedPercent(value)} (บล็อกแล้วดาเมจส่วนตัวลด 50%)`,
         damageTakenRate: `ดาเมจที่ได้รับขั้นสุดท้าย ${targetText} ${signedPercent(value)}`,
         dodgeRate: `อัตราหลบหลีก ${targetText} ${signedPercent(value)}`,
@@ -15077,8 +15076,8 @@
       const safeAttack = Math.max(0, Number(attack) || 0);
       const safeHp = Math.max(0, Number(hp) || 0);
       const safeDefense = Math.max(0, Number(defense) || 0);
-      const hits = Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(attackHits) || 1)));
-      const shields = Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(shieldHits) || 0)));
+      const hits = Math.max(1, Math.round(Number(attackHits) || 1));
+      const shields = Math.max(0, Math.round(Number(shieldHits) || 0));
       const base = safeAttack
         + safeHp * Number(CONFIG.totalPowerHpWeight || .45)
         + safeDefense * Number(CONFIG.totalPowerDefenseWeight || 1.10);
@@ -15089,11 +15088,11 @@
     }
 
     function applyCombatAttackHitModifier(baseHits = 1, modifier = 0) {
-      return Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(baseHits || 1) + Number(modifier || 0))));
+      return Math.max(1, Math.round(Number(baseHits || 1) + Number(modifier || 0)));
     }
 
     function applyCombatShieldHitModifier(baseHits = 0, modifier = 0) {
-      return Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(baseHits || 0) + Number(modifier || 0))));
+      return Math.max(0, Math.round(Number(baseHits || 0) + Number(modifier || 0)));
     }
 
     function getCombatAttackHits(abilitySummary = {}, opposingModifier = 0) {
@@ -15105,18 +15104,18 @@
     }
 
     function getCombatHealingRate(abilitySummary = {}, opposingModifier = 0) {
-      return Math.max(-1, Math.min(5, Number(abilitySummary.healingRate || 0) + Number(opposingModifier || 0)));
+      return Math.max(-1, Number(abilitySummary.healingRate || 0) + Number(opposingModifier || 0));
     }
 
     function getCombatShieldRecoveryRate(abilitySummary = {}, opposingModifier = 0) {
-      return Math.max(-1, Math.min(5, Number(abilitySummary.shieldRecoveryRate || 0) + Number(opposingModifier || 0)));
+      return Math.max(-1, Number(abilitySummary.shieldRecoveryRate || 0) + Number(opposingModifier || 0));
     }
 
     function resolveCombatExchange(attackerAttack, defenderDefense, attackHits = 1, shieldHits = 0, variance = 1, defenseOptions = {}) {
       const attack = Math.max(1, Number(attackerAttack || 0) * Math.max(.2, Number(variance) || 1));
       const defense = Math.max(0, Number(defenderDefense || 0));
-      const hits = Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(attackHits) || 1)));
-      const shields = Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(shieldHits) || 0)));
+      const hits = Math.max(1, Math.round(Number(attackHits) || 1));
+      const shields = Math.max(0, Math.round(Number(shieldHits) || 0));
 
       // 1) โล่ตัดจำนวนฮิตก่อน 2) หลบตามสัดส่วน HP ของแต่ละการ์ดก่อน DEF
       // 3) คิด DEF เฉพาะส่วนที่ไม่หลบ 4) บล็อกลด 50% 5) damageTakenRate เป็นตัวคูณขั้นสุดท้าย
@@ -15182,9 +15181,9 @@
     // เพิ่มโดยอลิซ: จำลองการต่อสู้แบบผลัดกันตีจน HP ฝ่ายใดฝ่ายหนึ่งหมด
     // โล่เป็นจำนวนฮิตรวมต่อหนึ่งการต่อสู้ ไม่รีเซ็ตทุกเทิร์น
     function buildTurnBasedCombat(options = {}) {
-      const clampRate = value => Math.max(-1, Math.min(5, Number(value) || 0));
-      const clampTemporaryCriticalRate = value => Math.max(-1, Math.min(1, Number(value) || 0));
-      const clampPendingHits = value => Math.max(-(Number(CONFIG.combatMaxAttackHits || 1) - 1), Math.min(Number(CONFIG.combatMaxAttackHits || 1) - 1, Math.round(Number(value) || 0)));
+      const clampRate = value => Math.max(-1, Number(value) || 0);
+      const clampTemporaryCriticalRate = value => Math.max(-1, Number(value) || 0);
+      const clampPendingHits = value => Math.round(Number(value) || 0);
 
       function runtimeTriggerMode(item = {}) {
         const raw = String(item.triggerOn || "").trim().toLowerCase();
@@ -15208,7 +15207,7 @@
           triggerOn: runtimeTriggerMode(item),
           baseAfterOwnAttacks: runtimeTriggerMode(item) !== "nextAttack"
             ? 0
-            : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Math.floor(Number(item.baseAfterOwnAttacks ?? item.afterOwnAttacks) || 1))),
+            : Math.max(1, Math.floor(Number(item.baseAfterOwnAttacks ?? item.afterOwnAttacks) || 1)),
           permanentCostChange: Math.round(Number(item.permanentCostChange) || 0),
           cycleCostChange: Math.round(Number(item.cycleCostChange) || 0),
           afterOwnAttacks: 0,
@@ -15223,8 +15222,8 @@
           enemyHealingRateChange: clampRate(item.enemyHealingRateChange),
           shieldRecoveryRateChange: clampRate(item.shieldRecoveryRateChange),
           enemyShieldRecoveryRateChange: clampRate(item.enemyShieldRecoveryRateChange),
-          criticalRateChange: Math.max(-1, Math.min(1, Number(item.criticalRateChange) || 0)),
-          enemyCriticalRateChange: Math.max(-1, Math.min(1, Number(item.enemyCriticalRateChange) || 0)),
+          criticalRateChange: Math.max(-1, Number(item.criticalRateChange) || 0),
+          enemyCriticalRateChange: Math.max(-1, Number(item.enemyCriticalRateChange) || 0),
           nextAttackCriticalRate: clampTemporaryCriticalRate(item.nextAttackCriticalRate),
           enemyNextAttackCriticalRate: clampTemporaryCriticalRate(item.enemyNextAttackCriticalRate),
           maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
@@ -15615,7 +15614,7 @@
               }
               case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS_STACK:
                 field = "attackHits";
-                applied = changeRuntimeNumber(target, "attackHits", Math.round(value), null, n => Math.max(1, Math.min(Number(CONFIG.combatMaxAttackHits || 1), Math.round(Number(n) || 1))));
+                applied = changeRuntimeNumber(target, "attackHits", Math.round(value), null, n => Math.max(1, Math.round(Number(n) || 1)));
                 break;
               case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS_STACK:
                 field = "shieldHits";
@@ -15625,12 +15624,11 @@
               case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK: {
                 field = type === CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK ? "permanentCostChange" : "cycleCostChange";
                 const memberIds = new Set(members.map(member => String(member.id)));
-                const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
                 target.activeTriggers.forEach(trigger => {
                   if (memberIds.size && !memberIds.has(String(trigger.sourceCardId))) return;
                   if (trigger.onOwnAttack || trigger.onBattleStart) return;
                   const before = Number(trigger[field]) || 0;
-                  trigger[field] = Math.max(-(cap - 1), Math.min(cap - 1, before + Math.round(value)));
+                  trigger[field] = before + Math.round(value);
                   trigger.afterOwnAttacks = Math.max(1, trigger.baseAfterOwnAttacks + trigger.permanentCostChange + trigger.cycleCostChange);
                   applied += trigger[field] - before;
                 });
@@ -16024,7 +16022,7 @@
               trigger.charge = 0;
               trigger.armed = false;
               trigger.cycleCostChange = 0;
-              trigger.afterOwnAttacks = Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), trigger.baseAfterOwnAttacks + trigger.permanentCostChange));
+              trigger.afterOwnAttacks = Math.max(1, trigger.baseAfterOwnAttacks + trigger.permanentCostChange);
               if (!trigger.repeat) trigger.completed = true;
             }
           });
@@ -16159,7 +16157,7 @@
             trigger.armed = false;
             // คอสชั่วคราวมีผลเฉพาะรอบที่เพิ่งใช้ Active; รอบใหม่คืนฐาน + คอสถาวร
             trigger.cycleCostChange = 0;
-            trigger.afterOwnAttacks = Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), trigger.baseAfterOwnAttacks + trigger.permanentCostChange));
+            trigger.afterOwnAttacks = Math.max(1, trigger.baseAfterOwnAttacks + trigger.permanentCostChange);
             if (!trigger.repeat) trigger.completed = true;
             return;
           }
@@ -16362,7 +16360,7 @@
         if (requested > 0) {
           const multiplier = Math.max(0, 1 + Number(fighter.shieldRecoveryRate || 0));
           requested = Math.max(0, Math.floor(requested * multiplier + 1e-9));
-          const gained = Math.max(0, Math.min(Number(CONFIG.combatMaxShieldHits || 0) - fighter.shieldHits, requested));
+          const gained = Math.max(0, requested);
           fighter.shieldHits += gained;
           return gained;
         }
@@ -17081,12 +17079,12 @@
             triggerOn: record.trigger.onOwnAttack ? "ownAttack" : "nextAttack",
             baseAfterOwnAttacks: record.trigger.onOwnAttack
               ? 0
-              : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1))),
+              : Math.max(1, Number(record.trigger.afterOwnAttacks || 1)),
             permanentCostChange: Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0),
             cycleCostChange: Number(summary.triggerCostChanges && summary.triggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0),
             afterOwnAttacks: record.trigger.onOwnAttack
               ? 0
-              : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0))),
+              : Math.max(1, Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0)),
             repeat: record.trigger.onOwnAttack ? true : record.trigger.repeat !== false,
             requiresActivationKey: String(record.requiresActivationKey || ""),
             requiredDomainId: String(record.trigger && record.trigger.requiredDomainId || ""),
@@ -17218,7 +17216,7 @@
           case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS_STACK:
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE_STACK:
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK: {
-            const effectMaxStacks = Math.max(1, Math.min(99, Math.floor(Number(effect.maxStacks) || 1)));
+            const effectMaxStacks = Math.max(1, Math.floor(Number(effect.maxStacks) || 1));
             group.stackEffects.push({
               ...effect,
               type: effectType,
@@ -17294,18 +17292,18 @@
         ...item,
         attackBonus: Math.max(-teamPower * .90, Math.min(attackCap, Number(item.attackBonus || 0))),
         healHp: Math.max(0, Math.min(healCap, Number(item.healHp || 0))),
-        extraHits: Math.max(-Number(CONFIG.combatMaxTriggeredExtraHits || 20), Math.min(Number(CONFIG.combatMaxTriggeredExtraHits || 20), Math.round(item.extraHits || 0))),
-        enemyNextAttackHits: Math.max(-Number(CONFIG.combatMaxTriggeredExtraHits || 20), Math.min(Number(CONFIG.combatMaxTriggeredExtraHits || 20), Math.round(item.enemyNextAttackHits || 0))),
-        restoreShieldHits: Math.max(-Number(CONFIG.combatMaxTriggeredShieldHits || 20), Math.min(Number(CONFIG.combatMaxTriggeredShieldHits || 20), Math.round(item.restoreShieldHits || 0))),
-        enemyShieldHitsChange: Math.max(-Number(CONFIG.combatMaxTriggeredShieldHits || 20), Math.min(Number(CONFIG.combatMaxTriggeredShieldHits || 20), Math.round(item.enemyShieldHitsChange || 0))),
-        healingRateChange: Math.max(-1, Math.min(5, Number(item.healingRateChange || 0))),
-        enemyHealingRateChange: Math.max(-1, Math.min(5, Number(item.enemyHealingRateChange || 0))),
-        shieldRecoveryRateChange: Math.max(-1, Math.min(5, Number(item.shieldRecoveryRateChange || 0))),
-        enemyShieldRecoveryRateChange: Math.max(-1, Math.min(5, Number(item.enemyShieldRecoveryRateChange || 0))),
-        criticalRateChange: Math.max(-1, Math.min(1, teamPower > 0 ? Number(item.criticalRateWeightedChange || 0) / teamPower : 0)),
-        enemyCriticalRateChange: Math.max(-1, Math.min(1, Number(item.enemyCriticalRateChange || 0))),
-        nextAttackCriticalRate: Math.max(-1, Math.min(1, Number(item.nextAttackCriticalRate || 0))),
-        enemyNextAttackCriticalRate: Math.max(-1, Math.min(1, Number(item.enemyNextAttackCriticalRate || 0))),
+        extraHits: Math.round(Number(item.extraHits) || 0),
+        enemyNextAttackHits: Math.round(Number(item.enemyNextAttackHits) || 0),
+        restoreShieldHits: Math.round(Number(item.restoreShieldHits) || 0),
+        enemyShieldHitsChange: Math.round(Number(item.enemyShieldHitsChange) || 0),
+        healingRateChange: Math.max(-1, Number(item.healingRateChange) || 0),
+        enemyHealingRateChange: Math.max(-1, Number(item.enemyHealingRateChange) || 0),
+        shieldRecoveryRateChange: Math.max(-1, Number(item.shieldRecoveryRateChange) || 0),
+        enemyShieldRecoveryRateChange: Math.max(-1, Number(item.enemyShieldRecoveryRateChange) || 0),
+        criticalRateChange: Math.max(-1, teamPower > 0 ? Number(item.criticalRateWeightedChange || 0) / teamPower : 0),
+        enemyCriticalRateChange: Math.max(-1, Number(item.enemyCriticalRateChange) || 0),
+        nextAttackCriticalRate: Math.max(-1, Number(item.nextAttackCriticalRate) || 0),
+        enemyNextAttackCriticalRate: Math.max(-1, Number(item.enemyNextAttackCriticalRate) || 0),
         maxHpGain: Math.max(0, Math.min(teamHp * 10, Number(item.maxHpGain || 0))),
         attackStackGain: Math.max(0, Math.min(teamPower, Number(item.attackStackGain || 0))),
         stackEffects: abilityArray(item.stackEffects).map(effect => {
@@ -17314,21 +17312,21 @@
             ...normalized,
             value: Number(normalized.value || 0),
             stackKey: String(normalized.stackKey || item.stackKey || "sharedStack"),
-            maxStacks: Math.max(1, Math.min(99, Math.floor(Number(normalized.maxStacks || item.maxStacks || 1))))
+            maxStacks: Math.max(1, Math.floor(Number(normalized.maxStacks || item.maxStacks || 1)))
           };
         }).filter(effect => CARD_ABILITY_STACK_EFFECT_TYPES.has(effect.type) && effect.value),
         stackKey: String(item.stackKey || ""),
-        maxStacks: Math.max(0, Math.min(99, Math.floor(Number(item.maxStacks || 0)))),
+        maxStacks: Math.max(0, Math.floor(Number(item.maxStacks || 0))),
         triggerCostChanges: Object.fromEntries(Object.entries(item.triggerCostChanges || {}).map(([id, change]) => [String(id), Math.round(Number(change) || 0)]).filter(([, change]) => change)),
         enemyTriggerCostRules: abilityArray(item.enemyTriggerCostRules).map(rule => ({ ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), match: normalizeAbilityTargetMatch(rule && rule.match), value: Math.round(Number(rule && rule.value) || 0), effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE), resistanceKey: String(rule && rule.resistanceKey || "") })).filter(rule => rule.value),
         permanentTriggerCostChanges: Object.fromEntries(Object.entries(item.permanentTriggerCostChanges || {}).map(([id, change]) => [String(id), Math.round(Number(change) || 0)]).filter(([, change]) => change)),
         enemyPermanentTriggerCostRules: abilityArray(item.enemyPermanentTriggerCostRules).map(rule => ({ ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), match: normalizeAbilityTargetMatch(rule && rule.match), value: Math.round(Number(rule && rule.value) || 0), effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT), resistanceKey: String(rule && rule.resistanceKey || "") })).filter(rule => rule.value),
-        blockRateChanges: Object.fromEntries(Object.entries(item.blockRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Math.min(1, Number(change) || 0))]).filter(([, change]) => change)),
-        enemyBlockRateRules: abilityArray(item.enemyBlockRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value),
+        blockRateChanges: Object.fromEntries(Object.entries(item.blockRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Number(change) || 0)]).filter(([, change]) => change)),
+        enemyBlockRateRules: abilityArray(item.enemyBlockRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         damageTakenRateChanges: Object.fromEntries(Object.entries(item.damageTakenRateChanges || {}).map(([id, change]) => [String(id), clampDamageTakenRate(change)]).filter(([, change]) => change)),
         enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: clampDamageTakenRate(rule && rule.value) })).filter(rule => rule.value),
-        dodgeRateChanges: Object.fromEntries(Object.entries(item.dodgeRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Math.min(1, Number(change) || 0))]).filter(([, change]) => change)),
-        enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DODGE_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value),
+        dodgeRateChanges: Object.fromEntries(Object.entries(item.dodgeRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Number(change) || 0)]).filter(([, change]) => change)),
+        enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DODGE_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} })),
         domainActivations: abilityArray(item.domainActivations).filter(rule => rule && rule.domainId).map(rule => ({ ...rule })),
         domainPassiveEffects: abilityArray(item.domainPassiveEffects).map(effect => ({ ...effect })),
@@ -17979,8 +17977,8 @@
       const aiAttack = Math.max(1, playerAttack * scale * (.97 + Math.random() * .06));
       const aiHp = Math.max(1, playerHp * scale * (.97 + Math.random() * .06));
       const aiDefense = Math.max(0, playerDefense * scale * (.97 + Math.random() * .06));
-      const attackHits = Math.max(1, Math.min(CONFIG.combatMaxAttackHits, playerTraits.attackHits + (Math.random() < .22 ? (Math.random() < .5 ? -1 : 1) : 0)));
-      const shieldHits = Math.max(0, Math.min(CONFIG.combatMaxShieldHits, playerTraits.shieldHits + (Math.random() < .18 ? (Math.random() < .5 ? -1 : 1) : 0)));
+      const attackHits = Math.max(1, Math.round(playerTraits.attackHits + (Math.random() < .22 ? (Math.random() < .5 ? -1 : 1) : 0)));
+      const shieldHits = Math.max(0, Math.round(playerTraits.shieldHits + (Math.random() < .18 ? (Math.random() < .5 ? -1 : 1) : 0)));
       const shuffled = CARDS.slice().sort(() => Math.random() - .5);
       const chosen = shuffled.slice(0, CONFIG.arenaTeamSlots);
       const slotCount = Math.max(1, chosen.length);
@@ -18073,8 +18071,8 @@
 
         function getArenaOpponentCombatTraits(profile) {
       return {
-        attackHits: Math.max(1, Math.min(CONFIG.combatMaxAttackHits, Math.round(Number(profile && profile.arenaAttackHits) || 1))),
-        shieldHits: Math.max(0, Math.min(CONFIG.combatMaxShieldHits, Math.round(Number(profile && profile.arenaShieldHits) || 0)))
+        attackHits: Math.max(1, Math.round(Number(profile && profile.arenaAttackHits) || 1)),
+        shieldHits: Math.max(0, Math.round(Number(profile && profile.arenaShieldHits) || 0))
       };
     }
 
