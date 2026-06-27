@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-24-daily-monthly-rewards-v53">
+  <meta name="gacha-app-build" content="2026-06-27-domain-runtime-v54">
   <title>Anime Card Collection</title>
   <style>
     :root {
@@ -6175,14 +6175,14 @@
       // เพิ่มโดยอลิซ: ระบบคริติคอลแทนค่าโชคเดิม
       // ค่า 0.05 = โอกาสคริติคอลพื้นฐาน 5% และคริติคอลสร้างดาเมจ x1.5
       combatBaseCriticalRate: 0.05,
-      combatMaxCriticalRate: 1.00,
-      combatCriticalDamageMultiplier: 1.50,
+      combatMaxCriticalRate: 999,
+      combatCriticalDamageMultiplier: 2,
       combatMultiHitPenalty: 0.025,
       combatMultiHitMinEfficiency: 0.82,
-      combatMaxAttackHits: 999,
-      combatMaxShieldHits: 999,
+      combatMaxAttackHits: 9999,
+      combatMaxShieldHits: 9999,
       // ต่อสู้ผลัดกันตีจน HP ฝ่ายใดฝ่ายหนึ่งหมด
-      combatMaxTurns: 120,
+      combatMaxTurns: 900,
       combatFatigueStartRound: 18,
       combatFatigueMaxHpRate: 0.10,
       // สูตรพลังรวมสำหรับจับคู่ AI เท่านั้น
@@ -6198,10 +6198,10 @@
       combatMaxTriggeredShieldHits: 9999,
       // ระบบป้องกันขั้นสุดท้าย: หลบก่อน DEF, บล็อกหลัง DEF, แล้วคูณ damageTakenRate เป็นขั้นสุดท้าย
       combatBlockDamageMultiplier: 0.50,
-      combatMaxBlockRate: 1.00,
-      combatMaxDodgeRate: 1.00,
-      combatMaxStatusResistanceRate: 1.00,
-      combatMaxCopiedAbilities: 99,
+      combatMaxBlockRate: 999.00,
+      combatMaxDodgeRate: 999.00,
+      combatMaxStatusResistanceRate: 999.00,
+      combatMaxCopiedAbilities: 999,
       combatMaxCopiedAbilityDurationAttacks: 9999,
       combatMaxCopiedAbilityDurationTurns: 9999,
       combatMaxCopiedAbilityUses: 9999,
@@ -6404,7 +6404,7 @@
   colors: ["#7A4800", "#D99A16", "#FFF2A8", "#FFD700", "#A86400"],
   gradient: "linear-gradient(135deg, #6B3F00 0%, #D99A16 22%, #FFF7C2 43%, #FFD700 58%, #B8750D 78%, #FFE98A 100%)",
   glow: "#FFD966",
-  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 243000,  baseHp: 1215000,  baseDefense: 97200,  baseIncome: 6500,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .38, incomeBonus: .25 },
+  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 243000,  baseHp: 1215000,  baseDefense: 97200,  baseIncome: 6500,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .38, incomeBonus: .25 },
       SC:  { label: "Mystical",   color: "#f5d9ff",
   colors: [
     "#ff77d9",
@@ -6418,7 +6418,7 @@
   gradient: "linear-gradient(135deg, #ff77d9 0%, #9c8cff 16%, #65e8ff 32%, #75ffbf 48%, #fff18a 64%, #ff9f76 80%, #ffffff 92%, #ff77d9 100%)",
   glow: "#f4caff",
   textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 729000,  baseHp: 3645000,  baseDefense: 291600, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 3,  awakenCopies: [1,1,2], powerBonus: .65, incomeBonus: .45 },
-      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2187000, baseHp: 10935000, baseDefense: 874800, baseIncome: 50000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 3, awakenCopies: [1,1,2], powerBonus: .90, incomeBonus: .70 }
+      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2187000, baseHp: 10935000, baseDefense: 874800, baseIncome: 50000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 4, awakenCopies: [1,1,2,3], powerBonus: .90, incomeBonus: .70 }
     });
 
     // เพิ่มโดยอลิซ: เรทแพ็คสุ่มในกระเป๋า แยกจากตู้กาชาและไม่สะสม pity
@@ -6811,6 +6811,7 @@
       STATUS_RESISTANCE: "statusResistance",
       NULLIFY_CARD_ABILITIES: "nullifyCardAbilities",
       IGNORE_ABILITY_CONDITIONS: "ignoreAbilityConditions",
+      ACTIVATE_DOMAIN: "activateDomain",
       NEXT_ATTACK_POWER_RATE: "nextAttackPowerRate",
       NEXT_ATTACK_POWER_FLAT: "nextAttackPowerFlat",
       NEXT_ATTACK_CRITICAL_RATE: "nextAttackCriticalRate",
@@ -6989,12 +6990,12 @@
       },
       {
         "name": "Water Secreat",
-        "description": "เมื่อการ์ดใบนี้จับทีมคู่กับตัวละคร 'kasuma;megumin;darkness' ตัวตัวนึง ได้รับ ; ทุกครั้งที่ตี 3 ครั้ง จะฟื้นฟู HP+15% และลดคอสการใช้สกิลของตนเอง 1",
+        "description": "เมื่อการ์ดใบนี้จับทีมคู่กับตัวละคร 'kasuma;megumin;darkness' ตัวใดตัวนึง ได้รับ ; ทุกครั้งที่ตี 3 ครั้ง จะฟื้นฟู HP+15% และลดคอสการใช้สกิลของเพื่อนร่วมทีม 1",
         "activeIn": ["team", "tower", "arena"],
         "condition": {"anyCardIds":[2001,2003,2004]},
         "effects": [
           { "type": "healHpRate", "value": 0.15, "condition": { "afterOwnAttacks": 2, "repeat": true } },
-          { "type": "activeSkillCostCycle", "value": -1, "targetSide": "self", "condition": { "afterOwnAttacks": 2, "repeat": true } }
+          { "type": "activeSkillCostCycle", "value": -1, "targetSide": "ally", "condition": { "afterOwnAttacks": 2, "repeat": true } }
         ]
       }
     ]
@@ -7037,13 +7038,14 @@
     },
       "ability": {
         "name": "EXPLOSION",
-        "description": "เมื่อการ์ดใบนี้ ตีครบ 20 ครั้ง จะการโจมตีครั้งถัดไปจะได้รับ ; ATK+1000%/HP-99% และทำดาเมจ +40% ของพลังโจมตี ใช้งานได้ครั้งเดียว ",
+        "description": "เมื่อการ์ดใบนี้ ตีครบ 20 ครั้ง จะการโจมตีครั้งถัดไปจะได้รับ ; ลบเกราะฝ่ายตรงข้ามทั้งหมด และ ATK+1000%/HP-99% และสร้างความเสียหายเพิ่ม +40% ของพลังโจมตีทั้งทีม ใช้งานได้ครั้งเดียว ",
         "activeIn": ["team", "tower", "arena"],
         "condition": { "afterOwnAttacks": 20, "repeat": false },
         "effects": [
-          { "type": "selfPowerRate", "value": 10.0 },
+          { "type": "shieldHits", "value": 999, "targetSide": "enemy" },
+          { "type": "nextAttackPowerRate", "value": 10.0, "targetSide": "self" },
           { "type": "selfHpRate", "value": -0.99 },
-          { "type": "nextAttackPowerRate", "value": 0.40 }
+          { "type": "damageTakenRate", "value": 0.40, "targetSide": "enemy" }
       ]
     }
   }, 
@@ -7066,7 +7068,7 @@
     "overlay": "overlay.mp4",
     "scCutscene": {
       "kicker": "SYSTEM OVERRIDE",
-      "quote": "เมื่อผู้สร้างลงมือกฎของโลกก็เป็นเพียงโค้ด",
+      "quote": "ไร้เมตตา เมื่อพระเจ้าลงสนาม",
       "subtitle": "Developer Authority",
       "video": "DEVop.mp4",
       "poster": "",
@@ -7081,7 +7083,154 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "SYSTEM ACCESS GRANTED",
-      "revealTitle": "MYSTICAL · DEV."
+      "revealTitle": "MYSTICAL · DEV.",
+"ability": [
+  {
+    "name": "ROOT ACCESS",
+    "description": "ต้านสถานะของตนเอง +900%; ศัตรูทั้งหมดถูกลดต้านสถานะ 300%, ลดการฟื้น HP/โล่ 50%, ได้รับดาเมจเพิ่ม 50% และคอสสกิลแอคทีฟเพิ่มถาวร 2 หน่วย",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "statusResistance",
+        "value": 9,
+        "targetSide": "self"
+      },
+      {
+        "type": "statusResistance",
+        "value": -3,
+        "targetSide": "enemy",
+        "targetSelection": "all",
+        "scope": "field"
+      },
+      {
+        "type": "healingRate",
+        "value": -0.5,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "shieldRecoveryRate",
+        "value": -0.5,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "damageTakenRate",
+        "value": 0.5,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "activeSkillCostPermanent",
+        "value": 2,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      }
+    ]
+  },
+  {
+    "name": "GLOBAL NERF",
+    "description": "ลด ATK, คริติคอล, หลบหลีก และบล็อคเรทของศัตรูทั้งหมด 50%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "enemyPowerRate",
+        "value": -0.5
+      },
+      {
+        "type": "criticalRate",
+        "value": -0.5,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "dodgeRate",
+        "value": -0.5,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "blockRate",
+        "value": -0.5,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      }
+    ]
+  },
+  {
+    "name": "MAINTENANCE MODE",
+    "description": "ทุกครั้งที่โจมตีครบ 9 ครั้ง จะทำลายโล่ศัตรูทั้งหมด 9 ฮิต เพิ่มคอสสกิลรอบปัจจุบัน 3 หน่วย และทำให้ความสามารถของศัตรูทุกใบไร้ผลในการทำงานครั้งถัดไป",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 8,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "shieldHits",
+        "value": -9,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "activeSkillCostCycle",
+        "value": 3,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nullifyCardAbilities",
+        "targetSide": "enemy",
+        "targetSelection": "all",
+        "durationTriggers": 1
+      }
+    ]
+  },
+  {
+    "name": "SYSTEM RESET: DELETE ALL",
+    "description": "เมื่อโจมตีครบ 18 ครั้ง จะลบโล่ศัตรูทั้งหมด ลดต้านสถานะ 900% ห้ามฟื้น HP และโล่ พร้อมทำให้ความสามารถของศัตรูทุกใบไร้ผล 2 ครั้ง ทำงานครั้งเดียวต่อไฟต์",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 17,
+      "repeat": false
+    },
+    "effects": [
+      {
+        "type": "shieldHits",
+        "value": -999,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "statusResistance",
+        "value": -9,
+        "targetSide": "enemy",
+        "targetSelection": "all",
+        "scope": "field"
+      },
+      {
+        "type": "healingRate",
+        "value": -1,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "shieldRecoveryRate",
+        "value": -1,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nullifyCardAbilities",
+        "targetSide": "enemy",
+        "targetSelection": "all",
+        "durationTriggers": 2
+      }
+    ]
+  }
+]
     }
   },
   {
@@ -7102,7 +7251,7 @@
     "poster": "999.png",
     "scCutscene": {
       "kicker": "THE FIRST STROKE",
-      "quote": "ทุกจักรวาล เริ่มต้นจากจินตนาการเพียงหนึ่งครั้ง",
+      "quote": "ลองชิมสายฟ้าของผู้คิดค้นหน่อยไหมม..",
       "subtitle": "Creative Overdrive",
       "video": "CREATORop.mp4",
       "poster": "",
@@ -7117,7 +7266,131 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "ORIGIN SIGNATURE",
-      "revealTitle": "MYSTICAL · CREATOR"
+      "revealTitle": "MYSTICAL · CREATOR",
+"ability": [
+  {
+    "name": "บัญญัติที่ 1: พลังแห่งเลข 9",
+    "description": "ATK +900%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      { "type": "selfPowerRate", "value": 9 }
+    ]
+  },
+  {
+    "name": "บัญญัติที่ 2: ชีพจร 999",
+    "description": "HP +900%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      { "type": "selfHpRate", "value": 9 }
+    ]
+  },
+  {
+    "name": "บัญญัติที่ 3: เกราะนพชั้น",
+    "description": "DEF +900% และได้รับโล่ 9 ฮิต",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      { "type": "selfDefenseRate", "value": 9 },
+      { "type": "shieldHits", "value": 9, "targetSide": "self" }
+    ]
+  },
+  {
+    "name": "บัญญัติที่ 4: เนตรสายฟ้า 99",
+    "description": "อัตราคริติคอล +99%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      { "type": "criticalRate", "value": 0.99, "targetSide": "self" }
+    ]
+  },
+  {
+    "name": "บัญญัติที่ 5: ก้าวย่างเก้าสายฟ้า",
+    "description": "อัตราหลบหลีก +90%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      { "type": "dodgeRate", "value": 0.9, "targetSide": "self" }
+    ]
+  },
+  {
+    "name": "บัญญัติที่ 6: สิทธิ์ของผู้สร้าง",
+    "description": "ต้านสถานะ +900%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      { "type": "statusResistance", "value": 9, "targetSide": "self" }
+    ]
+  },
+  {
+    "name": "บัญญัติที่ 7: พรแห่งผู้สร้าง",
+    "description": "ATK ของทั้งทีม +90%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      { "type": "teamPowerRate", "value": 0.9 }
+    ]
+  },
+  {
+    "name": "บัญญัติที่ 8: วงจรฟื้นคืนลำดับเก้า",
+    "description": "ทุกการโจมตีครั้งที่ 9 ฟื้นฟู HP 9,000,000 และฟื้นโล่ 9 ฮิต",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "healHpFlat",
+        "value": 9000000,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 8,
+          "repeat": true
+        }
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 9,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 8,
+          "repeat": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "บัญญัติที่ 9: CREATOR CODE 9999",
+    "description": "เมื่อโจมตีครบ 9 ครั้ง การโจมตีครั้งถัดไปจะทำลายโล่ศัตรู 9 ฮิต สร้างดาเมจเพิ่มขึ้น 9999% โจมตีเพิ่ม 9 ฮิต และติดคริติคอล 100%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 9,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "shieldHits",
+        "value": -9,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nextAttackPowerRate",
+        "value": 99.99,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackHits",
+        "value": 9,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackCriticalRate",
+        "value": 1,
+        "targetSide": "self"
+      }
+    ]
+  }
+]
     }
   },
   {
@@ -7153,7 +7426,55 @@
       "volume": 0.5,
       "showCardAfterVideo": true,
       "revealKicker": "THE GRAND ARCANA",
-      "revealTitle": "MYSTICAL · GREAT MAGICIAN"
+      "revealTitle": "MYSTICAL · GREAT MAGICIAN",
+"ability": [
+  {
+    "name": "คลังมหาเวทไร้ขอบเขต",
+    "description": "รายได้ของตนเอง +500% รายได้ทั้งทีม +200% และเพิ่มรายได้คงที่ให้ทีม 5,000 ต่อวินาที",
+    "activeIn": ["team"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "selfIncomeRate",
+        "value": 5
+      },
+      {
+        "type": "teamIncomeRate",
+        "value": 2
+      },
+      {
+        "type": "teamIncomeFlat",
+        "value": 5000
+      }
+    ]
+  },
+  {
+    "name": "มหาเวทบิดเบือนความน่าจะเป็น",
+    "description": "เมื่ออเวกตันและเลเวลตัน จะเพิ่มน้ำหนักเรทกาชาระดับ LR +50%, EX +100% และ SC +150%",
+    "activeIn": ["team"],
+    "condition": {
+      "sourceMinAwaken": 4,
+      "sourceMinLevel": 220
+    },
+    "effects": [
+      {
+        "type": "gachaRarityRate",
+        "value": 0.5,
+        "targetRarities": ["LR"]
+      },
+      {
+        "type": "gachaRarityRate",
+        "value": 1,
+        "targetRarities": ["EX"]
+      },
+      {
+        "type": "gachaRarityRate",
+        "value": 1.5,
+        "targetRarities": ["SC"]
+      }
+    ]
+  }
+]
     }
   },
   {
@@ -7174,7 +7495,7 @@
     "poster": "2000.png",
     "scCutscene": {
       "kicker": "ABYSSAL FORTUNE",
-      "quote": "โชคชะตาไม่ใช่สิ่งที่รอคอย แต่มันคือสิ่งที่ข้าครอบครอง",
+      "quote": "ปราสาทน้ำแข็งของข้าไม่มีสิ่งใดเทียมเท่า",
       "subtitle": "Fortune of the Deep",
       "video": "MAMONop.mp4",
       "poster": "",
@@ -7190,7 +7511,168 @@
       "showCardAfterVideo": true,
       "revealKicker": "FORTUNE ANSWERS",
       "revealTitle": "MYSTICAL · MAMON"
-    }
+    },
+    "ability": [
+  {
+    "name": "กางอาณาเขต: จักรวรรดิเหมันต์นิรันดร์",
+    "description": "เมื่อโจมตีครบ 5 ครั้ง จะกางอาณาเขตน้ำแข็งจนจบการต่อสู้ ทำให้ตนเองได้รับ ATK/HP +500%; พันธมิตรทั้งหมดได้รับ HP +200% และบล็อคเรท +30%; ศัตรูทั้งหมดถูกลดอัตราหลบหลีกและบล็อคเรท 40% พร้อมเพิ่มคอสสกิลแอคทีฟ 2 หน่วย หลังจากกางอาณาเขตแล้วจึงสามารถใช้ความสามารถอื่นได้",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 5,
+      "repeat": false
+    },
+    "effects": [
+      {
+        "type": "activateDomain",
+        "domainId": "mamonIceDomain",
+        "duration": "battle"
+      },
+      {
+        "type": "selfPowerRate",
+        "value": 5,
+        "targetSide": "self"
+      },
+      {
+        "type": "selfHpRate",
+        "value": 5,
+        "targetSide": "self"
+      },
+      {
+        "type": "cardHpRate",
+        "value": 2,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "blockRate",
+        "value": 0.3,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "dodgeRate",
+        "value": -0.4,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "blockRate",
+        "value": -0.4,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "activeSkillCostPermanent",
+        "value": 2,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      }
+    ]
+  },
+  {
+    "name": "ชีพจรแห่งบัลลังก์น้ำแข็ง",
+    "description": "ขณะอาณาเขตน้ำแข็งทำงาน ทุกครั้งที่โจมตีในอาณาเขตครบ 4 ครั้ง จะฟื้นฟู HP ให้ตนเอง 6,000,000 และพันธมิตรทุกคนคนละ 3,000,000 พร้อมเพิ่มโล่ให้ตนเอง 2 ฮิตและพันธมิตรคนละ 1 ฮิต",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "domainActive": "mamonIceDomain",
+      "afterDomainAttacks": 3,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "healHpFlat",
+        "value": 6000000,
+        "targetSide": "self"
+      },
+      {
+        "type": "healHpFlat",
+        "value": 3000000,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 2,
+        "targetSide": "self"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 1,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      }
+    ]
+  },
+  {
+    "name": "โซ่ตรวนศูนย์สัมบูรณ์",
+    "description": "ขณะอาณาเขตน้ำแข็งทำงาน ทุกครั้งที่โจมตีในอาณาเขตครบ 8 ครั้ง จะลดต้านสถานะของศัตรูทั้งหมด 200% เพิ่มคอสสกิลแอคทีฟอีก 1 หน่วย และสุ่มทำให้ความสามารถทั้งหมดของศัตรู 1 ใบไร้ผลในการทำงานครั้งถัดไป",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "domainActive": "mamonIceDomain",
+      "afterDomainAttacks": 7,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "statusResistance",
+        "value": -2,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "activeSkillCost",
+        "value": 1,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nullifyCardAbilities",
+        "targetSide": "enemy",
+        "targetSelection": "random",
+        "durationTriggers": 1
+      }
+    ]
+  },
+  {
+    "name": "วันสิ้นโลกเยือกแข็ง: Absolute Calamity",
+    "description": "ขณะอาณาเขตน้ำแข็งทำงาน ทุกครั้งที่โจมตีในอาณาเขตครบ 12 ครั้ง จะทำลายโล่ศัตรูทั้งหมด ทำให้ความสามารถของศัตรูทุกใบไร้ผลในการทำงานครั้งถัดไป และทำให้การโจมตีครั้งถัดไปสร้างดาเมจเพิ่มขึ้น 15000% โจมตีเพิ่ม 6 ฮิต พร้อมติดคริติคอล 100%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "domainActive": "mamonIceDomain",
+      "afterDomainAttacks": 11,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "shieldHits",
+        "value": -999,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nullifyCardAbilities",
+        "targetSide": "enemy",
+        "targetSelection": "all",
+        "durationTriggers": 1
+      },
+      {
+        "type": "nextAttackPowerRate",
+        "value": 150,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackHits",
+        "value": 6,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackCriticalRate",
+        "value": 1,
+        "targetSide": "self"
+      }
+    ]
+  }
+]
   },
   {
     "id": 1041,
@@ -7267,7 +7749,94 @@
     "icon": "",
     "image": "38.png",
     "video": "38.mp4",
-    "poster": "38.png"
+    "poster": "38.png",
+"ability": {
+  "name": "วิเคราะห์เวทพันปี: ถอดสมการแห่งมิติ",
+  "description": "ต้านสถานะ +300% และลดคอสสกิลแอคทีฟของทั้งทีม 1 หน่วย ทุกครั้งที่โจมตีครบ 6 ครั้ง จะเร่งเงื่อนไขนับการโจมตีของสกิลฝ่ายเรา 3 ครั้ง พร้อมเพิ่มคอสสกิลศัตรูทั้งหมด 1 หน่วย และลดต้านสถานะ 100% เมื่อโจมตีครบ 12 ครั้ง จะยกเลิกเงื่อนไขของสกิลพันธมิตรแบบสุ่ม 1 สกิล ทำให้สกิลนั้นทำงานทันทีหนึ่งครั้ง และผนึกสกิลศัตรูแบบสุ่ม 1 สกิลในการทำงานครั้งถัดไป",
+  "activeIn": ["team", "tower", "arena"],
+  "condition": {},
+  "effects": [
+    {
+      "type": "statusResistance",
+      "value": 3,
+      "targetSide": "self"
+    },
+    {
+      "type": "activeSkillCost",
+      "value": -1,
+      "targetSide": "self"
+    },
+    {
+      "type": "activeSkillCost",
+      "value": -1,
+      "targetSide": "ally",
+      "targetSelection": "all"
+    },
+    {
+      "type": "abilityConditionProgress",
+      "value": 3,
+      "targetSide": "self",
+      "targetSelection": "all",
+      "condition": {
+        "afterOwnAttacks": 6,
+        "repeat": true
+      }
+    },
+    {
+      "type": "abilityConditionProgress",
+      "value": 3,
+      "targetSide": "ally",
+      "targetSelection": "all",
+      "condition": {
+        "afterOwnAttacks": 6,
+        "repeat": true
+      }
+    },
+    {
+      "type": "activeSkillCost",
+      "value": 1,
+      "targetSide": "enemy",
+      "targetSelection": "all",
+      "condition": {
+        "afterOwnAttacks": 6,
+        "repeat": true
+      }
+    },
+    {
+      "type": "statusResistance",
+      "value": -1,
+      "targetSide": "enemy",
+      "targetSelection": "all",
+      "condition": {
+        "afterOwnAttacks": 6,
+        "repeat": true
+      }
+    },
+    {
+      "type": "ignoreAbilityCondition",
+      "targetSide": "ally",
+      "targetSelection": "random",
+      "targetSkillSelection": "random",
+      "triggerImmediately": true,
+      "uses": 1,
+      "condition": {
+        "afterOwnAttacks": 12,
+        "repeat": true
+      }
+    },
+    {
+      "type": "nullifyCardAbilities",
+      "targetSide": "enemy",
+      "targetSelection": "random",
+      "targetSkillSelection": "random",
+      "durationTriggers": 1,
+      "condition": {
+        "afterOwnAttacks": 12,
+        "repeat": true
+      }
+    }
+  ]
+}
   },
   {
     "id": 39,
@@ -7284,7 +7853,54 @@
     "icon": "",
     "image": "39.png",
     "video": "39.mp4",
-    "poster": "39.png"
+    "poster": "39.png",
+"ability": {
+  "name": "โซลทราค: กระหน่ำเวทปราบอสูร",
+  "description": "ทุกครั้งที่โจมตีครบ 6 ครั้ง จะเจาะต้านสถานะของศัตรูทั้งหมด 500% จากนั้นลด ATK 150%, อัตราคริติคอล 50%, อัตราหลบหลีก 50%, บล็อคเรท 50% และเพิ่มคอสสกิลแอคทีฟ 2 หน่วย ทำงานซ้ำได้",
+  "activeIn": ["team", "tower", "arena"],
+  "condition": {
+    "afterOwnAttacks": 6,
+    "repeat": true
+  },
+  "effects": [
+    {
+  "type": "statusResistance",
+  "value": -5,
+  "targetSide": "enemy",
+  "targetSelection": "all"
+    },
+    {
+      "type": "powerRate",
+      "value": -1.5,
+      "targetSide": "enemy",
+      "targetSelection": "all"
+    },
+    {
+      "type": "criticalRate",
+      "value": -0.5,
+      "targetSide": "enemy",
+      "targetSelection": "all"
+    },
+    {
+      "type": "dodgeRate",
+      "value": -0.5,
+      "targetSide": "enemy",
+      "targetSelection": "all"
+    },
+    {
+      "type": "blockRate",
+      "value": -0.5,
+      "targetSide": "enemy",
+      "targetSelection": "all"
+    },
+    {
+      "type": "activeSkillCost",
+      "value": 2,
+      "targetSide": "enemy",
+      "targetSelection": "all"
+    }
+  ]
+}
   },
   {
     "id": 40,
@@ -7301,7 +7917,42 @@
     "icon": "",
     "image": "40.png",
     "video": "40.mp4",
-    "poster": "40.png"
+    "poster": "40.png",
+"activeSkill": {
+  "name": "สายฟ้าฟาด: ความกล้าของนักรบ",
+  "description": "ชาร์จจากการโจมตี 8 ครั้ง เมื่อใช้งานจะทำลายโล่ของเป้าหมายทั้งหมด และทำให้การโจมตีครั้งถัดไปสร้างดาเมจเพิ่มขึ้น 8000% โจมตีเพิ่ม 3 ฮิต ติดคริติคอล 100% พร้อมเพิ่มบล็อคเรทให้ตัวเอง 100% จนจบการโจมตี",
+  "activeIn": ["team", "tower", "arena"],
+  "chargeAttacks": 8,
+  "effects": [
+    {
+      "type": "shieldHits",
+      "value": -999,
+      "targetSide": "enemy",
+      "targetSelection": "specific"
+    },
+    {
+      "type": "nextAttackPowerRate",
+      "value": 80,
+      "targetSide": "self"
+    },
+    {
+      "type": "nextAttackHits",
+      "value": 3,
+      "targetSide": "self"
+    },
+    {
+      "type": "nextAttackCriticalRate",
+      "value": 1,
+      "targetSide": "self"
+    },
+    {
+      "type": "blockRate",
+      "value": 1,
+      "targetSide": "self",
+      "durationAttacks": 1
+    }
+  ]
+}
   },
   {
     "id": 41,
@@ -7318,7 +7969,93 @@
     "icon": "",
     "image": "41.png",
     "video": "41.mp4",
-    "poster": "41.png"
+    "poster": "41.png",
+"ability": {
+  "name": "ผู้กล้าที่ถูกจดจำชั่วนิรันดร์",
+  "description": "ATK/HP ของตนเอง +300% และต้านสถานะ +200%; พันธมิตรทั้งหมดได้รับ ATK +100%, อัตราคริติคอล +30% และบล็อคเรท +25% เมื่อโจมตีครบ 10 ครั้ง การโจมตีครั้งถัดไปจะทำลายโล่ศัตรู 5 ฮิต สร้างดาเมจเพิ่มขึ้น 5000% และติดคริติคอล 100% พร้อมเพิ่มโล่ให้ทั้งทีมคนละ 2 ฮิต",
+  "activeIn": ["team", "tower", "arena"],
+  "condition": {},
+  "effects": [
+    {
+      "type": "selfPowerRate",
+      "value": 3
+    },
+    {
+      "type": "selfHpRate",
+      "value": 3
+    },
+    {
+      "type": "statusResistance",
+      "value": 2,
+      "targetSide": "self"
+    },
+    {
+      "type": "powerRate",
+      "value": 1,
+      "targetSide": "ally",
+      "targetSelection": "all"
+    },
+    {
+      "type": "criticalRate",
+      "value": 0.3,
+      "targetSide": "ally",
+      "targetSelection": "all"
+    },
+    {
+      "type": "blockRate",
+      "value": 0.25,
+      "targetSide": "ally",
+      "targetSelection": "all"
+    },
+    {
+      "type": "shieldHits",
+      "value": -5,
+      "targetSide": "enemy",
+      "targetSelection": "all",
+      "condition": {
+        "afterOwnAttacks": 10,
+        "repeat": true
+      }
+    },
+    {
+      "type": "nextAttackPowerRate",
+      "value": 50,
+      "targetSide": "self",
+      "condition": {
+        "afterOwnAttacks": 10,
+        "repeat": true
+      }
+    },
+    {
+      "type": "nextAttackCriticalRate",
+      "value": 1,
+      "targetSide": "self",
+      "condition": {
+        "afterOwnAttacks": 10,
+        "repeat": true
+      }
+    },
+    {
+      "type": "restoreShieldHits",
+      "value": 2,
+      "targetSide": "self",
+      "condition": {
+        "afterOwnAttacks": 10,
+        "repeat": true
+      }
+    },
+    {
+      "type": "restoreShieldHits",
+      "value": 2,
+      "targetSide": "ally",
+      "targetSelection": "all",
+      "condition": {
+        "afterOwnAttacks": 10,
+        "repeat": true
+      }
+    }
+  ]
+}
   },
   {
     "id": 44,
@@ -7390,15 +8127,94 @@
     "awakenMax": 4,
     "icon": "",
     "image": "1.png",
-    "ability": {
-      "name": "เอ็กคาลิเบอร์",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ทุกการโจมตีครั้งที่4 +ATK10%(ไม่แสต็ค)",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
-      "effects": [
-        { "type": "nextAttackPowerRate", "value": 0.1, "condition": { "afterOwnAttacks": 4, "repeat": true } }
-      ]
-    }
+"ability": [
+  {
+    "name": "แก่นมังกรแห่งราชาอัศวิน",
+    "description": "ATK +500%, HP +400%, อัตราคริติคอล +50%, บล็อคเรท +50% และต้านสถานะ +300%; พันธมิตรทั้งหมดได้รับ ATK +150% และบล็อคเรท +30%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "selfPowerRate",
+        "value": 5
+      },
+      {
+        "type": "selfHpRate",
+        "value": 4
+      },
+      {
+        "type": "criticalRate",
+        "value": 0.5,
+        "targetSide": "self"
+      },
+      {
+        "type": "blockRate",
+        "value": 0.5,
+        "targetSide": "self"
+      },
+      {
+        "type": "statusResistance",
+        "value": 3,
+        "targetSide": "self"
+      },
+      {
+        "type": "powerRate",
+        "value": 1.5,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "blockRate",
+        "value": 0.3,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      }
+    ]
+  },
+  {
+    "name": "Excalibur: ดาบแห่งชัยชนะตามคำสัญญา",
+    "description": "เมื่อโจมตีครบ 15 ครั้ง จะปลดปล่อยแสงแห่งเอ็กซ์คาลิเบอร์ ทำลายโล่ศัตรูทั้งหมด และทำให้การโจมตีครั้งถัดไปสร้างดาเมจเพิ่มขึ้น 20000%, โจมตีเพิ่ม 7 ฮิต และติดคริติคอล 100% พร้อมเพิ่มโล่ให้ทั้งทีมคนละ 3 ฮิต ทำงานครั้งเดียวต่อไฟต์",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 15,
+      "repeat": false
+    },
+    "effects": [
+      {
+        "type": "shieldHits",
+        "value": -999,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nextAttackPowerRate",
+        "value": 200,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackHits",
+        "value": 7,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackCriticalRate",
+        "value": 1,
+        "targetSide": "self"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 3,
+        "targetSide": "self"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 3,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      }
+    ]
+  }
+]
   },
   {
     "id": 2,
@@ -7414,15 +8230,131 @@
     "awakenMax": 4,
     "icon": "",
     "image": "2.png",
-    "ability": {
-      "name": "จงตื่น",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ฮีล+5%ที่ตี3ครั้ง",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
-      "effects": [
-        { "type": "healHpRate", "value": 0.05, "condition": { "afterOwnAttacks": 3, "repeat": true } }
-      ]
-    }
+"ability": [
+  {
+    "name": "อาณาเขตราชาแห่งเงา",
+    "description": "ATK/HP ของตนเอง +500% และต้านสถานะ +500%; พันธมิตรทั้งหมดได้รับ ATK/HP +300%, อัตราคริติคอล +40%, อัตราหลบหลีก +25%, ต้านสถานะ +20% และโล่คนละ 3 ฮิต",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "selfPowerRate",
+        "value": 5
+      },
+      {
+        "type": "selfHpRate",
+        "value": 5
+      },
+      {
+        "type": "statusResistance",
+        "value": 5,
+        "targetSide": "self"
+      },
+      {
+        "type": "powerRate",
+        "value": 3,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "hpRate",
+        "value": 3,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "criticalRate",
+        "value": 0.4,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "dodgeRate",
+        "value": 0.25,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "statusResistance",
+        "value": 0.2,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 3,
+        "targetSide": "self"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 3,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      }
+    ]
+  },
+  {
+    "name": "อำนาจผู้ปกครอง: จงคุกเข่า",
+    "description": "ทุกครั้งที่โจมตีครบ 8 ครั้ง จะใช้อำนาจผู้ปกครองทำลายโล่ศัตรูทั้งหมด และทำให้การโจมตีครั้งถัดไปสร้างดาเมจเพิ่มขึ้น 10000%, โจมตีเพิ่ม 8 ฮิต และติดคริติคอล 100%; พร้อมฟื้นฟู HP ให้ทั้งทีมคนละ 8,000,000 เพิ่มโล่คนละ 2 ฮิต และเพิ่ม ATK ให้พันธมิตร +50% ต่อสแต็ก สูงสุด 5 สแต็ก",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 8,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "shieldHits",
+        "value": -999,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nextAttackPowerRate",
+        "value": 100,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackHits",
+        "value": 8,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackCriticalRate",
+        "value": 1,
+        "targetSide": "self"
+      },
+      {
+        "type": "healHpFlat",
+        "value": 8000000,
+        "targetSide": "self"
+      },
+      {
+        "type": "healHpFlat",
+        "value": 8000000,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 2,
+        "targetSide": "self"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 2,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "increaseAttackRateStack",
+        "value": 0.5,
+        "targetSide": "ally",
+        "targetSelection": "all",
+        "maxStacks": 5
+      }
+    ]
+  }
+]
   },
   {
     "id": 3,
@@ -7438,20 +8370,109 @@
     "awakenMax": 4,
     "icon": "",
     "image": "3.png",
-    "ability": {
-      "name": "1000ปี",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; HP+500%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
-      "effects": [
-        { "type": "selfHpRate", "value": 5 }
-      ]
-    }
+"ability": [
+  {
+    "name": "มหาจอมเวทผู้ซ่อนมานานับพันปี",
+    "description": "ATK/HP +500%, อัตราคริติคอล +50%, บล็อคเรท +50% และต้านสถานะ +500% พร้อมสร้างโล่ให้ทั้งทีมคนละ 3 ฮิต",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "selfPowerRate",
+        "value": 5
+      },
+      {
+        "type": "selfHpRate",
+        "value": 5
+      },
+      {
+        "type": "criticalRate",
+        "value": 0.5,
+        "targetSide": "self"
+      },
+      {
+        "type": "blockRate",
+        "value": 0.5,
+        "targetSide": "self"
+      },
+      {
+        "type": "statusResistance",
+        "value": 5,
+        "targetSide": "self"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 3,
+        "targetSide": "self"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 3,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      }
+    ]
+  },
+  {
+    "name": "โซลทราค: สุสานมหาพิภพ",
+    "description": "เมื่อโจมตีครบ 8 ครั้ง จะทำลายโล่ศัตรูทั้งหมด และทำให้การโจมตีครั้งถัดไปสร้างดาเมจเพิ่มขึ้น 10000%, โจมตีเพิ่ม 8 ฮิต และติดคริติคอล 100% พร้อมฟื้นฟู HP ให้ทั้งทีมคนละ 8,000,000 และเพิ่มโล่คนละ 2 ฮิต",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 8,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "shieldHits",
+        "value": -999,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nextAttackPowerRate",
+        "value": 100,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackHits",
+        "value": 8,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackCriticalRate",
+        "value": 1,
+        "targetSide": "self"
+      },
+      {
+        "type": "healHpFlat",
+        "value": 8000000,
+        "targetSide": "self"
+      },
+      {
+        "type": "healHpFlat",
+        "value": 8000000,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 2,
+        "targetSide": "self"
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 2,
+        "targetSide": "ally",
+        "targetSelection": "all"
+      }
+    ]
+  }
+]
   },
   {
     "id": 4,
     "name": "DEKU",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "แสง",
     "power": 242000,
         "hp": 1210000,
@@ -7462,20 +8483,210 @@
     "awakenMax": 4,
     "icon": "",
     "image": "4.png",
-    "ability": {
-      "name": "อะตอมมิค",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; โล่+10",
+    "ability": [
+    {
+      "name": "ผู้สืบทอดวันฟอร์ออลคนที่ 9",
+      "description": "ATK +500%, HP +300%, อัตราคริติคอล +50%, อัตราหลบหลีก +30% และต้านสถานะ +300%",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "condition": {},
       "effects": [
-        { "type": "shieldHits", "value": 10 }
+        {
+          "type": "selfPowerRate",
+          "value": 5
+        },
+        {
+          "type": "selfHpRate",
+          "value": 3
+        },
+        {
+          "type": "criticalRate",
+          "value": 0.5,
+          "targetSide": "self"
+        },
+        {
+          "type": "dodgeRate",
+          "value": 0.3,
+          "targetSide": "self"
+        },
+        {
+          "type": "statusResistance",
+          "value": 3,
+          "targetSide": "self"
+        }
+      ]
+    },
+    {
+      "name": "Danger Sense และ Float",
+      "description": "รับรู้การโจมตีล่วงหน้า เพิ่มอัตราหลบหลีกอีก 20% และบล็อคเรท 30%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {},
+      "effects": [
+        {
+          "type": "dodgeRate",
+          "value": 0.2,
+          "targetSide": "self"
+        },
+        {
+          "type": "blockRate",
+          "value": 0.3,
+          "targetSide": "self"
+        }
+      ]
+    },
+    {
+      "name": "Blackwhip: Internal Reinforcement",
+      "description": "ทุกครั้งที่โจมตีครบ 4 ครั้ง จะใช้แบล็กวิปเสริมร่างกาย ฟื้นฟู HP 5,000,000 และเพิ่มโล่ให้ตัวเอง 2 ฮิต พร้อมเพิ่มโล่ให้พันธมิตรทุกคนคนละ 1 ฮิต",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {},
+      "effects": [
+        {
+          "type": "healHpFlat",
+          "value": 5000000,
+          "targetSide": "self",
+          "condition": {
+            "afterOwnAttacks": 3,
+            "repeat": true
+          }
+        },
+        {
+          "type": "restoreShieldHits",
+          "value": 2,
+          "targetSide": "self",
+          "condition": {
+            "afterOwnAttacks": 3,
+            "repeat": true
+          }
+        },
+        {
+          "type": "restoreShieldHits",
+          "value": 1,
+          "targetSide": "ally",
+          "targetSelection": "all",
+          "condition": {
+            "afterOwnAttacks": 3,
+            "repeat": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fa Jin × Gearshift",
+      "description": "เมื่อโจมตีครบ 5 ครั้ง การโจมตีครั้งถัดไปจะสร้างดาเมจเพิ่มขึ้น 3000%, โจมตีเพิ่ม 4 ฮิต และติดคริติคอล 100%",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "afterOwnAttacks": 5,
+        "repeat": true
+      },
+      "effects": [
+        {
+          "type": "nextAttackPowerRate",
+          "value": 30,
+          "targetSide": "self"
+        },
+        {
+          "type": "nextAttackHits",
+          "value": 4,
+          "targetSide": "self"
+        },
+        {
+          "type": "nextAttackCriticalRate",
+          "value": 1,
+          "targetSide": "self"
+        }
+      ]
+    },
+    {
+      "name": "Overdrive: Detroit Smash Quintuple",
+      "description": "เมื่อโจมตีครบ 10 ครั้ง การโจมตีครั้งถัดไปจะสร้างดาเมจเพิ่มขึ้น 5000%, โจมตีเพิ่ม 5 ฮิต, ติดคริติคอล 100% และทำลายโล่ศัตรูทุกตัว 5 ฮิต",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "afterOwnAttacks": 10,
+        "repeat": true
+      },
+      "effects": [
+        {
+          "type": "nextAttackPowerRate",
+          "value": 50,
+          "targetSide": "self"
+        },
+        {
+          "type": "nextAttackHits",
+          "value": 5,
+          "targetSide": "self"
+        },
+        {
+          "type": "nextAttackCriticalRate",
+          "value": 1,
+          "targetSide": "self"
+        },
+        {
+          "type": "shieldHits",
+          "value": -5,
+          "targetSide": "enemy",
+          "targetSelection": "all"
+        }
+      ]
+    },
+    {
+      "name": "Plus Ultra: One For All Final Smash",
+      "description": "เมื่อโจมตีครบ 25 ครั้ง จะทำลายโล่ศัตรูทั้งหมด และทำให้การโจมตีครั้งถัดไปสร้างดาเมจเพิ่มขึ้น 20000%, โจมตีเพิ่ม 7 ฮิต และติดคริติคอล 100% พร้อมฟื้นฟู HP ให้ทั้งทีมคนละ 10,000,000 และเพิ่มโล่คนละ 3 ฮิต ทำงานครั้งเดียวต่อไฟต์",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {
+        "afterOwnAttacks": 25,
+        "repeat": false
+      },
+      "effects": [
+        {
+          "type": "shieldHits",
+          "value": -999,
+          "targetSide": "enemy",
+          "targetSelection": "all"
+        },
+        {
+          "type": "nextAttackPowerRate",
+          "value": 200,
+          "targetSide": "self"
+        },
+        {
+          "type": "nextAttackHits",
+          "value": 7,
+          "targetSide": "self"
+        },
+        {
+          "type": "nextAttackCriticalRate",
+          "value": 1,
+          "targetSide": "self"
+        },
+        {
+          "type": "healHpFlat",
+          "value": 10000000,
+          "targetSide": "self"
+        },
+        {
+          "type": "healHpFlat",
+          "value": 10000000,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        },
+        {
+          "type": "restoreShieldHits",
+          "value": 3,
+          "targetSide": "self"
+        },
+        {
+          "type": "restoreShieldHits",
+          "value": 3,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        }
       ]
     }
+  ]
   },
   {
     "id": 5,
     "name": "Kirito",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "ลม",
     "power": 242000,
         "hp": 1210000,
@@ -7486,20 +8697,118 @@
     "awakenMax": 4,
     "icon": "",
     "image": "5.png",
-    "ability": {
-      "name": "เร็วขึ้นอีก",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ATK +500%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
-      "effects": [
-        { "type": "selfPowerRate", "value": 5 }
-      ]
-    }
+"ability": [
+  {
+    "name": "นักดาบดำ",
+    "description": "ATK +150% อัตราคริติคอล +25% และอัตราหลบหลีก +30%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "selfPowerRate",
+        "value": 1.5
+      },
+      {
+        "type": "criticalRate",
+        "value": 0.25,
+        "targetSide": "self"
+      },
+      {
+        "type": "dodgeRate",
+        "value": 0.3,
+        "targetSide": "self"
+      }
+    ]
   },
+  {
+    "name": "Battle Healing",
+    "description": "ทุกครั้งที่โจมตีครบ 5 ครั้ง จะฟื้นฟู HP 3,000,000 และฟื้นฟูโล่ให้ตัวเอง 1 ฮิต",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "healHpFlat",
+        "value": 3000000,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 4,
+          "repeat": true
+        }
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 1,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 4,
+          "repeat": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "สกิลดาบคู่",
+    "description": "เมื่อโจมตีครบ 8 ครั้ง การโจมตีครั้งถัดไปจะโจมตีเพิ่ม 4 ฮิต สร้างดาเมจเพิ่มขึ้น 500% และติดคริติคอล 100%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 8,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "nextAttackHits",
+        "value": 4,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackPowerRate",
+        "value": 5,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackCriticalRate",
+        "value": 1,
+        "targetSide": "self"
+      }
+    ]
+  },
+  {
+    "name": "Starburst Stream",
+    "description": "เมื่อโจมตีครบ 16 ครั้ง จะปล่อยคอมโบต่อเนื่อง สร้างดาเมจเพิ่มขึ้น 1600% ลดอัตราหลบหลีกของศัตรูทั้งหมด 100% และฟื้นฟู HP 5,000,000 ทำงานซ้ำได้",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 15,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "nextAttackPowerRate",
+        "value": 16,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackCriticalRate",
+        "value": 1,
+        "targetSide": "self"
+      },
+      {
+        "type": "dodgeRate",
+        "value": -1,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "healHpFlat",
+        "value": 5000000,
+        "targetSide": "self"
+      }
+    ]
+  }
+]  },
   {
     "id": 6,
     "name": "Monkey D. Luffy",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "พืช",
     "power": 242000,
         "hp": 1210000,
@@ -7510,15 +8819,163 @@
     "awakenMax": 4,
     "icon": "",
     "image": "6.png",
-    "ability": {
-      "name": "นิกะนิกะโนมิ",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ATK +500%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
-      "effects": [
-        { "type": "selfPowerRate", "value": 5 }
-      ]
-    }
+"ability": [
+  {
+    "name": "นักรบแห่งการปลดปล่อย",
+    "description": "เมื่ออเวกตันและเลเวลถึง 220 จะเข้าสู่ร่างนิกะ ได้รับ ATK/HP +300% อัตราหลบหลีก +40% และต้านสถานะ +200%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "sourceMinAwaken": 4,
+      "sourceMinLevel": 220
+    },
+    "effects": [
+      {
+        "type": "selfPowerRate",
+        "value": 3
+      },
+      {
+        "type": "selfHpRate",
+        "value": 3
+      },
+      {
+        "type": "dodgeRate",
+        "value": 0.4,
+        "targetSide": "self"
+      },
+      {
+        "type": "statusResistance",
+        "value": 2,
+        "targetSide": "self"
+      }
+    ]
+  },
+  {
+    "name": "กลองแห่งการปลดปล่อย",
+    "description": "ทุกครั้งที่โจมตีครบ 5 ครั้ง จะฟื้นฟู HP ให้ตัวเอง 5,000,000 ฟื้นฟู HP ให้พันธมิตรทุกคนคนละ 2,000,000 และเพิ่มโล่ให้ทั้งทีมคนละ 1 ฮิต",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "sourceMinAwaken": 4,
+      "sourceMinLevel": 220
+    },
+    "effects": [
+      {
+        "type": "healHpFlat",
+        "value": 5000000,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 4,
+          "repeat": true
+        }
+      },
+      {
+        "type": "healHpFlat",
+        "value": 2000000,
+        "targetSide": "ally",
+        "targetSelection": "all",
+        "condition": {
+          "afterOwnAttacks": 4,
+          "repeat": true
+        }
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 1,
+        "targetSide": "ally",
+        "targetSelection": "all",
+        "condition": {
+          "afterOwnAttacks": 4,
+          "repeat": true
+        }
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 1,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 4,
+          "repeat": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "พลังที่ไร้ขีดจำกัดของจินตนาการ",
+    "description": "เมื่อโจมตีครบ 10 ครั้ง การโจมตีครั้งถัดไปจะสร้างดาเมจเพิ่มขึ้น 2000% ติดคริติคอล 100% และฟื้นฟู HP ให้ตัวเองตามจังหวะการต่อสู้ 3,000,000",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "sourceMinAwaken": 4,
+      "sourceMinLevel": 220,
+      "afterOwnAttacks": 10,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "nextAttackPowerRate",
+        "value": 20,
+        "targetSide": "self"
+      },
+      {
+        "type": "nextAttackCriticalRate",
+        "value": 1,
+        "targetSide": "self"
+      },
+      {
+        "type": "healHpFlat",
+        "value": 3000000,
+        "targetSide": "self"
+      }
+    ]
+  },
+  {
+    "name": "หัวเราะเข้าไว้ ลูฟี่!",
+    "description": "ทุกครั้งที่โจมตีครบ 20 ครั้ง จะฟื้นฟู HP ให้ทั้งทีมคนละ 5,000,000 และเพิ่มโล่ให้ทั้งทีมคนละ 2 ฮิต ทำงานซ้ำได้",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "sourceMinAwaken": 4,
+      "sourceMinLevel": 220
+    },
+    "effects": [
+      {
+        "type": "healHpFlat",
+        "value": 5000000,
+        "targetSide": "ally",
+        "targetSelection": "all",
+        "condition": {
+          "afterOwnAttacks": 19,
+          "repeat": true
+        }
+      },
+      {
+        "type": "healHpFlat",
+        "value": 5000000,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 19,
+          "repeat": true
+        }
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 2,
+        "targetSide": "ally",
+        "targetSelection": "all",
+        "condition": {
+          "afterOwnAttacks": 19,
+          "repeat": true
+        }
+      },
+      {
+        "type": "restoreShieldHits",
+        "value": 2,
+        "targetSide": "self",
+        "condition": {
+          "afterOwnAttacks": 19,
+          "repeat": true
+        }
+      }
+    ]
+  }
+]
   },
   {
     "id": 7,
@@ -7536,18 +8993,24 @@
     "image": "7.png",
     "ability": {
       "name": "มุราซากิ",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ATK +500%",
+      "description": "เมื่อโจมตีครบ 50 ครั้ง จะตีเป็นดาเมจ +5000% และเพิ่มโล่ให้ทีม คนละ +4 ทำงานครั้งเดียวต่อไฟต์",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
+      "condition": {"afterOwnAttacks":50 , "repeat": false },
       "effects": [
-        { "type": "selfPowerRate", "value": 5 }
+        { "type": "nextAttackPowerRate", "value": 50, "targetSide":"self" },
+        { "type": "restoreShieldHits", "value": 4, "targetSide":"ally","targetSelection" : "all" },
+{
+  "type": "restoreShieldHits",
+  "value": 4,
+  "targetSide": "self"
+}
       ]
     }
   },
   {
     "id": 8,
     "name": "CID",
-    "rarity": "LR",
+    "rarity": "SC",
     "element": "ความมืด",
     "power": 242000,
         "hp": 1210000,
@@ -7558,16 +9021,59 @@
     "awakenMax": 4,
     "icon": "",
     "image": "8.png",
-    "ability": {
-      "name": "ไอแอม..อะตอมมิค",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; โจมตี +8ฮิต",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
-      "effects": [
-        { "type": "attackHits", "value": 8 }
-      ]
-    }
+"ability": [
+  {
+    "name": "ไอแอม...อะตอมมิค",
+    "description": "เมื่อตีครบ 100 ครั้ง จะทำลายโล่ศัตรูทั้งหมด สร้างดาเมจเพิ่มขึ้น 100000% และเข้าเป้า 100%",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {
+      "afterOwnAttacks": 99,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "shieldHits",
+        "value": -999,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "nextAttackPowerRate",
+        "value": 1000,
+        "targetSide": "self"
+      },
+      {
+        "type": "dodgeRate",
+        "value": -1,
+        "targetSide": "enemy",
+        "targetSelection": "all"
+      },
+      {
+        "type": "dodgeRate",
+        "value": 1,
+        "targetSide": "enemy",
+        "targetSelection": "all",
+        "condition": {
+          "afterOwnAttacks": 100,
+          "repeat": true
+        }
+      }
+    ]
   },
+  {
+    "name": "ควบคุมเวทดั่งใจนึก",
+    "description": "ไม่รับผลเอฟเฟคการ์ดใดๆ",
+    "activeIn": ["team", "tower", "arena"],
+    "condition": {},
+    "effects": [
+      {
+        "type": "statusResistance",
+        "value": 5,
+        "targetSide": "self"
+      }
+    ]
+  }
+]  },
   {
     "id": 9,
     "name": "Kamado Tanjirou",
@@ -7582,15 +9088,26 @@
     "awakenMax": 4,
     "icon": "",
     "image": "9.png",
-    "ability": {
+    "ability": [ {
       "name": "ปราณวารี",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ทุกครั้งที่ตี 3 ครั้ง ฟื้นฟู 3000000 ",
+      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; ทุกครั้งที่ตี 4 ครั้ง ฟื้นฟู 3000000 ให้ตัวเอง ",
       "activeIn": ["team", "tower", "arena"],
       "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
       "effects": [
-        { "type": "selfHpRate", "value": 5 }
+        { "type": "healHpFlat", "value": 3000000, "targetSide": "self", "condition": {"afterOwnAttacks":3, "repeat": true} }
+      ]
+    },
+    {
+      "name": "ปราณวารีกระบวนท่าที่1 ผ่าวารี",
+      "description": " เมื่อตีครบ 4 ครั้ง จะ เพิ่มดาเมจในการตีครั้งถัดไป +1000% แบบติดคริ 100% ",
+      "activeIn": ["team", "tower", "arena"],
+      "condition": {"afterOwnAttacks": 4, "repeat": true},
+      "effects": [
+        { "type": "nextAttackPowerRate", "value": 10, "targetSide": "self" },
+        { "type": "nextAttackCriticalRate", "value": 1, "targetSide": "self" }
       ]
     }
+   ]
   },
   {
     "id": 10,
@@ -7607,14 +9124,30 @@
     "icon": "",
     "image": "10.png",
     "ability": {
-      "name": "โหมดเซียน",
-      "description": "เมื่ออเวกตันและเลเวล 150 จะได้รับ ; HP+500%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 4, "sourceMinLevel": 150 },
-      "effects": [
-        { "type": "selfHpRate", "value": 5 }
-      ]
+  "name": "โหมดเซียน",
+  "description": "เมื่ออเวกตันและเลเวลถึง 150 จะได้รับ ATK/HP +500% และทั้งทีมได้รับบล็อคเรท +30%",
+  "activeIn": ["team", "tower", "arena"],
+  "condition": {
+    "sourceMinAwaken": 4,
+    "sourceMinLevel": 150
+  },
+  "effects": [
+    {
+      "type": "selfPowerRate",
+      "value": 5
+    },
+    {
+      "type": "selfHpRate",
+      "value": 5
+    },
+    {
+      "type": "blockRate",
+      "value": 0.3,
+      "targetSide": "ally",
+      "targetSelection": "all"
     }
+  ]
+}
   },
   {
     "id": 1038,
@@ -7632,11 +9165,11 @@
     "image": "1038.png",
     "ability": {
       "name": "ตั้งมั่นสานสัมพันธ์",
-      "description": "ทีมเรา ATK-20% HP+90% และ เมื่ออเวกตันและเลเวล 150 โจมตี +5ฮิต",
+      "description": "ทีมเรา ATK-40% HP+90% และ เมื่ออเวกตันและเลเวล 150 โจมตี +5ฮิต",
       "activeIn": ["team", "tower", "arena"],
       "condition": {},
       "effects": [
-         { "type": "teamPowerRate", "value": -0.20 },
+         { "type": "teamPowerRate", "value": -0.40 },
         { "type": "teamHpRate", "value": 0.90 },
         { "type": "attackHits", "value": 5, "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 150} }
       ]
@@ -7658,13 +9191,13 @@
     "image": "1039.png",
     "ability": {
       "name": "มโหฬากาฬ",
-      "description": "หากการ์ดใบนี้ ตีครบ 10 ครั้ง จะอัญเชินมหโหฬาการ ; ATK/HP+40% และทุกครั้งที่ตี6ครั้งจะได้รับโล่ +3",
+      "description": "หากการ์ดใบนี้ ตีครบ 40 ครั้ง จะอัญเชินมหโหฬาการ ; ATK/HP+30% และทุกครั้งที่ตี6ครั้งจะได้รับโล่ +2",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "afterOwnAttacks": 9, "repeat": false },
+      "condition": { "afterOwnAttacks": 39, "repeat": false },
       "effects": [
-         { "type": "teamPowerRate", "value": 0.40 },
-        { "type": "teamHpRate", "value": 0.40 },
-        { "type": "restoreShieldHits", "value": 3, "persistentAfterActivation": true , "condition": { "afterOwnAttacks": 5, "repeat": true } }
+         { "type": "teamPowerRate", "value": 0.30 },
+        { "type": "teamHpRate", "value": 0.30 },
+        { "type": "restoreShieldHits", "value": 2, "persistentAfterActivation": true , "condition": { "afterOwnAttacks": 5, "repeat": true } }
       ]
     }
   },
@@ -7685,13 +9218,13 @@
     "abilities": [
       {
         "name": "สายสัมพันธ์มนุษย์และมนุษย์ต่างดาว",
-        "description": "หากการ์ดใบนี้จัดทีมร่วมกับ 'Yuka Okkotsu'และ'Marulu Val Vol Yelvori'จะได้รับ; รายได้+50% และ ATK/HP+40%",
+        "description": "หากการ์ดใบนี้จัดทีมร่วมกับ 'Yuka Okkotsu'และ'Marulu Val Vol Yelvori'จะได้รับ; รายได้+50% และ ATK/HP+30%",
         "activeIn": ["team", "tower", "arena"],
         "condition": { "requiredCardIds": [1039, 1038] },
         "effects": [
           { "type": "teamIncomeRate", "value": 0.50 },
-          { "type": "teamPowerRate", "value": 0.4 },
-          { "type": "teamHpRate", "value": 0.4 }
+          { "type": "teamPowerRate", "value": 0.3 },
+          { "type": "teamHpRate", "value": 0.3 }
         ]
       },
       {
@@ -7748,9 +9281,9 @@
     "image": "1034.png",
     "ability": {
       "name": "พยัคสายฟ้าทะลุทะลวง",
-      "description": "หากการ์ดใบนี้ ตีครบ 10 ครั้ง ครั้งต่อไปจะตี+10ฮิต ATK+10000000",
+      "description": "หากการ์ดใบนี้ ตีครบ 12 ครั้ง ครั้งต่อไปจะตี+10ฮิต ATK+10000000",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "afterOwnAttacks": 9, "repeat": true },
+      "condition": { "afterOwnAttacks": 12, "repeat": true },
       "effects": [
         { "type": "nextAttackHits", "value": 10 },
         { "type": "nextAttackPowerFlat", "value": 10000000 }
@@ -7785,11 +9318,11 @@
       },
       {
         "name": "ตัดสะบั้นV2",
-        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 16 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 4000% แบบเจาะโล่",
+        "description": "เมื่อการ์ดใบนี้มีการโจมตีมา 36 ครั้ง การโจมตีครั้งต่อไปจะ+ATK 4000% แบบเจาะโล่",
         "activeIn": ["team", "tower", "arena"],
         "condition": {},
         "effects": [
-          { "type": "nextAttackPowerRate", "value": 40.0, "condition": { "afterOwnAttacks": 16, "repeat": true } },
+          { "type": "nextAttackPowerRate", "value": 40.0, "condition": { "afterOwnAttacks": 36, "repeat": true } },
           { "type": "nextAttackHits", "value": 99, "condition": { "afterOwnAttacks": 16, "repeat": true } }
         ]
       }
@@ -7811,11 +9344,15 @@
     "image": "1021.png",
     "ability": {
       "name": "หลักฐานมัดตัว",
-      "description": "หากการ์ดใบนี้ตีครบ 5 ครั้งจะเปิดอาณาเขต; ศัตรู ATK-50% และความสามารถการ์ดทั้งหมดของศัตรูไร้ผล",
+      "description": "หากการ์ดใบนี้ตีครบ 30 ครั้งจะเปิดอาณาเขต; ศัตรู ATK-100% เป็นเวลา 10 เทิร์น และความสามารถการ์ดทั้งหมดของศัตรูไร้ผล",
       "activeIn": ["team", "tower", "arena"],
-      "condition": { "afterOwnAttacks": 5, "repeat": false },
+      "condition": { "afterOwnAttacks": 29, "repeat": false },
       "effects": [
-        { "type": "enemyPowerRate", "value": -0.5 },
+        { "type": "enemyPowerRate", "value": -1 },
+        { "type": "enemyPowerRate", "value": 1 , "condition": {
+        "afterOwnAttacks": 10
+      }
+  },
         { "type": "nullifyCardAbilities","targetSide": "enemy" }
       ]
     }
@@ -7836,11 +9373,33 @@
     "image": "1022.png",
     "ability": {
       "name": "ไม่ว่าอะไรก็จะเป็นเรื่องตลกไปหมด5555",
-      "description": "หากอเวกตัน/เลเวลตัน จะได้รับความสามารถ; เพิ่มอัตราคริติคอล +90% และเพิ่มเรทกาชา SC/EX 50%",
+      "description": "หากอเวกตันและเลเวลตัน จะได้รับความสามารถ; เพิ่มอัตราคริติคอล +100% และอัตราหลบหลีก +100% เป็นเวลา 10เทิร์น และเพิ่มเรทกาชา SC/EX 50%",
       "activeIn": ["team", "tower", "arena"],
       "condition": { "sourceMinAwaken": 4, "sourceMinLevel": 220 },
       "effects": [
-        { "type": "criticalRate", "value": 0.9 },
+        { "type": "criticalRate",
+          "targetSide": "self", "value": 1 },
+        {
+          "type": "dodgeRate",
+          "value": 1,
+          "targetSide": "self"
+        },
+    {
+      "type": "criticalRate",
+      "value": -1,
+      "targetSide": "self",
+      "condition": {
+        "afterOwnAttacks": 10
+      }
+    },
+    {
+      "type": "dodgeRate",
+      "value": -1,
+      "targetSide": "self",
+      "condition": {
+        "afterOwnAttacks": 10
+      }
+    },
         { "type": "gachaRarityRate", "value": 0.5, "targetRarities": ["EX", "SC"],"condition": { "mode": "team" } }
       ]
     }
@@ -7975,12 +9534,19 @@
       },
       {
         "name": "บัญญัติสวรรค์",
-        "description": "ATK/HP+150%",
+        "description": "ATK/HP+150% และต้านสถานะเพิ่ม 50%",
         "activeIn": ["team", "tower", "arena"],
         "condition": {},
         "effects": [
           { "type": "selfHpRate", "value": 1.5 },
-          { "type": "selfPowerRate", "value": 1.5 }
+          { "type": "selfPowerRate", "value": 1.5 },
+        {
+          "type": "statusResistance",
+          "value": 0.5,
+          "targetSide": "self",
+          "targetSelection": "specific",
+          "scope": "target"
+        }
         ]
       }
     ]
@@ -8024,12 +9590,19 @@
       },
       {
         "name": "บัญญัติสวรรค์",
-        "description": "ATK/HP+150%",
+        "description": "ATK/HP+150% และต้านสถานะเพิ่ม 50%",
         "activeIn": ["team", "tower", "arena"],
         "condition": {},
         "effects": [
           { "type": "selfHpRate", "value": 1.5 },
-          { "type": "selfPowerRate", "value": 1.5 }
+          { "type": "selfPowerRate", "value": 1.5 },
+        {
+          "type": "statusResistance",
+          "value": 0.5,
+          "targetSide": "self",
+          "targetSelection": "specific",
+          "scope": "target"
+        }
         ]
       }
     ]
@@ -11133,6 +12706,7 @@
     function normalizeBattleTriggerRule(condition = {}) {
       const raw = condition && typeof condition === "object" ? condition : {};
       const nested = raw.battleTrigger && typeof raw.battleTrigger === "object" ? raw.battleTrigger : raw;
+      const requiredDomainId = String(nested.domainActive || nested.requiredDomainId || "").trim();
       const onOwnAttack = nested.onOwnAttack === true
         || nested.triggerOnOwnAttack === true
         || String(nested.triggerOn || "").trim().toLowerCase() === "ownattack";
@@ -11141,21 +12715,24 @@
           onOwnAttack: true,
           afterOwnAttacks: 0,
           repeat: true,
-          triggerOn: "ownAttack"
+          triggerOn: "ownAttack",
+          requiredDomainId
         };
       }
-      const amount = Math.floor(Number(
-        nested.afterOwnAttacks !== undefined ? nested.afterOwnAttacks
+      const rawAmount = requiredDomainId && nested.afterDomainAttacks !== undefined
+        ? nested.afterDomainAttacks
+        : nested.afterOwnAttacks !== undefined ? nested.afterOwnAttacks
           : nested.triggerEveryOwnAttacks !== undefined ? nested.triggerEveryOwnAttacks
-          : nested.ownAttacksBeforeTrigger
-      ) || 0);
+            : nested.ownAttacksBeforeTrigger;
+      const amount = Math.floor(Number(rawAmount) || 0);
       if (amount < 1) return null;
       const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
       return {
         onOwnAttack: false,
         afterOwnAttacks: Math.min(cap, amount),
         repeat: nested.repeat !== false,
-        triggerOn: "nextAttack"
+        triggerOn: "nextAttack",
+        requiredDomainId
       };
     }
 
@@ -11171,6 +12748,9 @@
       delete result.activateOnNextAttack;
       delete result.triggerOn;
       delete result.repeat;
+      delete result.domainActive;
+      delete result.requiredDomainId;
+      delete result.afterDomainAttacks;
       return result;
     }
 
@@ -11218,7 +12798,11 @@
         stealAbility: CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES,
         stealSkill: CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES,
         statusResist: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE,
-        statusResistanceRate: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE
+        statusResistanceRate: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE,
+        powerRate: CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE,
+        hpRate: CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE,
+        ignoreAbilityCondition: CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS,
+        activateField: CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN
       };
       return aliases[type] || type;
     }
@@ -11391,7 +12975,7 @@
       const rawRate = effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value ?? 0;
       const scopeRaw = String(effect.scope || effect.resistanceScope || "target").trim().toLowerCase();
       return {
-        rate: normalizeAbilityChance(rawRate, 0),
+        rate: Number(rawRate) || 0,
         effectTypes: normalizeAbilityStringList(effect.resistEffectTypes || effect.statusEffectTypes || effect.effectTypes).map(normalizeAbilityEffectType),
         categories: normalizeAbilityStringList(effect.resistCategories || effect.categories).map(item => String(item).trim()),
         abilityNames: normalizeAbilityStringList(effect.resistAbilityNames || effect.abilityNames),
@@ -11414,7 +12998,7 @@
 
     function addStatusResistanceRule(map, cardId, rule) {
       const id = String(cardId || "");
-      if (!id || !rule || !(Number(rule.rate) > 0)) return;
+      if (!id || !rule || !Number(rule.rate)) return;
       if (!map[id]) map[id] = [];
       map[id].push({ ...rule });
     }
@@ -11439,7 +13023,7 @@
       const total = abilityArray(rules)
         .filter(rule => (scope !== "field" || String(rule && rule.scope || "target") === "field"))
         .filter(rule => statusResistanceRuleMatches(rule, effect))
-        .reduce((sum, rule) => sum + normalizeAbilityChance(rule && rule.rate, 0), 0);
+        .reduce((sum, rule) => sum + (Number(rule && rule.rate) || 0), 0);
       return Math.max(0, Math.min(cap, total));
     }
 
@@ -11758,102 +13342,7 @@
 
     // เพิ่มโดยอลิซ: สกิลเอกลักษณ์ประจำธาตุ
     // ระบบเติมให้อัตโนมัติตาม “ธาตุหลัก” ของการ์ด และไม่ทับ ability/abilities เฉพาะตัวเดิม
-    const ELEMENT_SIGNATURE_ABILITIES = Object.freeze({
-      "ดิน": Object.freeze({
-        name: "ธาตุดิน",
-        description: "DEF ของการ์ดนี้ +15% จากค่าเริ่มต้น",
-        activeIn: ["tower", "arena"],
-        effects: [{ type: "selfDefenseRate", value: 0.15 }]
-      }),
-      "น้ำ": Object.freeze({
-        name: "ธาตุน้ำ",
-        description: "HP ของการ์ดนี้ +15% จากค่าเริ่มต้น",
-        activeIn: ["tower", "arena"],
-        effects: [
-          { type: "selfHpRate", value: 0.15 }
-        ]
-      }),
-      "ลม": Object.freeze({
-        name: "ธาตุลม",
-        description: "ทุกการโจมตีครั้งที่ 3 เพิ่ม ATK ถาวรระหว่างไฟต์ 2% จาก ATK เริ่มต้น ซ้อนสูงสุด 5 ชั้น",
-        activeIn: ["tower", "arena"],
-        effects: [{ type: "increaseAttackRateStack", value: 0.02, maxStacks: 5, condition: { afterOwnAttacks: 2, repeat: true } }]
-      }),
-      "ไฟ": Object.freeze({
-        name: "ธาตุไฟ",
-        description: "ATK ของการ์ดนี้ +15% จากค่าเริ่มต้น",
-        activeIn: ["tower", "arena"],
-        effects: [{ type: "selfPowerRate", value: 0.15 }]
-      }),
-      "เหล็ก": Object.freeze({
-        name: "ธาตุเหล็ก",
-        description: "HP/DEF ของการ์ดนี้ +8% จากค่าเริ่มต้น",
-        activeIn: ["tower", "arena"],
-        effects: [{ type: "selfDefenseRate", value: 0.08 },{ type: "selfHpRate", value: 0.08 }]
-      }),
-      "น้ำแข็ง": Object.freeze({
-        name: "ธาตุน้ำแข็ง",
-        description: "DEF ของการ์ดนี้ +15% จากค่าเริ่มต้น",
-        activeIn: ["tower", "arena"],
-        effects: [{ type: "selfDefenseRate", value: 0.15 }]
-      }),
-      "พืช": Object.freeze({
-        name: "ธาตุพืช",
-        description: "HP ของการ์ดนี้ +10% และทุกการโจมตีครั้งที่ 4 ฟื้น HP 5%",
-        activeIn: ["tower", "arena"],
-        effects: [
-          { type: "selfHpRate", value: 0.10 },
-          { type: "healHpRate", value: 0.05, targetSide: "self", condition: { afterOwnAttacks: 3, repeat: true } }
-        ]
-      }),
-      "สายฟ้า": Object.freeze({
-        name: "ธาตุสายฟ้า",
-        description: "ATK ของการ์ดนี้ +5% และทุกการโจมตีครั้งที่ 3 จะตี 2 ครั้ง",
-        activeIn: ["tower", "arena"],
-        effects: [
-          { type: "selfPowerRate", value: 0.05 },
-          { type: "nextAttackHits", value: 2, targetSide: "self", condition: { afterOwnAttacks: 2, repeat: true } }
-        ]
-      }),
-      "ความมืด": Object.freeze({
-        name: "ธาตุความมืด",
-        description: "ลด ATK และ DEF ฝ่ายตรงข้ามอย่างละ 2%",
-        activeIn: ["tower", "arena"],
-        effects: [
-          { type: "enemyPowerRate", value: -0.02 },
-          { type: "enemyHpRate", value: -0.02 }
-        ]
-      }),
-      "แสง": Object.freeze({
-        name: "ธาตุแสง",
-        description: "เพิ่ม ATK และ DEF ทั้งทีมอย่างละ 4%",
-        activeIn: ["tower", "arena"],
-        effects: [
-          { type: "teamPowerRate", value: 0.04 },
-          { type: "teamHpRate", value: 0.04 }
-        ]
-      }),
-      "มิติ": Object.freeze({
-        name: "ธาตุมิติ",
-        description: "เพิ่ม ATK HP DEF ทั้งทีมอย่างละ 1.5%",
-        activeIn: ["tower", "arena"],
-        effects: [
-          { type: "teamPowerRate", value: 0.015 },
-          { type: "teamHpRate", value: 0.015 },
-          { type: "teamDefenseRate", value: 0.015 }
-        ]
-      }),
-      "ไร้ธาตุ": Object.freeze({
-        name: "ไร้ธาตุ",
-        description: "รายได้ทีม +6%, อัตราคริติคอล +4% ",
-        activeIn: ["team", "tower", "arena"],
-        effects: [
-          { type: "teamIncomeRate", value: 0.06 },
-          { type: "criticalRate", value: 0.04 }
-        ]
-      })
-    });
-
+ 
     function getElementSignatureAbility(card) {
       const element = getCardElement(card);
       const template = ELEMENT_SIGNATURE_ABILITIES[element];
@@ -12072,11 +13561,13 @@
         getRuntimeCardAbilityEntries(sourceCard, options).forEach(({ ability, abilityIndex, runtimeKey }) => {
           const modes = getAbilityModes(ability);
           const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
-          const baseActive = modes.includes(context.mode)
+          const baseActive = !abilityTrigger
+            && modes.includes(context.mode)
             && isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard);
           if (!baseActive) return;
           abilityArray(ability.effects).forEach((rawEffect, effectIndex) => {
             if (!rawEffect || typeof rawEffect !== "object" || !isStatusResistanceEffect(rawEffect)) return;
+            if (normalizeBattleTriggerRule(rawEffect.condition || {})) return;
             if (!isAbilityConditionMet(getStaticAbilityCondition(rawEffect.condition || {}), context, sourceCard)) return;
             const effect = {
               ...rawEffect,
@@ -12313,13 +13804,13 @@
               }
               return;
             }
-            if (isStatusResistanceEffect(record)) {
+            if (isStatusResistanceEffect(record) && !effectTrigger) {
               activeEffects.push(record);
               return;
             }
 
             // Active Skill แบบนับจำนวนครั้งโจมตี: เก็บไว้ให้ battle engine ประมวลผล ไม่ใช้เป็น Passive ทันที
-            if (effectTrigger && !isAbilityControlEffect(record)) {
+            if (effectTrigger) {
               const runtimeRecord = {
                 key: `${runtimeKey}:${effectIndex}`,
                 triggerKey: persistentAfterActivation
@@ -13305,9 +14796,15 @@
           copiedInstanceId: String(item.copiedInstanceId || ""),
           sourceAbilityRuntimeKey: String(item.sourceAbilityRuntimeKey || ""),
           transferDepth: Math.max(0, Math.floor(Number(item.transferDepth || 0))),
+          domainActivations: abilityArray(item.domainActivations).map(rule => ({ ...rule })),
+          domainPassiveEffects: abilityArray(item.domainPassiveEffects).map(effect => ({ ...effect })),
+          nullifyRules: abilityArray(item.nullifyRules).map(effect => ({ ...effect })),
+          statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
+          removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
+          requiredDomainId: String(item.requiredDomainId || ""),
           stacks: 0,
           requiresActivationKey: String(item.requiresActivationKey || ""),
-          unlocked: !String(item.requiresActivationKey || ""),
+          unlocked: !String(item.requiresActivationKey || "") && !String(item.requiredDomainId || ""),
           charge: 0,
           armed: runtimeTriggerMode(item) !== "nextAttack",
           completed: false,
@@ -13394,6 +14891,10 @@
           })),
           copiedAbilityInstances: [],
           disabledAbilityKeys: new Set(),
+          activeDomains: new Set(),
+          pendingNullifyByCardId: {},
+          domainEvents: [],
+          nullifyEvents: [],
           copiedTransferEvents: [],
           attackCount: 0,
           totalDamage: 0,
@@ -13532,7 +15033,13 @@
         const type = normalizeAbilityEffectType(effect.type);
         if (!type || isAbilityTransferEffect(effect)) return;
         const value = Number(effect.value || 0) * Number(direction || 1);
-        const side = normalizeAbilityTargetSide(effect.targetSide);
+        const selfOnlyTypes = new Set([
+          CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE,
+          CARD_ABILITY_EFFECT_TYPES.SELF_HP_RATE,
+          CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE,
+          CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE
+        ]);
+        const side = selfOnlyTypes.has(type) ? "self" : normalizeAbilityTargetSide(effect.targetSide);
         const localTarget = side === "enemy" ? opponent : owner;
         const localOpponent = localTarget === owner ? opponent : owner;
         const sourceIdForTarget = localTarget === owner ? sourceCardId : "";
@@ -13864,10 +15371,39 @@
       }
 
       function prepareTriggerActivation(fighter) {
-        const fired = fighter.activeTriggers.filter(trigger => trigger.unlocked && trigger.armed && !trigger.completed);
+        const armed = fighter.activeTriggers.filter(trigger => trigger.unlocked && trigger.armed && !trigger.completed);
+        const suppressed = [];
+        const suppressedCardIds = new Set();
+        armed.forEach(trigger => {
+          const cardId = String(trigger.sourceCardId || "");
+          if (!(Number(fighter.pendingNullifyByCardId && fighter.pendingNullifyByCardId[cardId]) > 0)) return;
+          suppressedCardIds.add(cardId);
+        });
+        suppressedCardIds.forEach(cardId => {
+          fighter.pendingNullifyByCardId[cardId] = Math.max(0, Number(fighter.pendingNullifyByCardId[cardId] || 0) - 1);
+          armed.filter(trigger => String(trigger.sourceCardId || "") === cardId).forEach(trigger => {
+            suppressed.push(trigger);
+            if (trigger.onBattleStart) {
+              trigger.armed = false;
+              trigger.completed = true;
+            } else if (trigger.onOwnAttack) {
+              trigger.charge = 0;
+              trigger.armed = true;
+            } else {
+              trigger.charge = 0;
+              trigger.armed = false;
+              trigger.cycleCostChange = 0;
+              trigger.afterOwnAttacks = Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), trigger.baseAfterOwnAttacks + trigger.permanentCostChange));
+              if (!trigger.repeat) trigger.completed = true;
+            }
+          });
+        });
+        const fired = armed.filter(trigger => !suppressed.includes(trigger));
         const stackable = fired.filter(trigger => trigger.attackStackGain > 0 && (!trigger.maxStacks || trigger.stacks < trigger.maxStacks));
         return {
           fired,
+          suppressed,
+          suppressedNames: suppressed.map(trigger => trigger.name),
           names: fired.map(trigger => trigger.name),
           details: fired.map(trigger => ({
             key: trigger.key,
@@ -13904,6 +15440,10 @@
             dodgeRateChanges: { ...trigger.dodgeRateChanges },
             enemyDodgeRateRules: abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule })),
             abilityTransfers: abilityArray(trigger.abilityTransfers).map(record => ({ ...record, transferDepth: trigger.transferDepth })),
+            domainActivations: abilityArray(trigger.domainActivations).map(rule => ({ ...rule })),
+            nullifyRules: abilityArray(trigger.nullifyRules).map(rule => ({ ...rule })),
+            statusResistanceEffects: abilityArray(trigger.statusResistanceEffects).map(effect => ({ ...effect })),
+            removeAllEnemyShield: Boolean(trigger.removeAllEnemyShield),
             copiedInstanceId: String(trigger.copiedInstanceId || ""),
             currentStacks: trigger.stacks,
             maxStacks: trigger.maxStacks
@@ -13937,7 +15477,11 @@
           enemyDamageTakenRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDamageTakenRateRules).map(rule => ({ ...rule }))),
           dodgeRateChanges: fired.reduce((map, trigger) => { Object.entries(trigger.dodgeRateChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
           enemyDodgeRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule }))),
-          abilityTransfers: fired.flatMap(trigger => abilityArray(trigger.abilityTransfers).map(record => ({ ...record, transferDepth: trigger.transferDepth })))
+          abilityTransfers: fired.flatMap(trigger => abilityArray(trigger.abilityTransfers).map(record => ({ ...record, transferDepth: trigger.transferDepth }))),
+          domainActivations: fired.flatMap(trigger => abilityArray(trigger.domainActivations).map(rule => ({ ...rule, sourceCardId: trigger.sourceCardId, sourceAbilityName: trigger.name, passiveEffects: abilityArray(trigger.domainPassiveEffects).map(effect => ({ ...effect })) }))),
+          nullifyRules: fired.flatMap(trigger => abilityArray(trigger.nullifyRules).map(rule => ({ ...rule, _sourceCardId: trigger.sourceCardId, _sourceAbilityName: trigger.name, _runtimeEffectKey: `${trigger.key}:nullify` }))),
+          statusResistanceEffects: fired.flatMap(trigger => abilityArray(trigger.statusResistanceEffects).map(effect => ({ ...effect, _sourceCardId: trigger.sourceCardId, _sourceAbilityName: trigger.name, _runtimeEffectKey: `${trigger.key}:resistance` }))),
+          removeAllEnemyShield: fired.some(trigger => trigger.removeAllEnemyShield)
         };
       }
 
@@ -13993,6 +15537,117 @@
             trigger.armed = false;
           });
         }
+      }
+
+      function applyTriggeredStatusResistance(owner, opponent, effects, turnIndex) {
+        const events = [];
+        abilityArray(effects).forEach((effect, effectIndex) => {
+          const side = normalizeAbilityTargetSide(effect.targetSide);
+          const targetFighter = side === "enemy" ? opponent : owner;
+          const sourceId = side === "enemy" ? "" : String(effect._sourceCardId || "");
+          let targets = runtimeTargetMembers(targetFighter, sourceId, { ...effect, targetSide: side === "enemy" ? "ally" : effect.targetSide });
+          const selection = normalizeAbilitySelectionMode(effect.targetSelection, "all");
+          targets = selectAbilityItems(
+            targets,
+            selection,
+            effect.targetCount || (selection === "specific" ? targets.length : 1),
+            `${options.statusResolutionSeed || "runtime"}`,
+            `${effect._runtimeEffectKey || "status"}:${turnIndex}:${effectIndex}`
+          );
+          targets.forEach(member => {
+            if (side === "enemy") {
+              const resisted = shouldAbilityEffectBeResisted(
+                member.statusResistanceRules,
+                effect,
+                `${options.statusResolutionSeed || "runtime"}`,
+                `${effect._runtimeEffectKey}:reduce:${member.id}:${turnIndex}`
+              );
+              if (resisted.resisted) {
+                events.push({ targetCardId: String(member.id), resisted: true, rate: resisted.rate, value: Number(effect.value || 0) });
+                return;
+              }
+            }
+            const rule = makeStatusResistanceRule(effect, {
+              sourceCard: runtimeRosterItem(owner, effect._sourceCardId) && runtimeRosterItem(owner, effect._sourceCardId).card,
+              ability: { name: String(effect._sourceAbilityName || "Active Skill") },
+              key: String(effect._runtimeEffectKey || "runtime-status")
+            });
+            member.statusResistanceRules.push(rule);
+            events.push({ targetCardId: String(member.id), resisted: false, value: Number(rule.rate || 0) });
+          });
+        });
+        return events;
+      }
+
+      function applyTriggeredNullify(owner, opponent, rules, turnIndex) {
+        const events = [];
+        abilityArray(rules).forEach((effect, effectIndex) => {
+          const targetFighter = normalizeAbilityTargetSide(effect.targetSide) === "enemy" ? opponent : owner;
+          const sourceCardId = targetFighter === owner ? String(effect._sourceCardId || "") : "";
+          let targets = runtimeSelectRoster(
+            targetFighter,
+            effect,
+            sourceCardId,
+            "ally",
+            `${options.statusResolutionSeed || "runtime"}`,
+            `${effect._runtimeEffectKey || "nullify"}:${turnIndex}:${effectIndex}`
+          );
+          if (normalizeAbilitySelectionMode(effect.targetSelection, "random") === "all") {
+            targets = abilityArray(targetFighter.abilityRoster).filter(item => runtimeCardMatches(item, effect));
+          }
+          targets.forEach(item => {
+            const cardId = String(item.id || "");
+            const member = runtimeMember(targetFighter, cardId);
+            const resisted = shouldAbilityEffectBeResisted(
+              member && member.statusResistanceRules,
+              effect,
+              `${options.statusResolutionSeed || "runtime"}`,
+              `${effect._runtimeEffectKey}:nullify:${cardId}:${turnIndex}`
+            );
+            if (resisted.resisted) {
+              events.push({ targetCardId: cardId, resisted: true, rate: resisted.rate });
+              return;
+            }
+            const uses = Math.max(1, Math.floor(Number(effect.durationTriggers || 1)));
+            targetFighter.pendingNullifyByCardId[cardId] = Math.max(Number(targetFighter.pendingNullifyByCardId[cardId] || 0), uses);
+            events.push({ targetCardId: cardId, resisted: false, durationTriggers: uses });
+          });
+        });
+        const eventTarget = abilityArray(rules).some(effect => normalizeAbilityTargetSide(effect.targetSide) !== "enemy") ? owner : opponent;
+        eventTarget.nullifyEvents.push(...events);
+        return events;
+      }
+
+      function applyDomainActivations(owner, opponent, activations, turnIndex) {
+        const events = [];
+        abilityArray(activations).forEach(activation => {
+          const domainId = String(activation.domainId || "").trim();
+          if (!domainId || owner.activeDomains.has(domainId)) return;
+          owner.activeDomains.add(domainId);
+          abilityArray(activation.passiveEffects).forEach(rawEffect => {
+            if (!rawEffect || normalizeAbilityEffectType(rawEffect.type) === CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN) return;
+            const effect = { ...rawEffect };
+            if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE].includes(normalizeAbilityEffectType(effect.type))) {
+              effect.type = CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT;
+            }
+            applyRuntimePassiveEffect(owner, opponent, String(activation.sourceCardId || ""), effect, null, 1);
+          });
+          owner.activeTriggers.forEach(trigger => {
+            if (trigger.unlocked || String(trigger.requiredDomainId || "") !== domainId) return;
+            trigger.unlocked = true;
+            trigger.charge = 0;
+            trigger.armed = Boolean(trigger.onOwnAttack || trigger.onBattleStart);
+          });
+          const event = {
+            domainId,
+            sourceCardId: String(activation.sourceCardId || ""),
+            sourceAbilityName: String(activation.sourceAbilityName || ""),
+            turnIndex
+          };
+          owner.domainEvents.push(event);
+          events.push(event);
+        });
+        return events;
       }
 
       function triggerMatchesCostRule(trigger, rule = {}) {
@@ -14108,6 +15763,8 @@
         const variance = actingSide === "player" ? playerVariance(round, turnIndex) : enemyVariance(round, turnIndex);
         const activation = prepareTriggerActivation(attacker);
         const transferEvents = processRuntimeAbilityTransfers(attacker, defender, activation.abilityTransfers, turnIndex, actingSide);
+        const statusResistanceEvents = applyTriggeredStatusResistance(attacker, defender, activation.statusResistanceEffects, turnIndex);
+        const nullifyEvents = applyTriggeredNullify(attacker, defender, activation.nullifyRules, turnIndex);
 
         attacker.healingRate = clampRate(attacker.healingRate + activation.healingRateChange);
         defender.healingRate = clampRate(defender.healingRate + activation.enemyHealingRateChange);
@@ -14120,7 +15777,10 @@
         );
 
         const selfShieldChange = applyShieldChange(attacker, activation.restoreShieldHits);
-        const enemyShieldChange = applyShieldChange(defender, activation.enemyShieldHitsChange);
+        const enemyShieldChange = activation.removeAllEnemyShield
+          ? -Math.max(0, Number(defender.shieldHits || 0))
+          : applyShieldChange(defender, activation.enemyShieldHitsChange);
+        if (activation.removeAllEnemyShield) defender.shieldHits = 0;
         defender.pendingAttackHits = clampPendingHits(defender.pendingAttackHits + activation.enemyNextAttackHits);
         applyMemberRateChanges(attacker, "blockRate", activation.blockRateChanges, [], clampBlockRate);
         applyMemberRateChanges(defender, "blockRate", {}, activation.enemyBlockRateRules, clampBlockRate);
@@ -14178,6 +15838,7 @@
         if (attackStackGain > 0) attacker.attack += attackStackGain;
 
         finishTriggerCycle(attacker, activation);
+        const domainEvents = applyDomainActivations(attacker, defender, activation.domainActivations, turnIndex);
         consumeCopiedAbilityUses(attacker, activation);
         applyActiveSkillCostChanges(attacker, activation.permanentTriggerCostChanges, [], true);
         applyActiveSkillCostChanges(defender, {}, activation.enemyPermanentTriggerCostRules, true);
@@ -14210,6 +15871,10 @@
           triggerActivated: activation.fired.length > 0,
           triggeredSkills: activation.names,
           triggeredDetails,
+          suppressedAbilities: activation.suppressedNames,
+          domainEvents,
+          nullifyEvents,
+          statusResistanceEvents,
           transferEvents,
           attackBonus: activation.attackBonus,
           attackStackGain,
@@ -14726,6 +16391,9 @@
       const summary = abilitySummary || {};
       const items = abilityArray(team).filter(Boolean);
       const grouped = new Map();
+      const domainTriggerKeys = new Set(abilityArray(summary.triggeredEffects)
+        .filter(record => record && record.effect && normalizeAbilityEffectType(record.effect.type) === CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN)
+        .map(record => String(record.triggerKey || record.key)));
       abilityArray(summary.triggeredEffects).forEach(record => {
         if (!record || !record.effect || !record.trigger) return;
         const effect = record.effect;
@@ -14762,6 +16430,13 @@
               : Math.max(1, Math.min(Number(CONFIG.combatMaxTriggerChargeAttacks || 99), Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[String(record.sourceCard && record.sourceCard.id || "")] || 0))),
             repeat: record.trigger.onOwnAttack ? true : record.trigger.repeat !== false,
             requiresActivationKey: String(record.requiresActivationKey || ""),
+            requiredDomainId: String(record.trigger && record.trigger.requiredDomainId || ""),
+            isDomainActivationGroup: domainTriggerKeys.has(String(key)),
+            domainActivations: [],
+            domainPassiveEffects: [],
+            nullifyRules: [],
+            statusResistanceEffects: [],
+            removeAllEnemyShield: false,
             sourceAbilityRuntimeKey: String(record.abilityRuntimeKey || ""),
             abilityTransfers: [],
             attackBonus: 0,
@@ -14795,7 +16470,12 @@
           });
         }
         const group = grouped.get(key);
-        switch (normalizeAbilityEffectType(effect.type)) {
+        const effectType = normalizeAbilityEffectType(effect.type);
+        if (group.isDomainActivationGroup && effectType !== CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN) {
+          group.domainPassiveEffects.push({ ...effect, type: effectType });
+          return;
+        }
+        switch (effectType) {
           case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE:
           case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE:
           case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
@@ -14823,7 +16503,8 @@
             break;
           case CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS:
           case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS:
-            if (side === "enemy") group.enemyShieldHitsChange += Math.round(value);
+            if (side === "enemy" && value <= -999) group.removeAllEnemyShield = true;
+            else if (side === "enemy") group.enemyShieldHitsChange += Math.round(value);
             else group.restoreShieldHits += Math.round(value);
             break;
           case CARD_ABILITY_EFFECT_TYPES.HEALING_RATE:
@@ -14878,6 +16559,18 @@
             else targetItems.forEach(item => addAbilityMapRate(group.permanentTriggerCostChanges, [getBattleItemId(item)], change));
             break;
           }
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN:
+            group.domainActivations.push({
+              domainId: String(effect.domainId || effect.id || "").trim(),
+              duration: String(effect.duration || "battle")
+            });
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES:
+            group.nullifyRules.push({ ...effect, type: effectType });
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE:
+            group.statusResistanceEffects.push({ ...effect, type: effectType });
+            break;
           case CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES:
           case CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES:
             group.abilityTransfers.push({
@@ -14926,8 +16619,14 @@
         enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: clampDamageTakenRate(rule && rule.value) })).filter(rule => rule.value),
         dodgeRateChanges: Object.fromEntries(Object.entries(item.dodgeRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Math.min(1, Number(change) || 0))]).filter(([, change]) => change)),
         enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DODGE_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Math.min(1, Number(rule && rule.value) || 0)) })).filter(rule => rule.value),
-        abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} }))
-      })).filter(item => abilityArray(item.abilityTransfers).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length);
+        abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} })),
+        domainActivations: abilityArray(item.domainActivations).filter(rule => rule && rule.domainId).map(rule => ({ ...rule })),
+        domainPassiveEffects: abilityArray(item.domainPassiveEffects).map(effect => ({ ...effect })),
+        nullifyRules: abilityArray(item.nullifyRules).map(effect => ({ ...effect })),
+        statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
+        removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
+        requiredDomainId: String(item.requiredDomainId || "")
+      })).filter(item => abilityArray(item.abilityTransfers).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
     }
 
 
@@ -17834,6 +19533,7 @@
       luckRate: "คริติคอล critical crit ค่าโชคเดิม legacy",
       gachaRarityRate: "กาชา gacha เรทกาชา rate up เพิ่มเรท ระดับการ์ด",
       nullifyCardAbilities: "ยกเลิกสกิล ลบสกิล ปิดสกิล ความสามารถไร้ผล nullify",
+      activateDomain: "กางอาณาเขต เปิดอาณาเขต domain field",
       ignoreAbilityConditions: "ยกเลิกเงื่อนไข ไม่สนเงื่อนไข ปลดเงื่อนไข ignore condition"
     });
 
