@@ -13349,7 +13349,7 @@
       if (!template) return null;
       return {
         ...template,
-        systemGenerated: true,
+        systemGenerated: false,
         elementSignature: element,
         effects: abilityArray(template.effects).map(effect => ({ ...effect, condition: effect.condition ? { ...effect.condition } : undefined }))
       };
