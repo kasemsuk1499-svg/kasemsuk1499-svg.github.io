@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-27-stack-runtime-v56">
-  <title>Anime Card Collection · Stack Runtime v56</title>
+  <meta name="gacha-app-build" content="2026-06-27-full-stack-runtime-v57-checked">
+  <title>Anime Card Collection · Full Stack Runtime v57 Checked</title>
   <style>
     :root {
       color-scheme: dark;
@@ -6862,6 +6862,7 @@
       ACTIVE_SKILL_COST: "activeSkillCost", // legacy alias -> activeSkillCostCycle
       ACTIVE_SKILL_COST_CYCLE: "activeSkillCostCycle",
       ACTIVE_SKILL_COST_PERMANENT: "activeSkillCostPermanent",
+      ABILITY_CONDITION_PROGRESS: "abilityConditionProgress",
       BLOCK_RATE: "blockRate",
       DAMAGE_TAKEN_RATE: "damageTakenRate",
       DODGE_RATE: "dodgeRate",
@@ -7050,7 +7051,9 @@
         }
       }
     ]
-  },
+  }
+]
+},
 {
   "id": 2007,
   "name": "วิส",
@@ -8148,7 +8151,8 @@
       "type": "activeSkillCost",
       "value": -1,
       "targetSide": "ally",
-      "targetSelection": "all"
+      "targetSelection": "all",
+      "excludeSelf": true
     },
     {
       "type": "abilityConditionProgress",
@@ -8165,6 +8169,7 @@
       "value": 3,
       "targetSide": "ally",
       "targetSelection": "all",
+      "excludeSelf": true,
       "condition": {
         "afterOwnAttacks": 6,
         "repeat": true
@@ -14346,6 +14351,13 @@
                 else addAbilityMapRate(summary.triggerCostChanges, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), change);
                 break;
               }
+              case CARD_ABILITY_EFFECT_TYPES.ABILITY_CONDITION_PROGRESS: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                const change = -Math.round(value);
+                if (side === "enemy") summary.enemyTriggerCostSelectors.push({ sourceCard, ability, effect: { ...record, type: CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, value: change } });
+                else addAbilityMapRate(summary.triggerCostChanges, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), change);
+                break;
+              }
               case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 const change = Math.round(value);
@@ -14906,6 +14918,7 @@
         activeSkillCost: `คอส Active Skill รอบปัจจุบัน ${targetText} ${value > 0 ? "+" : ""}${Math.round(value)} ครั้ง`,
         activeSkillCostCycle: `คอส Active Skill รอบปัจจุบัน ${targetText} ${value > 0 ? "+" : ""}${Math.round(value)} ครั้ง (ใช้แล้วรีเซ็ต)`,
         activeSkillCostPermanent: `คอส Active Skill ถาวรระหว่างไฟต์ ${targetText} ${value > 0 ? "+" : ""}${Math.round(value)} ครั้ง`,
+        abilityConditionProgress: `เร่งเงื่อนไข Active Skill ${targetText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ครั้ง`,
         rarityPowerRate: `ATK ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityHpRate: `HP ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityDefenseRate: `DEF ระดับ ${rarityText} ${signedPercent(value)}`,
@@ -15498,7 +15511,9 @@
             let members = runtimeTargetMembers(target, sourceCardId, memberEffect);
             const filter = getAbilityTargetFilter(effect);
             const hasFilters = filter.ids.length || filter.elements.length || filter.rarities.length;
-            if (!members.length && !hasFilters && side !== "self") members = abilityArray(target.members);
+            if (!members.length && !hasFilters && side !== "self") {
+              members = abilityArray(target.members).filter(member => !(effect.excludeSelf && String(member.id) === String(sourceCardId)));
+            }
 
             const resisted = [];
             if (target === opponent && isHarmfulAbilityEffect(effect) && members.length) {
@@ -15513,8 +15528,17 @@
                 return !check.resisted;
               });
             }
-            if ((hasFilters && !members.length) || (resisted.length && !members.length)) {
-              events.push({ type, value, applied: 0, field: "resisted", target: side, resisted, stackKey: String(effect.stackKey || "sharedStack"), turnIndex });
+            if ((hasFilters && !members.length) || (resisted.length && !members.length) || (effect.excludeSelf && !members.length)) {
+              events.push({
+                type,
+                value,
+                applied: 0,
+                field: resisted.length ? "resisted" : "noTarget",
+                target: side,
+                resisted,
+                stackKey: String(effect.stackKey || "sharedStack"),
+                turnIndex
+              });
               return;
             }
 
@@ -15591,7 +15615,7 @@
               }
               case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS_STACK:
                 field = "attackHits";
-                applied = changeRuntimeNumber(target, "attackHits", Math.round(value), null, n => applyCombatAttackHitModifier(0, n));
+                applied = changeRuntimeNumber(target, "attackHits", Math.round(value), null, n => Math.max(1, Math.min(Number(CONFIG.combatMaxAttackHits || 1), Math.round(Number(n) || 1))));
                 break;
               case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS_STACK:
                 field = "shieldHits";
@@ -17027,7 +17051,11 @@
         const filter = getAbilityTargetFilter(effect);
         const hasFilters = filter.ids.length || filter.elements.length || filter.rarities.length;
         const side = normalizeAbilityTargetSide(effect.targetSide);
-        const targetItems = selected.length ? selected : (!hasFilters && side === "ally" ? items : []);
+        const targetItems = selected.length
+          ? selected
+          : (!hasFilters && side === "ally"
+            ? items.filter(item => !(effect.excludeSelf && getBattleItemId(item) === cardIdString(record.sourceCard && record.sourceCard.id)))
+            : []);
         const targetPower = targetItems.reduce((sum, item) => sum + getBattleItemStat(item, summary, "power", snapshotMode), 0);
         const targetHp = targetItems.reduce((sum, item) => sum + getBattleItemStat(item, summary, "hp", snapshotMode), 0);
         const value = Number(effect.value || 0);
@@ -17212,6 +17240,12 @@
           case CARD_ABILITY_EFFECT_TYPES.SELF_TRIGGER_REDUCTION:
             addAbilityMapRate(group.triggerCostChanges, [cardIdString(record.sourceCard && record.sourceCard.id)], -Math.max(0, Math.floor(value)));
             break;
+          case CARD_ABILITY_EFFECT_TYPES.ABILITY_CONDITION_PROGRESS: {
+            const change = -Math.round(value);
+            if (side === "enemy") group.enemyTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change, effectType: CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, resistanceKey: record.key });
+            else targetItems.forEach(item => addAbilityMapRate(group.triggerCostChanges, [getBattleItemId(item)], change));
+            break;
+          }
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST:
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE: {
             const change = Math.round(value);
