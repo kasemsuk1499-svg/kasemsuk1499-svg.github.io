@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-27-unlimited-runtime-v58">
-  <title>Anime Card Collection · Unlimited Runtime v58</title>
+  <meta name="gacha-app-build" content="2026-06-30-daily-salary-v59">
+  <title>Anime Card Collection · Daily Salary v59</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5462,9 +5462,10 @@
             <button class="btn" data-action="open-update-notice">ดูประกาศ</button>
           </div>
           <div class="mini-card">
-            <strong>รายได้จากทีมโชว์</strong>
-            <p>การ์ดในทีมจะสะสม Gems แม้ระหว่างที่ไม่ได้กดเปิดแพ็ก</p>
-            <button class="btn btn-gold" data-action="claim-income">รับ <span id="bankText">0</span> Gems</button>
+            <strong>💼 เงินเดือนจากทีมโชว์</strong>
+            <p>คำนวณจากค่ารายได้รวมของการ์ดในทีมโชว์ × 60 × 60 × 24 และส่งเข้ากล่องจดหมายทุกวันเวลา 03:00 น.</p>
+            <div class="exchange-status"><span>เงินเดือนรอบปัจจุบัน</span><strong><span id="bankText">0</span> Gems / วัน</strong></div>
+            <button class="btn btn-gold" data-action="open-mailbox">เปิดกล่องจดหมาย</button>
           </div>
           <div class="mini-card">
             <strong>💱 ศูนย์แลกสกุลเงิน</strong>
@@ -5485,7 +5486,7 @@
             </div>
           </div>
           <div class="side-stats">
-            <div class="side-stat"><span>Income / sec</span><strong id="incomeText">0</strong></div>
+            <div class="side-stat"><span>Salary / day</span><strong id="incomeText">0</strong></div>
             <div class="side-stat"><span>Guarantee</span><strong id="pityText">0/0</strong></div>
             <div class="side-stat"><span>Team</span><strong id="teamText">0/5</strong></div>
             <div class="side-stat"><span>Last pull</span><strong id="lastRarityText">-</strong></div>
@@ -5514,7 +5515,7 @@
           </div>
           <div class="tools hidden" id="collectionTools">
             <input class="field" id="searchInput" type="search" placeholder="ค้นหาชื่อ, ID, ธาตุ หรือสกิลทั้งหมด..." autocomplete="off" aria-label="ค้นหาการ์ดทั้งหมด">
-            <input class="field" id="abilitySearchInput" type="search" placeholder="ค้นหาเฉพาะความสามารถ เช่น โล่, ATK, รายได้, เรทกาชา..." autocomplete="off" aria-label="ค้นหาเฉพาะความสามารถการ์ด">
+            <input class="field" id="abilitySearchInput" type="search" placeholder="ค้นหาเฉพาะความสามารถ เช่น โล่, ATK, เงินเดือน, เรทกาชา..." autocomplete="off" aria-label="ค้นหาเฉพาะความสามารถการ์ด">
             <select class="field" id="elementFilter" aria-label="กรองการ์ดตามธาตุ"></select>
             <select class="field" id="rarityFilter" aria-label="กรองระดับ"></select>
             <select class="field" id="sortMode" aria-label="เรียงลำดับการ์ด">
@@ -5525,7 +5526,7 @@
               <option value="rarity">เรียงตามระดับการ์ด</option>
               <option value="level">เรียงตามเลเวล</option>
               <option value="awaken">เรียงตามอเวก</option>
-              <option value="income">เรียงตามรายได้</option>
+              <option value="income">เรียงตามเงินเดือน</option>
             </select>
             <div class="sort-direction-switch" id="sortDirectionSwitch" aria-label="ทิศทางการเรียง">
               <button type="button" class="sort-direction-button active" data-action="set-sort-direction" data-direction="desc">มาก → น้อย</button>
@@ -5557,7 +5558,7 @@
 
         <section id="teamView" class="hidden">
           <div class="section-title">
-            <div><h2>ทีมโชว์</h2><p>ใส่ได้สูงสุด 5 ใบ การ์ดทุกใบในทีมสร้างรายได้แบบออฟไลน์</p></div>
+            <div><h2>ทีมโชว์</h2><p>ใส่ได้สูงสุด 5 ใบ ระบบจะคำนวณเงินเดือนจากทีมนี้เท่านั้น และส่งทางจดหมายทุกวันเวลา 03:00 น.</p></div>
           </div>
           <div class="team-preset-panel" id="teamPresetPanel"></div>
           <div class="team-grid" id="teamGrid"></div>
@@ -5565,13 +5566,13 @@
           <div class="element-panel" id="teamElementPanel"></div>
           <div class="element-guide" id="teamRulesGuide"></div>
           <div class="income-panel">
-            <div class="income-value"><span>รายได้ต่อวินาที</span><strong id="teamIncomeText">0</strong></div>
+            <div class="income-value"><span>เงินเดือนต่อวัน</span><strong id="teamIncomeText">0</strong></div>
             <div class="income-value"><span>พลังโจมตีรวม</span><strong id="teamPowerText">0</strong></div>
             <div class="income-value"><span>HP รวม</span><strong id="teamHpText">0</strong></div>
             <div class="income-value"><span>DEF รวม</span><strong id="teamDefenseText">0</strong></div>
             <div class="income-value"><span>พลังรวม</span><strong id="teamCombatPowerText">0</strong></div>
-            <div class="income-value"><span>Gems ที่สะสม</span><strong id="teamBankText">0</strong></div>
-            <button class="btn btn-gold" data-action="claim-income">รับรายได้</button>
+            <div class="income-value"><span>รอบจ่ายเงินเดือน</span><strong id="teamBankText">ทุกวัน 03:00</strong></div>
+            <button class="btn btn-gold" data-action="open-mailbox">เปิดกล่องจดหมาย</button>
           </div>
         </section>
 
@@ -5816,7 +5817,7 @@
           <option value="rarity">ระดับการ์ด</option>
           <option value="level">เลเวล</option>
           <option value="awaken">อเวก</option>
-          <option value="income">รายได้</option>
+          <option value="income">เงินเดือน</option>
         </select>
         <div class="sort-direction-switch" id="teamPickerDirectionSwitch">
           <button type="button" class="sort-direction-button active" data-action="set-picker-sort-direction" data-direction="desc">มาก → น้อย</button>
@@ -6118,7 +6119,7 @@
        [SECTION 04 GACHA-BANNERS]    ตู้กาชา ราคา เรท และการันตี
        [SECTION 05 CARD-ABILITIES]   ตัวเลือกคำสั่งความสามารถเฉพาะการ์ด
        [SECTION 06 CARD-DATA]        ข้อมูลการ์ดแต่ละใบ
-       [SECTION 07 CARD-CALC]        สูตรพลัง รายได้ และความสามารถทีม
+       [SECTION 07 CARD-CALC]        สูตรพลัง เงินเดือน และความสามารถทีม
        [SECTION 08 CARD-DETAIL-UI]   หน้ารายละเอียดการ์ด
        ===================================================================== */
 
@@ -6224,9 +6225,12 @@
 
     // เพิ่มโดยอลิซ v53: ทุกภารกิจทำได้ด้วยระบบพื้นฐาน ไม่บังคับใช้ Cristal หรือชนะการต่อสู้
     const DAILY_MISSION_REWARD_CRISTALS = 300;
+    // ระบบเงินเดือนรายวัน: ค่ารายได้เดิมเป็นฐานภายใน และคูณ 60 × 60 × 24 ตอนจ่ายจริง
+    const SALARY_SECONDS_PER_DAY = 60 * 60 * 24;
+    const SALARY_PAYROLL_HOUR = 3;
     const DAILY_MISSIONS = Object.freeze([
       { id: "login", title: "เข้าเกมวันนี้", description: "ล็อกอินเข้าเกม 1 ครั้ง", target: 1 },
-      { id: "income", title: "รับรายได้สะสม", description: "กดรับรายได้จากทีม 1 ครั้ง", target: 1 },
+      { id: "income", title: "รับเงินเดือน", description: "รับเงินเดือนทีมโชว์จากกล่องจดหมาย 1 ครั้ง", target: 1 },
       { id: "collection", title: "เยี่ยมชมคลังการ์ด", description: "เปิดหน้าคอลเล็กชั่น 1 ครั้ง", target: 1 }
     ]);
 
@@ -7179,7 +7183,7 @@
   "abilities": [
     {
       "name": "ค่าตอบแทนจากเควสค่ะ",
-      "description": "เพิ่มรายได้ให้กับทีม 50 % และ เพิ่มรายได้คงที่ให้ทีม 5000 gem/s",
+      "description": "เพิ่มเงินเดือนให้กับทีม 50% และเพิ่มค่าฐานเงินเดือนคงที่ให้ทีม 5,000 (ระบบคำนวณเป็นรายวัน)",
       "activeIn": [
         "team"
       ],
@@ -7196,7 +7200,7 @@
     },
     {
       "name": "ทางกิลต้องเรียกร้อง่าเสียหาเพิ่มค่ะ",
-      "description": "เมื่อจัดทีมกับตัวละครชื่อ 'อควา' จะทำการลดรายได้คงที่ 30000000 gem/s",
+      "description": "เมื่อจัดทีมกับตัวละครชื่อ 'อควา' จะลดค่าฐานเงินเดือนคงที่ 30,000,000 (ระบบคำนวณเป็นรายวัน)",
       "activeIn": [
         "team"
       ],
@@ -7825,7 +7829,7 @@
     "ability": [
         {
             "name": "คลังมหาเวทไร้ขอบเขต",
-            "description": "รายได้ของตนเอง +500% รายได้ทั้งทีม +200% และเพิ่มรายได้คงที่ให้ทีม 5,000 ต่อวินาที",
+            "description": "เงินเดือนของตนเอง +500% เงินเดือนทั้งทีม +200% และเพิ่มค่าฐานเงินเดือนคงที่ให้ทีม 5,000 (ระบบคำนวณเป็นรายวัน)",
             "activeIn": [
                 "team"
             ],
@@ -11960,8 +11964,14 @@
           date: "",
           crystalsExchanged: 0
         },
+        // เก็บไว้เพื่อย้ายยอดค้างจากระบบรายได้/วินาทีรุ่นเก่าเพียงครั้งเดียว
         incomeBank: 0,
         lastIncomeAt: Date.now(),
+        salaryPayroll: {
+          // ผู้เล่นใหม่จะเริ่มนับจากรอบเงินเดือนปัจจุบัน ไม่รับย้อนหลังทันที
+          lastPaidDate: getSalaryPayrollDateKey(new Date()),
+          legacySettled: false
+        },
         lastDaily: "",
         firstLoginRewards: {
           claimedDays: 0,
@@ -12603,6 +12613,12 @@
       delete next.currencyExchange.crystalGemSpent;
       next.incomeBank = Math.max(0, Number(next.incomeBank) || 0);
       next.lastIncomeAt = Number(next.lastIncomeAt) || Date.now();
+      next.salaryPayroll = Object.assign({
+        lastPaidDate: getSalaryPayrollDateKey(new Date()),
+        legacySettled: false
+      }, next.salaryPayroll || {});
+      next.salaryPayroll.lastPaidDate = String(next.salaryPayroll.lastPaidDate || getSalaryPayrollDateKey(new Date()));
+      next.salaryPayroll.legacySettled = Boolean(next.salaryPayroll.legacySettled);
       next.firstLoginRewards = Object.assign(defaultState().firstLoginRewards, next.firstLoginRewards || {});
       next.firstLoginRewards.claimedDays = Math.min(FIRST_LOGIN_REWARDS.length, Math.max(0, Math.floor(Number(next.firstLoginRewards.claimedDays) || 0)));
       next.firstLoginRewards.lastClaimDate = String(next.firstLoginRewards.lastClaimDate || "");
@@ -14892,7 +14908,7 @@
         teamPowerRate: `ATK ฝ่ายเรา ${signedPercent(value)}`,
         teamHpRate: `HP ฝ่ายเรา ${signedPercent(value)}`,
         teamDefenseRate: `DEF ฝ่ายเรา ${signedPercent(value)}`,
-        teamIncomeRate: `รายได้ฝ่ายเรา ${signedPercent(value)}`,
+        teamIncomeRate: `เงินเดือนฝ่ายเรา ${signedPercent(value)}`,
         enemyPowerRate: `ATK ฝ่ายตรงข้าม ${signedPercent(value)}`,
         enemyHpRate: `HP ฝ่ายตรงข้าม ${signedPercent(value)}`,
         enemyDefenseRate: `DEF ฝ่ายตรงข้าม ${signedPercent(value)}`,
@@ -14902,11 +14918,11 @@
         selfPowerRate: `ATK ของการ์ดนี้ ${signedPercent(value)}`,
         selfHpRate: `HP ของการ์ดนี้ ${signedPercent(value)}`,
         selfDefenseRate: `DEF ของการ์ดนี้ ${signedPercent(value)}`,
-        selfIncomeRate: `รายได้ของการ์ดนี้ ${signedPercent(value)}`,
+        selfIncomeRate: `เงินเดือนของการ์ดนี้ ${signedPercent(value)}`,
         cardPowerRate: `ATK ${targetText} ${signedPercent(value)}`,
         cardHpRate: `HP ${targetText} ${signedPercent(value)}`,
         cardDefenseRate: `DEF ${targetText} ${signedPercent(value)}`,
-        cardIncomeRate: `รายได้ ${targetText} ${signedPercent(value)}`,
+        cardIncomeRate: `เงินเดือน ${targetText} ${signedPercent(value)}`,
         copyAbilities: `คัดลอกสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.copyRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         stealAbilities: `ขโมยสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         statusResistance: `ต้านสถานะ ${targetText} ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value), 0))}${String(effect && (effect.scope || "")).toLowerCase() === "field" ? " • ทั้งสนาม" : ""}`,
@@ -14929,7 +14945,7 @@
         powerRateStack: `สะสม ATK ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         hpRateStack: `สะสม HP ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         defenseRateStack: `สะสม DEF ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
-        incomeRateStack: `สะสมรายได้ ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        incomeRateStack: `สะสมโบนัสเงินเดือน ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         criticalRateStack: `สะสมคริติคอล ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         dodgeRateStack: `สะสมหลบหลีก ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         blockRateStack: `สะสมบล็อก ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
@@ -14942,17 +14958,17 @@
         rarityPowerRate: `ATK ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityHpRate: `HP ระดับ ${rarityText} ${signedPercent(value)}`,
         rarityDefenseRate: `DEF ระดับ ${rarityText} ${signedPercent(value)}`,
-        rarityIncomeRate: `รายได้ระดับ ${rarityText} ${signedPercent(value)}`,
+        rarityIncomeRate: `เงินเดือนระดับ ${rarityText} ${signedPercent(value)}`,
         elementPowerRate: `ATK ธาตุ ${elementText} ${signedPercent(value)}`,
         elementHpRate: `HP ธาตุ ${elementText} ${signedPercent(value)}`,
         elementDefenseRate: `DEF ธาตุ ${elementText} ${signedPercent(value)}`,
-        elementIncomeRate: `รายได้ธาตุ ${elementText} ${signedPercent(value)}`,
+        elementIncomeRate: `เงินเดือนธาตุ ${elementText} ${signedPercent(value)}`,
         teamPowerFlat: `ATK ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
         teamHpFlat: `HP ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
         teamDefenseFlat: `DEF ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
         shieldHits: `โล่เริ่มต้น ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         attackHits: `จำนวนฮิต ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
-        teamIncomeFlat: `รายได้ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}/s`
+        teamIncomeFlat: `ค่าฐานเงินเดือนทีม ${value >= 0 ? "+" : ""}${formatNumber(value)} (คูณ 86,400 ตอนจ่าย)`
       };
       return labels[effectType] || `${effectType || "effect"}: ${value}`;
     }
@@ -17366,6 +17382,14 @@
       return Math.max(0, baseIncome * (1 + elementSummary.incomeRate + abilities.teamIncomeRate));
     }
 
+    function getCardDailySalary(card) {
+      return Math.max(0, Math.floor(getCardIncome(card) * SALARY_SECONDS_PER_DAY));
+    }
+
+    function getTeamDailySalary() {
+      return Math.max(0, Math.floor(getTeamIncome() * SALARY_SECONDS_PER_DAY));
+    }
+
     function getTeamPower() {
       const abilities = getTeamAbilitySummary(state.team, "team");
       const basePower = getRawTeamPower(state.team, "team", abilities) + abilities.teamPowerFlat;
@@ -17615,6 +17639,7 @@
       if (!mail || mail.claimedAt) return false;
       mail.rewards.forEach(applyMailReward);
       mail.claimedAt = Date.now();
+      if (mail.source === "daily-salary") markDailyMissionProgress("income", 1, false);
       saveState(true);
       renderAll();
       renderMailbox();
@@ -17624,7 +17649,16 @@
 
     function claimAllMail() {
       let count = 0;
-      (state.mailbox || []).forEach(mail => { if (!mail.claimedAt) { mail.rewards.forEach(applyMailReward); mail.claimedAt = Date.now(); count += 1; } });
+      let claimedSalary = false;
+      (state.mailbox || []).forEach(mail => {
+        if (!mail.claimedAt) {
+          mail.rewards.forEach(applyMailReward);
+          mail.claimedAt = Date.now();
+          if (mail.source === "daily-salary") claimedSalary = true;
+          count += 1;
+        }
+      });
+      if (claimedSalary) markDailyMissionProgress("income", 1, false);
       if (!count) return showToast("ไม่มีจดหมายที่ยังไม่ได้รับ");
       saveState(true); renderAll(); renderMailbox(); showToast(`รับรางวัลจากจดหมาย ${count} ฉบับแล้ว`);
     }
@@ -18903,41 +18937,81 @@
       showToast("เลือก Friend Support แล้ว");
     }
 
-    // ผูกนาฬิการายได้กับออบเจ็กต์เซฟปัจจุบันเพียงครั้งเดียว
-    // เมื่อเพิ่งโหลด Cloud/นำเข้าเซฟ จะคิดรายได้ออฟไลน์จาก lastIncomeAt หนึ่งครั้ง แล้วใช้ Runtime clock ต่อ
-    function ensureIncomeClockBound(applyOffline = true) {
-      const now = Date.now();
-      if (incomeClockStateRef === state && Number.isFinite(incomeRuntimeAt)) return false;
+    // ระบบเงินเดือนรายวัน
+    // - จ่ายจากทีมโชว์เท่านั้น
+    // - สูตร: รายได้รวมทีมโชว์ × 60 × 60 × 24
+    // - สร้างจดหมายเวลา 03:00 น. หากปิดเว็บอยู่ จะสร้างทันทีเมื่อกลับมาเปิดหลัง 03:00 น.
+    function processDailySalaryPayroll(referenceDate = new Date()) {
+      if (!state || typeof state !== "object") return false;
+      state.salaryPayroll = Object.assign({
+        lastPaidDate: getSalaryPayrollDateKey(referenceDate),
+        legacySettled: false
+      }, state.salaryPayroll || {});
 
-      const savedAt = Number(state && state.lastIncomeAt);
-      const offlineSeconds = applyOffline && Number.isFinite(savedAt)
-        ? Math.max(0, Math.min((now - savedAt) / 1000, 60 * 60 * 24 * 7))
-        : 0;
+      let changed = false;
 
-      // อัปเดตหมุดเวลาก่อนคำนวณ เพื่อไม่ให้ UI render ซ้ำหรือการเปลี่ยน Cristal นับช่วงเดิมซ้ำ
-      incomeClockStateRef = state;
-      incomeRuntimeAt = now;
-      state.lastIncomeAt = now;
-
-      if (offlineSeconds > 0) {
-        state.incomeBank = Math.max(0, Number(state.incomeBank) || 0) + getTeamIncome() * offlineSeconds;
+      // ย้าย Gems ที่ค้างจากระบบรายได้ต่อวินาทีเดิมเข้าจดหมายเพียงครั้งเดียว เพื่อไม่ให้ยอดผู้เล่นหาย
+      if (!state.salaryPayroll.legacySettled) {
+        const legacyAmount = Math.max(0, Math.floor(Number(state.incomeBank) || 0));
+        if (legacyAmount > 0) {
+          createSystemMail({
+            uniqueKey: "legacy-income-settlement-v59",
+            title: "ชำระยอดรายได้ระบบเดิม",
+            message: "ยอด Gems ที่สะสมจากระบบรายได้ต่อวินาทีเดิมถูกย้ายเข้ากล่องจดหมายแล้ว",
+            source: "salary-legacy",
+            rewards: [{ type: "gems", amount: legacyAmount }]
+          });
+        }
+        state.incomeBank = 0;
+        state.salaryPayroll.legacySettled = true;
+        changed = true;
       }
-      return offlineSeconds > 0;
+
+      const currentPayrollKey = getSalaryPayrollDateKey(referenceDate);
+      let lastPaidDate = String(state.salaryPayroll.lastPaidDate || "");
+      if (!localDateFromKey(lastPaidDate)) {
+        state.salaryPayroll.lastPaidDate = currentPayrollKey;
+        return true;
+      }
+      if (lastPaidDate >= currentPayrollKey) return changed;
+
+      const fromDate = localDateFromKey(lastPaidDate);
+      const toDate = localDateFromKey(currentPayrollKey);
+      const totalDueDays = Math.max(0, Math.round((toDate - fromDate) / SALARY_SECONDS_PER_DAY / 1000));
+      const payableDays = Math.min(120, totalDueDays);
+      const firstPayDate = new Date(toDate);
+      firstPayDate.setDate(firstPayDate.getDate() - payableDays + 1);
+      const baseIncome = Math.max(0, getTeamIncome());
+      const dailySalary = Math.max(0, Math.floor(baseIncome * SALARY_SECONDS_PER_DAY));
+
+      for (let index = 0; index < payableDays; index += 1) {
+        const payDate = new Date(firstPayDate);
+        payDate.setDate(firstPayDate.getDate() + index);
+        const payKey = getLocalDateKey(payDate);
+        if (dailySalary > 0) {
+          createSystemMail({
+            uniqueKey: `daily-salary-${payKey}`,
+            title: `เงินเดือนทีมโชว์ • ${formatShortThaiDate(payDate)}`,
+            message: `รายได้รวมทีมโชว์ ${formatNumber(baseIncome)} × 60 × 60 × 24 = ${formatNumber(dailySalary)} Gems • รอบจ่าย 03:00 น.`,
+            source: "daily-salary",
+            rewards: [{ type: "gems", amount: dailySalary }]
+          });
+        }
+      }
+
+      state.salaryPayroll.lastPaidDate = currentPayrollKey;
+      state.lastIncomeAt = Date.now();
+      changed = true;
+      return changed;
+    }
+
+    // คงชื่อฟังก์ชันเดิมไว้ เพื่อให้จุดเรียกเดิมทั้งหมดทำงานได้โดยไม่สะสมเงินต่อวินาทีอีก
+    function ensureIncomeClockBound() {
+      return processDailySalaryPayroll(new Date());
     }
 
     function updateIncome() {
-      ensureIncomeClockBound(true);
-      const now = Date.now();
-      const seconds = Math.max(0, Math.min((now - incomeRuntimeAt) / 1000, 60 * 60 * 24 * 7));
-
-      // เลื่อนหมุดเวลาก่อนเพิ่มเงิน ทุกการเรียกซ้ำในเฟรมเดียวกันจึงได้เวลาใกล้ 0 แทนการบวกย้อนหลังซ้ำ
-      incomeRuntimeAt = now;
-      state.lastIncomeAt = now;
-      if (seconds <= 0) return 0;
-
-      const earned = Math.max(0, getTeamIncome()) * seconds;
-      state.incomeBank = Math.max(0, Number(state.incomeBank) || 0) + earned;
-      return earned;
+      return processDailySalaryPayroll(new Date());
     }
 
     function weightedKey(map, fallback) {
@@ -19417,9 +19491,22 @@
       }
     }
 
-    function getLocalDateKey() {
-      const date = new Date();
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    function getLocalDateKey(date = new Date()) {
+      const value = date instanceof Date ? new Date(date) : new Date(date);
+      return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+    }
+
+    function getSalaryPayrollDateKey(date = new Date()) {
+      const value = date instanceof Date ? new Date(date) : new Date(date);
+      if (value.getHours() < SALARY_PAYROLL_HOUR) value.setDate(value.getDate() - 1);
+      return getLocalDateKey(value);
+    }
+
+    function localDateFromKey(key, hour = SALARY_PAYROLL_HOUR) {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key || ""));
+      if (!match) return null;
+      const value = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), hour, 0, 0, 0);
+      return Number.isNaN(value.getTime()) ? null : value;
     }
 
     function getLocalMonthKey(date = new Date()) {
@@ -19692,7 +19779,7 @@
       if (status) status.innerHTML = `
         <span class="cristal-note">1 Cristal = ${formatNumber(CONFIG.crystalGemCost)} Gems • วันนี้แลกได้อีก <strong>${formatNumber(info.remainingCrystals)}</strong>/${formatNumber(info.maxCrystals)} Cristal</span>
         <span>กาชา 1 ครั้ง = ${formatNumber(CONFIG.gachaCrystalCostPerPull)} Cristal • Dust: ${formatNumber(CONFIG.dustGemCost)} Gems = 1 Dust (ไม่จำกัด)</span>
-        <span>ต้นทุนอัปเต็มโดยประมาณ: SC <strong>${formatNumber(scCost)} Dust</strong> • EX <strong>${formatNumber(exCost)} Dust</strong> (EX มีรายได้สูงกว่า SC)</span>`;
+        <span>ต้นทุนอัปเต็มโดยประมาณ: SC <strong>${formatNumber(scCost)} Dust</strong> • EX <strong>${formatNumber(exCost)} Dust</strong> (EX มีฐานเงินเดือนสูงกว่า SC)</span>`;
     }
 
     function claimDaily() {
@@ -19738,14 +19825,8 @@
 
     function claimIncome() {
       updateIncome();
-      const reward = Math.floor(state.incomeBank);
-      if (reward < 1) return showToast("ยังไม่มีรายได้สะสม");
-      state.gems += reward;
-      state.incomeBank -= reward;
-      markDailyMissionProgress("income", 1, false);
-      saveState(true);
-      renderAll();
-      showToast(`รับ ${formatNumber(reward)} Gems แล้ว`);
+      openMailbox();
+      showToast("ระบบเปลี่ยนเป็นเงินเดือนรายวันแล้ว กรุณารับผ่านกล่องจดหมาย");
     }
 
     function getUpgradeCost(card) {
@@ -19900,17 +19981,17 @@
             <div class="card-visible-stat power"><span>ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
             <div class="card-visible-stat hp"><span>HP</span><strong>${formatNumber(getCardHp(card))}</strong></div>
             <div class="card-visible-stat defense"><span>DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
-            <div class="card-visible-stat income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+            <div class="card-visible-stat income"><span>Salary / day</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
           </div>`;
       }
       return `
-        <div class="card-upgrade-mini" title="เลเวล อเวก ATK HP DEF และรายได้ปัจจุบัน">
+        <div class="card-upgrade-mini" title="เลเวล อเวก ATK HP DEF และเงินเดือนปัจจุบัน">
           <div class="card-visible-stat"><span>Level</span><strong>${status.level}/${status.maxLevel}</strong></div>
           <div class="card-visible-stat awaken"><span>Awaken</span><strong>${status.rank}/${status.maxRank}</strong></div>
           <div class="card-visible-stat power"><span>ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
           <div class="card-visible-stat hp"><span>HP</span><strong>${formatNumber(getCardHp(card))}</strong></div>
           <div class="card-visible-stat defense"><span>DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
-          <div class="card-visible-stat income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+          <div class="card-visible-stat income"><span>Salary / day</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
         </div>`;
     }
 
@@ -20087,6 +20168,7 @@
       ensureIncomeClockBound(true);
       const uniqueOwned = Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length;
       const teamIncome = getTeamIncome();
+      const teamDailySalary = getTeamDailySalary();
       const teamPower = getTeamPower();
       const teamHp = getTeamHp();
       const teamDefense = getTeamDefense();
@@ -20103,13 +20185,13 @@
       renderAllInButton();
       document.getElementById("ticketsText").textContent = formatNumber(getTotalTicketCount());
       document.getElementById("ownedText").textContent = `${uniqueOwned}/${CARDS.length}`;
-      document.getElementById("bankText").textContent = formatNumber(state.incomeBank);
-      document.getElementById("incomeText").textContent = formatNumber(teamIncome);
+      document.getElementById("bankText").textContent = formatNumber(teamDailySalary);
+      document.getElementById("incomeText").textContent = formatNumber(teamDailySalary);
       document.getElementById("pityText").textContent = pityInfo.every > 0 ? `${formatNumber(pityInfo.current)}/${formatNumber(pityInfo.every)}` : "-";
       renderGuaranteeStatus();
       document.getElementById("teamText").textContent = `${state.team.length}/${CONFIG.teamSlots}`;
       document.getElementById("lastRarityText").textContent = state.recent[0] ? getRarity(CARD_BY_ID.get(state.recent[0])).label : "-";
-      document.getElementById("teamIncomeText").textContent = `${formatNumber(teamIncome)} Gems/s`;
+      document.getElementById("teamIncomeText").textContent = `${formatNumber(teamDailySalary)} Gems / วัน`;
       document.getElementById("teamPowerText").textContent = formatNumber(teamPower);
       const teamHpText = document.getElementById("teamHpText");
       if (teamHpText) teamHpText.textContent = formatNumber(teamHp);
@@ -20117,7 +20199,7 @@
       if (teamDefenseText) teamDefenseText.textContent = formatNumber(teamDefense);
       const teamCombatPowerText = document.getElementById("teamCombatPowerText");
       if (teamCombatPowerText) teamCombatPowerText.textContent = formatNumber(teamCombatPower);
-      document.getElementById("teamBankText").textContent = `${formatNumber(state.incomeBank)} Gems`;
+      document.getElementById("teamBankText").textContent = "ทุกวัน 03:00 น.";
       const newcomerClaimedToday = state.firstLoginRewards.lastClaimDate === getLocalDateKey();
       document.getElementById("dailyText").textContent = todayClaimed
         ? `ภารกิจรายวันรับได้ ${formatNumber(DAILY_MISSION_REWARD_CRISTALS)} Cristal • โบนัสล็อกอินวันนี้รับแล้ว`
@@ -20192,7 +20274,7 @@
     }
 
     function getSortLabel(mode = collectionSortMode) {
-      return ({ power: "พลังโจมตี", hp: "HP", defense: "DEF", acquired: "ลำดับการได้", rarity: "ระดับการ์ด", level: "เลเวล", awaken: "อเวก", income: "รายได้" })[mode] || "พลังโจมตี";
+      return ({ power: "พลังโจมตี", hp: "HP", defense: "DEF", acquired: "ลำดับการได้", rarity: "ระดับการ์ด", level: "เลเวล", awaken: "อเวก", income: "เงินเดือน" })[mode] || "พลังโจมตี";
     }
 
     function getSortDirectionText(mode = collectionSortMode, direction = collectionSortDirection) {
@@ -20235,10 +20317,10 @@
       elementDefenseRate: "def defense เกราะ พลังป้องกัน บัฟ def ธาตุ",
       teamDefenseFlat: "def defense เกราะ พลังป้องกัน ค่าคงที่ ทั้งทีม",
       enemyDefenseRate: "ลด def ลดเกราะ ลดพลังป้องกัน ศัตรู ฝ่ายตรงข้าม ดีบัฟ enemy",
-      teamIncomeRate: "รายได้ income gem gems ออฟไลน์ ทั้งทีม",
-      selfIncomeRate: "รายได้ income gem gems ตัวเอง ตนเอง",
-      cardIncomeRate: "รายได้ income gem gems เฉพาะการ์ด",
-      rarityIncomeRate: "รายได้ income gem gems ระดับการ์ด",
+      teamIncomeRate: "เงินเดือน salary income gem gems ทั้งทีม",
+      selfIncomeRate: "เงินเดือน salary income gem gems ตัวเอง ตนเอง",
+      cardIncomeRate: "เงินเดือน salary income gem gems เฉพาะการ์ด",
+      rarityIncomeRate: "เงินเดือน salary income gem gems ระดับการ์ด",
       elementIncomeRate: "รายได้ income gem gems ธาตุ",
       teamIncomeFlat: "รายได้ income gem gems ค่าคงที่ ทั้งทีม",
       shieldHits: "โล่ shield ป้องกันฮิต กันการโจมตี",
@@ -20446,7 +20528,7 @@
                 <div class="team-slot-stat"><span>ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
                 <div class="team-slot-stat"><span>HP</span><strong>${formatNumber(getCardHp(card))}</strong></div>
                 <div class="team-slot-stat"><span>DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
-                <div class="team-slot-stat"><span>INCOME</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+                <div class="team-slot-stat"><span>SALARY / DAY</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
               </div>
               <div class="team-slot-change">แตะเพื่อเปลี่ยนการ์ด</div>
             </div>
@@ -20463,7 +20545,7 @@
           <div class="guide-row-title">${escapeHTML(combo.name)}</div>
           <div class="guide-row-copy">
             <div class="element-chip-row" style="margin-top:0">${combo.required.map(element => elementChipHTML(element)).join("")}</div>
-            ATK +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}
+            ATK +${Math.round(combo.powerRate * 100)}% • เงินเดือน +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}
           </div>
         </div>`).join("");
       const universalComboRows = `
@@ -20706,7 +20788,7 @@
         ? summary.activeCombos.map(combo => `
             <div class="combo-card">
               <strong>${escapeHTML(combo.name)}</strong>
-              <span>Power +${Math.round(Number(combo.powerRate || 0) * 100)}% • Income +${Math.round(Number(combo.incomeRate || 0) * 100)}%<br>${escapeHTML(combo.note || "")}</span>
+              <span>Power +${Math.round(Number(combo.powerRate || 0) * 100)}% • เงินเดือน +${Math.round(Number(combo.incomeRate || 0) * 100)}%<br>${escapeHTML(combo.note || "")}</span>
             </div>
           `).join("")
         : `<div class="combo-card"><strong>ยังไม่ติดคอมโบ</strong><span>ลองใส่ธาตุซ้ำ 3 ใบ, 2+2 ใบ หรือจัดชุด ดิน/น้ำ/ลม/ไฟ เพื่อเปิดโบนัส</span></div>`;
@@ -21172,7 +21254,7 @@
       const summary = getArenaTeamSummary();
       const abilitySummary = getTeamAbilitySummary(state.arena.team, "arena");
       const comboHTML = summary.activeCombos.length
-        ? summary.activeCombos.map(combo => `<div class="combo-card"><strong>${escapeHTML(combo.name)}</strong><span>ATK +${Math.round(combo.powerRate * 100)}% • Income +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}</span></div>`).join("")
+        ? summary.activeCombos.map(combo => `<div class="combo-card"><strong>${escapeHTML(combo.name)}</strong><span>ATK +${Math.round(combo.powerRate * 100)}% • เงินเดือน +${Math.round(combo.incomeRate * 100)}%<br>${escapeHTML(combo.note)}</span></div>`).join("")
         : `<div class="combo-card"><strong>ยังไม่มีคอมโบ</strong><span>จัดธาตุซ้ำหรือคอมโบธาตุให้ครบเงื่อนไขเพื่อเพิ่มพลัง ARENA</span></div>`;
       const arenaAbilityHTML = abilitySummary.activeAbilities.length
         ? abilitySummary.activeAbilities.map(entry => `<div class="combo-card"><strong>✨ ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong><span>${entry.activeEffects.map(effect => escapeHTML(abilityEffectText(effect))).join(" • ")}</span></div>`).join("")
@@ -21498,7 +21580,7 @@
 
             <div class="detail-tabbar" role="tablist" aria-label="หมวดรายละเอียดการ์ด">
               <button type="button" class="detail-tab ${statsActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="stats" role="tab" aria-selected="${statsActive}">
-                <span>📊</span><strong>สแตตและพัฒนา</strong><small>เลเวล ATK HP DEF รายได้ อเวก</small>
+                <span>📊</span><strong>สแตตและพัฒนา</strong><small>เลเวล ATK HP DEF เงินเดือน อเวก</small>
               </button>
               <button type="button" class="detail-tab ${!statsActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="ability" role="tab" aria-selected="${!statsActive}">
                 <span>✨</span><strong>ความสามารถ</strong><small>${abilityCount ? `${abilityCount} ความสามารถ` : "ยังไม่ได้กำหนด"}</small>
@@ -21513,7 +21595,7 @@
                 <div class="stat stat-power"><span>Attack / ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
                 <div class="stat stat-hp"><span>Health / HP</span><strong>${formatNumber(getCardHp(card))}</strong></div>
                 <div class="stat stat-defense"><span>Defense / DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
-                <div class="stat stat-income"><span>Income</span><strong>${formatNumber(getCardIncome(card))}/s</strong></div>
+                <div class="stat stat-income"><span>Salary / day</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
                 <div class="stat stat-element"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
               </div>
               ${upgradeStatusPanelHTML(card, inTeam)}
@@ -22569,8 +22651,9 @@
       document.getElementById("bootError").classList.add("hidden");
       initFirebase();
       setInterval(() => {
-        // เดินรายได้เพียงจุดเดียวต่อวินาที ไม่ผูกกับจำนวนครั้งที่หน้าเว็บถูก render
-        updateIncome();
+        // ตรวจรอบเงินเดือนทุกวินาที ขณะเปิดเกม และบันทึกทันทีเมื่อมีจดหมายรอบ 03:00 น.
+        const payrollChanged = updateIncome();
+        if (payrollChanged) saveState(true);
         renderResources();
         ensureArenaWeekCurrent();
         if (activeTab === "battle") renderBattle();
