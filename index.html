@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-30-daily-salary-v59">
-  <title>Anime Card Collection · Daily Salary v59</title>
+  <meta name="gacha-app-build" content="2026-06-30-ability-conditions-v60">
+  <title>Anime Card Collection · Ability Conditions v60</title>
   <style>
     :root {
       color-scheme: dark;
@@ -6725,7 +6725,7 @@
        - cardPowerRate/cardHpRate/cardDefenseRate/cardIncomeRate ใช้ targetCardIds เพื่อเพิ่มค่าสเตตัสเฉพาะ ID ที่กำหนด
        - nullifyCardAbilities ใช้ targetSide: "ally"/"self"/"enemy" และ targetCardIds เพื่อทำให้ความสามารถของการ์ดเป้าหมายไร้ผล
        - ignoreAbilityConditions เลือกเป้าหมายด้วย targetCardIds / targetElements / targetRarities และ targetMatch: "any"/"all" ได้
-       - condition: { "afterOwnAttacks": 3, "repeat": true } = ตีปกติครบ 3 ครั้ง แล้วเอฟเฟกต์ทำงานในการโจมตีครั้งถัดไป จากนั้นรีเซ็ตวนลูป
+       - condition: { "afterOwnAttacks": 2, "repeat": true } = เอฟเฟกต์ทำงานในการโจมตีครั้งที่ 3, 6, 9... และรีเซ็ตวนลูป
        - nextAttackPowerRate/nextAttackPowerFlat เพิ่ม ATK เฉพาะการโจมตีที่ Active แล้วกลับเป็นค่าปกติทันที
        - nextAttackCriticalRate เพิ่ม/ลดเรทคริติคอลเฉพาะการโจมตีที่ Active ทำงาน โดยไม่เปลี่ยน criticalRate ถาวร
        - healHpRate/healHpFlat ฟื้น HP ปัจจุบันหลังโจมตีที่ Active โดยไม่เพิ่ม HP สูงสุด
@@ -6785,7 +6785,7 @@
        - maxCopiedAbilities = จำนวนสกิลคัดลอกสูงสุดที่ถือพร้อมกัน
 
        คีย์ของ statusResistance
-       - value / successRate / resistRate = อัตราต้านสำเร็จ
+       - value / successRate / resistRate = อัตราต้านสำเร็จ; 9 = 9%, 100 = 100%, 150 = 150% และ 0.50 ยังรองรับเป็น 50%
        - resistEffectTypes = ระบุ type ที่ต้องการต้านโดยตรง
        - resistCategories: "all", "cost", "transfer", "abilityControl", "statReduction",
          "hitReduction", "healingReduction", "shieldReduction"
@@ -7018,6 +7018,536 @@
 
     /* ======================== [SECTION 06 CARD-DATA] ======================== */
     const CARDS = [
+{
+  "id": 2010,
+  "name": "ไอริส",
+  "rarity": "SC",
+  "element": "แสง",
+  "power": 850000,
+  "hp": 3400000,
+  "defense": 272000,
+  "incomePerSec": 19000,
+  "upgradeDustBase": 10000,
+  "upgradeDustGrowth": 1.092,
+  "awakenMax": 4,
+  "icon": "",
+  "image": "2010.png",
+  "poster": "2010.png",
+  "video": "2010.mp4",
+  "overlay": "",
+  "scCutscene": {
+    "kicker": "Royal Sacred Sword",
+    "quote": "ในนามแห่งราชวงศ์เบลเซิร์ก... ฉันจะไม่ยอมให้ใครทำร้ายพวกพ้อง!",
+    "subtitle": "Sacred Explode",
+    "video": "IRISop.mp4",
+    "poster": "",
+    "accent": "#fde68a",
+    "accent2": "#f8fafc",
+    "introMs": 4000,
+    "maxVideoMs": 30000,
+    "revealMs": 4000,
+    "objectFit": "cover",
+    "objectPosition": "center center",
+    "muted": false,
+    "volume": 0.5,
+    "showCardAfterVideo": true,
+    "revealKicker": "ROYAL SACRED SWORD",
+    "revealTitle": "MYSTICAL · IRIS"
+  },
+  "abilities": [
+    {
+      "name": "โลหิตแห่งราชวงศ์เบลเซิร์ก",
+      "description": "เพิ่ม ATK ของตัวเอง 75% เพิ่มอัตราคริติคอล 50% และได้รับค่าต้านสถานะ 50%",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "effects": [
+        {
+          "type": "selfPowerRate",
+          "value": 0.75
+        },
+        {
+          "type": "criticalRate",
+          "value": 0.5,
+          "targetSide": "self"
+        },
+        {
+          "type": "statusResistance",
+          "value": 50,
+          "targetSide": "self"
+        }
+      ]
+    },
+    {
+      "name": "องค์หญิงและอัศวินประจำพระองค์",
+      "description": "เมื่อจัดทีมร่วมกับดาร์กเนส ไอริสจะได้รับคริติคอลเพิ่มอีก 50% ลดความเสียหายที่ได้รับ 50% และลดคอสสกิลถาวร 2 คอส ส่วนดาร์กเนสจะได้รับ HP +100%, DEF +200%, อัตราบล็อก +50% และค่าต้านสถานะ 150%",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "condition": {
+        "requiredCardIds": [
+          2004
+        ]
+      },
+      "effects": [
+        {
+          "type": "criticalRate",
+          "value": 0.5,
+          "targetSide": "self"
+        },
+        {
+          "type": "damageTakenRate",
+          "value": -0.5,
+          "targetSide": "self"
+        },
+        {
+          "type": "activeSkillCostPermanent",
+          "value": -2,
+          "targetSide": "self"
+        },
+        {
+          "type": "cardHpRate",
+          "value": 1,
+          "targetSide": "ally",
+          "targetCardIds": [
+            2004
+          ]
+        },
+        {
+          "type": "cardDefenseRate",
+          "value": 2,
+          "targetSide": "ally",
+          "targetCardIds": [
+            2004
+          ]
+        },
+        {
+          "type": "blockRate",
+          "value": 0.5,
+          "targetSide": "ally",
+          "targetCardIds": [
+            2004
+          ]
+        },
+        {
+          "type": "statusResistance",
+          "value": 150,
+          "targetSide": "ally",
+          "targetSelection": "specific",
+          "targetCardIds": [
+            2004
+          ]
+        }
+      ]
+    },
+    {
+      "name": "คำสาบานของลาลาทิน่า",
+      "description": "เมื่อจัดทีมร่วมกับดาร์กเนส ทุกครั้งที่ไอริสโจมตีครบ 3 ครั้ง จะฟื้นฟู HP ของไอริส 15% ฟื้นฟู HP ของดาร์กเนส 20% ฟื้นโล่ให้ดาร์กเนส 2 ชั้น และเพิ่ม ATK ของไอริส 10% สูงสุด 10 สแต็ก",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "condition": {
+        "requiredCardIds": [
+          2004
+        ],
+        "afterOwnAttacks": 2,
+        "repeat": true
+      },
+      "effects": [
+        {
+          "type": "healHpRate",
+          "value": 0.15,
+          "targetSide": "self"
+        },
+        {
+          "type": "healHpRate",
+          "value": 0.2,
+          "targetSide": "ally",
+          "targetCardIds": [
+            2004
+          ]
+        },
+        {
+          "type": "restoreShieldHits",
+          "value": 2,
+          "targetSide": "ally",
+          "targetCardIds": [
+            2004
+          ]
+        },
+        {
+          "type": "powerRateStack",
+          "value": 0.1,
+          "targetSide": "self",
+          "maxStacks": 10,
+          "stackKey": "IRIS_DARKNESS_OATH"
+        }
+      ]
+    },
+    {
+      "name": "เซเคร็ดเอ็กซ์โพลด",
+      "description": "เมื่อจัดทีมร่วมกับดาร์กเนส ทุกการโจมตีครั้งที่ 8 การโจมตีครั้งนั้นจะได้รับ ATK +300% เพิ่ม 5 ฮิต มีอัตราคริติคอลเพิ่ม 100% และลด DEF ของฝ่ายตรงข้าม 10% สูงสุด 5 สแต็ก",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "condition": {
+        "requiredCardIds": [
+          2004
+        ],
+        "afterOwnAttacks": 7,
+        "repeat": true
+      },
+      "effects": [
+        {
+          "type": "nextAttackPowerRate",
+          "value": 3,
+          "targetSide": "self"
+        },
+        {
+          "type": "nextAttackHits",
+          "value": 5,
+          "targetSide": "self"
+        },
+        {
+          "type": "nextAttackCriticalRate",
+          "value": 1,
+          "targetSide": "self"
+        },
+        {
+          "type": "defenseRateStack",
+          "value": -0.1,
+          "targetSide": "enemy",
+          "maxStacks": 5,
+          "stackKey": "IRIS_SACRED_EXPLODE"
+        }
+      ]
+    }
+  ]
+},
+{
+  "id": 2009,
+  "name": "เซซิเลีย",
+  "rarity": "LR",
+  "element": "น้ำ",
+  "power": 243000,
+  "hp": 1215000,
+  "defense": 97200,
+  "incomePerSec": 6500,
+  "upgradeDustBase": 2800,
+  "upgradeDustGrowth": 1.078,
+  "awakenMax": 4,
+  "icon": "",
+  "image": "2009.png",
+  "abilities": [
+    {
+      "name": "พรแห่งเทพธิดาอวา",
+      "description": "หากไม่ได้จัดทีมร่วมกับอควา จะลดคอส Active Skill ของเพื่อนร่วมทีม 2 คอสอย่างถาวร และทุกครั้งที่การ์ดใบนี้โจมตีครบ 3 ครั้ง จะฟื้นฟู HP ให้ฝ่ายเรา 15%",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "condition": {
+        "withoutCardIds": [
+          2002
+        ]
+      },
+      "effects": [
+        {
+          "type": "activeSkillCostPermanent",
+          "value": -2,
+          "targetSide": "ally",
+          "excludeSelf": true
+        },
+        {
+          "type": "healHpRate",
+          "value": 0.15,
+          "targetSide": "ally",
+          "condition": {
+            "afterOwnAttacks": 2,
+            "repeat": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "พลังของสาวกแห่งเทพธิดาอควา",
+      "description": "หากจัดทีมร่วมกับอควา จะยกเลิกเงื่อนไขสกิลของอควา และทำให้ Active Skill ที่มีตัวนับพร้อมใช้ในการโจมตีครั้งแรก",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "condition": {
+        "requiredCardIds": [
+          2002
+        ]
+      },
+      "effects": [
+        {
+          "type": "ignoreAbilityConditions",
+          "targetSide": "ally",
+          "targetSelection": "specific",
+          "targetCardIds": [
+            2002
+          ],
+          "targetMatch": "all",
+          "triggerImmediately": true
+        }
+      ]
+    }
+  ]
+},
+{
+  "id": 2004,
+  "name": "ดาร์กเนส",
+  "rarity": "EX",
+  "element": [
+    "แสง",
+    "ดิน"
+  ],
+  "power": 1968300,
+  "hp": 9841500,
+  "defense": 787320,
+  "incomePerSec": 45000,
+  "upgradeDustBase": 20000,
+  "upgradeDustGrowth": 1.102,
+  "awakenMax": 3,
+  "icon": "",
+  "image": "2004.png",
+  "abilities": [
+    {
+      "name": "ครูเซเดอร์ สาย...",
+      "description": "ตัวเอง ATK-100% แต่ได้ DEF+1000%",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "effects": [
+        {
+          "type": "selfPowerRate",
+          "value": -1
+        },
+        {
+          "type": "selfDefenseRate",
+          "value": 10
+        }
+      ]
+    },
+    {
+      "name": "ข้าจะปกป้องทุกคนเอง",
+      "description": "เมื่อจัดทีมร่วมกับ ซาโต้ คาสึมะ หรือ เมกุมิน หรือ อควา จะลดความเสียหายที่ได้รับลงอีก 50 %",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "effects": [
+        {
+          "type": "damageTakenRate",
+          "value": -0.5,
+          "targetSide": "ally"
+        }
+      ],
+      "condition": {
+        "anyCardIds": [
+          2003,
+          2001,
+          2002
+        ]
+      }
+    },
+    {
+      "name": "ขั้นสุดแห่งสาย...",
+      "description": "เมื่อการ์ดใบนี้ อเวกตันและเลเวลตัน จะได้ พลังป้องกัน 5000% และเลือด เพิ่มอีก 2000% เฉพาะตัวเอง",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "effects": [
+        {
+          "type": "selfDefenseRate",
+          "value": 50
+        },
+        {
+          "type": "selfHpRate",
+          "value": 20
+        }
+      ],
+      "condition": {
+        "sourceMinLevel": 300,
+        "sourceMinAwaken": 3
+      }
+    }
+  ],
+   "scCutscene": {
+      "kicker": "ครูเซสเดอร์ผู้เพรียบพร้อม",
+      "quote": "ฉันจะปกป้องทุกคนเอง ฮิฮิ",
+      "subtitle": "ด้วยเกียรติของอัศวิน อุฮิ้",
+      "video": "DARKop.mp4",
+      "poster": "",
+            "accent": "#facc15",
+            "accent2": "#fef3c7",
+      "introMs": 4000,
+      "maxVideoMs": 30000,
+      "revealMs": 4000,
+      "objectFit": "cover",
+      "objectPosition": "center center",
+      "muted": false,
+      "volume": 0.5,
+      "showCardAfterVideo": true,
+      "revealKicker": "ฉันรู้สึกซาบซึ้งใจ",
+      "revealTitle": "EX · ดาร์กเนส
+    }
+},
+{
+  "id": 2001,
+  "name": "ซาโต้ คาสึมะ",
+  "rarity": "EX",
+  "element": [
+    "น้ำ",
+    "ความมืด"
+  ],
+  "power": 1968300,
+  "hp": 9841500,
+  "defense": 787320,
+  "incomePerSec": 45000,
+  "upgradeDustBase": 20000,
+  "upgradeDustGrowth": 1.102,
+  "awakenMax": 3,
+  "icon": "",
+  "image": "2001.png",
+  "poster": "2001.png",
+  "video": "2001.mp4",
+  "abilities": [
+    {
+      "name": "ปาร์ตี้ไร้เทียมทาน",
+      "description": "เมื่อจัดทีมกับ ดาร์กเนส อควา และ เมกุมิน จะให้ได้รับบัพ คริติคอล +100% ตลอดเวลา และลดคอสการใช้สกิลของคนในทีม 19 คอส",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "effects": [
+        {
+          "type": "criticalRate",
+          "value": 1,
+          "targetSide": "ally"
+        },
+        {
+          "type": "activeSkillCostPermanent",
+          "value": -19,
+          "targetSide": "ally" , "excludeSelf": true
+        }
+      ],
+      "condition": {
+        "requiredCardIds": [
+          2002,
+          2003,
+          2004
+        ]
+      }
+    },
+    {
+      "name": "ครีเอทวอร์เทอร์",
+      "description": "ทุกการโจมตี จะเพิ่มฟื้มฟูเลือดให้ตัวเองและ คนในทีม 5% และจะลด พลังป้องกันฝ่ายตรงข้ามลง 5% สูงสุด 10 สแตก",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "effects": [
+        {
+          "type": "healingRate",
+          "value": 0.05,
+          "targetSide": "ally"
+        },
+        {
+          "type": "enemyDefenseRateStack",
+          "value": -0.05,
+          "maxStacks": 10,
+          "stackKey": "CREATWT"
+        }
+      ],
+      "condition": {
+        "onOwnAttack": true
+      }
+    },
+    {
+      "name": "เดรนครัส",
+      "description": "ทุกครั้งที่โจมตีจะลดเลือดฝั่งตรงข้าม 3 %",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "effects": [
+        {
+          "type": "enemyHpRateStack",
+          "value": -0.03,
+          "maxStacks": 99,
+          "stackKey": "sharedStack"
+        }
+      ],
+      "condition": {
+        "onOwnAttack": true
+      }
+    },
+    {
+      "name": "สตีล",
+      "description": "คาซึมะจะทำการขโมยสกิล ทุกๆการโจมตี 15 ครั้ง แบบสุ่ม โอกาสสำเร็จ 45 %",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena"
+      ],
+      "effects": [
+        {
+          "type": "stealAbilities",
+          "targetSide": "enemy",
+          "targetSelection": "random",
+          "targetCount": 1,
+          "successRate": 0.45,
+          "abilitySelection": "random",
+          "abilityCount": 1,
+          "recipientSide": "self"
+        }
+      ],
+      "condition": {
+        "afterOwnAttacks": 14 , "repeat": true
+      }
+    }
+  ],
+   "scCutscene": {
+      "kicker": "ชายผู้ถูกตั้งความหวังในการปราบมาร",
+      "quote": "ชื่อของฉันคือ ซาโต้ คาสึมะ อย่าคิดมีเรื่องกับฉันจะดีกว่า ",
+      "subtitle": "ครีเอทวอร์เทอร์",
+      "video": "SATO.mp4",
+      "poster": "",
+          "accent": "#22c55e",
+           "accent2": "#84cc16",
+      "introMs": 4000,
+      "maxVideoMs": 30000,
+      "revealMs": 4000,
+      "objectFit": "cover",
+      "objectPosition": "center center",
+      "muted": false,
+      "volume": 0.5,
+      "showCardAfterVideo": true,
+      "revealKicker": "SATO",
+      "revealTitle": "EX · ซาโต้ คาสึมะ"
+    }
+},
 {
   "id": 2008,
   "name": "ยุนยุน",
@@ -13004,8 +13534,9 @@
 
       const rawPowerRate = activeCombos.reduce((sum, combo) => sum + Number(combo.powerRate || 0), 0);
       const rawIncomeRate = activeCombos.reduce((sum, combo) => sum + Number(combo.incomeRate || 0), 0);
-      const powerRate = Math.min(9.99, rawPowerRate);
-      const incomeRate = Math.min(9.99, rawIncomeRate);
+      // ไม่ตัดค่าบวกของอัตราคอมโบ เพื่อเก็บแต้มสำรองเกิน 100% สำหรับหักล้างดีบัฟ
+      const powerRate = rawPowerRate;
+      const incomeRate = rawIncomeRate;
       return { cards: teamCards, counts, uniqueElements, nonNeutralElements, leaderElement, highestElementCount, allElementsUnique, dominantElement, dominantReason, activeCombos, rawPowerRate, rawIncomeRate, powerRate, incomeRate, powerCapped: rawPowerRate > powerRate, incomeCapped: rawIncomeRate > incomeRate };
     }
 
@@ -13310,12 +13841,28 @@
       };
     }
 
-    function normalizeAbilityChance(value, fallback = 1) {
+    function normalizeAbilityPercentRate(value, fallback = 0) {
       let number = Number(value);
       if (!Number.isFinite(number)) number = Number(fallback);
-      if (!Number.isFinite(number)) number = 1;
-      if (number > 1) number /= 100;
-      return Math.max(0, Math.min(1, number));
+      if (!Number.isFinite(number)) number = 0;
+      // รองรับสองรูปแบบพร้อมกัน: 0.50 = 50% (ข้อมูลเก่า) และ 9 = 9%, 150 = 150% (เปอร์เซ็นต์พอยต์)
+      if (Math.abs(number) > 1) number /= 100;
+      return number;
+    }
+
+    function normalizeStatusResistanceRate(value, fallback = 0) {
+      let number = Number(value);
+      if (!Number.isFinite(number)) number = Number(fallback);
+      if (!Number.isFinite(number)) number = 0;
+      // statusResistance ใช้เปอร์เซ็นต์พอยต์เมื่อเป็นจำนวนเต็ม/ค่า >= 1: 1 = 1%, 9 = 9%, 150 = 150%
+      // ยังรองรับข้อมูลเก่าแบบทศนิยมที่ต่ำกว่า 1 เช่น 0.50 = 50%
+      if (Math.abs(number) >= 1) number /= 100;
+      return number;
+    }
+
+    function normalizeAbilityChance(value, fallback = 1) {
+      // โอกาสทั่วไปยังรองรับ 1 = 100% และ 70 = 70%; ไม่มีเพดานค่าบวกเพื่อเก็บแต้มสำรอง
+      return Math.max(0, normalizeAbilityPercentRate(value, fallback));
     }
 
     function normalizeAbilityStringList(value) {
@@ -13447,7 +13994,7 @@
       const rawRate = effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value ?? 0;
       const scopeRaw = String(effect.scope || effect.resistanceScope || "target").trim().toLowerCase();
       return {
-        rate: Number(rawRate) || 0,
+        rate: normalizeStatusResistanceRate(rawRate, 0),
         effectTypes: normalizeAbilityStringList(effect.resistEffectTypes || effect.statusEffectTypes || effect.effectTypes).map(normalizeAbilityEffectType),
         categories: normalizeAbilityStringList(effect.resistCategories || effect.categories).map(item => String(item).trim()),
         abilityNames: normalizeAbilityStringList(effect.resistAbilityNames || effect.abilityNames),
@@ -13999,6 +14546,8 @@
       if (requiredCardIds.some(id => !context.cardIdSet.has(id))) return false;
       const anyCardIds = normalizeAbilityCardIds(rule.anyCardIds);
       if (anyCardIds.length && !anyCardIds.some(id => context.cardIdSet.has(id))) return false;
+      const withoutCardIds = normalizeAbilityCardIds(rule.withoutCardIds ?? rule.excludedCardIds ?? rule.forbiddenCardIds);
+      if (withoutCardIds.some(id => context.cardIdSet.has(id))) return false;
 
       const sourceId = String(sourceCard.id);
       const progress = context.progressByCardId[sourceId] || getOwned(sourceId) || {};
@@ -14014,6 +14563,7 @@
       const externalConditionIgnored = new Set(normalizeAbilityCardIds(options.externalConditionIgnoredCardIds));
       const allyNullified = new Set();
       const allyConditionIgnored = new Set(externalConditionIgnored);
+      const immediateConditionIgnored = new Set(normalizeAbilityCardIds(options.externalImmediateConditionIgnoredCardIds));
       const enemyNullifySelectors = [];
       const enemyIgnoreConditionSelectors = [];
       const nullifyEffects = [];
@@ -14106,7 +14656,9 @@
             if (targetSide === "enemy") {
               enemyIgnoreConditionSelectors.push({ sourceCard, ability, effect });
             } else {
-              resolveLocalTargets({ ...effect, _sourceCardId: String(sourceCard.id), _sourceAbilityName: String(ability.name || "") }, sourceCard, `${runtimeKey}:${effectIndex}:ignore`).forEach(id => allyConditionIgnored.add(String(id)));
+              const ignoredTargetIds = resolveLocalTargets({ ...effect, _sourceCardId: String(sourceCard.id), _sourceAbilityName: String(ability.name || "") }, sourceCard, `${runtimeKey}:${effectIndex}:ignore`);
+              ignoredTargetIds.forEach(id => allyConditionIgnored.add(String(id)));
+              if (effect.triggerImmediately === true) ignoredTargetIds.forEach(id => immediateConditionIgnored.add(String(id)));
             }
             ignoreConditionEffects.push({ key: `${runtimeKey}:${effectIndex}`, sourceCard, ability, effect: { ...effect, targetSide } });
           });
@@ -14175,6 +14727,7 @@
         allyNullifiedCardIds: [...allyNullified],
         conditionIgnoredCardIds: [...conditionIgnoredCardIdSet],
         allyConditionIgnoredCardIds: [...allyConditionIgnored],
+        immediateConditionIgnoredCardIds: [...immediateConditionIgnored],
         enemyNullifySelectors,
         enemyIgnoreConditionSelectors,
         enemyStatusResistanceSelectors,
@@ -14209,6 +14762,7 @@
           const sourceId = String(sourceCard.id);
           const sourceNullified = nullifiedCardIdSet.has(sourceId);
           const sourceIgnoresConditions = conditionIgnoredCardIdSet.has(sourceId);
+          const sourceTriggersImmediately = immediateConditionIgnored.has(sourceId);
           const abilityTrigger = normalizeBattleTriggerRule(ability.condition || {});
           const baseConditionActive = modes.includes(context.mode)
             && (sourceIgnoresConditions || isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard));
@@ -14221,7 +14775,8 @@
             const ignoreControl = isIgnoreConditionAbilityEffect(effect);
             const ownEffectTrigger = normalizeBattleTriggerRule(effect.condition || {});
             const persistentAfterActivation = Boolean(effect.persistentAfterActivation && abilityTrigger);
-            const effectTrigger = persistentAfterActivation ? ownEffectTrigger : (ownEffectTrigger || abilityTrigger);
+            let effectTrigger = persistentAfterActivation ? ownEffectTrigger : (ownEffectTrigger || abilityTrigger);
+            if (sourceTriggersImmediately && effectTrigger && !effectTrigger.onOwnAttack) effectTrigger = { ...effectTrigger, activateImmediately: true };
             const parentActivationKey = abilityTrigger ? `${runtimeKey}:${JSON.stringify(abilityTrigger)}` : "";
             const conditionActive = baseConditionActive
               && (sourceIgnoresConditions || isAbilityConditionMet(getStaticAbilityCondition(effect.condition || {}), context, sourceCard));
@@ -14925,7 +15480,7 @@
         cardIncomeRate: `เงินเดือน ${targetText} ${signedPercent(value)}`,
         copyAbilities: `คัดลอกสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.copyRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         stealAbilities: `ขโมยสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
-        statusResistance: `ต้านสถานะ ${targetText} ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value), 0))}${String(effect && (effect.scope || "")).toLowerCase() === "field" ? " • ทั้งสนาม" : ""}`,
+        statusResistance: `ต้านสถานะ ${targetText} ${signedPercent(normalizeStatusResistanceRate(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value), 0))}${String(effect && (effect.scope || "")).toLowerCase() === "field" ? " • ทั้งสนาม" : ""}`,
         nullifyCardAbilities: `ยกเลิกความสามารถ ${targetText}`,
         ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
         nextAttackPowerRate: `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
@@ -15241,6 +15796,7 @@
           cutscene: item.cutscene && typeof item.cutscene === "object" ? { ...item.cutscene } : {},
           onBattleStart: runtimeTriggerMode(item) === "battleStart",
           onOwnAttack: runtimeTriggerMode(item) === "ownAttack",
+          activateImmediately: Boolean(item.activateImmediately),
           triggerOn: runtimeTriggerMode(item),
           baseAfterOwnAttacks: runtimeTriggerMode(item) !== "nextAttack"
             ? 0
@@ -15315,6 +15871,10 @@
             trigger.armed = true;
           } else {
             trigger.afterOwnAttacks = Math.max(1, Math.min(cap, trigger.baseAfterOwnAttacks + trigger.permanentCostChange + trigger.cycleCostChange));
+            if (trigger.activateImmediately) {
+              trigger.charge = trigger.afterOwnAttacks;
+              trigger.armed = true;
+            }
           }
           return trigger;
         });
@@ -17113,6 +17673,7 @@
               ? { ...getActiveSkillCutsceneConfig(record.ability, record.sourceCard), enabled: false }
               : getActiveSkillCutsceneConfig(record.ability, record.sourceCard),
             onOwnAttack: Boolean(record.trigger.onOwnAttack),
+            activateImmediately: Boolean(record.trigger.activateImmediately),
             triggerOn: record.trigger.onOwnAttack ? "ownAttack" : "nextAttack",
             baseAfterOwnAttacks: record.trigger.onOwnAttack
               ? 0
@@ -17341,8 +17902,9 @@
         enemyCriticalRateChange: Math.max(-1, Number(item.enemyCriticalRateChange) || 0),
         nextAttackCriticalRate: Math.max(-1, Number(item.nextAttackCriticalRate) || 0),
         enemyNextAttackCriticalRate: Math.max(-1, Number(item.enemyNextAttackCriticalRate) || 0),
-        maxHpGain: Math.max(0, Math.min(teamHp * 10, Number(item.maxHpGain || 0))),
-        attackStackGain: Math.max(0, Math.min(teamPower, Number(item.attackStackGain || 0))),
+        // ไม่มีเพดานค่าบวกของอัตรา/สแต็ก ผู้ใช้สามารถสะสมเกิน 100% เพื่อเผื่อการลดอัตรา
+        maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
+        attackStackGain: Math.max(0, Number(item.attackStackGain || 0)),
         stackEffects: abilityArray(item.stackEffects).map(effect => {
           const normalized = normalizeAbilityStackEffect(effect || {});
           return {
