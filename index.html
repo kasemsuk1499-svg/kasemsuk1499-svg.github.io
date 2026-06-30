@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-30-ability-conditions-v61-percent-display">
-  <title>Anime Card Collection · Ability Conditions v61 · Percent Display</title>
+  <meta name="gacha-app-build" content="2026-06-30-ability-conditions-v62-cutscene-all-methods">
+  <title>Anime Card Collection · Ability Conditions v62 · Cutscene All Methods</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5891,7 +5891,7 @@
     </div>
   </div>
 
-  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดระดับ Mystical (SC)">
+  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดพิเศษ EX / SC">
     <video class="sc-cutscene-video" id="scCutsceneVideo" playsinline preload="auto"></video>
     <div class="sc-cutscene-shade" aria-hidden="true"></div>
     <button class="sc-skip" data-action="skip-sc-cutscene" aria-label="ข้ามคัทซีน SC">ข้ามคัทซีน · ESC</button>
@@ -7323,6 +7323,8 @@
   "awakenMax": 3,
   "icon": "",
   "image": "2004.png",
+  "poster": "2004.png",
+  "video": "2004.mp4",
   "abilities": [
     {
       "name": "ครูเซเดอร์ สาย...",
@@ -19615,9 +19617,13 @@
       const guarantee = getBannerGuarantee(banner);
       const effectiveRates = getEffectiveBannerRates(banner);
       const results = [];
-      // เพิ่มโดยอลิซ: โหมดหยุดสุ่มทันทีเมื่อเจอระดับที่กำหนด
-      // ใช้กับ “เทหน้าตัก” เพื่อให้ SC เล่นคัทซีนทันทีและไม่กินผลสุ่มใบถัดไป
-      const stopOnRarity = String(options && options.stopOnRarity || "").toUpperCase();
+      // เพิ่มโดยอลิซ v62: หยุดสุ่มทันทีเมื่อเจอการ์ดที่ต้องเล่นคัทซีน
+      // รองรับทั้ง stopOnRarity เดิม, stopOnRarities หลายระดับ และ stopOnCutscene
+      const stopOnRarities = new Set([
+        ...(Array.isArray(options && options.stopOnRarities) ? options.stopOnRarities : []),
+        options && options.stopOnRarity
+      ].filter(Boolean).map(value => String(value).toUpperCase()));
+      const stopOnCutscene = Boolean(options && options.stopOnCutscene);
 
       for (let index = 0; index < times; index += 1) {
         let pity = Math.max(0, Number(state.pity[banner.id]) || 0) + 1;
@@ -19652,7 +19658,8 @@
         });
 
         // สำคัญ: ตรวจหลังบันทึกการ์ดและ pity แล้ว จากนั้นตัดลูปก่อนสุ่มใบต่อไปทันที
-        if (stopOnRarity && String(card.rarity || "").toUpperCase() === stopOnRarity) break;
+        const pulledRarity = String(card.rarity || "").toUpperCase();
+        if ((stopOnCutscene && isAcquisitionCutsceneCard(card)) || stopOnRarities.has(pulledRarity)) break;
       }
       return results;
     }
@@ -19840,11 +19847,25 @@
       if (!RARITIES[rarity] || getItemCount(`selector:${rarity}`) < 1) return showToast(`ไม่มีใบเลือกการ์ดระดับ ${rarity}`);
       removeInventoryItem(`selector:${rarity}`, 1);
       const added = addCardToCollection(card, false);
+      const result = {
+        card,
+        duplicate: added.duplicate,
+        guaranteed: true,
+        selector: true,
+        dustEarned: added.dustEarned,
+        maxAwakenBonus: added.maxAwakenBonus,
+        convertedCopies: added.convertedCopies
+      };
       state.recent = [String(card.id), ...state.recent.filter(id => String(id) !== String(card.id))].slice(0, CONFIG.recentPullLimit);
       saveState(true);
       renderAfterPull();
-      openCardModal(card.id);
-      showToast(`${added.duplicate ? "รับซ้ำ" : "ปลดล็อก"} ${card.name} จากใบเลือกระดับ ${rarity}`);
+      closeModal();
+
+      const finish = () => {
+        openCardModal(card.id);
+        showToast(`${added.duplicate ? "รับซ้ำ" : "ปลดล็อก"} ${card.name} จากใบเลือกระดับ ${rarity}`);
+      };
+      if (!playAcquisitionCutsceneSequence([result], finish)) finish();
     }
 
     function pullCardsFromInventoryItem(itemId, times = 1) {
@@ -19960,9 +19981,27 @@
       if (!meta || meta.kind !== "selector" || !card || card.rarity !== meta.rarity) return;
       if (!removeInventoryItem(activeSelectorItemId, 1)) return showToast("ใบเลือกไม่พอ");
       const added = addCardToCollection(card, false);
+      const result = {
+        card,
+        duplicate: added.duplicate,
+        guaranteed: true,
+        selector: true,
+        item: true,
+        dustEarned: added.dustEarned,
+        maxAwakenBonus: added.maxAwakenBonus,
+        convertedCopies: added.convertedCopies
+      };
       state.recent = [String(card.id), ...state.recent.filter(id => String(id) !== String(card.id))].slice(0, CONFIG.recentPullLimit);
-      saveState(true); renderAll(); closeItemSelector(); closeInventory(); openCardModal(card.id);
-      showToast(`${added.duplicate ? "รับการ์ดซ้ำ" : "ปลดล็อก"} ${card.name} จากใบเลือก ${meta.rarity}`);
+      saveState(true);
+      renderAll();
+      closeItemSelector();
+      closeInventory();
+
+      const finish = () => {
+        openCardModal(card.id);
+        showToast(`${added.duplicate ? "รับการ์ดซ้ำ" : "ปลดล็อก"} ${card.name} จากใบเลือก ${meta.rarity}`);
+      };
+      if (!playAcquisitionCutsceneSequence([result], finish)) finish();
     }
 
     function openPack(times) {
@@ -19983,12 +20022,13 @@
       presentPullResults(results, useFastSummary);
     }
 
-    // เพิ่มโดยอลิซ v50: เทหน้าตักใช้ Cristal และเปิดต่อจน Cristal หมด
-    // เมื่อพบ SC จะหยุดคิวสุ่มชั่วคราว เล่นคัทซีนให้จบก่อน แล้วจึงเปิดต่อ
+    // เพิ่มโดยอลิซ v62: เทหน้าตักใช้ Cristal และเปิดต่อจน Cristal หมด
+    // เมื่อพบการ์ดที่มีคัทซีน (EX / SC / การ์ดที่กำหนด scCutscene) จะหยุดคิวชั่วคราว
+    // เล่นคัทซีนให้จบก่อน แล้วจึงเปิดต่อ โดยไม่ข้ามแม้เป็นการ์ดซ้ำ
     // หากผู้เล่นกดข้าม finishSCCutscene() จะ resolve ทันทีและคิวจะไหลต่อทันที
-    function playSCCutsceneAsync(results = [], totalSC = 0) {
+    function playSCCutsceneAsync(results = []) {
       return new Promise(resolve => {
-        if (!playSCCutscene(results, resolve, totalSC)) resolve();
+        if (!playAcquisitionCutsceneSequence(results, resolve)) resolve();
       });
     }
 
@@ -20004,13 +20044,13 @@
       const recentIds = [];
       let remaining = plan.count;
       let processed = 0;
-      let scCutsceneCount = 0;
+      let specialCutsceneCount = 0;
 
       try {
         while (remaining > 0) {
           const chunkSize = Math.min(250, remaining);
-          // ตัดก้อนทันทีเมื่อเจอ SC เพื่อไม่ให้ระบบสุ่มใบถัดไประหว่างคัทซีน
-          const chunkResults = pullCards(chunkSize, { stopOnRarity: "SC" });
+          // ตัดก้อนทันทีเมื่อเจอการ์ดที่มีคัทซีน เพื่อไม่สุ่มใบถัดไประหว่างคัทซีน
+          const chunkResults = pullCards(chunkSize, { stopOnCutscene: true });
           const actualPulled = chunkResults.length;
           if (actualPulled < 1) break;
 
@@ -20029,12 +20069,13 @@
           saveState(true);
           renderAfterPull();
 
-          const scResult = chunkResults.find(result => result && result.card && result.card.rarity === "SC");
+          const cutsceneResult = chunkResults.find(result => result && result.card && isAcquisitionCutsceneCard(result.card));
           const progressText = document.getElementById("allInCost");
-          if (scResult) {
-            scCutsceneCount += 1;
-            if (progressText) progressText.textContent = `พบ ${rarityDisplayName("SC")} ใบที่ ${formatNumber(processed)} • รอคัทซีนจบแล้วจะเปิดต่อ ${formatNumber(remaining)} ใบ`;
-            await playSCCutsceneAsync([scResult], 1);
+          if (cutsceneResult) {
+            specialCutsceneCount += 1;
+            const rarityName = getAcquisitionCutsceneRarityName(cutsceneResult.card);
+            if (progressText) progressText.textContent = `พบ ${rarityName} ใบที่ ${formatNumber(processed)} • รอคัทซีนจบแล้วจะเปิดต่อ ${formatNumber(remaining)} ใบ`;
+            await playSCCutsceneAsync([cutsceneResult]);
             if (progressText && remaining > 0) progressText.textContent = `คัทซีนจบ • กำลังเปิดต่อ ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
           } else if (progressText) {
             progressText.textContent = `เปิดแล้ว ${formatNumber(processed)} / ${formatNumber(plan.count)} ใบ`;
@@ -20046,7 +20087,7 @@
         state.recent = recentIds;
         saveState(true);
         renderAfterPull();
-        const extra = scCutsceneCount > 0 ? ` • เล่นคัทซีน SC ${formatNumber(scCutsceneCount)} ครั้ง` : "";
+        const extra = specialCutsceneCount > 0 ? ` • เล่นคัทซีนพิเศษ ${formatNumber(specialCutsceneCount)} ครั้ง` : "";
         showToast(`${summarizePullStats(stats)}${extra} • Cristal คงเหลือ ${formatNumber(state.crystals)}`);
       } catch (error) {
         console.error("All-in summon failed", error);
@@ -22391,18 +22432,42 @@
       return Math.min(max, Math.max(min, number));
     }
 
+    // เพิ่มโดยอลิซ v62: การ์ดที่ต้องเล่นคัทซีนเมื่อได้รับ ไม่จำกัดเฉพาะช่องทางกาชา
+    // - EX / SC เล่นคัทซีนเสมอ
+    // - ระดับอื่นที่กำหนด card.scCutscene เอง ก็เล่นคัทซีนได้เช่นกัน
+    function isAcquisitionCutsceneCard(card) {
+      if (!card || typeof card !== "object") return false;
+      const rarity = String(card.rarity || "").toUpperCase();
+      const hasCustomCutscene = Boolean(card.scCutscene && typeof card.scCutscene === "object");
+      return hasCustomCutscene || rarity === "EX" || rarity === "SC";
+    }
+
+    function getAcquisitionCutsceneResults(results = []) {
+      return (Array.isArray(results) ? results : [])
+        .filter(result => result && result.card && isAcquisitionCutsceneCard(result.card));
+    }
+
+    function getAcquisitionCutsceneRarityName(card) {
+      const rarity = String(card && card.rarity || "").toUpperCase();
+      return rarityDisplayName(rarity) || rarity || "SPECIAL";
+    }
+
     function getSCCutsceneConfig(card) {
       const custom = card && card.scCutscene && typeof card.scCutscene === "object"
         ? card.scCutscene
         : {};
+      const rarity = String(card && card.rarity || "").toUpperCase();
+      const rarityName = getAcquisitionCutsceneRarityName(card);
+      const isEX = rarity === "EX";
+      const isSC = rarity === "SC";
       return {
-        kicker: String(custom.kicker || "ASTRAL CONVERGENCE"),
-        quote: String(custom.quote || `${card && card.name ? card.name : "Mystical"} ได้ตอบรับการอัญเชิญ`),
-        subtitle: String(custom.subtitle || "A Supreme Card Has Answered"),
+        kicker: String(custom.kicker || (isEX ? "EXCEED AWAKENING" : isSC ? "ASTRAL CONVERGENCE" : `${rarityName} MANIFESTATION`)),
+        quote: String(custom.quote || `${card && card.name ? card.name : rarityName} ได้ตอบรับการอัญเชิญ`),
+        subtitle: String(custom.subtitle || (isEX ? "An Exceed Card Has Answered" : isSC ? "A Supreme Card Has Answered" : "A Special Card Has Answered")),
         video: resolveAsset(custom.video || (card && card.video), "card"),
         poster: resolveAsset(custom.poster || (card && (card.poster || card.image || card.icon)), "card"),
-        accent: String(custom.accent || "#a78bfa"),
-        accent2: String(custom.accent2 || "#22d3ee"),
+        accent: String(custom.accent || (isEX ? "#22d3ee" : isSC ? "#a78bfa" : "#ffd166")),
+        accent2: String(custom.accent2 || (isEX ? "#facc15" : "#22d3ee")),
         introMs: clampSCCutsceneNumber(custom.introMs, 2200, 500, 12000),
         maxVideoMs: clampSCCutsceneNumber(custom.maxVideoMs, 14000, 1000, 120000),
         revealMs: clampSCCutsceneNumber(custom.revealMs, 1900, 400, 12000),
@@ -22411,8 +22476,8 @@
         muted: custom.muted === undefined ? false : Boolean(custom.muted),
         volume: clampSCCutsceneNumber(custom.volume, 0.9, 0, 1),
         showCardAfterVideo: custom.showCardAfterVideo !== false,
-        revealKicker: String(custom.revealKicker || "SUPREME CONVERGENCE"),
-        revealTitle: String(custom.revealTitle || "MYSTICAL ACQUIRED"),
+        revealKicker: String(custom.revealKicker || (isEX ? "EXCEED MANIFESTATION" : isSC ? "SUPREME CONVERGENCE" : `${rarityName} MANIFESTATION`)),
+        revealTitle: String(custom.revealTitle || `${rarityName} ACQUIRED`),
         revealText: String(custom.revealText || "")
       };
     }
@@ -22536,12 +22601,8 @@
       scheduleSCCutscene(() => showSCCutsceneCardReveal(token, config), config.maxVideoMs);
     }
 
-   function playSCCutscene(results = [], onComplete = null, totalSC = 0) {
-    const scResults = results.filter(result =>
-    result &&
-    result.card &&
-    ["EX", "SC"].includes(String(result.card.rarity || "").toUpperCase())
-  );
+    function playSCCutscene(results = [], onComplete = null, totalSpecial = 0) {
+      const scResults = getAcquisitionCutsceneResults(results);
       if (!scResults.length) return false;
 
       const selected = scResults[0];
@@ -22567,9 +22628,12 @@
       const revealKickerNode = document.getElementById("scCutsceneRevealKicker");
       const revealTitleNode = document.getElementById("scCutsceneRevealTitle");
 
+      const selectedRarity = String(selected.card.rarity || "SPECIAL").toUpperCase();
+      const selectedRarityName = getAcquisitionCutsceneRarityName(selected.card);
+      if (screen) screen.setAttribute("aria-label", `คัทซีนการ์ด ${selectedRarityName}`);
       if (cardNode) cardNode.innerHTML = art
         ? `<img src="${escapeHTML(art)}" alt="${escapeHTML(selected.card.name)}">`
-        : `<div style="height:100%;display:grid;place-items:center;font-size:4rem;font-weight:1000">SC</div>`;
+        : `<div style="height:100%;display:grid;place-items:center;font-size:4rem;font-weight:1000">${escapeHTML(selectedRarity)}</div>`;
       if (nameNode) nameNode.textContent = selected.card.name;
       if (introKickerNode) introKickerNode.textContent = config.kicker;
       if (introQuoteNode) introQuoteNode.textContent = config.quote;
@@ -22577,10 +22641,10 @@
       if (revealKickerNode) revealKickerNode.textContent = config.revealKicker;
       if (revealTitleNode) revealTitleNode.textContent = config.revealTitle;
 
-      const amount = Math.max(scResults.length, Math.floor(Number(totalSC) || 0));
+      const amount = Math.max(scResults.length, Math.floor(Number(totalSpecial) || 0));
       if (copyNode) copyNode.textContent = config.revealText || (amount > 1
-        ? `พลังระดับ ${rarityDisplayName("SC")} ปรากฏ ${formatNumber(amount)} ใบในครั้งนี้`
-        : `การ์ดระดับ ${rarityDisplayName("SC")} ได้ตอบรับการอัญเชิญของคุณ`);
+        ? `พลังระดับ ${selectedRarityName} ปรากฏ ${formatNumber(amount)} ใบในครั้งนี้`
+        : `การ์ดระดับ ${selectedRarityName} ได้ตอบรับการอัญเชิญของคุณ`);
 
       screen.style.setProperty("--sc-accent", config.accent);
       screen.style.setProperty("--sc-accent-2", config.accent2);
@@ -22608,12 +22672,32 @@
       return true;
     }
 
+    // เล่นคัทซีนของทุกใบตามลำดับ ไม่ตัดเหลือเพียงใบแรก
+    // ทำให้การเปิด x10/x50/x100, ตั๋ว, แพ็คไอเทม และการ์ดซ้ำ แสดงคัทซีนครบทุกครั้ง
+    function playAcquisitionCutsceneSequence(results = [], onComplete = null) {
+      const queue = getAcquisitionCutsceneResults(results);
+      if (!queue.length) return false;
+
+      let index = 0;
+      const playNext = () => {
+        if (index >= queue.length) {
+          if (typeof onComplete === "function") onComplete();
+          return;
+        }
+        const current = queue[index];
+        index += 1;
+        if (!playSCCutscene([current], playNext, 1)) playNext();
+      };
+      playNext();
+      return true;
+    }
+
     function presentPullResults(results = [], useFastSummary = false) {
       const finish = () => {
         if (useFastSummary) showToast(summarizePullResults(results));
         else showReveal(results);
       };
-      if (!playSCCutscene(results, finish)) finish();
+      if (!playAcquisitionCutsceneSequence(results, finish)) finish();
     }
 
     function renderRevealSelection(index) {
