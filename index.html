@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-30-ability-conditions-v60">
-  <title>Anime Card Collection · Ability Conditions v60</title>
+  <meta name="gacha-app-build" content="2026-06-30-ability-conditions-v61-percent-display">
+  <title>Anime Card Collection · Ability Conditions v61 · Percent Display</title>
   <style>
     :root {
       color-scheme: dark;
@@ -15445,6 +15445,9 @@
     }
 
     function abilityEffectText(effect) {
+      // ทำให้ alias เก่าของเอฟเฟกต์สแต็ก เช่น enemyHpRateStack / enemyDefenseRateStack
+      // ใช้ข้อความแสดงผลชุดเดียวกับชนิดกลาง และแสดงค่า rate เป็นเปอร์เซ็นต์เสมอ
+      effect = normalizeAbilityStackEffect(effect && typeof effect === "object" ? effect : {});
       const effectType = normalizeAbilityEffectType(effect && effect.type);
       const value = Number(effect && effect.value || 0);
       const rarityText = normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).map(rarityDisplayName).join("/") || "ทุกระดับ";
@@ -15525,7 +15528,11 @@
         attackHits: `จำนวนฮิต ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         teamIncomeFlat: `ค่าฐานเงินเดือนทีม ${value >= 0 ? "+" : ""}${formatNumber(value)} (คูณ 86,400 ตอนจ่าย)`
       };
-      return labels[effectType] || `${effectType || "effect"}: ${value}`;
+      const isRateValue = /(?:Rate|RateStack)$/i.test(String(effectType || ""));
+      return labels[effectType]
+        || (isRateValue
+          ? `${effectType || "effect"}: ${signedPercent(value)}`
+          : `${effectType || "effect"}: ${value}`);
     }
 
     function abilityConditionText(condition = {}) {
@@ -22529,8 +22536,12 @@
       scheduleSCCutscene(() => showSCCutsceneCardReveal(token, config), config.maxVideoMs);
     }
 
-    function playSCCutscene(results = [], onComplete = null, totalSC = 0) {
-      const scResults = results.filter(result => result && result.card && result.card.rarity === "SC");
+   function playSCCutscene(results = [], onComplete = null, totalSC = 0) {
+    const scResults = results.filter(result =>
+    result &&
+    result.card &&
+    ["EX", "SC"].includes(String(result.card.rarity || "").toUpperCase())
+  );
       if (!scResults.length) return false;
 
       const selected = scResults[0];
