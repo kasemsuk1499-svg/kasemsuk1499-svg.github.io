@@ -6132,9 +6132,9 @@
       oldAccountsKey: "simple_gacha_accounts_v5_stable",
       oldActiveUserKey: "simple_gacha_active_user_v5_stable",
       oldBannerKey: "simple_gacha_active_banner_v5_stable",
-      startingGems: 250000,
-      startingCrystals: 0,
-      startingDust: 300,
+      startingGems: 300000000,
+      startingCrystals: 30,
+      startingDust: 30000000,
       // เพิ่มโดยอลิซ v50: Gems เป็นเงินหลัก แลกสกุลก่อนใช้งาน
       crystalGemCost: 1000000,
       crystalDailyLimit: 3000000,
@@ -7938,7 +7938,7 @@
     "ability": [
         {
             "name": "ROOT ACCESS",
-            "description": "ต้านสถานะของตนเอง +900%; ศัตรูทั้งหมดถูกลดต้านสถานะ 300%, ลดการฟื้น HP/โล่ 50%, ได้รับดาเมจเพิ่ม 50% และคอสสกิลแอคทีฟเพิ่มถาวร 2 หน่วย",
+            "description": "ต้านสถานะของตนเอง +100%; ศัตรูทั้งหมดถูกลดต้านสถานะ 300%, ลดการฟื้น HP/โล่ 50%, ได้รับดาเมจเพิ่ม 50% และคอสสกิลแอคทีฟเพิ่มถาวร 2 หน่วย",
             "activeIn": [
                 "team",
                 "tower",
@@ -7948,12 +7948,12 @@
             "effects": [
                 {
                     "type": "statusResistance",
-                    "value": 9,
+                    "value": 100,
                     "targetSide": "self"
                 },
                 {
                     "type": "statusResistance",
-                    "value": -3,
+                    "value": -300,
                     "targetSide": "enemy",
                     "targetSelection": "all",
                     "scope": "field"
@@ -8189,8 +8189,8 @@
             ]
         },
         {
-            "name": "บัญญัติที่ 4: เนตรสายฟ้า 99",
-            "description": "อัตราคริติคอล +99%",
+            "name": "บัญญัติที่ 4: เนตรสายฟ้า 9",
+            "description": "อัตราคริติคอล +9%",
             "activeIn": [
                 "team",
                 "tower",
@@ -8200,7 +8200,7 @@
             "effects": [
                 {
                     "type": "criticalRate",
-                    "value": 0.99,
+                    "value": 0.09,
                     "targetSide": "self"
                 }
             ]
@@ -8224,7 +8224,7 @@
         },
         {
             "name": "บัญญัติที่ 6: สิทธิ์ของผู้สร้าง",
-            "description": "ต้านสถานะ +900%",
+            "description": "ต้านสถานะ +90%",
             "activeIn": [
                 "team",
                 "tower",
@@ -8234,7 +8234,7 @@
             "effects": [
                 {
                     "type": "statusResistance",
-                    "value": 9,
+                    "value": 90,
                     "targetSide": "self"
                 }
             ]
