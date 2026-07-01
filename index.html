@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-01-capture-revive-balance-awaken-v5">
-  <title>Anime Card Collection · Capture Revive + Balanced Base + Awaken 20 v5</title>
+  <meta name="gacha-app-build" content="2026-07-02-dust-qol-team-detail-v6">
+  <title>Anime Card Collection · Dust Economy + Upgrade All + Team Detail v6</title>
   <style>
     :root {
       color-scheme: dark;
@@ -380,6 +380,12 @@
     }
 
     .btn-danger { color: #ffe8ed; background: rgba(190, 24, 93, .25); }
+    .btn-upgrade-all {
+      color: #052015;
+      border-color: transparent;
+      background: linear-gradient(135deg, #56e39f, #a7f3d0 58%, #5ce8ff);
+      box-shadow: 0 10px 28px rgba(86,227,159,.18);
+    }
     .cost { display: block; font-size: .69rem; opacity: .76; margin-top: 2px; }
 
     .side-panel {
@@ -5588,12 +5594,12 @@
                 <button class="btn btn-primary" data-action="exchange-cristal">แลก Cristal</button>
               </div>
               <div class="exchange-row">
-                <input class="field" id="dustExchangeGemAmount" type="number" min="10" step="10" value="1000000" aria-label="จำนวน Gems ที่ต้องการใช้แลก Dust">
+                <input class="field" id="dustExchangeGemAmount" type="number" min="100" step="100" value="1000000000" aria-label="จำนวน Gems ที่ต้องการใช้แลก Dust">
                 <button class="btn btn-gold" data-action="exchange-dust">แลก Dust</button>
               </div>
               <div class="exchange-status" id="currencyExchangeStatus">
                 <span class="cristal-note">1 Cristal = 1,000,000 Gems • เปิด 1 ครั้งใช้ 3 Cristal</span>
-                <span>Dust: 10 Gems = 1 Dust • ไม่จำกัดจำนวนแลก</span>
+                <span>Dust: 100 Gems = 1 Dust • เงินเดือน 1,000M แลกได้ 10M Dust • ไม่จำกัดจำนวนแลก</span>
               </div>
             </div>
           </div>
@@ -6272,8 +6278,8 @@
       crystalDailyLimit: 3000000,
       gachaCrystalCostPerPull: 3,
       // แก้โดยอลิซ v51: ผู้เล่นยืนยันอัตราแลก Dust โดยคำนึงถึงรายได้ของ EX ที่สูงกว่า SC
-      // ใช้ 10 Gems แลก 1 Dust และไม่จำกัดจำนวนแลกต่อวัน
-      dustGemCost: 0.2,
+      // ใช้ 100 Gems แลก 1 Dust: เงินเดือน 1,000M Gems แลกได้ 10M Dust พออัป EX จาก Lv.1 ถึงเลเวลตัน 1 ใบ
+      dustGemCost: 100,
       starterSRSelector: 1,
       starterTeamSize: 5,
       dailyGems: 2500000,
@@ -6534,16 +6540,16 @@
     /* ===================== [SECTION 02 RARITY-COLORS] ===================== */
     const RARITIES = Object.freeze({
       // สมดุลใหม่: ATK : HP : DEF ≈ 1 : 5 : 0.40 เพื่อให้การ์ดระดับเดียวกันสู้กันประมาณ 8–9 เทิร์นก่อนคิดสกิล/โล่
-      N:   { label: "N",         color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,      basePower: 12000,    baseHp: 60000,     baseDefense: 4800, baseSpeed: 90,    baseIncome: 80,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015, incomePerLevel: .008,  awakenMax: 20, awakenCopies: [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8], powerBonus: 0.02, incomeBonus: 0.0125 },
-      R:   { label: "R",         color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,     basePower: 14000,    baseHp: 70000,    baseDefense: 5600, baseSpeed: 92,   baseIncome: 100,   maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016, incomePerLevel: .0085, awakenMax: 20, awakenCopies: [7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7], powerBonus: 0.0225, incomeBonus: 0.014 },
-      SR:  { label: "SR",        color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,     basePower: 16000,    baseHp: 80000,    baseDefense: 6400, baseSpeed: 94,   baseIncome: 125,   maxLevel: 140, upgradeDustBase: 70,    upgradeDustGrowth: 1.040, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 20,  awakenCopies: [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6], powerBonus: 0.025, incomeBonus: 0.0155 },
-      SSR: { label: "SSR",       color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,    basePower: 18000,   baseHp: 90000,   baseDefense: 7200, baseSpeed: 96,  baseIncome: 155,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 20,  awakenCopies: [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5], powerBonus: 0.0275, incomeBonus: 0.017 },
-      UR:  { label: "UR",        color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,   basePower: 21000,   baseHp: 105000,   baseDefense: 8400, baseSpeed: 98,  baseIncome: 190,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 20,  awakenCopies: [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4], powerBonus: 0.03, incomeBonus: 0.019 },
+      N:   { label: "N",         color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,      basePower: 12000,    baseHp: 60000,     baseDefense: 4800, baseSpeed: 90,    baseIncome: 80,    maxLevel: 100, upgradeDustBase: 596,   upgradeDustGrowth: 1.010, powerPerLevel: .015, incomePerLevel: .008,  awakenMax: 20, awakenCopies: [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8], powerBonus: 0.02, incomeBonus: 0.0125 },
+      R:   { label: "R",         color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,     basePower: 14000,    baseHp: 70000,    baseDefense: 5600, baseSpeed: 92,   baseIncome: 100,   maxLevel: 120, upgradeDustBase: 822,   upgradeDustGrowth: 1.011, powerPerLevel: .016, incomePerLevel: .0085, awakenMax: 20, awakenCopies: [7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7], powerBonus: 0.0225, incomeBonus: 0.014 },
+      SR:  { label: "SR",        color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,     basePower: 16000,    baseHp: 80000,    baseDefense: 6400, baseSpeed: 94,   baseIncome: 125,   maxLevel: 140, upgradeDustBase: 1130,   upgradeDustGrowth: 1.0120, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 20,  awakenCopies: [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6], powerBonus: 0.025, incomeBonus: 0.0155 },
+      SSR: { label: "SSR",       color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,    basePower: 18000,   baseHp: 90000,   baseDefense: 7200, baseSpeed: 96,  baseIncome: 155,   maxLevel: 160, upgradeDustBase: 1530,   upgradeDustGrowth: 1.013, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 20,  awakenCopies: [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5], powerBonus: 0.0275, incomeBonus: 0.017 },
+      UR:  { label: "UR",        color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,   basePower: 21000,   baseHp: 105000,   baseDefense: 8400, baseSpeed: 98,  baseIncome: 190,  maxLevel: 180, upgradeDustBase: 1901,   upgradeDustGrowth: 1.014, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 20,  awakenCopies: [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4], powerBonus: 0.03, incomeBonus: 0.019 },
       LR:  { label: "Legends",     color: "#FFD700",
   colors: ["#7A4800", "#D99A16", "#FFF2A8", "#FFD700", "#A86400"],
   gradient: "linear-gradient(135deg, #6B3F00 0%, #D99A16 22%, #FFF7C2 43%, #FFD700 58%, #B8750D 78%, #FFE98A 100%)",
   glow: "#FFD966",
-  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 24000,  baseHp: 120000,  baseDefense: 9600, baseSpeed: 100,  baseIncome: 230,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 20,  awakenCopies: [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], powerBonus: 0.0325, incomeBonus: 0.021 },
+  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 24000,  baseHp: 120000,  baseDefense: 9600, baseSpeed: 100,  baseIncome: 230,  maxLevel: 220, upgradeDustBase: 1795,   upgradeDustGrowth: 1.015, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 20,  awakenCopies: [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], powerBonus: 0.0325, incomeBonus: 0.021 },
       SC:  { label: "Mystical",   color: "#f5d9ff",
   colors: [
     "#ff77d9",
@@ -6556,8 +6562,8 @@
   ],
   gradient: "linear-gradient(135deg, #ff77d9 0%, #9c8cff 16%, #65e8ff 32%, #75ffbf 48%, #fff18a 64%, #ff9f76 80%, #ffffff 92%, #ff77d9 100%)",
   glow: "#f4caff",
-  textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 27000,  baseHp: 135000,  baseDefense: 10800, baseSpeed: 103, baseIncome: 275, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 20,  awakenCopies: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], powerBonus: 0.035, incomeBonus: 0.023 },
-      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 }
+  textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 27000,  baseHp: 135000,  baseDefense: 10800, baseSpeed: 103, baseIncome: 275, maxLevel: 250, upgradeDustBase: 1723,   upgradeDustGrowth: 1.016, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 20,  awakenCopies: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], powerBonus: 0.035, incomeBonus: 0.023 },
+      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 1107,   upgradeDustGrowth: 1.017, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 }
     });
 
     // เพิ่มโดยอลิซ v5: ปรับเบสทุกระดับให้ใกล้กัน และย้ายการ์ดเก่าเข้าสเกลใหม่โดยรักษาความต่างรายใบไว้ไม่เกิน ±10%
@@ -12576,6 +12582,8 @@
     let teamPickerSortMode = "power";
     let teamPickerSortDirection = "desc";
     let teamPickerContext = { mode: "showcase", slotIndex: 0 };
+    let teamDetailContext = null;
+    let cardUpgradeBusy = false;
     let draggedTeamSlot = null;
     let pointerDraggedTeamSlot = null;
     let pointerDragTarget = null;
@@ -21980,7 +21988,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (status) status.innerHTML = `
         <span class="cristal-note">1 Cristal = ${formatNumber(CONFIG.crystalGemCost)} Gems • วันนี้แลกได้อีก <strong>${formatNumber(info.remainingCrystals)}</strong>/${formatNumber(info.maxCrystals)} Cristal</span>
         <span>กาชา 1 ครั้ง = ${formatNumber(CONFIG.gachaCrystalCostPerPull)} Cristal • Dust: ${formatNumber(CONFIG.dustGemCost)} Gems = 1 Dust (ไม่จำกัด)</span>
-        <span>ต้นทุนอัปเต็มโดยประมาณ: SC <strong>${formatNumber(scCost)} Dust</strong> • EX <strong>${formatNumber(exCost)} Dust</strong> (EX มีฐานเงินเดือนสูงกว่า SC)</span>`;
+        <span>เงินเดือน 1,000M Gems = <strong>${formatNumber(Math.floor(1000000000 / CONFIG.dustGemCost))} Dust</strong> • อัปเต็ม EX ใช้ประมาณ <strong>${formatNumber(exCost)} Dust</strong></span>
+        <span>ต้นทุนไล่ระดับ: SC <strong>${formatNumber(scCost)} Dust</strong> • EX <strong>${formatNumber(exCost)} Dust</strong> • เงินเดือน 1,000M เพียงพอสำหรับ EX Lv.1 → MAX 1 ใบ</span>`;
     }
 
     function claimDaily() {
@@ -22030,29 +22039,119 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       showToast("ระบบเปลี่ยนเป็นเงินเดือนรายวันแล้ว กรุณารับผ่านกล่องจดหมาย");
     }
 
+    function getUpgradeCurve(card) {
+      // Dust Economy v6: ใช้สเกลของระดับเป็นค่ากลางเสมอ
+      // ไม่อ่านค่าเก่าในข้อมูลการ์ด เพื่อให้การ์ดเดิมทั้งหมดถูกปรับเข้าสเกลใหม่พร้อมกัน
+      const rarity = getRarity(card);
+      return {
+        base: Math.max(1, Math.floor(Number(rarity.upgradeDustBase) || 1)),
+        growth: Math.max(1, Number(rarity.upgradeDustGrowth) || 1)
+      };
+    }
+
+    function getUpgradeCostAtLevel(card, level) {
+      const curve = getUpgradeCurve(card);
+      return Math.ceil(curve.base * Math.pow(curve.growth, Math.max(0, Math.floor(Number(level) || 1) - 1)));
+    }
+
     function getUpgradeCost(card) {
       const owned = getOwned(card.id);
       if (!owned) return Infinity;
-      const rarity = getRarity(card);
-      const base = Number(card.upgradeDustBase || rarity.upgradeDustBase || 250);
-      const growth = Number(card.upgradeDustGrowth || rarity.upgradeDustGrowth || 1.10);
-      return Math.ceil(base * Math.pow(growth, owned.level - 1));
+      return getUpgradeCostAtLevel(card, owned.level);
+    }
+
+    function getUpgradeCostToMax(card, fromLevel = null) {
+      const owned = getOwned(card.id);
+      const maxLevel = getCardMaxLevel(card);
+      const startLevel = Math.max(1, Math.min(maxLevel, Math.floor(Number(fromLevel ?? (owned ? owned.level : 1)) || 1)));
+      let total = 0;
+      for (let level = startLevel; level < maxLevel; level += 1) total += getUpgradeCostAtLevel(card, level);
+      return total;
+    }
+
+    function getAffordableUpgradePlan(card, availableDust = state.dust) {
+      const owned = getOwned(card.id);
+      const maxLevel = getCardMaxLevel(card);
+      const startLevel = owned ? Math.max(1, Math.floor(Number(owned.level) || 1)) : 1;
+      const budget = Math.max(0, Math.floor(Number(availableDust) || 0));
+      let total = 0;
+      let targetLevel = startLevel;
+      for (let level = startLevel; level < maxLevel; level += 1) {
+        const cost = getUpgradeCostAtLevel(card, level);
+        if (total + cost > budget) break;
+        total += cost;
+        targetLevel = level + 1;
+      }
+      return {
+        startLevel,
+        targetLevel,
+        levels: Math.max(0, targetLevel - startLevel),
+        cost: total,
+        fullCost: getUpgradeCostToMax(card, startLevel),
+        reachesMax: targetLevel >= maxLevel
+      };
+    }
+
+    function refreshCardProgressUI(cardId) {
+      const card = CARD_BY_ID.get(String(cardId));
+      if (!card) return;
+      renderResources();
+      if (activeTab === "summon") renderRecent();
+      if (activeTab === "collection") renderCollection();
+      if (activeTab === "team") renderTeam();
+      if (activeTab === "battle") renderBattle();
+      if (activeTab === "arena") renderArena();
+      if (!document.getElementById("teamPickerModal").classList.contains("hidden")) renderTeamPicker();
+      if (modalCardId === String(card.id) && !document.getElementById("cardModal").classList.contains("hidden")) {
+        refreshCardDetailProgress(card.id);
+      }
     }
 
     function upgradeCard(cardId) {
+      if (cardUpgradeBusy) return;
       const card = CARD_BY_ID.get(String(cardId));
       const owned = card && getOwned(card.id);
       if (!card || !owned) return;
       const maxLevel = getCardMaxLevel(card);
       if (owned.level >= maxLevel) return showToast("การ์ดใบนี้เลเวลเต็มแล้ว");
       const cost = getUpgradeCost(card);
-      if (state.dust < cost) return showToast("Dust ไม่พอ");
-      updateIncome();
-      state.dust -= cost;
-      owned.level += 1;
-      saveState();
-      renderAll();
-      openCardModal(card.id);
+      if (state.dust < cost) return showToast(`Dust ไม่พอ • ต้องใช้ ${formatNumber(cost)} Dust`);
+      cardUpgradeBusy = true;
+      try {
+        updateIncome();
+        state.dust -= cost;
+        owned.level += 1;
+        saveState();
+        refreshCardProgressUI(card.id);
+      } finally {
+        cardUpgradeBusy = false;
+      }
+    }
+
+    function upgradeCardToMax(cardId) {
+      if (cardUpgradeBusy) return;
+      const card = CARD_BY_ID.get(String(cardId));
+      const owned = card && getOwned(card.id);
+      if (!card || !owned) return;
+      const maxLevel = getCardMaxLevel(card);
+      if (owned.level >= maxLevel) return showToast("การ์ดใบนี้เลเวลเต็มแล้ว");
+      const plan = getAffordableUpgradePlan(card, state.dust);
+      if (plan.levels < 1) {
+        return showToast(`Dust ไม่พอสำหรับเลเวลถัดไป • ต้องใช้ ${formatNumber(getUpgradeCost(card))} Dust`);
+      }
+      cardUpgradeBusy = true;
+      try {
+        updateIncome();
+        state.dust -= plan.cost;
+        owned.level = plan.targetLevel;
+        saveState();
+        refreshCardProgressUI(card.id);
+        showToast(plan.reachesMax
+          ? `อัป ${card.name} ถึง Lv.${maxLevel} สำเร็จ • ใช้ ${formatNumber(plan.cost)} Dust`
+          : `อัป ${card.name} ${formatNumber(plan.levels)} เลเวล ถึง Lv.${plan.targetLevel} • ใช้ Dust ที่มีได้สูงสุด ${formatNumber(plan.cost)}`);
+      } finally {
+        cardUpgradeBusy = false;
+      }
     }
 
     function getAwakenCost(card) {
@@ -22082,8 +22181,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       owned.duplicateRank += 1;
       const converted = convertMaxAwakenStockToDust(card, owned);
       saveState();
-      renderAll();
-      openCardModal(card.id);
+      refreshCardProgressUI(card.id);
       if (converted.copies > 0) {
         showToast(`อเวกเต็มแล้ว • แปลงการ์ดซ้ำค้าง ${formatNumber(converted.copies)} ใบ เป็นโบนัส Dust +${formatNumber(converted.dust)}`);
       }
@@ -22699,7 +22797,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const image = getCardImage(card);
       return `
         <div class="team-slot team-slot-filled${isLeader ? " is-leader" : ""}" draggable="true" data-team-slot="true" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}" style="${rarityStyleVars(rarity)}">
-          <button type="button" class="team-slot-select" data-action="open-team-picker" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}">
+          <button type="button" class="team-slot-select" data-action="open-team-card-detail" data-card-id="${escapeHTML(card.id)}" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}">
             <div class="team-slot-art">
               ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" onerror="this.remove()">` : ""}
               <span class="team-slot-number">${escapeHTML(slotLabel)} • ${escapeHTML(rarity.label)}</span>
@@ -22717,7 +22815,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                 <div class="team-slot-stat"><span>BASE SPD</span><strong>${formatNumber(getCardSpeed(card))}</strong></div>
                 <div class="team-slot-stat"><span>SALARY / DAY</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
               </div>
-              <div class="team-slot-change">แตะเพื่อเปลี่ยนการ์ด</div>
+              <div class="team-slot-change">แตะเพื่อดูรายละเอียดและอ่านสกิล</div>
               <div class="team-slot-drag-hint">ลากการ์ดเพื่อสลับช่องและแนวรบ</div>
             </div>
           </button>
@@ -22793,6 +22891,24 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         return state.arena.team;
       }
       return state.team;
+    }
+
+    function openTeamCardDetail(mode = "showcase", slotIndex = 0, cardId = "") {
+      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const index = Math.max(0, Math.floor(Number(slotIndex) || 0));
+      const id = String(cardId || getTeamArrayByMode(safeMode)[index] || "");
+      if (!id || !CARD_BY_ID.has(id)) return openTeamPicker(safeMode, index);
+      teamDetailContext = { mode: safeMode, slotIndex: index, cardId: id };
+      openCardModal(id, { fromTeam: true });
+    }
+
+    function changeTeamCardFromDetail(mode = "showcase", slotIndex = 0) {
+      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const index = Math.max(0, Math.floor(Number(slotIndex) || 0));
+      document.getElementById("cardModal").classList.add("hidden");
+      modalCardId = "";
+      teamDetailContext = null;
+      openTeamPicker(safeMode, index);
     }
 
     function openTeamPicker(mode = "showcase", slotIndex = 0) {
@@ -22902,6 +23018,18 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         if (!cardSearchMatches(getCardSearchText(card), query)) return false;
         return cardSearchMatches(getCardAbilitySearchText(card), abilityQuery);
       }), teamPickerSortMode, teamPickerSortDirection, false);
+      // UX v6: การ์ดที่จัดอยู่ในทีมปัจจุบันต้องขึ้นก่อนเสมอ
+      // ใบในช่องที่กำลังแก้ขึ้นเป็นใบแรก จากนั้นเรียงสมาชิกทีมตามหมายเลขช่อง แล้วจึงตามตัวกรองปกติ
+      const teamSlotOrder = new Map(currentTeam.map((id, index) => [String(id || ""), index]).filter(([id]) => id));
+      const normalOrder = new Map(cards.map((card, index) => [String(card.id), index]));
+      cards.sort((a, b) => {
+        const aId = String(a.id);
+        const bId = String(b.id);
+        const aPriority = aId === currentId ? -1 : teamSlotOrder.has(aId) ? teamSlotOrder.get(aId) : 9999;
+        const bPriority = bId === currentId ? -1 : teamSlotOrder.has(bId) ? teamSlotOrder.get(bId) : 9999;
+        if (aPriority !== bPriority) return aPriority - bPriority;
+        return (normalOrder.get(aId) || 0) - (normalOrder.get(bId) || 0);
+      });
       grid.innerHTML = cards.length
         ? cards.map(card => teamPickerCardHTML(card, currentId)).join("")
         : `<div class="empty-state">ไม่พบการ์ดที่ครอบครองตรงกับตัวกรอง</div>`;
@@ -23829,6 +23957,13 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const inTowerTeam = getTowerTeamIds().includes(String(card.id));
       const inArenaTeam = Boolean(state.arena && Array.isArray(state.arena.team) && state.arena.team.includes(String(card.id)));
       const selectorCount = getSelectorCount(card.rarity);
+      const validTeamDetailContext = teamDetailContext
+        && String(teamDetailContext.cardId || "") === String(card.id)
+        && String(getTeamArrayByMode(teamDetailContext.mode)[teamDetailContext.slotIndex] || "") === String(card.id)
+        ? teamDetailContext : null;
+      const changeTeamCardButton = validTeamDetailContext
+        ? `<button class="btn btn-primary" data-action="change-team-card" data-team-mode="${escapeHTML(validTeamDetailContext.mode)}" data-slot-index="${validTeamDetailContext.slotIndex}">🔄 เปลี่ยนตัวละครในช่องนี้</button>`
+        : "";
       const selectorButton = selectorCount > 0
         ? `<button class="btn btn-primary" data-action="use-selector" data-card-id="${escapeHTML(card.id)}">ใช้ใบเลือก ${escapeHTML(card.rarity)} <span class="cost">มี ${formatNumber(selectorCount)} ใบ</span></button>`
         : "";
@@ -23865,25 +24000,29 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             </div>
 
             <section class="detail-tab-panel ${statsActive ? "active" : ""}" role="tabpanel">
-              ${awakenDetailStatusHTML(card)}
+              <div id="cardDetailAwakenStatus">${awakenDetailStatusHTML(card)}</div>
               <div class="stat-grid">
-                <div class="stat"><span>Level</span><strong>${level}/${maxLevel}</strong></div>
-                <div class="stat"><span>Awaken</span><strong>${rank}/${maxRank}</strong></div>
-                <div class="stat stat-power"><span>Attack / ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
-                <div class="stat stat-hp"><span>Health / HP</span><strong>${formatNumber(getCardHp(card))}</strong></div>
-                <div class="stat stat-defense"><span>Defense / DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
-                <div class="stat"><span>Base Speed / SPD</span><strong>${formatNumber(getCardSpeed(card))}</strong></div>
-                <div class="stat stat-income"><span>Salary / day</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
+                <div class="stat"><span>Level</span><strong id="cardDetailLevel">${level}/${maxLevel}</strong></div>
+                <div class="stat"><span>Awaken</span><strong id="cardDetailAwaken">${rank}/${maxRank}</strong></div>
+                <div class="stat stat-power"><span>Attack / ATK</span><strong id="cardDetailPower">${formatNumber(getCardPower(card))}</strong></div>
+                <div class="stat stat-hp"><span>Health / HP</span><strong id="cardDetailHp">${formatNumber(getCardHp(card))}</strong></div>
+                <div class="stat stat-defense"><span>Defense / DEF</span><strong id="cardDetailDefense">${formatNumber(getCardDefense(card))}</strong></div>
+                <div class="stat"><span>Base Speed / SPD</span><strong id="cardDetailSpeed">${formatNumber(getCardSpeed(card))}</strong></div>
+                <div class="stat stat-income"><span>Salary / day</span><strong id="cardDetailIncome">${formatNumber(getCardDailySalary(card))}</strong></div>
                 <div class="stat stat-element"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
               </div>
-              ${upgradeStatusPanelHTML(card, inTeam)}
+              <div id="cardDetailUpgradePanel">${upgradeStatusPanelHTML(card, inTeam)}</div>
               <div class="detail-actions">
                 ${owned ? `
-                  <button class="btn btn-primary" data-action="upgrade" data-card-id="${escapeHTML(card.id)}" ${level >= maxLevel ? "disabled" : ""}>
-                    อัปเกรดเลเวล <span class="cost">${level >= maxLevel ? "เลเวลเต็ม" : `${formatNumber(upgradeCost)} Dust`}</span>
+                  ${changeTeamCardButton}
+                  <button id="cardUpgradeOneButton" class="btn btn-primary" data-action="upgrade" data-card-id="${escapeHTML(card.id)}" ${level >= maxLevel ? "disabled" : ""}>
+                    อัปเกรด 1 เลเวล <span id="cardUpgradeOneCost" class="cost">${level >= maxLevel ? "เลเวลเต็ม" : `${formatNumber(upgradeCost)} Dust`}</span>
                   </button>
-                  <button class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
-                    ปลุกพลัง <span class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
+                  <button id="cardUpgradeAllButton" class="btn btn-upgrade-all" data-action="upgrade-all" data-card-id="${escapeHTML(card.id)}" ${level >= maxLevel ? "disabled" : ""}>
+                    อัปทีเดียวถึงเลเวลตัน <span id="cardUpgradeAllCost" class="cost">${level >= maxLevel ? "เลเวลเต็ม" : `${formatNumber(getUpgradeCostToMax(card))} Dust`}</span>
+                  </button>
+                  <button id="cardAwakenButton" class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
+                    ปลุกพลัง <span id="cardAwakenCost" class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
                   </button>
                   <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีมโชว์" : "เพิ่มเข้าทีมโชว์"}</button>
                   <button class="btn ${inTowerTeam ? "btn-danger" : "btn-gold"}" data-action="toggle-tower-team" data-card-id="${escapeHTML(card.id)}">${inTowerTeam ? "นำออกจากทีมไต่หอ" : "เพิ่มเข้าทีมไต่หอ"}</button>
@@ -23906,9 +24045,43 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       `;
     }
 
-    function openCardModal(cardId) {
+    function refreshCardDetailProgress(cardId) {
+      const card = CARD_BY_ID.get(String(cardId));
+      const owned = card && getOwned(card.id);
+      if (!card || !owned) return;
+      const status = getCardProgressStatus(card);
+      const setText = (id, value) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = value;
+      };
+      setText("cardDetailLevel", `${status.level}/${status.maxLevel}`);
+      setText("cardDetailAwaken", `${status.rank}/${status.maxRank}`);
+      setText("cardDetailPower", formatNumber(getCardPower(card)));
+      setText("cardDetailHp", formatNumber(getCardHp(card)));
+      setText("cardDetailDefense", formatNumber(getCardDefense(card)));
+      setText("cardDetailSpeed", formatNumber(getCardSpeed(card)));
+      setText("cardDetailIncome", formatNumber(getCardDailySalary(card)));
+
+      const awakenStatus = document.getElementById("cardDetailAwakenStatus");
+      if (awakenStatus) awakenStatus.innerHTML = awakenDetailStatusHTML(card);
+      const upgradePanel = document.getElementById("cardDetailUpgradePanel");
+      if (upgradePanel) upgradePanel.innerHTML = upgradeStatusPanelHTML(card, state.team.includes(String(card.id)));
+
+      const oneButton = document.getElementById("cardUpgradeOneButton");
+      const allButton = document.getElementById("cardUpgradeAllButton");
+      const awakenButton = document.getElementById("cardAwakenButton");
+      if (oneButton) oneButton.disabled = status.level >= status.maxLevel;
+      if (allButton) allButton.disabled = status.level >= status.maxLevel;
+      if (awakenButton) awakenButton.disabled = status.rank >= status.maxRank;
+      setText("cardUpgradeOneCost", status.level >= status.maxLevel ? "เลเวลเต็ม" : `${formatNumber(status.upgradeCost)} Dust`);
+      setText("cardUpgradeAllCost", status.level >= status.maxLevel ? "เลเวลเต็ม" : `${formatNumber(getUpgradeCostToMax(card))} Dust`);
+      setText("cardAwakenCost", status.rank >= status.maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${status.awakenCost} ใบ / มี ${status.availableDuplicates}`);
+    }
+
+    function openCardModal(cardId, options = {}) {
       const modalAlreadyOpen = !document.getElementById("cardModal").classList.contains("hidden");
       if (!modalAlreadyOpen) returnToReveal = false;
+      if (!options.fromTeam) teamDetailContext = null;
       const nextCardId = String(cardId);
       if (modalCardId !== nextCardId) cardDetailActiveTab = "stats";
       modalCardId = nextCardId;
@@ -23919,6 +24092,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function closeModal() {
       modalCardId = "";
+      teamDetailContext = null;
       document.getElementById("cardModal").classList.add("hidden");
       if (returnToReveal && activeRevealResults.length) {
         returnToReveal = false;
@@ -24806,6 +24980,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "exchange-dust") exchangeGemsForDust();
       if (action === "open-card") openCardModal(cardId);
       if (action === "open-picker-card-detail") openCardModal(cardId);
+      if (action === "open-team-card-detail") openTeamCardDetail(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0, cardId);
+      if (action === "change-team-card") changeTeamCardFromDetail(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
       if (action === "switch-card-detail-tab") {
         cardDetailActiveTab = target.dataset.detailTab === "ability" ? "ability" : "stats";
         if (modalCardId) renderCardDetail(modalCardId);
@@ -24855,6 +25031,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "next-reveal-card") renderRevealSelection(activeRevealIndex + 1);
       if (action === "open-reveal-detail") openRevealDetail();
       if (action === "upgrade") upgradeCard(cardId);
+      if (action === "upgrade-all") upgradeCardToMax(cardId);
       if (action === "awaken") awakenCard(cardId);
       if (action === "toggle-team") toggleTeam(cardId);
       if (action === "toggle-tower-team") toggleTowerTeam(cardId);
