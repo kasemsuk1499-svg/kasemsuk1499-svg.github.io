@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-01-turn-based-formation-spd-v1">
-  <title>Anime Card Collection · Turn Based Formation + SPD v1</title>
+  <meta name="gacha-app-build" content="2026-07-01-turn-based-animation-revive-spd-v2">
+  <title>Anime Card Collection · Turn Based Animation + Revive + SPD v2</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5381,6 +5381,20 @@
       .battle-character-row span:nth-child(n+5){display:none}
     }
 
+  
+    /* v64 · Individual battle animation / KO / Revive / SPD */
+    .battle-turn-order{position:absolute;z-index:12;top:12px;left:50%;width:min(92%,760px);transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:6px 10px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(4,7,16,.76);backdrop-filter:blur(12px);overflow:hidden}
+    .battle-turn-chip{min-width:64px;max-width:110px;display:grid;grid-template-columns:26px minmax(0,1fr);gap:5px;align-items:center;padding:4px 7px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.045);font-size:.56rem}
+    .battle-turn-chip.player{box-shadow:inset 3px 0 0 var(--cyan)}.battle-turn-chip.enemy{box-shadow:inset 3px 0 0 var(--danger)}.battle-turn-chip.current{border-color:var(--gold);transform:scale(1.06)}
+    .battle-turn-chip img{width:26px;height:26px;border-radius:50%;object-fit:cover}.battle-turn-chip b,.battle-turn-chip small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.battle-turn-chip small{color:var(--muted)}
+    .battle-playback-controls{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:7px 0}.battle-playback-controls button{min-width:42px;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 9px;color:var(--muted);font-weight:1000;background:rgba(255,255,255,.05)}.battle-playback-controls button.active{color:#071019;border-color:transparent;background:linear-gradient(135deg,var(--cyan),var(--violet))}
+    .battle-unit{will-change:transform,filter,opacity;transform-origin:center bottom}.battle-unit.is-acting{z-index:20!important;filter:drop-shadow(0 0 18px rgba(92,232,255,.8));}.battle-unit.is-target{z-index:19!important;filter:drop-shadow(0 0 20px rgba(251,113,133,.85));}.battle-unit.is-hit{animation:battle-unit-hit .32s ease}.battle-unit.is-dead{filter:grayscale(1) brightness(.42)!important;opacity:.55!important;pointer-events:none}.battle-unit.is-dead::before{content:"หมดสภาพ";position:absolute;z-index:20;inset:0;display:grid;place-items:center;color:#fff;font-size:.72rem;font-weight:1000;letter-spacing:.08em;background:rgba(3,5,12,.42)}.battle-unit.is-reviving{animation:battle-revive-glow .75s ease}
+    .battle-unit-state{position:absolute;z-index:15;top:5px;left:5px;right:5px;display:flex;justify-content:space-between;gap:4px;pointer-events:none}.battle-unit-status,.battle-unit-special{border-radius:999px;padding:3px 5px;color:#fff;font-size:.48rem;line-height:1;background:rgba(3,5,12,.78);text-shadow:0 1px 2px #000}.battle-unit-special{color:#fde68a}
+    .battle-unit-hp{position:absolute;z-index:16;left:6px;right:6px;bottom:25px;height:5px;border-radius:999px;overflow:hidden;background:rgba(0,0,0,.62);box-shadow:0 0 0 1px rgba(255,255,255,.12)}.battle-unit-hp i{display:block;width:100%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#22c55e,#a3e635);transition:width .22s ease}
+    .battle-moving-clone{position:fixed!important;z-index:9999!important;margin:0!important;pointer-events:none!important;transform:none!important;filter:drop-shadow(0 20px 25px rgba(0,0,0,.55))}.battle-floating-number{position:fixed;z-index:10000;pointer-events:none;color:#fff;font-weight:1000;font-size:clamp(.9rem,2vw,1.3rem);text-shadow:0 2px 4px #000,0 0 14px rgba(251,113,133,.9);animation:battle-float-number .72s ease forwards}.battle-floating-number.heal{color:#86efac;text-shadow:0 2px 4px #000,0 0 14px rgba(34,197,94,.9)}.battle-floating-number.revive{color:#fde68a;text-shadow:0 2px 4px #000,0 0 18px rgba(250,204,21,.95)}.battle-floating-number.speed{color:#93c5fd;text-shadow:0 2px 4px #000,0 0 18px rgba(59,130,246,.95)}
+    @keyframes battle-unit-hit{0%,100%{transform:translateX(0) rotate(var(--model-tilt))}25%{transform:translateX(-7px) rotate(-3deg)}55%{transform:translateX(8px) rotate(3deg)}}@keyframes battle-revive-glow{0%{filter:grayscale(1) brightness(.4)}45%{filter:brightness(1.8) drop-shadow(0 0 28px #fde68a);transform:scale(1.12)}100%{filter:none;transform:scale(1)}}@keyframes battle-float-number{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}20%{opacity:1;transform:translate(-50%,0) scale(1.12)}100%{opacity:0;transform:translate(-50%,-48px) scale(.92)}}
+    @media(max-width:760px){.battle-turn-order{top:6px;width:96%;justify-content:flex-start;overflow:auto}.battle-turn-chip{min-width:58px}.battle-unit-hp{bottom:22px}}
+
   </style>
 </head>
 <body class="auth-locked">
@@ -5667,6 +5681,7 @@
           <div class="battle-layout">
             <div class="battle-arena">
               <div class="battle-impact" aria-hidden="true"></div>
+              <div class="battle-turn-order" id="battleTurnOrder" aria-label="ลำดับเทิร์น"></div>
               <div class="battle-sides">
                 <div class="fighter player">
                   <div class="fighter-label">Your Formation</div>
@@ -5688,6 +5703,7 @@
               <div class="battle-actions">
                 <button class="btn btn-primary" id="battleButton" data-action="battle">เริ่มต่อสู้</button>
                 <button class="btn" id="battleSummaryButton" data-action="open-battle-summary" data-summary-mode="tower" disabled>📊 สรุปฉบับเต็ม</button>
+                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1" class="active">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3">x3</button><button type="button" data-battle-skip="true">ข้ามแอนิเมชัน</button></div>
                 <div class="battle-result" id="battleResult">จัดทีมให้พร้อมแล้วท้าทายหอคอย</div>
               </div>
             </div>
@@ -5743,6 +5759,7 @@
           <div class="battle-layout">
             <div class="battle-arena" id="arenaBattleStage">
               <div class="battle-impact" aria-hidden="true"></div>
+              <div class="battle-turn-order" id="arenaTurnOrder" aria-label="ลำดับเทิร์น"></div>
               <div class="battle-sides">
                 <div class="fighter player">
                   <div class="fighter-label">Your Arena Team</div>
@@ -5764,6 +5781,7 @@
               <div class="battle-actions">
                 <button class="btn btn-primary" id="arenaBattleButton" data-action="arena-battle">ใช้ดาบ 1 เล่มและสุ่มคู่ต่อสู้</button>
                 <button class="btn" id="arenaSummaryButton" data-action="open-battle-summary" data-summary-mode="arena" disabled>📊 สรุปฉบับเต็ม</button>
+                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1" class="active">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3">x3</button><button type="button" data-battle-skip="true">ข้ามแอนิเมชัน</button></div>
                 <div class="battle-result" id="arenaBattleResult">ชนะ +25 แต้ม • แพ้ -10 แต้ม</div>
               </div>
             </div>
@@ -6967,6 +6985,11 @@
       SHIELD_RECOVERY_RATE: "shieldRecoveryRate",
       RESTORE_SHIELD_HITS: "restoreShieldHits",
       NEXT_ATTACK_HITS: "nextAttackHits",
+      REVIVE: "revive",
+      REVIVE_TIMED_UNDYING: "reviveTimedUndying",
+      REVIVE_HIT_LIFE: "reviveHitLife",
+      SPEED_FLAT: "speedFlat",
+      SPEED_FLAT_STACK: "speedFlatStack",
       INCREASE_MAX_HP_BASE_RATE: "increaseMaxHpBaseRate",
       INCREASE_ATTACK_RATE_STACK: "increaseAttackRateStack",
       SELF_TRIGGER_REDUCTION: "selfTriggerReduction", // รองรับข้อมูลเก่า: ทำงานเป็นคอสชั่วคราวรอบปัจจุบัน
@@ -7014,6 +7037,7 @@
       CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS_STACK,
       CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE_STACK,
       CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT_STACK,
+      CARD_ABILITY_EFFECT_TYPES.SPEED_FLAT_STACK,
       CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE_STACK,
       CARD_ABILITY_EFFECT_TYPES.ENEMY_POWER_RATE_STACK,
       CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE_STACK,
@@ -15620,6 +15644,11 @@
         shieldRecoveryRate: `อัตราฟื้นโล่ ${targetSideText} ${signedPercent(value)}`,
         restoreShieldHits: `เมื่อสกิลทำงาน โล่ ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         nextAttackHits: `เมื่อสกิลทำงาน จำนวนฮิตครั้งถัดไปของ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
+        revive: `คืนชีพ ${targetText} ด้วย HP ${signedPercent(Math.max(0, value))}`,
+        reviveTimedUndying: `คืนชีพอมตะชั่วคราว ${targetText} ด้วย HP ${signedPercent(Math.max(0, value))} • ตายเมื่อครบ ${Math.max(1, Math.floor(Number(effect && effect.durationTurns) || 1))} เทิร์น`,
+        reviveHitLife: `คืนชีพชีวิตตามฮิต ${targetText} ด้วย HP ${signedPercent(Math.max(0, value))} • รับได้ ${Math.max(1, Math.floor(Number(effect && effect.surviveHits) || 1))} ฮิต`,
+        speedFlat: `SPD ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)}`,
+        speedFlatStack: `SPD แบบสแต็ก ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)} ต่อชั้น • สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         increaseMaxHpBaseRate: `เพิ่ม HP สูงสุดและ HP ปัจจุบันจาก HP เบส ${signedPercent(Math.max(0, value))}`,
         increaseAttackRateStack: `สะสม ATK ถาวรระหว่างไฟต์ ${signedPercent(Math.max(0, value))} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         powerRateStack: `สะสม ATK ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
@@ -17455,7 +17484,9 @@
             currentHp: hpRaw,
             baseDefense: defenseRaw,
             defense,
+            baseSpeed: Math.max(1, Math.round(Number(item.speed) || 90)),
             speed: Math.max(1, Math.round(Number(item.speed) || 90)),
+            speedStacks: {},
             attackHits: attackHitsOf(side),
             shieldHits: 0,
             initialShieldHits: 0,
@@ -17479,7 +17510,13 @@
             criticalHits: 0,
             blocks: 0,
             dodges: 0,
-            ko: false
+            ko: false,
+            deathReason: "",
+            reviveMode: "",
+            reviveTurnsRemaining: 0,
+            reviveHitLifeRemaining: 0,
+            reviveUses: {},
+            reviveCount: 0
           };
         });
         const shieldOrder = [...members.filter(m => m.row === "front"), ...members.filter(m => m.row === "back")];
@@ -17510,9 +17547,16 @@
 
       const player = makeTeam("player");
       const enemy = makeTeam("enemy");
+      const initialMemberState = member => ({
+        id: member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
+        maxHp: member.maxHp, currentHp: member.currentHp, shieldHits: member.shieldHits, ko: false,
+        reviveMode: "", reviveTurnsRemaining: 0, reviveHitLifeRemaining: 0
+      });
+      const playerInitialMembers = player.members.map(initialMemberState);
+      const enemyInitialMembers = enemy.members.map(initialMemberState);
       const teamBySide = { player, enemy };
       const opposing = side => side === "player" ? enemy : player;
-      const alive = team => team.members.filter(member => member.currentHp > 0);
+      const alive = team => team.members.filter(member => member.currentHp > 0 && !member.ko);
       const teamHp = team => alive(team).reduce((sum, member) => sum + member.currentHp, 0);
       const teamMaxHp = team => team.members.reduce((sum, member) => sum + member.maxHp, 0);
       const teamShield = team => alive(team).reduce((sum, member) => sum + member.shieldHits, 0);
@@ -17548,18 +17592,22 @@
       function resolveRuntimeTargets(rule, ownerTeam, defenderTeam, actor, currentTarget) {
         const side = String(rule && rule.side || "self");
         const targetTeam = side === "enemy" ? defenderTeam : ownerTeam;
-        let candidates = alive(targetTeam).filter(member => memberMatchesRuntimeRule(member, rule || {}));
+        const includeKo = Boolean(rule && rule.includeKo);
+        let candidates = (includeKo
+          ? targetTeam.members.filter(member => member.ko || member.currentHp <= 0)
+          : alive(targetTeam)).filter(member => memberMatchesRuntimeRule(member, rule || {}));
         if (side !== "enemy" && rule && rule.excludeSelf) candidates = candidates.filter(member => member.id !== actor.id);
         const hasFilter = abilityArray(rule && rule.ids).length || abilityArray(rule && rule.elements).length || abilityArray(rule && rule.rarities).length;
-        const selection = String(rule && rule.selection || (side === "enemy" ? "current" : "self")).toLowerCase();
-        if (!hasFilter) {
-          if (side === "enemy" && selection !== "all" && selection !== "random") return currentTarget && currentTarget.currentHp > 0 ? [currentTarget] : [];
-          if (side !== "enemy" && selection !== "all" && selection !== "random") return actor.currentHp > 0 ? [actor] : [];
+        const selection = String(rule && rule.selection || (includeKo ? "firstKo" : side === "enemy" ? "current" : "self")).toLowerCase();
+        if (!hasFilter && !includeKo) {
+          if (side === "enemy" && selection !== "all" && selection !== "random") return currentTarget && currentTarget.currentHp > 0 && !currentTarget.ko ? [currentTarget] : [];
+          if (side !== "enemy" && selection !== "all" && selection !== "random") return actor.currentHp > 0 && !actor.ko ? [actor] : [];
         }
         if (!candidates.length) return [];
         if (selection === "all") return candidates;
         if (selection === "random") return [candidates[Math.floor(Math.random() * candidates.length)]];
-        return candidates;
+        if (selection === "lowesthp" || selection === "lowhp") return [[...candidates].sort((a,b)=>a.currentHp-b.currentHp)[0]];
+        return [candidates[0]];
       }
 
       function triggersForActor(team, actor, includeStart = true) {
@@ -17597,6 +17645,8 @@
         const sum = key => fired.reduce((total, trigger) => total + (Number(trigger[key]) || 0), 0);
         return {
           fired, details, names: fired.map(trigger => trigger.name),
+          reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
+          speedTargetRules: fired.flatMap(trigger => abilityArray(trigger.speedTargetRules).map(rule => ({ ...rule }))),
           healTargetRules: fired.flatMap(trigger => abilityArray(trigger.healTargetRules).map(rule => ({ ...rule }))),
           hitTargetRules: fired.flatMap(trigger => abilityArray(trigger.hitTargetRules).map(rule => ({ ...rule }))),
           shieldTargetRules: fired.flatMap(trigger => abilityArray(trigger.shieldTargetRules).map(rule => ({ ...rule }))),
@@ -17631,6 +17681,8 @@
           if (roundEnded && effect.rounds > 0) effect.rounds -= 1;
           if ((effect.turns === 0 && !effect.rounds) || (roundEnded && effect.rounds === 0 && !effect.turns)) {
             member[effect.field] = Number(member[effect.field] || 0) - Number(effect.delta || 0);
+            if (effect.field === "speed") member.speed = Math.max(1, Math.round(member.speed));
+            if (effect.stackKey && member.speedStacks[effect.stackKey]) member.speedStacks[effect.stackKey] = Math.max(0, member.speedStacks[effect.stackKey] - 1);
             return false;
           }
           return true;
@@ -17682,6 +17734,107 @@
         });
       }
 
+      function applySpeedRules(rules, ownerTeam, defenderTeam, actor, currentTarget) {
+        const events = [];
+        abilityArray(rules).forEach(rule => {
+          const recipients = resolveRuntimeTargets(rule, ownerTeam, defenderTeam, actor, currentTarget);
+          recipients.forEach(recipient => {
+            const key = String(rule.stackKey || rule.ruleKey || "speed");
+            if (rule.isStack) {
+              const currentStacks = Math.max(0, Number(recipient.speedStacks[key]) || 0);
+              const maxStacks = Math.max(1, Number(rule.maxStacks) || 1);
+              if (currentStacks >= maxStacks) return;
+              recipient.speedStacks[key] = currentStacks + 1;
+            }
+            const before = recipient.speed;
+            const delta = Math.round(Number(rule.value) || 0);
+            recipient.speed = Math.max(1, Math.round(recipient.speed + delta));
+            const applied = recipient.speed - before;
+            if ((Number(rule.durationTurns) || Number(rule.durationRounds)) && applied) {
+              recipient.timedEffects.push({
+                field: "speed", delta: applied,
+                turns: Math.max(0, Math.floor(Number(rule.durationTurns) || 0)),
+                rounds: Math.max(0, Math.floor(Number(rule.durationRounds) || 0)),
+                stackKey: rule.isStack ? key : ""
+              });
+            }
+            if (applied) events.push({
+              targetCardId: recipient.id, targetName: recipient.name, before, after: recipient.speed, change: applied,
+              stackKey: rule.isStack ? key : "", stacks: rule.isStack ? recipient.speedStacks[key] : 0,
+              maxStacks: rule.isStack ? Math.max(1, Number(rule.maxStacks) || 1) : 0
+            });
+          });
+        });
+        return events;
+      }
+
+      function applyReviveRules(rules, ownerTeam, defenderTeam, actor, currentTarget) {
+        const events = [];
+        abilityArray(rules).forEach(rule => {
+          const recipients = resolveRuntimeTargets({ ...rule, includeKo: true }, ownerTeam, defenderTeam, actor, currentTarget);
+          recipients.forEach(recipient => {
+            const key = String(rule.ruleKey || `${actor.id}:${rule.reviveType || "revive"}`);
+            const used = Math.max(0, Number(recipient.reviveUses[key]) || 0);
+            const maxTriggers = Math.max(1, Math.floor(Number(rule.maxTriggers) || 1));
+            if (used >= maxTriggers || (!recipient.ko && recipient.currentHp > 0)) return;
+            recipient.reviveUses[key] = used + 1;
+            recipient.reviveCount += 1;
+            recipient.currentHp = Math.max(1, Math.min(recipient.maxHp, recipient.maxHp * Math.max(.01, Number(rule.hpRate) || .3)));
+            recipient.ko = false;
+            recipient.deathReason = "";
+            recipient.reviveMode = String(rule.reviveType || "revive");
+            recipient.reviveTurnsRemaining = recipient.reviveMode === "reviveTimedUndying"
+              ? Math.max(1, Math.floor(Number(rule.durationTurns) || 1)) : 0;
+            recipient.reviveHitLifeRemaining = recipient.reviveMode === "reviveHitLife"
+              ? Math.max(1, Math.floor(Number(rule.surviveHits) || 1)) : 0;
+            events.push({
+              targetCardId: recipient.id, targetName: recipient.name, hp: recipient.currentHp, maxHp: recipient.maxHp,
+              reviveType: recipient.reviveMode, turnsRemaining: recipient.reviveTurnsRemaining,
+              hitLifeRemaining: recipient.reviveHitLifeRemaining, count: recipient.reviveCount
+            });
+          });
+        });
+        return events;
+      }
+
+      function applyReviveSurvivalAfterHit(member, incomingHits) {
+        if (!member || member.ko) return { expired: false, hitLifeConsumed: 0 };
+        let hitLifeConsumed = 0;
+        if (member.reviveHitLifeRemaining > 0 && incomingHits > 0) {
+          hitLifeConsumed = Math.min(member.reviveHitLifeRemaining, Math.max(0, Math.floor(Number(incomingHits) || 0)));
+          member.reviveHitLifeRemaining = Math.max(0, member.reviveHitLifeRemaining - Math.max(0, Math.floor(Number(incomingHits) || 0)));
+          if (member.reviveHitLifeRemaining <= 0) {
+            member.currentHp = 0; member.ko = true; member.deathReason = "hitLifeExpired"; member.reviveMode = "";
+            return { expired: true, hitLifeConsumed };
+          }
+          if (member.currentHp <= 0) member.currentHp = 1;
+          return { expired: false, hitLifeConsumed };
+        }
+        if (member.reviveTurnsRemaining > 0 && member.currentHp <= 0) member.currentHp = 1;
+        return { expired: false, hitLifeConsumed };
+      }
+
+      function tickReviveTurn(member) {
+        if (!member || member.ko || member.reviveTurnsRemaining <= 0) return false;
+        member.reviveTurnsRemaining -= 1;
+        if (member.reviveTurnsRemaining <= 0) {
+          member.currentHp = 0; member.ko = true; member.deathReason = "timedReviveExpired"; member.reviveMode = "";
+          return true;
+        }
+        return false;
+      }
+
+      function battleMemberStates() {
+        const snap = member => ({
+          id: member.id, name: member.name, row: member.row, slot: member.slot,
+          speed: member.speed, baseSpeed: member.baseSpeed, maxHp: member.maxHp, currentHp: Math.max(0, member.currentHp),
+          shieldHits: member.shieldHits, ko: Boolean(member.ko || member.currentHp <= 0), deathReason: member.deathReason || "",
+          reviveMode: member.reviveMode || "", reviveTurnsRemaining: member.reviveTurnsRemaining || 0,
+          reviveHitLifeRemaining: member.reviveHitLifeRemaining || 0
+        });
+        return { player: player.members.map(snap), enemy: enemy.members.map(snap) };
+      }
+
       function guardDecision(team, actor) {
         if (team.commandStrategy !== "guard") return false;
         return actor.currentHp / Math.max(1, actor.maxHp) <= .45;
@@ -17690,8 +17843,10 @@
       function summarizeMember(member) {
         return {
           id: member.id, name: member.name, rarity: member.rarity, row: member.row, slot: member.slot,
-          speed: member.speed, power: member.power, defense: member.defense, maxHp: member.maxHp,
+          speed: member.speed, baseSpeed: member.baseSpeed, power: member.power, defense: member.defense, maxHp: member.maxHp,
           currentHp: Math.max(0, member.currentHp), shieldRemaining: member.shieldHits,
+          reviveMode: member.reviveMode, reviveTurnsRemaining: member.reviveTurnsRemaining,
+          reviveHitLifeRemaining: member.reviveHitLifeRemaining, reviveCount: member.reviveCount, deathReason: member.deathReason,
           damage: member.damageDealt, healing: member.healingDone, shieldCreated: member.shieldCreated,
           skillActivations: member.skillActivations, attacks: member.attackCount, totalHits: member.totalHits,
           criticalHits: member.criticalHits, blocks: member.blocks, dodges: member.dodges, ko: member.currentHp <= 0
@@ -17734,6 +17889,10 @@
               playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
               actorRemaining:actor.currentHp, targetRemaining:target.currentHp
             });
+            const guardTimedDeath = tickReviveTurn(actor);
+            const guardState = battleMemberStates();
+            turns[turns.length - 1].timedReviveExpired = guardTimedDeath;
+            turns[turns.length - 1].memberStates = guardState;
             continue;
           }
 
@@ -17749,6 +17908,7 @@
             applyTimedRate(target, "healingRate", Number(trigger.enemyHealingRateChange)||0, trigger);
             applyTimedRate(target, "shieldRecoveryRate", Number(trigger.enemyShieldRecoveryRateChange)||0, trigger);
           });
+          const speedEvents = applySpeedRules(activation.speedTargetRules, team, defenderTeam, actor, target);
 
           let targetedCurrentHitChange = 0;
           if (abilityArray(activation.hitTargetRules).length) {
@@ -17833,7 +17993,14 @@
           if (dodged) { target.dodges += 1; defenderTeam.totalDodges += 1; }
           if (blocked) { target.blocks += 1; defenderTeam.totalBlocks += 1; defenderTeam.totalBlockedDamage += damage; }
           target.currentHp = Math.max(0, target.currentHp - damage);
-          target.ko = target.currentHp <= 0;
+          // ชีวิตแบบนับฮิต: ฮิตที่โล่รับยังถือว่าโดนโจมตี แต่ฮิตที่หลบสำเร็จไม่นับ
+          const receivedHitsForReviveLife = blockedHits + (dodged ? 0 : unblockedHits);
+          const reviveSurvival = applyReviveSurvivalAfterHit(target, receivedHitsForReviveLife);
+          if (!reviveSurvival.expired) {
+            if (target.currentHp <= 0 && target.reviveTurnsRemaining > 0) target.currentHp = 1;
+            target.ko = target.currentHp <= 0;
+            if (target.ko) target.deathReason = "damage";
+          }
           if (target.guardTurns > 0) target.guardTurns -= 1;
           actor.attackCount += 1;
           actor.totalHits += hits;
@@ -17872,7 +18039,9 @@
           target.pendingCriticalRateChange += Number(activation.enemyNextAttackCriticalRate) || 0;
           applyCostChanges(team, activation.permanentTriggerCostChanges, true);
           applyCostChanges(team, activation.triggerCostChanges, false);
+          const reviveEvents = applyReviveRules(activation.reviveRules, team, defenderTeam, actor, target);
           finishTriggers(team, actor, activation);
+          const timedReviveExpired = tickReviveTurn(actor);
 
           const selfShieldChange = teamShield(team) - alliedShieldBefore;
           const enemyShieldChange = teamShield(defenderTeam) - enemyShieldBefore;
@@ -17897,8 +18066,11 @@
             enemyShieldRecoveryRate:target.shieldRecoveryRate, criticalRateChange:activation.criticalRateChange,
             enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activation.nextAttackCriticalRate,
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
-            actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko
+            actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
+            reviveEvents, speedEvents, hitLifeConsumed:reviveSurvival.hitLifeConsumed,
+            hitLifeExpired:reviveSurvival.expired, timedReviveExpired
           });
+          turns[turns.length - 1].memberStates = battleMemberStates();
         }
         [...player.members, ...enemy.members].forEach(member => tickTimed(member, true));
       }
@@ -17908,6 +18080,7 @@
         const losing = teamHp(player) >= teamHp(enemy) ? enemy : player;
         alive(losing).forEach(member => { member.currentHp = 0; member.ko = true; });
         turns.push({ round:lastRound+1, side:losing===enemy?"player":"enemy", command:"suddenBreak", actorName:"Sudden Break", targetName:"ทั้งทีม", hits:1, baseHits:1, passiveBaseHits:1, pendingHitChange:0, activeHitChange:0, extraHits:0, hitReduction:0, requestedExtraHits:0, enemyNextAttackHits:0, blockedHits:0, unblockedHits:1, damage:0, critical:false, criticalRate:0, criticalMultiplier:1, defenderDefense:0, suddenBreak:true, triggerActivated:false, triggeredSkills:[], triggeredDetails:[], attackBonus:0, healHp:0, shieldChange:0, enemyShieldChange:0, playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy) });
+        turns[turns.length - 1].memberStates = battleMemberStates();
       }
 
       const playerMembers = player.members.map(summarizeMember);
@@ -17933,7 +18106,7 @@
         playerTotalBlocks:player.totalBlocks, enemyTotalBlocks:enemy.totalBlocks, playerTotalDodges:player.totalDodges, enemyTotalDodges:enemy.totalDodges,
         playerTotalBlockedDamage:player.totalBlockedDamage, enemyTotalBlockedDamage:enemy.totalBlockedDamage,
         playerTriggerActivations:player.totalTriggerActivations, enemyTriggerActivations:enemy.totalTriggerActivations,
-        playerMembers, enemyMembers, playerFormation:player.formationRule, enemyFormation:enemy.formationRule,
+        playerInitialMembers, enemyInitialMembers, playerMembers, enemyMembers, playerFormation:player.formationRule, enemyFormation:enemy.formationRule,
         playerMostUsedSkill:{name:mostUsed(player)[0],count:mostUsed(player)[1]}, enemyMostUsedSkill:{name:mostUsed(enemy)[0],count:mostUsed(enemy)[1]},
         copiedAbilityEvents:[], playerCopiedAbilitiesRemaining:[], enemyCopiedAbilitiesRemaining:[]
       };
@@ -18222,41 +18395,190 @@
       if (target) target.innerHTML = combatHitReportHTML(combat, labels);
     }
 
-    async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
+    
+    let battlePlaybackSpeed = 1;
+    let battleSkipAnimations = false;
+
+    document.addEventListener("click", event => {
+      const speedButton = event.target.closest("[data-battle-speed]");
+      if (speedButton) {
+        battlePlaybackSpeed = Math.max(1, Math.min(3, Number(speedButton.dataset.battleSpeed) || 1));
+        document.querySelectorAll("[data-battle-speed]").forEach(button => button.classList.toggle("active", Number(button.dataset.battleSpeed) === battlePlaybackSpeed));
+        return;
+      }
+      const skipButton = event.target.closest("[data-battle-skip]");
+      if (skipButton) {
+        battleSkipAnimations = true;
+        showToast("ข้ามแอนิเมชันของไฟต์นี้แล้ว");
+      }
+    });
+
+    function battleUnitNode(stage, side, cardId) {
+      if (!stage || cardId === undefined || cardId === null) return null;
+      const safeId = String(cardId).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      return stage.querySelector(`.battle-unit[data-battle-side="${side}"][data-battle-card-id="${safeId}"]`);
+    }
+
+    function battleCardImage(cardId) {
+      const card = CARD_BY_ID.get(String(cardId));
+      return card ? getCardImage(card) : "";
+    }
+
+    function setBattleUnitState(stage, side, state) {
+      const node = battleUnitNode(stage, side, state && state.id);
+      if (!node || !state) return;
+      const hpRate = Math.max(0, Math.min(1, Number(state.currentHp || 0) / Math.max(1, Number(state.maxHp || 1))));
+      node.classList.toggle("is-dead", Boolean(state.ko || Number(state.currentHp) <= 0));
+      const hp = node.querySelector(".battle-unit-hp i");
+      if (hp) hp.style.width = `${hpRate * 100}%`;
+      const status = node.querySelector(".battle-unit-status");
+      if (status) status.textContent = state.ko ? "KO" : `HP ${Math.ceil(hpRate * 100)}%`;
+      const special = node.querySelector(".battle-unit-special");
+      if (special) {
+        const parts = [`SPD ${Math.max(1, Math.round(Number(state.speed) || 1))}`];
+        if (Number(state.shieldHits) > 0) parts.push(`🛡${state.shieldHits}`);
+        if (Number(state.reviveTurnsRemaining) > 0) parts.push(`⏳${state.reviveTurnsRemaining}`);
+        if (Number(state.reviveHitLifeRemaining) > 0) parts.push(`HIT ${state.reviveHitLifeRemaining}`);
+        special.textContent = parts.join(" • ");
+      }
+    }
+
+    function syncBattleBoard(stage, states) {
+      if (!stage || !states) return;
+      abilityArray(states.player).forEach(state => setBattleUnitState(stage, "player", state));
+      abilityArray(states.enemy).forEach(state => setBattleUnitState(stage, "enemy", state));
+    }
+
+    function renderBattleTurnOrder(stage, combat, currentIndex, labels = {}) {
+      const bar = stage && stage.querySelector(".battle-turn-order");
+      if (!bar) return;
+      const upcoming = abilityArray(combat && combat.turns).slice(currentIndex, currentIndex + 8);
+      bar.innerHTML = upcoming.map((turn, index) => {
+        const image = battleCardImage(turn.actorCardId);
+        const name = turn.actorName || (turn.side === "player" ? labels.player : labels.enemy) || turn.side;
+        return `<div class="battle-turn-chip ${turn.side} ${index === 0 ? "current" : ""}">${image ? `<img src="${escapeHTML(image)}" alt="">` : `<span>⚔️</span>`}<div><b>${escapeHTML(name)}</b><small>SPD ${formatNumber(turn.actorSpeed || 0)}</small></div></div>`;
+      }).join("");
+    }
+
+    function floatBattleText(node, text, tone = "") {
+      if (!node || !text) return;
+      const rect = node.getBoundingClientRect();
+      const label = document.createElement("div");
+      label.className = `battle-floating-number ${tone}`.trim();
+      label.textContent = text;
+      label.style.left = `${rect.left + rect.width / 2}px`;
+      label.style.top = `${rect.top + rect.height * .28}px`;
+      document.body.appendChild(label);
+      window.setTimeout(() => label.remove(), 850);
+    }
+
+    async function animateIndividualBattleAction(stage, turn, duration) {
+      if (!stage || battleSkipAnimations || !turn || turn.command === "suddenBreak") return;
+      const actorNode = battleUnitNode(stage, turn.side, turn.actorCardId);
+      const targetSide = turn.side === "player" ? "enemy" : "player";
+      const targetNode = battleUnitNode(stage, targetSide, turn.targetCardId);
+      if (!actorNode) return;
+      actorNode.classList.add("is-acting");
+      if (turn.command === "guard" || !targetNode) {
+        actorNode.animate?.([{transform:"scale(1)"},{transform:"scale(1.10)"},{transform:"scale(1)"}],{duration:Math.max(120,duration),easing:"ease"});
+        await wait(Math.max(70, duration));
+        actorNode.classList.remove("is-acting");
+        return;
+      }
+      targetNode.classList.add("is-target");
+      const a = actorNode.getBoundingClientRect();
+      const t = targetNode.getBoundingClientRect();
+      const clone = actorNode.cloneNode(true);
+      clone.classList.add("battle-moving-clone");
+      clone.classList.remove("is-dead");
+      Object.assign(clone.style,{left:`${a.left}px`,top:`${a.top}px`,width:`${a.width}px`,height:`${a.height}px`});
+      document.body.appendChild(clone);
+      actorNode.style.opacity = ".28";
+      const dx = (t.left + t.width/2) - (a.left + a.width/2);
+      const dy = (t.top + t.height/2) - (a.top + a.height/2);
+      const travel = Math.max(110, Math.floor(duration * .65));
+      if (clone.animate) {
+        await clone.animate([{transform:"translate(0,0) scale(1)"},{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`}],{duration:travel,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}).finished.catch(()=>{});
+      } else {
+        clone.style.transform = `translate(${dx*.88}px,${dy*.88}px) scale(1.08)`;
+        await wait(travel);
+      }
+      targetNode.classList.add("is-hit");
+      floatBattleText(targetNode, turn.dodgedMembers && turn.dodgedMembers.length ? "DODGE" : turn.damage ? `-${formatNumber(turn.damage)}` : "BLOCK");
+      await wait(Math.max(60, Math.floor(duration*.28)));
+      targetNode.classList.remove("is-hit");
+      if (clone.animate) {
+        await clone.animate([{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`},{transform:"translate(0,0) scale(1)"}],{duration:Math.max(90,Math.floor(travel*.55)),easing:"ease-in",fill:"forwards"}).finished.catch(()=>{});
+      }
+      clone.remove();
+      actorNode.style.opacity = "";
+      actorNode.classList.remove("is-acting");
+      targetNode.classList.remove("is-target");
+    }
+
+    function animateBattleEvents(stage, turn) {
+      const targetSide = turn.side === "player" ? "enemy" : "player";
+      abilityArray(turn.speedEvents).forEach(event => {
+        const side = battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : targetSide;
+        const node = battleUnitNode(stage, side, event.targetCardId);
+        if (node) floatBattleText(node, `SPD ${event.change >= 0 ? "+" : ""}${event.change}`, "speed");
+      });
+      abilityArray(turn.reviveEvents).forEach(event => {
+        const side = battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : targetSide;
+        const node = battleUnitNode(stage, side, event.targetCardId);
+        if (node) {
+          node.classList.remove("is-dead");
+          node.classList.add("is-reviving");
+          floatBattleText(node, "REVIVE", "revive");
+          window.setTimeout(()=>node.classList.remove("is-reviving"),800);
+        }
+      });
+    }
+
+async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
       updateTurnBattleDisplay(display, combat);
       const playerLabel = labels.player || "ทีมของคุณ";
       const enemyLabel = labels.enemy || "ศัตรู";
       const starterLabel = combat.playerFirst ? playerLabel : enemyLabel;
-      result.textContent = `${starterLabel} ได้เริ่มโจมตีก่อน • ต่อสู้จน HP ฝ่ายใดฝ่ายหนึ่งหมด`;
-      await wait(Math.min(240, Math.max(20, phaseDuration)));
+      syncBattleBoard(stage, { player: combat.playerInitialMembers || [], enemy: combat.enemyInitialMembers || [] });
+      renderBattleTurnOrder(stage, combat, 0, labels);
+      result.textContent = `${starterLabel} ได้เริ่มโจมตีก่อน • ตัวละครที่หมดสภาพจะหยุดโจมตีและไม่ตกเป็นเป้าหมาย`;
+      await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
 
-      for (const turn of combat.turns) {
+      for (let turnIndex = 0; turnIndex < combat.turns.length; turnIndex += 1) {
+        const turn = combat.turns[turnIndex];
+        renderBattleTurnOrder(stage, combat, turnIndex, labels);
         const sideLabel = turn.side === "player" ? playerLabel : enemyLabel;
         const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
         const attackerLabel = turn.actorName ? `${turn.actorName} (${sideLabel})` : sideLabel;
         const defenderLabel = turn.targetName ? `${turn.targetName} (${defenderSideLabel})` : defenderSideLabel;
-        const strikeClass = turn.side === "player" ? "player-strike" : "enemy-strike";
         const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
         const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
+        const reviveText = abilityArray(turn.reviveEvents).length ? ` • ✨ คืนชีพ ${turn.reviveEvents.map(item=>item.targetName).join(", ")}` : "";
+        const speedText = abilityArray(turn.speedEvents).length ? ` • SPD ${turn.speedEvents.map(item=>`${item.targetName} ${item.change>=0?"+":""}${item.change}`).join(", ")}` : "";
+        const lifeText = turn.hitLifeConsumed ? ` • ตัดชีวิต ${turn.hitLifeConsumed} HIT${turn.hitLifeExpired ? " และหมดสภาพ" : ""}` : "";
         const activeText = turn.triggerActivated
-          ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.enemyNextAttackHits ? ` • ฮิตครั้งถัดไปศัตรู ${turn.enemyNextAttackHits >= 0 ? "+" : ""}${formatNumber(turn.enemyNextAttackHits)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}${turn.enemyShieldChange ? ` • โล่ศัตรู ${turn.enemyShieldChange >= 0 ? "+" : ""}${formatNumber(turn.enemyShieldChange)}` : ""}${turn.criticalRateChange ? ` • คริฝ่ายตน ${signedPercent(turn.criticalRateChange)}` : ""}${turn.enemyCriticalRateChange ? ` • คริศัตรู ${signedPercent(turn.enemyCriticalRateChange)}` : ""}${turn.nextAttackCriticalRateChange ? ` • คริชั่วคราว ${signedPercent(turn.nextAttackCriticalRateChange)}` : ""}${turn.enemyNextAttackCriticalRate ? ` • คริครั้งถัดไปศัตรู ${signedPercent(turn.enemyNextAttackCriticalRate)}` : ""}`
+          ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}`
           : "";
         const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
         result.textContent = turn.command === "guard"
-          ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}`
-          : `รอบ ${turn.round} • ${attackerLabel} → ${defenderLabel} • ${turn.hits} ฮิต${criticalText}${blockText}${activeText} • เสีย HP ${formatNumber(turn.damage)} เหลือ ${formatNumber(turn.targetRemaining ?? remaining)} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+          ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
+          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${turn.hits} ฮิต${criticalText}${blockText}${activeText}${reviveText}${speedText}${lifeText} • เสีย HP ${formatNumber(turn.damage)} เหลือ ${formatNumber(turn.targetRemaining ?? remaining)} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
-            await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
+            if (!battleSkipAnimations) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
           }
         }
-        const speed = turn.round > 6 ? Math.max(45, Math.floor(phaseDuration * .45)) : phaseDuration;
-        if (turn.command !== "guard") await playStrikeSequence(stage, strikeClass, turn.hits, speed);
-        else await wait(Math.max(30, Math.floor(speed * .55)));
+        const baseSpeed = turn.round > 6 ? Math.max(55, Math.floor(phaseDuration * .55)) : phaseDuration;
+        const speed = battleSkipAnimations ? 5 : Math.max(35, Math.floor(baseSpeed / battlePlaybackSpeed));
+        await animateIndividualBattleAction(stage, turn, speed * 2.25);
+        animateBattleEvents(stage, turn);
+        syncBattleBoard(stage, turn.memberStates);
         updateTurnBattleDisplay(display, combat, turn);
         if (turn.suddenBreak) result.textContent += " • Sudden Break!";
-        if (remaining <= 0) break;
+        if (!battleSkipAnimations) await wait(Math.max(20, Math.floor(speed * .25)));
       }
+      renderBattleTurnOrder(stage, combat, combat.turns.length, labels);
     }
 
     async function playStrikeSequence(stage, className, hits, phaseDuration) {
@@ -18438,6 +18760,8 @@
             restoreShieldHits: 0,
             enemyShieldHitsChange: 0,
             shieldTargetRules: [],
+            reviveRules: [],
+            speedTargetRules: [],
             healingRateChange: 0,
             enemyHealingRateChange: 0,
             shieldRecoveryRateChange: 0,
@@ -18471,6 +18795,38 @@
         group.durationRounds = Math.max(Number(group.durationRounds || 0), Math.max(0, Math.floor(Number(effect.durationRounds) || 0)));
         if (group.isDomainActivationGroup && effectType !== CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN) {
           group.domainPassiveEffects.push({ ...effect, type: effectType });
+          return;
+        }
+        if ([CARD_ABILITY_EFFECT_TYPES.REVIVE, CARD_ABILITY_EFFECT_TYPES.REVIVE_TIMED_UNDYING, CARD_ABILITY_EFFECT_TYPES.REVIVE_HIT_LIFE].includes(effectType)) {
+          const reviveSides = side === "both" ? ["ally", "enemy"] : [side === "self" ? "ally" : side];
+          reviveSides.forEach(reviveSide => group.reviveRules.push({
+            ...runtimeTargetRule,
+            side: reviveSide,
+            includeKo: true,
+            selection: targetSelection || "firstKo",
+            ids: reviveSide === "ally" && side === "self" ? [sourceRuntimeId] : runtimeTargetRule.ids,
+            hpRate: Math.max(.01, Number(effect.hpRate ?? effect.value ?? .3) || .3),
+            durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns) || 0)),
+            surviveHits: Math.max(0, Math.floor(Number(effect.surviveHits) || 0)),
+            maxTriggers: Math.max(1, Math.floor(Number(effect.maxTriggers) || 1)),
+            reviveType: effectType,
+            ruleKey: String(record._runtimeEffectKey || record.key || `${baseKey}:${effectType}`)
+          }));
+          return;
+        }
+        if ([CARD_ABILITY_EFFECT_TYPES.SPEED_FLAT, CARD_ABILITY_EFFECT_TYPES.SPEED_FLAT_STACK].includes(effectType)) {
+          const speedSides = side === "both" ? ["ally", "enemy"] : [side];
+          speedSides.forEach(speedSide => group.speedTargetRules.push({
+            ...runtimeTargetRule,
+            side: speedSide,
+            value: Math.round(value),
+            isStack: effectType === CARD_ABILITY_EFFECT_TYPES.SPEED_FLAT_STACK,
+            maxStacks: Math.max(1, Math.floor(Number(effect.maxStacks) || 1)),
+            stackKey: String(effect.stackKey || record.abilityRuntimeKey || baseKey || "speedStack"),
+            durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns) || 0)),
+            durationRounds: Math.max(0, Math.floor(Number(effect.durationRounds) || 0)),
+            ruleKey: String(record._runtimeEffectKey || record.key || `${baseKey}:${effectType}`)
+          }));
           return;
         }
         switch (effectType) {
@@ -18675,6 +19031,8 @@
         healTargetRules: abilityArray(item.healTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities) })),
         hitTargetRules: abilityArray(item.hitTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         shieldTargetRules: abilityArray(item.shieldTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
+        reviveRules: abilityArray(item.reviveRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), hpRate: Math.max(.01, Number(rule && rule.hpRate) || .3), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), surviveHits: Math.max(0, Math.floor(Number(rule && rule.surviveHits) || 0)), maxTriggers: Math.max(1, Math.floor(Number(rule && rule.maxTriggers) || 1)) })),
+        speedTargetRules: abilityArray(item.speedTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0), maxStacks: Math.max(1, Math.floor(Number(rule && rule.maxStacks) || 1)) })).filter(rule => rule.value),
         abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} })),
         domainActivations: abilityArray(item.domainActivations).filter(rule => rule && rule.domainId).map(rule => ({ ...rule })),
         domainPassiveEffects: abilityArray(item.domainPassiveEffects).map(effect => ({ ...effect })),
@@ -18682,7 +19040,7 @@
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.speedTargetRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
     }
 
 
@@ -19573,7 +19931,8 @@
       const image = card ? getCardImage(card) : "";
       const name = item && item.name || (card && card.name) || "Unknown";
       const tilt = enemy ? (index - 2) * -4 : (index - 2) * 4;
-      return `<div class="battle-model-card" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 4}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
+      const side = enemy ? "enemy" : "player";
+      return `<div class="battle-model-card battle-unit" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 4}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
     }
 
     async function refreshArenaData(showNotice = false) {
@@ -19637,6 +19996,7 @@
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const phaseDuration = reducedMotion ? 20 : 175;
       arenaAnimating = true;
+      battleSkipAnimations = false;
       state.battle.energy -= 1;
       renderArena();
 
@@ -20009,6 +20369,7 @@
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const phaseDuration = reducedMotion ? 20 : 175;
       battleAnimating = true;
+      battleSkipAnimations = false;
       state.battle.energy -= 1;
       const combat = buildIndividualTurnBasedCombat({
         playerAttack: stats.effectiveAttack,
@@ -21453,10 +21814,13 @@
       const lift = enemy ? 0 : Math.abs(index - center) * 5;
       const tag = enemy ? "div" : "button";
       const action = enemy ? "" : ` data-action="open-card" data-card-id="${escapeHTML(card.id)}"`;
+      const side = enemy ? "enemy" : "player";
       return `
-        <${tag} class="battle-model-card" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`})}"${action} aria-label="${escapeHTML(card.name)}">
+        <${tag} class="battle-model-card battle-unit" data-battle-card-id="${escapeHTML(card.id)}" data-battle-side="${side}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`})}"${action} aria-label="${escapeHTML(card.name)}">
           ${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
           ${enemy ? "" : awakenBadgeHTML(card)}
+          <div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div>
+          <div class="battle-unit-hp"><i></i></div>
           <span>ID ${escapeHTML(card.id)} • ${escapeHTML(card.name)}</span>
         </${tag}>
       `;
