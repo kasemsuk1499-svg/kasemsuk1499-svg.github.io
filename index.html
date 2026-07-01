@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-01-turn-based-multi-target-stable-ui-v3">
-  <title>Anime Card Collection · Turn Based Multi Target + Stable UI v3</title>
+  <meta name="gacha-app-build" content="2026-07-01-taunt-free-formation-leader-v4">
+  <title>Anime Card Collection · Taunt + Free Formation + Leader v4</title>
   <style>
     :root {
       color-scheme: dark;
@@ -903,6 +903,31 @@
       font-weight: 1000;
       background: rgba(190,24,93,.54);
     }
+
+    /* เพิ่มโดยอลิซ v4: ลากสลับช่อง + กำหนด Leader แยกจากตำแหน่ง */
+    .team-slot[data-team-slot] { transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease; }
+    .team-slot[draggable="true"] { cursor: grab; }
+    .team-slot[draggable="true"]:active { cursor: grabbing; }
+    .team-slot.dragging { opacity: .42; transform: scale(.97); }
+    .team-slot.drag-over { border-color: var(--cyan) !important; box-shadow: 0 0 0 3px rgba(92,232,255,.32), 0 18px 36px rgba(0,0,0,.36) !important; }
+    .team-slot-leader {
+      position: absolute; z-index: 7; right: 44px; bottom: 8px; min-width: 34px; height: 30px;
+      border: 1px solid rgba(255,209,102,.42); border-radius: 10px; padding: 0 8px;
+      color: #fde68a; font-size: .72rem; font-weight: 1000; background: rgba(120,74,0,.72);
+    }
+    .team-slot-leader.active { color: #241600; border-color: transparent; background: linear-gradient(135deg,#fff1a8,#f59e0b); box-shadow: 0 0 18px rgba(255,209,102,.38); }
+    .team-leader-badge {
+      position:absolute; z-index:6; right:8px; top:8px; border:1px solid rgba(255,255,255,.28);
+      border-radius:999px; padding:5px 8px; color:#241600; font-size:.62rem; font-weight:1000;
+      background:linear-gradient(135deg,#fff2a8,#f59e0b); box-shadow:0 0 18px rgba(255,209,102,.38);
+    }
+    .team-slot-drag-hint { margin-top:5px; color:var(--muted); font-size:.57rem; text-align:center; }
+    .team-slot-drag-handle {
+      position:absolute; z-index:8; left:8px; bottom:8px; width:34px; height:30px; padding:0;
+      border:1px solid rgba(92,232,255,.38); border-radius:10px; color:#dffaff; font-weight:1000;
+      background:rgba(8,80,104,.72); cursor:grab; touch-action:none; user-select:none;
+    }
+    .team-slot-drag-handle:active { cursor:grabbing; }
 
     /* เพิ่มโดยอลิซ: คู่มือคอมโบและตารางแพ้ทาง/ชนะทางทั้งหมด */
     .element-guide {
@@ -5677,7 +5702,7 @@
             <div class="team-preset-panel" id="towerPresetPanel"></div>
             <div class="turn-tactics-panel" id="towerTacticsPanel">
               <div class="turn-tactics-grid">
-                <div class="turn-tactics-field"><label for="towerFormationSelect">แผนการรบ หน้า / หลัง</label><select class="field" id="towerFormationSelect"><option value="4">หน้า 4 • หลัง 1</option><option value="3">หน้า 3 • หลัง 2</option><option value="2">หน้า 2 • หลัง 3</option><option value="1">หน้า 1 • หลัง 4</option></select></div>
+                <div class="turn-tactics-field"><label for="towerFormationSelect">แผนการรบ หน้า / หลัง</label><select class="field" id="towerFormationSelect"><option value="4">หน้า 4 DEF +10% • หลัง 1 ATK +45%</option><option value="3">หน้า 3 DEF +20% • หลัง 2 ATK +30%</option><option value="2">หน้า 2 DEF +30% • หลัง 3 ATK +20%</option><option value="1">หน้า 1 DEF +45% • หลัง 4 ATK +10%</option></select></div>
                 <div class="turn-tactics-field"><label for="towerCommandSelect">คำสั่ง AI ฝ่ายเรา</label><select class="field" id="towerCommandSelect"><option value="balanced">สมดุล • ใช้สกิลเมื่อพร้อม</option><option value="skill">เน้นสกิล • รีบใช้ Active</option><option value="attack">โจมตีปกติ • เก็บ Active</option><option value="guard">ตั้งรับ • ป้องกันเมื่อ HP ต่ำ</option></select></div>
                 <div class="turn-tactics-field"><label for="towerTargetSelect">วิธีเลือกเป้าหมาย</label><select class="field" id="towerTargetSelect"><option value="lowHp">แนวหน้าที่ HP ต่ำสุด</option><option value="highAtk">แนวหน้าที่ ATK สูงสุด</option><option value="random">สุ่มจากแนวหน้าที่ยังอยู่</option></select></div>
               </div>
@@ -5831,7 +5856,7 @@
             <div class="team-preset-panel" id="arenaPresetPanel"></div>
             <div class="turn-tactics-panel" id="arenaTacticsPanel">
               <div class="turn-tactics-grid">
-                <div class="turn-tactics-field"><label for="arenaFormationSelect">แผนการรบ หน้า / หลัง</label><select class="field" id="arenaFormationSelect"><option value="4">หน้า 4 • หลัง 1</option><option value="3">หน้า 3 • หลัง 2</option><option value="2">หน้า 2 • หลัง 3</option><option value="1">หน้า 1 • หลัง 4</option></select></div>
+                <div class="turn-tactics-field"><label for="arenaFormationSelect">แผนการรบ หน้า / หลัง</label><select class="field" id="arenaFormationSelect"><option value="4">หน้า 4 DEF +10% • หลัง 1 ATK +45%</option><option value="3">หน้า 3 DEF +20% • หลัง 2 ATK +30%</option><option value="2">หน้า 2 DEF +30% • หลัง 3 ATK +20%</option><option value="1">หน้า 1 DEF +45% • หลัง 4 ATK +10%</option></select></div>
                 <div class="turn-tactics-field"><label for="arenaCommandSelect">คำสั่ง AI ฝ่ายเรา</label><select class="field" id="arenaCommandSelect"><option value="balanced">สมดุล • ใช้สกิลเมื่อพร้อม</option><option value="skill">เน้นสกิล • รีบใช้ Active</option><option value="attack">โจมตีปกติ • เก็บ Active</option><option value="guard">ตั้งรับ • ป้องกันเมื่อ HP ต่ำ</option></select></div>
                 <div class="turn-tactics-field"><label for="arenaTargetSelect">วิธีเลือกเป้าหมาย</label><select class="field" id="arenaTargetSelect"><option value="lowHp">แนวหน้าที่ HP ต่ำสุด</option><option value="highAtk">แนวหน้าที่ ATK สูงสุด</option><option value="random">สุ่มจากแนวหน้าที่ยังอยู่</option></select></div>
               </div>
@@ -6537,10 +6562,11 @@
 
     // เพิ่มโดยอลิซ v63: ค่าโบนัสแผนการรบ ทีมมาตรฐาน 5 ตัว
     const FORMATION_RULES = Object.freeze({
-      4: Object.freeze({ front: 4, back: 1, frontDefenseRate: .35, backAttackRate: .10 }),
-      3: Object.freeze({ front: 3, back: 2, frontDefenseRate: .25, backAttackRate: .15 }),
-      2: Object.freeze({ front: 2, back: 3, frontDefenseRate: .15, backAttackRate: .25 }),
-      1: Object.freeze({ front: 1, back: 4, frontDefenseRate: .10, backAttackRate: .35 })
+      // ฝั่งที่มีจำนวนน้อยกว่าได้รับโบนัสสูงกว่า เพื่อชดเชยความเสี่ยงของตำแหน่ง
+      4: Object.freeze({ front: 4, back: 1, frontDefenseRate: .10, backAttackRate: .45 }),
+      3: Object.freeze({ front: 3, back: 2, frontDefenseRate: .20, backAttackRate: .30 }),
+      2: Object.freeze({ front: 2, back: 3, frontDefenseRate: .30, backAttackRate: .20 }),
+      1: Object.freeze({ front: 1, back: 4, frontDefenseRate: .45, backAttackRate: .10 })
     });
 
     function normalizeFormationFront(value, teamSize = 5) {
@@ -6999,6 +7025,7 @@
       REVIVE_HIT_LIFE: "reviveHitLife",
       SPEED_FLAT: "speedFlat",
       SPEED_FLAT_STACK: "speedFlatStack",
+      TAUNT: "taunt",
       INCREASE_MAX_HP_BASE_RATE: "increaseMaxHpBaseRate",
       INCREASE_ATTACK_RATE_STACK: "increaseAttackRateStack",
       SELF_TRIGGER_REDUCTION: "selfTriggerReduction", // รองรับข้อมูลเก่า: ทำงานเป็นคอสชั่วคราวรอบปัจจุบัน
@@ -12562,6 +12589,9 @@
     let teamPickerSortMode = "power";
     let teamPickerSortDirection = "desc";
     let teamPickerContext = { mode: "showcase", slotIndex: 0 };
+    let draggedTeamSlot = null;
+    let pointerDraggedTeamSlot = null;
+    let pointerDragTarget = null;
     let activeNoticeTab = "news";
     let activePromoIndex = 0;
     let promoAutoplayTimer = 0;
@@ -12662,6 +12692,7 @@
         // เพิ่มโดยอลิซ: เก็บลำดับครั้งแรกที่ได้การ์ด เพื่อใช้ปุ่ม “เรียงตามลำดับการได้”
         collectionOrder: starter.collectionOrder,
         team: starter.team,
+        teamLeaderId: String(starter.team[0] || ""),
         // พรีเซ็ตทีมใช้ร่วมกันทั้ง 3 โหมด จำกัด 30 ช่อง
         teamPresets: Array.from({ length: CONFIG.teamPresetLimit }, () => null),
         pity: {},
@@ -12693,6 +12724,7 @@
           wins: 0,
           losses: 0,
           supportUid: "",
+          leaderId: String(starter.team[0] || ""),
           formationFront: 2,
           commandStrategy: "balanced",
           targetStrategy: "lowHp"
@@ -12705,12 +12737,65 @@
           weekKey: getArenaWeekKey(),
           rewardedWeeks: {},
           lastWeeklyReward: null,
+          leaderId: String(starter.team[0] || ""),
           formationFront: 2,
           commandStrategy: "balanced",
           targetStrategy: "lowHp"
         },
         migratedFromOldSave: false
       };
+    }
+
+    function getTeamSlotLimit(mode = "showcase") {
+      return mode === "arena" ? CONFIG.arenaTeamSlots : mode === "tower" ? CONFIG.towerTeamSlots : CONFIG.teamSlots;
+    }
+
+    function trimTrailingTeamSlots(team = []) {
+      const next = Array.isArray(team) ? team.slice() : [];
+      while (next.length && !String(next[next.length - 1] || "")) next.pop();
+      return next;
+    }
+
+    function normalizeTeamSlotArray(value, limit, ownedMap = {}) {
+      const size = Math.max(1, Math.floor(Number(limit) || 5));
+      const source = Array.isArray(value) ? value : [];
+      const seen = new Set();
+      const result = Array.from({ length: Math.min(size, source.length) }, (_, index) => {
+        const id = String(source[index] || "");
+        if (!id || seen.has(id) || !ownedMap[id] || !CARD_BY_ID.has(id)) return "";
+        seen.add(id);
+        return id;
+      });
+      return trimTrailingTeamSlots(result);
+    }
+
+    function normalizeTeamLeaderId(value, team = []) {
+      const ids = abilityArray(team).map(item => String(item || "")).filter(Boolean);
+      const candidate = String(value || "");
+      return candidate && ids.includes(candidate) ? candidate : (ids[0] || "");
+    }
+
+    function getTeamLeaderId(mode = "showcase", teamOverride = null) {
+      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const team = Array.isArray(teamOverride) ? teamOverride : safeMode === "arena" ? state?.arena?.team : safeMode === "tower" ? state?.battle?.team : state?.team;
+      const candidate = safeMode === "arena" ? state?.arena?.leaderId : safeMode === "tower" ? state?.battle?.leaderId : state?.teamLeaderId;
+      return normalizeTeamLeaderId(candidate, team || []);
+    }
+
+    function setStoredTeamLeaderId(mode, leaderId) {
+      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      if (safeMode === "arena") state.arena.leaderId = String(leaderId || "");
+      else if (safeMode === "tower") state.battle.leaderId = String(leaderId || "");
+      else state.teamLeaderId = String(leaderId || "");
+    }
+
+    function getLeaderIdForAbilityMode(mode = "team", ids = [], explicitLeaderId = "") {
+      const list = abilityArray(ids).map(item => String(item || "")).filter(Boolean);
+      const explicit = String(explicitLeaderId || "");
+      if (explicit && list.includes(explicit)) return explicit;
+      const normalizedMode = normalizeAbilityMode(mode);
+      const configured = normalizedMode === "arena" ? state?.arena?.leaderId : normalizedMode === "tower" ? state?.battle?.leaderId : state?.teamLeaderId;
+      return normalizeTeamLeaderId(configured, list);
     }
 
     function safeParse(value, fallback = null) {
@@ -13338,9 +13423,8 @@
           if (!next.owned[id].acquiredAt) next.owned[id].acquiredAt = Date.now() - ownedIds.length + index;
           next.collectionOrder.push(id);
         });
-      next.team = Array.isArray(next.team)
-        ? [...new Set(next.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.teamSlots)
-        : [];
+      next.team = normalizeTeamSlotArray(next.team, CONFIG.teamSlots, next.owned);
+      next.teamLeaderId = normalizeTeamLeaderId(next.teamLeaderId, next.team);
       next.teamPresets = normalizeTeamPresets(next.teamPresets, next.owned);
       next.pity = next.pity && typeof next.pity === "object" ? next.pity : {};
       next.recent = Array.isArray(next.recent) ? next.recent.map(String).filter(id => CARD_BY_ID.has(id)).slice(0, CONFIG.recentPullLimit) : [];
@@ -13372,27 +13456,29 @@
       // เพิ่มโดยอลิซ: เซฟเก่าที่ยังไม่มีทีมไต่หอ จะคัดลอกทีมโชว์เดิมมาให้ครั้งแรก
       const hasSavedTowerTeam = Boolean(raw && raw.battle && Array.isArray(raw.battle.team));
       next.battle.team = hasSavedTowerTeam
-        ? [...new Set(next.battle.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.towerTeamSlots)
-        : next.team.slice(0, CONFIG.towerTeamSlots);
+        ? normalizeTeamSlotArray(next.battle.team, CONFIG.towerTeamSlots, next.owned)
+        : normalizeTeamSlotArray(next.team, CONFIG.towerTeamSlots, next.owned);
       next.battle.stage = Math.max(1, Math.floor(Number(next.battle.stage) || 1));
       next.battle.energy = Math.min(CONFIG.battleMaxEnergy, Math.max(0, Math.floor(Number(next.battle.energy) || 0)));
       next.battle.lastEnergyAt = Number(next.battle.lastEnergyAt) || Date.now();
       next.battle.wins = Math.max(0, Math.floor(Number(next.battle.wins) || 0));
       next.battle.losses = Math.max(0, Math.floor(Number(next.battle.losses) || 0));
       next.battle.supportUid = String(next.battle.supportUid || "");
+      next.battle.leaderId = normalizeTeamLeaderId(next.battle.leaderId, next.battle.team);
       next.battle.formationFront = normalizeFormationFront(next.battle.formationFront, CONFIG.towerTeamSlots);
       next.battle.commandStrategy = ["balanced","skill","attack","guard"].includes(String(next.battle.commandStrategy)) ? String(next.battle.commandStrategy) : "balanced";
       next.battle.targetStrategy = ["lowHp","highAtk","random"].includes(String(next.battle.targetStrategy)) ? String(next.battle.targetStrategy) : "lowHp";
       next.arena = Object.assign(defaultState().arena, next.arena || {});
       next.arena.team = Array.isArray(next.arena.team)
-        ? [...new Set(next.arena.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.arenaTeamSlots)
-        : next.team.slice(0, CONFIG.arenaTeamSlots);
+        ? normalizeTeamSlotArray(next.arena.team, CONFIG.arenaTeamSlots, next.owned)
+        : normalizeTeamSlotArray(next.team, CONFIG.arenaTeamSlots, next.owned);
       next.arena.points = Math.max(0, Math.floor(Number(next.arena.points) || 0));
       next.arena.wins = Math.max(0, Math.floor(Number(next.arena.wins) || 0));
       next.arena.losses = Math.max(0, Math.floor(Number(next.arena.losses) || 0));
       next.arena.weekKey = String(next.arena.weekKey || getArenaWeekKey());
       next.arena.rewardedWeeks = next.arena.rewardedWeeks && typeof next.arena.rewardedWeeks === "object" ? next.arena.rewardedWeeks : {};
       next.arena.lastWeeklyReward = next.arena.lastWeeklyReward || null;
+      next.arena.leaderId = normalizeTeamLeaderId(next.arena.leaderId, next.arena.team);
       next.arena.formationFront = normalizeFormationFront(next.arena.formationFront, CONFIG.arenaTeamSlots);
       next.arena.commandStrategy = ["balanced","skill","attack","guard"].includes(String(next.arena.commandStrategy)) ? String(next.arena.commandStrategy) : "balanced";
       next.arena.targetStrategy = ["lowHp","highAtk","random"].includes(String(next.arena.targetStrategy)) ? String(next.arena.targetStrategy) : "lowHp";
@@ -13643,13 +13729,15 @@
 
       const uniqueElements = THAI_ELEMENTS.filter(element => counts[element] > 0);
       const nonNeutralElements = uniqueElements.filter(element => element !== "ไร้ธาตุ");
-      const leaderElement = teamCards.length ? getCardElement(teamCards[0]) : "ไร้ธาตุ";
+      const configuredLeaderId = getTeamLeaderId(teamIds === state?.arena?.team ? "arena" : teamIds === state?.battle?.team ? "tower" : "showcase", teamIds);
+      const leaderCard = teamCards.find(card => String(card.id) === String(configuredLeaderId)) || teamCards[0];
+      const leaderElement = leaderCard ? getCardElement(leaderCard) : "ไร้ธาตุ";
       const highestElementCount = uniqueElements.reduce((highest, element) => Math.max(highest, counts[element] || 0), 0);
       const allElementsUnique = teamCards.length > 0 && highestElementCount === 1;
       const dominantElement = !teamCards.length
         ? "ไร้ธาตุ"
         : allElementsUnique
-          // เมื่อทุกธาตุมีอย่างละ 1 แหล่ง ให้ยึดธาตุแรกของหัวหน้าทีม (การ์ดช่อง 1)
+          // เมื่อทุกธาตุมีอย่างละ 1 แหล่ง ให้ยึดธาตุของ Leader ที่ผู้เล่นกำหนด
           ? leaderElement
           // ปกติเลือกจาก "จำนวนธาตุ" มากที่สุดก่อน แล้วจึงใช้พลังรวมเป็นตัวตัดสินกรณีจำนวนเท่ากัน
           : uniqueElements
@@ -13659,7 +13747,7 @@
       const dominantReason = !teamCards.length
         ? "ยังไม่มีการ์ดในทีม"
         : allElementsUnique
-          ? `ทุกธาตุมีอย่างละ 1 จึงใช้หัวหน้าทีมช่อง 1 (${elementLabel(leaderElement)})`
+          ? `ทุกธาตุมีอย่างละ 1 จึงใช้ Leader ${leaderCard ? leaderCard.name : "-"} (${elementLabel(leaderElement)})`
           : `${elementLabel(dominantElement)} มีจำนวนมากที่สุด ${counts[dominantElement] || 0} แหล่ง`;
 
       const activeCombos = [];
@@ -13912,7 +14000,9 @@
         powerRate: CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE,
         hpRate: CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE,
         ignoreAbilityCondition: CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS,
-        activateField: CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN
+        activateField: CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN,
+        provoke: CARD_ABILITY_EFFECT_TYPES.TAUNT,
+        aggro: CARD_ABILITY_EFFECT_TYPES.TAUNT
       };
       return aliases[type] || type;
     }
@@ -14587,7 +14677,7 @@
     }
 
     function buildAbilityContext(teamIds = state.team, mode = "team", options = {}) {
-      const ids = abilityArray(teamIds).map(id => String(id));
+      const ids = abilityArray(teamIds).map(id => String(id || "")).filter(Boolean);
       const cards = ids.map(id => CARD_BY_ID.get(id)).filter(Boolean);
       const elementCounts = Object.fromEntries(THAI_ELEMENTS.map(element => [element, 0]));
       const rarityCounts = Object.fromEntries(Object.keys(RARITIES).map(rarity => [rarity, 0]));
@@ -14600,7 +14690,7 @@
         ids,
         cards,
         teamSize: cards.length,
-        leaderId: ids[0] || "",
+        leaderId: getLeaderIdForAbilityMode(mode, ids, options && options.leaderId),
         elementCounts,
         rarityCounts,
         uniqueElements: THAI_ELEMENTS.filter(element => elementCounts[element] > 0),
@@ -15515,7 +15605,8 @@
     }
 
     function buildBattleDefenseMembers(team = [], abilitySummary = {}, snapshotMode = false) {
-      return abilityArray(team).filter(Boolean).map(item => {
+      return abilityArray(team).map((item, sourceIndex) => {
+        if (!item) return null;
         const id = getBattleItemId(item);
         const card = getBattleItemCard(item);
         if (!id || !card) return null;
@@ -15534,7 +15625,8 @@
           blockRate: getAbilityAdjustedCardBlockRate(card, abilitySummary),
           dodgeRate: getAbilityAdjustedCardDodgeRate(card, abilitySummary),
           damageTakenRate: getAbilityAdjustedCardDamageTakenRate(card, abilitySummary),
-          statusResistanceRules: abilityArray(abilitySummary.statusResistanceByCardId && abilitySummary.statusResistanceByCardId[String(id)]).map(rule => ({ ...rule }))
+          statusResistanceRules: abilityArray(abilitySummary.statusResistanceByCardId && abilitySummary.statusResistanceByCardId[String(id)]).map(rule => ({ ...rule })),
+          slot: Math.max(1, Math.floor(Number(item && item.slot) || sourceIndex + 1))
         };
       }).filter(Boolean);
     }
@@ -15659,6 +15751,7 @@
         reviveHitLife: `คืนชีพชีวิตตามฮิต ${targetText} ด้วย HP ${signedPercent(Math.max(0, value))} • รับได้ ${Math.max(1, Math.floor(Number(effect && effect.surviveHits) || 1))} ฮิต`,
         speedFlat: `SPD ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)}`,
         speedFlatStack: `SPD แบบสแต็ก ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)} ต่อชั้น • สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
+        taunt: `ยั่วยุ ${targetText} • บังคับฝ่ายตรงข้ามเล็งเป้าหมายนี้ก่อน ${Math.max(1, Math.floor(Number(effect && effect.durationTurns) || 1))} เทิร์นโจมตี`,
         increaseMaxHpBaseRate: `เพิ่ม HP สูงสุดและ HP ปัจจุบันจาก HP เบส ${signedPercent(Math.max(0, value))}`,
         increaseAttackRateStack: `สะสม ATK ถาวรระหว่างไฟต์ ${signedPercent(Math.max(0, value))} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         powerRateStack: `สะสม ATK ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
@@ -17462,8 +17555,9 @@
         const fallbackHp = Math.max(1, Number(options[`${side}Hp`]) || 1);
         const fallbackDefense = Math.max(0, Number(options[`${side}Defense`]) || 0);
         const source = raw.length ? raw : [{ id: `${side}-unit`, name: side === "player" ? "ทีมของคุณ" : "ศัตรู", power: fallbackAttack, hp: fallbackHp, defense: fallbackDefense, speed: 90 }];
-        const frontCount = formationOf(side, source.length);
-        const rule = getFormationRule(frontCount, source.length);
+        const formationSize = Math.max(1, Math.floor(Number(options[`${side}FormationSize`]) || Math.max(source.length, ...source.map((item, index) => Math.max(1, Math.floor(Number(item && item.slot) || index + 1))))));
+        const frontCount = formationOf(side, formationSize);
+        const rule = getFormationRule(frontCount, formationSize);
         const sourcePowerTotal = source.reduce((sum, item) => sum + Math.max(0, Number(item.power) || 0), 0);
         const sourceHpTotal = source.reduce((sum, item) => sum + Math.max(0, Number(item.hp) || 0), 0);
         const sourceDefenseTotal = source.reduce((sum, item) => sum + Math.max(0, Number(item.defense) || 0), 0);
@@ -17472,7 +17566,8 @@
         const hpScale = sourceHpTotal > 0 ? fallbackHp / sourceHpTotal : 1;
         const defenseScale = sourceDefenseTotal > 0 ? fallbackDefense / sourceDefenseTotal : 1;
         const members = source.map((item, index) => {
-          const row = source.length <= 1 || index < frontCount ? "front" : "back";
+          const slotNumber = Math.max(1, Math.floor(Number(item && item.slot) || index + 1));
+          const row = formationSize <= 1 || slotNumber <= frontCount ? "front" : "back";
           const powerShare = sourcePowerTotal > 0 ? Math.max(0, Number(item.power) || 0) * powerScale : fallbackAttack / source.length;
           const hpShare = sourceHpTotal > 0 ? Math.max(0, Number(item.hp) || 0) * hpScale : fallbackHp / source.length;
           const defenseShare = sourceDefenseTotal > 0 ? Math.max(0, Number(item.defense) || 0) * defenseScale : fallbackDefense / source.length;
@@ -17487,7 +17582,7 @@
             rarity: String(item.rarity || "N"),
             elements: normalizeAbilityElements(item.elements || item.element),
             row,
-            slot: index + 1,
+            slot: slotNumber,
             basePower: powerRaw,
             power,
             maxHp: hpRaw,
@@ -17527,7 +17622,10 @@
             reviveTurnsRemaining: 0,
             reviveHitLifeRemaining: 0,
             reviveUses: {},
-            reviveCount: 0
+            reviveCount: 0,
+            tauntTurnsRemaining: 0,
+            tauntRoundsRemaining: 0,
+            tauntSourceCardId: ""
           };
         });
         const shieldOrder = [...members.filter(m => m.row === "front"), ...members.filter(m => m.row === "back")];
@@ -17562,7 +17660,8 @@
         id: member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
         normalAttackTargetCount: member.normalAttackTargetCount,
         maxHp: member.maxHp, currentHp: member.currentHp, shieldHits: member.shieldHits, ko: false,
-        reviveMode: "", reviveTurnsRemaining: 0, reviveHitLifeRemaining: 0
+        reviveMode: "", reviveTurnsRemaining: 0, reviveHitLifeRemaining: 0,
+        tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0
       });
       const playerInitialMembers = player.members.map(initialMemberState);
       const enemyInitialMembers = enemy.members.map(initialMemberState);
@@ -17597,10 +17696,12 @@
         const living = alive(defenderTeam);
         if (!living.length) return [];
         const count = Math.max(1, Math.min(5, Math.floor(Number(requestedCount) || 1), living.length));
-        const front = sortRuntimeTargets(living.filter(member => member.row === "front"), attackerTeam.targetStrategy, seed);
-        const back = sortRuntimeTargets(living.filter(member => member.row === "back"), attackerTeam.targetStrategy, seed + 101);
-        // แนวหน้ารับเป้าหมายก่อน หากจำนวนโจมตีเหลือจึงกระจายไปแนวหลัง
-        return [...front, ...back].slice(0, count);
+        const taunters = sortRuntimeTargets(living.filter(member => Number(member.tauntTurnsRemaining || 0) > 0 || Number(member.tauntRoundsRemaining || 0) > 0), attackerTeam.targetStrategy, seed - 37);
+        const taunterIds = new Set(taunters.map(member => member.id));
+        const front = sortRuntimeTargets(living.filter(member => member.row === "front" && !taunterIds.has(member.id)), attackerTeam.targetStrategy, seed);
+        const back = sortRuntimeTargets(living.filter(member => member.row === "back" && !taunterIds.has(member.id)), attackerTeam.targetStrategy, seed + 101);
+        // ยั่วยุมีลำดับสูงสุด จากนั้นจึงเป็นแนวหน้าและแนวหลังตามปกติ
+        return [...taunters, ...front, ...back].slice(0, count);
       }
 
       function pickTarget(attackerTeam, defenderTeam, seed = 0) {
@@ -17627,6 +17728,7 @@
           ? targetTeam.members.filter(member => member.ko || member.currentHp <= 0)
           : alive(targetTeam)).filter(member => memberMatchesRuntimeRule(member, rule || {}));
         if (side !== "enemy" && rule && rule.excludeSelf) candidates = candidates.filter(member => member.id !== actor.id);
+        if (side === "self") return candidates.some(member => member.id === actor.id) && actor.currentHp > 0 && !actor.ko ? [actor] : [];
         const hasFilter = abilityArray(rule && rule.ids).length || abilityArray(rule && rule.elements).length || abilityArray(rule && rule.rarities).length;
         const selection = String(rule && rule.selection || (includeKo ? "firstKo" : side === "enemy" ? "current" : "self")).toLowerCase();
         if (!hasFilter && !includeKo) {
@@ -17678,6 +17780,7 @@
           attackTargetCount: Math.max(1, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 1)), 1))),
           reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
           speedTargetRules: fired.flatMap(trigger => abilityArray(trigger.speedTargetRules).map(rule => ({ ...rule }))),
+          tauntRules: fired.flatMap(trigger => abilityArray(trigger.tauntRules).map(rule => ({ ...rule }))),
           healTargetRules: fired.flatMap(trigger => abilityArray(trigger.healTargetRules).map(rule => ({ ...rule }))),
           hitTargetRules: fired.flatMap(trigger => abilityArray(trigger.hitTargetRules).map(rule => ({ ...rule }))),
           shieldTargetRules: fired.flatMap(trigger => abilityArray(trigger.shieldTargetRules).map(rule => ({ ...rule }))),
@@ -17799,6 +17902,36 @@
         return events;
       }
 
+      function applyTauntRules(rules, ownerTeam, defenderTeam, actor, currentTarget) {
+        const events = [];
+        abilityArray(rules).forEach(rule => {
+          const recipients = resolveRuntimeTargets(rule, ownerTeam, defenderTeam, actor, currentTarget);
+          recipients.forEach(recipient => {
+            const turns = Math.max(0, Math.floor(Number(rule.durationTurns) || 0));
+            const rounds = Math.max(0, Math.floor(Number(rule.durationRounds) || 0));
+            recipient.tauntTurnsRemaining = Math.max(Number(recipient.tauntTurnsRemaining) || 0, turns || (rounds ? 0 : 1));
+            recipient.tauntRoundsRemaining = Math.max(Number(recipient.tauntRoundsRemaining) || 0, rounds);
+            recipient.tauntSourceCardId = actor.id;
+            events.push({ targetCardId: recipient.id, targetName: recipient.name, turnsRemaining: recipient.tauntTurnsRemaining, roundsRemaining: recipient.tauntRoundsRemaining });
+          });
+        });
+        return events;
+      }
+
+      function consumeTauntAttackTurn(defenderTeam) {
+        alive(defenderTeam).forEach(member => {
+          if (member.tauntTurnsRemaining > 0) member.tauntTurnsRemaining -= 1;
+          if (member.tauntTurnsRemaining <= 0 && member.tauntRoundsRemaining <= 0) member.tauntSourceCardId = "";
+        });
+      }
+
+      function tickTauntRound(team) {
+        alive(team).forEach(member => {
+          if (member.tauntRoundsRemaining > 0) member.tauntRoundsRemaining -= 1;
+          if (member.tauntTurnsRemaining <= 0 && member.tauntRoundsRemaining <= 0) member.tauntSourceCardId = "";
+        });
+      }
+
       function applyReviveRules(rules, ownerTeam, defenderTeam, actor, currentTarget) {
         const events = [];
         abilityArray(rules).forEach(rule => {
@@ -17861,7 +17994,8 @@
           speed: member.speed, baseSpeed: member.baseSpeed, maxHp: member.maxHp, currentHp: Math.max(0, member.currentHp),
           shieldHits: member.shieldHits, ko: Boolean(member.ko || member.currentHp <= 0), deathReason: member.deathReason || "",
           reviveMode: member.reviveMode || "", reviveTurnsRemaining: member.reviveTurnsRemaining || 0,
-          reviveHitLifeRemaining: member.reviveHitLifeRemaining || 0
+          reviveHitLifeRemaining: member.reviveHitLifeRemaining || 0,
+          tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0
         });
         return { player: player.members.map(snap), enemy: enemy.members.map(snap) };
       }
@@ -17878,6 +18012,7 @@
           currentHp: Math.max(0, member.currentHp), shieldRemaining: member.shieldHits,
           reviveMode: member.reviveMode, reviveTurnsRemaining: member.reviveTurnsRemaining,
           reviveHitLifeRemaining: member.reviveHitLifeRemaining, reviveCount: member.reviveCount, deathReason: member.deathReason,
+          tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0,
           damage: member.damageDealt, healing: member.healingDone, shieldCreated: member.shieldCreated,
           skillActivations: member.skillActivations, attacks: member.attackCount, totalHits: member.totalHits,
           criticalHits: member.criticalHits, blocks: member.blocks, dodges: member.dodges, ko: member.currentHp <= 0
@@ -17943,6 +18078,7 @@
             applyTimedRate(target, "shieldRecoveryRate", Number(trigger.enemyShieldRecoveryRateChange)||0, trigger);
           });
           const speedEvents = applySpeedRules(activation.speedTargetRules, team, defenderTeam, actor, target);
+          const tauntEvents = applyTauntRules(activation.tauntRules, team, defenderTeam, actor, target);
 
           let targetedCurrentHitChange = 0;
           if (abilityArray(activation.hitTargetRules).length) {
@@ -18104,6 +18240,7 @@
           actor.attackCount += 1;
           const totalAppliedHits = hits * targetResults.length;
           actor.totalHits += totalAppliedHits;
+          consumeTauntAttackTurn(defenderTeam);
           actor.damageDealt += totalDamage;
           team.totalDamage += totalDamage;
           if (critical) { actor.criticalHits += 1; team.totalCriticalHits += 1; }
@@ -18168,12 +18305,14 @@
             enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activation.nextAttackCriticalRate,
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
             actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
-            reviveEvents, speedEvents, hitLifeConsumed:totalHitLifeConsumed,
+            reviveEvents, speedEvents, tauntEvents, hitLifeConsumed:totalHitLifeConsumed,
             hitLifeExpired:anyHitLifeExpired, timedReviveExpired
           });
           turns[turns.length - 1].memberStates = battleMemberStates();
         }
         [...player.members, ...enemy.members].forEach(member => tickTimed(member, true));
+        tickTauntRound(player);
+        tickTauntRound(enemy);
       }
 
       // กันไฟต์ไม่จบ: ฝ่ายที่มี HP รวมมากกว่าชนะ Sudden Break
@@ -18550,6 +18689,7 @@
         if (Number(state.shieldHits) > 0) parts.push(`🛡${state.shieldHits}`);
         if (Number(state.reviveTurnsRemaining) > 0) parts.push(`⏳${state.reviveTurnsRemaining}`);
         if (Number(state.reviveHitLifeRemaining) > 0) parts.push(`HIT ${state.reviveHitLifeRemaining}`);
+        if (Number(state.tauntTurnsRemaining) > 0 || Number(state.tauntRoundsRemaining) > 0) parts.push(`🎯 ยั่วยุ`);
         const specialText = parts.join(" • ");
         if (special.textContent !== specialText) special.textContent = specialText;
       }
@@ -18896,6 +19036,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             shieldTargetRules: [],
             reviveRules: [],
             speedTargetRules: [],
+            tauntRules: [],
             healingRateChange: 0,
             enemyHealingRateChange: 0,
             shieldRecoveryRateChange: 0,
@@ -18958,6 +19099,18 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             isStack: effectType === CARD_ABILITY_EFFECT_TYPES.SPEED_FLAT_STACK,
             maxStacks: Math.max(1, Math.floor(Number(effect.maxStacks) || 1)),
             stackKey: String(effect.stackKey || record.abilityRuntimeKey || baseKey || "speedStack"),
+            durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns) || 0)),
+            durationRounds: Math.max(0, Math.floor(Number(effect.durationRounds) || 0)),
+            ruleKey: String(record._runtimeEffectKey || record.key || `${baseKey}:${effectType}`)
+          }));
+          return;
+        }
+        if (effectType === CARD_ABILITY_EFFECT_TYPES.TAUNT) {
+          const tauntSides = side === "both" ? ["ally", "enemy"] : [side];
+          tauntSides.forEach(tauntSide => group.tauntRules.push({
+            ...runtimeTargetRule,
+            side: tauntSide,
+            selection: targetSelection || (tauntSide === "enemy" ? "current" : "self"),
             durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns) || 0)),
             durationRounds: Math.max(0, Math.floor(Number(effect.durationRounds) || 0)),
             ruleKey: String(record._runtimeEffectKey || record.key || `${baseKey}:${effectType}`)
@@ -19168,6 +19321,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         shieldTargetRules: abilityArray(item.shieldTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         reviveRules: abilityArray(item.reviveRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), hpRate: Math.max(.01, Number(rule && rule.hpRate) || .3), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), surviveHits: Math.max(0, Math.floor(Number(rule && rule.surviveHits) || 0)), maxTriggers: Math.max(1, Math.floor(Number(rule && rule.maxTriggers) || 1)) })),
         speedTargetRules: abilityArray(item.speedTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0), maxStacks: Math.max(1, Math.floor(Number(rule && rule.maxStacks) || 1)) })).filter(rule => rule.value),
+        tauntRules: abilityArray(item.tauntRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), durationRounds: Math.max(0, Math.floor(Number(rule && rule.durationRounds) || 0)) })),
         abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} })),
         domainActivations: abilityArray(item.domainActivations).filter(rule => rule && rule.domainId).map(rule => ({ ...rule })),
         domainPassiveEffects: abilityArray(item.domainPassiveEffects).map(effect => ({ ...effect })),
@@ -19175,7 +19329,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.speedTargetRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
     }
 
 
@@ -20121,7 +20275,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     async function runArenaBattle() {
       if (arenaAnimating) return;
       updateBattleEnergy();
-      if (!state.arena.team.length) return showToast("ต้องจัดทีม ARENA ก่อนต่อสู้");
+      if (!state.arena.team.some(Boolean)) return showToast("ต้องจัดทีม ARENA ก่อนต่อสู้");
       if (state.battle.energy < 1) return showToast("ดาบหมด รอให้ฟื้นก่อน");
 
       currentArenaOpponent = pickArenaOpponent();
@@ -20163,7 +20317,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         enemyAbilityRoster: stats.enemyAbilityRoster,
         statusResolutionSeed: makeAbilityResolutionSeed("arena", state.arena && state.arena.team || [], stats.enemyTeam && stats.enemyTeam.map(item => item.id) || [], ""),
         playerFormationFront: state.arena.formationFront,
+        playerFormationSize: CONFIG.arenaTeamSlots,
         enemyFormationFront: 2,
+        enemyFormationSize: CONFIG.arenaTeamSlots,
         playerCommandStrategy: state.arena.commandStrategy,
         playerTargetStrategy: state.arena.targetStrategy,
         enemyCommandStrategy: "balanced",
@@ -20496,7 +20652,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     async function runBattle() {
       const stats = getBattleStats();
       if (battleAnimating) return;
-      if (!getTowerTeamIds().length) return showToast("ต้องจัดการ์ดเข้าทีมไต่หอก่อนต่อสู้");
+      if (!getTowerTeamIds().some(Boolean)) return showToast("ต้องจัดการ์ดเข้าทีมไต่หอก่อนต่อสู้");
       if (!stats.restrictionStatus.ok) return showToast(`ทีมยังผิดเงื่อนไขชั้นนี้: ${stats.restrictionStatus.invalidCards.map(card => card.name).slice(0, 2).join(", ")}`);
       if (state.battle.energy < 1) return showToast("Energy หมด รอให้ฟื้นก่อน");
 
@@ -20534,7 +20690,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         enemyAbilityRoster: stats.enemyAbilityRoster,
         statusResolutionSeed: makeAbilityResolutionSeed("tower", getTowerTeamIds(), [stats.enemyCard && stats.enemyCard.id], ""),
         playerFormationFront: state.battle.formationFront,
+        playerFormationSize: CONFIG.towerTeamSlots,
         enemyFormationFront: 1,
+        enemyFormationSize: 1,
         playerCommandStrategy: state.battle.commandStrategy,
         playerTargetStrategy: state.battle.targetStrategy,
         enemyCommandStrategy: "balanced",
@@ -21747,54 +21905,32 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       }
     }
 
-    function toggleTeam(cardId) {
+    function toggleCardInModeTeam(mode, cardId) {
       const id = String(cardId);
-      if (!state.owned[id]) return;
+      if (!getOwned(id)) return;
+      const team = getTeamArrayByMode(mode);
+      const limit = getTeamSlotLimit(mode);
+      const existing = team.indexOf(id);
       updateIncome();
-      if (state.team.includes(id)) state.team = state.team.filter(item => item !== id);
+      if (existing >= 0) team[existing] = "";
       else {
-        if (state.team.length >= CONFIG.teamSlots) return showToast("ทีมเต็มแล้ว เอาการ์ดใบอื่นออกก่อน");
-        state.team.push(id);
+        let empty = -1;
+        for (let index = 0; index < limit; index += 1) if (!team[index]) { empty = index; break; }
+        if (empty < 0) return showToast(`${teamPresetModeLabel(mode)}เต็มแล้ว เอาการ์ดใบอื่นออกก่อน`);
+        while (team.length <= empty) team.push("");
+        team[empty] = id;
       }
-      saveState();
-      renderAll();
-      openCardModal(id);
-    }
-
-    function toggleTowerTeam(cardId) {
-      const id = String(cardId);
-      if (!getOwned(id)) return;
-      const team = getTowerTeamIds();
-      if (team.includes(id)) state.battle.team = team.filter(item => item !== id);
-      else {
-        if (team.length >= CONFIG.towerTeamSlots) return showToast("ทีมไต่หอเต็มแล้ว เอาการ์ดใบอื่นออกก่อน");
-        team.push(id);
-      }
-      battleResult = null;
-      lastBattleCombat = null;
-      lastBattleSummary = null;
+      const normalized = trimTrailingTeamSlots(team);
+      team.splice(0, team.length, ...normalized);
+      ensureModeLeader(mode);
+      resetModeBattleCache(mode);
       saveState(true);
       renderAll();
-      if (modalCardId) renderCardDetail(modalCardId);
     }
 
-    function toggleArenaTeam(cardId) {
-      const id = String(cardId);
-      if (!getOwned(id)) return;
-      if (!state.arena || !Array.isArray(state.arena.team)) state.arena = Object.assign(defaultState().arena, state.arena || {});
-      if (state.arena.team.includes(id)) state.arena.team = state.arena.team.filter(item => item !== id);
-      else {
-        if (state.arena.team.length >= CONFIG.arenaTeamSlots) return showToast("ทีม ARENA เต็มแล้ว เอาการ์ดใบอื่นออกก่อน");
-        state.arena.team.push(id);
-      }
-      currentArenaOpponent = null;
-      arenaResult = null;
-      lastArenaCombat = null;
-      lastArenaSummary = null;
-      saveState(true);
-      renderAll();
-      if (modalCardId) renderCardDetail(modalCardId);
-    }
+    function toggleTeam(cardId) { toggleCardInModeTeam("showcase", cardId); if (modalCardId) renderCardDetail(modalCardId); }
+    function toggleTowerTeam(cardId) { toggleCardInModeTeam("tower", cardId); if (modalCardId) renderCardDetail(modalCardId); }
+    function toggleArenaTeam(cardId) { toggleCardInModeTeam("arena", cardId); if (modalCardId) renderCardDetail(modalCardId); }
 
     function getCardProgressStatus(card) {
       const owned = getOwned(card && card.id);
@@ -22207,6 +22343,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       gachaRarityRate: "กาชา gacha เรทกาชา rate up เพิ่มเรท ระดับการ์ด",
       nullifyCardAbilities: "ยกเลิกสกิล ลบสกิล ปิดสกิล ความสามารถไร้ผล nullify",
       activateDomain: "กางอาณาเขต เปิดอาณาเขต domain field",
+      taunt: "ยั่วยุ taunt provoke aggro บังคับเป้าหมาย เล็งก่อน แทงค์ tank",
       ignoreAbilityConditions: "ยกเลิกเงื่อนไข ไม่สนเงื่อนไข ปลดเงื่อนไข ignore condition"
     });
 
@@ -22226,7 +22363,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       minUniqueElements: "จำนวนธาตุไม่ซ้ำขั้นต่ำ",
       minTeamSize: "จำนวนสมาชิกทีมขั้นต่ำ",
       maxTeamSize: "จำนวนสมาชิกทีมสูงสุด จำกัดคน",
-      leaderOnly: "หัวหน้าทีม leader ช่องหนึ่ง",
+      leaderOnly: "หัวหน้าทีม leader ที่กำหนด แยกจากตำแหน่งช่อง",
       sourceMinLevel: "เลเวลขั้นต่ำ level",
       sourceMinAwaken: "อเวกขั้นต่ำ awaken",
       requiredCardIds: "ต้องจัดทีมร่วมกับ การ์ดที่ต้องมี",
@@ -22362,12 +22499,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function teamSlotHTML(card, index, mode = "showcase") {
+      const leaderId = getTeamLeaderId(mode);
+      const isLeader = Boolean(card && String(card.id) === String(leaderId));
       const slotLabel = mode === "arena"
         ? `ช่อง ARENA ${index + 1}`
         : mode === "tower" ? `ช่องไต่หอ ${index + 1}` : `ช่องทีมโชว์ ${index + 1}`;
       if (!card) {
         return `
-          <button type="button" class="team-slot team-slot-empty" data-action="open-team-picker" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}">
+          <button type="button" class="team-slot team-slot-empty" data-team-slot="true" data-action="open-team-picker" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}">
             <b>＋</b><span>${escapeHTML(slotLabel)}</span><small>กดเพื่อเลือกการ์ดจากคลัง</small>
           </button>`;
       }
@@ -22375,12 +22514,13 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const status = getCardProgressStatus(card);
       const image = getCardImage(card);
       return `
-        <div class="team-slot team-slot-filled" style="${rarityStyleVars(rarity)}">
+        <div class="team-slot team-slot-filled${isLeader ? " is-leader" : ""}" draggable="true" data-team-slot="true" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}" style="${rarityStyleVars(rarity)}">
           <button type="button" class="team-slot-select" data-action="open-team-picker" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}">
             <div class="team-slot-art">
               ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" onerror="this.remove()">` : ""}
               <span class="team-slot-number">${escapeHTML(slotLabel)} • ${escapeHTML(rarity.label)}</span>
               ${awakenBadgeHTML(card)}
+              ${isLeader ? `<span class="team-leader-badge">👑 LEADER</span>` : ""}
             </div>
             <div class="team-slot-copy">
               <h3 class="team-slot-name">${escapeHTML(card.name)}<small>ID ${escapeHTML(card.id)}</small></h3>
@@ -22394,8 +22534,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                 <div class="team-slot-stat"><span>SALARY / DAY</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
               </div>
               <div class="team-slot-change">แตะเพื่อเปลี่ยนการ์ด</div>
+              <div class="team-slot-drag-hint">ลากการ์ดเพื่อสลับช่องและแนวรบ</div>
             </div>
           </button>
+          <button type="button" class="team-slot-drag-handle" data-team-drag-handle="true" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}" aria-label="ลากเพื่อสลับตำแหน่ง">↔</button>
+          <button type="button" class="team-slot-leader${isLeader ? " active" : ""}" data-action="set-team-leader" data-team-mode="${escapeHTML(mode)}" data-card-id="${escapeHTML(card.id)}" aria-label="กำหนดเป็น Leader">👑</button>
           <button type="button" class="team-slot-remove" data-action="clear-team-slot" data-team-mode="${escapeHTML(mode)}" data-slot-index="${index}" aria-label="นำออกจากทีม">×</button>
         </div>`;
     }
@@ -22455,7 +22598,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function getTowerTeamIds() {
       if (!state.battle || typeof state.battle !== "object") state.battle = Object.assign(defaultState().battle, state.battle || {});
-      if (!Array.isArray(state.battle.team)) state.battle.team = state.team.slice(0, CONFIG.towerTeamSlots);
+      if (!Array.isArray(state.battle.team)) state.battle.team = normalizeTeamSlotArray(state.team, CONFIG.towerTeamSlots, state.owned);
       return state.battle.team;
     }
 
@@ -22475,14 +22618,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const requestedIndex = Math.max(0, Math.floor(Number(slotIndex) || 0));
       teamPickerContext = {
         mode: safeMode,
-        // ทีมเก็บแบบเรียงชิดต่อกัน ช่องว่างที่กดจึงเติม “ช่องว่างแรก” เสมอ
-        slotIndex: Math.min(limit - 1, Math.min(requestedIndex, team.length))
+        // เลือกช่องได้อิสระ แม้ช่องก่อนหน้าจะยังว่าง
+        slotIndex: Math.min(limit - 1, requestedIndex)
       };
       const title = document.getElementById("teamPickerTitle");
       const subtitle = document.getElementById("teamPickerSubtitle");
       const modeLabel = teamPickerContext.mode === "arena" ? "ทีม ARENA" : teamPickerContext.mode === "tower" ? "ทีมไต่หอ" : "ทีมโชว์";
       if (title) title.textContent = `${modeLabel} • ช่อง ${teamPickerContext.slotIndex + 1}`;
-      if (subtitle) subtitle.textContent = "ดูรายละเอียดสกิลก่อนเลือกได้ และมีป้ายบอกว่าการ์ดอยู่ทีมโชว์ ทีมไต่หอ หรือทีม ARENA ช่องใด";
+      if (subtitle) subtitle.textContent = "เลือกลงช่องนี้ได้โดยตรง ช่องก่อนหน้าไม่จำเป็นต้องเต็ม และสามารถลากสลับตำแหน่งภายหลังได้";
       renderTeamPicker();
       document.getElementById("teamPickerModal").classList.remove("hidden");
       document.body.style.overflow = "hidden";
@@ -22581,34 +22724,37 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderSortDirectionButtons();
     }
 
+    function resetModeBattleCache(mode) {
+      if (mode === "arena") { currentArenaOpponent = null; arenaResult = null; lastArenaCombat = null; lastArenaSummary = null; }
+      if (mode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
+    }
+
+    function ensureModeLeader(mode) {
+      const team = getTeamArrayByMode(mode);
+      setStoredTeamLeaderId(mode, normalizeTeamLeaderId(getTeamLeaderId(mode, team), team));
+    }
+
     function assignCardToTeamSlot(cardId) {
       const id = cardIdString(cardId);
       if (!getOwned(id) || !CARD_BY_ID.has(id)) return showToast("เลือกได้เฉพาะการ์ดที่มีอยู่ในคลัง");
       const mode = teamPickerContext.mode;
-      const limit = mode === "arena" ? CONFIG.arenaTeamSlots : mode === "tower" ? CONFIG.towerTeamSlots : CONFIG.teamSlots;
+      const limit = getTeamSlotLimit(mode);
       const targetIndex = Math.min(limit - 1, Math.max(0, teamPickerContext.slotIndex));
       const team = getTeamArrayByMode(mode);
+      while (team.length <= targetIndex) team.push("");
       const existingIndex = team.indexOf(id);
-      const targetId = String(team[targetIndex] || "");
       if (existingIndex === targetIndex) {
         closeTeamPicker();
         return showToast("การ์ดใบนี้อยู่ในช่องที่เลือกแล้ว");
       }
       updateIncome();
-      if (existingIndex >= 0) {
-        if (targetId) team[existingIndex] = targetId;
-        else team.splice(existingIndex, 1);
-      }
-      if (targetIndex < team.length) team[targetIndex] = id;
-      else if (team.length < limit) team.push(id);
-      else return showToast("ทีมเต็มแล้ว");
-      if (mode === "arena") {
-        currentArenaOpponent = null;
-        arenaResult = null;
-        lastArenaCombat = null;
-        lastArenaSummary = null;
-      }
-      if (mode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
+      const targetId = String(team[targetIndex] || "");
+      if (existingIndex >= 0) team[existingIndex] = targetId;
+      team[targetIndex] = id;
+      const normalized = trimTrailingTeamSlots(team);
+      team.splice(0, team.length, ...normalized);
+      ensureModeLeader(mode);
+      resetModeBattleCache(mode);
       saveState(true);
       renderAll();
       closeTeamPicker();
@@ -22621,17 +22767,44 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const index = Math.max(0, Math.floor(Number(slotIndex) || 0));
       if (!team[index]) return;
       updateIncome();
-      team.splice(index, 1);
-      if (safeMode === "arena") {
-        currentArenaOpponent = null;
-        arenaResult = null;
-        lastArenaCombat = null;
-        lastArenaSummary = null;
-      }
-      if (safeMode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
+      team[index] = "";
+      const normalized = trimTrailingTeamSlots(team);
+      team.splice(0, team.length, ...normalized);
+      ensureModeLeader(safeMode);
+      resetModeBattleCache(safeMode);
       saveState(true);
       renderAll();
-      showToast("นำการ์ดออกจากทีมแล้ว");
+      showToast("นำการ์ดออกจากช่องแล้ว โดยตำแหน่งอื่นไม่เลื่อนตาม");
+    }
+
+    function setTeamLeader(mode = "showcase", cardId = "") {
+      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const team = getTeamArrayByMode(safeMode);
+      const id = String(cardId || "");
+      if (!id || !team.includes(id)) return showToast("Leader ต้องเป็นสมาชิกในทีมนี้");
+      setStoredTeamLeaderId(safeMode, id);
+      resetModeBattleCache(safeMode);
+      saveState(true);
+      renderAll();
+      showToast(`กำหนด ${CARD_BY_ID.get(id)?.name || id} เป็น Leader แล้ว`);
+    }
+
+    function swapTeamSlots(mode = "showcase", fromIndex = 0, toIndex = 0) {
+      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const limit = getTeamSlotLimit(safeMode);
+      const from = Math.max(0, Math.min(limit - 1, Math.floor(Number(fromIndex) || 0)));
+      const to = Math.max(0, Math.min(limit - 1, Math.floor(Number(toIndex) || 0)));
+      if (from === to) return;
+      const team = getTeamArrayByMode(safeMode);
+      while (team.length <= Math.max(from, to)) team.push("");
+      [team[from], team[to]] = [team[to] || "", team[from] || ""];
+      const normalized = trimTrailingTeamSlots(team);
+      team.splice(0, team.length, ...normalized);
+      ensureModeLeader(safeMode);
+      resetModeBattleCache(safeMode);
+      saveState(true);
+      renderAll();
+      showToast(`สลับช่อง ${from + 1} ↔ ${to + 1} แล้ว`);
     }
 
     function renderTeamElementPanel() {
@@ -22694,13 +22867,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return Array.from({ length: CONFIG.teamPresetLimit }, (_, index) => {
         const item = source[index];
         if (!item || typeof item !== "object") return null;
-        const cards = [...new Set(abilityArray(item.cards || item.team).map(String))]
-          .filter(id => ownedMap[id] && CARD_BY_ID.has(id))
-          .slice(0, Math.max(CONFIG.teamSlots, CONFIG.towerTeamSlots, CONFIG.arenaTeamSlots));
-        if (!cards.length) return null;
+        const cards = normalizeTeamSlotArray(item.cards || item.team, Math.max(CONFIG.teamSlots, CONFIG.towerTeamSlots, CONFIG.arenaTeamSlots), ownedMap);
+        if (!cards.some(Boolean)) return null;
         return {
           name: String(item.name || `พรีเซ็ต ${index + 1}`).trim().slice(0, 28) || `พรีเซ็ต ${index + 1}`,
           cards,
+          leaderId: normalizeTeamLeaderId(item.leaderId, cards),
           createdAt: Math.max(0, Number(item.createdAt) || Date.now()),
           updatedAt: Math.max(0, Number(item.updatedAt) || Date.now())
         };
@@ -22727,7 +22899,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!preset) {
         return `<div class="team-preset-card empty"><div class="team-preset-title-row"><strong>ช่องว่าง</strong><span class="team-preset-number">#${number}</span></div><button class="btn team-preset-save-empty" data-action="save-team-preset" data-preset-index="${index}" data-team-mode="${escapeHTML(mode)}">＋ บันทึกทีมปัจจุบัน</button></div>`;
       }
-      const cards = abilityArray(preset.cards).map(String).filter(id => CARD_BY_ID.has(id));
+      const cards = normalizeTeamSlotArray(preset.cards, 5, state.owned);
       const summary = getTeamElementSummary(cards);
       const comboCount = abilityArray(summary.activeCombos).length;
       const members = Array.from({ length: 5 }, (_, slot) => teamPresetMemberHTML(cards[slot])).join("");
@@ -22735,7 +22907,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         <div class="team-preset-card">
           <div class="team-preset-title-row"><strong title="${escapeHTML(preset.name)}">${escapeHTML(preset.name)}</strong><span class="team-preset-number">#${number}</span></div>
           <div class="team-preset-members">${members}</div>
-          <div class="team-preset-meta">${cards.length}/5 ใบ • ธาตุหลัก ${escapeHTML(elementLabel(summary.dominantElement))} • คอมโบ ${comboCount}</div>
+          <div class="team-preset-meta">${cards.filter(Boolean).length}/5 ใบ • Leader ${escapeHTML(CARD_BY_ID.get(String(preset.leaderId || ""))?.name || "-")} • ธาตุหลัก ${escapeHTML(elementLabel(summary.dominantElement))} • คอมโบ ${comboCount}</div>
           <div class="team-preset-actions">
             <button class="btn btn-primary" data-action="load-team-preset" data-preset-index="${index}" data-team-mode="${escapeHTML(mode)}">ใช้ทันที</button>
             <button class="btn" data-action="save-team-preset" data-preset-index="${index}" data-team-mode="${escapeHTML(mode)}">ทับ</button>
@@ -22768,13 +22940,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function saveTeamPreset(index, mode = "showcase") {
       const safeIndex = Math.max(0, Math.min(CONFIG.teamPresetLimit - 1, Math.floor(Number(index) || 0)));
-      const team = getTeamArrayByMode(mode).map(String).filter(id => state.owned[id] && CARD_BY_ID.has(id));
-      if (!team.length) return showToast(`ต้องจัด ${teamPresetModeLabel(mode)} อย่างน้อย 1 ใบก่อนบันทึก`);
+      const team = normalizeTeamSlotArray(getTeamArrayByMode(mode), getTeamSlotLimit(mode), state.owned);
+      if (!team.some(Boolean)) return showToast(`ต้องจัด ${teamPresetModeLabel(mode)} อย่างน้อย 1 ใบก่อนบันทึก`);
       if (!Array.isArray(state.teamPresets)) state.teamPresets = normalizeTeamPresets([], state.owned);
       const old = state.teamPresets[safeIndex];
       state.teamPresets[safeIndex] = {
         name: old && old.name ? old.name : `พรีเซ็ต ${safeIndex + 1}`,
-        cards: [...new Set(team)].slice(0, 5),
+        cards: team.slice(0, 5),
+        leaderId: getTeamLeaderId(mode, team),
         createdAt: old && old.createdAt ? old.createdAt : Date.now(),
         updatedAt: Date.now()
       };
@@ -22788,11 +22961,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const preset = Array.isArray(state.teamPresets) ? state.teamPresets[safeIndex] : null;
       if (!preset) return showToast("พรีเซ็ตช่องนี้ยังว่าง");
       const limit = mode === "tower" ? CONFIG.towerTeamSlots : mode === "arena" ? CONFIG.arenaTeamSlots : CONFIG.teamSlots;
-      const cards = [...new Set(abilityArray(preset.cards).map(String))].filter(id => state.owned[id] && CARD_BY_ID.has(id)).slice(0, limit);
-      if (!cards.length) return showToast("การ์ดในพรีเซ็ตนี้ไม่อยู่ในคลังแล้ว");
+      const cards = normalizeTeamSlotArray(preset.cards, limit, state.owned);
+      if (!cards.some(Boolean)) return showToast("การ์ดในพรีเซ็ตนี้ไม่อยู่ในคลังแล้ว");
       updateIncome();
       const team = getTeamArrayByMode(mode);
       team.splice(0, team.length, ...cards);
+      setStoredTeamLeaderId(mode, normalizeTeamLeaderId(preset.leaderId, cards));
       if (mode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
       if (mode === "arena") { currentArenaOpponent = null; arenaResult = null; lastArenaCombat = null; lastArenaSummary = null; }
       saveState(true);
@@ -22851,7 +23025,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (formation) formation.value = String(normalizeFormationFront(data.formationFront, 5));
       if (command) command.value = String(data.commandStrategy || "balanced");
       if (target) target.value = String(data.targetStrategy || "lowHp");
-      if (note) note.innerHTML = `<b>${escapeHTML(formationDescription(data.formationFront, 5))}</b><br>ช่องทีมลำดับ 1–${normalizeFormationFront(data.formationFront,5)} เป็นแนวหน้า • ตัวละครแต่ละใบโจมตีตาม Base SPD และนับ afterOwnAttacks เฉพาะตอนเจ้าของสกิลลงมือเอง`;
+      if (note) note.innerHTML = `<b>${escapeHTML(formationDescription(data.formationFront, 5))}</b><br>ช่อง 1–${normalizeFormationFront(data.formationFront,5)} เป็นแนวหน้า • ลากการ์ดเพื่อเปลี่ยนช่องได้อิสระ • Leader ปัจจุบัน: ${escapeHTML(CARD_BY_ID.get(getTeamLeaderId(mode, team))?.name || "ยังไม่กำหนด")}`;
       const grid = document.getElementById(`${prefix}TeamGrid`);
       if (grid) [...grid.children].forEach((slot,index) => {
         const row = index < normalizeFormationFront(data.formationFront,5) ? "front" : "back";
@@ -23139,7 +23313,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       document.getElementById("battleStageText").textContent = stats.stage;
       document.getElementById("battleRecordText").textContent = `${state.battle.wins} / ${state.battle.losses}`;
       document.getElementById("battleSupportText").textContent = supportText;
-      document.getElementById("battleButton").disabled = battleAnimating || !getTowerTeamIds().length || !stats.restrictionStatus.ok || state.battle.energy < 1;
+      document.getElementById("battleButton").disabled = battleAnimating || !getTowerTeamIds().some(Boolean) || !stats.restrictionStatus.ok || state.battle.energy < 1;
       const summaryButton = document.getElementById("battleSummaryButton");
       if (summaryButton) summaryButton.disabled = !lastBattleSummary;
       const difficulty = getTowerDifficultyInfo(stats);
@@ -23196,7 +23370,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!playerModels || !enemyModels) return;
 
       if (forceModels || !arenaAnimating || !playerModels.children.length || !enemyModels.children.length) {
-        playerModels.innerHTML = state.arena.team.length
+        playerModels.innerHTML = state.arena.team.some(Boolean)
           ? state.arena.team.map((id, index) => {
               const card = CARD_BY_ID.get(String(id));
               return card ? battleModelHTML(card, index, false, state.arena.team.length) : "";
@@ -24456,6 +24630,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "close-team-picker") closeTeamPicker();
       if (action === "assign-team-slot") assignCardToTeamSlot(cardId);
       if (action === "clear-team-slot") clearTeamSlot(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
+      if (action === "set-team-leader") setTeamLeader(target.dataset.teamMode, target.dataset.cardId || cardId);
       if (action === "save-team-preset") saveTeamPreset(Number(target.dataset.presetIndex) || 0, target.dataset.teamMode || "showcase");
       if (action === "load-team-preset") loadTeamPreset(Number(target.dataset.presetIndex) || 0, target.dataset.teamMode || "showcase");
       if (action === "rename-team-preset") renameTeamPreset(Number(target.dataset.presetIndex) || 0);
@@ -24589,6 +24764,76 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (scope === "battle") renderBattle(); else renderArena();
       showToast(`บันทึกแผนการรบ ${scope === "battle" ? "ไต่หอ" : "ARENA"} แล้ว`);
     });
+
+    document.addEventListener("dragstart", event => {
+      const slot = event.target && event.target.closest ? event.target.closest('[data-team-slot][draggable="true"]') : null;
+      if (!slot) return;
+      draggedTeamSlot = { mode: String(slot.dataset.teamMode || "showcase"), index: Number(slot.dataset.slotIndex) || 0 };
+      slot.classList.add("dragging");
+      if (event.dataTransfer) { event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", `${draggedTeamSlot.mode}:${draggedTeamSlot.index}`); }
+    });
+    document.addEventListener("dragover", event => {
+      const slot = event.target && event.target.closest ? event.target.closest('[data-team-slot="true"]') : null;
+      if (!slot || !draggedTeamSlot || String(slot.dataset.teamMode || "showcase") !== draggedTeamSlot.mode) return;
+      event.preventDefault();
+      slot.classList.add("drag-over");
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    });
+    document.addEventListener("dragleave", event => {
+      const slot = event.target && event.target.closest ? event.target.closest('[data-team-slot="true"]') : null;
+      if (slot && !slot.contains(event.relatedTarget)) slot.classList.remove("drag-over");
+    });
+    document.addEventListener("drop", event => {
+      const slot = event.target && event.target.closest ? event.target.closest('[data-team-slot="true"]') : null;
+      if (!slot || !draggedTeamSlot || String(slot.dataset.teamMode || "showcase") !== draggedTeamSlot.mode) return;
+      event.preventDefault();
+      const targetIndex = Number(slot.dataset.slotIndex) || 0;
+      document.querySelectorAll('.team-slot.drag-over').forEach(node => node.classList.remove('drag-over'));
+      swapTeamSlots(draggedTeamSlot.mode, draggedTeamSlot.index, targetIndex);
+      draggedTeamSlot = null;
+    });
+    document.addEventListener("dragend", () => {
+      document.querySelectorAll('.team-slot.dragging,.team-slot.drag-over').forEach(node => node.classList.remove('dragging','drag-over'));
+      draggedTeamSlot = null;
+    });
+
+    // Pointer Drag รองรับเมาส์ ปากกา และหน้าจอสัมผัสผ่านปุ่ม ↔
+    document.addEventListener("pointerdown", event => {
+      const handle = event.target && event.target.closest ? event.target.closest('[data-team-drag-handle="true"]') : null;
+      if (!handle) return;
+      const slot = handle.closest('[data-team-slot="true"]');
+      if (!slot) return;
+      event.preventDefault();
+      event.stopPropagation();
+      pointerDraggedTeamSlot = { mode:String(slot.dataset.teamMode || "showcase"), index:Number(slot.dataset.slotIndex) || 0, pointerId:event.pointerId, source:slot };
+      pointerDragTarget = slot;
+      slot.classList.add("dragging");
+      try { handle.setPointerCapture(event.pointerId); } catch {}
+    });
+    document.addEventListener("pointermove", event => {
+      if (!pointerDraggedTeamSlot || event.pointerId !== pointerDraggedTeamSlot.pointerId) return;
+      event.preventDefault();
+      document.querySelectorAll('.team-slot.drag-over').forEach(node => node.classList.remove('drag-over'));
+      const under = document.elementFromPoint(event.clientX, event.clientY);
+      const slot = under && under.closest ? under.closest('[data-team-slot="true"]') : null;
+      if (slot && String(slot.dataset.teamMode || "showcase") === pointerDraggedTeamSlot.mode) {
+        pointerDragTarget = slot;
+        slot.classList.add("drag-over");
+      }
+    }, { passive:false });
+    function finishPointerTeamDrag(event, cancelled = false) {
+      if (!pointerDraggedTeamSlot || (event && event.pointerId !== pointerDraggedTeamSlot.pointerId)) return;
+      const source = pointerDraggedTeamSlot;
+      const target = pointerDragTarget;
+      document.querySelectorAll('.team-slot.dragging,.team-slot.drag-over').forEach(node => node.classList.remove('dragging','drag-over'));
+      pointerDraggedTeamSlot = null;
+      pointerDragTarget = null;
+      if (!cancelled && target && String(target.dataset.teamMode || "showcase") === source.mode) {
+        swapTeamSlots(source.mode, source.index, Number(target.dataset.slotIndex) || 0);
+      }
+    }
+    document.addEventListener("pointerup", event => finishPointerTeamDrag(event, false));
+    document.addEventListener("pointercancel", event => finishPointerTeamDrag(event, true));
 
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
