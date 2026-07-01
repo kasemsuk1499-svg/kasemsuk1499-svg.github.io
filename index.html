@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-06-30-ability-conditions-v62-cutscene-all-methods">
-  <title>Anime Card Collection · Ability Conditions v62 · Cutscene All Methods</title>
+  <meta name="gacha-app-build" content="2026-07-01-turn-based-formation-spd-v1">
+  <title>Anime Card Collection · Turn Based Formation + SPD v1</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5317,6 +5317,70 @@
       #battleSummaryModal .battle-summary-card-art { width: 62px; }
     }
 
+
+
+    /* เพิ่มโดยอลิซ v63: ระบบเทิร์นเบสรายตัว + แผนหน้า/หลัง */
+    .turn-tactics-panel {
+      margin: 0 0 14px;
+      padding: 13px;
+      border: 1px solid rgba(92,232,255,.18);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(92,232,255,.055), rgba(167,139,250,.05));
+    }
+    .turn-tactics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 9px;
+    }
+    .turn-tactics-field label {
+      display:block;
+      margin-bottom:5px;
+      color:#dbe5ff;
+      font-size:.68rem;
+      font-weight:1000;
+    }
+    .turn-tactics-note {
+      margin-top:9px;
+      padding:9px 10px;
+      border-radius:12px;
+      color:var(--muted);
+      font-size:.69rem;
+      line-height:1.55;
+      background:rgba(3,5,12,.34);
+    }
+    .turn-tactics-note b { color:var(--cyan); }
+    .formation-row-badge {
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      margin-left:4px;
+      border-radius:999px;
+      padding:3px 7px;
+      font-size:.56rem;
+      font-weight:1000;
+    }
+    .formation-row-badge.front { color:#062016; background:var(--green); }
+    .formation-row-badge.back { color:#1f1300; background:var(--gold); }
+    .battle-character-report-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .battle-character-report { border:1px solid var(--line); border-radius:16px; overflow:hidden; background:rgba(255,255,255,.025); }
+    .battle-character-report h4 { margin:0; padding:11px 12px; border-bottom:1px solid var(--line); font-size:.84rem; }
+    .battle-character-row { display:grid; grid-template-columns:minmax(120px,1.35fr) repeat(6,minmax(66px,.7fr)); gap:7px; align-items:center; padding:9px 11px; border-bottom:1px solid rgba(255,255,255,.055); font-size:.65rem; }
+    .battle-character-row:last-child { border-bottom:0; }
+    .battle-character-row.header { color:var(--cyan); font-weight:1000; background:rgba(92,232,255,.045); }
+    .battle-character-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:1000; }
+    .battle-character-row .ko { color:var(--danger); }
+    .battle-mvp-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:12px; }
+    .battle-mvp-card { padding:11px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.035); }
+    .battle-mvp-card span { display:block; color:var(--muted); font-size:.63rem; }
+    .battle-mvp-card strong { display:block; margin-top:4px; font-size:.8rem; }
+    @media(max-width:900px){
+      .turn-tactics-grid{grid-template-columns:1fr}
+      .battle-character-report-grid{grid-template-columns:1fr}
+      .battle-mvp-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .battle-character-row{grid-template-columns:minmax(110px,1.3fr) repeat(3,minmax(62px,.7fr))}
+      .battle-character-row span:nth-child(n+5){display:none}
+    }
+
   </style>
 </head>
 <body class="auth-locked">
@@ -5588,6 +5652,14 @@
               <strong id="towerTeamPowerText">ATK 0 • HP 0 • DEF 0 • พลังรวม 0</strong>
             </div>
             <div class="team-preset-panel" id="towerPresetPanel"></div>
+            <div class="turn-tactics-panel" id="towerTacticsPanel">
+              <div class="turn-tactics-grid">
+                <div class="turn-tactics-field"><label for="towerFormationSelect">แผนการรบ หน้า / หลัง</label><select class="field" id="towerFormationSelect"><option value="4">หน้า 4 • หลัง 1</option><option value="3">หน้า 3 • หลัง 2</option><option value="2">หน้า 2 • หลัง 3</option><option value="1">หน้า 1 • หลัง 4</option></select></div>
+                <div class="turn-tactics-field"><label for="towerCommandSelect">คำสั่ง AI ฝ่ายเรา</label><select class="field" id="towerCommandSelect"><option value="balanced">สมดุล • ใช้สกิลเมื่อพร้อม</option><option value="skill">เน้นสกิล • รีบใช้ Active</option><option value="attack">โจมตีปกติ • เก็บ Active</option><option value="guard">ตั้งรับ • ป้องกันเมื่อ HP ต่ำ</option></select></div>
+                <div class="turn-tactics-field"><label for="towerTargetSelect">วิธีเลือกเป้าหมาย</label><select class="field" id="towerTargetSelect"><option value="lowHp">แนวหน้าที่ HP ต่ำสุด</option><option value="highAtk">แนวหน้าที่ ATK สูงสุด</option><option value="random">สุ่มจากแนวหน้าที่ยังอยู่</option></select></div>
+              </div>
+              <div class="turn-tactics-note" id="towerFormationNote">Tower: กำลังอ่านแผนการรบ…</div>
+            </div>
             <div class="team-grid" id="towerTeamGrid"></div>
             <div class="element-panel" id="towerElementPanel"></div>
           </div>
@@ -5730,6 +5802,14 @@
               <strong id="arenaTeamPowerText">ATK 0 • HP 0 • DEF 0 • พลังรวม 0</strong>
             </div>
             <div class="team-preset-panel" id="arenaPresetPanel"></div>
+            <div class="turn-tactics-panel" id="arenaTacticsPanel">
+              <div class="turn-tactics-grid">
+                <div class="turn-tactics-field"><label for="arenaFormationSelect">แผนการรบ หน้า / หลัง</label><select class="field" id="arenaFormationSelect"><option value="4">หน้า 4 • หลัง 1</option><option value="3">หน้า 3 • หลัง 2</option><option value="2">หน้า 2 • หลัง 3</option><option value="1">หน้า 1 • หลัง 4</option></select></div>
+                <div class="turn-tactics-field"><label for="arenaCommandSelect">คำสั่ง AI ฝ่ายเรา</label><select class="field" id="arenaCommandSelect"><option value="balanced">สมดุล • ใช้สกิลเมื่อพร้อม</option><option value="skill">เน้นสกิล • รีบใช้ Active</option><option value="attack">โจมตีปกติ • เก็บ Active</option><option value="guard">ตั้งรับ • ป้องกันเมื่อ HP ต่ำ</option></select></div>
+                <div class="turn-tactics-field"><label for="arenaTargetSelect">วิธีเลือกเป้าหมาย</label><select class="field" id="arenaTargetSelect"><option value="lowHp">แนวหน้าที่ HP ต่ำสุด</option><option value="highAtk">แนวหน้าที่ ATK สูงสุด</option><option value="random">สุ่มจากแนวหน้าที่ยังอยู่</option></select></div>
+              </div>
+              <div class="turn-tactics-note" id="arenaFormationNote">ARENA: กำลังอ่านแผนการรบ…</div>
+            </div>
             <div class="team-grid" id="arenaTeamGrid"></div>
             <div class="element-panel" id="arenaElementPanel"></div>
           </div>
@@ -6402,16 +6482,16 @@
     /* ===================== [SECTION 02 RARITY-COLORS] ===================== */
     const RARITIES = Object.freeze({
       // สมดุลใหม่: ATK : HP : DEF ≈ 1 : 5 : 0.40 เพื่อให้การ์ดระดับเดียวกันสู้กันประมาณ 8–9 เทิร์นก่อนคิดสกิล/โล่
-      N:   { label: "N",         color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,      basePower: 1000,    baseHp: 5000,     baseDefense: 400,    baseIncome: 35,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015, incomePerLevel: .008,  awakenMax: 13, awakenCopies: [1,1,1,2,2,3,3,4,5,6,7,8,10], powerBonus: .07, incomeBonus: .05 },
-      R:   { label: "R",         color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,     basePower: 3000,    baseHp: 15000,    baseDefense: 1200,   baseIncome: 100,   maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016, incomePerLevel: .0085, awakenMax: 11, awakenCopies: [1,1,2,2,3,3,4,5,6,7,8], powerBonus: .09, incomeBonus: .06 },
-      SR:  { label: "SR",        color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,     basePower: 9000,    baseHp: 45000,    baseDefense: 3600,   baseIncome: 280,   maxLevel: 140, upgradeDustBase: 70,    upgradeDustGrowth: 1.040, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 9,  awakenCopies: [1,1,2,2,3,4,5,6,8], powerBonus: .12, incomeBonus: .08 },
-      SSR: { label: "SSR",       color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,    basePower: 27000,   baseHp: 135000,   baseDefense: 10800,  baseIncome: 800,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 7,  awakenCopies: [1,1,2,3,4,5,7], powerBonus: .17, incomeBonus: .11 },
-      UR:  { label: "UR",        color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,   basePower: 81000,   baseHp: 405000,   baseDefense: 32400,  baseIncome: 2300,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
+      N:   { label: "N",         color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,      basePower: 1000,    baseHp: 5000,     baseDefense: 400, baseSpeed: 90,    baseIncome: 35,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015, incomePerLevel: .008,  awakenMax: 13, awakenCopies: [1,1,1,2,2,3,3,4,5,6,7,8,10], powerBonus: .07, incomeBonus: .05 },
+      R:   { label: "R",         color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,     basePower: 3000,    baseHp: 15000,    baseDefense: 1200, baseSpeed: 92,   baseIncome: 100,   maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016, incomePerLevel: .0085, awakenMax: 11, awakenCopies: [1,1,2,2,3,3,4,5,6,7,8], powerBonus: .09, incomeBonus: .06 },
+      SR:  { label: "SR",        color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,     basePower: 9000,    baseHp: 45000,    baseDefense: 3600, baseSpeed: 94,   baseIncome: 280,   maxLevel: 140, upgradeDustBase: 70,    upgradeDustGrowth: 1.040, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 9,  awakenCopies: [1,1,2,2,3,4,5,6,8], powerBonus: .12, incomeBonus: .08 },
+      SSR: { label: "SSR",       color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,    basePower: 27000,   baseHp: 135000,   baseDefense: 10800, baseSpeed: 96,  baseIncome: 800,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 7,  awakenCopies: [1,1,2,3,4,5,7], powerBonus: .17, incomeBonus: .11 },
+      UR:  { label: "UR",        color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,   basePower: 81000,   baseHp: 405000,   baseDefense: 32400, baseSpeed: 98,  baseIncome: 2300,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
       LR:  { label: "Legends",     color: "#FFD700",
   colors: ["#7A4800", "#D99A16", "#FFF2A8", "#FFD700", "#A86400"],
   gradient: "linear-gradient(135deg, #6B3F00 0%, #D99A16 22%, #FFF7C2 43%, #FFD700 58%, #B8750D 78%, #FFE98A 100%)",
   glow: "#FFD966",
-  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 243000,  baseHp: 1215000,  baseDefense: 97200,  baseIncome: 6500,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .38, incomeBonus: .25 },
+  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 243000,  baseHp: 1215000,  baseDefense: 97200, baseSpeed: 100,  baseIncome: 6500,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .38, incomeBonus: .25 },
       SC:  { label: "Mystical",   color: "#f5d9ff",
   colors: [
     "#ff77d9",
@@ -6424,9 +6504,34 @@
   ],
   gradient: "linear-gradient(135deg, #ff77d9 0%, #9c8cff 16%, #65e8ff 32%, #75ffbf 48%, #fff18a 64%, #ff9f76 80%, #ffffff 92%, #ff77d9 100%)",
   glow: "#f4caff",
-  textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 729000,  baseHp: 3645000,  baseDefense: 291600, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .65, incomeBonus: .45 },
-      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2187000, baseHp: 10935000, baseDefense: 874800, baseIncome: 50000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 3, awakenCopies: [1,2,3], powerBonus: .90, incomeBonus: .70 }
+  textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 729000,  baseHp: 3645000,  baseDefense: 291600, baseSpeed: 103, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .65, incomeBonus: .45 },
+      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2187000, baseHp: 10935000, baseDefense: 874800, baseSpeed: 106, baseIncome: 50000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 3, awakenCopies: [1,2,3], powerBonus: .90, incomeBonus: .70 }
     });
+
+    // เพิ่มโดยอลิซ v63: ค่าโบนัสแผนการรบ ทีมมาตรฐาน 5 ตัว
+    const FORMATION_RULES = Object.freeze({
+      4: Object.freeze({ front: 4, back: 1, frontDefenseRate: .35, backAttackRate: .10 }),
+      3: Object.freeze({ front: 3, back: 2, frontDefenseRate: .25, backAttackRate: .15 }),
+      2: Object.freeze({ front: 2, back: 3, frontDefenseRate: .15, backAttackRate: .25 }),
+      1: Object.freeze({ front: 1, back: 4, frontDefenseRate: .10, backAttackRate: .35 })
+    });
+
+    function normalizeFormationFront(value, teamSize = 5) {
+      const size = Math.max(1, Math.floor(Number(teamSize) || 1));
+      if (size <= 1) return 1;
+      return Math.max(1, Math.min(size - 1, Math.floor(Number(value) || 2)));
+    }
+
+    function getFormationRule(frontCount, teamSize = 5) {
+      const normalized = normalizeFormationFront(frontCount, Math.max(2, teamSize));
+      const base = FORMATION_RULES[normalized] || FORMATION_RULES[2];
+      return { ...base, front: normalized, back: Math.max(0, Number(teamSize) - normalized) };
+    }
+
+    function formationDescription(frontCount, teamSize = 5) {
+      const rule = getFormationRule(frontCount, teamSize);
+      return `หน้า ${rule.front} / หลัง ${rule.back} • แนวหน้า DEF +${Math.round(rule.frontDefenseRate * 100)}% • แนวหลัง ATK +${Math.round(rule.backAttackRate * 100)}% • ศัตรูต้องโค่นแนวหน้าก่อนจึงโจมตีแนวหลังได้`;
+    }
 
     // เพิ่มโดยอลิซ: เรทแพ็คสุ่มในกระเป๋า แยกจากตู้กาชาและไม่สะสม pity
     const ITEM_PACK_RATES = Object.freeze({ N: 49.5, R: 30, SR: 14, SSR: 5, UR: 1.2, LR: .37, SC: .01999, EX: .00001 });
@@ -12554,7 +12659,10 @@
           lastEnergyAt: Date.now(),
           wins: 0,
           losses: 0,
-          supportUid: ""
+          supportUid: "",
+          formationFront: 2,
+          commandStrategy: "balanced",
+          targetStrategy: "lowHp"
         },
         arena: {
           team: starter.team.slice(0, CONFIG.arenaTeamSlots),
@@ -12563,7 +12671,10 @@
           losses: 0,
           weekKey: getArenaWeekKey(),
           rewardedWeeks: {},
-          lastWeeklyReward: null
+          lastWeeklyReward: null,
+          formationFront: 2,
+          commandStrategy: "balanced",
+          targetStrategy: "lowHp"
         },
         migratedFromOldSave: false
       };
@@ -13236,6 +13347,9 @@
       next.battle.wins = Math.max(0, Math.floor(Number(next.battle.wins) || 0));
       next.battle.losses = Math.max(0, Math.floor(Number(next.battle.losses) || 0));
       next.battle.supportUid = String(next.battle.supportUid || "");
+      next.battle.formationFront = normalizeFormationFront(next.battle.formationFront, CONFIG.towerTeamSlots);
+      next.battle.commandStrategy = ["balanced","skill","attack","guard"].includes(String(next.battle.commandStrategy)) ? String(next.battle.commandStrategy) : "balanced";
+      next.battle.targetStrategy = ["lowHp","highAtk","random"].includes(String(next.battle.targetStrategy)) ? String(next.battle.targetStrategy) : "lowHp";
       next.arena = Object.assign(defaultState().arena, next.arena || {});
       next.arena.team = Array.isArray(next.arena.team)
         ? [...new Set(next.arena.team.map(String))].filter(id => next.owned[id] && CARD_BY_ID.has(id)).slice(0, CONFIG.arenaTeamSlots)
@@ -13246,6 +13360,9 @@
       next.arena.weekKey = String(next.arena.weekKey || getArenaWeekKey());
       next.arena.rewardedWeeks = next.arena.rewardedWeeks && typeof next.arena.rewardedWeeks === "object" ? next.arena.rewardedWeeks : {};
       next.arena.lastWeeklyReward = next.arena.lastWeeklyReward || null;
+      next.arena.formationFront = normalizeFormationFront(next.arena.formationFront, CONFIG.arenaTeamSlots);
+      next.arena.commandStrategy = ["balanced","skill","attack","guard"].includes(String(next.arena.commandStrategy)) ? String(next.arena.commandStrategy) : "balanced";
+      next.arena.targetStrategy = ["lowHp","highAtk","random"].includes(String(next.arena.targetStrategy)) ? String(next.arena.targetStrategy) : "lowHp";
 
       // เพิ่มโดยอลิซ v53: รีเซ็ตภารกิจตามวันที่จริงและนับล็อกอินเป็นภารกิจแรกอัตโนมัติ
       const todayKey = getLocalDateKey();
@@ -15375,6 +15492,7 @@
           power: Math.max(0, getBattleItemStat(item, abilitySummary, "power", snapshotMode)),
           hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
           defense: Math.max(0, getBattleItemStat(item, abilitySummary, "defense", snapshotMode)),
+          speed: Math.max(1, Number(item && item.speed) || getCardSpeed(card)),
           rarity: String(card.rarity || item && item.rarity || "N"),
           elements: getCardElements(card),
           level: Math.max(1, Math.floor(Number(item && item.level || getOwned(id) && getOwned(id).level || 1))),
@@ -15402,6 +15520,7 @@
           power: Math.max(0, getBattleItemStat(item, abilitySummary, "power", snapshotMode)),
           hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
           defense: Math.max(0, getBattleItemStat(item, abilitySummary, "defense", snapshotMode)),
+          speed: Math.max(1, Number(item && item.speed) || getCardSpeed(card)),
           level,
           awaken,
           card,
@@ -15413,6 +15532,7 @@
             power: Math.max(0, getBattleItemStat(item, abilitySummary, "power", snapshotMode)),
             hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
             defense: Math.max(0, getBattleItemStat(item, abilitySummary, "defense", snapshotMode)),
+            speed: Math.max(1, Number(item && item.speed) || getCardSpeed(card)),
             level,
             awaken
           },
@@ -15671,6 +15791,12 @@
       const defensePerLevel = Number(rarity.defensePerLevel !== undefined ? rarity.defensePerLevel : powerPerLevel * Number(CONFIG.defenseLevelGrowthScale || .74));
       const defenseBonus = Number(rarity.defenseBonus !== undefined ? rarity.defenseBonus : Number(rarity.powerBonus || 0) * Number(CONFIG.defenseAwakenGrowthScale || .70));
       return Math.max(0, baseDefense * (1 + (level - 1) * defensePerLevel) * (1 + rank * defenseBonus));
+    }
+
+    // Base SPD ไม่โตตามเลเวล เพื่อให้ลำดับเทิร์นอ่านง่ายและบาลานซ์แยกจาก ATK/HP/DEF
+    function getCardSpeed(card) {
+      const rarity = getRarity(card || {});
+      return Math.max(1, Math.round(Number((card && (card.speed ?? card.baseSpeed)) ?? rarity.baseSpeed ?? 90)));
     }
 
     function calculateCombatPower(attack, hp, defense, attackHits = 1, shieldHits = 0) {
@@ -17240,6 +17366,580 @@
       };
     }
 
+
+
+    /* ================= v63 INDIVIDUAL TURN ENGINE =================
+       - ตัวละครทุกใบมี HP/DEF/SPD/โล่ของตัวเอง
+       - ลำดับเทิร์นเรียงด้วย Base SPD
+       - สกิล afterOwnAttacks นับเฉพาะเจ้าของสกิลเป็นผู้โจมตี
+       - แนวหน้าถูกเล็งก่อน แนวหลังได้รับ ATK ตามแผน
+       - คำสั่งเป็นแผนล่วงหน้าก่อนเริ่มไฟต์ (เวอร์ชันแรก)
+    ================================================================ */
+    function buildIndividualTurnBasedCombat(options = {}) {
+      const sideKeys = ["player", "enemy"];
+      const clampRate = value => Math.max(-1, Number(value) || 0);
+      const maxRounds = Math.max(10, Math.floor(Number(options.maxRounds) || 60));
+      const commandOf = side => String(options[`${side}CommandStrategy`] || (side === "player" ? "balanced" : "balanced"));
+      const targetOf = side => String(options[`${side}TargetStrategy`] || (side === "player" ? "lowHp" : "highAtk"));
+      const formationOf = (side, size) => normalizeFormationFront(options[`${side}FormationFront`] || 2, size);
+      const varianceOf = side => typeof options[`${side}Variance`] === "function" ? Number(options[`${side}Variance`]()) || 1 : 1;
+      const criticalDamageOf = side => Math.max(1, Number(options[`${side}CriticalDamageMultiplier`] || CONFIG.combatCriticalDamageMultiplier || 1.5));
+      const attackHitsOf = side => applyCombatAttackHitModifier(Number(options[`${side}AttackHits`]) || 1, 0);
+      const initialShieldOf = side => Math.max(0, Math.round(Number(options[`${side}ShieldHits`]) || 0));
+      const healingRateOf = side => clampRate(options[`${side}HealingRate`]);
+      const shieldRecoveryRateOf = side => clampRate(options[`${side}ShieldRecoveryRate`]);
+      const criticalRateOf = side => clampCriticalRate(options[`${side}CriticalRate`] ?? CONFIG.combatBaseCriticalRate);
+
+      function normalizeTrigger(item = {}, index = 0) {
+        const mode = item.onBattleStart ? "battleStart" : item.onOwnAttack || String(item.triggerOn) === "ownAttack" ? "ownAttack" : "nextAttack";
+        const baseCost = mode === "nextAttack" ? Math.max(1, Math.floor(Number(item.baseAfterOwnAttacks ?? item.afterOwnAttacks) || 1)) : 0;
+        const permanent = Math.round(Number(item.permanentCostChange) || 0);
+        const cycle = Math.round(Number(item.cycleCostChange) || 0);
+        const cost = mode === "nextAttack" ? Math.max(1, baseCost + permanent + cycle) : 0;
+        return {
+          ...item,
+          key: String(item.key || `trigger-${index}`),
+          name: String(item.name || "Active Skill"),
+          sourceCardId: cardIdString(item.sourceCardId),
+          sourceCardName: String(item.sourceCardName || "Unknown Character"),
+          triggerOn: mode,
+          baseCost,
+          permanentCostChange: permanent,
+          cycleCostChange: cycle,
+          cost,
+          charge: item.activateImmediately ? cost : 0,
+          armed: mode !== "nextAttack" || Boolean(item.activateImmediately),
+          completed: false,
+          activations: 0,
+          repeat: mode === "ownAttack" ? true : item.repeat !== false,
+          durationTurns: Math.max(0, Math.floor(Number(item.durationTurns) || 0)),
+          durationRounds: Math.max(0, Math.floor(Number(item.durationRounds) || 0))
+        };
+      }
+
+      function makeTeam(side) {
+        const raw = abilityArray(options[`${side}Members`]).filter(Boolean);
+        const fallbackAttack = Math.max(1, Number(options[`${side}Attack`]) || 1);
+        const fallbackHp = Math.max(1, Number(options[`${side}Hp`]) || 1);
+        const fallbackDefense = Math.max(0, Number(options[`${side}Defense`]) || 0);
+        const source = raw.length ? raw : [{ id: `${side}-unit`, name: side === "player" ? "ทีมของคุณ" : "ศัตรู", power: fallbackAttack, hp: fallbackHp, defense: fallbackDefense, speed: 90 }];
+        const frontCount = formationOf(side, source.length);
+        const rule = getFormationRule(frontCount, source.length);
+        const sourcePowerTotal = source.reduce((sum, item) => sum + Math.max(0, Number(item.power) || 0), 0);
+        const sourceHpTotal = source.reduce((sum, item) => sum + Math.max(0, Number(item.hp) || 0), 0);
+        const sourceDefenseTotal = source.reduce((sum, item) => sum + Math.max(0, Number(item.defense) || 0), 0);
+        // กระจายค่าสรุปรวมกลับลงรายตัว เพื่อรักษาบัพทีม/ธาตุ/แพ้ทางจากระบบเดิม
+        const powerScale = sourcePowerTotal > 0 ? fallbackAttack / sourcePowerTotal : 1;
+        const hpScale = sourceHpTotal > 0 ? fallbackHp / sourceHpTotal : 1;
+        const defenseScale = sourceDefenseTotal > 0 ? fallbackDefense / sourceDefenseTotal : 1;
+        const members = source.map((item, index) => {
+          const row = source.length <= 1 || index < frontCount ? "front" : "back";
+          const powerShare = sourcePowerTotal > 0 ? Math.max(0, Number(item.power) || 0) * powerScale : fallbackAttack / source.length;
+          const hpShare = sourceHpTotal > 0 ? Math.max(0, Number(item.hp) || 0) * hpScale : fallbackHp / source.length;
+          const defenseShare = sourceDefenseTotal > 0 ? Math.max(0, Number(item.defense) || 0) * defenseScale : fallbackDefense / source.length;
+          const powerRaw = Math.max(1, powerShare);
+          const hpRaw = Math.max(1, hpShare);
+          const defenseRaw = Math.max(0, defenseShare);
+          const power = powerRaw * (row === "back" ? 1 + rule.backAttackRate : 1);
+          const defense = defenseRaw * (row === "front" ? 1 + rule.frontDefenseRate : 1);
+          return {
+            id: cardIdString(item.id || `${side}-${index}`),
+            name: String(item.name || `Unit ${index + 1}`),
+            rarity: String(item.rarity || "N"),
+            elements: normalizeAbilityElements(item.elements || item.element),
+            row,
+            slot: index + 1,
+            basePower: powerRaw,
+            power,
+            maxHp: hpRaw,
+            currentHp: hpRaw,
+            baseDefense: defenseRaw,
+            defense,
+            speed: Math.max(1, Math.round(Number(item.speed) || 90)),
+            attackHits: attackHitsOf(side),
+            shieldHits: 0,
+            initialShieldHits: 0,
+            healingRate: healingRateOf(side),
+            shieldRecoveryRate: shieldRecoveryRateOf(side),
+            criticalRate: criticalRateOf(side),
+            pendingAttackHits: 0,
+            pendingCriticalRateChange: 0,
+            blockRate: Math.max(0, Number(item.blockRate) || 0),
+            dodgeRate: Math.max(0, Number(item.dodgeRate) || 0),
+            damageTakenRate: Number(item.damageTakenRate) || 0,
+            guardTurns: 0,
+            timedEffects: [],
+            attackCount: 0,
+            damageDealt: 0,
+            healingDone: 0,
+            shieldCreated: 0,
+            shieldConsumed: 0,
+            skillActivations: 0,
+            totalHits: 0,
+            criticalHits: 0,
+            blocks: 0,
+            dodges: 0,
+            ko: false
+          };
+        });
+        const shieldOrder = [...members.filter(m => m.row === "front"), ...members.filter(m => m.row === "back")];
+        for (let i = 0; i < initialShieldOf(side); i += 1) {
+          const member = shieldOrder[i % Math.max(1, shieldOrder.length)];
+          if (member) { member.shieldHits += 1; member.initialShieldHits += 1; }
+        }
+        return {
+          side,
+          members,
+          frontCount,
+          formationRule: rule,
+          commandStrategy: commandOf(side),
+          targetStrategy: targetOf(side),
+          triggers: abilityArray(options[`${side}ActiveTriggers`]).map(normalizeTrigger),
+          abilityRoster: abilityArray(options[`${side}AbilityRoster`]),
+          totalDamage: 0,
+          totalHealing: 0,
+          totalShieldCreated: 0,
+          totalCriticalHits: 0,
+          totalBlocks: 0,
+          totalDodges: 0,
+          totalBlockedDamage: 0,
+          totalTriggerActivations: 0,
+          skillUsage: {}
+        };
+      }
+
+      const player = makeTeam("player");
+      const enemy = makeTeam("enemy");
+      const teamBySide = { player, enemy };
+      const opposing = side => side === "player" ? enemy : player;
+      const alive = team => team.members.filter(member => member.currentHp > 0);
+      const teamHp = team => alive(team).reduce((sum, member) => sum + member.currentHp, 0);
+      const teamMaxHp = team => team.members.reduce((sum, member) => sum + member.maxHp, 0);
+      const teamShield = team => alive(team).reduce((sum, member) => sum + member.shieldHits, 0);
+      const isDefeated = team => alive(team).length === 0;
+
+      function eligibleTargets(team) {
+        const living = alive(team);
+        const front = living.filter(member => member.row === "front");
+        return front.length ? front : living.filter(member => member.row === "back");
+      }
+
+      function pickTarget(attackerTeam, defenderTeam, seed = 0) {
+        const list = eligibleTargets(defenderTeam);
+        if (!list.length) return null;
+        const strategy = attackerTeam.targetStrategy;
+        if (strategy === "highAtk") return [...list].sort((a,b) => b.power - a.power || a.currentHp - b.currentHp)[0];
+        if (strategy === "random") return list[Math.abs(Math.floor(seed + Math.random() * 9999)) % list.length];
+        return [...list].sort((a,b) => a.currentHp - b.currentHp || b.power - a.power)[0];
+      }
+
+      function memberMatchesRuntimeRule(member, rule) {
+        const ids = abilityArray(rule && rule.ids).map(String);
+        const elements = abilityArray(rule && rule.elements).map(String);
+        const rarities = abilityArray(rule && rule.rarities).map(String);
+        const checks = [];
+        if (ids.length) checks.push(ids.includes(String(member.id)));
+        if (elements.length) checks.push(member.elements.some(element => elements.includes(String(element))));
+        if (rarities.length) checks.push(rarities.includes(String(member.rarity)));
+        if (!checks.length) return true;
+        return String(rule && rule.match || "any") === "all" ? checks.every(Boolean) : checks.some(Boolean);
+      }
+
+      function resolveRuntimeTargets(rule, ownerTeam, defenderTeam, actor, currentTarget) {
+        const side = String(rule && rule.side || "self");
+        const targetTeam = side === "enemy" ? defenderTeam : ownerTeam;
+        let candidates = alive(targetTeam).filter(member => memberMatchesRuntimeRule(member, rule || {}));
+        if (side !== "enemy" && rule && rule.excludeSelf) candidates = candidates.filter(member => member.id !== actor.id);
+        const hasFilter = abilityArray(rule && rule.ids).length || abilityArray(rule && rule.elements).length || abilityArray(rule && rule.rarities).length;
+        const selection = String(rule && rule.selection || (side === "enemy" ? "current" : "self")).toLowerCase();
+        if (!hasFilter) {
+          if (side === "enemy" && selection !== "all" && selection !== "random") return currentTarget && currentTarget.currentHp > 0 ? [currentTarget] : [];
+          if (side !== "enemy" && selection !== "all" && selection !== "random") return actor.currentHp > 0 ? [actor] : [];
+        }
+        if (!candidates.length) return [];
+        if (selection === "all") return candidates;
+        if (selection === "random") return [candidates[Math.floor(Math.random() * candidates.length)]];
+        return candidates;
+      }
+
+      function triggersForActor(team, actor, includeStart = true) {
+        return team.triggers.filter(trigger => {
+          if (trigger.completed || !trigger.armed) return false;
+          if (trigger.sourceCardId && trigger.sourceCardId !== actor.id) return false;
+          if (!includeStart && trigger.triggerOn === "battleStart") return false;
+          return true;
+        });
+      }
+
+      function shouldUseActive(team, actor, available) {
+        if (!available.some(trigger => trigger.triggerOn === "nextAttack" || trigger.triggerOn === "battleStart")) return false;
+        if (team.commandStrategy === "attack") return false;
+        if (team.commandStrategy === "skill") return true;
+        return true;
+      }
+
+      function makeActivation(team, actor, target) {
+        const available = triggersForActor(team, actor, true);
+        const always = available.filter(trigger => trigger.triggerOn === "ownAttack" || trigger.triggerOn === "battleStart");
+        const active = shouldUseActive(team, actor, available) ? available.filter(trigger => trigger.triggerOn === "nextAttack") : [];
+        const fired = [...always, ...active].filter((trigger, index, list) => list.indexOf(trigger) === index);
+        const details = fired.map(trigger => ({
+          key: trigger.key, name: trigger.name, sourceCardId: trigger.sourceCardId, sourceCardName: trigger.sourceCardName,
+          sourceCardImage: trigger.sourceCardImage, sourceCardRarity: trigger.sourceCardRarity, cutscene: trigger.cutscene,
+          attackBonus: Number(trigger.attackBonus) || 0, healHp: Number(trigger.healHp) || 0,
+          extraHits: Number(trigger.extraHits) || 0, enemyNextAttackHits: Number(trigger.enemyNextAttackHits) || 0,
+          restoreShieldHits: Number(trigger.restoreShieldHits) || 0, enemyShieldHitsChange: Number(trigger.enemyShieldHitsChange) || 0,
+          criticalRateChange: Number(trigger.criticalRateChange) || 0, enemyCriticalRateChange: Number(trigger.enemyCriticalRateChange) || 0,
+          nextAttackCriticalRate: Number(trigger.nextAttackCriticalRate) || 0, enemyNextAttackCriticalRate: Number(trigger.enemyNextAttackCriticalRate) || 0,
+          durationTurns: Number(trigger.durationTurns) || 0, durationRounds: Number(trigger.durationRounds) || 0,
+          currentStacks: Number(trigger.stacks) || 0, maxStacks: Number(trigger.maxStacks) || 0
+        }));
+        const sum = key => fired.reduce((total, trigger) => total + (Number(trigger[key]) || 0), 0);
+        return {
+          fired, details, names: fired.map(trigger => trigger.name),
+          healTargetRules: fired.flatMap(trigger => abilityArray(trigger.healTargetRules).map(rule => ({ ...rule }))),
+          hitTargetRules: fired.flatMap(trigger => abilityArray(trigger.hitTargetRules).map(rule => ({ ...rule }))),
+          shieldTargetRules: fired.flatMap(trigger => abilityArray(trigger.shieldTargetRules).map(rule => ({ ...rule }))),
+          attackBonus: sum("attackBonus"), healHp: Math.max(0, sum("healHp")), extraHits: Math.round(sum("extraHits")),
+          enemyNextAttackHits: Math.round(sum("enemyNextAttackHits")), restoreShieldHits: Math.round(sum("restoreShieldHits")),
+          enemyShieldHitsChange: Math.round(sum("enemyShieldHitsChange")), healingRateChange: sum("healingRateChange"),
+          enemyHealingRateChange: sum("enemyHealingRateChange"), shieldRecoveryRateChange: sum("shieldRecoveryRateChange"),
+          enemyShieldRecoveryRateChange: sum("enemyShieldRecoveryRateChange"), criticalRateChange: sum("criticalRateChange"),
+          enemyCriticalRateChange: sum("enemyCriticalRateChange"), nextAttackCriticalRate: sum("nextAttackCriticalRate"),
+          enemyNextAttackCriticalRate: sum("enemyNextAttackCriticalRate"), maxHpGain: Math.max(0, sum("maxHpGain")),
+          attackStackGain: Math.max(0, sum("attackStackGain")),
+          blockRateChanges: fired.reduce((map,t)=>Object.assign(map,t.blockRateChanges||{}),{}),
+          damageTakenRateChanges: fired.reduce((map,t)=>Object.assign(map,t.damageTakenRateChanges||{}),{}),
+          dodgeRateChanges: fired.reduce((map,t)=>Object.assign(map,t.dodgeRateChanges||{}),{}),
+          triggerCostChanges: fired.reduce((map,t)=>{Object.entries(t.triggerCostChanges||{}).forEach(([id,v])=>map[id]=(map[id]||0)+Number(v||0));return map;},{}),
+          permanentTriggerCostChanges: fired.reduce((map,t)=>{Object.entries(t.permanentTriggerCostChanges||{}).forEach(([id,v])=>map[id]=(map[id]||0)+Number(v||0));return map;},{}),
+          removeAllEnemyShield: fired.some(t=>t.removeAllEnemyShield)
+        };
+      }
+
+      function applyTimedRate(member, field, delta, trigger) {
+        if (!delta) return;
+        member[field] = Number(member[field] || 0) + delta;
+        const turns = Math.max(0, Number(trigger && trigger.durationTurns) || 0);
+        const rounds = Math.max(0, Number(trigger && trigger.durationRounds) || 0);
+        if (turns || rounds) member.timedEffects.push({ field, delta, turns, rounds });
+      }
+
+      function tickTimed(member, roundEnded = false) {
+        member.timedEffects = member.timedEffects.filter(effect => {
+          if (effect.turns > 0) effect.turns -= 1;
+          if (roundEnded && effect.rounds > 0) effect.rounds -= 1;
+          if ((effect.turns === 0 && !effect.rounds) || (roundEnded && effect.rounds === 0 && !effect.turns)) {
+            member[effect.field] = Number(member[effect.field] || 0) - Number(effect.delta || 0);
+            return false;
+          }
+          return true;
+        });
+      }
+
+      function applyRateMaps(team, maps, field) {
+        Object.entries(maps || {}).forEach(([id, change]) => {
+          const member = team.members.find(item => item.id === String(id));
+          if (member) member[field] = Number(member[field] || 0) + Number(change || 0);
+        });
+      }
+
+      function applyCostChanges(team, maps, permanent = false) {
+        Object.entries(maps || {}).forEach(([id, change]) => {
+          team.triggers.filter(trigger => !id || trigger.sourceCardId === String(id)).forEach(trigger => {
+            if (trigger.triggerOn !== "nextAttack") return;
+            if (permanent) trigger.permanentCostChange += Math.round(Number(change) || 0);
+            else trigger.cycleCostChange += Math.round(Number(change) || 0);
+            trigger.cost = Math.max(1, trigger.baseCost + trigger.permanentCostChange + trigger.cycleCostChange);
+            trigger.armed = trigger.charge >= trigger.cost;
+          });
+        });
+      }
+
+      function finishTriggers(team, actor, activation) {
+        activation.fired.forEach(trigger => {
+          trigger.activations += 1;
+          actor.skillActivations += 1;
+          team.totalTriggerActivations += 1;
+          team.skillUsage[trigger.name] = (team.skillUsage[trigger.name] || 0) + 1;
+          if (trigger.triggerOn === "battleStart") {
+            trigger.armed = false; trigger.completed = true;
+          } else if (trigger.triggerOn === "ownAttack") {
+            trigger.armed = true;
+          } else {
+            trigger.charge = 0;
+            trigger.cycleCostChange = 0;
+            trigger.cost = Math.max(1, trigger.baseCost + trigger.permanentCostChange);
+            trigger.armed = false;
+            if (!trigger.repeat) trigger.completed = true;
+          }
+        });
+        // สำคัญ: เพิ่มคอส/ชาร์จเฉพาะสกิลของตัวละครที่เพิ่งโจมตีเท่านั้น
+        team.triggers.filter(trigger => trigger.sourceCardId === actor.id && trigger.triggerOn === "nextAttack" && !trigger.completed).forEach(trigger => {
+          if (activation.fired.includes(trigger)) return;
+          trigger.charge += 1;
+          if (trigger.charge >= trigger.cost) trigger.armed = true;
+        });
+      }
+
+      function guardDecision(team, actor) {
+        if (team.commandStrategy !== "guard") return false;
+        return actor.currentHp / Math.max(1, actor.maxHp) <= .45;
+      }
+
+      function summarizeMember(member) {
+        return {
+          id: member.id, name: member.name, rarity: member.rarity, row: member.row, slot: member.slot,
+          speed: member.speed, power: member.power, defense: member.defense, maxHp: member.maxHp,
+          currentHp: Math.max(0, member.currentHp), shieldRemaining: member.shieldHits,
+          damage: member.damageDealt, healing: member.healingDone, shieldCreated: member.shieldCreated,
+          skillActivations: member.skillActivations, attacks: member.attackCount, totalHits: member.totalHits,
+          criticalHits: member.criticalHits, blocks: member.blocks, dodges: member.dodges, ko: member.currentHp <= 0
+        };
+      }
+
+      const turns = [];
+      let firstSide = "player";
+      let turnIndex = 0;
+      let lastRound = 0;
+      for (let round = 1; round <= maxRounds && !isDefeated(player) && !isDefeated(enemy); round += 1) {
+        lastRound = round;
+        const queue = [...alive(player).map(member => ({ side:"player", member })), ...alive(enemy).map(member => ({ side:"enemy", member }))]
+          .sort((a,b) => b.member.speed - a.member.speed || (a.side === b.side ? a.member.slot - b.member.slot : a.side === "player" ? -1 : 1));
+        if (round === 1 && queue[0]) firstSide = queue[0].side;
+        for (const entry of queue) {
+          if (isDefeated(player) || isDefeated(enemy)) break;
+          const team = teamBySide[entry.side];
+          const defenderTeam = opposing(entry.side);
+          const actor = entry.member;
+          if (actor.currentHp <= 0) continue;
+          const target = pickTarget(team, defenderTeam, turnIndex);
+          if (!target) break;
+          turnIndex += 1;
+          tickTimed(actor, false);
+
+          if (guardDecision(team, actor)) {
+            actor.guardTurns = 1;
+            const shieldBefore = actor.shieldHits;
+            actor.shieldHits += 1;
+            actor.shieldCreated += 1;
+            team.totalShieldCreated += 1;
+            turns.push({
+              round, side:entry.side, command:"guard", actorCardId:actor.id, actorName:actor.name, actorSpeed:actor.speed, actorRow:actor.row,
+              targetCardId:target.id, targetName:target.name, hits:0, baseHits:0, passiveBaseHits:actor.attackHits, pendingHitChange:0,
+              activeHitChange:0, extraHits:0, hitReduction:0, requestedExtraHits:0, enemyNextAttackHits:0,
+              blockedHits:0, unblockedHits:0, damage:0, critical:false, criticalRate:actor.criticalRate, criticalMultiplier:1,
+              defenderDefense:target.defense, triggerActivated:false, triggeredSkills:[], triggeredDetails:[], attackBonus:0,
+              healHp:0, shieldChange:actor.shieldHits-shieldBefore, enemyShieldChange:0, shieldGain:1, shieldLoss:0,
+              playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
+              actorRemaining:actor.currentHp, targetRemaining:target.currentHp
+            });
+            continue;
+          }
+
+          const activation = makeActivation(team, actor, target);
+          applyRateMaps(team, activation.blockRateChanges, "blockRate");
+          applyRateMaps(team, activation.damageTakenRateChanges, "damageTakenRate");
+          applyRateMaps(team, activation.dodgeRateChanges, "dodgeRate");
+          activation.fired.forEach(trigger => {
+            applyTimedRate(actor, "criticalRate", Number(trigger.criticalRateChange)||0, trigger);
+            applyTimedRate(actor, "healingRate", Number(trigger.healingRateChange)||0, trigger);
+            applyTimedRate(actor, "shieldRecoveryRate", Number(trigger.shieldRecoveryRateChange)||0, trigger);
+            applyTimedRate(target, "criticalRate", Number(trigger.enemyCriticalRateChange)||0, trigger);
+            applyTimedRate(target, "healingRate", Number(trigger.enemyHealingRateChange)||0, trigger);
+            applyTimedRate(target, "shieldRecoveryRate", Number(trigger.enemyShieldRecoveryRateChange)||0, trigger);
+          });
+
+          let targetedCurrentHitChange = 0;
+          if (abilityArray(activation.hitTargetRules).length) {
+            abilityArray(activation.hitTargetRules).forEach(rule => {
+              const recipients = resolveRuntimeTargets(rule, team, defenderTeam, actor, target);
+              recipients.forEach(recipient => {
+                const change = Math.round(Number(rule.value) || 0);
+                if (recipient === actor && String(rule.side || "self") !== "enemy") targetedCurrentHitChange += change;
+                else recipient.pendingAttackHits += change;
+              });
+            });
+          }
+          const pendingHitChange = Math.round(Number(actor.pendingAttackHits) || 0);
+          actor.pendingAttackHits = 0;
+          const baseHits = applyCombatAttackHitModifier(actor.attackHits, pendingHitChange);
+          const activeHitRuleChange = abilityArray(activation.hitTargetRules).length ? targetedCurrentHitChange : activation.extraHits;
+          const hits = applyCombatAttackHitModifier(baseHits, activeHitRuleChange);
+          const nextCrit = Number(actor.pendingCriticalRateChange || 0) + Number(activation.nextAttackCriticalRate || 0);
+          actor.pendingCriticalRateChange = 0;
+          const effectiveCrit = clampCriticalRate(actor.criticalRate + nextCrit);
+          const critical = rollCriticalHit(effectiveCrit);
+          const critMultiplier = critical ? criticalDamageOf(entry.side) : 1;
+          const activeAttack = Math.max(1, actor.power + Number(activation.attackBonus || 0) + Number(activation.attackStackGain || 0));
+
+          const alliedShieldBefore = teamShield(team);
+          const enemyShieldBefore = teamShield(defenderTeam);
+          if (activation.removeAllEnemyShield) target.shieldHits = 0;
+          if (abilityArray(activation.shieldTargetRules).length) {
+            abilityArray(activation.shieldTargetRules).forEach(rule => {
+              const recipients = resolveRuntimeTargets(rule, team, defenderTeam, actor, target);
+              recipients.forEach(recipient => {
+                const requested = Math.round(Number(rule.value) || 0);
+                const adjusted = requested > 0 ? Math.round(requested * Math.max(0, 1 + recipient.shieldRecoveryRate)) : requested;
+                const before = recipient.shieldHits;
+                recipient.shieldHits = Math.max(0, recipient.shieldHits + adjusted);
+                const change = recipient.shieldHits - before;
+                if (change > 0) {
+                  recipient.shieldCreated += change;
+                  (String(rule.side || "self") === "enemy" ? defenderTeam : team).totalShieldCreated += change;
+                }
+              });
+            });
+          } else {
+            const enemyShieldRequested = Math.round(Number(activation.enemyShieldHitsChange) || 0);
+            if (enemyShieldRequested) target.shieldHits = Math.max(0, target.shieldHits + enemyShieldRequested);
+            const selfShieldRequested = Math.round(Number(activation.restoreShieldHits) || 0);
+            if (selfShieldRequested) {
+              const adjusted = selfShieldRequested > 0 ? Math.round(selfShieldRequested * Math.max(0,1+actor.shieldRecoveryRate)) : selfShieldRequested;
+              const before = actor.shieldHits;
+              actor.shieldHits = Math.max(0, actor.shieldHits + adjusted);
+              const change = actor.shieldHits - before;
+              if (change > 0) { actor.shieldCreated += change; team.totalShieldCreated += change; }
+            }
+          }
+
+          const blockedHits = Math.min(target.shieldHits, hits);
+          target.shieldHits -= blockedHits;
+          target.shieldConsumed += blockedHits;
+          const unblockedHits = Math.max(0, hits - blockedHits);
+          const hitRate = hits > 0 ? unblockedHits / hits : 0;
+          let dodged = false, blocked = false;
+          let damage = 0;
+          if (unblockedHits > 0) {
+            dodged = Math.random() < Math.max(0, target.dodgeRate);
+            if (!dodged) {
+              const attackAfterShield = activeAttack * hitRate * varianceOf(entry.side) * critMultiplier;
+              const defenseApplied = target.defense * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, hitRate);
+              const minimum = activeAttack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)) * hitRate;
+              damage = Math.max(minimum, attackAfterShield - defenseApplied);
+              blocked = Math.random() < Math.max(0, target.blockRate);
+              if (blocked) damage *= Number(CONFIG.combatBlockDamageMultiplier || .5);
+              if (target.guardTurns > 0) damage *= .5;
+              damage *= Math.max(0, 1 + Number(target.damageTakenRate || 0));
+              const fatigueStart = Math.max(1, Number(CONFIG.combatFatigueStartRound || 18));
+              if (round >= fatigueStart) {
+                const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxHpRate || .10), .01 + Math.max(0, round-fatigueStart)*.003);
+                damage = Math.max(damage, target.maxHp * fatigueRate);
+              }
+              damage = Math.max(1, Math.min(target.currentHp, damage));
+            }
+          }
+          if (dodged) { target.dodges += 1; defenderTeam.totalDodges += 1; }
+          if (blocked) { target.blocks += 1; defenderTeam.totalBlocks += 1; defenderTeam.totalBlockedDamage += damage; }
+          target.currentHp = Math.max(0, target.currentHp - damage);
+          target.ko = target.currentHp <= 0;
+          if (target.guardTurns > 0) target.guardTurns -= 1;
+          actor.attackCount += 1;
+          actor.totalHits += hits;
+          actor.damageDealt += damage;
+          team.totalDamage += damage;
+          if (critical) { actor.criticalHits += 1; team.totalCriticalHits += 1; }
+
+          let requestedHeal = 0;
+          let heal = 0;
+          if (abilityArray(activation.healTargetRules).length) {
+            abilityArray(activation.healTargetRules).forEach(rule => {
+              const recipients = resolveRuntimeTargets(rule, team, defenderTeam, actor, target);
+              recipients.forEach(recipient => {
+                const requested = rule.mode === "rate"
+                  ? recipient.maxHp * Math.max(0, Number(rule.value) || 0)
+                  : Math.max(0, Number(rule.value) || 0);
+                const actual = Math.max(0, Math.min(recipient.maxHp - recipient.currentHp, requested * Math.max(0, 1 + recipient.healingRate)));
+                requestedHeal += requested;
+                if (actual > 0) {
+                  recipient.currentHp += actual;
+                  recipient.healingDone += actual;
+                  (String(rule.side || "self") === "enemy" ? defenderTeam : team).totalHealing += actual;
+                  heal += actual;
+                }
+              });
+            });
+          } else {
+            requestedHeal = Math.max(0, Number(activation.healHp) || 0);
+            heal = Math.max(0, Math.min(actor.maxHp - actor.currentHp, requestedHeal * Math.max(0,1+actor.healingRate)));
+            if (heal > 0) { actor.currentHp += heal; actor.healingDone += heal; team.totalHealing += heal; }
+          }
+          const maxHpGain = Math.max(0, Number(activation.maxHpGain) || 0);
+          if (maxHpGain > 0) { actor.maxHp += maxHpGain; actor.currentHp += maxHpGain; }
+          if (activation.attackStackGain > 0) actor.power += activation.attackStackGain;
+          if (!abilityArray(activation.hitTargetRules).length) target.pendingAttackHits += Math.round(Number(activation.enemyNextAttackHits) || 0);
+          target.pendingCriticalRateChange += Number(activation.enemyNextAttackCriticalRate) || 0;
+          applyCostChanges(team, activation.permanentTriggerCostChanges, true);
+          applyCostChanges(team, activation.triggerCostChanges, false);
+          finishTriggers(team, actor, activation);
+
+          const selfShieldChange = teamShield(team) - alliedShieldBefore;
+          const enemyShieldChange = teamShield(defenderTeam) - enemyShieldBefore;
+          turns.push({
+            round, side:entry.side, command:activation.fired.length?"skill":"attack", actorCardId:actor.id, actorName:actor.name,
+            actorSpeed:actor.speed, actorRow:actor.row, targetCardId:target.id, targetName:target.name, targetRow:target.row,
+            hits, baseHits, passiveBaseHits:actor.attackHits, pendingHitChange, activeHitChange:hits-baseHits,
+            extraHits:Math.max(0,hits-baseHits), hitReduction:Math.max(0,baseHits-hits), requestedExtraHits:activeHitRuleChange,
+            enemyNextAttackHits:abilityArray(activation.hitTargetRules).length ? 0 : activation.enemyNextAttackHits, blockedHits, unblockedHits, damage, critical,
+            criticalRate:effectiveCrit, baseCriticalRate:actor.criticalRate, nextAttackCriticalRateChange:nextCrit,
+            enemyNextAttackCriticalRate:activation.enemyNextAttackCriticalRate, criticalMultiplier:critMultiplier,
+            defenderDefense:target.defense, dodgedMembers:dodged?[{id:target.id,name:target.name,hpShare:1}]:[],
+            blockedMembers:blocked?[{id:target.id,name:target.name,finalDamage:damage}]:[], dodgedHpRate:dodged?1:0,
+            blockDamageReduced:0, damageBeforeBlock:damage, damageAfterBlock:damage,
+            triggerActivated:activation.fired.length>0, triggeredSkills:activation.names, triggeredDetails:activation.details,
+            suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:[], transferEvents:[], stackEvents:[],
+            attackBonus:activation.attackBonus, attackStackGain:activation.attackStackGain, maxHpGain,
+            requestedHealHp:requestedHeal, healingMultiplier:Math.max(0,1+actor.healingRate), healHp:heal,
+            shieldChange:selfShieldChange, enemyShieldChange, shieldGain:Math.max(0,selfShieldChange), shieldLoss:Math.max(0,-selfShieldChange),
+            enemyShieldGain:Math.max(0,enemyShieldChange), enemyShieldLoss:Math.max(0,-enemyShieldChange),
+            healingRate:actor.healingRate, enemyHealingRate:target.healingRate, shieldRecoveryRate:actor.shieldRecoveryRate,
+            enemyShieldRecoveryRate:target.shieldRecoveryRate, criticalRateChange:activation.criticalRateChange,
+            enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activation.nextAttackCriticalRate,
+            playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
+            actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko
+          });
+        }
+        [...player.members, ...enemy.members].forEach(member => tickTimed(member, true));
+      }
+
+      // กันไฟต์ไม่จบ: ฝ่ายที่มี HP รวมมากกว่าชนะ Sudden Break
+      if (!isDefeated(player) && !isDefeated(enemy) && lastRound >= maxRounds) {
+        const losing = teamHp(player) >= teamHp(enemy) ? enemy : player;
+        alive(losing).forEach(member => { member.currentHp = 0; member.ko = true; });
+        turns.push({ round:lastRound+1, side:losing===enemy?"player":"enemy", command:"suddenBreak", actorName:"Sudden Break", targetName:"ทั้งทีม", hits:1, baseHits:1, passiveBaseHits:1, pendingHitChange:0, activeHitChange:0, extraHits:0, hitReduction:0, requestedExtraHits:0, enemyNextAttackHits:0, blockedHits:0, unblockedHits:1, damage:0, critical:false, criticalRate:0, criticalMultiplier:1, defenderDefense:0, suddenBreak:true, triggerActivated:false, triggeredSkills:[], triggeredDetails:[], attackBonus:0, healHp:0, shieldChange:0, enemyShieldChange:0, playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy) });
+      }
+
+      const playerMembers = player.members.map(summarizeMember);
+      const enemyMembers = enemy.members.map(summarizeMember);
+      const mostUsed = team => Object.entries(team.skillUsage).sort((a,b)=>b[1]-a[1])[0] || ["-",0];
+      return {
+        winner:isDefeated(enemy)?"player":"enemy", playerFirst:firstSide==="player", turns,
+        rounds:turns.length?Math.max(...turns.map(turn=>Number(turn.round)||0)):0,
+        playerAttack:player.members.reduce((s,m)=>s+m.power,0), enemyAttack:enemy.members.reduce((s,m)=>s+m.power,0),
+        playerDefense:player.members.reduce((s,m)=>s+m.defense,0), enemyDefense:enemy.members.reduce((s,m)=>s+m.defense,0),
+        playerMaxHp:teamMaxHp(player), enemyMaxHp:teamMaxHp(enemy), playerRemainingHp:teamHp(player), enemyRemainingHp:teamHp(enemy),
+        playerInitialShieldHits:player.members.reduce((s,m)=>s+m.initialShieldHits,0), enemyInitialShieldHits:enemy.members.reduce((s,m)=>s+m.initialShieldHits,0),
+        playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
+        playerInitialHealingRate:healingRateOf("player"), enemyInitialHealingRate:healingRateOf("enemy"),
+        playerHealingRate:healingRateOf("player"), enemyHealingRate:healingRateOf("enemy"),
+        playerInitialShieldRecoveryRate:shieldRecoveryRateOf("player"), enemyInitialShieldRecoveryRate:shieldRecoveryRateOf("enemy"),
+        playerShieldRecoveryRate:shieldRecoveryRateOf("player"), enemyShieldRecoveryRate:shieldRecoveryRateOf("enemy"),
+        playerInitialCriticalRate:criticalRateOf("player"), enemyInitialCriticalRate:criticalRateOf("enemy"),
+        playerCriticalRate:criticalRateOf("player"), enemyCriticalRate:criticalRateOf("enemy"), criticalDamageMultiplier:Math.max(criticalDamageOf("player"),criticalDamageOf("enemy")),
+        playerTotalDamage:player.totalDamage, enemyTotalDamage:enemy.totalDamage, playerTotalHealing:player.totalHealing, enemyTotalHealing:enemy.totalHealing,
+        playerTotalShieldCreated:player.totalShieldCreated, enemyTotalShieldCreated:enemy.totalShieldCreated,
+        playerTotalCriticalHits:player.totalCriticalHits, enemyTotalCriticalHits:enemy.totalCriticalHits,
+        playerTotalBlocks:player.totalBlocks, enemyTotalBlocks:enemy.totalBlocks, playerTotalDodges:player.totalDodges, enemyTotalDodges:enemy.totalDodges,
+        playerTotalBlockedDamage:player.totalBlockedDamage, enemyTotalBlockedDamage:enemy.totalBlockedDamage,
+        playerTriggerActivations:player.totalTriggerActivations, enemyTriggerActivations:enemy.totalTriggerActivations,
+        playerMembers, enemyMembers, playerFormation:player.formationRule, enemyFormation:enemy.formationRule,
+        playerMostUsedSkill:{name:mostUsed(player)[0],count:mostUsed(player)[1]}, enemyMostUsedSkill:{name:mostUsed(enemy)[0],count:mostUsed(enemy)[1]},
+        copiedAbilityEvents:[], playerCopiedAbilitiesRemaining:[], enemyCopiedAbilitiesRemaining:[]
+      };
+    }
+
+
     function updateTurnBattleDisplay(display, combat, turn = null) {
       if (!display || !combat) return;
       const playerHp = Math.max(0, Number(turn ? turn.playerRemaining : combat.playerMaxHp));
@@ -17531,8 +18231,10 @@
       await wait(Math.min(240, Math.max(20, phaseDuration)));
 
       for (const turn of combat.turns) {
-        const attackerLabel = turn.side === "player" ? playerLabel : enemyLabel;
-        const defenderLabel = turn.side === "player" ? enemyLabel : playerLabel;
+        const sideLabel = turn.side === "player" ? playerLabel : enemyLabel;
+        const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
+        const attackerLabel = turn.actorName ? `${turn.actorName} (${sideLabel})` : sideLabel;
+        const defenderLabel = turn.targetName ? `${turn.targetName} (${defenderSideLabel})` : defenderSideLabel;
         const strikeClass = turn.side === "player" ? "player-strike" : "enemy-strike";
         const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
         const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
@@ -17540,14 +18242,17 @@
           ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.enemyNextAttackHits ? ` • ฮิตครั้งถัดไปศัตรู ${turn.enemyNextAttackHits >= 0 ? "+" : ""}${formatNumber(turn.enemyNextAttackHits)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}${turn.enemyShieldChange ? ` • โล่ศัตรู ${turn.enemyShieldChange >= 0 ? "+" : ""}${formatNumber(turn.enemyShieldChange)}` : ""}${turn.criticalRateChange ? ` • คริฝ่ายตน ${signedPercent(turn.criticalRateChange)}` : ""}${turn.enemyCriticalRateChange ? ` • คริศัตรู ${signedPercent(turn.enemyCriticalRateChange)}` : ""}${turn.nextAttackCriticalRateChange ? ` • คริชั่วคราว ${signedPercent(turn.nextAttackCriticalRateChange)}` : ""}${turn.enemyNextAttackCriticalRate ? ` • คริครั้งถัดไปศัตรู ${signedPercent(turn.enemyNextAttackCriticalRate)}` : ""}`
           : "";
         const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
-        result.textContent = `รอบ ${turn.round} • ${attackerLabel} โจมตี ${turn.hits} ฮิต${criticalText}${blockText}${activeText} • ${defenderLabel} เสีย HP ${formatNumber(turn.damage)} เหลือ ${formatNumber(remaining)}`;
+        result.textContent = turn.command === "guard"
+          ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}`
+          : `รอบ ${turn.round} • ${attackerLabel} → ${defenderLabel} • ${turn.hits} ฮิต${criticalText}${blockText}${activeText} • เสีย HP ${formatNumber(turn.damage)} เหลือ ${formatNumber(turn.targetRemaining ?? remaining)} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
             await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
           }
         }
         const speed = turn.round > 6 ? Math.max(45, Math.floor(phaseDuration * .45)) : phaseDuration;
-        await playStrikeSequence(stage, strikeClass, turn.hits, speed);
+        if (turn.command !== "guard") await playStrikeSequence(stage, strikeClass, turn.hits, speed);
+        else await wait(Math.max(30, Math.floor(speed * .55)));
         updateTurnBattleDisplay(display, combat, turn);
         if (turn.suddenBreak) result.textContent += " • Sudden Break!";
         if (remaining <= 0) break;
@@ -17664,6 +18369,27 @@
         const targetHp = targetItems.reduce((sum, item) => sum + getBattleItemStat(item, summary, "hp", snapshotMode), 0);
         const value = Number(effect.value || 0);
         const effectType = normalizeAbilityEffectType(effect.type);
+        const sourceRuntimeId = cardIdString(record.sourceCard && record.sourceCard.id);
+        const targetSelection = String(effect.targetSelection || "").trim().toLowerCase();
+        // สำหรับฮิต/โล่/ฮีลในระบบรายตัว: ถ้าไม่ระบุเป้าหมาย จะถือว่าเป็นเจ้าของสกิล
+        const runtimeTargetRule = {
+          side,
+          ids: side === "enemy"
+            ? normalizeAbilityCardIds(filter.ids)
+            : side === "self"
+              ? [sourceRuntimeId]
+              : hasFilters
+                ? targetItems.map(getBattleItemId).filter(Boolean)
+                : [],
+          elements: side === "enemy" ? normalizeAbilityElements(filter.elements) : [],
+          rarities: side === "enemy" ? normalizeAbilityRarities(filter.rarities) : [],
+          match: normalizeAbilityTargetMatch(filter.match),
+          selection: targetSelection || (side === "enemy" ? "current" : "self"),
+          excludeSelf: Boolean(effect.excludeSelf),
+          sourceCardId: sourceRuntimeId,
+          effectType,
+          value
+        };
         const baseKey = record.triggerKey || record.key;
         const stackKey = CARD_ABILITY_STACK_EFFECT_TYPES.has(effectType)
           ? String(effect.stackKey || record.abilityRuntimeKey || baseKey || "sharedStack").trim()
@@ -17705,10 +18431,13 @@
             abilityTransfers: [],
             attackBonus: 0,
             healHp: 0,
+            healTargetRules: [],
             extraHits: 0,
             enemyNextAttackHits: 0,
+            hitTargetRules: [],
             restoreShieldHits: 0,
             enemyShieldHitsChange: 0,
+            shieldTargetRules: [],
             healingRateChange: 0,
             enemyHealingRateChange: 0,
             shieldRecoveryRateChange: 0,
@@ -17723,6 +18452,8 @@
             stackEffects: [],
             stackKey,
             maxStacks: 0,
+            durationTurns: 0,
+            durationRounds: 0,
             triggerCostChanges: {},
             enemyTriggerCostRules: [],
             permanentTriggerCostChanges: {},
@@ -17736,6 +18467,8 @@
           });
         }
         const group = grouped.get(key);
+        group.durationTurns = Math.max(Number(group.durationTurns || 0), Math.max(0, Math.floor(Number(effect.durationTurns) || 0)));
+        group.durationRounds = Math.max(Number(group.durationRounds || 0), Math.max(0, Math.floor(Number(effect.durationRounds) || 0)));
         if (group.isDomainActivationGroup && effectType !== CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN) {
           group.domainPassiveEffects.push({ ...effect, type: effectType });
           return;
@@ -17756,21 +18489,25 @@
           case CARD_ABILITY_EFFECT_TYPES.SELF_HP_RATE:
           case CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE:
             group.healHp += targetHp * Math.max(0, value);
+            group.healTargetRules.push({ ...runtimeTargetRule, mode: "rate" });
             break;
           case CARD_ABILITY_EFFECT_TYPES.HEAL_HP_FLAT:
           case CARD_ABILITY_EFFECT_TYPES.TEAM_HP_FLAT:
             group.healHp += Math.max(0, value);
+            group.healTargetRules.push({ ...runtimeTargetRule, mode: "flat" });
             break;
           case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS:
           case CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS:
             if (side === "enemy") group.enemyNextAttackHits += Math.round(value);
             else group.extraHits += Math.round(value);
+            group.hitTargetRules.push({ ...runtimeTargetRule, value: Math.round(value) });
             break;
           case CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS:
           case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS:
             if (side === "enemy" && value <= -999) group.removeAllEnemyShield = true;
             else if (side === "enemy") group.enemyShieldHitsChange += Math.round(value);
             else group.restoreShieldHits += Math.round(value);
+            group.shieldTargetRules.push({ ...runtimeTargetRule, value: Math.round(value) });
             break;
           case CARD_ABILITY_EFFECT_TYPES.HEALING_RATE:
             if (side === "enemy") group.enemyHealingRateChange += value;
@@ -17935,6 +18672,9 @@
         enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: clampDamageTakenRate(rule && rule.value) })).filter(rule => rule.value),
         dodgeRateChanges: Object.fromEntries(Object.entries(item.dodgeRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Number(change) || 0)]).filter(([, change]) => change)),
         enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DODGE_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Number(rule && rule.value) || 0) })).filter(rule => rule.value),
+        healTargetRules: abilityArray(item.healTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities) })),
+        hitTargetRules: abilityArray(item.hitTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
+        shieldTargetRules: abilityArray(item.shieldTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} })),
         domainActivations: abilityArray(item.domainActivations).filter(rule => rule && rule.domainId).map(rule => ({ ...rule })),
         domainPassiveEffects: abilityArray(item.domainPassiveEffects).map(effect => ({ ...effect })),
@@ -17942,7 +18682,7 @@
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
     }
 
 
@@ -18361,6 +19101,7 @@
         power: Math.floor(getCardPower(card)),
         hp: Math.floor(getCardHp(card)),
         defense: Math.floor(getCardDefense(card)),
+        speed: getCardSpeed(card),
         elements: getCardElements(card),
         level: Math.floor(Number(getOwned(card.id)?.level) || 1),
         awaken: Math.floor(Number(getOwned(card.id)?.duplicateRank) || 0)
@@ -18899,7 +19640,7 @@
       state.battle.energy -= 1;
       renderArena();
 
-      const combat = buildTurnBasedCombat({
+      const combat = buildIndividualTurnBasedCombat({
         playerAttack: stats.effectiveAttack,
         playerHp: stats.effectiveHp,
         playerDefense: stats.effectiveDefense,
@@ -18926,6 +19667,12 @@
         playerAbilityRoster: stats.playerAbilityRoster,
         enemyAbilityRoster: stats.enemyAbilityRoster,
         statusResolutionSeed: makeAbilityResolutionSeed("arena", state.arena && state.arena.team || [], stats.enemyTeam && stats.enemyTeam.map(item => item.id) || [], ""),
+        playerFormationFront: state.arena.formationFront,
+        enemyFormationFront: 2,
+        playerCommandStrategy: state.arena.commandStrategy,
+        playerTargetStrategy: state.arena.targetStrategy,
+        enemyCommandStrategy: "balanced",
+        enemyTargetStrategy: "highAtk",
         playerVariance: () => .91 + Math.random() * .18,
         enemyVariance: () => .91 + Math.random() * .18
       });
@@ -19263,7 +20010,7 @@
       const phaseDuration = reducedMotion ? 20 : 175;
       battleAnimating = true;
       state.battle.energy -= 1;
-      const combat = buildTurnBasedCombat({
+      const combat = buildIndividualTurnBasedCombat({
         playerAttack: stats.effectiveAttack,
         playerHp: stats.effectiveHp,
         playerDefense: stats.effectiveDefense,
@@ -19290,6 +20037,12 @@
         playerAbilityRoster: stats.playerAbilityRoster,
         enemyAbilityRoster: stats.enemyAbilityRoster,
         statusResolutionSeed: makeAbilityResolutionSeed("tower", getTowerTeamIds(), [stats.enemyCard && stats.enemyCard.id], ""),
+        playerFormationFront: state.battle.formationFront,
+        enemyFormationFront: 1,
+        playerCommandStrategy: state.battle.commandStrategy,
+        playerTargetStrategy: state.battle.targetStrategy,
+        enemyCommandStrategy: "balanced",
+        enemyTargetStrategy: "highAtk",
         playerVariance: () => .90 + Math.random() * .20,
         enemyVariance: () => .90 + Math.random() * .20
       });
@@ -21138,6 +21891,7 @@
                 <div class="team-slot-stat"><span>ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
                 <div class="team-slot-stat"><span>HP</span><strong>${formatNumber(getCardHp(card))}</strong></div>
                 <div class="team-slot-stat"><span>DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
+                <div class="team-slot-stat"><span>BASE SPD</span><strong>${formatNumber(getCardSpeed(card))}</strong></div>
                 <div class="team-slot-stat"><span>SALARY / DAY</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
               </div>
               <div class="team-slot-change">แตะเพื่อเปลี่ยนการ์ด</div>
@@ -21584,6 +22338,34 @@
       renderAllElementRulesGuide();
     }
 
+
+
+    function renderTurnTactics(mode) {
+      const isArena = mode === "arena";
+      const data = isArena ? state.arena : state.battle;
+      const team = isArena ? state.arena.team : getTowerTeamIds();
+      const prefix = isArena ? "arena" : "tower";
+      const formation = document.getElementById(`${prefix}FormationSelect`);
+      const command = document.getElementById(`${prefix}CommandSelect`);
+      const target = document.getElementById(`${prefix}TargetSelect`);
+      const note = document.getElementById(`${prefix}FormationNote`);
+      if (formation) formation.value = String(normalizeFormationFront(data.formationFront, 5));
+      if (command) command.value = String(data.commandStrategy || "balanced");
+      if (target) target.value = String(data.targetStrategy || "lowHp");
+      if (note) note.innerHTML = `<b>${escapeHTML(formationDescription(data.formationFront, 5))}</b><br>ช่องทีมลำดับ 1–${normalizeFormationFront(data.formationFront,5)} เป็นแนวหน้า • ตัวละครแต่ละใบโจมตีตาม Base SPD และนับ afterOwnAttacks เฉพาะตอนเจ้าของสกิลลงมือเอง`;
+      const grid = document.getElementById(`${prefix}TeamGrid`);
+      if (grid) [...grid.children].forEach((slot,index) => {
+        const row = index < normalizeFormationFront(data.formationFront,5) ? "front" : "back";
+        const badge = slot.querySelector('.formation-row-badge');
+        if (badge) badge.remove();
+        const label = document.createElement('span');
+        label.className = `formation-row-badge ${row}`;
+        label.textContent = row === "front" ? "แนวหน้า" : "แนวหลัง";
+        const name = slot.querySelector('.team-slot-name');
+        if (name) name.appendChild(label);
+      });
+    }
+
     function renderTowerTeam(stats = null) {
       const grid = document.getElementById("towerTeamGrid");
       const panel = document.getElementById("towerElementPanel");
@@ -21596,6 +22378,7 @@
       }
       grid.innerHTML = slots.join("");
       renderTeamPresets("tower");
+      renderTurnTactics("tower");
 
       const summary = getTeamElementSummary(teamIds);
       const abilitySummary = stats && stats.abilitySummary ? stats.abilitySummary : getTeamAbilitySummary(teamIds, "tower");
@@ -21662,7 +22445,8 @@
         elements: source.elements || (source.element ? getCardElements(source) : []),
         power: Math.max(0, Number(source.power || 0)),
         hp: getSnapshotBaseStat(source, "hp"),
-        defense: getSnapshotBaseStat(source, "defense")
+        defense: getSnapshotBaseStat(source, "defense"),
+        speed: Math.max(1, Number(source.speed) || getCardSpeed(source))
       };
     }
 
@@ -21675,6 +22459,7 @@
         snap.power = getCardPower(card);
         snap.hp = getCardHp(card);
         snap.defense = getCardDefense(card);
+        snap.speed = getCardSpeed(card);
         return snap;
       }).filter(Boolean);
     }
@@ -21705,6 +22490,18 @@
       return `<div class="battle-summary-team"><h4>${escapeHTML(title)}</h4><div class="battle-summary-card-row">${rows}</div></div>`;
     }
 
+
+    function battleCharacterReportHTML(members, title) {
+      const rows = abilityArray(members);
+      const header = `<div class="battle-character-row header"><span>ตัวละคร</span><span>SPD</span><span>ดาเมจ</span><span>ฮีล</span><span>โล่สร้าง</span><span>สกิล</span><span>HP เหลือ</span></div>`;
+      const body = rows.length ? rows.map(member => `<div class="battle-character-row"><span class="battle-character-name ${member.ko ? "ko" : ""}">${escapeHTML(member.name)} • ${member.row === "front" ? "หน้า" : "หลัง"}</span><span>${formatNumber(member.speed)}</span><span>${formatNumber(member.damage)}</span><span>${formatNumber(member.healing)}</span><span>${formatNumber(member.shieldCreated)}</span><span>${formatNumber(member.skillActivations)}</span><span>${formatNumber(member.currentHp)}/${formatNumber(member.maxHp)}</span></div>`).join("") : `<div class="empty-state" style="min-height:80px">ไม่มีข้อมูลรายตัว</div>`;
+      return `<div class="battle-character-report"><h4>${escapeHTML(title)}</h4>${header}${body}</div>`;
+    }
+
+    function battleBestMember(members, field) {
+      return [...abilityArray(members)].sort((a,b)=>Number(b[field]||0)-Number(a[field]||0))[0] || null;
+    }
+
     function renderBattleSummary(summary) {
       const target = document.getElementById("battleSummaryContent");
       if (!target) return;
@@ -21717,11 +22514,19 @@
       const enemyHits = getCombatHitSideSummary(combat, "enemy");
       const playerShieldUsed = Math.max(0, combat.playerInitialShieldHits - combat.playerShieldRemaining);
       const enemyShieldUsed = Math.max(0, combat.enemyInitialShieldHits - combat.enemyShieldRemaining);
+      const topDamage = battleBestMember(combat.playerMembers, "damage");
+      const topHeal = battleBestMember(combat.playerMembers, "healing");
+      const topShield = battleBestMember(combat.playerMembers, "shieldCreated");
+      const mostSkill = combat.playerMostUsedSkill || { name:"-", count:0 };
       const metrics = [
         ["ผล", combat.winner === "player" ? "ชนะ" : "แพ้"],
         ["จำนวนรอบ", `${formatNumber(combat.rounds)} รอบ`],
         ["ผู้เริ่มก่อน", combat.playerFirst ? summary.playerLabel : summary.enemyLabel],
         ["ดาเมจเรา", formatNumber(combat.playerTotalDamage)],
+        ["MVP ดาเมจ", topDamage ? `${topDamage.name} • ${formatNumber(topDamage.damage)}` : "-"],
+        ["ฮีลสูงสุด", topHeal ? `${topHeal.name} • ${formatNumber(topHeal.healing)}` : "-"],
+        ["สร้างโล่สูงสุด", topShield ? `${topShield.name} • ${formatNumber(topShield.shieldCreated)}` : "-"],
+        ["สกิลใช้บ่อย", mostSkill.count ? `${mostSkill.name} • ${formatNumber(mostSkill.count)} ครั้ง` : "-"],
         ["ดาเมจศัตรู", formatNumber(combat.enemyTotalDamage)],
         ["ACTIVE", `${combat.playerTriggerActivations}/${combat.enemyTriggerActivations}`],
         ["ฮิตรวม", `${formatNumber(playerHits.totalHits)}/${formatNumber(enemyHits.totalHits)}`],
@@ -21734,16 +22539,18 @@
         ["เวลา", new Date(summary.createdAt).toLocaleString("th-TH")]
       ];
       const turnRows = combat.turns.map((turn, index) => {
-        const attacker = turn.side === "player" ? summary.playerLabel : summary.enemyLabel;
+        const attacker = turn.actorName || (turn.side === "player" ? summary.playerLabel : summary.enemyLabel);
+        const targetName = turn.targetName || (turn.side === "player" ? summary.enemyLabel : summary.playerLabel);
         const skills = turn.triggerActivated ? abilityArray(turn.triggeredSkills).join(" • ") : (turn.suddenBreak ? "Sudden Break" : "-");
         const shieldText = `${Number(turn.shieldChange || 0) >= 0 ? "+" : ""}${formatNumber(turn.shieldChange || 0)} / ศัตรู ${Number(turn.enemyShieldChange || 0) >= 0 ? "+" : ""}${formatNumber(turn.enemyShieldChange || 0)}`;
-        return `<div class="battle-turn-row ${turn.side === "enemy" ? "enemy" : ""} ${turn.triggerActivated ? "active" : ""}"><span>#${index + 1} / R${turn.round}</span><strong>${escapeHTML(attacker)}</strong><span>${formatNumber(turn.hits)} ฮิต</span><span>${formatNumber(turn.blockedHits)} บล็อก</span><span>${formatNumber(turn.damage)}</span><span>+${formatNumber(turn.healHp || 0)}</span><span>${escapeHTML(shieldText)}</span><span>${formatNumber(turn.playerRemaining)}</span><span>${formatNumber(turn.enemyRemaining)}</span><span class="battle-turn-skill">${escapeHTML(skills)}</span></div>`;
+        return `<div class="battle-turn-row ${turn.side === "enemy" ? "enemy" : ""} ${turn.triggerActivated ? "active" : ""}"><span>#${index + 1} / R${turn.round}</span><strong>${escapeHTML(attacker)} → ${escapeHTML(targetName)}</strong><span>${turn.command === "guard" ? "ตั้งรับ" : `${formatNumber(turn.hits)} ฮิต`}</span><span>${formatNumber(turn.blockedHits)} บล็อก</span><span>${formatNumber(turn.damage)}</span><span>+${formatNumber(turn.healHp || 0)}</span><span>${escapeHTML(shieldText)}</span><span>${formatNumber(turn.playerRemaining)}</span><span>${formatNumber(turn.enemyRemaining)}</span><span class="battle-turn-skill">${escapeHTML(skills)}</span></div>`;
       }).join("");
       target.innerHTML = `
         <div class="battle-summary-head"><p class="eyebrow">${summary.mode === "arena" ? "Arena Battle Report" : "Tower Battle Report"}</p><h2>${escapeHTML(summary.title)}</h2><p>${escapeHTML(summary.playerLabel)} ปะทะ ${escapeHTML(summary.enemyLabel)}</p></div>
         <div class="battle-summary-body">
           <div class="battle-summary-result ${summary.tone}"><strong>${escapeHTML(summary.outcomeText || (combat.winner === "player" ? "ชัยชนะ" : "พ่ายแพ้"))}</strong><span>${escapeHTML(summary.rewardText || "สรุปข้อมูลจากการต่อสู้ล่าสุด")}</span></div>
           <div class="battle-summary-metrics">${metrics.map(([label, value]) => `<div class="battle-summary-metric"><span>${escapeHTML(label)}</span><strong title="${escapeHTML(value)}">${escapeHTML(value)}</strong></div>`).join("")}</div>
+          <div class="battle-summary-section"><h3>ไฮไลต์รายตัว</h3><div class="battle-mvp-strip"><div class="battle-mvp-card"><span>ทำดาเมจสูงสุด</span><strong>${escapeHTML(topDamage ? `${topDamage.name} • ${formatNumber(topDamage.damage)}` : "-")}</strong></div><div class="battle-mvp-card"><span>ฮีลสูงสุด</span><strong>${escapeHTML(topHeal ? `${topHeal.name} • ${formatNumber(topHeal.healing)}` : "-")}</strong></div><div class="battle-mvp-card"><span>สร้างโล่สูงสุด</span><strong>${escapeHTML(topShield ? `${topShield.name} • ${formatNumber(topShield.shieldCreated)}` : "-")}</strong></div><div class="battle-mvp-card"><span>สกิลใช้บ่อยที่สุด</span><strong>${escapeHTML(mostSkill.count ? `${mostSkill.name} • ${formatNumber(mostSkill.count)} ครั้ง` : "-")}</strong></div></div><div class="battle-character-report-grid">${battleCharacterReportHTML(combat.playerMembers, summary.playerLabel)}${battleCharacterReportHTML(combat.enemyMembers, summary.enemyLabel)}</div></div>
           <div class="battle-summary-section"><h3>สมาชิกทั้งสองฝ่าย</h3><div class="battle-summary-team-grid">${battleSummaryTeamHTML(summary.playerCards, summary.playerLabel)}${battleSummaryTeamHTML(summary.enemyCards, summary.enemyLabel)}</div></div>
           <div class="battle-summary-section"><h3>สรุปฮิตและ ACTIVE Skill</h3>${combatHitReportHTML(combat, { player: summary.playerLabel, enemy: summary.enemyLabel })}</div>
           <div class="battle-summary-section"><h3>ลำดับการต่อสู้ทุกเทิร์น</h3><div class="battle-turn-log"><div class="battle-turn-row header"><span>เทิร์น</span><span>ผู้โจมตี</span><span>ฮิต</span><span>โล่บล็อก</span><span>ดาเมจ</span><span>ฮีล</span><span>โล่เปลี่ยน เรา/ศัตรู</span><span>HP เรา</span><span>HP ศัตรู</span><span>ACTIVE Skill</span></div>${turnRows}</div></div>
@@ -21861,6 +22668,7 @@
       }
       grid.innerHTML = slots.join("");
       renderTeamPresets("arena");
+      renderTurnTactics("arena");
       const summary = getArenaTeamSummary();
       const abilitySummary = getTeamAbilitySummary(state.arena.team, "arena");
       const comboHTML = summary.activeCombos.length
@@ -22205,6 +23013,7 @@
                 <div class="stat stat-power"><span>Attack / ATK</span><strong>${formatNumber(getCardPower(card))}</strong></div>
                 <div class="stat stat-hp"><span>Health / HP</span><strong>${formatNumber(getCardHp(card))}</strong></div>
                 <div class="stat stat-defense"><span>Defense / DEF</span><strong>${formatNumber(getCardDefense(card))}</strong></div>
+                <div class="stat"><span>Base Speed / SPD</span><strong>${formatNumber(getCardSpeed(card))}</strong></div>
                 <div class="stat stat-income"><span>Salary / day</span><strong>${formatNumber(getCardDailySalary(card))}</strong></div>
                 <div class="stat stat-element"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
               </div>
@@ -23264,6 +24073,21 @@
 
     const bgmVolumeInput = document.getElementById("bgmVolume");
     if (bgmVolumeInput) bgmVolumeInput.addEventListener("input", event => setBGMVolume(event.target.value));
+
+
+    document.addEventListener("change", event => {
+      const id = String(event.target && event.target.id || "");
+      const map = {
+        towerFormationSelect:["battle","formationFront"], towerCommandSelect:["battle","commandStrategy"], towerTargetSelect:["battle","targetStrategy"],
+        arenaFormationSelect:["arena","formationFront"], arenaCommandSelect:["arena","commandStrategy"], arenaTargetSelect:["arena","targetStrategy"]
+      };
+      if (!map[id]) return;
+      const [scope, field] = map[id];
+      state[scope][field] = field === "formationFront" ? normalizeFormationFront(event.target.value, 5) : String(event.target.value || "");
+      saveState(true);
+      if (scope === "battle") renderBattle(); else renderArena();
+      showToast(`บันทึกแผนการรบ ${scope === "battle" ? "ไต่หอ" : "ARENA"} แล้ว`);
+    });
 
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
