@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-01-taunt-free-formation-leader-v4">
-  <title>Anime Card Collection · Taunt + Free Formation + Leader v4</title>
+  <meta name="gacha-app-build" content="2026-07-01-capture-revive-balance-awaken-v5">
+  <title>Anime Card Collection · Capture Revive + Balanced Base + Awaken 20 v5</title>
   <style>
     :root {
       color-scheme: dark;
@@ -6534,16 +6534,16 @@
     /* ===================== [SECTION 02 RARITY-COLORS] ===================== */
     const RARITIES = Object.freeze({
       // สมดุลใหม่: ATK : HP : DEF ≈ 1 : 5 : 0.40 เพื่อให้การ์ดระดับเดียวกันสู้กันประมาณ 8–9 เทิร์นก่อนคิดสกิล/โล่
-      N:   { label: "N",         color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,      basePower: 1000,    baseHp: 5000,     baseDefense: 400, baseSpeed: 90,    baseIncome: 35,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015, incomePerLevel: .008,  awakenMax: 13, awakenCopies: [1,1,1,2,2,3,3,4,5,6,7,8,10], powerBonus: .07, incomeBonus: .05 },
-      R:   { label: "R",         color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,     basePower: 3000,    baseHp: 15000,    baseDefense: 1200, baseSpeed: 92,   baseIncome: 100,   maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016, incomePerLevel: .0085, awakenMax: 11, awakenCopies: [1,1,2,2,3,3,4,5,6,7,8], powerBonus: .09, incomeBonus: .06 },
-      SR:  { label: "SR",        color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,     basePower: 9000,    baseHp: 45000,    baseDefense: 3600, baseSpeed: 94,   baseIncome: 280,   maxLevel: 140, upgradeDustBase: 70,    upgradeDustGrowth: 1.040, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 9,  awakenCopies: [1,1,2,2,3,4,5,6,8], powerBonus: .12, incomeBonus: .08 },
-      SSR: { label: "SSR",       color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,    basePower: 27000,   baseHp: 135000,   baseDefense: 10800, baseSpeed: 96,  baseIncome: 800,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 7,  awakenCopies: [1,1,2,3,4,5,7], powerBonus: .17, incomeBonus: .11 },
-      UR:  { label: "UR",        color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,   basePower: 81000,   baseHp: 405000,   baseDefense: 32400, baseSpeed: 98,  baseIncome: 2300,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .26, incomeBonus: .17 },
+      N:   { label: "N",         color: "#94a3b8", colors: ["#94a3b8", "#0f172a"], gradient: "linear-gradient(135deg, #94a3b8, #334155 55%, #020617)", glow: "#94a3b8", textColor: "#071019", order: 0, stars: 3,  dust: 5,      basePower: 12000,    baseHp: 60000,     baseDefense: 4800, baseSpeed: 90,    baseIncome: 80,    maxLevel: 100, upgradeDustBase: 10,    upgradeDustGrowth: 1.025, powerPerLevel: .015, incomePerLevel: .008,  awakenMax: 20, awakenCopies: [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8], powerBonus: 0.02, incomeBonus: 0.0125 },
+      R:   { label: "R",         color: "#38bdf8", colors: ["#38bdf8", "#2563eb", "#0f172a"], gradient: "linear-gradient(135deg, #38bdf8, #2563eb 58%, #020617)", glow: "#38bdf8", textColor: "#06111f", order: 1, stars: 4,  dust: 18,     basePower: 14000,    baseHp: 70000,    baseDefense: 5600, baseSpeed: 92,   baseIncome: 100,   maxLevel: 120, upgradeDustBase: 25,    upgradeDustGrowth: 1.032, powerPerLevel: .016, incomePerLevel: .0085, awakenMax: 20, awakenCopies: [7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7], powerBonus: 0.0225, incomeBonus: 0.014 },
+      SR:  { label: "SR",        color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,     basePower: 16000,    baseHp: 80000,    baseDefense: 6400, baseSpeed: 94,   baseIncome: 125,   maxLevel: 140, upgradeDustBase: 70,    upgradeDustGrowth: 1.040, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 20,  awakenCopies: [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6], powerBonus: 0.025, incomeBonus: 0.0155 },
+      SSR: { label: "SSR",       color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,    basePower: 18000,   baseHp: 90000,   baseDefense: 7200, baseSpeed: 96,  baseIncome: 155,   maxLevel: 160, upgradeDustBase: 220,   upgradeDustGrowth: 1.052, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 20,  awakenCopies: [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5], powerBonus: 0.0275, incomeBonus: 0.017 },
+      UR:  { label: "UR",        color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,   basePower: 21000,   baseHp: 105000,   baseDefense: 8400, baseSpeed: 98,  baseIncome: 190,  maxLevel: 180, upgradeDustBase: 750,   upgradeDustGrowth: 1.064, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 20,  awakenCopies: [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4], powerBonus: 0.03, incomeBonus: 0.019 },
       LR:  { label: "Legends",     color: "#FFD700",
   colors: ["#7A4800", "#D99A16", "#FFF2A8", "#FFD700", "#A86400"],
   gradient: "linear-gradient(135deg, #6B3F00 0%, #D99A16 22%, #FFF7C2 43%, #FFD700 58%, #B8750D 78%, #FFE98A 100%)",
   glow: "#FFD966",
-  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 243000,  baseHp: 1215000,  baseDefense: 97200, baseSpeed: 100,  baseIncome: 6500,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 5,  awakenCopies: [1,1,2,3,5], powerBonus: .38, incomeBonus: .25 },
+  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 24000,  baseHp: 120000,  baseDefense: 9600, baseSpeed: 100,  baseIncome: 230,  maxLevel: 220, upgradeDustBase: 2800,  upgradeDustGrowth: 1.078, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 20,  awakenCopies: [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], powerBonus: 0.0325, incomeBonus: 0.021 },
       SC:  { label: "Mystical",   color: "#f5d9ff",
   colors: [
     "#ff77d9",
@@ -6556,9 +6556,32 @@
   ],
   gradient: "linear-gradient(135deg, #ff77d9 0%, #9c8cff 16%, #65e8ff 32%, #75ffbf 48%, #fff18a 64%, #ff9f76 80%, #ffffff 92%, #ff77d9 100%)",
   glow: "#f4caff",
-  textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 729000,  baseHp: 3645000,  baseDefense: 291600, baseSpeed: 103, baseIncome: 18000, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 4,  awakenCopies: [1,1,2,3], powerBonus: .65, incomeBonus: .45 },
-      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 2187000, baseHp: 10935000, baseDefense: 874800, baseSpeed: 106, baseIncome: 50000, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 3, awakenCopies: [1,2,3], powerBonus: .90, incomeBonus: .70 }
+  textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 27000,  baseHp: 135000,  baseDefense: 10800, baseSpeed: 103, baseIncome: 275, maxLevel: 250, upgradeDustBase: 10000, upgradeDustGrowth: 1.092, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 20,  awakenCopies: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], powerBonus: 0.035, incomeBonus: 0.023 },
+      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 20000, upgradeDustGrowth: 1.102, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 }
     });
+
+    // เพิ่มโดยอลิซ v5: ปรับเบสทุกระดับให้ใกล้กัน และย้ายการ์ดเก่าเข้าสเกลใหม่โดยรักษาความต่างรายใบไว้ไม่เกิน ±10%
+    const CARD_BALANCE_SCHEMA_VERSION = 3;
+    const LEGACY_RARITY_BASES = Object.freeze({
+      N:{power:1000,hp:5000,defense:400,income:35}, R:{power:3000,hp:15000,defense:1200,income:100},
+      SR:{power:9000,hp:45000,defense:3600,income:280}, SSR:{power:27000,hp:135000,defense:10800,income:800},
+      UR:{power:81000,hp:405000,defense:32400,income:2300}, LR:{power:243000,hp:1215000,defense:97200,income:6500},
+      SC:{power:729000,hp:3645000,defense:291600,income:18000}, EX:{power:2187000,hp:10935000,defense:874800,income:50000}
+    });
+
+    function getBalancedCardBase(card, statKey, rarityKey) {
+      const rarity = getRarity(card || {});
+      const targetKey = statKey === "power" ? "basePower" : statKey === "hp" ? "baseHp" : statKey === "defense" ? "baseDefense" : "baseIncome";
+      const targetBase = Math.max(0, Number(rarity[targetKey]) || 0);
+      const raw = Number(card && card[statKey === "income" ? "incomePerSec" : statKey]);
+      if (Number(card && card.balanceSchemaVersion) >= CARD_BALANCE_SCHEMA_VERSION) {
+        return Number.isFinite(raw) && raw > 0 ? raw : targetBase;
+      }
+      const code = String(card && card.rarity || rarityKey || "N").toUpperCase();
+      const legacyBase = Number(LEGACY_RARITY_BASES[code] && LEGACY_RARITY_BASES[code][statKey]) || targetBase || 1;
+      const ratio = Number.isFinite(raw) && raw > 0 ? Math.max(.90, Math.min(1.10, raw / Math.max(1, legacyBase))) : 1;
+      return targetBase * ratio;
+    }
 
     // เพิ่มโดยอลิซ v63: ค่าโบนัสแผนการรบ ทีมมาตรฐาน 5 ตัว
     const FORMATION_RULES = Object.freeze({
@@ -7026,6 +7049,7 @@
       SPEED_FLAT: "speedFlat",
       SPEED_FLAT_STACK: "speedFlatStack",
       TAUNT: "taunt",
+      CAPTURE_REVIVE: "captureRevive",
       INCREASE_MAX_HP_BASE_RATE: "increaseMaxHpBaseRate",
       INCREASE_ATTACK_RATE_STACK: "increaseAttackRateStack",
       SELF_TRIGGER_REDUCTION: "selfTriggerReduction", // รองรับข้อมูลเก่า: ทำงานเป็นคอสชั่วคราวรอบปัจจุบัน
@@ -14002,7 +14026,9 @@
         ignoreAbilityCondition: CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS,
         activateField: CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN,
         provoke: CARD_ABILITY_EFFECT_TYPES.TAUNT,
-        aggro: CARD_ABILITY_EFFECT_TYPES.TAUNT
+        aggro: CARD_ABILITY_EFFECT_TYPES.TAUNT,
+        soulCapture: CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE,
+        captureEnemyRevive: CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE
       };
       return aliases[type] || type;
     }
@@ -14980,6 +15006,7 @@
         resistedEffects,
         abilityResolutionSeed: resolutionSeed,
         abilityTransferEffects: [],
+        captureReviveEffects: [],
         transferResults: abilityArray(options.transferResults).filter(Boolean).map(item => ({ ...item })),
         enemyFieldEffects: [],
         triggeredEffects: [],
@@ -15072,6 +15099,13 @@
               activeEffects.push(record);
               return;
             }
+            // captureRevive ทำงานเมื่อเจ้าของเอฟเฟกต์เป็นผู้จัดการเป้าหมายสำเร็จโดยตรง
+            // เงื่อนไขจัดทีม/เลเวล/อเวกยังใช้ตามปกติ แต่ไม่ใช้ afterOwnAttacks/onOwnAttack ซ้อนอีกชั้น
+            if (effectType === CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE) {
+              summary.captureReviveEffects.push({ key: record._runtimeEffectKey, sourceCard, ability, effect: record });
+              activeEffects.push({ ...record, killTriggered: true });
+              return;
+            }
 
             // Active Skill แบบนับจำนวนครั้งโจมตี: เก็บไว้ให้ battle engine ประมวลผล ไม่ใช้เป็น Passive ทันที
             if (effectTrigger) {
@@ -15094,6 +15128,9 @@
 
             activeEffects.push(record);
             switch (effectType) {
+              case CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE:
+                summary.captureReviveEffects.push({ key: record._runtimeEffectKey, sourceCard, ability, effect: record });
+                break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE:
               case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE_STACK: summary.teamPowerRate += value; break;
               case CARD_ABILITY_EFFECT_TYPES.TEAM_HP_RATE:
@@ -15752,6 +15789,7 @@
         speedFlat: `SPD ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)}`,
         speedFlatStack: `SPD แบบสแต็ก ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)} ต่อชั้น • สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         taunt: `ยั่วยุ ${targetText} • บังคับฝ่ายตรงข้ามเล็งเป้าหมายนี้ก่อน ${Math.max(1, Math.floor(Number(effect && effect.durationTurns) || 1))} เทิร์นโจมตี`,
+        captureRevive: `ชิงร่างศัตรูที่จัดการได้มาเข้าฝ่ายเรา • สูงสุด ${Math.max(1, Math.min(5, Math.floor(Number(effect && effect.targetCount) || 1)))} เป้าหมาย • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? 1), 1))} • ${String(effect && effect.reviveType || "revive")}`,
         increaseMaxHpBaseRate: `เพิ่ม HP สูงสุดและ HP ปัจจุบันจาก HP เบส ${signedPercent(Math.max(0, value))}`,
         increaseAttackRateStack: `สะสม ATK ถาวรระหว่างไฟต์ ${signedPercent(Math.max(0, value))} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         powerRateStack: `สะสม ATK ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
@@ -15892,7 +15930,7 @@
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
       const rarity = getRarity(card);
-      const basePower = Number(card.power || rarity.basePower || 0);
+      const basePower = getBalancedCardBase(card, "power", card && card.rarity);
       const powerPerLevel = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
       return basePower * (1 + (level - 1) * powerPerLevel) * (1 + rank * Number(rarity.powerBonus || 0));
     }
@@ -15904,8 +15942,8 @@
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
       const rarity = getRarity(card);
-      const fallbackBase = Number(rarity.baseHp !== undefined ? rarity.baseHp : Number(card.power || rarity.basePower || 0) * Number(CONFIG.hpBaseRatio || .64));
-      const baseHp = Number(card.hp !== undefined ? card.hp : fallbackBase);
+      const fallbackBase = Number(rarity.baseHp !== undefined ? rarity.baseHp : Number(rarity.basePower || 0) * Number(CONFIG.hpBaseRatio || .64));
+      const baseHp = Math.max(1, getBalancedCardBase(card, "hp", card && card.rarity) || fallbackBase);
       const powerPerLevel = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
       const hpPerLevel = Number(rarity.hpPerLevel !== undefined ? rarity.hpPerLevel : powerPerLevel * Number(CONFIG.hpLevelGrowthScale || .88));
       const hpBonus = Number(rarity.hpBonus !== undefined ? rarity.hpBonus : Number(rarity.powerBonus || 0) * Number(CONFIG.hpAwakenGrowthScale || .85));
@@ -15917,8 +15955,8 @@
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
       const rarity = getRarity(card);
-      const fallbackBase = Number(rarity.baseDefense !== undefined ? rarity.baseDefense : Number(card.power || rarity.basePower || 0) * Number(CONFIG.defenseBaseRatio || .32));
-      const baseDefense = Number(card.defense !== undefined ? card.defense : fallbackBase);
+      const fallbackBase = Number(rarity.baseDefense !== undefined ? rarity.baseDefense : Number(rarity.basePower || 0) * Number(CONFIG.defenseBaseRatio || .32));
+      const baseDefense = Math.max(0, getBalancedCardBase(card, "defense", card && card.rarity) || fallbackBase);
       const powerPerLevel = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
       const defensePerLevel = Number(rarity.defensePerLevel !== undefined ? rarity.defensePerLevel : powerPerLevel * Number(CONFIG.defenseLevelGrowthScale || .74));
       const defenseBonus = Number(rarity.defenseBonus !== undefined ? rarity.defenseBonus : Number(rarity.powerBonus || 0) * Number(CONFIG.defenseAwakenGrowthScale || .70));
@@ -17625,7 +17663,9 @@
             reviveCount: 0,
             tauntTurnsRemaining: 0,
             tauntRoundsRemaining: 0,
-            tauntSourceCardId: ""
+            tauntSourceCardId: "",
+            cardId: cardIdString(item.id || `${side}-${index}`),
+            originalSide: side, originalSlot: slotNumber, originalRow: row, capturedBySide: "", captureOwnerCardId: "", captureUses: {}
           };
         });
         const shieldOrder = [...members.filter(m => m.row === "front"), ...members.filter(m => m.row === "back")];
@@ -17642,6 +17682,7 @@
           targetStrategy: targetOf(side),
           triggers: abilityArray(options[`${side}ActiveTriggers`]).map(normalizeTrigger),
           abilityRoster: abilityArray(options[`${side}AbilityRoster`]),
+          captureRules: abilityArray(options[`${side}CaptureRules`]).map(rule => ({ ...rule })),
           totalDamage: 0,
           totalHealing: 0,
           totalShieldCreated: 0,
@@ -17657,7 +17698,7 @@
       const player = makeTeam("player");
       const enemy = makeTeam("enemy");
       const initialMemberState = member => ({
-        id: member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
+        id: member.id, cardId: member.cardId || member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
         normalAttackTargetCount: member.normalAttackTargetCount,
         maxHp: member.maxHp, currentHp: member.currentHp, shieldHits: member.shieldHits, ko: false,
         reviveMode: "", reviveTurnsRemaining: 0, reviveHitLifeRemaining: 0,
@@ -17713,7 +17754,7 @@
         const elements = abilityArray(rule && rule.elements).map(String);
         const rarities = abilityArray(rule && rule.rarities).map(String);
         const checks = [];
-        if (ids.length) checks.push(ids.includes(String(member.id)));
+        if (ids.length) checks.push(ids.includes(String(member.cardId || member.id)) || ids.includes(String(member.id)));
         if (elements.length) checks.push(member.elements.some(element => elements.includes(String(element))));
         if (rarities.length) checks.push(rarities.includes(String(member.rarity)));
         if (!checks.length) return true;
@@ -17932,6 +17973,106 @@
         });
       }
 
+      function moveMemberTriggers(fromTeam, toTeam, oldId, newId) {
+        const oldKey = String(oldId), newKey = String(newId);
+        const movedTriggers = fromTeam.triggers.filter(trigger => String(trigger.sourceCardId) === oldKey);
+        fromTeam.triggers = fromTeam.triggers.filter(trigger => String(trigger.sourceCardId) !== oldKey);
+        movedTriggers.forEach(trigger => { trigger.sourceCardId = newKey; });
+        toTeam.triggers.push(...movedTriggers);
+
+        const movedCaptureRules = fromTeam.captureRules.filter(rule => String(rule.sourceCardId) === oldKey);
+        fromTeam.captureRules = fromTeam.captureRules.filter(rule => String(rule.sourceCardId) !== oldKey);
+        movedCaptureRules.forEach(rule => { rule.sourceCardId = newKey; });
+        toTeam.captureRules.push(...movedCaptureRules);
+
+        const movedRoster = fromTeam.abilityRoster.filter(item => String(item && item.id) === oldKey);
+        fromTeam.abilityRoster = fromTeam.abilityRoster.filter(item => String(item && item.id) !== oldKey);
+        movedRoster.forEach(item => {
+          item.id = newKey;
+          if (item.snapshot && typeof item.snapshot === "object") item.snapshot.id = newKey;
+        });
+        toTeam.abilityRoster.push(...movedRoster);
+      }
+
+      function reviveCapturedMember(member, rule) {
+        member.currentHp = Math.max(1, Math.min(member.maxHp, member.maxHp * Math.max(.01, Number(rule.hpRate) || .30)));
+        member.ko = false; member.deathReason = "";
+        member.reviveMode = String(rule.reviveType || "revive");
+        member.reviveTurnsRemaining = member.reviveMode === "reviveTimedUndying" ? Math.max(1, Math.floor(Number(rule.durationTurns) || 1)) : 0;
+        member.reviveHitLifeRemaining = member.reviveMode === "reviveHitLife" ? Math.max(1, Math.floor(Number(rule.surviveHits) || 1)) : 0;
+        member.shieldHits = 0; member.guardTurns = 0; member.tauntTurnsRemaining = 0; member.tauntRoundsRemaining = 0; member.tauntSourceCardId = "";
+      }
+
+      function applyCaptureReviveRules(ownerTeam, defenderTeam, actor, killedMembers, seedBase = 0) {
+        const events = [];
+        const candidates = abilityArray(killedMembers).filter(member => member && member.ko && member.currentHp <= 0 && !member.capturedBySide);
+        if (!candidates.length) return events;
+        abilityArray(ownerTeam.captureRules).filter(rule => {
+          const sourceId = String(rule.sourceCardId);
+          return sourceId === String(actor.id) || sourceId === String(actor.cardId || actor.id);
+        }).forEach((rule, ruleIndex) => {
+          const key = String(rule.ruleKey || `${actor.cardId || actor.id}:captureRevive`);
+          const used = Math.max(0, Number(actor.captureUses[key]) || 0);
+          const rawLimit = Number(rule.maxTriggers);
+          const maxTriggers = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.max(1, Math.floor(rawLimit)) : Number.POSITIVE_INFINITY;
+          if (used >= maxTriggers) return;
+          const matching = candidates.filter(member => defenderTeam.members.includes(member) && memberMatchesRuntimeRule(member, rule));
+          const selection = normalizeAbilitySelectionMode(rule.targetSelection, "random");
+          const strategy = selection === "random" ? "random" : ownerTeam.targetStrategy;
+          const ordered = sortRuntimeTargets(matching, strategy, seedBase + ruleIndex * 71);
+          const count = Math.max(1, Math.min(5, Math.floor(Number(rule.targetCount) || 1), ordered.length, maxTriggers - used));
+          let capturedCount = 0;
+          for (const member of ordered) {
+            if (capturedCount >= count || Math.max(0, Number(actor.captureUses[key]) || 0) >= maxTriggers) break;
+            const successRate = Math.max(0, Number(rule.successRate) || 0);
+            const succeeded = Math.random() < Math.min(1, successRate);
+            const baseCardId = String(member.cardId || member.id);
+            if (!succeeded) {
+              events.push({ status:"failed", sourceCardId:actor.id, targetCardId:member.id, cardId:baseCardId, targetName:member.name, successRate });
+              continue;
+            }
+            actor.captureUses[key] = Math.max(0, Number(actor.captureUses[key]) || 0) + 1;
+            const oldId = String(member.id);
+            const collision = ownerTeam.members.some(item => String(item.id) === oldId);
+            const newId = collision ? `${baseCardId}@C${ownerTeam.side}${turnIndex}${capturedCount}` : oldId;
+            const idx = defenderTeam.members.indexOf(member);
+            if (idx >= 0) defenderTeam.members.splice(idx, 1);
+            moveMemberTriggers(defenderTeam, ownerTeam, oldId, newId);
+            member.cardId = baseCardId;
+            member.id = newId;
+            member.originalSide = defenderTeam.side;
+            member.originalSlot = member.originalSlot || member.slot;
+            member.originalRow = member.originalRow || member.row;
+            member.capturedBySide = ownerTeam.side;
+            member.captureOwnerCardId = actor.id;
+            member.slot = Math.max(1, ...ownerTeam.members.map(item => Number(item.slot) || 0)) + 1;
+            member.row = "back";
+            reviveCapturedMember(member, rule);
+            ownerTeam.members.push(member);
+            capturedCount += 1;
+            events.push({ status:"success", sourceCardId:actor.id, targetCardId:newId, cardId:baseCardId, targetName:member.name, successRate, reviveType:member.reviveMode, hp:member.currentHp, maxHp:member.maxHp, turnsRemaining:member.reviveTurnsRemaining, hitLifeRemaining:member.reviveHitLifeRemaining, fromSide:defenderTeam.side, toSide:ownerTeam.side });
+          }
+        });
+        return events;
+      }
+
+      function releaseCapturedCorpses(currentTeam, originalTeam) {
+        const events = [];
+        [...currentTeam.members].forEach(member => {
+          if (!member || !member.capturedBySide || member.originalSide !== originalTeam.side || (!member.ko && member.currentHp > 0)) return;
+          const oldId = String(member.id);
+          const baseId = String(member.cardId || oldId).split("@C")[0];
+          currentTeam.members = currentTeam.members.filter(item => item !== member);
+          moveMemberTriggers(currentTeam, originalTeam, oldId, baseId);
+          member.id = baseId; member.cardId = baseId; member.capturedBySide = ""; member.captureOwnerCardId = "";
+          member.slot = Math.max(1, Number(member.originalSlot) || 1); member.row = member.originalRow || "front";
+          member.currentHp = 0; member.ko = true; member.reviveMode = ""; member.reviveTurnsRemaining = 0; member.reviveHitLifeRemaining = 0;
+          if (!originalTeam.members.includes(member)) originalTeam.members.push(member);
+          events.push({ targetCardId:baseId, targetName:member.name, returnedToSide:originalTeam.side });
+        });
+        return events;
+      }
+
       function applyReviveRules(rules, ownerTeam, defenderTeam, actor, currentTarget) {
         const events = [];
         abilityArray(rules).forEach(rule => {
@@ -17990,12 +18131,13 @@
 
       function battleMemberStates() {
         const snap = member => ({
-          id: member.id, name: member.name, row: member.row, slot: member.slot,
+          id: member.id, cardId: member.cardId || member.id, name: member.name, row: member.row, slot: member.slot,
           speed: member.speed, baseSpeed: member.baseSpeed, maxHp: member.maxHp, currentHp: Math.max(0, member.currentHp),
           shieldHits: member.shieldHits, ko: Boolean(member.ko || member.currentHp <= 0), deathReason: member.deathReason || "",
           reviveMode: member.reviveMode || "", reviveTurnsRemaining: member.reviveTurnsRemaining || 0,
           reviveHitLifeRemaining: member.reviveHitLifeRemaining || 0,
-          tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0
+          tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0,
+          capturedBySide: member.capturedBySide || "", originalSide: member.originalSide || ""
         });
         return { player: player.members.map(snap), enemy: enemy.members.map(snap) };
       }
@@ -18012,7 +18154,7 @@
           currentHp: Math.max(0, member.currentHp), shieldRemaining: member.shieldHits,
           reviveMode: member.reviveMode, reviveTurnsRemaining: member.reviveTurnsRemaining,
           reviveHitLifeRemaining: member.reviveHitLifeRemaining, reviveCount: member.reviveCount, deathReason: member.deathReason,
-          tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0,
+          tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0, capturedBySide: member.capturedBySide || "", cardId: member.cardId || member.id,
           damage: member.damageDealt, healing: member.healingDone, shieldCreated: member.shieldCreated,
           skillActivations: member.skillActivations, attacks: member.attackCount, totalHits: member.totalHits,
           criticalHits: member.criticalHits, blocks: member.blocks, dodges: member.dodges, ko: member.currentHp <= 0
@@ -18245,6 +18387,13 @@
           team.totalDamage += totalDamage;
           if (critical) { actor.criticalHits += 1; team.totalCriticalHits += 1; }
 
+          const killedMembers = targetResults.filter(item => item.ko).map(item => defenderTeam.members.find(member => String(member.id) === String(item.targetCardId))).filter(Boolean);
+          const captureEvents = applyCaptureReviveRules(team, defenderTeam, actor, killedMembers, turnIndex);
+          const captureReleaseEvents = [
+            ...releaseCapturedCorpses(team, defenderTeam),
+            ...releaseCapturedCorpses(defenderTeam, team)
+          ];
+
           let requestedHeal = 0;
           let heal = 0;
           if (abilityArray(activation.healTargetRules).length) {
@@ -18305,7 +18454,7 @@
             enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activation.nextAttackCriticalRate,
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
             actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
-            reviveEvents, speedEvents, tauntEvents, hitLifeConsumed:totalHitLifeConsumed,
+            reviveEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, hitLifeConsumed:totalHitLifeConsumed,
             hitLifeExpired:anyHitLifeExpired, timedReviveExpired
           });
           turns[turns.length - 1].memberStates = battleMemberStates();
@@ -18660,12 +18809,31 @@
     }
 
     function battleCardImage(cardId) {
-      const card = CARD_BY_ID.get(String(cardId));
+      const baseId = String(cardId || "").split("@C")[0];
+      const card = CARD_BY_ID.get(baseId);
       return card ? getCardImage(card) : "";
     }
 
+    function ensureBattleUnitNode(stage, side, state) {
+      let node = battleUnitNode(stage, side, state && state.id);
+      if (node || !stage || !state) return node;
+      const stack = stage.querySelector(side === "player" ? "#battlePlayerModels, #arenaPlayerModels" : "#battleEnemyModels, #arenaEnemyModels");
+      if (!stack) return null;
+      const baseId = String(state.cardId || state.id || "").split("@C")[0];
+      const card = CARD_BY_ID.get(baseId) || { id:baseId, name:state.name || baseId, rarity:"N" };
+      const holder = document.createElement("div");
+      holder.innerHTML = battleModelHTML(card, stack.children.length, side === "enemy", Math.max(1, stack.children.length + 1));
+      node = holder.firstElementChild;
+      if (!node) return null;
+      node.dataset.battleCardId = String(state.id);
+      node.dataset.battleSide = side;
+      node.dataset.dynamicCapture = "true";
+      stack.appendChild(node);
+      return node;
+    }
+
     function setBattleUnitState(stage, side, state) {
-      const node = battleUnitNode(stage, side, state && state.id);
+      const node = ensureBattleUnitNode(stage, side, state);
       if (!node || !state) return;
       const hpRate = Math.max(0, Math.min(1, Number(state.currentHp || 0) / Math.max(1, Number(state.maxHp || 1))));
       const hpPercent = Math.round(hpRate * 10000) / 100;
@@ -18690,6 +18858,7 @@
         if (Number(state.reviveTurnsRemaining) > 0) parts.push(`⏳${state.reviveTurnsRemaining}`);
         if (Number(state.reviveHitLifeRemaining) > 0) parts.push(`HIT ${state.reviveHitLifeRemaining}`);
         if (Number(state.tauntTurnsRemaining) > 0 || Number(state.tauntRoundsRemaining) > 0) parts.push(`🎯 ยั่วยุ`);
+        if (state.capturedBySide) parts.push(`👻 ชิงร่าง`);
         const specialText = parts.join(" • ");
         if (special.textContent !== specialText) special.textContent = specialText;
       }
@@ -18699,6 +18868,12 @@
       if (!stage || !states) return;
       abilityArray(states.player).forEach(state => setBattleUnitState(stage, "player", state));
       abilityArray(states.enemy).forEach(state => setBattleUnitState(stage, "enemy", state));
+      ["player","enemy"].forEach(side => {
+        const ids = new Set(abilityArray(states[side]).map(item => String(item.id)));
+        stage.querySelectorAll(`.battle-unit[data-battle-side="${side}"][data-dynamic-capture="true"]`).forEach(node => {
+          if (!ids.has(String(node.dataset.battleCardId))) node.remove();
+        });
+      });
     }
 
     function renderBattleTurnOrder(stage, combat, currentIndex, labels = {}) {
@@ -18802,6 +18977,20 @@
           window.setTimeout(()=>node.classList.remove("is-reviving"),800);
         }
       });
+      abilityArray(turn.captureEvents).forEach(event => {
+        if (event.status !== "success") return;
+        const oldNode = battleUnitNode(stage, targetSide, event.cardId || event.targetCardId);
+        if (oldNode) { floatBattleText(oldNode, "CAPTURE", "revive"); oldNode.remove(); }
+        const newState = abilityArray(turn.memberStates && turn.memberStates[turn.side]).find(item => String(item.id) === String(event.targetCardId)) || { id:event.targetCardId, cardId:event.cardId, name:event.targetName, maxHp:event.maxHp, currentHp:event.hp, speed:1 };
+        const node = ensureBattleUnitNode(stage, turn.side, newState);
+        if (node) { node.classList.add("is-reviving"); floatBattleText(node, "SOUL CAPTURE", "revive"); window.setTimeout(()=>node.classList.remove("is-reviving"),900); }
+      });
+      abilityArray(turn.captureReleaseEvents).forEach(event => {
+        const returnedSide = event.returnedToSide || targetSide;
+        const state = abilityArray(turn.memberStates && turn.memberStates[returnedSide]).find(item => String(item.id) === String(event.targetCardId));
+        const node = state ? ensureBattleUnitNode(stage, returnedSide, state) : battleUnitNode(stage, returnedSide, event.targetCardId);
+        if (node) floatBattleText(node, "CORPSE RETURN", "revive");
+      });
     }
 
 async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
@@ -18829,6 +19018,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
         const reviveText = abilityArray(turn.reviveEvents).length ? ` • ✨ คืนชีพ ${turn.reviveEvents.map(item=>item.targetName).join(", ")}` : "";
         const speedText = abilityArray(turn.speedEvents).length ? ` • SPD ${turn.speedEvents.map(item=>`${item.targetName} ${item.change>=0?"+":""}${item.change}`).join(", ")}` : "";
+        const captureText = abilityArray(turn.captureEvents).length ? ` • 👻 ${turn.captureEvents.map(item=>item.status==="success"?`ชิงร่าง ${item.targetName}`:`ชิงร่าง ${item.targetName} ล้มเหลว`).join(", ")}` : "";
+        const captureReleaseText = abilityArray(turn.captureReleaseEvents).length ? ` • ↩ คืนศพ ${turn.captureReleaseEvents.map(item=>item.targetName).join(", ")}` : "";
         const lifeText = turn.hitLifeConsumed ? ` • ตัดชีวิต ${turn.hitLifeConsumed} HIT${turn.hitLifeExpired ? " และหมดสภาพ" : ""}` : "";
         const activeText = turn.triggerActivated
           ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}`
@@ -18836,7 +19027,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
         result.textContent = turn.command === "guard"
           ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
-          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${criticalText}${blockText}${activeText}${reviveText}${speedText}${lifeText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${criticalText}${blockText}${activeText}${reviveText}${captureText}${captureReleaseText}${speedText}${lifeText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
             if (!battleSkipAnimations) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
@@ -18870,7 +19061,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const level = owned ? owned.level : 1;
       const rank = owned ? owned.duplicateRank : 0;
       const rarity = getRarity(card);
-      const baseIncome = Number(card.incomePerSec || rarity.baseIncome || 0);
+      const baseIncome = getBalancedCardBase(card, "income", card && card.rarity);
       const incomePerLevel = Number(rarity.incomePerLevel !== undefined ? rarity.incomePerLevel : CONFIG.incomeGrowth);
       return baseIncome * (1 + (level - 1) * incomePerLevel) * (1 + rank * Number(rarity.incomeBonus || 0));
     }
@@ -18935,6 +19126,32 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (stat === "hp") return getAbilityAdjustedCardHp(card, summary);
       if (stat === "defense") return getAbilityAdjustedCardDefense(card, summary);
       return getAbilityAdjustedCardPower(card, summary);
+    }
+
+    // แปลง captureRevive แบบ Passive เป็นกฎหลังสังหารของระบบรายตัว
+    function buildTeamCaptureReviveConfigs(abilitySummary) {
+      return abilityArray(abilitySummary && abilitySummary.captureReviveEffects).map((entry, index) => {
+        const effect = entry && entry.effect || {};
+        const reviveType = ["revive", "reviveTimedUndying", "reviveHitLife"].includes(String(effect.reviveType || effect.captureReviveType || "revive"))
+          ? String(effect.reviveType || effect.captureReviveType || "revive") : "revive";
+        return {
+          ruleKey: String(entry && entry.key || `captureRevive:${index}`),
+          sourceCardId: cardIdString(entry && entry.sourceCard && entry.sourceCard.id),
+          ids: normalizeAbilityCardIds(effect.targetCardIds || effect.cardIds),
+          elements: normalizeAbilityElements(effect.targetElements || effect.elements),
+          rarities: normalizeAbilityRarities(effect.targetRarities || effect.rarities),
+          match: normalizeAbilityTargetMatch(effect.targetMatch),
+          targetSelection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
+          targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount) || 1))),
+          successRate: normalizeAbilityChance(effect.successRate ?? effect.chance ?? effect.rate ?? 1, 1),
+          reviveType,
+          hpRate: Math.max(.01, Math.min(1, Number(effect.hpRate ?? effect.value ?? .30) || .30)),
+          durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns) || 0)),
+          surviveHits: Math.max(0, Math.floor(Number(effect.surviveHits) || 0)),
+          maxTriggers: Number.isFinite(Number(effect.maxTriggers)) && Number(effect.maxTriggers) > 0
+            ? Math.max(1, Math.floor(Number(effect.maxTriggers))) : Number.POSITIVE_INFINITY
+        };
+      }).filter(rule => rule.sourceCardId);
     }
 
     // แปลง triggeredEffects เป็น Active Skill ของ battle engine
@@ -19329,7 +19546,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
     }
 
 
@@ -20315,6 +20532,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         enemyActiveTriggers: stats.enemyActiveTriggers,
         playerAbilityRoster: stats.playerAbilityRoster,
         enemyAbilityRoster: stats.enemyAbilityRoster,
+        playerCaptureRules: buildTeamCaptureReviveConfigs(stats.abilitySummary),
+        enemyCaptureRules: buildTeamCaptureReviveConfigs(stats.enemyAbilitySummary),
         statusResolutionSeed: makeAbilityResolutionSeed("arena", state.arena && state.arena.team || [], stats.enemyTeam && stats.enemyTeam.map(item => item.id) || [], ""),
         playerFormationFront: state.arena.formationFront,
         playerFormationSize: CONFIG.arenaTeamSlots,
@@ -20688,6 +20907,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         enemyActiveTriggers: stats.enemyActiveTriggers,
         playerAbilityRoster: stats.playerAbilityRoster,
         enemyAbilityRoster: stats.enemyAbilityRoster,
+        playerCaptureRules: buildTeamCaptureReviveConfigs(stats.abilitySummary),
+        enemyCaptureRules: buildTeamCaptureReviveConfigs(stats.enemyAbilitySummary),
         statusResolutionSeed: makeAbilityResolutionSeed("tower", getTowerTeamIds(), [stats.enemyCard && stats.enemyCard.id], ""),
         playerFormationFront: state.battle.formationFront,
         playerFormationSize: CONFIG.towerTeamSlots,
