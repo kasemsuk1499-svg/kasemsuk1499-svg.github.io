@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-01-turn-based-animation-revive-spd-v2">
-  <title>Anime Card Collection · Turn Based Animation + Revive + SPD v2</title>
+  <meta name="gacha-app-build" content="2026-07-01-turn-based-multi-target-stable-ui-v3">
+  <title>Anime Card Collection · Turn Based Multi Target + Stable UI v3</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5394,6 +5394,15 @@
     .battle-moving-clone{position:fixed!important;z-index:9999!important;margin:0!important;pointer-events:none!important;transform:none!important;filter:drop-shadow(0 20px 25px rgba(0,0,0,.55))}.battle-floating-number{position:fixed;z-index:10000;pointer-events:none;color:#fff;font-weight:1000;font-size:clamp(.9rem,2vw,1.3rem);text-shadow:0 2px 4px #000,0 0 14px rgba(251,113,133,.9);animation:battle-float-number .72s ease forwards}.battle-floating-number.heal{color:#86efac;text-shadow:0 2px 4px #000,0 0 14px rgba(34,197,94,.9)}.battle-floating-number.revive{color:#fde68a;text-shadow:0 2px 4px #000,0 0 18px rgba(250,204,21,.95)}.battle-floating-number.speed{color:#93c5fd;text-shadow:0 2px 4px #000,0 0 18px rgba(59,130,246,.95)}
     @keyframes battle-unit-hit{0%,100%{transform:translateX(0) rotate(var(--model-tilt))}25%{transform:translateX(-7px) rotate(-3deg)}55%{transform:translateX(8px) rotate(3deg)}}@keyframes battle-revive-glow{0%{filter:grayscale(1) brightness(.4)}45%{filter:brightness(1.8) drop-shadow(0 0 28px #fde68a);transform:scale(1.12)}100%{filter:none;transform:scale(1)}}@keyframes battle-float-number{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}20%{opacity:1;transform:translate(-50%,0) scale(1.12)}100%{opacity:0;transform:translate(-50%,-48px) scale(.92)}}
     @media(max-width:760px){.battle-turn-order{top:6px;width:96%;justify-content:flex-start;overflow:auto}.battle-turn-chip{min-width:58px}.battle-unit-hp{bottom:22px}}
+
+    /* v65 · Stable battle HUD + 1–5 attack targets */
+    .battle-unit{contain:layout paint;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+    .battle-unit.is-dead{animation:none!important;transition:filter .18s ease,opacity .18s ease!important;transform:translateZ(0)}
+    .battle-unit.is-dead .battle-unit-hp i{transition:none!important}
+    .battle-unit-hp i[data-stable-width]{will-change:width}
+    .battle-unit.is-multi-target{box-shadow:0 0 0 2px rgba(251,113,133,.42),0 0 22px rgba(251,113,133,.22)}
+    .battle-target-count-badge{position:absolute;z-index:22;right:5px;bottom:32px;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px 6px;color:#fff;font-size:.48rem;font-weight:1000;background:rgba(190,24,93,.82);pointer-events:none}
+
 
   </style>
 </head>
@@ -15517,6 +15526,7 @@
           hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
           defense: Math.max(0, getBattleItemStat(item, abilitySummary, "defense", snapshotMode)),
           speed: Math.max(1, Number(item && item.speed) || getCardSpeed(card)),
+          normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number((item && (item.normalAttackTargetCount ?? item.attackTargetCount)) ?? card.normalAttackTargetCount ?? card.attackTargetCount ?? 1) || 1))),
           rarity: String(card.rarity || item && item.rarity || "N"),
           elements: getCardElements(card),
           level: Math.max(1, Math.floor(Number(item && item.level || getOwned(id) && getOwned(id).level || 1))),
@@ -17486,6 +17496,7 @@
             defense,
             baseSpeed: Math.max(1, Math.round(Number(item.speed) || 90)),
             speed: Math.max(1, Math.round(Number(item.speed) || 90)),
+            normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(item.normalAttackTargetCount ?? item.attackTargetCount ?? 1) || 1))),
             speedStacks: {},
             attackHits: attackHitsOf(side),
             shieldHits: 0,
@@ -17549,6 +17560,7 @@
       const enemy = makeTeam("enemy");
       const initialMemberState = member => ({
         id: member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
+        normalAttackTargetCount: member.normalAttackTargetCount,
         maxHp: member.maxHp, currentHp: member.currentHp, shieldHits: member.shieldHits, ko: false,
         reviveMode: "", reviveTurnsRemaining: 0, reviveHitLifeRemaining: 0
       });
@@ -17568,13 +17580,31 @@
         return front.length ? front : living.filter(member => member.row === "back");
       }
 
+      function sortRuntimeTargets(list, strategy, seed = 0) {
+        const source = [...list];
+        if (strategy === "highAtk") return source.sort((a,b) => b.power - a.power || a.currentHp - b.currentHp || a.slot - b.slot);
+        if (strategy === "random") {
+          let state = Math.abs(Math.floor(Number(seed) || 1)) + source.length * 97;
+          return source.sort(() => {
+            state = (state * 9301 + 49297) % 233280;
+            return state / 233280 - .5;
+          });
+        }
+        return source.sort((a,b) => a.currentHp - b.currentHp || b.power - a.power || a.slot - b.slot);
+      }
+
+      function pickTargets(attackerTeam, defenderTeam, requestedCount = 1, seed = 0) {
+        const living = alive(defenderTeam);
+        if (!living.length) return [];
+        const count = Math.max(1, Math.min(5, Math.floor(Number(requestedCount) || 1), living.length));
+        const front = sortRuntimeTargets(living.filter(member => member.row === "front"), attackerTeam.targetStrategy, seed);
+        const back = sortRuntimeTargets(living.filter(member => member.row === "back"), attackerTeam.targetStrategy, seed + 101);
+        // แนวหน้ารับเป้าหมายก่อน หากจำนวนโจมตีเหลือจึงกระจายไปแนวหลัง
+        return [...front, ...back].slice(0, count);
+      }
+
       function pickTarget(attackerTeam, defenderTeam, seed = 0) {
-        const list = eligibleTargets(defenderTeam);
-        if (!list.length) return null;
-        const strategy = attackerTeam.targetStrategy;
-        if (strategy === "highAtk") return [...list].sort((a,b) => b.power - a.power || a.currentHp - b.currentHp)[0];
-        if (strategy === "random") return list[Math.abs(Math.floor(seed + Math.random() * 9999)) % list.length];
-        return [...list].sort((a,b) => a.currentHp - b.currentHp || b.power - a.power)[0];
+        return pickTargets(attackerTeam, defenderTeam, 1, seed)[0] || null;
       }
 
       function memberMatchesRuntimeRule(member, rule) {
@@ -17645,6 +17675,7 @@
         const sum = key => fired.reduce((total, trigger) => total + (Number(trigger[key]) || 0), 0);
         return {
           fired, details, names: fired.map(trigger => trigger.name),
+          attackTargetCount: Math.max(1, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 1)), 1))),
           reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
           speedTargetRules: fired.flatMap(trigger => abilityArray(trigger.speedTargetRules).map(rule => ({ ...rule }))),
           healTargetRules: fired.flatMap(trigger => abilityArray(trigger.healTargetRules).map(rule => ({ ...rule }))),
@@ -17843,7 +17874,7 @@
       function summarizeMember(member) {
         return {
           id: member.id, name: member.name, rarity: member.rarity, row: member.row, slot: member.slot,
-          speed: member.speed, baseSpeed: member.baseSpeed, power: member.power, defense: member.defense, maxHp: member.maxHp,
+          speed: member.speed, baseSpeed: member.baseSpeed, normalAttackTargetCount: member.normalAttackTargetCount, power: member.power, defense: member.defense, maxHp: member.maxHp,
           currentHp: Math.max(0, member.currentHp), shieldRemaining: member.shieldHits,
           reviveMode: member.reviveMode, reviveTurnsRemaining: member.reviveTurnsRemaining,
           reviveHitLifeRemaining: member.reviveHitLifeRemaining, reviveCount: member.reviveCount, deathReason: member.deathReason,
@@ -17868,7 +17899,7 @@
           const defenderTeam = opposing(entry.side);
           const actor = entry.member;
           if (actor.currentHp <= 0) continue;
-          const target = pickTarget(team, defenderTeam, turnIndex);
+          let target = pickTarget(team, defenderTeam, turnIndex);
           if (!target) break;
           turnIndex += 1;
           tickTimed(actor, false);
@@ -17897,6 +17928,9 @@
           }
 
           const activation = makeActivation(team, actor, target);
+          const requestedAttackTargets = activation.fired.length ? activation.attackTargetCount : actor.normalAttackTargetCount;
+          const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex);
+          target = attackTargets[0] || target;
           applyRateMaps(team, activation.blockRateChanges, "blockRate");
           applyRateMaps(team, activation.damageTakenRateChanges, "damageTakenRate");
           applyRateMaps(team, activation.dodgeRateChanges, "dodgeRate");
@@ -18001,11 +18035,77 @@
             target.ko = target.currentHp <= 0;
             if (target.ko) target.deathReason = "damage";
           }
+          const targetResults = [{
+            targetCardId: target.id, targetName: target.name, targetRow: target.row,
+            damage, blockedHits, unblockedHits, dodged, blocked,
+            remaining: Math.max(0, target.currentHp), ko: Boolean(target.ko),
+            hitLifeConsumed: reviveSurvival.hitLifeConsumed, hitLifeExpired: reviveSurvival.expired
+          }];
+          let totalDamage = damage;
+          let totalBlockedHits = blockedHits;
+          let totalUnblockedHits = unblockedHits;
+          let totalHitLifeConsumed = reviveSurvival.hitLifeConsumed;
+          let anyHitLifeExpired = reviveSurvival.expired;
+
+          for (const extraTarget of attackTargets.slice(1)) {
+            const extraBlockedHits = Math.min(extraTarget.shieldHits, hits);
+            extraTarget.shieldHits -= extraBlockedHits;
+            extraTarget.shieldConsumed += extraBlockedHits;
+            const extraUnblockedHits = Math.max(0, hits - extraBlockedHits);
+            const extraHitRate = hits > 0 ? extraUnblockedHits / hits : 0;
+            let extraDodged = false;
+            let extraBlocked = false;
+            let extraDamage = 0;
+            if (extraUnblockedHits > 0) {
+              extraDodged = Math.random() < Math.max(0, extraTarget.dodgeRate);
+              if (!extraDodged) {
+                const extraAttackAfterShield = activeAttack * extraHitRate * varianceOf(entry.side) * critMultiplier;
+                const extraDefenseApplied = extraTarget.defense * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, extraHitRate);
+                const extraMinimum = activeAttack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)) * extraHitRate;
+                extraDamage = Math.max(extraMinimum, extraAttackAfterShield - extraDefenseApplied);
+                extraBlocked = Math.random() < Math.max(0, extraTarget.blockRate);
+                if (extraBlocked) extraDamage *= Number(CONFIG.combatBlockDamageMultiplier || .5);
+                if (extraTarget.guardTurns > 0) extraDamage *= .5;
+                extraDamage *= Math.max(0, 1 + Number(extraTarget.damageTakenRate || 0));
+                const fatigueStart = Math.max(1, Number(CONFIG.combatFatigueStartRound || 18));
+                if (round >= fatigueStart) {
+                  const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxHpRate || .10), .01 + Math.max(0, round-fatigueStart)*.003);
+                  extraDamage = Math.max(extraDamage, extraTarget.maxHp * fatigueRate);
+                }
+                extraDamage = Math.max(1, Math.min(extraTarget.currentHp, extraDamage));
+              }
+            }
+            if (extraDodged) { extraTarget.dodges += 1; defenderTeam.totalDodges += 1; }
+            if (extraBlocked) { extraTarget.blocks += 1; defenderTeam.totalBlocks += 1; defenderTeam.totalBlockedDamage += extraDamage; }
+            extraTarget.currentHp = Math.max(0, extraTarget.currentHp - extraDamage);
+            const extraReceivedHits = extraBlockedHits + (extraDodged ? 0 : extraUnblockedHits);
+            const extraReviveSurvival = applyReviveSurvivalAfterHit(extraTarget, extraReceivedHits);
+            if (!extraReviveSurvival.expired) {
+              if (extraTarget.currentHp <= 0 && extraTarget.reviveTurnsRemaining > 0) extraTarget.currentHp = 1;
+              extraTarget.ko = extraTarget.currentHp <= 0;
+              if (extraTarget.ko) extraTarget.deathReason = "damage";
+            }
+            if (extraTarget.guardTurns > 0) extraTarget.guardTurns -= 1;
+            targetResults.push({
+              targetCardId: extraTarget.id, targetName: extraTarget.name, targetRow: extraTarget.row,
+              damage: extraDamage, blockedHits: extraBlockedHits, unblockedHits: extraUnblockedHits,
+              dodged: extraDodged, blocked: extraBlocked, remaining: Math.max(0, extraTarget.currentHp),
+              ko: Boolean(extraTarget.ko), hitLifeConsumed: extraReviveSurvival.hitLifeConsumed,
+              hitLifeExpired: extraReviveSurvival.expired
+            });
+            totalDamage += extraDamage;
+            totalBlockedHits += extraBlockedHits;
+            totalUnblockedHits += extraUnblockedHits;
+            totalHitLifeConsumed += extraReviveSurvival.hitLifeConsumed;
+            anyHitLifeExpired = anyHitLifeExpired || extraReviveSurvival.expired;
+          }
+
           if (target.guardTurns > 0) target.guardTurns -= 1;
           actor.attackCount += 1;
-          actor.totalHits += hits;
-          actor.damageDealt += damage;
-          team.totalDamage += damage;
+          const totalAppliedHits = hits * targetResults.length;
+          actor.totalHits += totalAppliedHits;
+          actor.damageDealt += totalDamage;
+          team.totalDamage += totalDamage;
           if (critical) { actor.criticalHits += 1; team.totalCriticalHits += 1; }
 
           let requestedHeal = 0;
@@ -18048,14 +18148,15 @@
           turns.push({
             round, side:entry.side, command:activation.fired.length?"skill":"attack", actorCardId:actor.id, actorName:actor.name,
             actorSpeed:actor.speed, actorRow:actor.row, targetCardId:target.id, targetName:target.name, targetRow:target.row,
-            hits, baseHits, passiveBaseHits:actor.attackHits, pendingHitChange, activeHitChange:hits-baseHits,
-            extraHits:Math.max(0,hits-baseHits), hitReduction:Math.max(0,baseHits-hits), requestedExtraHits:activeHitRuleChange,
-            enemyNextAttackHits:abilityArray(activation.hitTargetRules).length ? 0 : activation.enemyNextAttackHits, blockedHits, unblockedHits, damage, critical,
+            targetCardIds:targetResults.map(item=>item.targetCardId), targetNames:targetResults.map(item=>item.targetName), targetCount:targetResults.length, targetResults,
+            hits:totalAppliedHits, hitsPerTarget:hits, baseHits:baseHits*targetResults.length, baseHitsPerTarget:baseHits, passiveBaseHits:actor.attackHits, pendingHitChange, activeHitChange:(hits-baseHits)*targetResults.length,
+            extraHits:Math.max(0,hits-baseHits)*targetResults.length, hitReduction:Math.max(0,baseHits-hits)*targetResults.length, requestedExtraHits:activeHitRuleChange,
+            enemyNextAttackHits:abilityArray(activation.hitTargetRules).length ? 0 : activation.enemyNextAttackHits, blockedHits:totalBlockedHits, unblockedHits:totalUnblockedHits, damage:totalDamage, critical,
             criticalRate:effectiveCrit, baseCriticalRate:actor.criticalRate, nextAttackCriticalRateChange:nextCrit,
             enemyNextAttackCriticalRate:activation.enemyNextAttackCriticalRate, criticalMultiplier:critMultiplier,
-            defenderDefense:target.defense, dodgedMembers:dodged?[{id:target.id,name:target.name,hpShare:1}]:[],
-            blockedMembers:blocked?[{id:target.id,name:target.name,finalDamage:damage}]:[], dodgedHpRate:dodged?1:0,
-            blockDamageReduced:0, damageBeforeBlock:damage, damageAfterBlock:damage,
+            defenderDefense:target.defense, dodgedMembers:targetResults.filter(item=>item.dodged).map(item=>({id:item.targetCardId,name:item.targetName,hpShare:1})),
+            blockedMembers:targetResults.filter(item=>item.blocked).map(item=>({id:item.targetCardId,name:item.targetName,finalDamage:item.damage})), dodgedHpRate:targetResults.some(item=>item.dodged)?1:0,
+            blockDamageReduced:0, damageBeforeBlock:totalDamage, damageAfterBlock:totalDamage,
             triggerActivated:activation.fired.length>0, triggeredSkills:activation.names, triggeredDetails:activation.details,
             suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:[], transferEvents:[], stackEvents:[],
             attackBonus:activation.attackBonus, attackStackGain:activation.attackStackGain, maxHpGain,
@@ -18067,8 +18168,8 @@
             enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activation.nextAttackCriticalRate,
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
             actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
-            reviveEvents, speedEvents, hitLifeConsumed:reviveSurvival.hitLifeConsumed,
-            hitLifeExpired:reviveSurvival.expired, timedReviveExpired
+            reviveEvents, speedEvents, hitLifeConsumed:totalHitLifeConsumed,
+            hitLifeExpired:anyHitLifeExpired, timedReviveExpired
           });
           turns[turns.length - 1].memberStates = battleMemberStates();
         }
@@ -18428,18 +18529,29 @@
       const node = battleUnitNode(stage, side, state && state.id);
       if (!node || !state) return;
       const hpRate = Math.max(0, Math.min(1, Number(state.currentHp || 0) / Math.max(1, Number(state.maxHp || 1))));
-      node.classList.toggle("is-dead", Boolean(state.ko || Number(state.currentHp) <= 0));
+      const hpPercent = Math.round(hpRate * 10000) / 100;
+      const dead = Boolean(state.ko || Number(state.currentHp) <= 0);
+      if (node.dataset.deadState !== String(dead)) {
+        node.dataset.deadState = String(dead);
+        node.classList.toggle("is-dead", dead);
+      }
       const hp = node.querySelector(".battle-unit-hp i");
-      if (hp) hp.style.width = `${hpRate * 100}%`;
+      if (hp && hp.dataset.stableWidth !== String(hpPercent)) {
+        hp.dataset.stableWidth = String(hpPercent);
+        hp.setAttribute("data-stable-width", "true");
+        hp.style.width = `${hpPercent}%`;
+      }
+      const statusText = dead ? "KO" : `HP ${Math.ceil(hpRate * 100)}%`;
       const status = node.querySelector(".battle-unit-status");
-      if (status) status.textContent = state.ko ? "KO" : `HP ${Math.ceil(hpRate * 100)}%`;
+      if (status && status.textContent !== statusText) status.textContent = statusText;
       const special = node.querySelector(".battle-unit-special");
       if (special) {
         const parts = [`SPD ${Math.max(1, Math.round(Number(state.speed) || 1))}`];
         if (Number(state.shieldHits) > 0) parts.push(`🛡${state.shieldHits}`);
         if (Number(state.reviveTurnsRemaining) > 0) parts.push(`⏳${state.reviveTurnsRemaining}`);
         if (Number(state.reviveHitLifeRemaining) > 0) parts.push(`HIT ${state.reviveHitLifeRemaining}`);
-        special.textContent = parts.join(" • ");
+        const specialText = parts.join(" • ");
+        if (special.textContent !== specialText) special.textContent = specialText;
       }
     }
 
@@ -18476,21 +18588,35 @@
       if (!stage || battleSkipAnimations || !turn || turn.command === "suddenBreak") return;
       const actorNode = battleUnitNode(stage, turn.side, turn.actorCardId);
       const targetSide = turn.side === "player" ? "enemy" : "player";
-      const targetNode = battleUnitNode(stage, targetSide, turn.targetCardId);
+      const resultList = abilityArray(turn.targetResults).length
+        ? abilityArray(turn.targetResults)
+        : [{ targetCardId: turn.targetCardId, targetName: turn.targetName, damage: turn.damage, dodged: Boolean(turn.dodgedMembers && turn.dodgedMembers.length), blocked: !turn.damage }];
+      const targetEntries = resultList.map(result => ({ result, node: battleUnitNode(stage, targetSide, result.targetCardId) })).filter(entry => entry.node);
+      const primaryTargetNode = targetEntries[0] && targetEntries[0].node;
       if (!actorNode) return;
       actorNode.classList.add("is-acting");
-      if (turn.command === "guard" || !targetNode) {
+      if (turn.command === "guard" || !primaryTargetNode) {
         actorNode.animate?.([{transform:"scale(1)"},{transform:"scale(1.10)"},{transform:"scale(1)"}],{duration:Math.max(120,duration),easing:"ease"});
         await wait(Math.max(70, duration));
         actorNode.classList.remove("is-acting");
         return;
       }
-      targetNode.classList.add("is-target");
+      targetEntries.forEach(({node}) => {
+        node.classList.add("is-target");
+        if (targetEntries.length > 1) node.classList.add("is-multi-target");
+      });
       const a = actorNode.getBoundingClientRect();
-      const t = targetNode.getBoundingClientRect();
+      const t = primaryTargetNode.getBoundingClientRect();
       const clone = actorNode.cloneNode(true);
       clone.classList.add("battle-moving-clone");
       clone.classList.remove("is-dead");
+      clone.querySelectorAll(".battle-target-count-badge").forEach(node=>node.remove());
+      if (targetEntries.length > 1) {
+        const badge = document.createElement("b");
+        badge.className = "battle-target-count-badge";
+        badge.textContent = `${targetEntries.length} TARGETS`;
+        clone.appendChild(badge);
+      }
       Object.assign(clone.style,{left:`${a.left}px`,top:`${a.top}px`,width:`${a.width}px`,height:`${a.height}px`});
       document.body.appendChild(clone);
       actorNode.style.opacity = ".28";
@@ -18503,17 +18629,20 @@
         clone.style.transform = `translate(${dx*.88}px,${dy*.88}px) scale(1.08)`;
         await wait(travel);
       }
-      targetNode.classList.add("is-hit");
-      floatBattleText(targetNode, turn.dodgedMembers && turn.dodgedMembers.length ? "DODGE" : turn.damage ? `-${formatNumber(turn.damage)}` : "BLOCK");
+      targetEntries.forEach(({node, result}) => {
+        node.classList.add("is-hit");
+        const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
+        floatBattleText(node, text);
+      });
       await wait(Math.max(60, Math.floor(duration*.28)));
-      targetNode.classList.remove("is-hit");
+      targetEntries.forEach(({node}) => node.classList.remove("is-hit"));
       if (clone.animate) {
         await clone.animate([{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`},{transform:"translate(0,0) scale(1)"}],{duration:Math.max(90,Math.floor(travel*.55)),easing:"ease-in",fill:"forwards"}).finished.catch(()=>{});
       }
       clone.remove();
       actorNode.style.opacity = "";
       actorNode.classList.remove("is-acting");
-      targetNode.classList.remove("is-target");
+      targetEntries.forEach(({node}) => node.classList.remove("is-target", "is-multi-target"));
     }
 
     function animateBattleEvents(stage, turn) {
@@ -18551,7 +18680,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const sideLabel = turn.side === "player" ? playerLabel : enemyLabel;
         const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
         const attackerLabel = turn.actorName ? `${turn.actorName} (${sideLabel})` : sideLabel;
-        const defenderLabel = turn.targetName ? `${turn.targetName} (${defenderSideLabel})` : defenderSideLabel;
+        const targetNames = abilityArray(turn.targetNames).length ? abilityArray(turn.targetNames) : (turn.targetName ? [turn.targetName] : []);
+        const defenderLabel = targetNames.length > 1
+          ? `${targetNames.length} เป้าหมาย: ${targetNames.join(", ")} (${defenderSideLabel})`
+          : targetNames.length ? `${targetNames[0]} (${defenderSideLabel})` : defenderSideLabel;
+        const targetHitText = Number(turn.targetCount || 1) > 1 ? `${formatNumber(turn.hitsPerTarget || 0)} ฮิต × ${formatNumber(turn.targetCount)} เป้าหมาย` : `${formatNumber(turn.hits)} ฮิต`;
         const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
         const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
         const reviveText = abilityArray(turn.reviveEvents).length ? ` • ✨ คืนชีพ ${turn.reviveEvents.map(item=>item.targetName).join(", ")}` : "";
@@ -18563,7 +18696,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
         result.textContent = turn.command === "guard"
           ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
-          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${turn.hits} ฮิต${criticalText}${blockText}${activeText}${reviveText}${speedText}${lifeText} • เสีย HP ${formatNumber(turn.damage)} เหลือ ${formatNumber(turn.targetRemaining ?? remaining)} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${criticalText}${blockText}${activeText}${reviveText}${speedText}${lifeText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
             if (!battleSkipAnimations) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
@@ -18750,6 +18883,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             statusResistanceEffects: [],
             removeAllEnemyShield: false,
             sourceAbilityRuntimeKey: String(record.abilityRuntimeKey || ""),
+            attackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 1))),
             abilityTransfers: [],
             attackBonus: 0,
             healHp: 0,
@@ -18791,6 +18925,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           });
         }
         const group = grouped.get(key);
+        group.attackTargetCount = Math.max(Number(group.attackTargetCount) || 1, Math.max(1, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 1))));
         group.durationTurns = Math.max(Number(group.durationTurns || 0), Math.max(0, Math.floor(Number(effect.durationTurns) || 0)));
         group.durationRounds = Math.max(Number(group.durationRounds || 0), Math.max(0, Math.floor(Number(effect.durationRounds) || 0)));
         if (group.isDomainActivationGroup && effectType !== CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN) {
@@ -19932,7 +20067,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const name = item && item.name || (card && card.name) || "Unknown";
       const tilt = enemy ? (index - 2) * -4 : (index - 2) * 4;
       const side = enemy ? "enemy" : "player";
-      return `<div class="battle-model-card battle-unit" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 4}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
+      return `<div class="battle-model-card battle-unit" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" title="โจมตีธรรมดา ${Math.max(1,Math.min(5,Math.floor(Number(item && (item.normalAttackTargetCount ?? item.attackTargetCount) || 1))))} เป้าหมาย" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 4}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
     }
 
     async function refreshArenaData(showNotice = false) {
@@ -19998,7 +20133,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       arenaAnimating = true;
       battleSkipAnimations = false;
       state.battle.energy -= 1;
-      renderArena();
+      renderArena(true);
 
       const combat = buildIndividualTurnBasedCombat({
         playerAttack: stats.effectiveAttack,
@@ -23053,23 +23188,25 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (powerText) powerText.textContent = `ATK ${formatNumber(getArenaTeamPower())} • HP ${formatNumber(getArenaTeamHp())} • DEF ${formatNumber(getArenaTeamDefense())} • พลังรวม ${formatNumber(getArenaTeamCombatPower())}`;
     }
 
-        function renderArena() {
+        function renderArena(forceModels = false) {
       updateBattleEnergy();
       const stats = getArenaBattleStats(currentArenaOpponent);
       const playerModels = document.getElementById("arenaPlayerModels");
       const enemyModels = document.getElementById("arenaEnemyModels");
       if (!playerModels || !enemyModels) return;
 
-      playerModels.innerHTML = state.arena.team.length
-        ? state.arena.team.map((id, index) => {
-            const card = CARD_BY_ID.get(String(id));
-            return card ? battleModelHTML(card, index, false, state.arena.team.length) : "";
-          }).join("")
-        : `<div class="arena-secret-model">+</div>`;
+      if (forceModels || !arenaAnimating || !playerModels.children.length || !enemyModels.children.length) {
+        playerModels.innerHTML = state.arena.team.length
+          ? state.arena.team.map((id, index) => {
+              const card = CARD_BY_ID.get(String(id));
+              return card ? battleModelHTML(card, index, false, state.arena.team.length) : "";
+            }).join("")
+          : `<div class="arena-secret-model">+</div>`;
 
-      enemyModels.innerHTML = currentArenaOpponent && stats.enemyTeam.length
-        ? stats.enemyTeam.slice(0, CONFIG.arenaTeamSlots).map((item, index) => arenaSnapshotModelHTML(item, index, true)).join("")
-        : `<div class="arena-secret-model">?</div><div class="arena-secret-model">?</div><div class="arena-secret-model">?</div>`;
+        enemyModels.innerHTML = currentArenaOpponent && stats.enemyTeam.length
+          ? stats.enemyTeam.slice(0, CONFIG.arenaTeamSlots).map((item, index) => arenaSnapshotModelHTML(item, index, true)).join("")
+          : `<div class="arena-secret-model">?</div><div class="arena-secret-model">?</div><div class="arena-secret-model">?</div>`;
+      }
 
       const maxHp = Math.max(1, stats.effectiveHp, stats.enemyEffectiveHp || 0);
       const matchupPercent = Math.round(stats.matchup.modifier * 100);
