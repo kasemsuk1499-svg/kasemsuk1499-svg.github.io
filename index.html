@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-02-dust-qol-team-detail-v6">
-  <title>Anime Card Collection · Dust Economy + Upgrade All + Team Detail v6</title>
+  <meta name="gacha-app-build" content="2026-07-03-company-support-v64">
+  <title>Anime Card Collection · Company Support Runtime v64</title>
   <style>
     :root {
       color-scheme: dark;
@@ -7042,7 +7042,16 @@
       TEAM_DEFENSE_FLAT: "teamDefenseFlat",
       SHIELD_HITS: "shieldHits",
       ATTACK_HITS: "attackHits",
-      TEAM_INCOME_FLAT: "teamIncomeFlat"
+      TEAM_INCOME_FLAT: "teamIncomeFlat",
+      TRIGGER_THRESHOLD_MODIFIER: "triggerThresholdModifier",
+      TRIGGER_THRESHOLD_PERMANENT_MODIFIER: "triggerThresholdPermanentModifier",
+      NEXT_ATTACK_TARGET_COUNT: "nextAttackTargetCount",
+      FOLLOW_UP_ATTACK: "followUpAttack",
+      COUNTER_ATTACK: "counterAttack",
+      ADAPTIVE_ELEMENT: "adaptiveElement",
+      MULTI_ELEMENT_ATTACK: "multiElementAttack",
+      CRITICAL_DAMAGE_RATE: "criticalDamageRate",
+      DEFENSE_PENETRATION_RATE: "defensePenetrationRate"
     });
 
     // เอฟเฟกต์สแต็กกลาง: ทุกชนิดใช้ maxStacks + stackKey และเลือกฝ่ายด้วย targetSide
@@ -13900,33 +13909,32 @@
       const raw = condition && typeof condition === "object" ? condition : {};
       const nested = raw.battleTrigger && typeof raw.battleTrigger === "object" ? raw.battleTrigger : raw;
       const requiredDomainId = String(nested.domainActive || nested.requiredDomainId || "").trim();
-      const onOwnAttack = nested.onOwnAttack === true
-        || nested.triggerOnOwnAttack === true
-        || String(nested.triggerOn || "").trim().toLowerCase() === "ownattack";
-      if (onOwnAttack) {
-        return {
-          onOwnAttack: true,
-          afterOwnAttacks: 0,
-          repeat: true,
-          triggerOn: "ownAttack",
-          requiredDomainId
-        };
-      }
-      const rawAmount = requiredDomainId && nested.afterDomainAttacks !== undefined
-        ? nested.afterDomainAttacks
-        : nested.afterOwnAttacks !== undefined ? nested.afterOwnAttacks
-          : nested.triggerEveryOwnAttacks !== undefined ? nested.triggerEveryOwnAttacks
-            : nested.ownAttacksBeforeTrigger;
+      const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
+      const common = {
+        requiredDomainId,
+        repeat: nested.repeat !== false,
+        maxActivations: Math.max(0, Math.floor(Number(nested.maxActivations || nested.maxTriggers) || 0)),
+        sourceHpBelowRate: Number.isFinite(Number(nested.sourceHpBelowRate)) ? Math.max(0, Math.min(1, Number(nested.sourceHpBelowRate))) : null,
+        sourceHpAboveRate: Number.isFinite(Number(nested.sourceHpAboveRate)) ? Math.max(0, Math.min(1, Number(nested.sourceHpAboveRate))) : null,
+        targetHpBelowRate: Number.isFinite(Number(nested.targetHpBelowRate)) ? Math.max(0, Math.min(1, Number(nested.targetHpBelowRate))) : null,
+        targetHpAboveRate: Number.isFinite(Number(nested.targetHpAboveRate)) ? Math.max(0, Math.min(1, Number(nested.targetHpAboveRate))) : null
+      };
+      const result = (triggerOn, eventEvery = 1, extra = {}) => ({
+        onOwnAttack: triggerOn === "ownAttack", afterOwnAttacks: triggerOn === "nextAttack" ? Math.min(cap, Math.max(1, Math.floor(Number(eventEvery) || 1))) : 0,
+        eventEvery: Math.min(cap, Math.max(1, Math.floor(Number(eventEvery) || 1))), triggerOn, ...common, ...extra
+      });
+      if (nested.onBattleStart === true || String(nested.triggerOn || "").toLowerCase() === "battlestart") return result("battleStart", 1, { repeat:false, onBattleStart:true });
+      if (nested.onDamaged === true || String(nested.triggerOn || "").toLowerCase() === "damaged") return result("damaged", nested.afterDamagedHits || 1, { onDamaged:true });
+      if (nested.onCritical === true || String(nested.triggerOn || "").toLowerCase() === "critical") return result("critical", nested.afterCriticalHits || 1, { onCritical:true });
+      if (nested.onAllyActiveSkill === true || String(nested.triggerOn || "").toLowerCase() === "allyactiveskill") return result("allyActiveSkill", nested.afterActiveSkills || 1, { onAllyActiveSkill:true });
+      if (nested.onKill === true || String(nested.triggerOn || "").toLowerCase() === "kill") return result("kill", nested.afterKills || 1, { onKill:true });
+      if (common.sourceHpBelowRate !== null || common.sourceHpAboveRate !== null || String(nested.triggerOn || "").toLowerCase() === "hpthreshold") return result("hpThreshold", 1);
+      const onOwnAttack = nested.onOwnAttack === true || nested.triggerOnOwnAttack === true || String(nested.triggerOn || "").trim().toLowerCase() === "ownattack";
+      if (onOwnAttack) return result("ownAttack", 1, { repeat:true });
+      const rawAmount = requiredDomainId && nested.afterDomainAttacks !== undefined ? nested.afterDomainAttacks : nested.afterOwnAttacks !== undefined ? nested.afterOwnAttacks : nested.triggerEveryOwnAttacks !== undefined ? nested.triggerEveryOwnAttacks : nested.ownAttacksBeforeTrigger;
       const amount = Math.floor(Number(rawAmount) || 0);
       if (amount < 1) return null;
-      const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
-      return {
-        onOwnAttack: false,
-        afterOwnAttacks: Math.min(cap, amount),
-        repeat: nested.repeat !== false,
-        triggerOn: "nextAttack",
-        requiredDomainId
-      };
+      return result("nextAttack", amount);
     }
 
     function getStaticAbilityCondition(condition = {}) {
@@ -13944,6 +13952,7 @@
       delete result.domainActive;
       delete result.requiredDomainId;
       delete result.afterDomainAttacks;
+      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","maxActivations","maxTriggers"].forEach(key => delete result[key]);
       return result;
     }
 
@@ -13999,7 +14008,16 @@
         provoke: CARD_ABILITY_EFFECT_TYPES.TAUNT,
         aggro: CARD_ABILITY_EFFECT_TYPES.TAUNT,
         soulCapture: CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE,
-        captureEnemyRevive: CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE
+        captureEnemyRevive: CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE,
+        triggerCostModifier: CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_MODIFIER,
+        triggerPermanentModifier: CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_PERMANENT_MODIFIER,
+        aoeTargetCount: CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_TARGET_COUNT,
+        followAttack: CARD_ABILITY_EFFECT_TYPES.FOLLOW_UP_ATTACK,
+        counter: CARD_ABILITY_EFFECT_TYPES.COUNTER_ATTACK,
+        adaptElement: CARD_ABILITY_EFFECT_TYPES.ADAPTIVE_ELEMENT,
+        elementalSequence: CARD_ABILITY_EFFECT_TYPES.MULTI_ELEMENT_ATTACK,
+        critDamageRate: CARD_ABILITY_EFFECT_TYPES.CRITICAL_DAMAGE_RATE,
+        defensePenetration: CARD_ABILITY_EFFECT_TYPES.DEFENSE_PENETRATION_RATE
       };
       return aliases[type] || type;
     }
@@ -14781,6 +14799,12 @@
         if (Number(context.rarityCounts[rarity] || 0) < Math.max(1, Number(amountRaw) || 1)) return false;
       }
 
+      const normalizeCardGroupRule = value => value && typeof value === "object" ? { cardIds: normalizeAbilityCardIds(value.cardIds || value.ids), count: Math.max(0, Math.floor(Number(value.count ?? value.minCount ?? 0) || 0)) } : null;
+      const minGroup = normalizeCardGroupRule(rule.minCardGroupCount);
+      if (minGroup && context.ids.filter(id => minGroup.cardIds.includes(String(id))).length < minGroup.count) return false;
+      const maxGroup = normalizeCardGroupRule(rule.maxCardGroupCount);
+      if (maxGroup && context.ids.filter(id => maxGroup.cardIds.includes(String(id))).length > maxGroup.count) return false;
+
       const requiredCardIds = normalizeAbilityCardIds(rule.requiredCardIds);
       if (requiredCardIds.some(id => !context.cardIdSet.has(id))) return false;
       const anyCardIds = normalizeAbilityCardIds(rule.anyCardIds);
@@ -15078,7 +15102,21 @@
               return;
             }
 
-            // Active Skill แบบนับจำนวนครั้งโจมตี: เก็บไว้ให้ battle engine ประมวลผล ไม่ใช้เป็น Passive ทันที
+            // เอฟเฟกต์ต่อสู้ขั้นสูงที่ไม่ได้ใส่ Trigger จะใช้ค่าเริ่มต้นที่สมเหตุผล:
+            // Counter = เมื่อถูกโจมตี, ที่เหลือ = ทุกการโจมตีของเจ้าของสกิล
+            if (!effectTrigger && [
+              CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_TARGET_COUNT,
+              CARD_ABILITY_EFFECT_TYPES.FOLLOW_UP_ATTACK,
+              CARD_ABILITY_EFFECT_TYPES.COUNTER_ATTACK,
+              CARD_ABILITY_EFFECT_TYPES.ADAPTIVE_ELEMENT,
+              CARD_ABILITY_EFFECT_TYPES.MULTI_ELEMENT_ATTACK,
+              CARD_ABILITY_EFFECT_TYPES.CRITICAL_DAMAGE_RATE,
+              CARD_ABILITY_EFFECT_TYPES.DEFENSE_PENETRATION_RATE
+            ].includes(effectType)) {
+              effectTrigger = normalizeBattleTriggerRule(effectType === CARD_ABILITY_EFFECT_TYPES.COUNTER_ATTACK ? { onDamaged:true, repeat:true } : { onOwnAttack:true });
+            }
+
+            // Active Skill แบบนับจำนวนครั้งโจมตี/เหตุการณ์: เก็บไว้ให้ battle engineประมวลผล ไม่ใช้เป็น Passive ทันที
             if (effectTrigger) {
               const runtimeRecord = {
                 key: `${runtimeKey}:${effectIndex}`,
@@ -15188,7 +15226,8 @@
                 break;
               }
               case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST:
-              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE: {
+              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE:
+              case CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_MODIFIER: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 const change = Math.round(value);
                 if (side === "enemy") summary.enemyTriggerCostSelectors.push({ sourceCard, ability, effect: { ...record, value: change } });
@@ -15202,7 +15241,8 @@
                 else addAbilityMapRate(summary.triggerCostChanges, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), change);
                 break;
               }
-              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT: {
+              case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT:
+              case CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_PERMANENT_MODIFIER: {
                 const side = normalizeAbilityTargetSide(effect.targetSide);
                 const change = Math.round(value);
                 if (side === "enemy") summary.enemyPermanentTriggerCostSelectors.push({ sourceCard, ability, effect: { ...record, value: change } });
@@ -17516,6 +17556,13 @@
        - แนวหน้าถูกเล็งก่อน แนวหลังได้รับ ATK ตามแผน
        - คำสั่งเป็นแผนล่วงหน้าก่อนเริ่มไฟต์ (เวอร์ชันแรก)
     ================================================================ */
+
+    /* ================================================================
+       COMPANY SUPPORT RUNTIME v64 · 2026-07-03
+       - Event triggers: battleStart / damaged / critical / allyActiveSkill / kill / HP threshold
+       - Follow-up, Counter, Adaptive Element, Multi-element, Crit Damage, DEF Penetration
+       - Group-count conditions for Solo vs Company team builds
+       ================================================================ */
     function buildIndividualTurnBasedCombat(options = {}) {
       const sideKeys = ["player", "enemy"];
       const clampRate = value => Math.max(-1, Number(value) || 0);
@@ -17532,29 +17579,25 @@
       const criticalRateOf = side => clampCriticalRate(options[`${side}CriticalRate`] ?? CONFIG.combatBaseCriticalRate);
 
       function normalizeTrigger(item = {}, index = 0) {
-        const mode = item.onBattleStart ? "battleStart" : item.onOwnAttack || String(item.triggerOn) === "ownAttack" ? "ownAttack" : "nextAttack";
+        const allowedModes = new Set(["battleStart","ownAttack","nextAttack","damaged","critical","allyActiveSkill","kill","hpThreshold"]);
+        const requested = String(item.triggerOn || (item.onBattleStart ? "battleStart" : item.onOwnAttack ? "ownAttack" : "nextAttack"));
+        const mode = allowedModes.has(requested) ? requested : "nextAttack";
         const baseCost = mode === "nextAttack" ? Math.max(1, Math.floor(Number(item.baseAfterOwnAttacks ?? item.afterOwnAttacks) || 1)) : 0;
         const permanent = Math.round(Number(item.permanentCostChange) || 0);
         const cycle = Math.round(Number(item.cycleCostChange) || 0);
         const cost = mode === "nextAttack" ? Math.max(1, baseCost + permanent + cycle) : 0;
+        const eventEvery = Math.max(1, Math.floor(Number(item.eventEvery) || 1));
         return {
-          ...item,
-          key: String(item.key || `trigger-${index}`),
-          name: String(item.name || "Active Skill"),
-          sourceCardId: cardIdString(item.sourceCardId),
-          sourceCardName: String(item.sourceCardName || "Unknown Character"),
-          triggerOn: mode,
-          baseCost,
-          permanentCostChange: permanent,
-          cycleCostChange: cycle,
-          cost,
-          charge: item.activateImmediately ? cost : 0,
-          armed: mode !== "nextAttack" || Boolean(item.activateImmediately),
-          completed: false,
-          activations: 0,
+          ...item, key: String(item.key || `trigger-${index}`), name: String(item.name || "Active Skill"),
+          sourceCardId: cardIdString(item.sourceCardId), sourceCardName: String(item.sourceCardName || "Unknown Character"),
+          triggerOn: mode, baseCost, permanentCostChange: permanent, cycleCostChange: cycle, cost,
+          charge: item.activateImmediately ? cost : 0, eventEvery, eventCharge: item.activateImmediately ? eventEvery : 0,
+          armed: mode === "battleStart" || mode === "ownAttack" || Boolean(item.activateImmediately), completed:false, activations:0,
+          maxActivations: Math.max(0, Math.floor(Number(item.maxActivations) || 0)),
           repeat: mode === "ownAttack" ? true : item.repeat !== false,
-          durationTurns: Math.max(0, Math.floor(Number(item.durationTurns) || 0)),
-          durationRounds: Math.max(0, Math.floor(Number(item.durationRounds) || 0))
+          sourceHpBelowRate: item.sourceHpBelowRate, sourceHpAboveRate: item.sourceHpAboveRate,
+          targetHpBelowRate: item.targetHpBelowRate, targetHpAboveRate: item.targetHpAboveRate,
+          durationTurns: Math.max(0, Math.floor(Number(item.durationTurns) || 0)), durationRounds: Math.max(0, Math.floor(Number(item.durationRounds) || 0))
         };
       }
 
@@ -17754,12 +17797,81 @@
         return [candidates[0]];
       }
 
-      function triggersForActor(team, actor, includeStart = true) {
+      function runtimeTriggerConditionMet(trigger, source, target) {
+        if (!source || source.currentHp <= 0 || source.ko) return false;
+        const sourceRate = source.currentHp / Math.max(1, source.maxHp);
+        const targetRate = target ? target.currentHp / Math.max(1, target.maxHp) : 1;
+        if (trigger.sourceHpBelowRate !== null && trigger.sourceHpBelowRate !== undefined && sourceRate > Number(trigger.sourceHpBelowRate)) return false;
+        if (trigger.sourceHpAboveRate !== null && trigger.sourceHpAboveRate !== undefined && sourceRate < Number(trigger.sourceHpAboveRate)) return false;
+        if (trigger.targetHpBelowRate !== null && trigger.targetHpBelowRate !== undefined && targetRate > Number(trigger.targetHpBelowRate)) return false;
+        if (trigger.targetHpAboveRate !== null && trigger.targetHpAboveRate !== undefined && targetRate < Number(trigger.targetHpAboveRate)) return false;
+        if (trigger.maxActivations > 0 && trigger.activations >= trigger.maxActivations) return false;
+        return true;
+      }
+
+      function chargeRuntimeEvent(team, eventName, sourceMember, targetMember, amount = 1, allSources = false) {
+        const armed = [];
+        team.triggers.forEach(trigger => {
+          if (trigger.completed || trigger.triggerOn !== eventName) return;
+          const owner = team.members.find(member => member.id === trigger.sourceCardId);
+          if (!owner || owner.currentHp <= 0 || owner.ko) return;
+          if (!allSources && sourceMember && trigger.sourceCardId && trigger.sourceCardId !== sourceMember.id) return;
+          if (!runtimeTriggerConditionMet(trigger, owner, targetMember)) return;
+          trigger.eventCharge += Math.max(1, Math.floor(Number(amount) || 1));
+          if (trigger.eventCharge >= trigger.eventEvery) { trigger.armed = true; armed.push(trigger); }
+        });
+        return armed;
+      }
+
+      function armHpThresholdTriggers(team, actor, target) {
+        team.triggers.filter(trigger => trigger.triggerOn === "hpThreshold" && trigger.sourceCardId === actor.id && !trigger.completed)
+          .forEach(trigger => { trigger.armed = runtimeTriggerConditionMet(trigger, actor, target); });
+      }
+
+      function advancedElementModifier(actor, target, activation) {
+        const multi = abilityArray(activation.multiElementAttacks).flatMap(rule => abilityArray(rule.attackElements));
+        if (multi.length) return multi.reduce((sum, element) => sum + Number(getElementMatchup([element], target.elements).modifier || 0), 0) / multi.length;
+        const adaptive = activation.adaptiveElement && abilityArray(activation.adaptiveElement.availableElements).length ? activation.adaptiveElement.availableElements : null;
+        if (adaptive) return Number(getElementMatchup(adaptive, target.elements).modifier || 0);
+        return Number(getElementMatchup(actor.elements, target.elements).modifier || 0);
+      }
+
+      function executeCounterAttacks(defenderTeam, attackerTeam, damagedMembers, attacker, attackingSide) {
+        const events = [];
+        damagedMembers.forEach(defender => {
+          if (!defender || defender.currentHp <= 0 || defender.ko || attacker.currentHp <= 0 || attacker.ko) return;
+          const triggers = defenderTeam.triggers.filter(trigger => trigger.sourceCardId === defender.id && trigger.triggerOn === "damaged" && trigger.armed && abilityArray(trigger.counterAttacks).length && runtimeTriggerConditionMet(trigger, defender, attacker));
+          triggers.forEach(trigger => {
+            abilityArray(trigger.counterAttacks).forEach(rule => {
+              if (Math.random() > Math.max(0, Math.min(1, Number(rule.successRate) || 0))) return;
+              const hits = Math.max(1, Math.floor(Number(rule.hits) || 1));
+              const shielded = Math.min(attacker.shieldHits, hits); attacker.shieldHits -= shielded; attacker.shieldConsumed += shielded;
+              const landed = Math.max(0, hits - shielded); if (!landed) { events.push({sourceCardId:defender.id,sourceName:defender.name,targetCardId:attacker.id,targetName:attacker.name,hits,damage:0,blockedHits:shielded}); return; }
+              const critical = rule.canCritical !== false && rollCriticalHit(clampCriticalRate(defender.criticalRate));
+              const crit = critical ? criticalDamageOf(defenderTeam.side) : 1;
+              const penetration = Math.max(0, Math.min(1, Number(rule.defensePenetrationRate) || 0));
+              const attack = Math.max(1, defender.power * Math.max(0, Number(rule.powerRate) || 1) * (landed / hits) * crit);
+              const defense = attacker.defense * (1 - penetration) * Number(CONFIG.combatDefenseWeight || 1);
+              let damage = Math.max(attack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)), attack - defense);
+              damage = Math.max(1, Math.min(attacker.currentHp, damage)); attacker.currentHp = Math.max(0, attacker.currentHp - damage);
+              const survival = applyReviveSurvivalAfterHit(attacker, shielded + landed); if (!survival.expired && attacker.currentHp <= 0 && attacker.reviveTurnsRemaining > 0) attacker.currentHp = 1;
+              attacker.ko = attacker.currentHp <= 0; if (attacker.ko) attacker.deathReason = "counter";
+              defender.damageDealt += damage; defenderTeam.totalDamage += damage; defender.totalHits += hits; defender.attackCount += 1;
+              events.push({sourceCardId:defender.id,sourceName:defender.name,targetCardId:attacker.id,targetName:attacker.name,hits,damage,critical,blockedHits:shielded,remaining:attacker.currentHp,ko:attacker.ko});
+            });
+            trigger.activations += 1; defender.skillActivations += 1; defenderTeam.totalTriggerActivations += 1;
+            trigger.eventCharge = 0; trigger.armed = false; if (!trigger.repeat || (trigger.maxActivations > 0 && trigger.activations >= trigger.maxActivations)) trigger.completed = true;
+          });
+        });
+        return events;
+      }
+
+      function triggersForActor(team, actor, target, includeStart = true) {
         return team.triggers.filter(trigger => {
           if (trigger.completed || !trigger.armed) return false;
           if (trigger.sourceCardId && trigger.sourceCardId !== actor.id) return false;
           if (!includeStart && trigger.triggerOn === "battleStart") return false;
-          return true;
+          return runtimeTriggerConditionMet(trigger, actor, target);
         });
       }
 
@@ -17771,8 +17883,8 @@
       }
 
       function makeActivation(team, actor, target) {
-        const available = triggersForActor(team, actor, true);
-        const always = available.filter(trigger => trigger.triggerOn === "ownAttack" || trigger.triggerOn === "battleStart");
+        const available = triggersForActor(team, actor, target, true);
+        const always = available.filter(trigger => trigger.triggerOn === "ownAttack" || trigger.triggerOn === "battleStart" || !["nextAttack"].includes(trigger.triggerOn));
         const active = shouldUseActive(team, actor, available) ? available.filter(trigger => trigger.triggerOn === "nextAttack") : [];
         const fired = [...always, ...active].filter((trigger, index, list) => list.indexOf(trigger) === index);
         const details = fired.map(trigger => ({
@@ -17789,7 +17901,7 @@
         const sum = key => fired.reduce((total, trigger) => total + (Number(trigger[key]) || 0), 0);
         return {
           fired, details, names: fired.map(trigger => trigger.name),
-          attackTargetCount: Math.max(1, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 1)), 1))),
+          attackTargetCount: Math.max(1, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 1), ...abilityArray(trigger.multiElementAttacks).map(rule=>Math.floor(Number(rule.targetCount)||1)), ...abilityArray(trigger.followUpAttacks).map(rule=>Math.floor(Number(rule.targetCount)||1))), 1))),
           reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
           speedTargetRules: fired.flatMap(trigger => abilityArray(trigger.speedTargetRules).map(rule => ({ ...rule }))),
           tauntRules: fired.flatMap(trigger => abilityArray(trigger.tauntRules).map(rule => ({ ...rule }))),
@@ -17809,6 +17921,11 @@
           dodgeRateChanges: fired.reduce((map,t)=>Object.assign(map,t.dodgeRateChanges||{}),{}),
           triggerCostChanges: fired.reduce((map,t)=>{Object.entries(t.triggerCostChanges||{}).forEach(([id,v])=>map[id]=(map[id]||0)+Number(v||0));return map;},{}),
           permanentTriggerCostChanges: fired.reduce((map,t)=>{Object.entries(t.permanentTriggerCostChanges||{}).forEach(([id,v])=>map[id]=(map[id]||0)+Number(v||0));return map;},{}),
+          followUpAttacks: fired.flatMap(t=>abilityArray(t.followUpAttacks).map(rule=>({...rule,sourceTriggerKey:t.key}))),
+          counterAttacks: fired.flatMap(t=>abilityArray(t.counterAttacks).map(rule=>({...rule,sourceTriggerKey:t.key}))),
+          adaptiveElement: fired.map(t=>t.adaptiveElement).filter(Boolean).slice(-1)[0] || null,
+          multiElementAttacks: fired.flatMap(t=>abilityArray(t.multiElementAttacks).map(rule=>({...rule,sourceTriggerKey:t.key}))),
+          criticalDamageRate: sum("criticalDamageRate"), defensePenetrationRate: Math.max(0, Math.min(1, sum("defensePenetrationRate"))),
           removeAllEnemyShield: fired.some(t=>t.removeAllEnemyShield)
         };
       }
@@ -17856,28 +17973,22 @@
 
       function finishTriggers(team, actor, activation) {
         activation.fired.forEach(trigger => {
-          trigger.activations += 1;
-          actor.skillActivations += 1;
-          team.totalTriggerActivations += 1;
+          trigger.activations += 1; actor.skillActivations += 1; team.totalTriggerActivations += 1;
           team.skillUsage[trigger.name] = (team.skillUsage[trigger.name] || 0) + 1;
-          if (trigger.triggerOn === "battleStart") {
-            trigger.armed = false; trigger.completed = true;
-          } else if (trigger.triggerOn === "ownAttack") {
-            trigger.armed = true;
+          const reachedMax = trigger.maxActivations > 0 && trigger.activations >= trigger.maxActivations;
+          if (trigger.triggerOn === "battleStart") { trigger.armed = false; trigger.completed = true; }
+          else if (trigger.triggerOn === "ownAttack") { trigger.armed = !reachedMax; if (reachedMax) trigger.completed = true; }
+          else if (trigger.triggerOn === "nextAttack") {
+            trigger.charge = 0; trigger.cycleCostChange = 0; trigger.cost = Math.max(1, trigger.baseCost + trigger.permanentCostChange); trigger.armed = false;
+            if (!trigger.repeat || reachedMax) trigger.completed = true;
           } else {
-            trigger.charge = 0;
-            trigger.cycleCostChange = 0;
-            trigger.cost = Math.max(1, trigger.baseCost + trigger.permanentCostChange);
-            trigger.armed = false;
-            if (!trigger.repeat) trigger.completed = true;
+            trigger.eventCharge = 0; trigger.armed = false; if (!trigger.repeat || reachedMax) trigger.completed = true;
           }
         });
-        // สำคัญ: เพิ่มคอส/ชาร์จเฉพาะสกิลของตัวละครที่เพิ่งโจมตีเท่านั้น
         team.triggers.filter(trigger => trigger.sourceCardId === actor.id && trigger.triggerOn === "nextAttack" && !trigger.completed).forEach(trigger => {
-          if (activation.fired.includes(trigger)) return;
-          trigger.charge += 1;
-          if (trigger.charge >= trigger.cost) trigger.armed = true;
+          if (activation.fired.includes(trigger)) return; trigger.charge += 1; if (trigger.charge >= trigger.cost) trigger.armed = true;
         });
+        if (activation.fired.length) chargeRuntimeEvent(team, "allyActiveSkill", null, actor, 1, true);
       }
 
       function applySpeedRules(rules, ownerTeam, defenderTeam, actor, currentTarget) {
@@ -18175,6 +18286,7 @@
             continue;
           }
 
+          armHpThresholdTriggers(team, actor, target);
           const activation = makeActivation(team, actor, target);
           const requestedAttackTargets = activation.fired.length ? activation.attackTargetCount : actor.normalAttackTargetCount;
           const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex);
@@ -18208,13 +18320,16 @@
           actor.pendingAttackHits = 0;
           const baseHits = applyCombatAttackHitModifier(actor.attackHits, pendingHitChange);
           const activeHitRuleChange = abilityArray(activation.hitTargetRules).length ? targetedCurrentHitChange : activation.extraHits;
-          const hits = applyCombatAttackHitModifier(baseHits, activeHitRuleChange);
+          const followUpHits = abilityArray(activation.followUpAttacks).filter(rule=>Math.random()<=Math.max(0,Math.min(1,Number(rule.successRate)||0))).reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hits)||1)),0);
+          const multiElementHits = abilityArray(activation.multiElementAttacks).reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hitsPerElement)||1))*Math.max(1,abilityArray(rule.attackElements).length),0);
+          const hits = applyCombatAttackHitModifier(baseHits, activeHitRuleChange + followUpHits + multiElementHits);
           const nextCrit = Number(actor.pendingCriticalRateChange || 0) + Number(activation.nextAttackCriticalRate || 0);
           actor.pendingCriticalRateChange = 0;
           const effectiveCrit = clampCriticalRate(actor.criticalRate + nextCrit);
           const critical = rollCriticalHit(effectiveCrit);
-          const critMultiplier = critical ? criticalDamageOf(entry.side) : 1;
-          const activeAttack = Math.max(1, actor.power + Number(activation.attackBonus || 0) + Number(activation.attackStackGain || 0));
+          const critMultiplier = critical ? Math.max(1, criticalDamageOf(entry.side) * Math.max(0, 1 + Number(activation.criticalDamageRate || 0))) : 1;
+          const followUpPowerBonus = abilityArray(activation.followUpAttacks).reduce((sum,rule)=>sum + actor.power * Math.max(0,Number(rule.powerRate)||0),0);
+          const activeAttack = Math.max(1, actor.power + Number(activation.attackBonus || 0) + Number(activation.attackStackGain || 0) + followUpPowerBonus);
 
           const alliedShieldBefore = teamShield(team);
           const enemyShieldBefore = teamShield(defenderTeam);
@@ -18257,8 +18372,9 @@
           if (unblockedHits > 0) {
             dodged = Math.random() < Math.max(0, target.dodgeRate);
             if (!dodged) {
-              const attackAfterShield = activeAttack * hitRate * varianceOf(entry.side) * critMultiplier;
-              const defenseApplied = target.defense * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, hitRate);
+              const elementMultiplier = Math.max(0, 1 + advancedElementModifier(actor, target, activation));
+              const attackAfterShield = activeAttack * hitRate * varianceOf(entry.side) * critMultiplier * elementMultiplier;
+              const defenseApplied = target.defense * (1 - Math.max(0,Math.min(1,Number(activation.defensePenetrationRate)||0))) * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, hitRate);
               const minimum = activeAttack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)) * hitRate;
               damage = Math.max(minimum, attackAfterShield - defenseApplied);
               blocked = Math.random() < Math.max(0, target.blockRate);
@@ -18308,8 +18424,9 @@
             if (extraUnblockedHits > 0) {
               extraDodged = Math.random() < Math.max(0, extraTarget.dodgeRate);
               if (!extraDodged) {
-                const extraAttackAfterShield = activeAttack * extraHitRate * varianceOf(entry.side) * critMultiplier;
-                const extraDefenseApplied = extraTarget.defense * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, extraHitRate);
+                const extraElementMultiplier = Math.max(0, 1 + advancedElementModifier(actor, extraTarget, activation));
+                const extraAttackAfterShield = activeAttack * extraHitRate * varianceOf(entry.side) * critMultiplier * extraElementMultiplier;
+                const extraDefenseApplied = extraTarget.defense * (1 - Math.max(0,Math.min(1,Number(activation.defensePenetrationRate)||0))) * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, extraHitRate);
                 const extraMinimum = activeAttack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)) * extraHitRate;
                 extraDamage = Math.max(extraMinimum, extraAttackAfterShield - extraDefenseApplied);
                 extraBlocked = Math.random() < Math.max(0, extraTarget.blockRate);
@@ -18358,7 +18475,12 @@
           team.totalDamage += totalDamage;
           if (critical) { actor.criticalHits += 1; team.totalCriticalHits += 1; }
 
+          const damagedMembers = targetResults.filter(item => Number(item.damage) > 0).map(item => defenderTeam.members.find(member => String(member.id) === String(item.targetCardId))).filter(Boolean);
+          damagedMembers.forEach(member => chargeRuntimeEvent(defenderTeam, "damaged", member, actor, Math.max(1, targetResults.find(item=>String(item.targetCardId)===String(member.id))?.unblockedHits || 1)));
+          if (critical) chargeRuntimeEvent(team, "critical", actor, target, 1);
           const killedMembers = targetResults.filter(item => item.ko).map(item => defenderTeam.members.find(member => String(member.id) === String(item.targetCardId))).filter(Boolean);
+          if (killedMembers.length) chargeRuntimeEvent(team, "kill", actor, target, killedMembers.length);
+          const counterEvents = executeCounterAttacks(defenderTeam, team, damagedMembers, actor, entry.side);
           const captureEvents = applyCaptureReviveRules(team, defenderTeam, actor, killedMembers, turnIndex);
           const captureReleaseEvents = [
             ...releaseCapturedCorpses(team, defenderTeam),
@@ -18425,7 +18547,11 @@
             enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activation.nextAttackCriticalRate,
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
             actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
-            reviveEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, hitLifeConsumed:totalHitLifeConsumed,
+            reviveEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, counterEvents,
+            followUpEvents: abilityArray(activation.followUpAttacks).map(rule=>({powerRate:rule.powerRate,hits:rule.hits,targetCount:rule.targetCount})),
+            multiElementEvents: abilityArray(activation.multiElementAttacks).map(rule=>({attackElements:rule.attackElements,hitsPerElement:rule.hitsPerElement,targetCount:rule.targetCount})),
+            adaptiveElement: activation.adaptiveElement, defensePenetrationRate:activation.defensePenetrationRate, criticalDamageRate:activation.criticalDamageRate,
+            hitLifeConsumed:totalHitLifeConsumed,
             hitLifeExpired:anyHitLifeExpired, timedReviveExpired
           });
           turns[turns.length - 1].memberStates = battleMemberStates();
@@ -19191,17 +19317,24 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               ? { ...getActiveSkillCutsceneConfig(record.ability, record.sourceCard), enabled: false }
               : getActiveSkillCutsceneConfig(record.ability, record.sourceCard),
             onOwnAttack: Boolean(record.trigger.onOwnAttack),
+            onBattleStart: String(record.trigger.triggerOn || "") === "battleStart",
             activateImmediately: Boolean(record.trigger.activateImmediately),
-            triggerOn: record.trigger.onOwnAttack ? "ownAttack" : "nextAttack",
-            baseAfterOwnAttacks: record.trigger.onOwnAttack
-              ? 0
-              : Math.max(1, Number(record.trigger.afterOwnAttacks || 1)),
+            triggerOn: String(record.trigger.triggerOn || (record.trigger.onOwnAttack ? "ownAttack" : "nextAttack")),
+            eventEvery: Math.max(1, Number(record.trigger.eventEvery || 1)),
+            maxActivations: Math.max(0, Math.floor(Number(record.trigger.maxActivations || 0))),
+            sourceHpBelowRate: record.trigger.sourceHpBelowRate,
+            sourceHpAboveRate: record.trigger.sourceHpAboveRate,
+            targetHpBelowRate: record.trigger.targetHpBelowRate,
+            targetHpAboveRate: record.trigger.targetHpAboveRate,
+            baseAfterOwnAttacks: String(record.trigger.triggerOn || "") === "nextAttack"
+              ? Math.max(1, Number(record.trigger.afterOwnAttacks || 1))
+              : 0,
             permanentCostChange: Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0),
             cycleCostChange: Number(summary.triggerCostChanges && summary.triggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0),
-            afterOwnAttacks: record.trigger.onOwnAttack
-              ? 0
-              : Math.max(1, Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0)),
-            repeat: record.trigger.onOwnAttack ? true : record.trigger.repeat !== false,
+            afterOwnAttacks: String(record.trigger.triggerOn || "") === "nextAttack"
+              ? Math.max(1, Number(record.trigger.afterOwnAttacks || 1) + Number(summary.permanentTriggerCostChanges && summary.permanentTriggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0) + Number(summary.triggerCostChanges && summary.triggerCostChanges[cardIdString(record.sourceCard && record.sourceCard.id)] || 0))
+              : 0,
+            repeat: String(record.trigger.triggerOn || "") === "ownAttack" ? true : record.trigger.repeat !== false,
             requiresActivationKey: String(record.requiresActivationKey || ""),
             requiredDomainId: String(record.trigger && record.trigger.requiredDomainId || ""),
             isDomainActivationGroup: domainTriggerKeys.has(String(key)),
@@ -19250,7 +19383,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             damageTakenRateChanges: {},
             enemyDamageTakenRateRules: [],
             dodgeRateChanges: {},
-            enemyDodgeRateRules: []
+            enemyDodgeRateRules: [],
+            followUpAttacks: [], counterAttacks: [], adaptiveElement: null, multiElementAttacks: [],
+            criticalDamageRate: 0, defensePenetrationRate: 0
           });
         }
         const group = grouped.get(key);
@@ -19341,6 +19476,28 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             else group.restoreShieldHits += Math.round(value);
             group.shieldTargetRules.push({ ...runtimeTargetRule, value: Math.round(value) });
             break;
+          case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_TARGET_COUNT:
+            group.attackTargetCount = Math.max(group.attackTargetCount, Math.max(1, Math.min(5, Math.floor(value || effect.targetCount || 1))));
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.FOLLOW_UP_ATTACK:
+            group.followUpAttacks.push({ powerRate: Math.max(0, value || 1), hits: Math.max(1, Math.floor(Number(effect.hits) || 1)), targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount) || 1))), successRate: normalizeAbilityChance(effect.successRate ?? 1), canCritical: effect.canCritical !== false, countAsOwnAttack: effect.countAsOwnAttack === true, targetSelection: String(effect.targetSelection || "current") });
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.COUNTER_ATTACK:
+            group.counterAttacks.push({ powerRate: Math.max(0, value || 1), hits: Math.max(1, Math.floor(Number(effect.hits) || 1)), successRate: normalizeAbilityChance(effect.successRate ?? 1), canCritical: effect.canCritical !== false, defensePenetrationRate: Math.max(0, Math.min(1, Number(effect.defensePenetrationRate) || 0)) });
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.ADAPTIVE_ELEMENT:
+            group.adaptiveElement = { availableElements: normalizeAbilityElements(effect.availableElements || effect.attackElements || record.sourceCard && getCardElements(record.sourceCard)) };
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.MULTI_ELEMENT_ATTACK:
+            group.multiElementAttacks.push({ attackElements: normalizeAbilityElements(effect.attackElements || effect.elementSequence || record.sourceCard && getCardElements(record.sourceCard)), hitsPerElement: Math.max(1, Math.floor(Number(effect.hitsPerElement ?? value) || 1)), targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount) || 1))), canCritical: effect.canCritical !== false });
+            if (Number(effect.targetCount) > 0) group.attackTargetCount = Math.max(group.attackTargetCount, Math.min(5, Math.floor(Number(effect.targetCount))));
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.CRITICAL_DAMAGE_RATE:
+            group.criticalDamageRate += value;
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.DEFENSE_PENETRATION_RATE:
+            group.defensePenetrationRate += value;
+            break;
           case CARD_ABILITY_EFFECT_TYPES.HEALING_RATE:
             if (side === "enemy") group.enemyHealingRateChange += value;
             else group.healingRateChange += value;
@@ -19421,13 +19578,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             break;
           }
           case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST:
-          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE: {
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE:
+          case CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_MODIFIER: {
             const change = Math.round(value);
             if (side === "enemy") group.enemyTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
             else targetItems.forEach(item => addAbilityMapRate(group.triggerCostChanges, [getBattleItemId(item)], change));
             break;
           }
-          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT: {
+          case CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT:
+          case CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_PERMANENT_MODIFIER: {
             const change = Math.round(value);
             if (side === "enemy") group.enemyPermanentTriggerCostRules.push({ ...getAbilityTargetFilter(effect), value: change, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
             else targetItems.forEach(item => addAbilityMapRate(group.permanentTriggerCostChanges, [getBattleItemId(item)], change));
@@ -19480,6 +19639,18 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         enemyCriticalRateChange: Math.max(-1, Number(item.enemyCriticalRateChange) || 0),
         nextAttackCriticalRate: Math.max(-1, Number(item.nextAttackCriticalRate) || 0),
         enemyNextAttackCriticalRate: Math.max(-1, Number(item.enemyNextAttackCriticalRate) || 0),
+        followUpAttacks: abilityArray(item.followUpAttacks).map(rule => ({...rule})),
+        counterAttacks: abilityArray(item.counterAttacks).map(rule => ({...rule})),
+        adaptiveElement: item.adaptiveElement ? {...item.adaptiveElement} : null,
+        multiElementAttacks: abilityArray(item.multiElementAttacks).map(rule => ({...rule})),
+        criticalDamageRate: Number(item.criticalDamageRate) || 0,
+        defensePenetrationRate: Math.max(0, Math.min(1, Number(item.defensePenetrationRate) || 0)),
+        eventEvery: Math.max(1, Math.floor(Number(item.eventEvery) || 1)),
+        maxActivations: Math.max(0, Math.floor(Number(item.maxActivations) || 0)),
+        sourceHpBelowRate: item.sourceHpBelowRate,
+        sourceHpAboveRate: item.sourceHpAboveRate,
+        targetHpBelowRate: item.targetHpBelowRate,
+        targetHpAboveRate: item.targetHpAboveRate,
         // ไม่มีเพดานค่าบวกของอัตรา/สแต็ก ผู้ใช้สามารถสะสมเกิน 100% เพื่อเผื่อการลดอัตรา
         maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
         attackStackGain: Math.max(0, Number(item.attackStackGain || 0)),
@@ -19517,7 +19688,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
     }
 
 
