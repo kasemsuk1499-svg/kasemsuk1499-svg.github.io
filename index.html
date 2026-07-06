@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-center-popup-transfer-v68">
+  <meta name="gacha-app-build" content="2026-07-07-readable-safe-battle-v69">
   <title>Anime Card Collection · Center Formation Popup Runtime v68</title>
   <style>
     :root {
@@ -5963,6 +5963,279 @@
       .battle-skill-portrait { width: 58px; height: 58px; }
       .battle-skill-target { display: none; }
       .battle-event-feed { top: 96px; right: 8px; width: min(340px, 64vw); }
+    }
+
+
+    /* v69 · Readable Safe Battle UI Pass */
+    #battleView .battle-arena,
+    #arenaView .battle-arena {
+      min-height: 690px;
+      padding: 86px clamp(18px, 3vw, 34px) 126px;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(92,232,255,.18), transparent 28%),
+        radial-gradient(circle at 50% 55%, rgba(167,139,250,.13), transparent 36%),
+        linear-gradient(145deg, #07101f 0%, #101627 48%, #15101e 100%);
+    }
+
+    #battleView .battle-model-stack,
+    #arenaView .battle-model-stack {
+      min-height: 230px;
+      --formation-spacing: clamp(90px, 10.8vw, 154px) !important;
+    }
+
+    #battleView .fighter.player .battle-position-front,
+    #arenaView .fighter.player .battle-position-front { --row-y: -78px !important; --row-scale: 1.08 !important; }
+    #battleView .fighter.player .battle-position-back,
+    #arenaView .fighter.player .battle-position-back { --row-y: 78px !important; --row-scale: .98 !important; }
+    #battleView .fighter.enemy .battle-position-front,
+    #arenaView .fighter.enemy .battle-position-front { --row-y: 78px !important; --row-scale: 1.08 !important; }
+    #battleView .fighter.enemy .battle-position-back,
+    #arenaView .fighter.enemy .battle-position-back { --row-y: -78px !important; --row-scale: .98 !important; }
+
+    #battleView .battle-model-card,
+    #arenaView .battle-model-card {
+      width: clamp(96px, 9.4vw, 132px);
+      border-width: 3px;
+      border-radius: 16px;
+      box-shadow: 0 18px 36px rgba(0,0,0,.46), 0 0 24px color-mix(in srgb, var(--rarity-glow, var(--cyan)) 28%, transparent);
+    }
+
+    #battleView .battle-model-card span,
+    #arenaView .battle-model-card span {
+      left: 7px;
+      right: 7px;
+      bottom: 7px;
+      padding: 4px 7px;
+      border-radius: 9px;
+      color: #ffffff;
+      font-size: .72rem;
+      line-height: 1.15;
+      font-weight: 1000;
+      text-shadow: 0 2px 4px #000;
+      background: rgba(2,6,23,.82);
+      white-space: nowrap;
+    }
+
+    #battleView .battle-row-badge,
+    #arenaView .battle-row-badge,
+    #battleView .battle-unit-status,
+    #arenaView .battle-unit-status,
+    #battleView .battle-unit-special,
+    #arenaView .battle-unit-special {
+      font-size: .62rem;
+      font-weight: 1000;
+      text-shadow: 0 1px 3px #000;
+    }
+
+    #battleView .battle-unit-hp,
+    #arenaView .battle-unit-hp {
+      left: 8px;
+      right: 8px;
+      bottom: 31px;
+      height: 9px;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(0,0,0,.72);
+    }
+
+    #battleView .battle-unit-status-icons,
+    #arenaView .battle-unit-status-icons {
+      bottom: 45px;
+      gap: 4px;
+    }
+
+    #battleView .battle-status-chip,
+    #arenaView .battle-status-chip {
+      min-height: 20px;
+      padding: 4px 6px;
+      font-size: .58rem;
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(2,6,23,.88);
+      text-shadow: 0 1px 3px #000;
+    }
+
+    #battleView .battle-turn-order,
+    #arenaView .battle-turn-order {
+      top: 12px;
+      min-height: 52px;
+      padding: 7px 12px;
+      border: 2px solid rgba(92,232,255,.25);
+      background: rgba(2,6,23,.90);
+      box-shadow: 0 10px 36px rgba(0,0,0,.35);
+    }
+    #battleView .battle-turn-order.empty,
+    #arenaView .battle-turn-order.empty {
+      display: none;
+    }
+    #battleView .battle-turn-chip,
+    #arenaView .battle-turn-chip {
+      min-width: 98px;
+      max-width: 160px;
+      grid-template-columns: 34px minmax(0,1fr);
+      font-size: .72rem;
+      background: rgba(255,255,255,.08);
+    }
+    #battleView .battle-turn-chip img,
+    #arenaView .battle-turn-chip img { width: 34px; height: 34px; }
+    #battleView .battle-turn-chip b,
+    #arenaView .battle-turn-chip b { color:#fff; text-shadow: 0 1px 2px #000; }
+    #battleView .battle-turn-chip small,
+    #arenaView .battle-turn-chip small { color:#dbeafe; }
+
+    #battleView .battle-action-ribbon,
+    #arenaView .battle-action-ribbon {
+      top: 68px;
+      width: min(94%, 880px);
+      min-height: 66px;
+      border-radius: 20px;
+      border: 2px solid rgba(92,232,255,.38);
+      background: linear-gradient(135deg, rgba(2,6,23,.96), rgba(15,23,42,.92));
+    }
+    #battleView .battle-action-main b,
+    #arenaView .battle-action-main b {
+      color:#fff;
+      font-size: .98rem;
+      white-space: normal;
+      text-shadow: 0 2px 5px #000;
+    }
+    #battleView .battle-action-main small,
+    #arenaView .battle-action-main small {
+      color:#dbeafe;
+      font-size: .78rem;
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    #battleView .battle-event-feed,
+    #arenaView .battle-event-feed {
+      top: 142px;
+      right: 14px;
+      width: min(470px, 45vw);
+    }
+    #battleView .battle-event-card,
+    #arenaView .battle-event-card {
+      padding: 11px 12px;
+      border-width: 2px;
+      background: rgba(2,6,23,.94);
+    }
+    #battleView .battle-event-copy b,
+    #arenaView .battle-event-copy b { font-size:.88rem; color:#fff; white-space:normal; }
+    #battleView .battle-event-copy span,
+    #arenaView .battle-event-copy span { font-size:.76rem; color:#e5edff; white-space:normal; line-height:1.45; }
+
+    #battleView .battle-skill-toast,
+    #arenaView .battle-skill-toast {
+      z-index: 60;
+      top: 34%;
+      width: min(760px, 94%);
+      grid-template-columns: 86px minmax(0,1fr) 82px;
+      border: 2px solid rgba(92,232,255,.55);
+      background:
+        radial-gradient(circle at 12% 18%, rgba(92,232,255,.22), transparent 42%),
+        linear-gradient(135deg, rgba(2,6,23,.98), rgba(17,24,39,.96));
+      animation: battle-skill-toast-v69 1.65s cubic-bezier(.2,.85,.2,1) both;
+    }
+    #battleView .battle-skill-toast.copy,
+    #arenaView .battle-skill-toast.copy,
+    #battleView .battle-skill-toast.steal,
+    #arenaView .battle-skill-toast.steal {
+      top: 31%;
+      width: min(840px, 96%);
+      animation-duration: 2.45s;
+    }
+    #battleView .battle-skill-copy small,
+    #arenaView .battle-skill-copy small { font-size:.74rem; letter-spacing:.13em; }
+    #battleView .battle-skill-copy b,
+    #arenaView .battle-skill-copy b {
+      font-size: clamp(1.28rem, 3vw, 2rem);
+      white-space: normal;
+      line-height: 1.06;
+      text-shadow: 0 2px 8px #000;
+    }
+    #battleView .battle-skill-copy span,
+    #arenaView .battle-skill-copy span {
+      margin-top: 8px;
+      color:#f8fafc;
+      font-size:.88rem;
+      line-height:1.48;
+      white-space: normal;
+    }
+    #battleView .battle-skill-portrait,
+    #battleView .battle-skill-target,
+    #arenaView .battle-skill-portrait,
+    #arenaView .battle-skill-target { width:82px; height:82px; }
+
+    #battleView .battle-result,
+    #arenaView .battle-result {
+      min-height: 58px;
+      border: 2px solid rgba(92,232,255,.28);
+      background: rgba(2,6,23,.82);
+      color: #f8fafc;
+      font-size: .86rem;
+      line-height: 1.45;
+    }
+    #battleView .battle-result.readable .result-chip,
+    #arenaView .battle-result.readable .result-chip,
+    #battleView .battle-result.readable b,
+    #arenaView .battle-result.readable b {
+      min-height: 31px;
+      padding: 6px 10px;
+      font-size: .80rem;
+      color:#ffffff;
+      background: rgba(255,255,255,.10);
+      text-shadow: 0 1px 3px #000;
+    }
+    #battleView .battle-result.readable b,
+    #arenaView .battle-result.readable b {
+      color:#071019;
+      text-shadow:none;
+      background: linear-gradient(135deg, var(--cyan), #bfdbfe);
+    }
+    #battleView .battle-actions .btn,
+    #arenaView .battle-actions .btn {
+      color:#ffffff;
+      font-size:.86rem;
+      text-shadow: 0 1px 3px #000;
+      background: rgba(15,23,42,.82);
+      border-color: rgba(255,255,255,.20);
+    }
+    #battleView .battle-actions .btn-primary,
+    #arenaView .battle-actions .btn-primary {
+      color:#061019;
+      text-shadow:none;
+      background: linear-gradient(135deg, var(--cyan), #bfdbfe, var(--violet));
+    }
+
+    @keyframes battle-skill-toast-v69 {
+      0% { opacity: 0; transform: translate(-50%, -42%) scale(.88); }
+      14% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+      82% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -58%) scale(.96); }
+    }
+
+    @media (max-width: 900px) {
+      #battleView .battle-arena,
+      #arenaView .battle-arena { min-height: 700px; padding-top: 118px; padding-bottom: 156px; }
+      #battleView .battle-model-stack,
+      #arenaView .battle-model-stack { --formation-spacing: clamp(68px, 17vw, 108px) !important; }
+      #battleView .battle-model-card,
+      #arenaView .battle-model-card { width: clamp(76px, 19vw, 104px); }
+      #battleView .battle-action-ribbon,
+      #arenaView .battle-action-ribbon { top: 58px; width: calc(100% - 16px); }
+      #battleView .battle-event-feed,
+      #arenaView .battle-event-feed { top: 132px; right: 8px; width: min(340px, 68vw); }
+      #battleView .battle-skill-toast,
+      #arenaView .battle-skill-toast,
+      #battleView .battle-skill-toast.copy,
+      #arenaView .battle-skill-toast.copy,
+      #battleView .battle-skill-toast.steal,
+      #arenaView .battle-skill-toast.steal {
+        top: 34%;
+        grid-template-columns: 62px minmax(0,1fr);
+      }
+      #battleView .battle-skill-portrait,
+      #arenaView .battle-skill-portrait { width:62px; height:62px; }
+      #battleView .battle-skill-target,
+      #arenaView .battle-skill-target { display:none; }
     }
 
   </style>
@@ -19682,6 +19955,8 @@
       const bar = stage && stage.querySelector(".battle-turn-order");
       if (!bar) return;
       const upcoming = abilityArray(combat && combat.turns).slice(currentIndex, currentIndex + 8);
+      bar.classList.toggle("empty", !upcoming.length);
+      if (!upcoming.length) { bar.innerHTML = ""; return; }
       bar.innerHTML = upcoming.map((turn, index) => {
         const image = battleCardImage(turn.actorCardId);
         const name = turn.actorName || (turn.side === "player" ? labels.player : labels.enemy) || turn.side;
@@ -19759,10 +20034,14 @@
       const old = stage.querySelector(".battle-skill-toast");
       if (old) old.remove();
       const toast = document.createElement("div");
-      toast.className = `battle-skill-toast ${String(options.tone || "active")}`;
-      toast.innerHTML = `<div class="battle-skill-portrait">${battlePortraitHTML(options.sourceCardId, options.sourceName)}</div><div class="battle-skill-copy"><small>${escapeHTML(options.kicker || "ACTIVE SKILL")}</small><b>${escapeHTML(options.title || "Skill")}</b><span>${escapeHTML(options.body || "")}</span></div><div class="battle-skill-target">${battlePortraitHTML(options.targetCardId || options.donorCardId || options.recipientCardId, options.targetName || options.donorName || options.recipientName)}</div>`;
+      const tone = String(options.tone || "active");
+      toast.className = `battle-skill-toast ${tone}`;
+      const targetId = options.targetCardId || options.recipientCardId || options.donorCardId;
+      const targetName = options.targetName || options.recipientName || options.donorName;
+      toast.innerHTML = `<div class="battle-skill-portrait">${battlePortraitHTML(options.sourceCardId, options.sourceName)}</div><div class="battle-skill-copy"><small>${escapeHTML(options.kicker || "ACTIVE SKILL")}</small><b>${escapeHTML(options.title || "Skill")}</b><span>${escapeHTML(options.body || "")}</span></div><div class="battle-skill-target">${battlePortraitHTML(targetId, targetName)}</div>`;
       stage.appendChild(toast);
-      window.setTimeout(() => { if (toast.isConnected) toast.remove(); }, Number(options.duration || 1150));
+      const baseDuration = tone === "copy" || tone === "steal" ? 2550 : 1650;
+      window.setTimeout(() => { if (toast.isConnected) toast.remove(); }, Number(options.duration || baseDuration));
     }
 
     function updateBattleActionRibbon(stage, turn, labels = {}) {
@@ -19804,25 +20083,43 @@
       const sourceId = detail.sourceCardId || (turn && turn.actorCardId);
       const sourceName = detail.sourceCardName || (turn && turn.actorName) || "ผู้ใช้สกิล";
       const targetName = abilityArray(turn && turn.targetNames).join(", ") || (turn && turn.targetName) || "เป้าหมาย";
-      showBattleSkillToast(stage, { tone: "active", sourceCardId: sourceId, sourceName, targetCardId: turn && turn.targetCardId, targetName, kicker: "ACTIVE POPUP", title: detail.name || "Active Skill", body: `${sourceName} ใช้สกิลใส่ ${targetName}`, duration: 1050 });
+      showBattleSkillToast(stage, { tone: "active", sourceCardId: sourceId, sourceName, targetCardId: turn && turn.targetCardId, targetName, kicker: "ACTIVE POPUP", title: detail.name || "Active Skill", body: `${sourceName} ใช้สกิลใส่ ${targetName}`, duration: 1650 });
       pushBattleEventCard(stage, { tone: "active", cardId: sourceId, cardName: sourceName, title: `ACTIVE: ${detail.name || "Skill"}`, body: `${sourceName} → ${targetName}` });
+    }
+
+    function battleInfoFromTurn(turn = {}, cardId = "", fallbackName = "") {
+      const rawId = String(cardId || "");
+      const pools = [
+        ...(abilityArray(turn.memberStates && turn.memberStates.player)),
+        ...(abilityArray(turn.memberStates && turn.memberStates.enemy)),
+        ...(abilityArray(turn.playerMembers)),
+        ...(abilityArray(turn.enemyMembers))
+      ];
+      const found = pools.find(item => String(item && (item.id ?? item.cardId)) === rawId || String(item && item.cardId) === rawId || String(item && item.id).split("@C")[0] === rawId.split("@C")[0]);
+      return getBattleInfoCard(rawId || (found && (found.cardId || found.id)), fallbackName || (found && found.name) || "");
     }
 
     function showTransferBattleEvent(stage, event = {}, turn = {}) {
       const type = String(event.transferType || "copy");
       const tone = type === "steal" ? "steal" : "copy";
-      const donor = getBattleInfoCard(event.donorCardId, event.donorName || "ต้นทาง");
-      const recipient = getBattleInfoCard(event.recipientCardId, event.recipientName || (turn && turn.actorName) || "ผู้รับ");
-      const source = getBattleInfoCard(event.sourceCardId || (turn && turn.actorCardId), event.sourceName || (turn && turn.actorName) || "ผู้ใช้");
-      const abilityName = String(event.abilityName || "สกิล");
-      let title = tone === "steal" ? `ขโมยสกิล: ${abilityName}` : `คัดลอกสกิล: ${abilityName}`;
-      let body = `${source.name} ทำให้ ${recipient.name} ได้สกิล “${abilityName}” จาก ${donor.name}`;
-      if (tone === "steal") body = `${source.name} ขโมย “${abilityName}” จาก ${donor.name} → ${recipient.name}`;
-      if (event.status === "failed") { title = tone === "steal" ? `ขโมยล้มเหลว: ${abilityName}` : `คัดลอกล้มเหลว: ${abilityName}`; body = `${source.name} พยายามเล่นกับสกิลของ ${donor.name} แต่ไม่สำเร็จ`; }
+      const donor = battleInfoFromTurn(turn, event.donorCardId, event.donorName || "ต้นทาง");
+      const source = battleInfoFromTurn(turn, event.sourceCardId || (turn && turn.actorCardId), event.sourceName || (turn && turn.actorName) || "ผู้ใช้");
+      const recipientIds = abilityArray(event.recipientCardIds).length ? abilityArray(event.recipientCardIds) : [event.recipientCardId || (turn && turn.actorCardId)];
+      const recipientNames = abilityArray(event.recipientNames).length ? abilityArray(event.recipientNames) : [event.recipientName || ""];
+      const recipientList = recipientIds.filter(Boolean).map((id, index) => battleInfoFromTurn(turn, id, recipientNames[index] || event.recipientName || "ผู้รับ"));
+      const recipient = recipientList[0] || battleInfoFromTurn(turn, event.recipientCardId, event.recipientName || "ผู้รับ");
+      const recipientText = recipientList.length > 1 ? recipientList.map(item => item.name).join(", ") : recipient.name;
+      const abilityName = String(event.abilityName || event.sourceAbilityName || "ไม่ทราบชื่อสกิล");
+      const actionWord = tone === "steal" ? "ขโมย" : "คัดลอก";
+      let title = `${actionWord}สกิล: ${abilityName}`;
+      let body = `ผู้ใช้ ${source.name} • ได้ “${abilityName}” จาก ${donor.name} • ผู้รับ ${recipientText}`;
+      if (tone === "steal") body = `ผู้ใช้ ${source.name} • ขโมย “${abilityName}” จาก ${donor.name} • ส่งให้ ${recipientText}`;
+      if (event.status === "failed") { title = `${actionWord}ล้มเหลว: ${abilityName}`; body = `${source.name} พยายาม${actionWord} “${abilityName}” จาก ${donor.name} แต่ไม่สำเร็จ`; }
       if (event.status === "resisted") { title = "ถูกต้านการแทรกแซงสกิล"; body = `${donor.name} ต้าน${tone === "steal" ? "การขโมย" : "การคัดลอก"}จาก ${source.name}`; }
-      if (event.status === "expired") { title = `สกิลหมดเวลา: ${abilityName}`; body = `${recipient.name} สูญเสียสกิล “${abilityName}”`; }
-      showBattleSkillToast(stage, { tone, sourceCardId: source.id || donor.id, sourceName: source.name, targetCardId: recipient.id || donor.id, targetName: recipient.name, donorCardId: donor.id, donorName: donor.name, kicker: tone === "steal" ? "STEAL SKILL" : "COPY SKILL", title, body, duration: 1900 });
-      pushBattleEventCard(stage, { tone, cardId: source.id || donor.id, cardName: source.name, title, body, duration: 7200 });
+      if (event.status === "expired") { title = `สกิลหมดเวลา: ${abilityName}`; body = `${recipientText} สูญเสียสกิล “${abilityName}”`; }
+      if (event.status === "no-target") { title = `${actionWord}ไม่พบเป้าหมาย`; body = `${source.name} ยังไม่พบสกิลที่ตรงเงื่อนไข`; }
+      showBattleSkillToast(stage, { tone, sourceCardId: source.id || donor.id, sourceName: source.name, targetCardId: recipient.id || donor.id, targetName: recipient.name, donorCardId: donor.id, donorName: donor.name, kicker: tone === "steal" ? "STEAL SKILL" : "COPY SKILL", title, body, duration: 2550 });
+      pushBattleEventCard(stage, { tone, cardId: source.id || donor.id, cardName: source.name, title, body, duration: 9000 });
     }
 
     function showStatusBattleEvent(stage, event = {}, turn = {}) {
@@ -19849,66 +20146,81 @@
       const targetEntries = resultList.map(result => ({ result, node: battleUnitNode(stage, targetSide, result.targetCardId) })).filter(entry => entry.node);
       const primaryTargetNode = targetEntries[0] && targetEntries[0].node;
       if (!actorNode) return;
-      actorNode.classList.add("is-acting");
-      if (turn.command === "guard" || turn.command === "statusSkip" || !primaryTargetNode) {
-        actorNode.animate?.([{transform:"scale(1)"},{transform:"scale(1.10)"},{transform:"scale(1)"}],{duration:Math.max(120,duration),easing:"ease"});
-        await wait(Math.max(70, duration));
+      let clone = null;
+      let path = null;
+      const cleanup = () => {
+        if (clone && clone.isConnected) clone.remove();
+        if (path && path.isConnected) path.remove();
+        actorNode.style.opacity = "";
         actorNode.classList.remove("is-acting");
-        return;
+        targetEntries.forEach(({node}) => node.classList.remove("is-target", "is-multi-target", "is-hit"));
+      };
+      const finishAnimation = async (animation, timeoutMs) => {
+        if (!animation || !animation.finished) { await wait(timeoutMs); return; }
+        await Promise.race([animation.finished.catch(()=>{}), wait(Math.max(80, timeoutMs + 120))]);
+      };
+      try {
+        actorNode.classList.add("is-acting");
+        if (turn.command === "guard" || turn.command === "statusSkip" || !primaryTargetNode) {
+          const pulse = actorNode.animate?.([{transform:"scale(1)"},{transform:"scale(1.10)"},{transform:"scale(1)"}],{duration:Math.max(120,duration),easing:"ease"});
+          await finishAnimation(pulse, Math.max(70, duration));
+          return;
+        }
+        targetEntries.forEach(({node}) => {
+          node.classList.add("is-target");
+          if (targetEntries.length > 1) node.classList.add("is-multi-target");
+        });
+        const a = actorNode.getBoundingClientRect();
+        const t = primaryTargetNode.getBoundingClientRect();
+        clone = actorNode.cloneNode(true);
+        clone.classList.add("battle-moving-clone", "v67-runner");
+        clone.classList.remove("is-dead");
+        clone.querySelectorAll(".battle-target-count-badge").forEach(node=>node.remove());
+        if (targetEntries.length > 1) {
+          const badge = document.createElement("b");
+          badge.className = "battle-target-count-badge";
+          badge.textContent = `${targetEntries.length} TARGETS`;
+          clone.appendChild(badge);
+        }
+        Object.assign(clone.style,{
+          position:"fixed", left:`${a.left}px`, top:`${a.top}px`, width:`${a.width}px`, height:`${a.height}px`,
+          margin:"0", zIndex:"9999", pointerEvents:"none", transform:"translate3d(0,0,0) scale(1)"
+        });
+        document.body.appendChild(clone);
+        actorNode.style.opacity = ".32";
+        const dx = (t.left + t.width/2) - (a.left + a.width/2);
+        const dy = (t.top + t.height/2) - (a.top + a.height/2);
+        path = document.createElement("div");
+        path.className = `battle-attack-path ${turn.side === "enemy" ? "enemy" : "player"}`;
+        const fromX = a.left + a.width / 2;
+        const fromY = a.top + a.height / 2;
+        const distance = Math.max(20, Math.hypot(dx, dy));
+        path.style.left = `${fromX}px`;
+        path.style.top = `${fromY}px`;
+        path.style.width = `${distance}px`;
+        path.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+        document.body.appendChild(path);
+        window.setTimeout(() => { if (path && path.isConnected) path.remove(); }, Math.max(520, duration + 120));
+        const travel = Math.max(120, Math.floor(duration * .62));
+        if (clone.animate) {
+          await finishAnimation(clone.animate([{transform:"translate3d(0,0,0) scale(1)"},{transform:`translate3d(${dx*.90}px,${dy*.90}px,0) scale(1.10)`}],{duration:travel,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}), travel);
+        } else {
+          clone.style.transform = `translate3d(${dx*.90}px,${dy*.90}px,0) scale(1.10)`;
+          await wait(travel);
+        }
+        targetEntries.forEach(({node, result}) => {
+          node.classList.add("is-hit");
+          const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
+          floatBattleText(node, text);
+        });
+        await wait(Math.max(55, Math.floor(duration*.20)));
+        targetEntries.forEach(({node}) => node.classList.remove("is-hit"));
+        if (clone.animate) {
+          await finishAnimation(clone.animate([{transform:`translate3d(${dx*.90}px,${dy*.90}px,0) scale(1.10)`},{transform:"translate3d(0,0,0) scale(1)"}],{duration:Math.max(80,Math.floor(travel*.45)),easing:"ease-in",fill:"forwards"}), Math.max(80,Math.floor(travel*.45)));
+        }
+      } finally {
+        cleanup();
       }
-      targetEntries.forEach(({node}) => {
-        node.classList.add("is-target");
-        if (targetEntries.length > 1) node.classList.add("is-multi-target");
-      });
-      const a = actorNode.getBoundingClientRect();
-      const t = primaryTargetNode.getBoundingClientRect();
-      const clone = actorNode.cloneNode(true);
-      clone.classList.add("battle-moving-clone", "v67-runner");
-      clone.classList.remove("is-dead");
-      clone.querySelectorAll(".battle-target-count-badge").forEach(node=>node.remove());
-      if (targetEntries.length > 1) {
-        const badge = document.createElement("b");
-        badge.className = "battle-target-count-badge";
-        badge.textContent = `${targetEntries.length} TARGETS`;
-        clone.appendChild(badge);
-      }
-      Object.assign(clone.style,{left:`${a.left}px`,top:`${a.top}px`,width:`${a.width}px`,height:`${a.height}px`});
-      document.body.appendChild(clone);
-      actorNode.style.opacity = ".28";
-      const dx = (t.left + t.width/2) - (a.left + a.width/2);
-      const dy = (t.top + t.height/2) - (a.top + a.height/2);
-      const path = document.createElement("div");
-      path.className = `battle-attack-path ${turn.side === "enemy" ? "enemy" : "player"}`;
-      const fromX = a.left + a.width / 2;
-      const fromY = a.top + a.height / 2;
-      const distance = Math.max(20, Math.hypot(dx, dy));
-      path.style.left = `${fromX}px`;
-      path.style.top = `${fromY}px`;
-      path.style.width = `${distance}px`;
-      path.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
-      document.body.appendChild(path);
-      window.setTimeout(() => path.remove(), Math.max(520, duration));
-      const travel = Math.max(140, Math.floor(duration * .72));
-      if (clone.animate) {
-        await clone.animate([{transform:"translate(0,0) scale(1)"},{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`}],{duration:travel,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}).finished.catch(()=>{});
-      } else {
-        clone.style.transform = `translate(${dx*.88}px,${dy*.88}px) scale(1.08)`;
-        await wait(travel);
-      }
-      targetEntries.forEach(({node, result}) => {
-        node.classList.add("is-hit");
-        const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
-        floatBattleText(node, text);
-      });
-      await wait(Math.max(60, Math.floor(duration*.28)));
-      targetEntries.forEach(({node}) => node.classList.remove("is-hit"));
-      if (clone.animate) {
-        await clone.animate([{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`},{transform:"translate(0,0) scale(1)"}],{duration:Math.max(90,Math.floor(travel*.55)),easing:"ease-in",fill:"forwards"}).finished.catch(()=>{});
-      }
-      clone.remove();
-      actorNode.style.opacity = "";
-      actorNode.classList.remove("is-acting");
-      targetEntries.forEach(({node}) => node.classList.remove("is-target", "is-multi-target"));
     }
 
     function animateBattleEvents(stage, turn) {
@@ -19970,7 +20282,18 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       beautifyBattleResult(result);
       await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
 
+      const animationStartMs = Date.now();
+      const maxDetailedTurns = battleSkipAnimations ? combat.turns.length : Math.min(combat.turns.length, 54);
+      let autoFastForwarded = false;
       for (let turnIndex = 0; turnIndex < combat.turns.length; turnIndex += 1) {
+        if (!battleSkipAnimations && (turnIndex >= maxDetailedTurns || Date.now() - animationStartMs > 26000)) {
+          autoFastForwarded = true;
+          result.textContent = `ไฟต์นี้ยาวมาก ระบบข้ามแอนิเมชันที่เหลือและสรุปผลทันที • เล่นไปแล้ว ${formatNumber(turnIndex)}/${formatNumber(combat.turns.length)} เทิร์น`;
+          beautifyBattleResult(result);
+          syncBattleBoard(stage, { player: combat.playerMembers || [], enemy: combat.enemyMembers || [] });
+          updateTurnBattleDisplay(display, combat, combat.turns[combat.turns.length - 1] || null);
+          break;
+        }
         const turn = combat.turns[turnIndex];
         renderBattleTurnOrder(stage, combat, turnIndex, labels);
         updateBattleActionRibbon(stage, turn, labels);
@@ -20015,6 +20338,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         if (!battleSkipAnimations) await wait(Math.max(20, Math.floor(speed * .25)));
       }
       renderBattleTurnOrder(stage, combat, combat.turns.length, labels);
+      if (autoFastForwarded) {
+        const hud = ensureBattleCinematicHud(stage);
+        if (hud && hud.main) hud.main.innerHTML = `<b>จบการต่อสู้แบบข้ามแอนิเมชัน</b><small>ผลลัพธ์ถูกคำนวณครบแล้ว แค่ไม่เล่นอนิเมชันที่เหลือเพื่อกันค้าง</small>`;
+      }
     }
 
     async function playStrikeSequence(stage, className, hits, phaseDuration) {
@@ -21548,7 +21875,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const stage = document.getElementById("arenaBattleStage");
       const result = document.getElementById("arenaBattleResult");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 175;
+      const phaseDuration = reducedMotion ? 20 : 115;
       arenaAnimating = true;
       battleSkipAnimations = false;
       state.battle.energy -= 1;
@@ -21925,7 +22252,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
       const arena = document.querySelector("#battleView .battle-arena");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 175;
+      const phaseDuration = reducedMotion ? 20 : 115;
       battleAnimating = true;
       battleSkipAnimations = false;
       state.battle.energy -= 1;
