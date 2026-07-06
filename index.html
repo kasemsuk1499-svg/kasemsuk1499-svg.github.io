@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-fixed-animation-spacing-v71">
-  <title>Anime Card Collection · Fixed Animation Spacing Runtime v71</title>
+  <meta name="gacha-app-build" content="2026-07-07-seven-battle-v67">
+  <title>Anime Card Collection · Seven Battle Runtime v67</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5844,471 +5844,7 @@
       #arenaView .battle-model-card { width: clamp(62px, 18vw, 102px); }
     }
 
-
-    /* v68 · Formation Center + Popup Skill Battle Pass */
-    #battleView .battle-model-stack,
-    #arenaView .battle-model-stack {
-      display: block !important;
-      position: relative !important;
-      overflow: visible;
-      --formation-spacing: clamp(56px, 8.4vw, 132px);
-    }
-
-    #battleView .battle-model-card,
-    #arenaView .battle-model-card {
-      position: absolute !important;
-      left: 50%;
-      top: 50%;
-      margin: 0 !important;
-      transform:
-        translate(-50%, -50%)
-        translateX(calc((var(--row-index, 0) - var(--row-center, 0)) * var(--formation-spacing)))
-        translateY(calc(var(--row-y, 0px) + var(--model-lift, 0px)))
-        rotate(var(--model-tilt, 0deg))
-        scale(var(--row-scale, 1));
-    }
-
-    #battleView button.battle-model-card:hover,
-    #arenaView button.battle-model-card:hover {
-      z-index: 24;
-      transform:
-        translate(-50%, -50%)
-        translateX(calc((var(--row-index, 0) - var(--row-center, 0)) * var(--formation-spacing)))
-        translateY(calc(var(--row-y, 0px) + var(--model-lift, 0px) - 10px))
-        rotate(0deg)
-        scale(calc(var(--row-scale, 1) * 1.07));
-    }
-
-    #battleView .battle-unit.is-acting,
-    #arenaView .battle-unit.is-acting {
-      z-index: 30 !important;
-      transform:
-        translate(-50%, -50%)
-        translateX(calc((var(--row-index, 0) - var(--row-center, 0)) * var(--formation-spacing)))
-        translateY(calc(var(--row-y, 0px) + var(--model-lift, 0px) - 14px))
-        rotate(0deg)
-        scale(calc(var(--row-scale, 1) * 1.12)) !important;
-    }
-
-    .battle-skill-toast {
-      top: 45%;
-      width: min(680px, 92%);
-      grid-template-columns: 82px minmax(0, 1fr) 68px;
-      border-color: rgba(92,232,255,.30);
-      background:
-        radial-gradient(circle at 12% 22%, rgba(92,232,255,.24), transparent 42%),
-        linear-gradient(135deg, rgba(4,7,16,.98), rgba(30,27,75,.94));
-    }
-    .battle-skill-toast.copy,
-    .battle-skill-toast.steal {
-      width: min(760px, 94%);
-      grid-template-columns: 78px minmax(0, 1fr) 78px;
-      top: 42%;
-      border-width: 2px;
-    }
-    .battle-skill-toast.copy { border-color: rgba(92,232,255,.62); }
-    .battle-skill-toast.steal { border-color: rgba(251,113,133,.68); }
-    .battle-skill-toast.copy .battle-skill-copy small { color: var(--cyan); }
-    .battle-skill-toast.steal .battle-skill-copy small { color: #fda4af; }
-    .battle-skill-toast.copy .battle-skill-copy b,
-    .battle-skill-toast.steal .battle-skill-copy b {
-      font-size: clamp(1.15rem, 2.9vw, 1.9rem);
-      white-space: normal;
-    }
-    .battle-skill-toast.copy .battle-skill-copy span,
-    .battle-skill-toast.steal .battle-skill-copy span {
-      white-space: normal;
-      line-height: 1.45;
-      font-size: .82rem;
-    }
-    .battle-skill-portrait,
-    .battle-skill-target { width: 78px; height: 78px; }
-    .battle-skill-toast.active {
-      top: 38%;
-      width: min(620px, 90%);
-      grid-template-columns: 72px minmax(0, 1fr);
-    }
-    .battle-skill-toast.active .battle-skill-target { display: none; }
-    .battle-event-feed {
-      top: 104px;
-      width: min(420px, 40vw);
-    }
-    .battle-event-card.copy,
-    .battle-event-card.steal {
-      grid-template-columns: 50px minmax(0, 1fr);
-      border-width: 2px;
-      background: rgba(4,7,16,.90);
-    }
-    .battle-event-card.copy .battle-event-copy b,
-    .battle-event-card.steal .battle-event-copy b {
-      font-size: .82rem;
-      white-space: normal;
-    }
-    .battle-event-card.copy .battle-event-copy span,
-    .battle-event-card.steal .battle-event-copy span {
-      color: #e5edff;
-      white-space: normal;
-      font-size: .70rem;
-    }
-
-    @media (max-width: 900px) {
-      #battleView .battle-model-stack,
-      #arenaView .battle-model-stack { --formation-spacing: clamp(48px, 16vw, 92px); }
-      .battle-skill-toast,
-      .battle-skill-toast.copy,
-      .battle-skill-toast.steal {
-        top: 40%;
-        grid-template-columns: 58px minmax(0, 1fr);
-      }
-      .battle-skill-portrait { width: 58px; height: 58px; }
-      .battle-skill-target { display: none; }
-      .battle-event-feed { top: 96px; right: 8px; width: min(340px, 64vw); }
-    }
-
-
-    /* v69 · No-Hang Battle UI Pass */
-    #battleView .battle-arena,
-    #arenaView .battle-arena {
-      min-height: 690px;
-      padding: 86px clamp(18px, 3vw, 34px) 126px;
-      background:
-        radial-gradient(circle at 50% 42%, rgba(92,232,255,.18), transparent 28%),
-        radial-gradient(circle at 50% 55%, rgba(167,139,250,.13), transparent 36%),
-        linear-gradient(145deg, #07101f 0%, #101627 48%, #15101e 100%);
-    }
-
-    #battleView .battle-model-stack,
-    #arenaView .battle-model-stack {
-      min-height: 230px;
-      --formation-spacing: clamp(90px, 10.8vw, 154px) !important;
-    }
-
-    #battleView .fighter.player .battle-position-front,
-    #arenaView .fighter.player .battle-position-front { --row-y: -78px !important; --row-scale: 1.08 !important; }
-    #battleView .fighter.player .battle-position-back,
-    #arenaView .fighter.player .battle-position-back { --row-y: 78px !important; --row-scale: .98 !important; }
-    #battleView .fighter.enemy .battle-position-front,
-    #arenaView .fighter.enemy .battle-position-front { --row-y: 78px !important; --row-scale: 1.08 !important; }
-    #battleView .fighter.enemy .battle-position-back,
-    #arenaView .fighter.enemy .battle-position-back { --row-y: -78px !important; --row-scale: .98 !important; }
-
-    #battleView .battle-model-card,
-    #arenaView .battle-model-card {
-      width: clamp(96px, 9.4vw, 132px);
-      border-width: 3px;
-      border-radius: 16px;
-      box-shadow: 0 18px 36px rgba(0,0,0,.46), 0 0 24px color-mix(in srgb, var(--rarity-glow, var(--cyan)) 28%, transparent);
-    }
-
-    #battleView .battle-model-card span,
-    #arenaView .battle-model-card span {
-      left: 7px;
-      right: 7px;
-      bottom: 7px;
-      padding: 4px 7px;
-      border-radius: 9px;
-      color: #ffffff;
-      font-size: .72rem;
-      line-height: 1.15;
-      font-weight: 1000;
-      text-shadow: 0 2px 4px #000;
-      background: rgba(2,6,23,.82);
-      white-space: nowrap;
-    }
-
-    #battleView .battle-row-badge,
-    #arenaView .battle-row-badge,
-    #battleView .battle-unit-status,
-    #arenaView .battle-unit-status,
-    #battleView .battle-unit-special,
-    #arenaView .battle-unit-special {
-      font-size: .62rem;
-      font-weight: 1000;
-      text-shadow: 0 1px 3px #000;
-    }
-
-    #battleView .battle-unit-hp,
-    #arenaView .battle-unit-hp {
-      left: 8px;
-      right: 8px;
-      bottom: 31px;
-      height: 9px;
-      border: 1px solid rgba(255,255,255,.22);
-      background: rgba(0,0,0,.72);
-    }
-
-    #battleView .battle-unit-status-icons,
-    #arenaView .battle-unit-status-icons {
-      bottom: 45px;
-      gap: 4px;
-    }
-
-    #battleView .battle-status-chip,
-    #arenaView .battle-status-chip {
-      min-height: 20px;
-      padding: 4px 6px;
-      font-size: .58rem;
-      border: 1px solid rgba(255,255,255,.28);
-      background: rgba(2,6,23,.88);
-      text-shadow: 0 1px 3px #000;
-    }
-
-    #battleView .battle-turn-order,
-    #arenaView .battle-turn-order {
-      top: 12px;
-      min-height: 52px;
-      padding: 7px 12px;
-      border: 2px solid rgba(92,232,255,.25);
-      background: rgba(2,6,23,.90);
-      box-shadow: 0 10px 36px rgba(0,0,0,.35);
-    }
-    #battleView .battle-turn-order.empty,
-    #arenaView .battle-turn-order.empty {
-      display: none;
-    }
-    #battleView .battle-turn-chip,
-    #arenaView .battle-turn-chip {
-      min-width: 98px;
-      max-width: 160px;
-      grid-template-columns: 34px minmax(0,1fr);
-      font-size: .72rem;
-      background: rgba(255,255,255,.08);
-    }
-    #battleView .battle-turn-chip img,
-    #arenaView .battle-turn-chip img { width: 34px; height: 34px; }
-    #battleView .battle-turn-chip b,
-    #arenaView .battle-turn-chip b { color:#fff; text-shadow: 0 1px 2px #000; }
-    #battleView .battle-turn-chip small,
-    #arenaView .battle-turn-chip small { color:#dbeafe; }
-
-    #battleView .battle-action-ribbon,
-    #arenaView .battle-action-ribbon {
-      top: 68px;
-      width: min(94%, 880px);
-      min-height: 66px;
-      border-radius: 20px;
-      border: 2px solid rgba(92,232,255,.38);
-      background: linear-gradient(135deg, rgba(2,6,23,.96), rgba(15,23,42,.92));
-    }
-    #battleView .battle-action-main b,
-    #arenaView .battle-action-main b {
-      color:#fff;
-      font-size: .98rem;
-      white-space: normal;
-      text-shadow: 0 2px 5px #000;
-    }
-    #battleView .battle-action-main small,
-    #arenaView .battle-action-main small {
-      color:#dbeafe;
-      font-size: .78rem;
-      white-space: normal;
-      line-height: 1.35;
-    }
-
-    #battleView .battle-event-feed,
-    #arenaView .battle-event-feed {
-      top: 142px;
-      right: 14px;
-      width: min(470px, 45vw);
-    }
-    #battleView .battle-event-card,
-    #arenaView .battle-event-card {
-      padding: 11px 12px;
-      border-width: 2px;
-      background: rgba(2,6,23,.94);
-    }
-    #battleView .battle-event-copy b,
-    #arenaView .battle-event-copy b { font-size:.88rem; color:#fff; white-space:normal; }
-    #battleView .battle-event-copy span,
-    #arenaView .battle-event-copy span { font-size:.76rem; color:#e5edff; white-space:normal; line-height:1.45; }
-
-    #battleView .battle-skill-toast,
-    #arenaView .battle-skill-toast {
-      z-index: 60;
-      top: 34%;
-      width: min(760px, 94%);
-      grid-template-columns: 86px minmax(0,1fr) 82px;
-      border: 2px solid rgba(92,232,255,.55);
-      background:
-        radial-gradient(circle at 12% 18%, rgba(92,232,255,.22), transparent 42%),
-        linear-gradient(135deg, rgba(2,6,23,.98), rgba(17,24,39,.96));
-      animation: battle-skill-toast-v69 1.65s cubic-bezier(.2,.85,.2,1) both;
-    }
-    #battleView .battle-skill-toast.copy,
-    #arenaView .battle-skill-toast.copy,
-    #battleView .battle-skill-toast.steal,
-    #arenaView .battle-skill-toast.steal {
-      top: 31%;
-      width: min(840px, 96%);
-      animation-duration: 2.45s;
-    }
-    #battleView .battle-skill-copy small,
-    #arenaView .battle-skill-copy small { font-size:.74rem; letter-spacing:.13em; }
-    #battleView .battle-skill-copy b,
-    #arenaView .battle-skill-copy b {
-      font-size: clamp(1.28rem, 3vw, 2rem);
-      white-space: normal;
-      line-height: 1.06;
-      text-shadow: 0 2px 8px #000;
-    }
-    #battleView .battle-skill-copy span,
-    #arenaView .battle-skill-copy span {
-      margin-top: 8px;
-      color:#f8fafc;
-      font-size:.88rem;
-      line-height:1.48;
-      white-space: normal;
-    }
-    #battleView .battle-skill-portrait,
-    #battleView .battle-skill-target,
-    #arenaView .battle-skill-portrait,
-    #arenaView .battle-skill-target { width:82px; height:82px; }
-
-    #battleView .battle-result,
-    #arenaView .battle-result {
-      min-height: 58px;
-      border: 2px solid rgba(92,232,255,.28);
-      background: rgba(2,6,23,.82);
-      color: #f8fafc;
-      font-size: .86rem;
-      line-height: 1.45;
-    }
-    #battleView .battle-result.readable .result-chip,
-    #arenaView .battle-result.readable .result-chip,
-    #battleView .battle-result.readable b,
-    #arenaView .battle-result.readable b {
-      min-height: 31px;
-      padding: 6px 10px;
-      font-size: .80rem;
-      color:#ffffff;
-      background: rgba(255,255,255,.10);
-      text-shadow: 0 1px 3px #000;
-    }
-    #battleView .battle-result.readable b,
-    #arenaView .battle-result.readable b {
-      color:#071019;
-      text-shadow:none;
-      background: linear-gradient(135deg, var(--cyan), #bfdbfe);
-    }
-    #battleView .battle-actions .btn,
-    #arenaView .battle-actions .btn {
-      color:#ffffff;
-      font-size:.86rem;
-      text-shadow: 0 1px 3px #000;
-      background: rgba(15,23,42,.82);
-      border-color: rgba(255,255,255,.20);
-    }
-    #battleView .battle-actions .btn-primary,
-    #arenaView .battle-actions .btn-primary {
-      color:#061019;
-      text-shadow:none;
-      background: linear-gradient(135deg, var(--cyan), #bfdbfe, var(--violet));
-    }
-
-    @keyframes battle-skill-toast-v69 {
-      0% { opacity: 0; transform: translate(-50%, -42%) scale(.88); }
-      14% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
-      82% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -58%) scale(.96); }
-    }
-
-    @media (max-width: 900px) {
-      #battleView .battle-arena,
-      #arenaView .battle-arena { min-height: 700px; padding-top: 118px; padding-bottom: 156px; }
-      #battleView .battle-model-stack,
-      #arenaView .battle-model-stack { --formation-spacing: clamp(68px, 17vw, 108px) !important; }
-      #battleView .battle-model-card,
-      #arenaView .battle-model-card { width: clamp(76px, 19vw, 104px); }
-      #battleView .battle-action-ribbon,
-      #arenaView .battle-action-ribbon { top: 58px; width: calc(100% - 16px); }
-      #battleView .battle-event-feed,
-      #arenaView .battle-event-feed { top: 132px; right: 8px; width: min(340px, 68vw); }
-      #battleView .battle-skill-toast,
-      #arenaView .battle-skill-toast,
-      #battleView .battle-skill-toast.copy,
-      #arenaView .battle-skill-toast.copy,
-      #battleView .battle-skill-toast.steal,
-      #arenaView .battle-skill-toast.steal {
-        top: 34%;
-        grid-template-columns: 62px minmax(0,1fr);
-      }
-      #battleView .battle-skill-portrait,
-      #arenaView .battle-skill-portrait { width:62px; height:62px; }
-      #battleView .battle-skill-target,
-      #arenaView .battle-skill-target { display:none; }
-    }
-
-  
-
-    /* v71 · Fixed centered formation spacing + normal animation playback
-       แก้เฉพาะตำแหน่งสนามและคืนการเล่นอนิเมชันปกติ ไม่ตัดจำนวนเทิร์นอัตโนมัติ */
-    #battleView .battle-sides,
-    #arenaView .battle-sides {
-      gap: clamp(32px, 5.8vh, 72px) !important;
-      padding-top: clamp(8px, 1.8vh, 22px) !important;
-      padding-bottom: clamp(8px, 1.8vh, 22px) !important;
-    }
-
-    #battleView .battle-model-stack,
-    #arenaView .battle-model-stack {
-      min-height: clamp(210px, 30vh, 340px) !important;
-      --formation-spacing: clamp(108px, 12.2vw, 178px) !important;
-      overflow: visible !important;
-    }
-
-    #battleView .fighter.enemy .battle-model-stack,
-    #arenaView .fighter.enemy .battle-model-stack {
-      transform: translateY(clamp(-40px, -4vh, -18px));
-    }
-
-    #battleView .fighter.player .battle-model-stack,
-    #arenaView .fighter.player .battle-model-stack {
-      transform: translateY(clamp(18px, 4vh, 40px));
-    }
-
-    #battleView .fighter.enemy .battle-position-front,
-    #arenaView .fighter.enemy .battle-position-front { --row-y: 28px !important; --row-scale: 1.06 !important; z-index: 8 !important; }
-    #battleView .fighter.enemy .battle-position-back,
-    #arenaView .fighter.enemy .battle-position-back { --row-y: -74px !important; --row-scale: .96 !important; z-index: 5 !important; }
-    #battleView .fighter.player .battle-position-front,
-    #arenaView .fighter.player .battle-position-front { --row-y: -28px !important; --row-scale: 1.06 !important; z-index: 8 !important; }
-    #battleView .fighter.player .battle-position-back,
-    #arenaView .fighter.player .battle-position-back { --row-y: 74px !important; --row-scale: .96 !important; z-index: 5 !important; }
-
-    #battleView .battle-model-card,
-    #arenaView .battle-model-card {
-      width: clamp(90px, 8.8vw, 124px) !important;
-    }
-
-    #battleView .battle-turn-order:empty,
-    #arenaView .battle-turn-order:empty {
-      display: none !important;
-    }
-
-    @media (max-width: 900px) {
-      #battleView .battle-sides,
-      #arenaView .battle-sides { gap: clamp(24px, 4.5vh, 46px) !important; }
-      #battleView .battle-model-stack,
-      #arenaView .battle-model-stack {
-        min-height: 205px !important;
-        --formation-spacing: clamp(76px, 18vw, 116px) !important;
-      }
-      #battleView .fighter.enemy .battle-model-stack,
-      #arenaView .fighter.enemy .battle-model-stack { transform: translateY(-20px); }
-      #battleView .fighter.player .battle-model-stack,
-      #arenaView .fighter.player .battle-model-stack { transform: translateY(20px); }
-      #battleView .fighter.enemy .battle-position-front,
-      #arenaView .fighter.enemy .battle-position-front { --row-y: 22px !important; }
-      #battleView .fighter.enemy .battle-position-back,
-      #arenaView .fighter.enemy .battle-position-back { --row-y: -58px !important; }
-      #battleView .fighter.player .battle-position-front,
-      #arenaView .fighter.player .battle-position-front { --row-y: -22px !important; }
-      #battleView .fighter.player .battle-position-back,
-      #arenaView .fighter.player .battle-position-back { --row-y: 58px !important; }
-      #battleView .battle-model-card,
-      #arenaView .battle-model-card { width: clamp(72px, 18vw, 98px) !important; }
-    }
-</style>
+  </style>
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
@@ -17732,7 +17268,7 @@
             const donorRules = abilityArray(runtimeMember(pair.fighter, donorId) && runtimeMember(pair.fighter, donorId).statusResistanceRules);
             const resistance = shouldAbilityEffectBeResisted(donorRules, effect, seed, `${sourceKey}:resist:${donorId}:${donorIndex}`);
             if (resistance.resisted) {
-              events.push({ status: "resisted", transferType: isStealAbilityEffect(effect) ? "steal" : "copy", donorCardId: donorId, donorName: String(pair.item && pair.item.name || ""), sourceCardId, sourceName: String(record && record.sourceCardName || ""), resistanceRate: resistance.rate });
+              events.push({ status: "resisted", transferType: isStealAbilityEffect(effect) ? "steal" : "copy", donorCardId: donorId, sourceCardId, resistanceRate: resistance.rate });
               return;
             }
             const entries = runtimeAbilityEntries(pair.fighter, pair.item, effect);
@@ -17741,7 +17277,7 @@
             selected.forEach((entry, abilityIndex) => {
               const success = deterministicAbilityRoll(seed, `${sourceKey}:success:${donorId}:${entry.runtimeKey}:${abilityIndex}`) < successRate;
               if (!success) {
-                events.push({ status: "failed", transferType: isStealAbilityEffect(effect) ? "steal" : "copy", donorCardId: donorId, donorName: String(pair.item && pair.item.name || ""), sourceCardId, sourceName: String(record && record.sourceCardName || ""), abilityName: String(entry.ability && entry.ability.name || ""), successRate });
+                events.push({ status: "failed", transferType: isStealAbilityEffect(effect) ? "steal" : "copy", donorCardId: donorId, sourceCardId, abilityName: String(entry.ability && entry.ability.name || ""), successRate });
                 return;
               }
               recipient.items.forEach(recipientItem => {
@@ -17753,7 +17289,7 @@
                   sourceTransferKey: sourceKey,
                   transferDepth: Number(record && record.transferDepth || 0)
                 }, effect, turnIndex);
-                if (instance) events.push({ status: "success", transferType: instance.transferType, donorCardId: donorId, donorName: String(pair.item && pair.item.name || ""), sourceCardId, sourceName: String(record && record.sourceCardName || ""), recipientCardId: String(recipientItem.id), recipientName: String(recipientItem && recipientItem.name || ""), abilityName: String(entry.ability && entry.ability.name || ""), instanceId: instance.id, lifetime: { ...instance.lifetime } });
+                if (instance) events.push({ status: "success", transferType: instance.transferType, donorCardId: donorId, recipientCardId: String(recipientItem.id), abilityName: String(entry.ability && entry.ability.name || ""), instanceId: instance.id, lifetime: { ...instance.lifetime } });
               });
               if (isStealAbilityEffect(effect)) removeStolenOriginalAbility(pair.fighter, pair.opponent, pair.item, entry, effect);
             });
@@ -18561,7 +18097,6 @@
             tauntRoundsRemaining: 0,
             tauntSourceCardId: "",
             statusEffects: [],
-            statusResistanceRules: abilityArray(item.statusResistanceRules).map(rule => ({ ...rule })),
             statusSerial: 0,
             cardId: cardIdString(item.id || `${side}-${index}`),
             originalSide: side, originalSlot: slotNumber, originalRow: row, capturedBySide: "", captureOwnerCardId: "", captureUses: {}
@@ -18581,11 +18116,6 @@
           targetStrategy: targetOf(side),
           triggers: abilityArray(options[`${side}ActiveTriggers`]).map(normalizeTrigger),
           abilityRoster: abilityArray(options[`${side}AbilityRoster`]),
-          copiedAbilityInstances: [],
-          disabledAbilityKeys: new Set(),
-          copiedTransferEvents: [],
-          activeDomains: new Set(),
-          pendingNullifyByCardId: {},
           captureRules: abilityArray(options[`${side}CaptureRules`]).map(rule => ({ ...rule })),
           totalDamage: 0,
           totalHealing: 0,
@@ -18601,9 +18131,6 @@
 
       const player = makeTeam("player");
       const enemy = makeTeam("enemy");
-      // v68: ให้ระบบ copy/steal เดิมเขียน Active ที่ขโมย/คัดลอกลง battle engine รายตัวได้ทันที
-      player.activeTriggers = player.triggers;
-      enemy.activeTriggers = enemy.triggers;
       const initialMemberState = member => ({
         id: member.id, cardId: member.cardId || member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
         normalAttackTargetCount: member.normalAttackTargetCount,
@@ -18897,7 +18424,6 @@
         return {
           fired, details, names: fired.map(trigger => trigger.name),
           attackTargetCount: Math.max(1, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 1), ...abilityArray(trigger.multiElementAttacks).map(rule=>Math.floor(Number(rule.targetCount)||1)), ...abilityArray(trigger.followUpAttacks).map(rule=>Math.floor(Number(rule.targetCount)||1))), 1))),
-          abilityTransfers: fired.flatMap(trigger => abilityArray(trigger.abilityTransfers).map(record => ({ ...record, transferDepth: trigger.transferDepth }))),
           reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
           speedTargetRules: fired.flatMap(trigger => abilityArray(trigger.speedTargetRules).map(rule => ({ ...rule }))),
           tauntRules: fired.flatMap(trigger => abilityArray(trigger.tauntRules).map(rule => ({ ...rule }))),
@@ -19302,7 +18828,6 @@
 
           armHpThresholdTriggers(team, actor, target);
           const activation = makeActivation(team, actor, target);
-          const transferEvents = processRuntimeAbilityTransfers(team, defenderTeam, activation.abilityTransfers, turnIndex, entry.side);
           const requestedAttackTargets = activation.fired.length ? activation.attackTargetCount : actor.normalAttackTargetCount;
           const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex);
           target = attackTargets[0] || target;
@@ -19570,7 +19095,7 @@
             blockedMembers:targetResults.filter(item=>item.blocked).map(item=>({id:item.targetCardId,name:item.targetName,finalDamage:item.damage})), dodgedHpRate:targetResults.some(item=>item.dodged)?1:0,
             blockDamageReduced:0, damageBeforeBlock:totalDamage, damageAfterBlock:totalDamage,
             triggerActivated:activation.fired.length>0, triggeredSkills:activation.names, triggeredDetails:activation.details,
-            suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:[], transferEvents, stackEvents:[], statusEvents,
+            suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:[], transferEvents:[], stackEvents:[], statusEvents,
             blindMiss:attackMissedByBlind,
             attackBonus:activation.attackBonus, attackStackGain:activation.attackStackGain, maxHpGain,
             requestedHealHp:requestedHeal, healingMultiplier:Math.max(0,1+actor.healingRate), healHp:heal,
@@ -20025,8 +19550,6 @@
       const bar = stage && stage.querySelector(".battle-turn-order");
       if (!bar) return;
       const upcoming = abilityArray(combat && combat.turns).slice(currentIndex, currentIndex + 8);
-      bar.classList.toggle("empty", !upcoming.length);
-      if (!upcoming.length) { bar.innerHTML = ""; return; }
       bar.innerHTML = upcoming.map((turn, index) => {
         const image = battleCardImage(turn.actorCardId);
         const name = turn.actorName || (turn.side === "player" ? labels.player : labels.enemy) || turn.side;
@@ -20104,14 +19627,10 @@
       const old = stage.querySelector(".battle-skill-toast");
       if (old) old.remove();
       const toast = document.createElement("div");
-      const tone = String(options.tone || "active");
-      toast.className = `battle-skill-toast ${tone}`;
-      const targetId = options.targetCardId || options.recipientCardId || options.donorCardId;
-      const targetName = options.targetName || options.recipientName || options.donorName;
-      toast.innerHTML = `<div class="battle-skill-portrait">${battlePortraitHTML(options.sourceCardId, options.sourceName)}</div><div class="battle-skill-copy"><small>${escapeHTML(options.kicker || "ACTIVE SKILL")}</small><b>${escapeHTML(options.title || "Skill")}</b><span>${escapeHTML(options.body || "")}</span></div><div class="battle-skill-target">${battlePortraitHTML(targetId, targetName)}</div>`;
+      toast.className = `battle-skill-toast ${String(options.tone || "active")}`;
+      toast.innerHTML = `<div class="battle-skill-portrait">${battlePortraitHTML(options.sourceCardId, options.sourceName)}</div><div class="battle-skill-copy"><small>${escapeHTML(options.kicker || "ACTIVE SKILL")}</small><b>${escapeHTML(options.title || "Skill")}</b><span>${escapeHTML(options.body || "")}</span></div><div class="battle-skill-target">${battlePortraitHTML(options.targetCardId || options.donorCardId || options.recipientCardId, options.targetName || options.donorName || options.recipientName)}</div>`;
       stage.appendChild(toast);
-      const baseDuration = tone === "copy" || tone === "steal" ? 2550 : 1650;
-      window.setTimeout(() => { if (toast.isConnected) toast.remove(); }, Number(options.duration || baseDuration));
+      window.setTimeout(() => { if (toast.isConnected) toast.remove(); }, Number(options.duration || 1150));
     }
 
     function updateBattleActionRibbon(stage, turn, labels = {}) {
@@ -20153,43 +19672,23 @@
       const sourceId = detail.sourceCardId || (turn && turn.actorCardId);
       const sourceName = detail.sourceCardName || (turn && turn.actorName) || "ผู้ใช้สกิล";
       const targetName = abilityArray(turn && turn.targetNames).join(", ") || (turn && turn.targetName) || "เป้าหมาย";
-      showBattleSkillToast(stage, { tone: "active", sourceCardId: sourceId, sourceName, targetCardId: turn && turn.targetCardId, targetName, kicker: "ACTIVE POPUP", title: detail.name || "Active Skill", body: `${sourceName} ใช้สกิลใส่ ${targetName}`, duration: 1650 });
+      showBattleSkillToast(stage, { tone: "active", sourceCardId: sourceId, sourceName, targetCardId: turn && turn.targetCardId, targetName, kicker: "ACTIVE SKILL", title: detail.name || "Active Skill", body: `${sourceName} ใช้สกิลใส่ ${targetName}` });
       pushBattleEventCard(stage, { tone: "active", cardId: sourceId, cardName: sourceName, title: `ACTIVE: ${detail.name || "Skill"}`, body: `${sourceName} → ${targetName}` });
-    }
-
-    function battleInfoFromTurn(turn = {}, cardId = "", fallbackName = "") {
-      const rawId = String(cardId || "");
-      const pools = [
-        ...(abilityArray(turn.memberStates && turn.memberStates.player)),
-        ...(abilityArray(turn.memberStates && turn.memberStates.enemy)),
-        ...(abilityArray(turn.playerMembers)),
-        ...(abilityArray(turn.enemyMembers))
-      ];
-      const found = pools.find(item => String(item && (item.id ?? item.cardId)) === rawId || String(item && item.cardId) === rawId || String(item && item.id).split("@C")[0] === rawId.split("@C")[0]);
-      return getBattleInfoCard(rawId || (found && (found.cardId || found.id)), fallbackName || (found && found.name) || "");
     }
 
     function showTransferBattleEvent(stage, event = {}, turn = {}) {
       const type = String(event.transferType || "copy");
       const tone = type === "steal" ? "steal" : "copy";
-      const donor = battleInfoFromTurn(turn, event.donorCardId, event.donorName || "ต้นทาง");
-      const source = battleInfoFromTurn(turn, event.sourceCardId || (turn && turn.actorCardId), event.sourceName || (turn && turn.actorName) || "ผู้ใช้");
-      const recipientIds = abilityArray(event.recipientCardIds).length ? abilityArray(event.recipientCardIds) : [event.recipientCardId || (turn && turn.actorCardId)];
-      const recipientNames = abilityArray(event.recipientNames).length ? abilityArray(event.recipientNames) : [event.recipientName || ""];
-      const recipientList = recipientIds.filter(Boolean).map((id, index) => battleInfoFromTurn(turn, id, recipientNames[index] || event.recipientName || "ผู้รับ"));
-      const recipient = recipientList[0] || battleInfoFromTurn(turn, event.recipientCardId, event.recipientName || "ผู้รับ");
-      const recipientText = recipientList.length > 1 ? recipientList.map(item => item.name).join(", ") : recipient.name;
-      const abilityName = String(event.abilityName || event.sourceAbilityName || "ไม่ทราบชื่อสกิล");
-      const actionWord = tone === "steal" ? "ขโมย" : "คัดลอก";
-      let title = `${actionWord}สกิล: ${abilityName}`;
-      let body = `ผู้ใช้ ${source.name} • ได้ “${abilityName}” จาก ${donor.name} • ผู้รับ ${recipientText}`;
-      if (tone === "steal") body = `ผู้ใช้ ${source.name} • ขโมย “${abilityName}” จาก ${donor.name} • ส่งให้ ${recipientText}`;
-      if (event.status === "failed") { title = `${actionWord}ล้มเหลว: ${abilityName}`; body = `${source.name} พยายาม${actionWord} “${abilityName}” จาก ${donor.name} แต่ไม่สำเร็จ`; }
-      if (event.status === "resisted") { title = "ถูกต้านการแทรกแซงสกิล"; body = `${donor.name} ต้าน${tone === "steal" ? "การขโมย" : "การคัดลอก"}จาก ${source.name}`; }
-      if (event.status === "expired") { title = `สกิลหมดเวลา: ${abilityName}`; body = `${recipientText} สูญเสียสกิล “${abilityName}”`; }
-      if (event.status === "no-target") { title = `${actionWord}ไม่พบเป้าหมาย`; body = `${source.name} ยังไม่พบสกิลที่ตรงเงื่อนไข`; }
-      showBattleSkillToast(stage, { tone, sourceCardId: source.id || donor.id, sourceName: source.name, targetCardId: recipient.id || donor.id, targetName: recipient.name, donorCardId: donor.id, donorName: donor.name, kicker: tone === "steal" ? "STEAL SKILL" : "COPY SKILL", title, body, duration: 2550 });
-      pushBattleEventCard(stage, { tone, cardId: source.id || donor.id, cardName: source.name, title, body, duration: 9000 });
+      const donor = getBattleInfoCard(event.donorCardId, event.donorName || "ต้นทาง");
+      const recipient = getBattleInfoCard(event.recipientCardId, event.recipientName || (turn && turn.actorName) || "ผู้รับ");
+      const abilityName = String(event.abilityName || "สกิล");
+      let title = tone === "steal" ? "ขโมยสกิลสำเร็จ" : "คัดลอกสกิลสำเร็จ";
+      let body = `${recipient.name} ได้ “${abilityName}” จาก ${donor.name}`;
+      if (event.status === "failed") { title = tone === "steal" ? "ขโมยสกิลล้มเหลว" : "คัดลอกสกิลล้มเหลว"; body = `${donor.name} • ${abilityName}`; }
+      if (event.status === "resisted") { title = "ถูกต้านสกิล"; body = `${donor.name} ต้าน${tone === "steal" ? "การขโมย" : "การคัดลอก"}`; }
+      if (event.status === "expired") { title = "สกิลที่ได้มาหมดเวลา"; body = `${recipient.name} สูญเสีย “${abilityName}”`; }
+      showBattleSkillToast(stage, { tone, sourceCardId: donor.id, sourceName: donor.name, targetCardId: recipient.id, targetName: recipient.name, kicker: tone === "steal" ? "STEAL SKILL" : "COPY SKILL", title, body, duration: 1450 });
+      pushBattleEventCard(stage, { tone, cardId: donor.id, cardName: donor.name, title, body, duration: 5200 });
     }
 
     function showStatusBattleEvent(stage, event = {}, turn = {}) {
@@ -20216,81 +19715,66 @@
       const targetEntries = resultList.map(result => ({ result, node: battleUnitNode(stage, targetSide, result.targetCardId) })).filter(entry => entry.node);
       const primaryTargetNode = targetEntries[0] && targetEntries[0].node;
       if (!actorNode) return;
-      let clone = null;
-      let path = null;
-      const cleanup = () => {
-        if (clone && clone.isConnected) clone.remove();
-        if (path && path.isConnected) path.remove();
-        actorNode.style.opacity = "";
+      actorNode.classList.add("is-acting");
+      if (turn.command === "guard" || turn.command === "statusSkip" || !primaryTargetNode) {
+        actorNode.animate?.([{transform:"scale(1)"},{transform:"scale(1.10)"},{transform:"scale(1)"}],{duration:Math.max(120,duration),easing:"ease"});
+        await wait(Math.max(70, duration));
         actorNode.classList.remove("is-acting");
-        targetEntries.forEach(({node}) => node.classList.remove("is-target", "is-multi-target", "is-hit"));
-      };
-      const finishAnimation = async (animation, timeoutMs) => {
-        if (!animation || !animation.finished) { await wait(timeoutMs); return; }
-        await Promise.race([animation.finished.catch(()=>{}), wait(Math.max(80, timeoutMs + 120))]);
-      };
-      try {
-        actorNode.classList.add("is-acting");
-        if (turn.command === "guard" || turn.command === "statusSkip" || !primaryTargetNode) {
-          const pulse = actorNode.animate?.([{transform:"scale(1)"},{transform:"scale(1.10)"},{transform:"scale(1)"}],{duration:Math.max(120,duration),easing:"ease"});
-          await finishAnimation(pulse, Math.max(70, duration));
-          return;
-        }
-        targetEntries.forEach(({node}) => {
-          node.classList.add("is-target");
-          if (targetEntries.length > 1) node.classList.add("is-multi-target");
-        });
-        const a = actorNode.getBoundingClientRect();
-        const t = primaryTargetNode.getBoundingClientRect();
-        clone = actorNode.cloneNode(true);
-        clone.classList.add("battle-moving-clone", "v67-runner");
-        clone.classList.remove("is-dead");
-        clone.querySelectorAll(".battle-target-count-badge").forEach(node=>node.remove());
-        if (targetEntries.length > 1) {
-          const badge = document.createElement("b");
-          badge.className = "battle-target-count-badge";
-          badge.textContent = `${targetEntries.length} TARGETS`;
-          clone.appendChild(badge);
-        }
-        Object.assign(clone.style,{
-          position:"fixed", left:`${a.left}px`, top:`${a.top}px`, width:`${a.width}px`, height:`${a.height}px`,
-          margin:"0", zIndex:"9999", pointerEvents:"none", transform:"translate3d(0,0,0) scale(1)"
-        });
-        document.body.appendChild(clone);
-        actorNode.style.opacity = ".32";
-        const dx = (t.left + t.width/2) - (a.left + a.width/2);
-        const dy = (t.top + t.height/2) - (a.top + a.height/2);
-        path = document.createElement("div");
-        path.className = `battle-attack-path ${turn.side === "enemy" ? "enemy" : "player"}`;
-        const fromX = a.left + a.width / 2;
-        const fromY = a.top + a.height / 2;
-        const distance = Math.max(20, Math.hypot(dx, dy));
-        path.style.left = `${fromX}px`;
-        path.style.top = `${fromY}px`;
-        path.style.width = `${distance}px`;
-        path.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
-        document.body.appendChild(path);
-        window.setTimeout(() => { if (path && path.isConnected) path.remove(); }, Math.max(520, duration + 120));
-        const travel = Math.max(120, Math.floor(duration * .62));
-        if (clone.animate) {
-          await finishAnimation(clone.animate([{transform:"translate3d(0,0,0) scale(1)"},{transform:`translate3d(${dx*.90}px,${dy*.90}px,0) scale(1.10)`}],{duration:travel,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}), travel);
-        } else {
-          clone.style.transform = `translate3d(${dx*.90}px,${dy*.90}px,0) scale(1.10)`;
-          await wait(travel);
-        }
-        targetEntries.forEach(({node, result}) => {
-          node.classList.add("is-hit");
-          const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
-          floatBattleText(node, text);
-        });
-        await wait(Math.max(55, Math.floor(duration*.20)));
-        targetEntries.forEach(({node}) => node.classList.remove("is-hit"));
-        if (clone.animate) {
-          await finishAnimation(clone.animate([{transform:`translate3d(${dx*.90}px,${dy*.90}px,0) scale(1.10)`},{transform:"translate3d(0,0,0) scale(1)"}],{duration:Math.max(80,Math.floor(travel*.45)),easing:"ease-in",fill:"forwards"}), Math.max(80,Math.floor(travel*.45)));
-        }
-      } finally {
-        cleanup();
+        return;
       }
+      targetEntries.forEach(({node}) => {
+        node.classList.add("is-target");
+        if (targetEntries.length > 1) node.classList.add("is-multi-target");
+      });
+      const a = actorNode.getBoundingClientRect();
+      const t = primaryTargetNode.getBoundingClientRect();
+      const clone = actorNode.cloneNode(true);
+      clone.classList.add("battle-moving-clone", "v67-runner");
+      clone.classList.remove("is-dead");
+      clone.querySelectorAll(".battle-target-count-badge").forEach(node=>node.remove());
+      if (targetEntries.length > 1) {
+        const badge = document.createElement("b");
+        badge.className = "battle-target-count-badge";
+        badge.textContent = `${targetEntries.length} TARGETS`;
+        clone.appendChild(badge);
+      }
+      Object.assign(clone.style,{left:`${a.left}px`,top:`${a.top}px`,width:`${a.width}px`,height:`${a.height}px`});
+      document.body.appendChild(clone);
+      actorNode.style.opacity = ".28";
+      const dx = (t.left + t.width/2) - (a.left + a.width/2);
+      const dy = (t.top + t.height/2) - (a.top + a.height/2);
+      const path = document.createElement("div");
+      path.className = `battle-attack-path ${turn.side === "enemy" ? "enemy" : "player"}`;
+      const fromX = a.left + a.width / 2;
+      const fromY = a.top + a.height / 2;
+      const distance = Math.max(20, Math.hypot(dx, dy));
+      path.style.left = `${fromX}px`;
+      path.style.top = `${fromY}px`;
+      path.style.width = `${distance}px`;
+      path.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+      document.body.appendChild(path);
+      window.setTimeout(() => path.remove(), Math.max(520, duration));
+      const travel = Math.max(140, Math.floor(duration * .72));
+      if (clone.animate) {
+        await clone.animate([{transform:"translate(0,0) scale(1)"},{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`}],{duration:travel,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}).finished.catch(()=>{});
+      } else {
+        clone.style.transform = `translate(${dx*.88}px,${dy*.88}px) scale(1.08)`;
+        await wait(travel);
+      }
+      targetEntries.forEach(({node, result}) => {
+        node.classList.add("is-hit");
+        const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
+        floatBattleText(node, text);
+      });
+      await wait(Math.max(60, Math.floor(duration*.28)));
+      targetEntries.forEach(({node}) => node.classList.remove("is-hit"));
+      if (clone.animate) {
+        await clone.animate([{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`},{transform:"translate(0,0) scale(1)"}],{duration:Math.max(90,Math.floor(travel*.55)),easing:"ease-in",fill:"forwards"}).finished.catch(()=>{});
+      }
+      clone.remove();
+      actorNode.style.opacity = "";
+      actorNode.classList.remove("is-acting");
+      targetEntries.forEach(({node}) => node.classList.remove("is-target", "is-multi-target"));
     }
 
     function animateBattleEvents(stage, turn) {
@@ -20340,125 +19824,64 @@
     }
 
 async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
-      const safeTurns = abilityArray(combat && combat.turns);
+      updateTurnBattleDisplay(display, combat);
       const playerLabel = labels.player || "ทีมของคุณ";
       const enemyLabel = labels.enemy || "ศัตรู";
-      const starterLabel = combat && combat.playerFirst ? playerLabel : enemyLabel;
-      const setResultText = text => {
-        if (!result) return;
-        result.textContent = text;
-        beautifyBattleResult(result);
-      };
-      const clearMovingVisuals = () => {
-        try {
-          document.querySelectorAll(".battle-moving-clone,.battle-attack-path").forEach(node => node.remove());
-          stage && stage.classList.remove("player-strike", "enemy-strike");
-        } catch (error) {}
-      };
-      const safeSync = states => {
-        try { if (stage && states) syncBattleBoard(stage, states); } catch (error) { console.warn("Battle board sync skipped:", error); }
-      };
-      const safeUpdateDisplay = turn => {
-        try { updateTurnBattleDisplay(display, combat, turn || null); } catch (error) { console.warn("Battle display update skipped:", error); }
-      };
-
-      clearMovingVisuals();
-      finishActiveSkillCutscene?.();
-      safeUpdateDisplay(null);
-      safeSync({ player: combat && combat.playerInitialMembers || [], enemy: combat && combat.enemyInitialMembers || [] });
+      const starterLabel = combat.playerFirst ? playerLabel : enemyLabel;
+      syncBattleBoard(stage, { player: combat.playerInitialMembers || [], enemy: combat.enemyInitialMembers || [] });
       const cinematicHud = ensureBattleCinematicHud(stage);
       if (cinematicHud && cinematicHud.feed) cinematicHud.feed.innerHTML = "";
       renderBattleTurnOrder(stage, combat, 0, labels);
-      setResultText(`${starterLabel} ได้เริ่มโจมตีก่อน • อนิเมชันต่อสู้เล่นครบตามปกติ`);
-      await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, (Number(phaseDuration) || 180) / Math.max(1, battlePlaybackSpeed))));
+      result.textContent = `${starterLabel} ได้เริ่มโจมตีก่อน • ตัวละครที่หมดสภาพจะหยุดโจมตีและไม่ตกเป็นเป้าหมาย`;
+      beautifyBattleResult(result);
+      await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
 
-      let skippedByUser = false;
-      for (let turnIndex = 0; turnIndex < safeTurns.length; turnIndex += 1) {
-        if (battleSkipAnimations) {
-          skippedByUser = true;
-          break;
-        }
-        const turn = safeTurns[turnIndex];
-        if (!turn) continue;
-
-        try {
-          renderBattleTurnOrder(stage, combat, turnIndex, labels);
-          updateBattleActionRibbon(stage, turn, labels);
-          const sideLabel = turn.side === "player" ? playerLabel : enemyLabel;
-          const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
-          const attackerLabel = turn.actorName ? `${turn.actorName} (${sideLabel})` : sideLabel;
-          const targetNames = abilityArray(turn.targetNames).length ? abilityArray(turn.targetNames) : (turn.targetName ? [turn.targetName] : []);
-          const defenderLabel = targetNames.length > 1
-            ? `${targetNames.length} เป้าหมาย: ${targetNames.join(", ")} (${defenderSideLabel})`
-            : targetNames.length ? `${targetNames[0]} (${defenderSideLabel})` : defenderSideLabel;
-          const targetHitText = Number(turn.targetCount || 1) > 1 ? `${formatNumber(turn.hitsPerTarget || 0)} ฮิต × ${formatNumber(turn.targetCount)} เป้าหมาย` : `${formatNumber(turn.hits || 0)} ฮิต`;
-          const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
-          const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
-          const reviveText = abilityArray(turn.reviveEvents).length ? ` • ✨ คืนชีพ ${turn.reviveEvents.map(item=>item.targetName).join(", ")}` : "";
-          const speedText = abilityArray(turn.speedEvents).length ? ` • SPD ${turn.speedEvents.map(item=>`${item.targetName} ${item.change>=0?"+":""}${item.change}`).join(", ")}` : "";
-          const captureText = abilityArray(turn.captureEvents).length ? ` • 👻 ${turn.captureEvents.map(item=>item.status==="success"?`ชิงร่าง ${item.targetName}`:`ชิงร่าง ${item.targetName} ล้มเหลว`).join(", ")}` : "";
-          const captureReleaseText = abilityArray(turn.captureReleaseEvents).length ? ` • ↩ คืนศพ ${turn.captureReleaseEvents.map(item=>item.targetName).join(", ")}` : "";
-          const lifeText = turn.hitLifeConsumed ? ` • ตัดชีวิต ${turn.hitLifeConsumed} HIT${turn.hitLifeExpired ? " และหมดสภาพ" : ""}` : "";
-          const transferText = abilityArray(turn.transferEvents).length ? ` • 🧬 ${abilityArray(turn.transferEvents).slice(0, 4).map(event => {
-            const kind = String(event.transferType || event.type || "copy") === "steal" ? "ขโมย" : "คัดลอก";
-            const skill = event.abilityName || event.sourceAbilityName || event.copiedAbilityName || "สกิล";
-            const from = event.sourceName || event.fromName || event.targetName || "ต้นทาง";
-            const to = event.recipientName || event.toName || event.ownerName || turn.actorName || "ผู้รับ";
-            const status = String(event.status || "success");
-            if (status === "resisted") return `${kind} ${skill} จาก ${from} ถูกต้าน`;
-            if (status === "failed") return `${kind} ${skill} จาก ${from} ล้มเหลว`;
-            return `${to} ${kind} ${skill} จาก ${from}`;
-          }).join(" / ")}` : "";
-          const statusText = abilityArray(turn.statusEvents).length ? ` • 🧩 สถานะ: ${abilityArray(turn.statusEvents).slice(0, 4).map(event => `${event.targetName || "เป้าหมาย"}=${event.statusLabel || event.statusType || event.status || "STATUS"}${event.instantDeath ? "(ตาย)" : event.chainedFrom ? `(เชนจาก ${event.chainedFrom})` : ""}`).join(" / ")}` : "";
-          const activeText = turn.triggerActivated
-            ? ` • ⚡ ${abilityArray(turn.triggeredSkills).join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}`
-            : "";
-          const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
-          if (turn.command === "statusSkip") {
-            setResultText(`รอบ ${turn.round} • ${attackerLabel} ถูก ${abilityArray(turn.statusEvents)[0]?.statusLabel || "สถานะผิดปกติ"} จึงข้ามเทิร์น${statusText}${transferText} • SPD ${formatNumber(turn.actorSpeed || 0)}`);
-          } else if (turn.command === "guard") {
-            setResultText(`รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)}${transferText} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`);
-          } else {
-            setResultText(`รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${transferText}${reviveText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage || 0)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`);
+      for (let turnIndex = 0; turnIndex < combat.turns.length; turnIndex += 1) {
+        const turn = combat.turns[turnIndex];
+        renderBattleTurnOrder(stage, combat, turnIndex, labels);
+        updateBattleActionRibbon(stage, turn, labels);
+        const sideLabel = turn.side === "player" ? playerLabel : enemyLabel;
+        const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
+        const attackerLabel = turn.actorName ? `${turn.actorName} (${sideLabel})` : sideLabel;
+        const targetNames = abilityArray(turn.targetNames).length ? abilityArray(turn.targetNames) : (turn.targetName ? [turn.targetName] : []);
+        const defenderLabel = targetNames.length > 1
+          ? `${targetNames.length} เป้าหมาย: ${targetNames.join(", ")} (${defenderSideLabel})`
+          : targetNames.length ? `${targetNames[0]} (${defenderSideLabel})` : defenderSideLabel;
+        const targetHitText = Number(turn.targetCount || 1) > 1 ? `${formatNumber(turn.hitsPerTarget || 0)} ฮิต × ${formatNumber(turn.targetCount)} เป้าหมาย` : `${formatNumber(turn.hits)} ฮิต`;
+        const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
+        const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
+        const reviveText = abilityArray(turn.reviveEvents).length ? ` • ✨ คืนชีพ ${turn.reviveEvents.map(item=>item.targetName).join(", ")}` : "";
+        const speedText = abilityArray(turn.speedEvents).length ? ` • SPD ${turn.speedEvents.map(item=>`${item.targetName} ${item.change>=0?"+":""}${item.change}`).join(", ")}` : "";
+        const captureText = abilityArray(turn.captureEvents).length ? ` • 👻 ${turn.captureEvents.map(item=>item.status==="success"?`ชิงร่าง ${item.targetName}`:`ชิงร่าง ${item.targetName} ล้มเหลว`).join(", ")}` : "";
+        const captureReleaseText = abilityArray(turn.captureReleaseEvents).length ? ` • ↩ คืนศพ ${turn.captureReleaseEvents.map(item=>item.targetName).join(", ")}` : "";
+        const lifeText = turn.hitLifeConsumed ? ` • ตัดชีวิต ${turn.hitLifeConsumed} HIT${turn.hitLifeExpired ? " และหมดสภาพ" : ""}` : "";
+        const statusText = abilityArray(turn.statusEvents).length ? ` • 🧩 สถานะ: ${abilityArray(turn.statusEvents).slice(0, 4).map(event => `${event.targetName || "เป้าหมาย"}=${event.statusLabel || event.statusType || event.status || "STATUS"}${event.instantDeath ? "(ตาย)" : event.chainedFrom ? `(เชนจาก ${event.chainedFrom})` : ""}`).join(" / ")}` : "";
+        const activeText = turn.triggerActivated
+          ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}`
+          : "";
+        const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
+        if (turn.command === "statusSkip") {
+          result.textContent = `รอบ ${turn.round} • ${attackerLabel} ถูก ${abilityArray(turn.statusEvents)[0]?.statusLabel || "สถานะผิดปกติ"} จึงข้ามเทิร์น${statusText} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+        } else result.textContent = turn.command === "guard"
+          ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
+          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+        beautifyBattleResult(result);
+        if (turn.triggerActivated) {
+          for (const detail of abilityArray(turn.triggeredDetails)) {
+            showTriggeredAbilityEvent(stage, detail, turn, { attacker: attackerLabel, defender: defenderLabel });
+            if (!battleSkipAnimations) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
           }
-
-          if (turn.triggerActivated) {
-            for (const detail of abilityArray(turn.triggeredDetails)) {
-              showTriggeredAbilityEvent(stage, detail, turn, { attacker: attackerLabel, defender: defenderLabel });
-            }
-          }
-
-          const baseSpeed = turn.round > 6 ? Math.max(55, Math.floor((Number(phaseDuration) || 180) * .55)) : (Number(phaseDuration) || 180);
-          const speed = Math.max(35, Math.floor(baseSpeed / Math.max(1, battlePlaybackSpeed)));
-          await Promise.race([
-            animateIndividualBattleAction(stage, turn, speed * 2.25),
-            wait(Math.max(450, Math.floor(speed * 2.25) + 260))
-          ]).catch(error => console.warn("Battle animation skipped:", error));
-          animateBattleEvents(stage, turn);
-          safeSync(turn.memberStates);
-          safeUpdateDisplay(turn);
-          if (turn.suddenBreak) { setResultText(`${result && result.dataset && result.dataset.rawBattleText || result && result.textContent || ""} • Sudden Break!`); }
-          await wait(Math.max(20, Math.floor(speed * .25)));
-        } catch (turnError) {
-          console.warn("Battle turn skipped:", turnError);
-          clearMovingVisuals();
-          // ข้ามเฉพาะเทิร์นที่ผิดพลาด แล้วเล่นเทิร์นถัดไปต่อ ไม่ตัดจบไฟต์ทั้งชุด
         }
+        const baseSpeed = turn.round > 6 ? Math.max(55, Math.floor(phaseDuration * .55)) : phaseDuration;
+        const speed = battleSkipAnimations ? 5 : Math.max(35, Math.floor(baseSpeed / battlePlaybackSpeed));
+        await animateIndividualBattleAction(stage, turn, speed * 2.25);
+        animateBattleEvents(stage, turn);
+        syncBattleBoard(stage, turn.memberStates);
+        updateTurnBattleDisplay(display, combat, turn);
+        if (turn.suddenBreak) { result.textContent = `${result.dataset.rawBattleText || result.textContent} • Sudden Break!`; beautifyBattleResult(result); }
+        if (!battleSkipAnimations) await wait(Math.max(20, Math.floor(speed * .25)));
       }
-
-      if (skippedByUser) {
-        const finalTurn = safeTurns[safeTurns.length - 1] || null;
-        const finalStates = finalTurn && finalTurn.memberStates
-          ? finalTurn.memberStates
-          : { player: combat && combat.playerMembers || [], enemy: combat && combat.enemyMembers || [] };
-        safeSync(finalStates);
-        safeUpdateDisplay(finalTurn);
-        abilityArray(safeTurns).forEach(turn => abilityArray(turn && turn.transferEvents).slice(0, 4).forEach(event => showTransferBattleEvent(stage, event, turn)));
-        setResultText(`ข้ามแอนิเมชันตามคำสั่งผู้เล่น • HP เหลือ ${formatNumber(combat && combat.playerRemainingHp || 0)} ต่อ ${formatNumber(combat && combat.enemyRemainingHp || 0)}`);
-      }
-      renderBattleTurnOrder(stage, combat, safeTurns.length, labels);
-      clearMovingVisuals();
-      battleSkipAnimations = false;
+      renderBattleTurnOrder(stage, combat, combat.turns.length, labels);
     }
 
     async function playStrikeSequence(stage, className, hits, phaseDuration) {
@@ -21917,20 +21340,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       };
     }
 
-        function arenaSnapshotModelHTML(item, index = 0, enemy = true, rowIndex = null, rowTotal = null) {
+        function arenaSnapshotModelHTML(item, index = 0, enemy = true) {
       const card = CARD_BY_ID.get(cardIdString(item && item.id));
       const rarity = card ? getRarity(card) : (RARITIES[item && item.rarity] || RARITIES.N);
       const image = card ? getCardImage(card) : "";
       const name = item && item.name || (card && card.name) || "Unknown";
+      const tilt = enemy ? (index - 2) * -3 : (index - 2) * 3;
       const side = enemy ? "enemy" : "player";
       const row = String(item && item.row || (index < normalizeFormationFront(enemy ? (currentArenaOpponent && currentArenaOpponent.formationFront) : state.arena.formationFront, 5) ? "front" : "back")) === "back" ? "back" : "front";
-      const logicalTotal = Math.max(1, Math.floor(Number(rowTotal) || 1));
-      const logicalIndex = Math.max(0, Math.min(logicalTotal - 1, Math.floor(Number(rowIndex) || 0)));
-      const rowCenter = (logicalTotal - 1) / 2;
-      const tilt = enemy ? (logicalIndex - rowCenter) * -3 : (logicalIndex - rowCenter) * 3;
-      const rowY = row === "front" ? (enemy ? 44 : -44) : (enemy ? -44 : 44);
-      const rowScale = row === "front" ? 1.05 : .92;
-      return `<div class="battle-model-card battle-unit battle-position-${row}" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" data-battle-row="${row}" data-battle-slot="${escapeHTML(item && item.slot || index + 1)}" title="โจมตีธรรมดา ${Math.max(1,Math.min(5,Math.floor(Number(item && (item.normalAttackTargetCount ?? item.attackTargetCount) || 1))))} เป้าหมาย" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(logicalIndex - rowCenter) * 2.5}px`, "--row-index": logicalIndex, "--row-center": rowCenter, "--row-y": `${rowY}px`, "--row-scale": rowScale})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<b class="battle-row-badge">${row === "front" ? "หน้า" : "หลัง"}</b><div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
+      return `<div class="battle-model-card battle-unit battle-position-${row}" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" data-battle-row="${row}" data-battle-slot="${escapeHTML(item && item.slot || index + 1)}" title="โจมตีธรรมดา ${Math.max(1,Math.min(5,Math.floor(Number(item && (item.normalAttackTargetCount ?? item.attackTargetCount) || 1))))} เป้าหมาย" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 3}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<b class="battle-row-badge">${row === "front" ? "หน้า" : "หลัง"}</b><div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
     }
 
     async function refreshArenaData(showNotice = false) {
@@ -21992,7 +21410,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const stage = document.getElementById("arenaBattleStage");
       const result = document.getElementById("arenaBattleResult");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 115;
+      const phaseDuration = reducedMotion ? 20 : 175;
       arenaAnimating = true;
       battleSkipAnimations = false;
       state.battle.energy -= 1;
@@ -22369,7 +21787,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
       const arena = document.querySelector("#battleView .battle-arena");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 115;
+      const phaseDuration = reducedMotion ? 20 : 175;
       battleAnimating = true;
       battleSkipAnimations = false;
       state.battle.energy -= 1;
@@ -23878,24 +23296,21 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return pool[(stage * 13 + 7) % pool.length];
     }
 
-    function battleModelHTML(card, index, enemy, teamCount = null, row = "front", slotNumber = null, rowIndex = null, rowTotal = null) {
+    function battleModelHTML(card, index, enemy, teamCount = null, row = "front", slotNumber = null) {
       if (!card) return "";
       const rarity = getRarity(card);
       const image = getCardImage(card);
+      const count = Math.max(1, enemy ? 1 : Number(teamCount) || state.team.length);
+      const center = (count - 1) / 2;
+      const tilt = enemy ? (index - center) * -3 : (index - center) * 3;
+      const lift = Math.abs(index - center) * 3;
       const safeRow = String(row || "front") === "back" ? "back" : "front";
-      const side = enemy ? "enemy" : "player";
-      const logicalTotal = Math.max(1, Math.floor(Number(rowTotal) || 1));
-      const logicalIndex = Math.max(0, Math.min(logicalTotal - 1, Math.floor(Number(rowIndex) || 0)));
-      const rowCenter = (logicalTotal - 1) / 2;
-      const tilt = enemy ? (logicalIndex - rowCenter) * -3 : (logicalIndex - rowCenter) * 3;
-      const lift = Math.abs(logicalIndex - rowCenter) * 2.5;
-      const rowY = safeRow === "front" ? (enemy ? 44 : -44) : (enemy ? -44 : 44);
-      const rowScale = safeRow === "front" ? 1.05 : .92;
       const tag = enemy ? "div" : "button";
       const action = enemy ? "" : ` data-action="open-card" data-card-id="${escapeHTML(card.id)}"`;
+      const side = enemy ? "enemy" : "player";
       const slot = slotNumber === null || slotNumber === undefined ? index + 1 : slotNumber;
       return `
-        <${tag} class="battle-model-card battle-unit battle-position-${safeRow}" data-battle-card-id="${escapeHTML(card.id)}" data-battle-side="${side}" data-battle-row="${safeRow}" data-battle-slot="${escapeHTML(slot)}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`, "--row-index": logicalIndex, "--row-center": rowCenter, "--row-y": `${rowY}px`, "--row-scale": rowScale})}"${action} aria-label="${escapeHTML(card.name)}">
+        <${tag} class="battle-model-card battle-unit battle-position-${safeRow}" data-battle-card-id="${escapeHTML(card.id)}" data-battle-side="${side}" data-battle-row="${safeRow}" data-battle-slot="${escapeHTML(slot)}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`})}"${action} aria-label="${escapeHTML(card.name)}">
           ${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
           ${enemy ? "" : awakenBadgeHTML(card)}
           <b class="battle-row-badge">${safeRow === "front" ? "หน้า" : "หลัง"}</b>
@@ -23906,32 +23321,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       `;
     }
 
-    function battleFormationLayouts(items = [], frontCount = 2) {
-      const list = abilityArray(items).map((item, index) => ({ item, index })).filter(entry => entry.item);
-      const entries = list.map(entry => {
-        const explicit = entry.item && typeof entry.item === "object" ? String(entry.item.row || "") : "";
-        const row = explicit === "back" ? "back" : explicit === "front" ? "front" : (entry.index < frontCount ? "front" : "back");
-        return { ...entry, row };
-      });
-      const counts = {
-        front: entries.filter(entry => entry.row === "front").length,
-        back: entries.filter(entry => entry.row === "back").length
-      };
-      const seen = { front: 0, back: 0 };
-      return entries.map(entry => ({
-        ...entry,
-        rowIndex: seen[entry.row]++,
-        rowTotal: Math.max(1, counts[entry.row] || 1)
-      }));
-    }
-
     function renderBattleModels(stats) {
       const teamCards = getTowerTeamIds().map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
       const enemyCard = stats.enemyCard || getBattleEnemyCard(stats.stage);
       const frontCount = normalizeFormationFront(state.battle && state.battle.formationFront, Math.max(2, teamCards.length || 5));
-      const teamLayouts = battleFormationLayouts(teamCards, frontCount);
       document.getElementById("battlePlayerModels").innerHTML = teamCards.length
-        ? teamLayouts.map(entry => battleModelHTML(entry.item, entry.index, false, teamCards.length, entry.row, entry.index + 1, entry.rowIndex, entry.rowTotal)).join("")
+        ? teamCards.map((card, index) => battleModelHTML(card, index, false, teamCards.length, index < frontCount ? "front" : "back", index + 1)).join("")
         : `<div class="empty-state" style="min-height:130px;padding:14px">ยังไม่มีการ์ดในทีมไต่หอ</div>`;
       document.getElementById("battleEnemyModels").innerHTML = battleModelHTML(enemyCard, 0, true, 1, "front", 1);
     }
@@ -25230,17 +24625,16 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!playerModels || !enemyModels) return;
 
       if (forceModels || !arenaAnimating || !playerModels.children.length || !enemyModels.children.length) {
-        const arenaFrontCount = normalizeFormationFront(state.arena && state.arena.formationFront, Math.max(2, state.arena.team.length || 5));
-        const arenaPlayerLayouts = battleFormationLayouts(state.arena.team.map(id => CARD_BY_ID.get(String(id))).filter(Boolean), arenaFrontCount);
         playerModels.innerHTML = state.arena.team.some(Boolean)
-          ? arenaPlayerLayouts.map(entry => battleModelHTML(entry.item, entry.index, false, state.arena.team.length, entry.row, entry.index + 1, entry.rowIndex, entry.rowTotal)).join("")
+          ? state.arena.team.map((id, index) => {
+              const card = CARD_BY_ID.get(String(id));
+              const frontCount = normalizeFormationFront(state.arena && state.arena.formationFront, Math.max(2, state.arena.team.length || 5));
+              return card ? battleModelHTML(card, index, false, state.arena.team.length, index < frontCount ? "front" : "back", index + 1) : "";
+            }).join("")
           : `<div class="arena-secret-model">+</div>`;
 
-        const visibleEnemyTeam = currentArenaOpponent && stats.enemyTeam.length ? stats.enemyTeam.slice(0, CONFIG.arenaTeamSlots) : [];
-        const enemyFrontCount = normalizeFormationFront(currentArenaOpponent && currentArenaOpponent.formationFront, Math.max(2, visibleEnemyTeam.length || 5));
-        const enemyLayouts = battleFormationLayouts(visibleEnemyTeam, enemyFrontCount);
-        enemyModels.innerHTML = visibleEnemyTeam.length
-          ? enemyLayouts.map(entry => arenaSnapshotModelHTML(entry.item, entry.index, true, entry.rowIndex, entry.rowTotal)).join("")
+        enemyModels.innerHTML = currentArenaOpponent && stats.enemyTeam.length
+          ? stats.enemyTeam.slice(0, CONFIG.arenaTeamSlots).map((item, index) => arenaSnapshotModelHTML(item, index, true)).join("")
           : `<div class="arena-secret-model">?</div><div class="arena-secret-model">?</div><div class="arena-secret-model">?</div>`;
       }
 
