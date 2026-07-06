@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-status-fullscreen-v66">
-  <title>Anime Card Collection · Status Fullscreen Runtime v66</title>
+  <meta name="gacha-app-build" content="2026-07-07-seven-battle-v67">
+  <title>Anime Card Collection · Seven Battle Runtime v67</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5456,6 +5456,393 @@
     .battle-floating-number.status{color:#fef3c7;text-shadow:0 2px 4px #000,0 0 16px rgba(250,204,21,.95)}.battle-floating-number.miss{color:#c7d2fe;text-shadow:0 2px 4px #000,0 0 16px rgba(129,140,248,.95)}.battle-unit.is-status-controlled{filter:drop-shadow(0 0 16px rgba(250,204,21,.75)) saturate(1.18)}
     @media(max-width:900px){#battleView .battle-sidebar,#arenaView .battle-sidebar{grid-template-columns:1fr}#battleView .battle-sides,#arenaView .battle-sides{grid-template-columns:1fr;gap:18px}#battleView .battle-arena,#arenaView .battle-arena{min-height:auto}#battleView .battle-model-stack,#arenaView .battle-model-stack{min-height:220px}}
 
+
+
+    /* v67 · Seven Knights-style battle readability pass */
+    #battleView .battle-layout,
+    #arenaView .battle-layout {
+      gap: 12px;
+    }
+
+    #battleView .battle-arena,
+    #arenaView .battle-arena {
+      min-height: clamp(620px, calc(100vh - 126px), 900px);
+      padding: clamp(58px, 6vh, 86px) clamp(10px, 2.2vw, 28px) clamp(118px, 14vh, 154px);
+      border-radius: 18px;
+      border-color: rgba(92,232,255,.16);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(92,232,255,.13), transparent 28%),
+        radial-gradient(circle at 12% 82%, rgba(86,227,159,.12), transparent 32%),
+        radial-gradient(circle at 88% 18%, rgba(251,113,133,.14), transparent 34%),
+        linear-gradient(180deg, #10172f 0%, #090d1b 48%, #101827 100%);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.045),
+        inset 0 -90px 120px rgba(0,0,0,.24),
+        0 22px 70px rgba(0,0,0,.38);
+    }
+
+    #battleView .battle-arena::before,
+    #arenaView .battle-arena::before {
+      content: "";
+      position: absolute;
+      inset: 52px 12px 116px;
+      z-index: 0;
+      border-radius: 26px;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, transparent 0 47%, rgba(255,255,255,.08) 50%, transparent 53%),
+        radial-gradient(ellipse at 50% 50%, rgba(255,255,255,.085), transparent 45%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.055);
+    }
+
+    #battleView .battle-arena::after,
+    #arenaView .battle-arena::after {
+      opacity: .055;
+      top: 47%;
+      font-size: clamp(4.8rem, 15vw, 10rem);
+    }
+
+    #battleView .battle-sides,
+    #arenaView .battle-sides {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0;
+      align-items: stretch;
+      padding: 4px 0;
+    }
+
+    #battleView .fighter,
+    #arenaView .fighter {
+      position: relative;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr);
+      align-content: stretch;
+      min-height: 0;
+      text-align: center;
+    }
+
+    #battleView .fighter.enemy,
+    #arenaView .fighter.enemy { grid-row: 1; text-align: center; }
+    #battleView .fighter.player,
+    #arenaView .fighter.player { grid-row: 2; text-align: center; }
+
+    #battleView .fighter-label,
+    #arenaView .fighter-label,
+    #battleView .fighter h3,
+    #arenaView .fighter h3,
+    #battleView .fighter-power,
+    #arenaView .fighter-power {
+      position: absolute;
+      z-index: 8;
+      margin: 0;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      background: rgba(4,7,16,.72);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+    }
+
+    #battleView .fighter-label,
+    #arenaView .fighter-label { display: none; }
+    #battleView .fighter h3,
+    #arenaView .fighter h3 {
+      left: 10px;
+      max-width: min(44vw, 420px);
+      padding: 8px 12px;
+      overflow: hidden;
+      font-size: clamp(.82rem, 1.35vw, 1.05rem);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #battleView .fighter.enemy h3,
+    #arenaView .fighter.enemy h3 { top: 2px; }
+    #battleView .fighter.player h3,
+    #arenaView .fighter.player h3 { bottom: 2px; }
+
+    #battleView .fighter-power,
+    #arenaView .fighter-power {
+      right: 10px;
+      max-width: min(48vw, 520px);
+      padding: 7px 10px;
+      justify-content: flex-end;
+      gap: 8px;
+      font-size: clamp(.72rem, 1.2vw, .96rem);
+      line-height: 1.15;
+    }
+    #battleView .fighter.enemy .fighter-power,
+    #arenaView .fighter.enemy .fighter-power { top: 2px; }
+    #battleView .fighter.player .fighter-power,
+    #arenaView .fighter.player .fighter-power { bottom: 2px; }
+    #battleView .fighter-power .combat-total-top,
+    #arenaView .fighter-power .combat-total-top { display: none; }
+    #battleView .fighter-power .combat-def,
+    #arenaView .fighter-power .combat-def { font-size: .78em; }
+    #battleView .power-breakdown,
+    #arenaView .power-breakdown,
+    #battleView .power-meter,
+    #arenaView .power-meter { display: none; }
+
+    #battleView .battle-model-stack,
+    #arenaView .battle-model-stack {
+      min-height: 100%;
+      margin: 0;
+      padding-inline: clamp(8px, 4vw, 70px) !important;
+      gap: clamp(7px, 1.4vw, 22px);
+      justify-content: center !important;
+      align-items: center;
+      overflow: visible;
+    }
+
+    #battleView .fighter.enemy .battle-model-stack,
+    #arenaView .fighter.enemy .battle-model-stack { padding-top: clamp(30px, 5vh, 72px) !important; padding-bottom: 0 !important; }
+    #battleView .fighter.player .battle-model-stack,
+    #arenaView .fighter.player .battle-model-stack { padding-top: 0 !important; padding-bottom: clamp(30px, 5vh, 72px) !important; }
+
+    #battleView .battle-model-card,
+    #arenaView .battle-model-card {
+      width: clamp(78px, 10.8vw, 158px);
+      margin-left: 0 !important;
+      border-width: 2px;
+      border-radius: 18px;
+      transform: translateY(calc(var(--model-lift, 0px) + var(--row-offset, 0px))) rotate(var(--model-tilt, 0deg)) scale(var(--row-scale, 1));
+      transition: transform .22s ease, filter .22s ease, box-shadow .22s ease, opacity .22s ease;
+    }
+
+    #battleView .fighter.player .battle-position-front,
+    #arenaView .fighter.player .battle-position-front { --row-offset: -28px; --row-scale: 1.04; z-index: 5; }
+    #battleView .fighter.player .battle-position-back,
+    #arenaView .fighter.player .battle-position-back { --row-offset: 34px; --row-scale: .91; z-index: 3; }
+    #battleView .fighter.enemy .battle-position-front,
+    #arenaView .fighter.enemy .battle-position-front { --row-offset: 30px; --row-scale: 1.04; z-index: 5; }
+    #battleView .fighter.enemy .battle-position-back,
+    #arenaView .fighter.enemy .battle-position-back { --row-offset: -34px; --row-scale: .91; z-index: 3; }
+
+    #battleView .battle-model-card span,
+    #arenaView .battle-model-card span {
+      left: 7px;
+      right: 7px;
+      bottom: 8px;
+      padding: 5px 7px;
+      border-radius: 9px;
+      background: rgba(3,5,12,.68);
+      backdrop-filter: blur(8px);
+      font-size: clamp(.52rem, .75vw, .68rem);
+      text-align: center;
+    }
+
+    .battle-row-badge {
+      position: absolute;
+      z-index: 17;
+      left: 7px;
+      top: 7px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      padding: 4px 6px;
+      color: #061019;
+      font-size: .48rem;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      pointer-events: none;
+    }
+    .battle-position-back .battle-row-badge { color: #251700; background: linear-gradient(135deg, #fde68a, #fb923c); }
+
+    #battleView .battle-actions,
+    #arenaView .battle-actions {
+      position: absolute;
+      z-index: 18;
+      left: clamp(10px, 2vw, 22px);
+      right: clamp(10px, 2vw, 22px);
+      bottom: clamp(10px, 2vh, 18px);
+      display: grid;
+      grid-template-columns: auto auto minmax(180px, auto) minmax(0, 1fr);
+      align-items: center;
+      margin: 0;
+      padding: 9px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 18px;
+      background: rgba(4,7,16,.76);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 14px 44px rgba(0,0,0,.38);
+    }
+
+    #battleView .battle-playback-controls,
+    #arenaView .battle-playback-controls { margin: 0; justify-content: flex-start; }
+    #battleView .battle-result,
+    #arenaView .battle-result {
+      min-height: 50px;
+      max-height: 104px;
+      overflow: auto;
+      margin: 0;
+      border-color: rgba(92,232,255,.18);
+      background: rgba(3,5,12,.54);
+    }
+    .battle-result.readable { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; line-height: 1.25; }
+    .battle-result.readable b,
+    .battle-result.readable .result-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(255,255,255,.06);
+      color: #eaf8ff;
+      font-size: .68rem;
+      font-weight: 900;
+    }
+    .battle-result.readable b { color: #071019; background: linear-gradient(135deg, var(--cyan), var(--violet)); }
+    .battle-result.readable .result-chip:nth-child(3n) { color: #fde68a; }
+    .battle-result.readable .result-chip:nth-child(4n) { color: #bbf7d0; }
+
+    .battle-cinematic-hud {
+      position: absolute;
+      inset: 0;
+      z-index: 16;
+      pointer-events: none;
+    }
+    .battle-action-ribbon {
+      position: absolute;
+      left: 50%;
+      top: 54px;
+      width: min(92%, 760px);
+      min-height: 54px;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(5,8,18,.90), rgba(30,41,59,.78));
+      backdrop-filter: blur(16px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.34);
+      transform: translateX(-50%);
+    }
+    .battle-action-ribbon img,
+    .battle-event-portrait img,
+    .battle-skill-portrait img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+    .battle-action-ribbon .battle-action-actor {
+      width: 42px; height: 42px; overflow: hidden; border-radius: 50%; border: 2px solid var(--cyan); background: rgba(255,255,255,.08);
+    }
+    .battle-action-main { min-width: 0; }
+    .battle-action-main b { display: block; overflow: hidden; color: #fff; font-size: .82rem; text-overflow: ellipsis; white-space: nowrap; }
+    .battle-action-main small { display: block; overflow: hidden; color: var(--muted); font-size: .64rem; text-overflow: ellipsis; white-space: nowrap; }
+    .battle-action-targets { display: flex; align-items: center; gap: -4px; }
+    .battle-action-targets img,
+    .battle-action-targets span {
+      width: 28px; height: 28px; display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.22); border-radius: 50%; margin-left: -6px; color: white; background: rgba(251,113,133,.45); font-size: .58rem; font-weight: 1000;
+    }
+    .battle-action-targets img:first-child,
+    .battle-action-targets span:first-child { margin-left: 0; }
+
+    .battle-event-feed {
+      position: absolute;
+      top: 116px;
+      right: 12px;
+      width: min(360px, 38vw);
+      display: grid;
+      gap: 8px;
+      justify-items: end;
+    }
+    .battle-event-card {
+      width: min(360px, 100%);
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 9px;
+      align-items: center;
+      padding: 9px 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      background: rgba(4,7,16,.82);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 14px 36px rgba(0,0,0,.30);
+      animation: battle-event-in .22s ease both;
+    }
+    .battle-event-card.copy { border-color: rgba(92,232,255,.36); }
+    .battle-event-card.steal { border-color: rgba(251,113,133,.38); }
+    .battle-event-card.status { border-color: rgba(250,204,21,.38); }
+    .battle-event-card.active { border-color: rgba(167,139,250,.44); }
+    .battle-event-portrait { width: 42px; height: 42px; overflow: hidden; border-radius: 13px; background: linear-gradient(135deg, var(--cyan), var(--violet)); }
+    .battle-event-copy { min-width: 0; }
+    .battle-event-copy b { display: block; overflow: hidden; color: #fff; font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
+    .battle-event-copy span { display: block; margin-top: 2px; overflow: hidden; color: #cbd5e1; font-size: .62rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+
+    .battle-skill-toast {
+      position: absolute;
+      z-index: 28;
+      left: 50%;
+      top: 50%;
+      width: min(560px, 88%);
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr) 58px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 22px;
+      background:
+        linear-gradient(135deg, rgba(4,7,16,.96), rgba(30,27,75,.88)),
+        radial-gradient(circle at 12% 20%, rgba(92,232,255,.28), transparent 40%);
+      box-shadow: 0 24px 80px rgba(0,0,0,.52), 0 0 36px rgba(92,232,255,.18);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: battle-skill-toast .95s cubic-bezier(.2,.85,.2,1) both;
+    }
+    .battle-skill-toast.steal { box-shadow: 0 24px 80px rgba(0,0,0,.52), 0 0 40px rgba(251,113,133,.25); }
+    .battle-skill-toast.status { box-shadow: 0 24px 80px rgba(0,0,0,.52), 0 0 40px rgba(250,204,21,.24); }
+    .battle-skill-portrait { width: 74px; height: 74px; overflow: hidden; border-radius: 18px; border: 2px solid var(--cyan); background: linear-gradient(135deg, var(--cyan), var(--violet)); }
+    .battle-skill-target { width: 58px; height: 58px; overflow: hidden; border-radius: 16px; border: 2px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); }
+    .battle-skill-copy { min-width: 0; }
+    .battle-skill-copy small { display: block; color: var(--gold); font-size: .68rem; font-weight: 1000; letter-spacing: .10em; text-transform: uppercase; }
+    .battle-skill-copy b { display: block; overflow: hidden; margin-top: 2px; color: #fff; font-size: clamp(1.05rem, 2.5vw, 1.55rem); line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
+    .battle-skill-copy span { display: block; overflow: hidden; margin-top: 5px; color: #cbd5e1; font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
+
+    .battle-attack-path {
+      position: fixed;
+      z-index: 9998;
+      height: 5px;
+      border-radius: 999px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(92,232,255,.95), rgba(255,255,255,.95), transparent);
+      box-shadow: 0 0 18px rgba(92,232,255,.60), 0 0 36px rgba(92,232,255,.22);
+      transform-origin: left center;
+      animation: battle-path-flash .54s ease both;
+    }
+    .battle-attack-path.enemy { background: linear-gradient(90deg, transparent, rgba(251,113,133,.95), rgba(255,255,255,.95), transparent); box-shadow: 0 0 18px rgba(251,113,133,.6), 0 0 36px rgba(251,113,133,.22); }
+    .battle-moving-clone.v67-runner { border-radius: 20px !important; box-shadow: 0 28px 44px rgba(0,0,0,.55), 0 0 36px rgba(92,232,255,.32) !important; }
+    .battle-unit.is-target { outline: 3px solid rgba(255,255,255,.35); outline-offset: 5px; animation: battle-target-pulse .62s ease infinite alternate; }
+    .battle-unit.is-acting { transform: translateY(calc(var(--model-lift, 0px) + var(--row-offset, 0px) - 8px)) rotate(0deg) scale(1.08) !important; }
+
+    @keyframes battle-event-in { from { opacity: 0; transform: translateX(18px) scale(.96); } to { opacity: 1; transform: translateX(0) scale(1); } }
+    @keyframes battle-skill-toast { 0% { opacity: 0; transform: translate(-50%, -44%) scale(.88); } 18% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); } 76% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -56%) scale(.96); } }
+    @keyframes battle-path-flash { 0% { opacity: 0; clip-path: inset(0 100% 0 0); } 20% { opacity: 1; clip-path: inset(0 0 0 0); } 100% { opacity: 0; clip-path: inset(0 0 0 100%); } }
+    @keyframes battle-target-pulse { from { filter: drop-shadow(0 0 18px rgba(251,113,133,.75)); } to { filter: drop-shadow(0 0 30px rgba(255,255,255,.72)); } }
+
+    @media (max-width: 900px) {
+      #battleView .battle-arena,
+      #arenaView .battle-arena { min-height: 680px; padding-top: 76px; padding-bottom: 168px; }
+      #battleView .battle-actions,
+      #arenaView .battle-actions { grid-template-columns: 1fr 1fr; }
+      #battleView .battle-result,
+      #arenaView .battle-result { grid-column: 1 / -1; }
+      .battle-action-ribbon { top: 48px; grid-template-columns: 34px minmax(0,1fr); border-radius: 18px; }
+      .battle-action-ribbon .battle-action-actor { width: 34px; height: 34px; }
+      .battle-action-targets { display: none; }
+      .battle-event-feed { top: 100px; right: 8px; width: min(320px, 56vw); }
+      .battle-skill-toast { grid-template-columns: 58px minmax(0,1fr); }
+      .battle-skill-portrait { width: 58px; height: 58px; }
+      .battle-skill-target { display: none; }
+      #battleView .fighter-power,
+      #arenaView .fighter-power { display: none; }
+      #battleView .battle-model-card,
+      #arenaView .battle-model-card { width: clamp(62px, 18vw, 102px); }
+    }
 
   </style>
 </head>
@@ -19091,7 +19478,7 @@
       const baseId = String(state.cardId || state.id || "").split("@C")[0];
       const card = CARD_BY_ID.get(baseId) || { id:baseId, name:state.name || baseId, rarity:"N" };
       const holder = document.createElement("div");
-      holder.innerHTML = battleModelHTML(card, stack.children.length, side === "enemy", Math.max(1, stack.children.length + 1));
+      holder.innerHTML = battleModelHTML(card, stack.children.length, side === "enemy", Math.max(1, stack.children.length + 1), state.row || "front", state.slot || stack.children.length + 1);
       node = holder.firstElementChild;
       if (!node) return null;
       node.dataset.battleCardId = String(state.id);
@@ -19111,6 +19498,15 @@
         node.dataset.deadState = String(dead);
         node.classList.toggle("is-dead", dead);
       }
+      if (state.row) {
+        const safeRow = String(state.row) === "back" ? "back" : "front";
+        node.dataset.battleRow = safeRow;
+        node.classList.toggle("battle-position-front", safeRow === "front");
+        node.classList.toggle("battle-position-back", safeRow === "back");
+        const rowBadge = node.querySelector(".battle-row-badge");
+        if (rowBadge) rowBadge.textContent = safeRow === "front" ? "หน้า" : "หลัง";
+      }
+      if (state.slot !== undefined && state.slot !== null) node.dataset.battleSlot = String(state.slot);
       const hp = node.querySelector(".battle-unit-hp i");
       if (hp && hp.dataset.stableWidth !== String(hpPercent)) {
         hp.dataset.stableWidth = String(hpPercent);
@@ -19173,6 +19569,142 @@
       window.setTimeout(() => label.remove(), 850);
     }
 
+
+    function getBattleInfoCard(cardId, fallbackName = "") {
+      const rawId = String(cardId || "");
+      const baseId = rawId.split("@C")[0];
+      const card = CARD_BY_ID.get(baseId);
+      return {
+        id: rawId,
+        baseId,
+        name: String(fallbackName || (card && card.name) || rawId || "Unknown"),
+        image: card ? getCardImage(card) : ""
+      };
+    }
+
+    function battlePortraitHTML(cardId, fallbackName = "", className = "") {
+      const info = getBattleInfoCard(cardId, fallbackName);
+      const safeClass = className ? ` class="${className}"` : "";
+      if (info.image) return `<img${safeClass} src="${escapeHTML(info.image)}" alt="${escapeHTML(info.name)}" loading="lazy" onerror="this.replaceWith(document.createTextNode('✦'))">`;
+      return `<span${safeClass}>${escapeHTML((info.name || "?").slice(0, 1))}</span>`;
+    }
+
+    function ensureBattleCinematicHud(stage) {
+      if (!stage) return null;
+      let hud = stage.querySelector(".battle-cinematic-hud");
+      if (!hud) {
+        hud = document.createElement("div");
+        hud.className = "battle-cinematic-hud";
+        hud.innerHTML = `<div class="battle-action-ribbon"><div class="battle-action-actor"></div><div class="battle-action-main"><b>พร้อมต่อสู้</b><small>ระบบจะแสดงแอ็กชันและเป้าหมายตรงนี้</small></div><div class="battle-action-targets"></div></div><div class="battle-event-feed"></div>`;
+        const turnOrder = stage.querySelector(".battle-turn-order");
+        if (turnOrder && turnOrder.parentNode === stage) stage.insertBefore(hud, turnOrder.nextSibling);
+        else stage.prepend(hud);
+      }
+      return {
+        root: hud,
+        ribbon: hud.querySelector(".battle-action-ribbon"),
+        actor: hud.querySelector(".battle-action-actor"),
+        main: hud.querySelector(".battle-action-main"),
+        targets: hud.querySelector(".battle-action-targets"),
+        feed: hud.querySelector(".battle-event-feed")
+      };
+    }
+
+    function pushBattleEventCard(stage, options = {}) {
+      const hud = ensureBattleCinematicHud(stage);
+      if (!hud || !hud.feed) return;
+      const card = document.createElement("div");
+      const tone = String(options.tone || "active");
+      card.className = `battle-event-card ${tone}`;
+      card.innerHTML = `<div class="battle-event-portrait">${battlePortraitHTML(options.cardId, options.cardName)}</div><div class="battle-event-copy"><b>${escapeHTML(options.title || "Battle Event")}</b><span>${escapeHTML(options.body || "")}</span></div>`;
+      hud.feed.prepend(card);
+      while (hud.feed.children.length > 5) hud.feed.lastElementChild.remove();
+      window.setTimeout(() => { if (card.isConnected) card.remove(); }, Number(options.duration || 4200));
+    }
+
+    function showBattleSkillToast(stage, options = {}) {
+      if (!stage) return;
+      const old = stage.querySelector(".battle-skill-toast");
+      if (old) old.remove();
+      const toast = document.createElement("div");
+      toast.className = `battle-skill-toast ${String(options.tone || "active")}`;
+      toast.innerHTML = `<div class="battle-skill-portrait">${battlePortraitHTML(options.sourceCardId, options.sourceName)}</div><div class="battle-skill-copy"><small>${escapeHTML(options.kicker || "ACTIVE SKILL")}</small><b>${escapeHTML(options.title || "Skill")}</b><span>${escapeHTML(options.body || "")}</span></div><div class="battle-skill-target">${battlePortraitHTML(options.targetCardId || options.donorCardId || options.recipientCardId, options.targetName || options.donorName || options.recipientName)}</div>`;
+      stage.appendChild(toast);
+      window.setTimeout(() => { if (toast.isConnected) toast.remove(); }, Number(options.duration || 1150));
+    }
+
+    function updateBattleActionRibbon(stage, turn, labels = {}) {
+      const hud = ensureBattleCinematicHud(stage);
+      if (!hud || !turn) return;
+      const sideLabel = turn.side === "player" ? (labels.player || "ทีมของคุณ") : (labels.enemy || "ศัตรู");
+      const actor = getBattleInfoCard(turn.actorCardId, turn.actorName || sideLabel);
+      const targetResults = abilityArray(turn.targetResults).length ? abilityArray(turn.targetResults) : (turn.targetCardId ? [{ targetCardId: turn.targetCardId, targetName: turn.targetName }] : []);
+      const targetNames = targetResults.map(item => item.targetName || getBattleInfoCard(item.targetCardId).name).filter(Boolean);
+      const skillNames = abilityArray(turn.triggeredSkills).filter(Boolean);
+      if (hud.actor) hud.actor.innerHTML = battlePortraitHTML(actor.id, actor.name);
+      if (hud.main) {
+        const title = turn.command === "guard" ? `${actor.name} ตั้งรับ` : turn.command === "statusSkip" ? `${actor.name} ถูกหยุดการกระทำ` : `${actor.name} → ${targetNames.length ? targetNames.join(", ") : "เป้าหมาย"}`;
+        const chips = [
+          `รอบ ${formatNumber(turn.round || 0)}`,
+          skillNames.length ? `สกิล: ${skillNames.join(" + ")}` : "โจมตีปกติ",
+          Number(turn.damage || 0) > 0 ? `ดาเมจ ${formatNumber(turn.damage)}` : turn.blindMiss ? "ตาบอด: พลาด" : "กำลังประมวลผล",
+          `SPD ${formatNumber(turn.actorSpeed || 0)}`
+        ];
+        hud.main.innerHTML = `<b>${escapeHTML(title)}</b><small>${escapeHTML(chips.join(" • "))}</small>`;
+      }
+      if (hud.targets) {
+        hud.targets.innerHTML = targetResults.slice(0, 5).map(item => battlePortraitHTML(item.targetCardId, item.targetName)).join("");
+      }
+    }
+
+    function beautifyBattleResult(result) {
+      if (!result) return;
+      const text = String(result.textContent || "").trim();
+      if (!text) return;
+      result.dataset.rawBattleText = text;
+      const parts = text.split(" • ").map(part => part.trim()).filter(Boolean);
+      result.classList.add("readable");
+      result.innerHTML = parts.map((part, index) => index === 0 ? `<b>${escapeHTML(part)}</b>` : `<span class="result-chip">${escapeHTML(part)}</span>`).join("");
+    }
+
+    function showTriggeredAbilityEvent(stage, detail, turn, labels = {}) {
+      if (!detail) return;
+      const sourceId = detail.sourceCardId || (turn && turn.actorCardId);
+      const sourceName = detail.sourceCardName || (turn && turn.actorName) || "ผู้ใช้สกิล";
+      const targetName = abilityArray(turn && turn.targetNames).join(", ") || (turn && turn.targetName) || "เป้าหมาย";
+      showBattleSkillToast(stage, { tone: "active", sourceCardId: sourceId, sourceName, targetCardId: turn && turn.targetCardId, targetName, kicker: "ACTIVE SKILL", title: detail.name || "Active Skill", body: `${sourceName} ใช้สกิลใส่ ${targetName}` });
+      pushBattleEventCard(stage, { tone: "active", cardId: sourceId, cardName: sourceName, title: `ACTIVE: ${detail.name || "Skill"}`, body: `${sourceName} → ${targetName}` });
+    }
+
+    function showTransferBattleEvent(stage, event = {}, turn = {}) {
+      const type = String(event.transferType || "copy");
+      const tone = type === "steal" ? "steal" : "copy";
+      const donor = getBattleInfoCard(event.donorCardId, event.donorName || "ต้นทาง");
+      const recipient = getBattleInfoCard(event.recipientCardId, event.recipientName || (turn && turn.actorName) || "ผู้รับ");
+      const abilityName = String(event.abilityName || "สกิล");
+      let title = tone === "steal" ? "ขโมยสกิลสำเร็จ" : "คัดลอกสกิลสำเร็จ";
+      let body = `${recipient.name} ได้ “${abilityName}” จาก ${donor.name}`;
+      if (event.status === "failed") { title = tone === "steal" ? "ขโมยสกิลล้มเหลว" : "คัดลอกสกิลล้มเหลว"; body = `${donor.name} • ${abilityName}`; }
+      if (event.status === "resisted") { title = "ถูกต้านสกิล"; body = `${donor.name} ต้าน${tone === "steal" ? "การขโมย" : "การคัดลอก"}`; }
+      if (event.status === "expired") { title = "สกิลที่ได้มาหมดเวลา"; body = `${recipient.name} สูญเสีย “${abilityName}”`; }
+      showBattleSkillToast(stage, { tone, sourceCardId: donor.id, sourceName: donor.name, targetCardId: recipient.id, targetName: recipient.name, kicker: tone === "steal" ? "STEAL SKILL" : "COPY SKILL", title, body, duration: 1450 });
+      pushBattleEventCard(stage, { tone, cardId: donor.id, cardName: donor.name, title, body, duration: 5200 });
+    }
+
+    function showStatusBattleEvent(stage, event = {}, turn = {}) {
+      if (!event || event.status === "control") return;
+      const target = getBattleInfoCard(event.targetCardId, event.targetName || "เป้าหมาย");
+      const label = String(event.statusLabel || event.statusType || event.status || "STATUS");
+      let title = `ติดสถานะ: ${label}`;
+      let body = `${target.name} ได้รับสถานะ ${label}`;
+      if (event.status === "failed") { title = "สถานะไม่ติด"; body = `${target.name} ไม่ติดสถานะ`; }
+      if (event.status === "resisted") { title = "ต้านสถานะสำเร็จ"; body = `${target.name} ต้าน ${label}`; }
+      if (event.damage) body += ` • DOT ${formatNumber(event.damage)}`;
+      if (event.instantDeath) body += " • เข้าสู่ KO";
+      if (event.chainedFrom) body += ` • เชนจาก ${event.chainedFrom}`;
+      pushBattleEventCard(stage, { tone: "status", cardId: target.id, cardName: target.name, title, body, duration: 4200 });
+    }
+
     async function animateIndividualBattleAction(stage, turn, duration) {
       if (!stage || battleSkipAnimations || !turn || turn.command === "suddenBreak") return;
       const actorNode = battleUnitNode(stage, turn.side, turn.actorCardId);
@@ -19197,7 +19729,7 @@
       const a = actorNode.getBoundingClientRect();
       const t = primaryTargetNode.getBoundingClientRect();
       const clone = actorNode.cloneNode(true);
-      clone.classList.add("battle-moving-clone");
+      clone.classList.add("battle-moving-clone", "v67-runner");
       clone.classList.remove("is-dead");
       clone.querySelectorAll(".battle-target-count-badge").forEach(node=>node.remove());
       if (targetEntries.length > 1) {
@@ -19211,7 +19743,18 @@
       actorNode.style.opacity = ".28";
       const dx = (t.left + t.width/2) - (a.left + a.width/2);
       const dy = (t.top + t.height/2) - (a.top + a.height/2);
-      const travel = Math.max(110, Math.floor(duration * .65));
+      const path = document.createElement("div");
+      path.className = `battle-attack-path ${turn.side === "enemy" ? "enemy" : "player"}`;
+      const fromX = a.left + a.width / 2;
+      const fromY = a.top + a.height / 2;
+      const distance = Math.max(20, Math.hypot(dx, dy));
+      path.style.left = `${fromX}px`;
+      path.style.top = `${fromY}px`;
+      path.style.width = `${distance}px`;
+      path.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+      document.body.appendChild(path);
+      window.setTimeout(() => path.remove(), Math.max(520, duration));
+      const travel = Math.max(140, Math.floor(duration * .72));
       if (clone.animate) {
         await clone.animate([{transform:"translate(0,0) scale(1)"},{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`}],{duration:travel,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}).finished.catch(()=>{});
       } else {
@@ -19236,6 +19779,8 @@
 
     function animateBattleEvents(stage, turn) {
       const targetSide = turn.side === "player" ? "enemy" : "player";
+      abilityArray(turn.transferEvents).slice(0, 5).forEach(event => showTransferBattleEvent(stage, event, turn));
+      abilityArray(turn.statusEvents).slice(0, 4).forEach(event => showStatusBattleEvent(stage, event, turn));
       abilityArray(turn.speedEvents).forEach(event => {
         const side = battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : targetSide;
         const node = battleUnitNode(stage, side, event.targetCardId);
@@ -19284,13 +19829,17 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const enemyLabel = labels.enemy || "ศัตรู";
       const starterLabel = combat.playerFirst ? playerLabel : enemyLabel;
       syncBattleBoard(stage, { player: combat.playerInitialMembers || [], enemy: combat.enemyInitialMembers || [] });
+      const cinematicHud = ensureBattleCinematicHud(stage);
+      if (cinematicHud && cinematicHud.feed) cinematicHud.feed.innerHTML = "";
       renderBattleTurnOrder(stage, combat, 0, labels);
       result.textContent = `${starterLabel} ได้เริ่มโจมตีก่อน • ตัวละครที่หมดสภาพจะหยุดโจมตีและไม่ตกเป็นเป้าหมาย`;
+      beautifyBattleResult(result);
       await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
 
       for (let turnIndex = 0; turnIndex < combat.turns.length; turnIndex += 1) {
         const turn = combat.turns[turnIndex];
         renderBattleTurnOrder(stage, combat, turnIndex, labels);
+        updateBattleActionRibbon(stage, turn, labels);
         const sideLabel = turn.side === "player" ? playerLabel : enemyLabel;
         const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
         const attackerLabel = turn.actorName ? `${turn.actorName} (${sideLabel})` : sideLabel;
@@ -19316,8 +19865,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         } else result.textContent = turn.command === "guard"
           ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
           : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+        beautifyBattleResult(result);
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
+            showTriggeredAbilityEvent(stage, detail, turn, { attacker: attackerLabel, defender: defenderLabel });
             if (!battleSkipAnimations) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
           }
         }
@@ -19327,7 +19878,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         animateBattleEvents(stage, turn);
         syncBattleBoard(stage, turn.memberStates);
         updateTurnBattleDisplay(display, combat, turn);
-        if (turn.suddenBreak) result.textContent += " • Sudden Break!";
+        if (turn.suddenBreak) { result.textContent = `${result.dataset.rawBattleText || result.textContent} • Sudden Break!`; beautifyBattleResult(result); }
         if (!battleSkipAnimations) await wait(Math.max(20, Math.floor(speed * .25)));
       }
       renderBattleTurnOrder(stage, combat, combat.turns.length, labels);
@@ -20794,9 +21345,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const rarity = card ? getRarity(card) : (RARITIES[item && item.rarity] || RARITIES.N);
       const image = card ? getCardImage(card) : "";
       const name = item && item.name || (card && card.name) || "Unknown";
-      const tilt = enemy ? (index - 2) * -4 : (index - 2) * 4;
+      const tilt = enemy ? (index - 2) * -3 : (index - 2) * 3;
       const side = enemy ? "enemy" : "player";
-      return `<div class="battle-model-card battle-unit" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" title="โจมตีธรรมดา ${Math.max(1,Math.min(5,Math.floor(Number(item && (item.normalAttackTargetCount ?? item.attackTargetCount) || 1))))} เป้าหมาย" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 4}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
+      const row = String(item && item.row || (index < normalizeFormationFront(enemy ? (currentArenaOpponent && currentArenaOpponent.formationFront) : state.arena.formationFront, 5) ? "front" : "back")) === "back" ? "back" : "front";
+      return `<div class="battle-model-card battle-unit battle-position-${row}" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" data-battle-row="${row}" data-battle-slot="${escapeHTML(item && item.slot || index + 1)}" title="โจมตีธรรมดา ${Math.max(1,Math.min(5,Math.floor(Number(item && (item.normalAttackTargetCount ?? item.attackTargetCount) || 1))))} เป้าหมาย" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 3}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<b class="battle-row-badge">${row === "front" ? "หน้า" : "หลัง"}</b><div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
     }
 
     async function refreshArenaData(showNotice = false) {
@@ -22744,21 +23296,24 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return pool[(stage * 13 + 7) % pool.length];
     }
 
-    function battleModelHTML(card, index, enemy, teamCount = null) {
+    function battleModelHTML(card, index, enemy, teamCount = null, row = "front", slotNumber = null) {
       if (!card) return "";
       const rarity = getRarity(card);
       const image = getCardImage(card);
       const count = Math.max(1, enemy ? 1 : Number(teamCount) || state.team.length);
       const center = (count - 1) / 2;
-      const tilt = enemy ? 3 : (index - center) * 5;
-      const lift = enemy ? 0 : Math.abs(index - center) * 5;
+      const tilt = enemy ? (index - center) * -3 : (index - center) * 3;
+      const lift = Math.abs(index - center) * 3;
+      const safeRow = String(row || "front") === "back" ? "back" : "front";
       const tag = enemy ? "div" : "button";
       const action = enemy ? "" : ` data-action="open-card" data-card-id="${escapeHTML(card.id)}"`;
       const side = enemy ? "enemy" : "player";
+      const slot = slotNumber === null || slotNumber === undefined ? index + 1 : slotNumber;
       return `
-        <${tag} class="battle-model-card battle-unit" data-battle-card-id="${escapeHTML(card.id)}" data-battle-side="${side}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`})}"${action} aria-label="${escapeHTML(card.name)}">
+        <${tag} class="battle-model-card battle-unit battle-position-${safeRow}" data-battle-card-id="${escapeHTML(card.id)}" data-battle-side="${side}" data-battle-row="${safeRow}" data-battle-slot="${escapeHTML(slot)}" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${lift}px`})}"${action} aria-label="${escapeHTML(card.name)}">
           ${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
           ${enemy ? "" : awakenBadgeHTML(card)}
+          <b class="battle-row-badge">${safeRow === "front" ? "หน้า" : "หลัง"}</b>
           <div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div>
           <div class="battle-unit-hp"><i></i></div>
           <span>ID ${escapeHTML(card.id)} • ${escapeHTML(card.name)}</span>
@@ -22769,10 +23324,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     function renderBattleModels(stats) {
       const teamCards = getTowerTeamIds().map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
       const enemyCard = stats.enemyCard || getBattleEnemyCard(stats.stage);
+      const frontCount = normalizeFormationFront(state.battle && state.battle.formationFront, Math.max(2, teamCards.length || 5));
       document.getElementById("battlePlayerModels").innerHTML = teamCards.length
-        ? teamCards.map((card, index) => battleModelHTML(card, index, false, teamCards.length)).join("")
+        ? teamCards.map((card, index) => battleModelHTML(card, index, false, teamCards.length, index < frontCount ? "front" : "back", index + 1)).join("")
         : `<div class="empty-state" style="min-height:130px;padding:14px">ยังไม่มีการ์ดในทีมไต่หอ</div>`;
-      document.getElementById("battleEnemyModels").innerHTML = battleModelHTML(enemyCard, 0, true);
+      document.getElementById("battleEnemyModels").innerHTML = battleModelHTML(enemyCard, 0, true, 1, "front", 1);
     }
 
     function renderBanner() {
@@ -24072,7 +24628,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         playerModels.innerHTML = state.arena.team.some(Boolean)
           ? state.arena.team.map((id, index) => {
               const card = CARD_BY_ID.get(String(id));
-              return card ? battleModelHTML(card, index, false, state.arena.team.length) : "";
+              const frontCount = normalizeFormationFront(state.arena && state.arena.formationFront, Math.max(2, state.arena.team.length || 5));
+              return card ? battleModelHTML(card, index, false, state.arena.team.length, index < frontCount ? "front" : "back", index + 1) : "";
             }).join("")
           : `<div class="arena-secret-model">+</div>`;
 
