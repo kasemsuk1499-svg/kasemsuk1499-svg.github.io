@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-no-hang-battle-v70">
-  <title>Anime Card Collection · No-Hang Battle Runtime v70</title>
+  <meta name="gacha-app-build" content="2026-07-07-fixed-animation-spacing-v71">
+  <title>Anime Card Collection · Fixed Animation Spacing Runtime v71</title>
   <style>
     :root {
       color-scheme: dark;
@@ -6238,7 +6238,77 @@
       #arenaView .battle-skill-target { display:none; }
     }
 
-  </style>
+  
+
+    /* v71 · Fixed centered formation spacing + normal animation playback
+       แก้เฉพาะตำแหน่งสนามและคืนการเล่นอนิเมชันปกติ ไม่ตัดจำนวนเทิร์นอัตโนมัติ */
+    #battleView .battle-sides,
+    #arenaView .battle-sides {
+      gap: clamp(32px, 5.8vh, 72px) !important;
+      padding-top: clamp(8px, 1.8vh, 22px) !important;
+      padding-bottom: clamp(8px, 1.8vh, 22px) !important;
+    }
+
+    #battleView .battle-model-stack,
+    #arenaView .battle-model-stack {
+      min-height: clamp(210px, 30vh, 340px) !important;
+      --formation-spacing: clamp(108px, 12.2vw, 178px) !important;
+      overflow: visible !important;
+    }
+
+    #battleView .fighter.enemy .battle-model-stack,
+    #arenaView .fighter.enemy .battle-model-stack {
+      transform: translateY(clamp(-40px, -4vh, -18px));
+    }
+
+    #battleView .fighter.player .battle-model-stack,
+    #arenaView .fighter.player .battle-model-stack {
+      transform: translateY(clamp(18px, 4vh, 40px));
+    }
+
+    #battleView .fighter.enemy .battle-position-front,
+    #arenaView .fighter.enemy .battle-position-front { --row-y: 28px !important; --row-scale: 1.06 !important; z-index: 8 !important; }
+    #battleView .fighter.enemy .battle-position-back,
+    #arenaView .fighter.enemy .battle-position-back { --row-y: -74px !important; --row-scale: .96 !important; z-index: 5 !important; }
+    #battleView .fighter.player .battle-position-front,
+    #arenaView .fighter.player .battle-position-front { --row-y: -28px !important; --row-scale: 1.06 !important; z-index: 8 !important; }
+    #battleView .fighter.player .battle-position-back,
+    #arenaView .fighter.player .battle-position-back { --row-y: 74px !important; --row-scale: .96 !important; z-index: 5 !important; }
+
+    #battleView .battle-model-card,
+    #arenaView .battle-model-card {
+      width: clamp(90px, 8.8vw, 124px) !important;
+    }
+
+    #battleView .battle-turn-order:empty,
+    #arenaView .battle-turn-order:empty {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      #battleView .battle-sides,
+      #arenaView .battle-sides { gap: clamp(24px, 4.5vh, 46px) !important; }
+      #battleView .battle-model-stack,
+      #arenaView .battle-model-stack {
+        min-height: 205px !important;
+        --formation-spacing: clamp(76px, 18vw, 116px) !important;
+      }
+      #battleView .fighter.enemy .battle-model-stack,
+      #arenaView .fighter.enemy .battle-model-stack { transform: translateY(-20px); }
+      #battleView .fighter.player .battle-model-stack,
+      #arenaView .fighter.player .battle-model-stack { transform: translateY(20px); }
+      #battleView .fighter.enemy .battle-position-front,
+      #arenaView .fighter.enemy .battle-position-front { --row-y: 22px !important; }
+      #battleView .fighter.enemy .battle-position-back,
+      #arenaView .fighter.enemy .battle-position-back { --row-y: -58px !important; }
+      #battleView .fighter.player .battle-position-front,
+      #arenaView .fighter.player .battle-position-front { --row-y: -22px !important; }
+      #battleView .fighter.player .battle-position-back,
+      #arenaView .fighter.player .battle-position-back { --row-y: 58px !important; }
+      #battleView .battle-model-card,
+      #arenaView .battle-model-card { width: clamp(72px, 18vw, 98px) !important; }
+    }
+</style>
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
@@ -20271,21 +20341,19 @@
 
 async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
       const safeTurns = abilityArray(combat && combat.turns);
-      const totalTurns = safeTurns.length;
       const playerLabel = labels.player || "ทีมของคุณ";
       const enemyLabel = labels.enemy || "ศัตรู";
       const starterLabel = combat && combat.playerFirst ? playerLabel : enemyLabel;
-      const finishVisuals = () => {
-        try { finishActiveSkillCutscene(); } catch (error) {}
-        try {
-          document.querySelectorAll(".battle-moving-clone,.battle-attack-path").forEach(node => node.remove());
-          stage && stage.classList.remove("player-strike", "enemy-strike", "battle-win", "battle-lose");
-        } catch (error) {}
-      };
       const setResultText = text => {
         if (!result) return;
         result.textContent = text;
         beautifyBattleResult(result);
+      };
+      const clearMovingVisuals = () => {
+        try {
+          document.querySelectorAll(".battle-moving-clone,.battle-attack-path").forEach(node => node.remove());
+          stage && stage.classList.remove("player-strike", "enemy-strike");
+        } catch (error) {}
       };
       const safeSync = states => {
         try { if (stage && states) syncBattleBoard(stage, states); } catch (error) { console.warn("Battle board sync skipped:", error); }
@@ -20294,24 +20362,20 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         try { updateTurnBattleDisplay(display, combat, turn || null); } catch (error) { console.warn("Battle display update skipped:", error); }
       };
 
-      finishVisuals();
+      clearMovingVisuals();
+      finishActiveSkillCutscene?.();
       safeUpdateDisplay(null);
       safeSync({ player: combat && combat.playerInitialMembers || [], enemy: combat && combat.enemyInitialMembers || [] });
       const cinematicHud = ensureBattleCinematicHud(stage);
       if (cinematicHud && cinematicHud.feed) cinematicHud.feed.innerHTML = "";
       renderBattleTurnOrder(stage, combat, 0, labels);
-      setResultText(`${starterLabel} ได้เริ่มโจมตีก่อน • โหมดปลอดค้างจะแสดงแอ็กชันสำคัญ แล้วสรุปผลทันที`);
-      await wait(30);
+      setResultText(`${starterLabel} ได้เริ่มโจมตีก่อน • อนิเมชันต่อสู้เล่นครบตามปกติ`);
+      await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, (Number(phaseDuration) || 180) / Math.max(1, battlePlaybackSpeed))));
 
-      const startMs = Date.now();
-      const hardLimitMs = battleSkipAnimations ? 120 : 5200;
-      const maxDetailedTurns = battleSkipAnimations ? 0 : Math.min(totalTurns, 12);
-      let renderedTurns = 0;
-      let skipped = false;
-
-      for (let turnIndex = 0; turnIndex < totalTurns; turnIndex += 1) {
-        if (battleSkipAnimations || turnIndex >= maxDetailedTurns || Date.now() - startMs > hardLimitMs) {
-          skipped = turnIndex < totalTurns;
+      let skippedByUser = false;
+      for (let turnIndex = 0; turnIndex < safeTurns.length; turnIndex += 1) {
+        if (battleSkipAnimations) {
+          skippedByUser = true;
           break;
         }
         const turn = safeTurns[turnIndex];
@@ -20327,66 +20391,74 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           const defenderLabel = targetNames.length > 1
             ? `${targetNames.length} เป้าหมาย: ${targetNames.join(", ")} (${defenderSideLabel})`
             : targetNames.length ? `${targetNames[0]} (${defenderSideLabel})` : defenderSideLabel;
-          const skillNames = abilityArray(turn.triggeredSkills).filter(Boolean);
-          const transferText = abilityArray(turn.transferEvents).length ? ` • 🧬 ${abilityArray(turn.transferEvents).slice(0, 2).map(event => `${String(event.transferType || "copy") === "steal" ? "ขโมย" : "คัดลอก"} ${event.abilityName || event.sourceAbilityName || "สกิล"}`).join(" / ")}` : "";
-          const statusText = abilityArray(turn.statusEvents).length ? ` • 🧩 ${abilityArray(turn.statusEvents).slice(0, 3).map(event => `${event.targetName || "เป้าหมาย"}=${event.statusLabel || event.statusType || event.status || "STATUS"}`).join(" / ")}` : "";
-          const activeText = skillNames.length ? ` • ⚡ ${skillNames.join(" + ")}` : "";
+          const targetHitText = Number(turn.targetCount || 1) > 1 ? `${formatNumber(turn.hitsPerTarget || 0)} ฮิต × ${formatNumber(turn.targetCount)} เป้าหมาย` : `${formatNumber(turn.hits || 0)} ฮิต`;
+          const blockText = turn.blockedHits ? ` • โล่บล็อก ${turn.blockedHits} ฮิต` : "";
+          const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
+          const reviveText = abilityArray(turn.reviveEvents).length ? ` • ✨ คืนชีพ ${turn.reviveEvents.map(item=>item.targetName).join(", ")}` : "";
+          const speedText = abilityArray(turn.speedEvents).length ? ` • SPD ${turn.speedEvents.map(item=>`${item.targetName} ${item.change>=0?"+":""}${item.change}`).join(", ")}` : "";
+          const captureText = abilityArray(turn.captureEvents).length ? ` • 👻 ${turn.captureEvents.map(item=>item.status==="success"?`ชิงร่าง ${item.targetName}`:`ชิงร่าง ${item.targetName} ล้มเหลว`).join(", ")}` : "";
+          const captureReleaseText = abilityArray(turn.captureReleaseEvents).length ? ` • ↩ คืนศพ ${turn.captureReleaseEvents.map(item=>item.targetName).join(", ")}` : "";
+          const lifeText = turn.hitLifeConsumed ? ` • ตัดชีวิต ${turn.hitLifeConsumed} HIT${turn.hitLifeExpired ? " และหมดสภาพ" : ""}` : "";
+          const transferText = abilityArray(turn.transferEvents).length ? ` • 🧬 ${abilityArray(turn.transferEvents).slice(0, 4).map(event => {
+            const kind = String(event.transferType || event.type || "copy") === "steal" ? "ขโมย" : "คัดลอก";
+            const skill = event.abilityName || event.sourceAbilityName || event.copiedAbilityName || "สกิล";
+            const from = event.sourceName || event.fromName || event.targetName || "ต้นทาง";
+            const to = event.recipientName || event.toName || event.ownerName || turn.actorName || "ผู้รับ";
+            const status = String(event.status || "success");
+            if (status === "resisted") return `${kind} ${skill} จาก ${from} ถูกต้าน`;
+            if (status === "failed") return `${kind} ${skill} จาก ${from} ล้มเหลว`;
+            return `${to} ${kind} ${skill} จาก ${from}`;
+          }).join(" / ")}` : "";
+          const statusText = abilityArray(turn.statusEvents).length ? ` • 🧩 สถานะ: ${abilityArray(turn.statusEvents).slice(0, 4).map(event => `${event.targetName || "เป้าหมาย"}=${event.statusLabel || event.statusType || event.status || "STATUS"}${event.instantDeath ? "(ตาย)" : event.chainedFrom ? `(เชนจาก ${event.chainedFrom})` : ""}`).join(" / ")}` : "";
+          const activeText = turn.triggerActivated
+            ? ` • ⚡ ${abilityArray(turn.triggeredSkills).join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}`
+            : "";
+          const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
           if (turn.command === "statusSkip") {
-            setResultText(`รอบ ${turn.round} • ${attackerLabel} ถูกสถานะหยุดการกระทำ${statusText} • SPD ${formatNumber(turn.actorSpeed || 0)}`);
+            setResultText(`รอบ ${turn.round} • ${attackerLabel} ถูก ${abilityArray(turn.statusEvents)[0]?.statusLabel || "สถานะผิดปกติ"} จึงข้ามเทิร์น${statusText}${transferText} • SPD ${formatNumber(turn.actorSpeed || 0)}`);
           } else if (turn.command === "guard") {
-            setResultText(`รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}`);
+            setResultText(`รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)}${transferText} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`);
           } else {
-            const targetHitText = Number(turn.targetCount || 1) > 1 ? `${formatNumber(turn.hitsPerTarget || 0)} ฮิต × ${formatNumber(turn.targetCount)} เป้าหมาย` : `${formatNumber(turn.hits || 0)} ฮิต`;
-            setResultText(`รอบ ${turn.round} • ${attackerLabel} โจมตี ${defenderLabel} • ${targetHitText}${activeText}${transferText}${statusText} • ดาเมจ ${formatNumber(turn.damage || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}`);
+            setResultText(`รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${transferText}${reviveText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage || 0)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`);
           }
 
           if (turn.triggerActivated) {
-            abilityArray(turn.triggeredDetails).slice(0, 2).forEach(detail => showTriggeredAbilityEvent(stage, detail, turn, { attacker: attackerLabel, defender: defenderLabel }));
+            for (const detail of abilityArray(turn.triggeredDetails)) {
+              showTriggeredAbilityEvent(stage, detail, turn, { attacker: attackerLabel, defender: defenderLabel });
+            }
           }
 
-          const safeAnimationMs = Math.max(55, Math.min(260, Math.floor((Number(phaseDuration) || 115) / Math.max(1, battlePlaybackSpeed))));
+          const baseSpeed = turn.round > 6 ? Math.max(55, Math.floor((Number(phaseDuration) || 180) * .55)) : (Number(phaseDuration) || 180);
+          const speed = Math.max(35, Math.floor(baseSpeed / Math.max(1, battlePlaybackSpeed)));
           await Promise.race([
-            animateIndividualBattleAction(stage, turn, safeAnimationMs),
-            wait(Math.max(220, safeAnimationMs + 160))
+            animateIndividualBattleAction(stage, turn, speed * 2.25),
+            wait(Math.max(450, Math.floor(speed * 2.25) + 260))
           ]).catch(error => console.warn("Battle animation skipped:", error));
           animateBattleEvents(stage, turn);
           safeSync(turn.memberStates);
           safeUpdateDisplay(turn);
-          renderedTurns += 1;
-          await wait(12);
+          if (turn.suddenBreak) { setResultText(`${result && result.dataset && result.dataset.rawBattleText || result && result.textContent || ""} • Sudden Break!`); }
+          await wait(Math.max(20, Math.floor(speed * .25)));
         } catch (turnError) {
           console.warn("Battle turn skipped:", turnError);
-          skipped = true;
-          break;
+          clearMovingVisuals();
+          // ข้ามเฉพาะเทิร์นที่ผิดพลาด แล้วเล่นเทิร์นถัดไปต่อ ไม่ตัดจบไฟต์ทั้งชุด
         }
       }
 
-      const finalTurn = safeTurns[totalTurns - 1] || null;
-      const finalStates = finalTurn && finalTurn.memberStates
-        ? finalTurn.memberStates
-        : { player: combat && combat.playerMembers || [], enemy: combat && combat.enemyMembers || [] };
-      safeSync(finalStates);
-      safeUpdateDisplay(finalTurn);
-      renderBattleTurnOrder(stage, combat, totalTurns, labels);
-
-      if (skipped) {
-        safeTurns.slice(renderedTurns).forEach(turn => {
-          abilityArray(turn && turn.transferEvents).slice(0, 4).forEach(event => showTransferBattleEvent(stage, event, turn));
-        });
+      if (skippedByUser) {
+        const finalTurn = safeTurns[safeTurns.length - 1] || null;
+        const finalStates = finalTurn && finalTurn.memberStates
+          ? finalTurn.memberStates
+          : { player: combat && combat.playerMembers || [], enemy: combat && combat.enemyMembers || [] };
+        safeSync(finalStates);
+        safeUpdateDisplay(finalTurn);
+        abilityArray(safeTurns).forEach(turn => abilityArray(turn && turn.transferEvents).slice(0, 4).forEach(event => showTransferBattleEvent(stage, event, turn)));
+        setResultText(`ข้ามแอนิเมชันตามคำสั่งผู้เล่น • HP เหลือ ${formatNumber(combat && combat.playerRemainingHp || 0)} ต่อ ${formatNumber(combat && combat.enemyRemainingHp || 0)}`);
       }
-
-      const playerHp = formatNumber(combat && combat.playerRemainingHp || 0);
-      const enemyHp = formatNumber(combat && combat.enemyRemainingHp || 0);
-      const skipText = skipped ? ` • ข้ามแอนิเมชัน ${formatNumber(Math.max(0, totalTurns - renderedTurns))} เทิร์นเพื่อกันค้าง` : "";
-      setResultText(`จบการต่อสู้ • เล่นแอ็กชัน ${formatNumber(renderedTurns)}/${formatNumber(totalTurns)} เทิร์น • HP เหลือ ${playerHp} ต่อ ${enemyHp}${skipText}`);
-
-      const hud = ensureBattleCinematicHud(stage);
-      if (hud && hud.main) {
-        hud.main.innerHTML = `<b>จบการต่อสู้</b><small>ผลลัพธ์คำนวณครบแล้ว${skipped ? " • ระบบข้ามแอนิเมชันที่เหลือเพื่อไม่ให้ค้าง" : ""}</small>`;
-      }
-      if (hud && hud.targets) hud.targets.innerHTML = "";
+      renderBattleTurnOrder(stage, combat, safeTurns.length, labels);
+      clearMovingVisuals();
       battleSkipAnimations = false;
-      finishVisuals();
     }
 
     async function playStrikeSequence(stage, className, hits, phaseDuration) {
@@ -21948,7 +22020,6 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         mode: "arena",
-        maxRounds: 24,
         playerActiveTriggers: stats.playerActiveTriggers,
         enemyActiveTriggers: stats.enemyActiveTriggers,
         playerAbilityRoster: stats.playerAbilityRoster,
@@ -22324,7 +22395,6 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         mode: "tower",
-        maxRounds: 24,
         playerActiveTriggers: stats.activeTriggers,
         enemyActiveTriggers: stats.enemyActiveTriggers,
         playerAbilityRoster: stats.playerAbilityRoster,
