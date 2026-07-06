@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-seven-battle-v67">
-  <title>Anime Card Collection · Seven Battle Runtime v67</title>
+  <meta name="gacha-app-build" content="2026-07-07-stable-center-transfer-v72">
+  <title>Anime Card Collection · Stable Center Transfer Runtime v72</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5842,6 +5842,93 @@
       #arenaView .fighter-power { display: none; }
       #battleView .battle-model-card,
       #arenaView .battle-model-card { width: clamp(62px, 18vw, 102px); }
+    }
+
+  
+
+    /* v72 · Minimal stable center formation + clear Copy/Steal display
+       ฐานจาก v67 ที่เล่นปกติ: ไม่แตะ loop/จำนวนเทิร์น/ระบบแอนิเมชันหลัก */
+    #battleView .battle-sides,
+    #arenaView .battle-sides {
+      gap: clamp(18px, 4.2vh, 62px) !important;
+    }
+
+    #battleView .battle-model-stack.v72-rowed,
+    #arenaView .battle-model-stack.v72-rowed {
+      display: grid !important;
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      justify-items: center !important;
+      align-items: center !important;
+      align-content: center !important;
+      row-gap: clamp(14px, 2.9vh, 42px);
+      padding-inline: clamp(18px, 5vw, 96px) !important;
+      overflow: visible;
+    }
+
+    .battle-row-line {
+      min-width: 0;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: clamp(12px, 1.85vw, 28px);
+      pointer-events: none;
+    }
+    .battle-row-line .battle-unit { pointer-events: auto; }
+    .battle-row-line:empty { display: none; }
+
+    #battleView .battle-model-stack.v72-rowed .battle-model-card,
+    #arenaView .battle-model-stack.v72-rowed .battle-model-card {
+      margin-left: 0 !important;
+      flex: 0 0 auto;
+      --row-offset: 0px;
+    }
+
+    #battleView .battle-model-stack.v72-rowed .battle-position-front,
+    #arenaView .battle-model-stack.v72-rowed .battle-position-front {
+      --row-scale: 1.03;
+      z-index: 6;
+    }
+    #battleView .battle-model-stack.v72-rowed .battle-position-back,
+    #arenaView .battle-model-stack.v72-rowed .battle-position-back {
+      --row-scale: .94;
+      z-index: 4;
+    }
+
+    #battleView .fighter.enemy .battle-row-line.back,
+    #arenaView .fighter.enemy .battle-row-line.back { align-self: end; }
+    #battleView .fighter.enemy .battle-row-line.front,
+    #arenaView .fighter.enemy .battle-row-line.front { align-self: start; }
+    #battleView .fighter.player .battle-row-line.front,
+    #arenaView .fighter.player .battle-row-line.front { align-self: end; }
+    #battleView .fighter.player .battle-row-line.back,
+    #arenaView .fighter.player .battle-row-line.back { align-self: start; }
+
+    .battle-transfer-toast {
+      width: min(680px, 92%) !important;
+      grid-template-columns: 82px minmax(0, 1fr) 82px !important;
+      border-width: 2px !important;
+      background:
+        linear-gradient(135deg, rgba(3,7,18,.98), rgba(15,23,42,.94)),
+        radial-gradient(circle at 18% 22%, rgba(92,232,255,.32), transparent 38%) !important;
+    }
+    .battle-transfer-toast.steal {
+      background:
+        linear-gradient(135deg, rgba(17,7,18,.98), rgba(42,15,23,.94)),
+        radial-gradient(circle at 18% 22%, rgba(251,113,133,.34), transparent 38%) !important;
+    }
+    .battle-transfer-toast .battle-skill-copy small { font-size: .78rem; color: #fde68a; }
+    .battle-transfer-toast .battle-skill-copy b { font-size: clamp(1.15rem, 2.8vw, 1.85rem); white-space: normal; }
+    .battle-transfer-toast .battle-skill-copy span { font-size: .86rem; line-height: 1.35; white-space: normal; }
+    .battle-event-card.transfer-focus { width: min(430px, 100%); border-width: 2px; }
+    .battle-event-card.transfer-focus .battle-event-copy b { font-size: .82rem; white-space: normal; }
+    .battle-event-card.transfer-focus .battle-event-copy span { font-size: .70rem; white-space: normal; }
+
+    @media(max-width:900px){
+      #battleView .battle-model-stack.v72-rowed,
+      #arenaView .battle-model-stack.v72-rowed { row-gap: 12px; padding-inline: 12px !important; }
+      .battle-row-line { gap: 9px; }
+      .battle-transfer-toast { grid-template-columns: 64px minmax(0,1fr) 54px !important; }
     }
 
   </style>
@@ -19620,6 +19707,7 @@
       hud.feed.prepend(card);
       while (hud.feed.children.length > 5) hud.feed.lastElementChild.remove();
       window.setTimeout(() => { if (card.isConnected) card.remove(); }, Number(options.duration || 4200));
+      return card;
     }
 
     function showBattleSkillToast(stage, options = {}) {
@@ -19676,19 +19764,36 @@
       pushBattleEventCard(stage, { tone: "active", cardId: sourceId, cardName: sourceName, title: `ACTIVE: ${detail.name || "Skill"}`, body: `${sourceName} → ${targetName}` });
     }
 
+    function transferRecipientNames(event = {}, fallbackTurn = {}) {
+      const ids = abilityArray(event.recipientCardIds).length ? abilityArray(event.recipientCardIds) : [event.recipientCardId || fallbackTurn.actorCardId].filter(Boolean);
+      const names = ids.map(id => getBattleInfoCard(id, "ผู้รับ").name).filter(Boolean);
+      return names.length ? names.join(", ") : (event.recipientName || fallbackTurn.actorName || "ผู้รับ");
+    }
+
     function showTransferBattleEvent(stage, event = {}, turn = {}) {
       const type = String(event.transferType || "copy");
       const tone = type === "steal" ? "steal" : "copy";
+      const actionText = tone === "steal" ? "ขโมย" : "คัดลอก";
       const donor = getBattleInfoCard(event.donorCardId, event.donorName || "ต้นทาง");
-      const recipient = getBattleInfoCard(event.recipientCardId, event.recipientName || (turn && turn.actorName) || "ผู้รับ");
-      const abilityName = String(event.abilityName || "สกิล");
-      let title = tone === "steal" ? "ขโมยสกิลสำเร็จ" : "คัดลอกสกิลสำเร็จ";
-      let body = `${recipient.name} ได้ “${abilityName}” จาก ${donor.name}`;
-      if (event.status === "failed") { title = tone === "steal" ? "ขโมยสกิลล้มเหลว" : "คัดลอกสกิลล้มเหลว"; body = `${donor.name} • ${abilityName}`; }
-      if (event.status === "resisted") { title = "ถูกต้านสกิล"; body = `${donor.name} ต้าน${tone === "steal" ? "การขโมย" : "การคัดลอก"}`; }
-      if (event.status === "expired") { title = "สกิลที่ได้มาหมดเวลา"; body = `${recipient.name} สูญเสีย “${abilityName}”`; }
-      showBattleSkillToast(stage, { tone, sourceCardId: donor.id, sourceName: donor.name, targetCardId: recipient.id, targetName: recipient.name, kicker: tone === "steal" ? "STEAL SKILL" : "COPY SKILL", title, body, duration: 1450 });
-      pushBattleEventCard(stage, { tone, cardId: donor.id, cardName: donor.name, title, body, duration: 5200 });
+      const source = getBattleInfoCard(event.sourceCardId || turn.actorCardId, event.sourceName || turn.actorName || "ผู้ใช้สกิล");
+      const recipientId = event.recipientCardId || abilityArray(event.recipientCardIds)[0] || turn.actorCardId;
+      const recipient = getBattleInfoCard(recipientId, event.recipientName || turn.actorName || "ผู้รับ");
+      const recipientNames = transferRecipientNames(event, turn);
+      const abilityName = String(event.abilityName || event.ability || "สกิลที่เลือก");
+      let title = `${actionText}สกิล: ${abilityName}`;
+      let body = `${source.name} ${actionText} “${abilityName}” จาก ${donor.name} → ให้ ${recipientNames}`;
+      if (event.status === "failed") { title = `${actionText}สกิลล้มเหลว`; body = `${source.name} พยายาม${actionText} “${abilityName}” จาก ${donor.name} แต่ไม่สำเร็จ`; }
+      if (event.status === "resisted") { title = "ถูกต้านสกิล"; body = `${donor.name} ต้าน${tone === "steal" ? "การขโมย" : "การคัดลอก"}จาก ${source.name}`; }
+      if (event.status === "expired") { title = "สกิลที่ได้มาหมดเวลา"; body = `${recipientNames} สูญเสีย “${abilityName}”`; }
+      showBattleSkillToast(stage, { tone, sourceCardId: donor.id, sourceName: donor.name, targetCardId: recipient.id, targetName: recipient.name, kicker: tone === "steal" ? "STEAL SKILL" : "COPY SKILL", title, body, duration: 2300 });
+      const toast = stage && stage.querySelector(".battle-skill-toast");
+      if (toast) toast.classList.add("battle-transfer-toast", tone);
+      const eventNode = pushBattleEventCard(stage, { tone, cardId: donor.id, cardName: donor.name, title, body, duration: 7600 });
+      if (eventNode) eventNode.classList.add("transfer-focus");
+      const recipientNode = battleUnitNode(stage, "player", recipient.id) || battleUnitNode(stage, "enemy", recipient.id);
+      const donorNode = battleUnitNode(stage, "player", donor.id) || battleUnitNode(stage, "enemy", donor.id);
+      if (recipientNode && event.status !== "failed" && event.status !== "resisted") floatBattleText(recipientNode, `${tone === "steal" ? "STEAL" : "COPY"}: ${abilityName}`, "status");
+      if (donorNode && tone === "steal" && event.status !== "failed" && event.status !== "resisted") floatBattleText(donorNode, "SKILL LOST", "miss");
     }
 
     function showStatusBattleEvent(stage, event = {}, turn = {}) {
@@ -19832,6 +19937,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const cinematicHud = ensureBattleCinematicHud(stage);
       if (cinematicHud && cinematicHud.feed) cinematicHud.feed.innerHTML = "";
       renderBattleTurnOrder(stage, combat, 0, labels);
+      abilityArray(combat.initialTransferEvents).slice(0, 8).forEach(event => showTransferBattleEvent(stage, event, { actorCardId: event.sourceCardId, actorName: event.sourceName }));
       result.textContent = `${starterLabel} ได้เริ่มโจมตีก่อน • ตัวละครที่หมดสภาพจะหยุดโจมตีและไม่ตกเป็นเป้าหมาย`;
       beautifyBattleResult(result);
       await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
@@ -21340,15 +21446,20 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       };
     }
 
-        function arenaSnapshotModelHTML(item, index = 0, enemy = true) {
+        function arenaSnapshotModelHTML(item, index = 0, enemy = true, rowIndex = index, rowTotal = 5, slotNumber = null, forcedRow = "") {
       const card = CARD_BY_ID.get(cardIdString(item && item.id));
       const rarity = card ? getRarity(card) : (RARITIES[item && item.rarity] || RARITIES.N);
       const image = card ? getCardImage(card) : "";
       const name = item && item.name || (card && card.name) || "Unknown";
-      const tilt = enemy ? (index - 2) * -3 : (index - 2) * 3;
+      const count = Math.max(1, Number(rowTotal) || 1);
+      const center = (count - 1) / 2;
+      const localIndex = Math.max(0, Number(rowIndex) || 0);
+      const tilt = enemy ? (localIndex - center) * -3 : (localIndex - center) * 3;
       const side = enemy ? "enemy" : "player";
-      const row = String(item && item.row || (index < normalizeFormationFront(enemy ? (currentArenaOpponent && currentArenaOpponent.formationFront) : state.arena.formationFront, 5) ? "front" : "back")) === "back" ? "back" : "front";
-      return `<div class="battle-model-card battle-unit battle-position-${row}" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" data-battle-row="${row}" data-battle-slot="${escapeHTML(item && item.slot || index + 1)}" title="โจมตีธรรมดา ${Math.max(1,Math.min(5,Math.floor(Number(item && (item.normalAttackTargetCount ?? item.attackTargetCount) || 1))))} เป้าหมาย" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(index - 2) * 3}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<b class="battle-row-badge">${row === "front" ? "หน้า" : "หลัง"}</b><div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
+      const fallbackRow = index < normalizeFormationFront(enemy ? (currentArenaOpponent && currentArenaOpponent.formationFront) : state.arena.formationFront, 5) ? "front" : "back";
+      const row = String(forcedRow || item && item.row || fallbackRow) === "back" ? "back" : "front";
+      const slot = slotNumber === null || slotNumber === undefined ? (item && item.slot || index + 1) : slotNumber;
+      return `<div class="battle-model-card battle-unit battle-position-${row}" data-battle-card-id="${escapeHTML(item && item.id || "")}" data-battle-side="${side}" data-battle-row="${row}" data-battle-slot="${escapeHTML(slot)}" title="โจมตีธรรมดา ${Math.max(1,Math.min(5,Math.floor(Number(item && (item.normalAttackTargetCount ?? item.attackTargetCount) || 1))))} เป้าหมาย" style="${rarityStyleVars(rarity, {"--model-tilt": `${tilt}deg`, "--model-lift": `${Math.abs(localIndex - center) * 3}px`})}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<b class="battle-row-badge">${row === "front" ? "หน้า" : "หลัง"}</b><div class="battle-unit-state"><b class="battle-unit-status"></b><small class="battle-unit-special"></small></div><div class="battle-unit-hp"><i></i></div><span>ID ${escapeHTML(item && item.id || "-")} • ${escapeHTML(name)}</span></div>`;
     }
 
     async function refreshArenaData(showNotice = false) {
@@ -21459,6 +21570,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       // เก็บค่าพลังรวมไว้ให้แสดงด้านบนตลอดระหว่างแอนิเมชันต่อสู้ ARENA
       combat.playerCombatPower = stats.totalCombatPower;
       combat.enemyCombatPower = stats.enemyCombatPower;
+      combat.initialTransferEvents = abilityArray(stats.abilitySummary && stats.abilitySummary.transferResults)
+        .concat(abilityArray(stats.enemyAbilitySummary && stats.enemyAbilitySummary.transferResults));
       const won = combat.winner === "player";
       result.className = "battle-result";
 
@@ -21831,6 +21944,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         playerVariance: () => .90 + Math.random() * .20,
         enemyVariance: () => .90 + Math.random() * .20
       });
+      combat.initialTransferEvents = abilityArray(stats.abilitySummary && stats.abilitySummary.transferResults)
+        .concat(abilityArray(stats.enemyAbilitySummary && stats.enemyAbilitySummary.transferResults));
       const won = combat.winner === "player";
       const result = document.getElementById("battleResult");
 
@@ -23300,7 +23415,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!card) return "";
       const rarity = getRarity(card);
       const image = getCardImage(card);
-      const count = Math.max(1, enemy ? 1 : Number(teamCount) || state.team.length);
+      const count = Math.max(1, Number(teamCount) || 1);
       const center = (count - 1) / 2;
       const tilt = enemy ? (index - center) * -3 : (index - center) * 3;
       const lift = Math.abs(index - center) * 3;
@@ -23321,14 +23436,32 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       `;
     }
 
+    function battleRowedModelRowsHTML(records = [], enemy = false, renderItem = null) {
+      const safeRecords = abilityArray(records).filter(item => item && item.row && item.model);
+      const front = safeRecords.filter(item => item.row === "front");
+      const back = safeRecords.filter(item => item.row !== "front");
+      const rowOrder = enemy ? [["back", back], ["front", front]] : [["front", front], ["back", back]];
+      return rowOrder.map(([row, items]) => {
+        const html = items.map((item, rowIndex) => renderItem ? renderItem(item, rowIndex, items.length, row) : item.model).join("");
+        return `<div class="battle-row-line ${row}">${html}</div>`;
+      }).join("");
+    }
+
     function renderBattleModels(stats) {
-      const teamCards = getTowerTeamIds().map(id => CARD_BY_ID.get(String(id))).filter(Boolean);
+      const teamIds = getTowerTeamIds();
+      const teamCards = teamIds.map((id, index) => ({ card: CARD_BY_ID.get(String(id)), slot: index + 1 })).filter(item => item.card);
       const enemyCard = stats.enemyCard || getBattleEnemyCard(stats.stage);
-      const frontCount = normalizeFormationFront(state.battle && state.battle.formationFront, Math.max(2, teamCards.length || 5));
-      document.getElementById("battlePlayerModels").innerHTML = teamCards.length
-        ? teamCards.map((card, index) => battleModelHTML(card, index, false, teamCards.length, index < frontCount ? "front" : "back", index + 1)).join("")
+      const frontCount = normalizeFormationFront(state.battle && state.battle.formationFront, CONFIG.towerTeamSlots || Math.max(2, teamCards.length || 5));
+      const playerStack = document.getElementById("battlePlayerModels");
+      const enemyStack = document.getElementById("battleEnemyModels");
+      if (playerStack) playerStack.classList.add("v72-rowed");
+      if (enemyStack) enemyStack.classList.add("v72-rowed");
+      if (playerStack) playerStack.innerHTML = teamCards.length
+        ? battleRowedModelRowsHTML(teamCards.map(item => ({ ...item, row: item.slot <= frontCount ? "front" : "back", model: true })), false, (item, rowIndex, rowTotal, row) => battleModelHTML(item.card, rowIndex, false, rowTotal, row, item.slot))
         : `<div class="empty-state" style="min-height:130px;padding:14px">ยังไม่มีการ์ดในทีมไต่หอ</div>`;
-      document.getElementById("battleEnemyModels").innerHTML = battleModelHTML(enemyCard, 0, true, 1, "front", 1);
+      if (enemyStack) enemyStack.innerHTML = enemyCard
+        ? battleRowedModelRowsHTML([{ card: enemyCard, slot: 1, row: "front", model: true }], true, (item, rowIndex, rowTotal, row) => battleModelHTML(item.card, rowIndex, true, rowTotal, row, item.slot))
+        : `<div class="arena-secret-model">?</div>`;
     }
 
     function renderBanner() {
@@ -24625,16 +24758,20 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!playerModels || !enemyModels) return;
 
       if (forceModels || !arenaAnimating || !playerModels.children.length || !enemyModels.children.length) {
-        playerModels.innerHTML = state.arena.team.some(Boolean)
-          ? state.arena.team.map((id, index) => {
-              const card = CARD_BY_ID.get(String(id));
-              const frontCount = normalizeFormationFront(state.arena && state.arena.formationFront, Math.max(2, state.arena.team.length || 5));
-              return card ? battleModelHTML(card, index, false, state.arena.team.length, index < frontCount ? "front" : "back", index + 1) : "";
-            }).join("")
+        playerModels.classList.add("v72-rowed");
+        enemyModels.classList.add("v72-rowed");
+        const playerFrontCount = normalizeFormationFront(state.arena && state.arena.formationFront, CONFIG.arenaTeamSlots || 5);
+        const playerRecords = state.arena.team.map((id, index) => ({ card: CARD_BY_ID.get(String(id)), slot: index + 1 })).filter(item => item.card);
+        playerModels.innerHTML = playerRecords.length
+          ? battleRowedModelRowsHTML(playerRecords.map(item => ({ ...item, row: item.slot <= playerFrontCount ? "front" : "back", model: true })), false, (item, rowIndex, rowTotal, row) => battleModelHTML(item.card, rowIndex, false, rowTotal, row, item.slot))
           : `<div class="arena-secret-model">+</div>`;
 
-        enemyModels.innerHTML = currentArenaOpponent && stats.enemyTeam.length
-          ? stats.enemyTeam.slice(0, CONFIG.arenaTeamSlots).map((item, index) => arenaSnapshotModelHTML(item, index, true)).join("")
+        const enemyFrontCount = normalizeFormationFront(currentArenaOpponent && currentArenaOpponent.formationFront, CONFIG.arenaTeamSlots || 5);
+        const enemyRecords = currentArenaOpponent && stats.enemyTeam.length
+          ? stats.enemyTeam.slice(0, CONFIG.arenaTeamSlots).map((item, index) => ({ item, slot: Math.max(1, Math.floor(Number(item && item.slot) || index + 1)), row: String(item && item.row || "") === "back" ? "back" : (Math.max(1, Math.floor(Number(item && item.slot) || index + 1)) <= enemyFrontCount ? "front" : "back"), model: true }))
+          : [];
+        enemyModels.innerHTML = enemyRecords.length
+          ? battleRowedModelRowsHTML(enemyRecords, true, (record, rowIndex, rowTotal, row) => arenaSnapshotModelHTML(record.item, rowIndex, true, rowIndex, rowTotal, record.slot, row))
           : `<div class="arena-secret-model">?</div><div class="arena-secret-model">?</div><div class="arena-secret-model">?</div>`;
       }
 
