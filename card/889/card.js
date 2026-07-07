@@ -43,7 +43,7 @@ ACC_REGISTER_CARD({
           targetSelection: "random",
           targetCount: 5,
           status: "stun",
-          successRate: 1,
+          successRate: 0.2,
           durationTurns: 2,
           condition: {
             afterOwnAttacks: 2,
