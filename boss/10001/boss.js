@@ -5,7 +5,7 @@ ACC_REGISTER_BOSS({
   description: "ตัวอย่างบอสแยกไฟล์จาก boss/10001/boss.js",
   rarity: "WORLD_BOSS",
   element: ["มิติ", "ความมืด"],
-  image: "boss.png",
+  image: "10001.png",
   power: 2400000,
   hp: 90000000,
   defense: 560000,
