@@ -6,13 +6,20 @@
   2) สร้างไฟล์: card/3001/card.js
   3) ใส่ 3001 ใน ACC_CARD_MANIFEST ด้านล่าง
 
+  สรุป: หลังจากอัปเดต index.html + card-loader.js ชุดนี้แล้ว
+  การเพิ่มการ์ดใหม่ในอนาคตให้แก้แค่ไฟล์นี้ และเพิ่มโฟลเดอร์ card/<id>/card.js
+  ไม่ต้องแก้ index.html อีก ยกเว้นเพิ่มระบบใหม่ที่โค้ดเกมยังไม่รองรับ
+
   หมายเหตุ: GitHub Pages/เว็บสแตติกไม่สามารถไล่อ่านรายชื่อโฟลเดอร์เองได้
   จึงต้องมี manifest นี้เพื่อบอกเกมว่าต้องโหลดโฟลเดอร์ไหนบ้าง
 */
-window.ACC_CARD_VERSION = "2026-07-07-split-card-data-v1";
+window.ACC_CARD_VERSION = "2026-07-07-split-card-data-v2";
 window.ACC_CARD_ROOT = "card";
 window.ACC_CARD_MANIFEST = [
-  // ตัวอย่าง:
+  888,
+
+  // เพิ่มการ์ดใหม่ตรงนี้ เช่น:
+  // 889,
   // 3001,
   // 3002,
   // หรือ { id: 3003, src: "card/3003/card.js" },

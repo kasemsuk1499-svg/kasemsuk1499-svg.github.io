@@ -2,12 +2,16 @@
   โหลดการ์ดเสริมจาก ACC_CARD_MANIFEST
   รูปแบบไฟล์การ์ดเสริมที่แนะนำ: card/<id>/card.js
   ในไฟล์นั้นให้เรียก ACC_REGISTER_CARD({ ...ข้อมูลการ์ด... });
+
+  อัปเดต v2:
+  - รองรับ ACC_CARD_CACHE_BUSTER จาก index.html
+  - ทำให้เพิ่ม/แก้การ์ดใน GitHub แล้วรีเฟรชหน้าเว็บได้ง่ายขึ้น
 */
 (function () {
   "use strict";
 
   var root = String(window.ACC_CARD_ROOT || "card").replace(/\/+$/, "");
-  var version = String(window.ACC_CARD_VERSION || "");
+  var version = String(window.ACC_CARD_CACHE_BUSTER || window.ACC_CARD_VERSION || "");
   var manifest = Array.isArray(window.ACC_CARD_MANIFEST) ? window.ACC_CARD_MANIFEST : [];
 
   window.ACC_EXTRA_CARD_DATA = Array.isArray(window.ACC_EXTRA_CARD_DATA) ? window.ACC_EXTRA_CARD_DATA : [];
