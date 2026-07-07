@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v78-status-runtime-fix">
-  <title>Anime Card Collection · Split Card Data Runtime v78 Status Runtime Fix</title>
+  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v79-status-activation-wire">
+  <title>Anime Card Collection · Split Card Data Runtime v79 Status Activation Fix</title>
   <style>
     :root {
       color-scheme: dark;
@@ -13428,6 +13428,17 @@
           adaptiveElement: fired.map(t=>t.adaptiveElement).filter(Boolean).slice(-1)[0] || null,
           multiElementAttacks: fired.flatMap(t=>abilityArray(t.multiElementAttacks).map(rule=>({...rule,sourceTriggerKey:t.key}))),
           criticalDamageRate: sum("criticalDamageRate"), defensePenetrationRate: Math.max(0, Math.min(1, sum("defensePenetrationRate"))),
+          statusApplyRules: fired.flatMap(t => abilityArray(t.statusApplyRules).map(rule => ({
+            ...rule,
+            sourceCardId: rule.sourceCardId || t.sourceCardId,
+            sourceAbilityName: rule.sourceAbilityName || t.name,
+            _runtimeEffectKey: rule._runtimeEffectKey || `${t.key}:status`
+          }))),
+          // สำรองสำหรับเอฟเฟกต์ขั้นสูงที่อาจถูกใช้ต่อใน engine รายตัวในอนาคต
+          statusResistanceEffects: fired.flatMap(t => abilityArray(t.statusResistanceEffects).map(effect => ({ ...effect }))),
+          nullifyRules: fired.flatMap(t => abilityArray(t.nullifyRules).map(rule => ({ ...rule }))),
+          abilityTransfers: fired.flatMap(t => abilityArray(t.abilityTransfers).map(record => ({ ...record }))),
+          domainActivations: fired.flatMap(t => abilityArray(t.domainActivations).map(rule => ({ ...rule }))),
           removeAllEnemyShield: fired.some(t=>t.removeAllEnemyShield)
         };
       }
