@@ -20,7 +20,7 @@ ACC_REGISTER_CARD({
   abilities: [
     {
       name: "แผนการจัดการทั่วไป",
-      description: "เมื่อการ์ดใบนี้ยืนบนสนาม จะทำการเพิ่มคอสถาวรฝ่ายตรงข้าม 2 และทุกการโจมตีครบ 3 ครั้ง จะมีโอกาสสตั้นเป้าหมาย 5 เป้าหมาย นาน 2 เทิร์น โอกาส 20%",
+      description: "เมื่อการ์ดใบนี้ยืนบนสนาม จะเพิ่มคอสถาวรฝ่ายตรงข้าม 2 และทุกการโจมตีครบ 3 ครั้ง จะโจมตี/เล็งศัตรู 5 เป้าหมาย แล้วมีโอกาสสตั้นแต่ละเป้าหมาย 20% นาน 2 เทิร์น",
       activeIn: ["team", "tower", "arena"],
       effects: [
         {
@@ -29,17 +29,26 @@ ACC_REGISTER_CARD({
           targetSide: "enemy"
         },
         {
-          type: "applyStatus",
-          targetSide: "enemy",
+          type: "nextAttackTargetCount",
+          value: 5,
+          targetSide: "self",
           condition: {
             afterOwnAttacks: 2,
             repeat: true
-          },
-          targetSelection: "all",
-          status: "stun",
-          successRate: 0.2,
+          }
+        },
+        {
+          type: "applyStatus",
+          targetSide: "enemy",
+          targetSelection: "random",
           targetCount: 5,
-          durationTurns: 2
+          status: "stun",
+          successRate: 1,
+          durationTurns: 2,
+          condition: {
+            afterOwnAttacks: 2,
+            repeat: true
+          }
         }
       ]
     },
