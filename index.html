@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v75-status-emoji">
-  <title>Anime Card Collection · Split Card Data Runtime v75 Status Emoji</title>
+  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v76-gacha-weight-balance">
+  <title>Anime Card Collection · Split Card Data Runtime v76 Gacha Weight Balance</title>
   <style>
     :root {
       color-scheme: dark;
@@ -7133,8 +7133,12 @@
       return `หน้า ${rule.front} / หลัง ${rule.back} • แนวหน้า DEF +${Math.round(rule.frontDefenseRate * 100)}% • แนวหลัง ATK +${Math.round(rule.backAttackRate * 100)}% • ศัตรูต้องโค่นแนวหน้าก่อนจึงโจมตีแนวหลังได้`;
     }
 
-    // เพิ่มโดยอลิซ: เรทแพ็คสุ่มในกระเป๋า แยกจากตู้กาชาและไม่สะสม pity
-    const ITEM_PACK_RATES = Object.freeze({ N: 49.5, R: 30, SR: 14, SSR: 5, UR: 1.2, LR: .37, SC: .01999, EX: .00001 });
+    // เพิ่มโดยอลิซ v76: เรทแพ็คสุ่มในกระเป๋าใช้ระบบ "น้ำหนัก" แล้ว normalize ใหม่ทุกครั้ง
+    // ตั้งให้ EX / SC หายากขึ้นมาก เพื่อไม่ให้การเปิดรวดเดียวจำนวนมากดรอปถี่เกินไป
+    const ITEM_PACK_RATES = Object.freeze({ N: 58, R: 29, SR: 10, SSR: 2.65, UR: .30, LR: .048, EX: .0015, SC: .0005 });
+    // เพดานเรทสุดท้ายหลังรวมโบนัสทีม/สกิลกาชา หน่วยเป็นเปอร์เซ็นต์จริงหลัง normalize
+    // เช่น EX: .01 = ไม่เกิน 0.01% ต่อการเปิด 1 ใบ แม้มีสกิลเพิ่มเรทหลายใบ
+    const GACHA_EFFECTIVE_RATE_CAPS = Object.freeze({ EX: .01, SC: .002 });
     const ITEM_INVENTORY_VERSION = 1;
 
     /*
@@ -7211,7 +7215,7 @@
   {
     "id": "eventKONO",
     "name": "Konosuba Rate UP",
-    "description": "ตู้เพิ่มเรท ตัวละคร Konosuba",
+    "description": "ตู้เพิ่มเรทตัวละคร Konosuba • ระบบน้ำหนัก v76 ลดโอกาส EX/SC ไม่ให้เทหน้าตักแล้วออกถี่เกินไป",
     "image": "",
     "images": [
       "assets/banners/KONOSUBAban.mp4"
@@ -7219,36 +7223,39 @@
     "singlePullCost": 3,
     "tenPullCost": 30,
     "rateOverrides": {
-      "N": 45.99,
-      "R": 20.3,
-      "SR": 12.83,
-      "SSR": 9.8,
-      "UR": 0.5498,
-      "LR": 0.501,
-      "EX": 0.0012,
-      "SC": 0.028
+      "N": 55,
+      "R": 30,
+      "SR": 10,
+      "SSR": 4.5,
+      "UR": 0.45,
+      "LR": 0.048,
+      "EX": 0.0005,
+      "SC": 0.0015
     },
-    "rateUpCards": {"2005": 3,"2006": 3,"2007": 2, "2008": 2
+    "effectiveRateCaps": {
+      "EX": 0.01,
+      "SC": 0.002
+    },
+    "rateUpCards": {
     },
     "guarantee": {
       "enabled": true,
-      "every": 5000,
+      "every": 8000,
       "rarityRates": {
-        "LR": 99.9,
-        "SC": 0.09,
-        "EX": 0.01
+        "LR": 99.95,
+        "EX": 0.045,
+        "SC": 0.005
       },
       "resetWhenPullRarities": [
-        "LR",
         "EX",
         "SC"
       ]
     }
-  }, 
+  },
   {
     "id": "legend",
     "name": "Legend Rate Up",
-    "description": "ตู้เพิ่มโอกาส UR/LR/EX และเพิ่มน้ำหนัก ",
+    "description": "ตู้เพิ่มโอกาส UR/LR แบบควบคุม EX/SC ด้วยน้ำหนัก v76",
     "image": "",
     "images": [
       "assets/banners/LR1.mp4"
@@ -7256,27 +7263,29 @@
     "singlePullCost": 3,
     "tenPullCost": 30,
     "rateOverrides": {
-      "N": 45.99,
-      "R": 20.3,
-      "SR": 12.83,
-      "SSR": 9.8,
-      "UR": 0.5498,
-      "LR": 0.501,
-      "EX": 0.0012,
-      "SC": 0.028
+      "N": 55,
+      "R": 30,
+      "SR": 10,
+      "SSR": 4.5,
+      "UR": 0.45,
+      "LR": 0.048,
+      "EX": 0.0005,
+      "SC": 0.0015
     },
-    "rateUpCards": {
+    "effectiveRateCaps": {
+      "EX": 0.012,
+      "SC": 0.003
     },
+    "rateUpCards": {},
     "guarantee": {
       "enabled": true,
-      "every": 5000,
+      "every": 6000,
       "rarityRates": {
-        "LR": 99.9,
-        "SC": 0.09,
-        "EX": 0.01
+        "LR": 99.7,
+        "EX": 0.25,
+        "SC": 0.05
       },
       "resetWhenPullRarities": [
-        "LR",
         "EX",
         "SC"
       ]
@@ -10774,21 +10783,75 @@
       return summary;
     }
 
+    function normalizeGachaWeightBonus(value) {
+      const raw = Number(value) || 0;
+      if (!Number.isFinite(raw) || raw === 0) return 0;
+      // ค่าแบบเดิม 0.15 = +15% ของน้ำหนักฐาน, ค่าใหญ่กว่า 1 ใช้เป็นน้ำหนักตรง เช่น 2 = +2 weight
+      return Math.max(-0.95, Math.min(10, raw));
+    }
+
+    function getGachaRateCaps(banner = getActiveBanner()) {
+      const caps = Object.assign({}, GACHA_EFFECTIVE_RATE_CAPS || {});
+      if (banner && banner.effectiveRateCaps && typeof banner.effectiveRateCaps === "object") {
+        Object.entries(banner.effectiveRateCaps).forEach(([rarity, value]) => {
+          const cap = Number(value);
+          if (Number.isFinite(cap) && cap > 0) caps[rarity] = cap;
+        });
+      }
+      return caps;
+    }
+
+    function normalizeWeightMapToPercentages(weights = {}) {
+      const total = Object.values(weights).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+      const percentages = {};
+      Object.entries(weights).forEach(([rarity, weight]) => {
+        percentages[rarity] = total > 0 ? Math.max(0, Number(weight) || 0) / total * 100 : 0;
+      });
+      return percentages;
+    }
+
+    function applyGachaRateCaps(weights = {}, caps = {}) {
+      const rawPercentages = normalizeWeightMapToPercentages(weights);
+      const cappedPercentages = {};
+      let lockedPercent = 0;
+      let flexiblePercent = 0;
+
+      Object.entries(rawPercentages).forEach(([rarity, rate]) => {
+        const cap = Math.max(0, Number(caps[rarity]) || 0);
+        if (cap > 0 && rate > cap) {
+          cappedPercentages[rarity] = cap;
+          lockedPercent += cap;
+        } else {
+          flexiblePercent += rate;
+        }
+      });
+
+      const remainingPercent = Math.max(0, 100 - lockedPercent);
+      Object.entries(rawPercentages).forEach(([rarity, rate]) => {
+        if (Object.prototype.hasOwnProperty.call(cappedPercentages, rarity)) return;
+        cappedPercentages[rarity] = flexiblePercent > 0 ? rate / flexiblePercent * remainingPercent : 0;
+      });
+
+      // ใช้เปอร์เซ็นต์ที่ผ่าน cap เป็น weight ใหม่โดยตรง เพราะ weightedKey ต้องการแค่น้ำหนักสัมพัทธ์
+      return cappedPercentages;
+    }
+
     function getEffectiveBannerRates(banner = getActiveBanner()) {
       const baseRates = banner && banner.rateOverrides && typeof banner.rateOverrides === "object" ? banner.rateOverrides : {};
       const gachaSummary = getGachaAbilitySummary();
       const weights = {};
-      Object.entries(baseRates).forEach(([rarity, rate]) => {
-        const base = Math.max(0, Number(rate) || 0);
-        const bonus = Number(gachaSummary.rarityRateBonuses[rarity] || 0);
-        weights[rarity] = Math.max(0, base * Math.max(0.10, 1 + bonus));
+      const rarityKeys = new Set([...Object.keys(baseRates), ...Object.keys(gachaSummary.rarityRateBonuses || {})]);
+
+      rarityKeys.forEach(rarity => {
+        const base = Math.max(0, Number(baseRates[rarity]) || 0);
+        const bonus = normalizeGachaWeightBonus(gachaSummary.rarityRateBonuses[rarity] || 0);
+        const delta = Math.abs(bonus) <= 1 ? base * bonus : bonus;
+        weights[rarity] = Math.max(0, base + delta);
       });
-      const total = Object.values(weights).reduce((sum, value) => sum + Number(value || 0), 0);
-      const percentages = {};
-      Object.entries(weights).forEach(([rarity, weight]) => {
-        percentages[rarity] = total > 0 ? Number(weight) / total * 100 : 0;
-      });
-      return { baseRates, weights, percentages, gachaSummary };
+
+      const cappedWeights = applyGachaRateCaps(weights, getGachaRateCaps(banner));
+      const percentages = normalizeWeightMapToPercentages(cappedWeights);
+      return { baseRates, weights: cappedWeights, rawWeights: weights, percentages, gachaSummary };
     }
 
     function getAbilityAdjustedCardPower(card, abilitySummary) {
@@ -15527,7 +15590,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function getItemMeta(itemId = "") {
       const id = String(itemId || "");
-      if (id === "pack:normal") return { id, kind: "pack", icon: "🎴", name: "แพ็คสุ่มการ์ดธรรมดา", description: "สุ่มการ์ด 1 ใบจากเรทแพ็คกลาง แยกจากตู้กาชาและไม่เพิ่มการันตี", color: "#5ce8ff" };
+      if (id === "pack:normal") return { id, kind: "pack", icon: "🎴", name: "แพ็คสุ่มการ์ดธรรมดา", description: "สุ่มการ์ด 1 ใบต่อ 1 ชิ้นจากเรทแพ็คกลาง แยกจากตู้กาชาและไม่เพิ่มการันตี • มีปุ่มเปิด x10 / เปิดทั้งหมด", color: "#5ce8ff" };
       if (id.startsWith("pack:guarantee:")) {
         const rarity = id.split(":")[2];
         if (!RARITIES[rarity]) return null;
@@ -17341,7 +17404,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderAfterPull();
       renderInventory();
       closeInventory();
-      presentPullResults(results, false);
+      const fastToggle = document.getElementById("fastRevealToggle");
+      const useFastSummary = count >= 10 || Boolean(fastToggle && fastToggle.checked);
+      presentPullResults(results, useFastSummary);
     }
 
     function openInventory() { renderInventory(); document.getElementById("inventoryModal").classList.remove("hidden"); document.body.style.overflow = "hidden"; }
@@ -17388,11 +17453,13 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!grid) return;
       grid.innerHTML = entries.length ? entries.map(([id, amount]) => {
         const meta = getItemMeta(id);
-        const tenButton = meta.kind === "pack" && amount >= 10 ? `<button class="btn" data-action="use-item-pack" data-item-id="${escapeHTML(id)}" data-times="10">เปิด x10</button>` : "";
+        const safeAmount = Math.max(0, Math.floor(Number(amount) || 0));
+        const tenButton = meta.kind === "pack" && safeAmount >= 10 ? `<button class="btn" data-action="use-item-pack" data-item-id="${escapeHTML(id)}" data-times="10">เปิด x10</button>` : "";
+        const allButton = meta.kind === "pack" && safeAmount > 1 ? `<button class="btn btn-gold" data-action="use-item-pack" data-item-id="${escapeHTML(id)}" data-times="${safeAmount}">เปิดทั้งหมด x${formatNumber(safeAmount)}</button>` : "";
         const primary = meta.kind === "selector"
           ? `<button class="btn btn-primary" data-action="open-item-selector" data-item-id="${escapeHTML(id)}">เลือกการ์ด</button>`
           : `<button class="btn btn-primary" data-action="use-item-pack" data-item-id="${escapeHTML(id)}" data-times="1">เปิด 1 ชิ้น</button>`;
-        return `<article class="inventory-item" style="--item-color:${escapeHTML(meta.color)}"><span class="inventory-qty">x${formatNumber(amount)}</span><div class="inventory-item-icon">${meta.icon}</div><h3>${escapeHTML(meta.name)}</h3><p>${escapeHTML(meta.description)}</p><div class="inventory-actions">${primary}${tenButton}</div></article>`;
+        return `<article class="inventory-item" style="--item-color:${escapeHTML(meta.color)}"><span class="inventory-qty">x${formatNumber(amount)}</span><div class="inventory-item-icon">${meta.icon}</div><h3>${escapeHTML(meta.name)}</h3><p>${escapeHTML(meta.description)}</p><div class="inventory-actions">${primary}${tenButton}${allButton}</div></article>`;
       }).join("") : `<div class="empty-state">กระเป๋ายังว่างอยู่<br>รับรางวัลจากกล่องจดหมาย หรือเล่น Battle Tower / ARENA เพื่อรับไอเทม</div>`;
     }
 
