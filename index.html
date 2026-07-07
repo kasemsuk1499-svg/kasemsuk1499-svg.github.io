@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v74-manifest-only">
-  <title>Anime Card Collection · Split Card Data Runtime v74</title>
+  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v75-status-emoji">
+  <title>Anime Card Collection · Split Card Data Runtime v75 Status Emoji</title>
   <style>
     :root {
       color-scheme: dark;
@@ -5453,6 +5453,11 @@
     .battle-unit-status-icons{position:absolute;z-index:18;left:6px;right:6px;bottom:38px;display:flex;flex-wrap:wrap;justify-content:center;gap:3px;pointer-events:none}
     .battle-status-chip{border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px 5px;color:#fff;font-size:.48rem;font-weight:1000;line-height:1;background:rgba(3,5,12,.82);text-shadow:0 1px 2px #000;box-shadow:0 0 10px rgba(0,0,0,.25)}
     .battle-status-chip.death{background:linear-gradient(135deg,#111827,#7f1d1d)}.battle-status-chip.stun{background:linear-gradient(135deg,#92400e,#f59e0b);color:#271600}.battle-status-chip.blind{background:linear-gradient(135deg,#1f2937,#6b7280)}.battle-status-chip.freeze{background:linear-gradient(135deg,#075985,#67e8f9);color:#03212c}.battle-status-chip.burn{background:linear-gradient(135deg,#b91c1c,#f97316)}.battle-status-chip.bleed{background:linear-gradient(135deg,#7f1d1d,#e11d48)}.battle-status-chip.shock{background:linear-gradient(135deg,#312e81,#facc15);color:#160f38}
+    .battle-status-chip.poison{background:linear-gradient(135deg,#14532d,#84cc16);color:#07180b}.battle-status-chip.sleep{background:linear-gradient(135deg,#312e81,#a78bfa)}.battle-status-chip.silence{background:linear-gradient(135deg,#0f172a,#64748b)}.battle-status-chip.confuse{background:linear-gradient(135deg,#581c87,#22d3ee)}.battle-status-chip.curse{background:linear-gradient(135deg,#3b0764,#e879f9)}.battle-status-chip.slow{background:linear-gradient(135deg,#064e3b,#38bdf8)}.battle-status-chip.seal{background:linear-gradient(135deg,#1e293b,#facc15);color:#211500}.battle-status-chip.condition-cancel{background:linear-gradient(135deg,#0f766e,#5eead4);color:#042f2e}.battle-status-chip.skill-cancel{background:linear-gradient(135deg,#7f1d1d,#fb7185)}.battle-status-chip.skill-stolen{background:linear-gradient(135deg,#2e1065,#f97316)}.battle-status-chip.skill-copied{background:linear-gradient(135deg,#075985,#22d3ee);color:#03212c}
+    .battle-status-emoji-row{position:absolute;z-index:24;left:6px;right:6px;top:33px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;pointer-events:none}
+    .battle-status-emoji{width:24px;height:24px;display:inline-grid;place-items:center;border:1px solid rgba(255,255,255,.26);border-radius:999px;font-size:.9rem;line-height:1;background:rgba(3,5,12,.78);box-shadow:0 0 14px rgba(0,0,0,.38),0 0 12px rgba(250,204,21,.18);text-shadow:0 1px 3px #000;backdrop-filter:blur(8px)}
+    .battle-status-emoji.death{box-shadow:0 0 16px rgba(248,113,113,.35)}.battle-status-emoji.freeze{box-shadow:0 0 16px rgba(103,232,249,.36)}.battle-status-emoji.burn{box-shadow:0 0 16px rgba(249,115,22,.42)}.battle-status-emoji.shock{box-shadow:0 0 16px rgba(250,204,21,.42)}.battle-status-emoji.skill-cancel,.battle-status-emoji.skill-stolen{box-shadow:0 0 18px rgba(251,113,133,.45)}.battle-status-emoji.skill-copied,.battle-status-emoji.condition-cancel{box-shadow:0 0 18px rgba(34,211,238,.45)}
+    .battle-unit.has-battle-status{box-shadow:0 0 0 2px rgba(250,204,21,.24),0 18px 34px rgba(0,0,0,.36),0 0 30px color-mix(in srgb,var(--rarity-glow,var(--rarity)) 22%,transparent)}
     .battle-floating-number.status{color:#fef3c7;text-shadow:0 2px 4px #000,0 0 16px rgba(250,204,21,.95)}.battle-floating-number.miss{color:#c7d2fe;text-shadow:0 2px 4px #000,0 0 16px rgba(129,140,248,.95)}.battle-unit.is-status-controlled{filter:drop-shadow(0 0 16px rgba(250,204,21,.75)) saturate(1.18)}
     @media(max-width:900px){#battleView .battle-sidebar,#arenaView .battle-sidebar{grid-template-columns:1fr}#battleView .battle-sides,#arenaView .battle-sides{grid-template-columns:1fr;gap:18px}#battleView .battle-arena,#arenaView .battle-arena{min-height:auto}#battleView .battle-model-stack,#arenaView .battle-model-stack{min-height:220px}}
 
@@ -6787,8 +6792,8 @@
       startingCrystals: 30,
       startingDust: 300000,
       // เพิ่มโดยอลิซ v50: Gems เป็นเงินหลัก แลกสกุลก่อนใช้งาน
-      crystalGemCost: 1000000,
-      crystalDailyLimit: 300000,
+      crystalGemCost: 100000,
+      crystalDailyLimit: 3000000,
       gachaCrystalCostPerPull: 3,
       // แก้โดยอลิซ v51: ผู้เล่นยืนยันอัตราแลก Dust โดยคำนึงถึงรายได้ของ EX ที่สูงกว่า SC
       // ใช้ 100 Gems แลก 1 Dust: เงินเดือน 1,000M Gems แลกได้ 10M Dust พออัป EX จาก Lv.1 ถึงเลเวลตัน 1 ใบ
@@ -7214,8 +7219,8 @@
     "singlePullCost": 3,
     "tenPullCost": 30,
     "rateOverrides": {
-      "N": 50.99,
-      "R": 25.3,
+      "N": 45.99,
+      "R": 20.3,
       "SR": 12.83,
       "SSR": 9.8,
       "UR": 0.5498,
@@ -7251,8 +7256,8 @@
     "singlePullCost": 3,
     "tenPullCost": 30,
     "rateOverrides": {
-      "N": 50.99,
-      "R": 25.3,
+      "N": 45.99,
+      "R": 20.3,
       "SR": 12.83,
       "SSR": 9.8,
       "UR": 0.5498,
@@ -12980,12 +12985,41 @@
       const isDefeated = team => alive(team).length === 0;
 
 
-      const BATTLE_STATUS_LABELS = { death: "เดธ", stun: "สตั้น", blind: "ตาบอด", freeze: "แช่แข็ง", burn: "เผาไหม้", bleed: "เลือดไหล", shock: "ไฟช็อต" };
+      const BATTLE_STATUS_LABELS = {
+        death: "เดธ", stun: "สตั้น", blind: "ตาบอด", freeze: "แช่แข็ง", burn: "เผาไหม้", bleed: "เลือดไหล", shock: "ไฟช็อต",
+        poison: "พิษ", sleep: "หลับ", silence: "ใบ้", confuse: "สับสน", curse: "คำสาป", slow: "ช้า", seal: "ผนึก",
+        "condition-cancel": "ยกเลิกเงื่อนไข", "skill-cancel": "ยกเลิกสกิล", "skill-stolen": "ขโมยสกิล", "skill-copied": "ก็อปปี้สกิล"
+      };
+      const BATTLE_STATUS_EMOJIS = {
+        death: "☠️", stun: "💫", blind: "👁️", freeze: "❄️", burn: "🔥", bleed: "🩸", shock: "⚡",
+        poison: "☣️", sleep: "💤", silence: "🤐", confuse: "🌀", curse: "🔮", slow: "🐢", seal: "⛓️",
+        "condition-cancel": "🔓", "skill-cancel": "🚫", "skill-stolen": "🕸️", "skill-copied": "🧬"
+      };
+      const BATTLE_STICKY_STATUSES = new Set(["freeze", "death", "bleed", "condition-cancel", "skill-cancel", "skill-stolen", "skill-copied"]);
       function normalizeBattleStatusName(value) {
         const raw = String(value || "").trim();
         if (!raw) return "";
-        const key = raw.toLowerCase();
-        const aliases = { "dead":"death", "doom":"death", "execute":"death", "เดธ":"death", "stun":"stun", "stunned":"stun", "สตั้น":"stun", "มึน":"stun", "blind":"blind", "miss":"blind", "ตาบอด":"blind", "freeze":"freeze", "frozen":"freeze", "ice":"freeze", "แช่แข็ง":"freeze", "burn":"burn", "burning":"burn", "fire":"burn", "เผาไหม้":"burn", "bleed":"bleed", "bleeding":"bleed", "เลือดไหล":"bleed", "shock":"shock", "electric":"shock", "paralyze":"shock", "ไฟช็อต":"shock" };
+        const key = raw.toLowerCase().replace(/[\s_]+/g, "-");
+        const aliases = {
+          "dead":"death", "doom":"death", "execute":"death", "เดธ":"death",
+          "stun":"stun", "stunned":"stun", "สตั้น":"stun", "มึน":"stun",
+          "blind":"blind", "miss":"blind", "ตาบอด":"blind",
+          "freeze":"freeze", "frozen":"freeze", "ice":"freeze", "แช่แข็ง":"freeze",
+          "burn":"burn", "burning":"burn", "fire":"burn", "เผาไหม้":"burn",
+          "bleed":"bleed", "bleeding":"bleed", "เลือดไหล":"bleed",
+          "shock":"shock", "electric":"shock", "paralyze":"shock", "ไฟช็อต":"shock",
+          "poison":"poison", "poisoned":"poison", "toxic":"poison", "พิษ":"poison",
+          "sleep":"sleep", "asleep":"sleep", "หลับ":"sleep",
+          "silence":"silence", "silenced":"silence", "mute":"silence", "ใบ้":"silence", "ห้ามใช้สกิล":"silence",
+          "confuse":"confuse", "confused":"confuse", "confusion":"confuse", "สับสน":"confuse",
+          "curse":"curse", "cursed":"curse", "คำสาป":"curse",
+          "slow":"slow", "slowed":"slow", "speed-down":"slow", "ช้า":"slow",
+          "seal":"seal", "sealed":"seal", "ผนึก":"seal",
+          "conditioncancel":"condition-cancel", "condition-cancel":"condition-cancel", "cancel-condition":"condition-cancel", "ignore-condition":"condition-cancel", "ignore-conditions":"condition-cancel", "ignoreabilityconditions":"condition-cancel", "ignore-ability-conditions":"condition-cancel", "ยกเลิกเงื่อนไข":"condition-cancel", "โดนยกเลิกเงื่อนไข":"condition-cancel",
+          "skillcancel":"skill-cancel", "skill-cancel":"skill-cancel", "cancel-skill":"skill-cancel", "nullify":"skill-cancel", "nullifycardabilities":"skill-cancel", "nullify-card-abilities":"skill-cancel", "ยกเลิกสกิล":"skill-cancel", "ปิดสกิล":"skill-cancel",
+          "skillstolen":"skill-stolen", "skill-stolen":"skill-stolen", "steal-skill":"skill-stolen", "stealskill":"skill-stolen", "stealabilities":"skill-stolen", "steal-abilities":"skill-stolen", "ขโมยสกิล":"skill-stolen", "โดนขโมยสกิล":"skill-stolen",
+          "skillcopied":"skill-copied", "skill-copied":"skill-copied", "copy-skill":"skill-copied", "copyskill":"skill-copied", "copyabilities":"skill-copied", "copy-abilities":"skill-copied", "คัดลอกสกิล":"skill-copied", "ก็อปปี้สกิล":"skill-copied", "ก๊อปปี้สกิล":"skill-copied"
+        };
         return aliases[key] || key;
       }
       function activeStatusEffects(member, status = "") {
@@ -12994,18 +13028,22 @@
       }
       function compactBattleStatuses(member) {
         if (!member) return [];
-        member.statusEffects = abilityArray(member.statusEffects).filter(item => item && !item.expired && (item.status === "freeze" || item.status === "death" || item.status === "bleed" || Number(item.turnsRemaining ?? 1) !== 0));
+        member.statusEffects = abilityArray(member.statusEffects).filter(item => item && !item.expired && (BATTLE_STICKY_STATUSES.has(item.status) || Number(item.turnsRemaining ?? 1) !== 0));
         return member.statusEffects;
+      }
+      function statusEmojiText(effect = {}) {
+        return BATTLE_STATUS_EMOJIS[effect.status] || "💫";
       }
       function statusIconText(effect) {
         const label = BATTLE_STATUS_LABELS[effect.status] || effect.status;
-        if (effect.status === "death") return `☠ ${label}${effect.attacksRemaining ? ` ${effect.attacksRemaining}` : ""}`;
-        if (effect.status === "blind") return `👁 ${label}${Math.round((Number(effect.missRate)||0)*100)}%`;
-        if (effect.status === "freeze") return `❄ ${label}`;
-        if (effect.status === "burn") return `🔥 ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
-        if (effect.status === "bleed") return `🩸 ${label}`;
-        if (effect.status === "shock") return `⚡ ${label}${effect.hitCounter || 0}/${effect.chainAfterHits || 1}`;
-        return `💫 ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
+        const emoji = statusEmojiText(effect);
+        if (effect.status === "death") return `${emoji} ${label}${effect.attacksRemaining ? ` ${effect.attacksRemaining}` : ""}`;
+        if (effect.status === "blind") return `${emoji} ${label}${Math.round((Number(effect.missRate)||0)*100)}%`;
+        if (effect.status === "freeze") return `${emoji} ${label}`;
+        if (effect.status === "burn") return `${emoji} ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
+        if (effect.status === "bleed") return `${emoji} ${label}`;
+        if (effect.status === "shock") return `${emoji} ${label}${effect.hitCounter || 0}/${effect.chainAfterHits || 1}`;
+        return `${emoji} ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
       }
       function makeBattleStatusInstance(rule, source) {
         const status = normalizeBattleStatusName(rule && rule.status) || "stun";
@@ -13033,7 +13071,7 @@
         compactBattleStatuses(member); return expired;
       }
       function battleControlStatus(actor) {
-        const blocker = activeStatusEffects(actor).find(item => ["stun","freeze","shock"].includes(item.status));
+        const blocker = activeStatusEffects(actor).find(item => ["stun","freeze","shock","sleep"].includes(item.status));
         if (!blocker) return null;
         const expired = tickStatusDurations(actor, "control-skip");
         return { prevented:true, statusType:blocker.status, statusLabel:blocker.label, expired };
@@ -13235,7 +13273,8 @@
       }
 
       function makeActivation(team, actor, target) {
-        const available = triggersForActor(team, actor, target, true);
+        const skillLocked = activeStatusEffects(actor).some(effect => ["skill-cancel", "skill-stolen", "silence", "seal"].includes(effect.status));
+        const available = skillLocked ? [] : triggersForActor(team, actor, target, true);
         const always = available.filter(trigger => trigger.triggerOn === "ownAttack" || trigger.triggerOn === "battleStart" || !["nextAttack"].includes(trigger.triggerOn));
         const active = shouldUseActive(team, actor, available) ? available.filter(trigger => trigger.triggerOn === "nextAttack") : [];
         const fired = [...always, ...active].filter((trigger, index, list) => list.indexOf(trigger) === index);
@@ -13571,7 +13610,7 @@
           reviveMode: member.reviveMode || "", reviveTurnsRemaining: member.reviveTurnsRemaining || 0,
           reviveHitLifeRemaining: member.reviveHitLifeRemaining || 0,
           tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0,
-          statusEffects: compactBattleStatuses(member).map(effect => ({ status:effect.status, label:effect.label, text:statusIconText(effect), turnsRemaining:effect.turnsRemaining, attacksRemaining:effect.attacksRemaining, hitCounter:effect.hitCounter, chainAfterHits:effect.chainAfterHits })),
+          statusEffects: compactBattleStatuses(member).map(effect => ({ status:effect.status, label:effect.label, icon:statusEmojiText(effect), text:statusIconText(effect), turnsRemaining:effect.turnsRemaining, attacksRemaining:effect.attacksRemaining, hitCounter:effect.hitCounter, chainAfterHits:effect.chainAfterHits })),
           statusControlled: activeStatusEffects(member).some(effect => ["stun","freeze","shock"].includes(effect.status)),
           capturedBySide: member.capturedBySide || "", originalSide: member.originalSide || ""
         });
@@ -13591,7 +13630,7 @@
           reviveMode: member.reviveMode, reviveTurnsRemaining: member.reviveTurnsRemaining,
           reviveHitLifeRemaining: member.reviveHitLifeRemaining, reviveCount: member.reviveCount, deathReason: member.deathReason,
           tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0, capturedBySide: member.capturedBySide || "", cardId: member.cardId || member.id,
-          statusEffects: compactBattleStatuses(member).map(effect => ({ status:effect.status, label:effect.label, text:statusIconText(effect) })),
+          statusEffects: compactBattleStatuses(member).map(effect => ({ status:effect.status, label:effect.label, icon:statusEmojiText(effect), text:statusIconText(effect) })),
           damage: member.damageDealt, healing: member.healingDone, shieldCreated: member.shieldCreated,
           skillActivations: member.skillActivations, attacks: member.attackCount, totalHits: member.totalHits,
           criticalHits: member.criticalHits, blocks: member.blocks, dodges: member.dodges, ko: member.currentHp <= 0
@@ -14358,9 +14397,19 @@
         const specialText = parts.join(" • ");
         if (special.textContent !== specialText) special.textContent = specialText;
       }
+      const activeStatusList = abilityArray(state.statusEffects).filter(Boolean);
+      node.classList.toggle("has-battle-status", activeStatusList.length > 0);
+      let emojiBox = node.querySelector(".battle-status-emoji-row");
+      if (!emojiBox) { emojiBox = document.createElement("div"); emojiBox.className = "battle-status-emoji-row"; node.appendChild(emojiBox); }
+      const emojiChips = activeStatusList.slice(0, 8).map(effect => {
+        const label = effect.text || effect.label || effect.status || "STATUS";
+        const icon = effect.icon || String(effect.text || "💫").trim().split(/\s+/)[0] || "💫";
+        return `<span class="battle-status-emoji ${escapeHTML(effect.status || "")}" title="${escapeHTML(label)}" aria-label="${escapeHTML(label)}">${escapeHTML(icon)}</span>`;
+      }).join("");
+      if (emojiBox.innerHTML !== emojiChips) emojiBox.innerHTML = emojiChips;
       let statusBox = node.querySelector(".battle-unit-status-icons");
       if (!statusBox) { statusBox = document.createElement("div"); statusBox.className = "battle-unit-status-icons"; node.appendChild(statusBox); }
-      const chips = abilityArray(state.statusEffects).map(effect => `<span class="battle-status-chip ${escapeHTML(effect.status || "")}">${escapeHTML(effect.text || effect.label || effect.status || "")}</span>`).join("");
+      const chips = activeStatusList.map(effect => `<span class="battle-status-chip ${escapeHTML(effect.status || "")}">${escapeHTML(effect.text || effect.label || effect.status || "")}</span>`).join("");
       if (statusBox.innerHTML !== chips) statusBox.innerHTML = chips;
     }
 
