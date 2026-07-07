@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v79-status-activation-wire">
-  <title>Anime Card Collection · Split Card Data Runtime v79 Status Activation Fix</title>
+  <meta name="gacha-app-build" content="2026-07-07-world-boss-v81-id-folder-image">
+  <title>Anime Card Collection · Split Card Data Runtime v81 World Boss ID Folder Image</title>
   <style>
     :root {
       color-scheme: dark;
@@ -1511,6 +1511,158 @@
     .battle-card p, .friend-card p { margin-bottom: 0; color: var(--muted); font-size: .78rem; line-height: 1.5; }
     .battle-stat-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 9px; font-size: .8rem; }
     .battle-stat-row strong { color: var(--gold); }
+
+    /* เพิ่มโดยอลิซ v80: World Boss Raid */
+    .world-boss-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.22fr) minmax(290px, .78fr);
+      gap: 14px;
+    }
+    .world-boss-stage {
+      position: relative;
+      min-height: 560px;
+      overflow: hidden;
+      isolation: isolate;
+      background: linear-gradient(145deg, #0b1022, #090d1c);
+    }
+    .world-boss-bg {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      opacity: .26;
+      background:
+        radial-gradient(circle at 25% 20%, rgba(251,113,133,.35), transparent 34%),
+        radial-gradient(circle at 78% 18%, rgba(92,232,255,.28), transparent 36%),
+        linear-gradient(145deg, #050813, #13091d);
+      background-size: cover;
+      background-position: center;
+      filter: saturate(1.12) contrast(1.05);
+    }
+    .world-boss-stage::after {
+      content: "WORLD BOSS";
+      position: absolute;
+      right: -18px;
+      bottom: 8px;
+      z-index: -1;
+      color: rgba(255,255,255,.055);
+      font-size: clamp(3.2rem, 9vw, 8rem);
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      pointer-events: none;
+    }
+    .world-boss-content {
+      min-height: 560px;
+      display: grid;
+      grid-template-columns: minmax(220px, .72fr) minmax(0, 1fr);
+      gap: clamp(16px, 3vw, 34px);
+      align-items: center;
+      padding: clamp(18px, 4vw, 42px);
+    }
+    .world-boss-portrait {
+      position: relative;
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 28px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(251,113,133,.22), transparent 42%),
+        rgba(3,5,12,.42);
+      box-shadow: 0 28px 70px rgba(0,0,0,.34);
+    }
+    .world-boss-portrait img,
+    .world-boss-portrait video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 18%;
+    }
+    .world-boss-portrait .world-boss-placeholder {
+      padding: 28px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 900;
+    }
+    .world-boss-info h3 {
+      margin: 7px 0 7px;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: .94;
+      letter-spacing: -.055em;
+    }
+    .world-boss-info p { color: #c9d3ec; line-height: 1.62; }
+    .world-boss-hp-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 18px 0 8px;
+      color: #dbe5ff;
+      font-size: .82rem;
+      font-weight: 1000;
+    }
+    .world-boss-hp-row strong { color: var(--gold); }
+    .world-boss-hp-bar {
+      height: 14px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .world-boss-hp-bar i {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #fb7185, #f97316, #ffd166);
+      transition: width .25s ease;
+    }
+    .world-boss-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 13px 0;
+    }
+    .world-boss-stat-grid div {
+      min-height: 72px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 15px;
+      background: rgba(3,5,12,.38);
+    }
+    .world-boss-stat-grid span { display: block; color: var(--muted); font-size: .62rem; font-weight: 900; }
+    .world-boss-stat-grid strong { display: block; margin-top: 5px; overflow: hidden; font-size: .92rem; text-overflow: ellipsis; white-space: nowrap; }
+    .world-boss-actions { display: flex; flex-wrap: wrap; gap: 9px; margin: 14px 0; }
+    .world-boss-sidebar .battle-card { background: rgba(255,255,255,.04); }
+    .world-boss-skill-list, .world-boss-log { display: grid; gap: 8px; }
+    .world-boss-skill {
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 13px;
+      background: rgba(3,5,12,.36);
+    }
+    .world-boss-skill strong { display: block; color: var(--gold); font-size: .78rem; }
+    .world-boss-skill span { display: block; margin-top: 4px; color: var(--muted); font-size: .68rem; line-height: 1.45; }
+    .world-boss-log-row {
+      display: grid;
+      grid-template-columns: 56px minmax(0,1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 9px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      background: rgba(3,5,12,.32);
+      font-size: .68rem;
+    }
+    .world-boss-log-row strong { color: var(--cyan); }
+    .world-boss-log-row span { color: var(--muted); }
+    .world-boss-log-row.break span { color: #fde68a; }
+    @media (max-width: 980px) {
+      .world-boss-layout, .world-boss-content { grid-template-columns: 1fr; }
+      .world-boss-stage, .world-boss-content { min-height: auto; }
+      .world-boss-portrait { min-height: 320px; }
+      .world-boss-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
 
 
     /* เพิ่มโดยอลิซ: คัทซีน ACTIVE Skill ทุกครั้งที่สกิลทำงาน */
@@ -4506,12 +4658,14 @@
     #collectionView,
     #teamView,
     #battleView,
+    #worldBossView,
     #arenaView,
     #friendsView { min-height: 300px; }
 
     #collectionView .card-grid,
     #teamView .team-grid,
     #battleView .battle-layout,
+    #worldBossView .world-boss-layout,
     #arenaView .battle-layout,
     #friendsView .friends-columns {
       position: relative;
@@ -6136,6 +6290,7 @@
             <button class="tab" data-tab="collection">คอลเล็กชั่น</button>
             <button class="tab" data-tab="team">ทีมโชว์</button>
             <button class="tab" data-tab="battle">ไต่หอ</button>
+            <button class="tab" data-tab="worldBoss">บอสโลก</button>
             <button class="tab" data-tab="arena">ARENA</button>
             <button class="tab" data-tab="friends">เพื่อน</button>
           </div>
@@ -6299,6 +6454,71 @@
         </section>
 
 
+        <section id="worldBossView" class="hidden">
+          <div class="section-title">
+            <div><h2>World Boss</h2><p>บอสประจำวันสุ่มจากไฟล์บอสแยกโฟลเดอร์ GitHub • HP หมดแล้วยังตีต่อเพื่อสะสมคะแนนได้</p></div>
+            <button class="btn" data-action="refresh-world-boss">รีเฟรชบอสวันนี้</button>
+          </div>
+
+          <div class="world-boss-layout">
+            <div class="world-boss-stage panel">
+              <div class="world-boss-bg" id="worldBossBg"></div>
+              <div class="world-boss-content">
+                <div class="world-boss-portrait" id="worldBossPortrait"></div>
+                <div class="world-boss-info">
+                  <p class="eyebrow" id="worldBossDateText">Daily Raid</p>
+                  <h3 id="worldBossName">กำลังโหลดบอส...</h3>
+                  <p id="worldBossDescription">บอสจะเปลี่ยนทุกวัน และใช้กฎสเกลเทิร์นเดียวกันทุกตัว</p>
+                  <div class="world-boss-hp-row">
+                    <span id="worldBossHpText">HP 0 / 0</span>
+                    <strong id="worldBossBreakText">พร้อมต่อสู้</strong>
+                  </div>
+                  <div class="world-boss-hp-bar"><i id="worldBossHpMeter"></i></div>
+                  <div class="world-boss-stat-grid">
+                    <div><span>ATK</span><strong id="worldBossAtkText">0</strong></div>
+                    <div><span>HP</span><strong id="worldBossMaxHpText">0</strong></div>
+                    <div><span>DEF</span><strong id="worldBossDefText">0</strong></div>
+                    <div><span>ธาตุ</span><strong id="worldBossElementText">ไร้ธาตุ</strong></div>
+                  </div>
+                  <div class="world-boss-actions">
+                    <button class="btn btn-primary" id="worldBossBattleButton" data-action="world-boss-battle">เริ่มตีบอสโลก</button>
+                    <button class="btn" data-tab="battle">จัดทีมไต่หอ</button>
+                    <button class="btn" id="worldBossSummaryButton" data-action="open-battle-summary" data-summary-mode="worldBoss" disabled>📊 สรุปฉบับเต็ม</button>
+                  </div>
+                  <div class="battle-result" id="worldBossResult">ใช้ทีมไต่หอเป็นทีมตีบอส บอสจะเริ่มสเกลใหม่ทุกครั้งที่เริ่มไฟต์</div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="battle-sidebar world-boss-sidebar">
+              <div class="battle-card">
+                <h3>คะแนนวันนี้</h3>
+                <div class="battle-stat-row"><span>คะแนนรวม</span><strong id="worldBossTotalScoreText">0</strong></div>
+                <div class="battle-stat-row"><span>คะแนนดีที่สุด</span><strong id="worldBossBestScoreText">0</strong></div>
+                <div class="battle-stat-row"><span>จำนวนรอบที่ตี</span><strong id="worldBossAttemptText">0</strong></div>
+              </div>
+              <div class="battle-card">
+                <h3>กฎสเกลบอส</h3>
+                <p id="worldBossScaleText">ทุกเทิร์นบอสจะแข็งแกร่งขึ้น และรีเซ็ตกลับค่าเริ่มต้นเมื่อเริ่มต่อสู้ใหม่</p>
+              </div>
+              <div class="battle-card">
+                <h3>ทีมที่ใช้ตีบอส</h3>
+                <div class="battle-stat-row"><span>ทีม</span><strong>ทีมไต่หอ</strong></div>
+                <div class="battle-stat-row"><span>พลังรวม</span><strong id="worldBossTeamPowerText">0</strong></div>
+                <p>ปรับทีมจากหน้า Battle Tower ได้ทันที ไม่แย่งกับทีมโชว์หรือ ARENA</p>
+              </div>
+              <div class="battle-card">
+                <h3>สกิลบอส</h3>
+                <div class="world-boss-skill-list" id="worldBossSkillList"></div>
+              </div>
+              <div class="battle-card">
+                <h3>รายงานไฟต์ล่าสุด</h3>
+                <div class="world-boss-log" id="worldBossLog"><p class="hit-report-empty">หลังตีบอส ระบบจะแสดงคะแนน ดาเมจ เทิร์น และสถานะ Break ของบอส</p></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
         <section id="arenaView" class="hidden">
           <div class="section-title">
             <div><h2>ARENA</h2><p>จัดทีมอารีน่าแยก 5 ใบ แล้วสุ่มเจอทีม ARENA ของผู้เล่นในเซิร์ฟหรือทีม AI แบบไม่เปิดเผยก่อนเริ่ม</p></div>
@@ -6427,6 +6647,7 @@
     <button data-tab="collection">คลัง</button>
     <button data-tab="team">ทีม</button>
     <button data-tab="battle">ไต่หอ</button>
+    <button data-tab="worldBoss">บอสโลก</button>
     <button data-tab="arena">อารีน่า</button>
     <button data-tab="friends">เพื่อน</button>
   </nav>
@@ -6758,6 +6979,31 @@
       document.write('<script src="card/card-data.js?v=' + v + '"><\/script>');
       document.write('<script src="card/card-manifest.js?v=' + v + '"><\/script>');
       document.write('<script src="card/card-loader.js?v=' + v + '"><\/script>');
+    })();
+  </script>
+  <script>
+    /*
+      เพิ่มโดยอลิซ v80: ตัวโหลดข้อมูล World Boss แบบแยกจากคอลเลกชัน
+      - บอสพื้นฐานใส่ใน boss/boss-data.js
+      - บอสใหม่เพิ่ม ID ใน boss/boss-manifest.js
+      - ไฟล์บอสใหม่วางที่ boss/<id>/boss.js
+      - ID บอสจะไม่ถูกนับรวมกับการ์ดคอลเลกชัน / กาชา / คลังการ์ด
+    */
+    window.ACC_BOSS_CACHE_BUSTER = window.ACC_CARD_CACHE_BUSTER || Date.now();
+    window.ACC_BOSS_DATA = window.ACC_BOSS_DATA || [];
+    window.ACC_EXTRA_BOSS_DATA = window.ACC_EXTRA_BOSS_DATA || [];
+    window.ACC_REGISTER_BOSS = window.ACC_REGISTER_BOSS || function ACC_REGISTER_BOSS(boss) {
+      if (!boss || typeof boss !== "object") return;
+      window.ACC_EXTRA_BOSS_DATA = window.ACC_EXTRA_BOSS_DATA || [];
+      var folderId = String(window.ACC_CURRENT_BOSS_FOLDER_ID || boss.folderId || boss.folder || boss.assetFolder || "").trim();
+      if (folderId && !boss.folderId) boss.folderId = folderId;
+      window.ACC_EXTRA_BOSS_DATA.push(boss);
+    };
+    (function () {
+      var v = encodeURIComponent(String(window.ACC_BOSS_CACHE_BUSTER));
+      document.write('<script src="boss/boss-data.js?v=' + v + '"><\/script>');
+      document.write('<script src="boss/boss-manifest.js?v=' + v + '"><\/script>');
+      document.write('<script src="boss/boss-loader.js?v=' + v + '"><\/script>');
     })();
   </script>
   <script>
@@ -7755,6 +8001,68 @@
     const CARD_BY_ID = new Map(CARDS.map(card => [String(card.id), card]));
     const BANNER_BY_ID = new Map(BANNERS.map(banner => [banner.id, banner]));
 
+    /* ===================== [SECTION 06B WORLD-BOSS-DATA] =====================
+       ระบบบอสแยกจากคอลเลกชัน
+       - window.ACC_BOSS_DATA = บอสพื้นฐานจาก boss/boss-data.js
+       - window.ACC_EXTRA_BOSS_DATA = บอสที่โหลดจาก boss/<id>/boss.js ผ่าน boss-manifest.js
+       - ไม่ใส่บอสเข้า CARDS / CARD_BY_ID จึงไม่โผล่ในกาชา คลัง หรือทีมปกติ
+    ===================================================================== */
+    const WORLD_BOSS_CONFIG = Object.freeze({
+      maxTurns: 30,
+      turnAttackGrowthRate: 0.08,
+      turnDefenseGrowthRate: 0.045,
+      turnScoreBonusRate: 0.015,
+      breakScoreBonusRate: 0.18,
+      hitGainEveryTurns: 5,
+      maxBonusHits: 5
+    });
+
+    const WORLD_BOSS_FALLBACKS = Object.freeze([
+      {
+        id: "WB-DEMO-001",
+        name: "Demo World Boss",
+        title: "ตัวอย่างบอสโลก",
+        description: "บอสตัวอย่างสำหรับทดสอบระบบ หากยังไม่ได้อัปโหลดไฟล์ในโฟลเดอร์ boss/",
+        rarity: "BOSS",
+        element: ["ความมืด", "มิติ"],
+        image: "",
+        power: 1200000,
+        hp: 35000000,
+        defense: 320000,
+        speed: 80,
+        attackHits: 1,
+        shieldHits: 1,
+        scoreMultiplier: 1,
+        abilities: [
+          { name: "พลังบอสโลก", description: "ทุก 5 เทิร์น บอสโจมตีแรงขึ้นในเทิร์นนั้น", condition: { everyTurns: 5 }, effects: [{ type: "bossPowerRate", value: 0.35 }, { type: "bossAttackHits", value: 1 }] }
+        ]
+      }
+    ]);
+
+    function buildWorldBossDatabase() {
+      const baseBosses = Array.isArray(window.ACC_BOSS_DATA) ? window.ACC_BOSS_DATA : [];
+      const extraBosses = Array.isArray(window.ACC_EXTRA_BOSS_DATA) ? window.ACC_EXTRA_BOSS_DATA : [];
+      const byId = new Map();
+      [...baseBosses, ...extraBosses].forEach((rawBoss, index) => {
+        if (!rawBoss || typeof rawBoss !== "object") return;
+        const rawId = rawBoss.id ?? rawBoss.bossId ?? `WB-${index + 1}`;
+        const id = String(rawId).trim();
+        if (!id) return;
+        byId.set(id, {
+          ...rawBoss,
+          id,
+          name: String(rawBoss.name || rawBoss.title || `World Boss ${id}`),
+          rarity: String(rawBoss.rarity || "BOSS"),
+          scoreMultiplier: Math.max(0.01, Number(rawBoss.scoreMultiplier || rawBoss.scoreRate || 1))
+        });
+      });
+      if (!byId.size) WORLD_BOSS_FALLBACKS.forEach(boss => byId.set(String(boss.id), { ...boss }));
+      return Array.from(byId.values());
+    }
+
+    const WORLD_BOSSES = buildWorldBossDatabase();
+    const WORLD_BOSS_BY_ID = new Map(WORLD_BOSSES.map(boss => [String(boss.id), boss]));
+
     let activeTab = "summon";
 
     /* ================= [SECTION KONO-SUBA-UI-ASSET-MAP] =================
@@ -7848,6 +8156,9 @@
     let lastArenaCombat = null;
     let lastBattleSummary = null;
     let lastArenaSummary = null;
+    let lastWorldBossCombat = null;
+    let lastWorldBossSummary = null;
+    let worldBossAnimating = false;
     // เพิ่มโดยอลิซ: สถานะเรียงลำดับคลังและหน้าต่างเลือกทีม
     let collectionSortMode = "power";
     let collectionSortDirection = "desc";
@@ -7995,6 +8306,14 @@
           formationFront: 2,
           commandStrategy: "balanced",
           targetStrategy: "lowHp"
+        },
+        worldBoss: {
+          date: "",
+          bossId: "",
+          totalScore: 0,
+          bestScore: 0,
+          attempts: 0,
+          lastResult: null
         },
         arena: {
           team: starter.team.slice(0, CONFIG.arenaTeamSlots),
@@ -8735,6 +9054,7 @@
       next.battle.formationFront = normalizeFormationFront(next.battle.formationFront, CONFIG.towerTeamSlots);
       next.battle.commandStrategy = ["balanced","skill","attack","guard"].includes(String(next.battle.commandStrategy)) ? String(next.battle.commandStrategy) : "balanced";
       next.battle.targetStrategy = ["lowHp","highAtk","random"].includes(String(next.battle.targetStrategy)) ? String(next.battle.targetStrategy) : "lowHp";
+      next.worldBoss = normalizeWorldBossState(next.worldBoss || {});
       next.arena = Object.assign(defaultState().arena, next.arena || {});
       next.arena.team = Array.isArray(next.arena.team)
         ? normalizeTeamSlotArray(next.arena.team, CONFIG.arenaTeamSlots, next.owned)
@@ -8811,7 +9131,7 @@
       const source = String(value || "").trim();
       if (!source) return "";
       if (/^(https?:|data:|blob:)/i.test(source) || source.includes("/")) return source;
-      return type === "banner" ? `assets/banners/${source}` : `assets/cards/${source}`;
+      return type === "banner" ? `assets/banners/${source}` : type === "boss" ? `assets/bosses/${source}` : `assets/cards/${source}`;
     }
 
     function isVideo(value) {
@@ -19064,6 +19384,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     function resetModeBattleCache(mode) {
       if (mode === "arena") { currentArenaOpponent = null; arenaResult = null; lastArenaCombat = null; lastArenaSummary = null; }
       if (mode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
+      if (mode === "worldBoss") { lastWorldBossCombat = null; lastWorldBossSummary = null; }
     }
 
     function ensureModeLeader(mode) {
@@ -19444,7 +19765,534 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         </div>`;
     }
 
-        function battleSummaryCardSnapshot(cardLike) {
+    
+    /* ======================= [SECTION 07B WORLD-BOSS] ======================= */
+    function worldBossDateKey(date = new Date()) {
+      return getLocalDateKey(date);
+    }
+
+    function seededWorldBossNumber(seedText = "") {
+      let seed = 2166136261;
+      String(seedText || "").split("").forEach(char => {
+        seed ^= char.charCodeAt(0);
+        seed = Math.imul(seed, 16777619) >>> 0;
+      });
+      seed = (seed + 0x6D2B79F5) >>> 0;
+      let value = seed;
+      return function next() {
+        value += 0x6D2B79F5;
+        let t = value;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function getTodayWorldBoss(dateKey = worldBossDateKey()) {
+      const pool = WORLD_BOSSES.length ? WORLD_BOSSES : WORLD_BOSS_FALLBACKS;
+      const rand = seededWorldBossNumber(`world-boss:${dateKey}`);
+      return pool[Math.floor(rand() * pool.length)] || pool[0] || null;
+    }
+
+    function normalizeWorldBossState(raw = {}) {
+      const today = worldBossDateKey();
+      const boss = getTodayWorldBoss(today);
+      const bossId = String(boss && boss.id || "");
+      const savedDate = String(raw && raw.date || "");
+      const savedBossId = String(raw && raw.bossId || "");
+      const sameDailyBoss = savedDate === today && savedBossId === bossId;
+      return {
+        date: today,
+        bossId,
+        totalScore: sameDailyBoss ? Math.max(0, Number(raw.totalScore) || 0) : 0,
+        bestScore: sameDailyBoss ? Math.max(0, Number(raw.bestScore) || 0) : 0,
+        attempts: sameDailyBoss ? Math.max(0, Math.floor(Number(raw.attempts) || 0)) : 0,
+        lastResult: sameDailyBoss && raw.lastResult && typeof raw.lastResult === "object" ? raw.lastResult : null
+      };
+    }
+
+    function normalizeWorldBossStateForToday(force = false) {
+      const normalized = normalizeWorldBossState(force ? {} : state.worldBoss || {});
+      state.worldBoss = normalized;
+      return normalized;
+    }
+
+    function getBossElements(boss) {
+      const value = boss && (boss.elements || boss.element || boss.elementType);
+      const list = abilityArray(value).length ? abilityArray(value) : [value];
+      const normalized = list.map(normalizeElementName).filter(Boolean);
+      return normalized.length ? [...new Set(normalized)] : ["ไร้ธาตุ"];
+    }
+
+    function sanitizeBossFolderId(value) {
+      return String(value || "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
+    }
+
+    function getWorldBossFolderId(boss) {
+      return sanitizeBossFolderId(boss && (boss.folderId || boss.folder || boss.assetFolder || boss.assetDir));
+    }
+
+    function resolveWorldBossAsset(boss, value) {
+      const source = String(value || "").trim();
+      const folderId = getWorldBossFolderId(boss);
+      if (/^(https?:|data:|blob:)/i.test(source) || source.includes("/")) return source;
+      if (folderId) return `boss/${folderId}/${source || "boss.png"}`;
+      return resolveAsset(source, "boss");
+    }
+
+    function getWorldBossImage(boss) {
+      return resolveWorldBossAsset(boss, boss && (boss.poster || boss.image || boss.icon || boss.art));
+    }
+
+    function getWorldBossMediaHTML(boss) {
+      const source = getWorldBossImage(boss);
+      if (!source) return `<div class="world-boss-placeholder">ยังไม่ได้ใส่ภาพบอส<br><small>ใส่ boss.png ในโฟลเดอร์ ID หรือกำหนด image/poster ในไฟล์ boss ได้เลย</small></div>`;
+      return isVideo(source)
+        ? `<video src="${escapeHTML(source)}" autoplay muted loop playsinline></video>`
+        : `<img src="${escapeHTML(source)}" alt="${escapeHTML(boss && boss.name || "World Boss")}" onerror="this.parentElement.innerHTML='<div class=&quot;world-boss-placeholder&quot;>โหลดภาพบอสไม่สำเร็จ</div>'">`;
+    }
+
+    function getWorldBossAbilities(boss) {
+      return abilityArray(boss && (boss.abilities || boss.skills || boss.activeSkills)).filter(item => item && typeof item === "object");
+    }
+
+    function getWorldBossBaseStats(boss) {
+      return {
+        attack: Math.max(1, Number(boss && (boss.power ?? boss.attack ?? boss.atk ?? boss.basePower)) || 1),
+        hp: Math.max(1, Number(boss && (boss.hp ?? boss.maxHp ?? boss.life ?? boss.baseHp)) || 1),
+        defense: Math.max(0, Number(boss && (boss.defense ?? boss.def ?? boss.baseDefense)) || 0),
+        speed: Math.max(1, Number(boss && (boss.speed ?? boss.baseSpeed)) || 80),
+        attackHits: Math.max(1, Math.floor(Number(boss && (boss.attackHits ?? boss.normalAttackHits)) || 1)),
+        shieldHits: Math.max(0, Math.floor(Number(boss && boss.shieldHits) || 0)),
+        criticalRate: clampCriticalRate(Number(boss && boss.criticalRate) || CONFIG.combatBaseCriticalRate || 0),
+        scoreMultiplier: Math.max(0.01, Number(boss && (boss.scoreMultiplier ?? boss.scoreRate)) || 1)
+      };
+    }
+
+    function getWorldBossTeamStats() {
+      const bossState = normalizeWorldBossStateForToday();
+      const boss = WORLD_BOSS_BY_ID.get(String(bossState.bossId)) || getTodayWorldBoss();
+      const teamIds = getTowerTeamIds();
+      const abilitySummary = getTeamAbilitySummary(teamIds, "tower");
+      const elementSummary = getTeamElementSummary(teamIds);
+      const bossElements = getBossElements(boss);
+      const bossStats = getWorldBossBaseStats(boss);
+      const matchup = getElementMatchup(elementSummary.dominantElement, bossElements);
+      const rawAttack = getRawTeamPower(teamIds, "tower", abilitySummary) + abilitySummary.teamPowerFlat;
+      const rawHp = getRawTeamHp(teamIds, "tower", abilitySummary) + abilitySummary.teamHpFlat;
+      const rawDefense = getRawTeamDefense(teamIds, "tower", abilitySummary) + abilitySummary.teamDefenseFlat;
+      const elementAttack = rawAttack * elementSummary.powerRate;
+      const abilityAttack = rawAttack * abilitySummary.teamPowerRate;
+      const preElementAttack = rawAttack + elementAttack + abilityAttack;
+      const effectiveAttack = Math.max(0, preElementAttack * (1 + matchup.modifier));
+      const effectiveHp = Math.max(1, rawHp * (1 + abilitySummary.teamHpRate));
+      const effectiveDefense = Math.max(0, rawDefense * (1 + abilitySummary.teamDefenseRate));
+      const attackHits = getCombatAttackHits(abilitySummary);
+      const shieldHits = getCombatShieldHits(abilitySummary);
+      const healingRate = getCombatHealingRate(abilitySummary);
+      const shieldRecoveryRate = getCombatShieldRecoveryRate(abilitySummary);
+      const criticalRate = getTeamCriticalRate(teamIds, abilitySummary, false);
+      const playerMembers = buildBattleDefenseMembers(teamIds, abilitySummary, false);
+      const totalCombatPower = calculateCombatPower(effectiveAttack, effectiveHp, effectiveDefense, attackHits, shieldHits);
+      return {
+        bossState, boss, teamIds, abilitySummary, elementSummary, bossElements, bossStats, matchup,
+        rawAttack, rawHp, rawDefense, effectiveAttack, effectiveHp, effectiveDefense,
+        attackHits, shieldHits, healingRate, shieldRecoveryRate, criticalRate, playerMembers, totalCombatPower
+      };
+    }
+
+    function worldBossTurnGrowth(turn = 1) {
+      const safeTurn = Math.max(1, Math.floor(Number(turn) || 1));
+      const bonusHits = Math.min(
+        WORLD_BOSS_CONFIG.maxBonusHits,
+        Math.floor((safeTurn - 1) / Math.max(1, WORLD_BOSS_CONFIG.hitGainEveryTurns))
+      );
+      return {
+        attackMultiplier: 1 + (safeTurn - 1) * WORLD_BOSS_CONFIG.turnAttackGrowthRate,
+        defenseMultiplier: 1 + (safeTurn - 1) * WORLD_BOSS_CONFIG.turnDefenseGrowthRate,
+        scoreMultiplier: 1 + (safeTurn - 1) * WORLD_BOSS_CONFIG.turnScoreBonusRate,
+        bonusHits
+      };
+    }
+
+    function worldBossSkillConditionMet(skill = {}, turn = 1, bossHpRate = 1) {
+      const condition = skill.condition && typeof skill.condition === "object" ? skill.condition : skill.trigger && typeof skill.trigger === "object" ? skill.trigger : {};
+      if (condition.onBattleStart && turn !== 1) return false;
+      if (condition.turn !== undefined && Math.floor(Number(condition.turn) || 0) !== turn) return false;
+      if (Array.isArray(condition.turns) && !condition.turns.map(Number).includes(turn)) return false;
+      const every = Math.max(0, Math.floor(Number(condition.everyTurns ?? condition.every ?? condition.afterTurns) || 0));
+      if (every > 0 && turn % every !== 0) return false;
+      if (condition.hpBelowRate !== undefined && bossHpRate > Number(condition.hpBelowRate)) return false;
+      if (condition.hpAboveRate !== undefined && bossHpRate < Number(condition.hpAboveRate)) return false;
+      return true;
+    }
+
+    function getWorldBossSkillEffectsForTurn(boss, turn, bossHpRate) {
+      const payload = { attackRate: 0, defenseRate: 0, attackHits: 0, playerDamageRate: 0, scoreRate: 0, fixedDamageRateToPlayerHp: 0, names: [] };
+      getWorldBossAbilities(boss).forEach(skill => {
+        if (!worldBossSkillConditionMet(skill, turn, bossHpRate)) return;
+        let activated = false;
+        abilityArray(skill.effects).forEach(effect => {
+          if (!effect || typeof effect !== "object") return;
+          const type = String(effect.type || "").trim();
+          const value = Number(effect.value || 0);
+          if (["bossPowerRate", "bossAttackRate", "powerRate", "teamPowerRate"].includes(type)) { payload.attackRate += value; activated = true; }
+          else if (["bossDefenseRate", "defenseRate", "teamDefenseRate"].includes(type)) { payload.defenseRate += value; activated = true; }
+          else if (["bossAttackHits", "attackHits"].includes(type)) { payload.attackHits += Math.round(value); activated = true; }
+          else if (["playerDamageTakenRate", "playerDamageRate", "damageRate"].includes(type)) { payload.playerDamageRate += value; activated = true; }
+          else if (["scoreRate", "scoreMultiplierRate"].includes(type)) { payload.scoreRate += value; activated = true; }
+          else if (["fixedDamageRateToPlayerHp", "playerHpDamageRate"].includes(type)) { payload.fixedDamageRateToPlayerHp += value; activated = true; }
+        });
+        if (activated || !abilityArray(skill.effects).length) payload.names.push(String(skill.name || "Boss Skill"));
+      });
+      return payload;
+    }
+
+    function summarizeWorldBossMembers(stats, combat, playerRemainingHp) {
+      const totalPower = Math.max(1, abilityArray(stats.playerMembers).reduce((sum, member) => sum + Math.max(0, Number(member.power) || 0), 0));
+      const front = normalizeFormationFront(state.battle.formationFront, CONFIG.towerTeamSlots);
+      const remainingRate = Math.max(0, Math.min(1, playerRemainingHp / Math.max(1, stats.effectiveHp)));
+      const playerMembers = abilityArray(stats.playerMembers).map((member, index) => {
+        const share = Math.max(0, Number(member.power) || 0) / totalPower;
+        return {
+          ...member,
+          row: index < front ? "front" : "back",
+          damage: combat.playerTotalDamage * share,
+          healing: 0,
+          shieldCreated: 0,
+          skillActivations: 0,
+          currentHp: Math.max(0, Number(member.hp || 0) * remainingRate),
+          maxHp: Math.max(1, Number(member.hp || 1)),
+          ko: playerRemainingHp <= 0
+        };
+      });
+      const bossStats = stats.bossStats;
+      const bossMember = {
+        id: String(stats.boss.id),
+        name: String(stats.boss.name || "World Boss"),
+        row: "front",
+        speed: bossStats.speed,
+        damage: combat.enemyTotalDamage,
+        healing: 0,
+        shieldCreated: 0,
+        skillActivations: combat.enemyTriggerActivations,
+        currentHp: combat.enemyRemainingHp,
+        maxHp: bossStats.hp,
+        ko: combat.enemyRemainingHp <= 0
+      };
+      return { playerMembers, enemyMembers: [bossMember] };
+    }
+
+    function buildWorldBossCombat(stats) {
+      const turns = [];
+      const bossStats = stats.bossStats;
+      let playerHp = Math.max(1, stats.effectiveHp);
+      let bossVisibleHp = Math.max(1, bossStats.hp);
+      let bossBroken = false;
+      let playerShield = Math.max(0, stats.shieldHits);
+      let bossShield = Math.max(0, bossStats.shieldHits);
+      let totalScore = 0;
+      let totalDamageToBoss = 0;
+      let totalDamageToPlayer = 0;
+      let playerCriticalHits = 0;
+      let bossCriticalHits = 0;
+      let bossSkillCount = 0;
+      for (let turn = 1; turn <= WORLD_BOSS_CONFIG.maxTurns && playerHp > 0; turn += 1) {
+        const bossHpRate = Math.max(0, bossVisibleHp) / Math.max(1, bossStats.hp);
+        const growth = worldBossTurnGrowth(turn);
+        const skillPayload = getWorldBossSkillEffectsForTurn(stats.boss, turn, bossHpRate);
+        bossSkillCount += skillPayload.names.length;
+        const bossDefense = Math.max(0, bossStats.defense * growth.defenseMultiplier * Math.max(0, 1 + skillPayload.defenseRate));
+        const playerCritical = rollCriticalHit(stats.criticalRate);
+        if (playerCritical) playerCriticalHits += 1;
+        const playerExchange = resolveCombatExchange(
+          stats.effectiveAttack,
+          bossDefense,
+          stats.attackHits,
+          bossShield,
+          playerCritical ? CONFIG.combatCriticalDamageMultiplier : 1,
+          { members: [{ id: String(stats.boss.id), name: stats.boss.name, hp: Math.max(1, bossVisibleHp), blockRate: 0, dodgeRate: 0, damageTakenRate: 0 }], rollDefensiveEffects: true }
+        );
+        const playerDamage = Math.max(0, Number(playerExchange.damage || 0));
+        const scoreMultiplier = bossStats.scoreMultiplier * growth.scoreMultiplier * Math.max(0, 1 + skillPayload.scoreRate) * (bossBroken ? 1 + WORLD_BOSS_CONFIG.breakScoreBonusRate : 1);
+        const scoreGain = playerDamage * scoreMultiplier;
+        totalDamageToBoss += playerDamage;
+        totalScore += scoreGain;
+        bossShield = Math.max(0, bossShield - playerExchange.blockedHits);
+        bossVisibleHp = Math.max(0, bossVisibleHp - playerDamage);
+        if (!bossBroken && bossVisibleHp <= 0) bossBroken = true;
+        turns.push({
+          round: turn,
+          side: "player",
+          actorName: "ทีมไต่หอของคุณ",
+          targetName: stats.boss.name,
+          hits: playerExchange.hits,
+          baseHits: stats.attackHits,
+          passiveBaseHits: stats.attackHits,
+          pendingHitChange: 0,
+          activeHitChange: 0,
+          extraHits: 0,
+          hitReduction: 0,
+          blockedHits: playerExchange.blockedHits,
+          unblockedHits: playerExchange.unblockedHits,
+          damage: playerDamage,
+          scoreGain,
+          critical: playerCritical,
+          criticalRate: stats.criticalRate,
+          criticalMultiplier: playerCritical ? CONFIG.combatCriticalDamageMultiplier : 1,
+          defenderDefense: bossDefense,
+          triggerActivated: skillPayload.names.length > 0,
+          triggeredSkills: skillPayload.names,
+          triggeredDetails: [],
+          attackBonus: 0,
+          healHp: 0,
+          shieldChange: 0,
+          enemyShieldChange: -playerExchange.blockedHits,
+          playerRemaining: playerHp,
+          enemyRemaining: bossVisibleHp,
+          playerShieldRemaining: playerShield,
+          enemyShieldRemaining: bossShield,
+          worldBossBreak: bossBroken
+        });
+        if (playerHp <= 0) break;
+
+        const bossAttack = Math.max(1, bossStats.attack * growth.attackMultiplier * Math.max(0, 1 + skillPayload.attackRate));
+        const bossHits = Math.max(1, bossStats.attackHits + growth.bonusHits + Math.round(skillPayload.attackHits));
+        const bossCritical = rollCriticalHit(bossStats.criticalRate);
+        if (bossCritical) bossCriticalHits += 1;
+        const bossExchange = resolveCombatExchange(
+          bossAttack,
+          stats.effectiveDefense,
+          bossHits,
+          playerShield,
+          (bossCritical ? CONFIG.combatCriticalDamageMultiplier : 1) * Math.max(0, 1 + skillPayload.playerDamageRate),
+          { members: stats.playerMembers, rollDefensiveEffects: true }
+        );
+        const fixedDamage = Math.max(0, stats.effectiveHp * Math.max(0, skillPayload.fixedDamageRateToPlayerHp));
+        const bossDamage = Math.min(playerHp, Math.max(0, Number(bossExchange.damage || 0) + fixedDamage));
+        playerHp = Math.max(0, playerHp - bossDamage);
+        totalDamageToPlayer += bossDamage;
+        playerShield = Math.max(0, playerShield - bossExchange.blockedHits);
+        turns.push({
+          round: turn,
+          side: "enemy",
+          actorName: stats.boss.name,
+          targetName: "ทีมไต่หอของคุณ",
+          hits: bossExchange.hits,
+          baseHits: bossHits,
+          passiveBaseHits: bossStats.attackHits,
+          pendingHitChange: 0,
+          activeHitChange: Math.max(0, bossHits - bossStats.attackHits),
+          extraHits: Math.max(0, bossHits - bossStats.attackHits),
+          hitReduction: 0,
+          blockedHits: bossExchange.blockedHits,
+          unblockedHits: bossExchange.unblockedHits,
+          damage: bossDamage,
+          critical: bossCritical,
+          criticalRate: bossStats.criticalRate,
+          criticalMultiplier: bossCritical ? CONFIG.combatCriticalDamageMultiplier : 1,
+          defenderDefense: stats.effectiveDefense,
+          triggerActivated: skillPayload.names.length > 0,
+          triggeredSkills: skillPayload.names,
+          triggeredDetails: [],
+          attackBonus: bossAttack - bossStats.attack,
+          healHp: 0,
+          shieldChange: -bossExchange.blockedHits,
+          enemyShieldChange: 0,
+          playerRemaining: playerHp,
+          enemyRemaining: bossVisibleHp,
+          playerShieldRemaining: playerShield,
+          enemyShieldRemaining: bossShield,
+          worldBossBreak: bossBroken
+        });
+      }
+      const combat = {
+        winner: totalScore > 0 ? "player" : "enemy",
+        playerFirst: true,
+        turns,
+        rounds: turns.length ? Math.max(...turns.map(turn => Number(turn.round) || 0)) : 0,
+        playerAttack: stats.effectiveAttack,
+        enemyAttack: bossStats.attack,
+        playerDefense: stats.effectiveDefense,
+        enemyDefense: bossStats.defense,
+        playerMaxHp: stats.effectiveHp,
+        enemyMaxHp: bossStats.hp,
+        playerRemainingHp: playerHp,
+        enemyRemainingHp: bossVisibleHp,
+        playerInitialShieldHits: stats.shieldHits,
+        enemyInitialShieldHits: bossStats.shieldHits,
+        playerShieldRemaining: playerShield,
+        enemyShieldRemaining: bossShield,
+        playerInitialHealingRate: stats.healingRate,
+        enemyInitialHealingRate: 0,
+        playerHealingRate: stats.healingRate,
+        enemyHealingRate: 0,
+        playerInitialShieldRecoveryRate: stats.shieldRecoveryRate,
+        enemyInitialShieldRecoveryRate: 0,
+        playerShieldRecoveryRate: stats.shieldRecoveryRate,
+        enemyShieldRecoveryRate: 0,
+        playerInitialCriticalRate: stats.criticalRate,
+        enemyInitialCriticalRate: bossStats.criticalRate,
+        playerCriticalRate: stats.criticalRate,
+        enemyCriticalRate: bossStats.criticalRate,
+        criticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
+        playerTotalDamage: totalDamageToBoss,
+        enemyTotalDamage: totalDamageToPlayer,
+        playerTotalHealing: 0,
+        enemyTotalHealing: 0,
+        playerTotalShieldCreated: 0,
+        enemyTotalShieldCreated: 0,
+        playerTotalCriticalHits: playerCriticalHits,
+        enemyTotalCriticalHits: bossCriticalHits,
+        playerTotalBlocks: 0,
+        enemyTotalBlocks: 0,
+        playerTotalDodges: 0,
+        enemyTotalDodges: 0,
+        playerTotalBlockedDamage: 0,
+        enemyTotalBlockedDamage: 0,
+        playerTriggerActivations: 0,
+        enemyTriggerActivations: bossSkillCount,
+        worldBossScore: totalScore,
+        worldBossBroken: bossBroken,
+        copiedAbilityEvents: [],
+        playerCopiedAbilitiesRemaining: [],
+        enemyCopiedAbilitiesRemaining: []
+      };
+      const members = summarizeWorldBossMembers(stats, combat, playerHp);
+      combat.playerMembers = members.playerMembers;
+      combat.enemyMembers = members.enemyMembers;
+      combat.playerMostUsedSkill = { name: "-", count: 0 };
+      combat.enemyMostUsedSkill = { name: bossSkillCount ? "Boss Skill" : "-", count: bossSkillCount };
+      return combat;
+    }
+
+    function worldBossResultSummaryText(combat, stats) {
+      const bossBroken = combat.worldBossBroken ? " • บอสเข้าสู่ Break แล้ว แต่ยังนับคะแนนต่อ" : "";
+      return `ทำคะแนน ${formatNumber(combat.worldBossScore)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} • อยู่ได้ ${formatNumber(combat.rounds)} เทิร์น • HP เราเหลือ ${formatNumber(combat.playerRemainingHp)}/${formatNumber(combat.playerMaxHp)}${bossBroken}`;
+    }
+
+    function renderWorldBossLogFromResult(result = null) {
+      const target = document.getElementById("worldBossLog");
+      if (!target) return;
+      const combat = lastWorldBossCombat || (result && result.combat) || null;
+      if (!combat || !abilityArray(combat.turns).length) {
+        target.innerHTML = `<p class="hit-report-empty">หลังตีบอส ระบบจะแสดงคะแนน ดาเมจ เทิร์น และสถานะ Break ของบอส</p>`;
+        return;
+      }
+      const playerTurns = combat.turns.filter(turn => turn.side === "player").slice(-6).reverse();
+      target.innerHTML = playerTurns.map(turn => `<div class="world-boss-log-row ${turn.worldBossBreak ? "break" : ""}"><strong>T${formatNumber(turn.round)}</strong><span>${turn.worldBossBreak ? "BREAK • " : ""}ดาเมจ ${formatNumber(turn.damage)} • คะแนน +${formatNumber(turn.scoreGain || 0)}</span><b>${turn.critical ? "CRIT" : `${formatNumber(turn.hits)} hit`}</b></div>`).join("");
+    }
+
+    function renderWorldBoss() {
+      if (!document.getElementById("worldBossView")) return;
+      const stats = getWorldBossTeamStats();
+      const boss = stats.boss;
+      const bossState = normalizeWorldBossStateForToday();
+      const result = bossState.lastResult || null;
+      if (result && result.combat && String(result.bossId) === String(boss.id) && !lastWorldBossSummary) {
+        lastWorldBossCombat = result.combat;
+        lastWorldBossSummary = makeCombatSummary({
+          mode: "worldBoss",
+          title: `World Boss • ${boss.name}`,
+          opponent: boss.name,
+          combat: result.combat,
+          outcomeText: `คะแนน World Boss +${formatNumber(result.score || result.combat.worldBossScore || 0)}`,
+          rewardText: result.text || "สรุป World Boss ล่าสุด",
+          playerLabel: "ทีมไต่หอของคุณ",
+          enemyLabel: boss.name,
+          playerCards: battleSummaryOwnedTeam(getTowerTeamIds()),
+          enemyCards: [{ ...boss, image: getWorldBossImage(boss), elements: stats.bossElements, power: stats.bossStats.attack, hp: stats.bossStats.hp, defense: stats.bossStats.defense, speed: stats.bossStats.speed }]
+        });
+      }
+      const remainingHp = result && String(result.bossId) === String(boss.id) ? Math.max(0, Number(result.remainingHp) || 0) : stats.bossStats.hp;
+      const hpPercent = Math.max(0, Math.min(100, remainingHp / Math.max(1, stats.bossStats.hp) * 100));
+      const image = getWorldBossImage(boss);
+      const bg = document.getElementById("worldBossBg");
+      if (bg) bg.style.backgroundImage = image && !isVideo(image)
+        ? `linear-gradient(90deg, rgba(5,8,18,.92), rgba(5,8,18,.62)), url("${image.replace(/"/g, '%22')}")`
+        : "";
+      const portrait = document.getElementById("worldBossPortrait");
+      if (portrait) portrait.innerHTML = getWorldBossMediaHTML(boss);
+      const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+      setText("worldBossDateText", `Daily Raid • ${bossState.date}`);
+      setText("worldBossName", boss.name || "World Boss");
+      setText("worldBossDescription", boss.description || boss.title || "บอสโลกประจำวัน");
+      setText("worldBossHpText", `HP ${formatNumber(remainingHp)} / ${formatNumber(stats.bossStats.hp)}`);
+      setText("worldBossBreakText", remainingHp <= 0 ? "BREAK — ยังตีเก็บคะแนนต่อได้" : "HP หมดแล้วไม่หาย ตีต่อเพื่อคะแนน");
+      setText("worldBossAtkText", formatNumber(stats.bossStats.attack));
+      setText("worldBossMaxHpText", formatNumber(stats.bossStats.hp));
+      setText("worldBossDefText", formatNumber(stats.bossStats.defense));
+      setText("worldBossElementText", stats.bossElements.map(elementLabel).join(" / "));
+      setText("worldBossTotalScoreText", formatNumber(bossState.totalScore));
+      setText("worldBossBestScoreText", formatNumber(bossState.bestScore));
+      setText("worldBossAttemptText", `${formatNumber(bossState.attempts)} ครั้ง`);
+      setText("worldBossTeamPowerText", formatNumber(stats.totalCombatPower));
+      setText("worldBossScaleText", `ATK +${Math.round(WORLD_BOSS_CONFIG.turnAttackGrowthRate * 100)}%/เทิร์น • DEF +${Math.round(WORLD_BOSS_CONFIG.turnDefenseGrowthRate * 1000) / 10}%/เทิร์น • โบนัสคะแนน +${Math.round(WORLD_BOSS_CONFIG.turnScoreBonusRate * 1000) / 10}%/เทิร์น • ทุก ${WORLD_BOSS_CONFIG.hitGainEveryTurns} เทิร์น เพิ่มฮิตบอส +1 สูงสุด +${WORLD_BOSS_CONFIG.maxBonusHits}`);
+      const hpMeter = document.getElementById("worldBossHpMeter");
+      if (hpMeter) hpMeter.style.width = `${hpPercent}%`;
+      const resultBox = document.getElementById("worldBossResult");
+      if (resultBox) {
+        resultBox.className = `battle-result ${result ? "win" : ""}`;
+        resultBox.textContent = result ? result.text : "ใช้ทีมไต่หอเป็นทีมตีบอส บอสจะเริ่มสเกลใหม่ทุกครั้งที่เริ่มไฟต์";
+      }
+      const summaryButton = document.getElementById("worldBossSummaryButton");
+      if (summaryButton) summaryButton.disabled = !lastWorldBossSummary;
+      const skillList = document.getElementById("worldBossSkillList");
+      if (skillList) {
+        const abilities = getWorldBossAbilities(boss);
+        skillList.innerHTML = abilities.length
+          ? abilities.map(skill => `<div class="world-boss-skill"><strong>${escapeHTML(skill.name || "Boss Skill")}</strong><span>${escapeHTML(skill.description || abilityArray(skill.effects).map(abilityEffectText).join(" • ") || "สกิลบอส")}</span></div>`).join("")
+          : `<div class="world-boss-skill"><strong>ไม่มีสกิลบอส</strong><span>ใส่ abilities หรือ skills ในไฟล์บอสเพื่อเพิ่มสกิลได้</span></div>`;
+      }
+      renderWorldBossLogFromResult(result);
+    }
+
+    function runWorldBossBattle() {
+      if (worldBossAnimating) return;
+      const stats = getWorldBossTeamStats();
+      if (!stats.teamIds.some(Boolean)) return showToast("ต้องจัดทีมไต่หอก่อนตีบอสโลก");
+      worldBossAnimating = true;
+      try {
+        const combat = buildWorldBossCombat(stats);
+        lastWorldBossCombat = combat;
+        const score = Math.floor(Number(combat.worldBossScore) || 0);
+        const text = worldBossResultSummaryText(combat, stats);
+        const bossState = normalizeWorldBossStateForToday();
+        bossState.totalScore += score;
+        bossState.bestScore = Math.max(bossState.bestScore, score);
+        bossState.attempts += 1;
+        bossState.lastResult = {
+          bossId: String(stats.boss.id),
+          score,
+          totalDamage: Math.floor(Number(combat.playerTotalDamage) || 0),
+          remainingHp: Math.max(0, Number(combat.enemyRemainingHp) || 0),
+          turns: combat.rounds,
+          broke: Boolean(combat.worldBossBroken),
+          at: Date.now(),
+          text,
+          combat
+        };
+        lastWorldBossSummary = makeCombatSummary({
+          mode: "worldBoss",
+          title: `World Boss • ${stats.boss.name}`,
+          opponent: stats.boss.name,
+          combat,
+          outcomeText: `คะแนน World Boss +${formatNumber(score)}`,
+          rewardText: text,
+          playerLabel: "ทีมไต่หอของคุณ",
+          enemyLabel: stats.boss.name,
+          playerCards: battleSummaryOwnedTeam(getTowerTeamIds()),
+          enemyCards: [{ ...stats.boss, image: getWorldBossImage(stats.boss), elements: stats.bossElements, power: stats.bossStats.attack, hp: stats.bossStats.hp, defense: stats.bossStats.defense, speed: stats.bossStats.speed }]
+        });
+        saveState(true);
+        renderAll();
+        showToast(text);
+      } finally {
+        worldBossAnimating = false;
+      }
+    }
+
+    function battleSummaryCardSnapshot(cardLike) {
       if (!cardLike) return null;
       const source = CARD_BY_ID.get(cardIdString(cardLike.id)) || cardLike;
       return {
@@ -19556,7 +20404,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         return `<div class="battle-turn-row ${turn.side === "enemy" ? "enemy" : ""} ${turn.triggerActivated ? "active" : ""}"><span>#${index + 1} / R${turn.round}</span><strong>${escapeHTML(attacker)} → ${escapeHTML(targetName)}</strong><span>${turn.command === "guard" ? "ตั้งรับ" : `${formatNumber(turn.hits)} ฮิต`}</span><span>${formatNumber(turn.blockedHits)} บล็อก</span><span>${formatNumber(turn.damage)}</span><span>+${formatNumber(turn.healHp || 0)}</span><span>${escapeHTML(shieldText)}</span><span>${formatNumber(turn.playerRemaining)}</span><span>${formatNumber(turn.enemyRemaining)}</span><span class="battle-turn-skill">${escapeHTML(skills)}</span></div>`;
       }).join("");
       target.innerHTML = `
-        <div class="battle-summary-head"><p class="eyebrow">${summary.mode === "arena" ? "Arena Battle Report" : "Tower Battle Report"}</p><h2>${escapeHTML(summary.title)}</h2><p>${escapeHTML(summary.playerLabel)} ปะทะ ${escapeHTML(summary.enemyLabel)}</p></div>
+        <div class="battle-summary-head"><p class="eyebrow">${summary.mode === "arena" ? "Arena Battle Report" : summary.mode === "worldBoss" ? "World Boss Report" : "Tower Battle Report"}</p><h2>${escapeHTML(summary.title)}</h2><p>${escapeHTML(summary.playerLabel)} ปะทะ ${escapeHTML(summary.enemyLabel)}</p></div>
         <div class="battle-summary-body">
           <div class="battle-summary-result ${summary.tone}"><strong>${escapeHTML(summary.outcomeText || (combat.winner === "player" ? "ชัยชนะ" : "พ่ายแพ้"))}</strong><span>${escapeHTML(summary.rewardText || "สรุปข้อมูลจากการต่อสู้ล่าสุด")}</span></div>
           <div class="battle-summary-metrics">${metrics.map(([label, value]) => `<div class="battle-summary-metric"><span>${escapeHTML(label)}</span><strong title="${escapeHTML(value)}">${escapeHTML(value)}</strong></div>`).join("")}</div>
@@ -19568,7 +20416,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function openBattleSummary(mode = "tower") {
-      const summary = mode === "arena" ? lastArenaSummary : lastBattleSummary;
+      const summary = mode === "arena" ? lastArenaSummary : mode === "worldBoss" ? lastWorldBossSummary : lastBattleSummary;
       if (!summary) return showToast("ยังไม่มีสรุปการต่อสู้ของโหมดนี้");
       renderBattleSummary(summary);
       document.getElementById("battleSummaryModal").classList.remove("hidden");
@@ -19931,6 +20779,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       document.getElementById("collectionView").classList.toggle("hidden", activeTab !== "collection");
       document.getElementById("teamView").classList.toggle("hidden", activeTab !== "team");
       document.getElementById("battleView").classList.toggle("hidden", activeTab !== "battle");
+      document.getElementById("worldBossView").classList.toggle("hidden", activeTab !== "worldBoss");
       document.getElementById("arenaView").classList.toggle("hidden", activeTab !== "arena");
       document.getElementById("friendsView").classList.toggle("hidden", activeTab !== "friends");
       document.getElementById("collectionTools").classList.toggle("hidden", activeTab !== "collection");
@@ -19945,6 +20794,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderCollection();
       renderTeam();
       renderBattle();
+      renderWorldBoss();
       renderArena();
       renderFriends();
       renderAccount();
@@ -20977,6 +21827,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         renderTabs();
         if (activeTab === "friends") refreshFriends();
         if (activeTab === "arena") refreshArenaData();
+        if (activeTab === "worldBoss") renderWorldBoss();
         return;
       }
 
@@ -21074,6 +21925,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "toggle-tower-team") toggleTowerTeam(cardId);
       if (action === "toggle-arena-team") toggleArenaTeam(cardId);
       if (action === "arena-battle") runArenaBattle();
+      if (action === "world-boss-battle") runWorldBossBattle();
+      if (action === "refresh-world-boss") { normalizeWorldBossStateForToday(false); renderWorldBoss(); showToast("รีเฟรชข้อมูลบอสวันนี้แล้ว"); }
       if (action === "refresh-arena") refreshArenaData(true);
       if (action === "export-save") exportSave();
       if (action === "import-save") document.getElementById("importInput").click();
