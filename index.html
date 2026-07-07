@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v77-awaken-gems">
-  <title>Anime Card Collection · Split Card Data Runtime v77 Awaken Gems</title>
+  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v78-status-runtime-fix">
+  <title>Anime Card Collection · Split Card Data Runtime v78 Status Runtime Fix</title>
   <style>
     :root {
       color-scheme: dark;
@@ -13168,9 +13168,48 @@
       }
       function applyAttackStatusRules(rules, ownerTeam, defenderTeam, actor, attackResults, turnIndex) {
         const events = [];
-        abilityArray(rules).forEach((rule, ruleIndex) => { const count = Math.max(1,Math.min(5,Math.floor(Number(rule.targetCount)||1))); let candidates = [];
-          if (String(rule.side || "enemy") === "enemy") { const resultIds = new Set(abilityArray(attackResults).filter(item => !item.dodged && !item.ko).map(item => String(item.targetCardId))); candidates = defenderTeam.members.filter(member => resultIds.has(String(member.id)) && memberMatchesRuntimeRule(member, rule)); if (!candidates.length) candidates = resolveRuntimeTargets({ ...rule, side:"enemy" }, ownerTeam, defenderTeam, actor, null); } else candidates = resolveRuntimeTargets(rule, ownerTeam, defenderTeam, actor, null);
-          candidates.slice(0,count).forEach(member => { const resistance = shouldAbilityEffectBeResisted(member.statusResistanceRules, { ...rule, type:CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS }, `${options.statusResolutionSeed || "runtime-status"}`, `${rule._runtimeEffectKey || "status"}:${turnIndex}:${ruleIndex}:${member.id}`); if (resistance.resisted) { events.push({ status:"resisted", statusType:normalizeBattleStatusName(rule.status), statusLabel:BATTLE_STATUS_LABELS[normalizeBattleStatusName(rule.status)] || rule.status, targetCardId:member.id, targetName:member.name, rate:resistance.rate }); return; } if (Math.random() > Math.max(0,Math.min(1,Number(rule.successRate)||0))) { events.push({ status:"failed", statusType:normalizeBattleStatusName(rule.status), statusLabel:BATTLE_STATUS_LABELS[normalizeBattleStatusName(rule.status)] || rule.status, targetCardId:member.id, targetName:member.name, successRate:rule.successRate }); return; } const event = applyBattleStatus(member, rule, actor, ownerTeam, defenderTeam, "attack"); if (event) events.push(event); });
+        abilityArray(rules).forEach((rule, ruleIndex) => {
+          const count = Math.max(1, Math.min(5, Math.floor(Number(rule && rule.targetCount) || 1)));
+          const side = String(rule && rule.side || "enemy");
+          const selection = normalizeAbilitySelectionMode(rule && (rule.targetSelection || rule.selection), "random");
+          const seed = `${options.statusResolutionSeed || "runtime-status"}:${rule._runtimeEffectKey || "status"}:${turnIndex}:${ruleIndex}`;
+          let candidates = [];
+
+          if (side === "enemy") {
+            // v78: สถานะผิดปกติควรเลือกเป้าหมายจากฝั่งศัตรูตาม targetSelection/targetCount โดยตรง
+            // ไม่ผูกกับ attackResults อย่างเดียว เพราะถ้าการโจมตีจริงโดนแค่ 1 เป้า สถานะ AOE จะดูเหมือนไม่ทำงาน
+            candidates = resolveRuntimeTargets({ ...rule, side:"enemy", selection:"all" }, ownerTeam, defenderTeam, actor, null);
+
+            // ถ้ามีการระบุ current/target แบบข้อมูลเก่า และไม่มีเป้าจากตัวกรอง ให้ fallback ไปหาเป้าหมายที่โดนโจมตีจริง
+            if (!candidates.length) {
+              const resultIds = new Set(abilityArray(attackResults).filter(item => !item.ko).map(item => String(item.targetCardId)));
+              candidates = defenderTeam.members.filter(member => resultIds.has(String(member.id)) && memberMatchesRuntimeRule(member, rule));
+            }
+          } else {
+            candidates = resolveRuntimeTargets({ ...rule, selection:"all" }, ownerTeam, defenderTeam, actor, null);
+          }
+
+          candidates = selectAbilityItems(candidates, selection, count, seed, "targets");
+          candidates.forEach(member => {
+            const resistance = shouldAbilityEffectBeResisted(
+              member.statusResistanceRules,
+              { ...rule, type:CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS },
+              `${options.statusResolutionSeed || "runtime-status"}`,
+              `${rule._runtimeEffectKey || "status"}:${turnIndex}:${ruleIndex}:${member.id}`
+            );
+            const statusType = normalizeBattleStatusName(rule.status);
+            const statusLabel = BATTLE_STATUS_LABELS[statusType] || rule.status;
+            if (resistance.resisted) {
+              events.push({ status:"resisted", statusType, statusLabel, targetCardId:member.id, targetName:member.name, rate:resistance.rate });
+              return;
+            }
+            if (Math.random() > Math.max(0, Math.min(1, Number(rule.successRate) || 0))) {
+              events.push({ status:"failed", statusType, statusLabel, targetCardId:member.id, targetName:member.name, successRate:rule.successRate });
+              return;
+            }
+            const event = applyBattleStatus(member, rule, actor, ownerTeam, defenderTeam, "attack");
+            if (event) events.push(event);
+          });
         });
         return events;
       }
@@ -13683,7 +13722,7 @@
           reviveHitLifeRemaining: member.reviveHitLifeRemaining || 0,
           tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0,
           statusEffects: compactBattleStatuses(member).map(effect => ({ status:effect.status, label:effect.label, icon:statusEmojiText(effect), text:statusIconText(effect), turnsRemaining:effect.turnsRemaining, attacksRemaining:effect.attacksRemaining, hitCounter:effect.hitCounter, chainAfterHits:effect.chainAfterHits })),
-          statusControlled: activeStatusEffects(member).some(effect => ["stun","freeze","shock"].includes(effect.status)),
+          statusControlled: activeStatusEffects(member).some(effect => ["stun","freeze","shock","sleep"].includes(effect.status)),
           capturedBySide: member.capturedBySide || "", originalSide: member.originalSide || ""
         });
         return { player: player.members.map(snap), enemy: enemy.members.map(snap) };
@@ -15323,6 +15362,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               type: effectType,
               status: String(effect.status || effect.statusType || effect.abnormalStatus || "stun"),
               targetSelection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
+              selection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
               targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount || effect.count || 1) || 1))),
               successRate: normalizeAbilityChance(effect.successRate ?? effect.statusRate ?? effect.chance ?? effect.rate ?? effect.value ?? 1, 1),
               durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns ?? effect.turns ?? 1) || 0)),
