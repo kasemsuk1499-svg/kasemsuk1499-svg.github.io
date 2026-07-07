@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v76-gacha-weight-balance">
-  <title>Anime Card Collection · Split Card Data Runtime v76 Gacha Weight Balance</title>
+  <meta name="gacha-app-build" content="2026-07-07-split-card-data-v77-awaken-gems">
+  <title>Anime Card Collection · Split Card Data Runtime v77 Awaken Gems</title>
   <style>
     :root {
       color-scheme: dark;
@@ -386,6 +386,13 @@
       background: linear-gradient(135deg, #56e39f, #a7f3d0 58%, #5ce8ff);
       box-shadow: 0 10px 28px rgba(86,227,159,.18);
     }
+    .btn-awaken-gems {
+      color: #fdf2f8;
+      border-color: rgba(244,114,182,.42);
+      background: linear-gradient(135deg, rgba(126,34,206,.88), rgba(217,70,239,.64) 52%, rgba(245,158,11,.64));
+      box-shadow: 0 10px 28px rgba(217,70,239,.18);
+    }
+    .btn-awaken-gems .cost { color: #fff7ed; opacity: .9; }
     .cost { display: block; font-size: .69rem; opacity: .76; margin-top: 2px; }
 
     .side-panel {
@@ -6798,6 +6805,8 @@
       // แก้โดยอลิซ v51: ผู้เล่นยืนยันอัตราแลก Dust โดยคำนึงถึงรายได้ของ EX ที่สูงกว่า SC
       // ใช้ 100 Gems แลก 1 Dust: เงินเดือน 1,000M Gems แลกได้ 10M Dust พออัป EX จาก Lv.1 ถึงเลเวลตัน 1 ใบ
       dustGemCost: 100,
+      // เพิ่มโดยอลิซ v77: ใช้ Gems 1B เพื่ออเวกการ์ด +1 ขั้นทันที โดยไม่ต้องใช้การ์ดซ้ำ
+      awakenGemCost: 1000000000,
       starterSRSelector: 1,
       starterTeamSize: 5,
       dailyGems: 2500000,
@@ -18081,6 +18090,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return Math.max(1, usedAfter - usedBefore);
     }
 
+    function getAwakenGemCost(card) {
+      return Math.max(1, Math.floor(Number(CONFIG.awakenGemCost) || 1000000000));
+    }
+
     function awakenCard(cardId) {
       const card = CARD_BY_ID.get(String(cardId));
       const owned = card && getOwned(card.id);
@@ -18097,6 +18110,31 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       refreshCardProgressUI(card.id);
       if (converted.copies > 0) {
         showToast(`อเวกเต็มแล้ว • แปลงการ์ดซ้ำค้าง ${formatNumber(converted.copies)} ใบ เป็นโบนัส Dust +${formatNumber(converted.dust)}`);
+      }
+    }
+
+    function awakenCardWithGems(cardId) {
+      if (cardUpgradeBusy) return;
+      const card = CARD_BY_ID.get(String(cardId));
+      const owned = card && getOwned(card.id);
+      if (!card || !owned) return;
+      const maxRank = getCardAwakenMax(card);
+      if (owned.duplicateRank >= maxRank) return showToast("ปลุกพลังเต็มแล้ว");
+      const cost = getAwakenGemCost(card);
+      if (state.gems < cost) return showToast(`Gems ไม่พอ • ต้องใช้ ${formatNumber(cost)} Gems เพื่ออเวก +1`);
+      cardUpgradeBusy = true;
+      try {
+        updateIncome();
+        if (state.gems < cost) return showToast(`Gems ไม่พอ • ต้องใช้ ${formatNumber(cost)} Gems เพื่ออเวก +1`);
+        state.gems -= cost;
+        owned.duplicateRank = Math.min(maxRank, Math.max(0, Math.floor(Number(owned.duplicateRank) || 0)) + 1);
+        const converted = convertMaxAwakenStockToDust(card, owned);
+        saveState();
+        refreshCardProgressUI(card.id);
+        const convertText = converted.copies > 0 ? ` • อเวกเต็ม แปลงซ้ำค้าง ${formatNumber(converted.copies)} ใบเป็น Dust +${formatNumber(converted.dust)}` : "";
+        showToast(`ใช้เงิน ${formatNumber(cost)} Gems อเวก ${card.name} เป็น +${owned.duplicateRank} สำเร็จ${convertText}`);
+      } finally {
+        cardUpgradeBusy = false;
       }
     }
 
@@ -18140,7 +18178,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const overallPercent = owned ? Math.round((levelPercent + awakenPercent) / 2) : 0;
       const upgradeCost = owned && level < maxLevel ? getUpgradeCost(card) : 0;
       const awakenCost = owned && rank < maxRank ? getAwakenCost(card) : 0;
-      return { owned, maxLevel, maxRank, level, rank, count, availableDuplicates, levelPercent, awakenPercent, overallPercent, upgradeCost, awakenCost };
+      const awakenGemCost = owned && rank < maxRank ? getAwakenGemCost(card) : 0;
+      return { owned, maxLevel, maxRank, level, rank, count, availableDuplicates, levelPercent, awakenPercent, overallPercent, upgradeCost, awakenCost, awakenGemCost };
     }
 
     function awakenBadgeHTML(card) {
@@ -18203,7 +18242,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const levelNote = status.level >= status.maxLevel ? "เลเวลเต็มแล้ว" : `เลเวลถัดไปใช้ ${formatNumber(status.upgradeCost)} Dust`;
       const awakenNote = status.rank >= status.maxRank
         ? `ปลุกพลังเต็มแล้ว • การ์ดซ้ำใหม่แปลงเป็น Dust x${formatNumber(CONFIG.maxAwakenDuplicateDustMultiplier)}`
-        : `ขั้นถัดไปใช้ซ้ำ ${formatNumber(status.awakenCost)} ใบ • มีซ้ำ ${formatNumber(status.availableDuplicates)} ใบ`;
+        : `ขั้นถัดไปใช้ซ้ำ ${formatNumber(status.awakenCost)} ใบ • มีซ้ำ ${formatNumber(status.availableDuplicates)} ใบ • หรือใช้เงิน ${formatNumber(status.awakenGemCost)} Gems เพื่ออเวก +1`;
       const supportActive = String(state.profile.supportCardId || "") === String(card.id);
       return `
         <div class="upgrade-status-panel">
@@ -19964,6 +20003,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                   <button id="cardAwakenButton" class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
                     ปลุกพลัง <span id="cardAwakenCost" class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
                   </button>
+                  <button id="cardAwakenGemButton" class="btn btn-awaken-gems" data-action="awaken-gems" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
+                    ใช้เงินอเวก +1 <span id="cardAwakenGemCost" class="cost">${rank >= maxRank ? "เต็มแล้ว" : `${formatNumber(getAwakenGemCost(card))} Gems`}</span>
+                  </button>
                   <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีมโชว์" : "เพิ่มเข้าทีมโชว์"}</button>
                   <button class="btn ${inTowerTeam ? "btn-danger" : "btn-gold"}" data-action="toggle-tower-team" data-card-id="${escapeHTML(card.id)}">${inTowerTeam ? "นำออกจากทีมไต่หอ" : "เพิ่มเข้าทีมไต่หอ"}</button>
                   <button class="btn ${inArenaTeam ? "btn-danger" : "btn-primary"}" data-action="toggle-arena-team" data-card-id="${escapeHTML(card.id)}">${inArenaTeam ? "นำออกจากทีม ARENA" : "เพิ่มเข้าทีม ARENA"}</button>
@@ -20010,12 +20052,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const oneButton = document.getElementById("cardUpgradeOneButton");
       const allButton = document.getElementById("cardUpgradeAllButton");
       const awakenButton = document.getElementById("cardAwakenButton");
+      const awakenGemButton = document.getElementById("cardAwakenGemButton");
       if (oneButton) oneButton.disabled = status.level >= status.maxLevel;
       if (allButton) allButton.disabled = status.level >= status.maxLevel;
       if (awakenButton) awakenButton.disabled = status.rank >= status.maxRank;
+      if (awakenGemButton) awakenGemButton.disabled = status.rank >= status.maxRank;
       setText("cardUpgradeOneCost", status.level >= status.maxLevel ? "เลเวลเต็ม" : `${formatNumber(status.upgradeCost)} Dust`);
       setText("cardUpgradeAllCost", status.level >= status.maxLevel ? "เลเวลเต็ม" : `${formatNumber(getUpgradeCostToMax(card))} Dust`);
       setText("cardAwakenCost", status.rank >= status.maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${status.awakenCost} ใบ / มี ${status.availableDuplicates}`);
+      setText("cardAwakenGemCost", status.rank >= status.maxRank ? "เต็มแล้ว" : `${formatNumber(status.awakenGemCost)} Gems`);
     }
 
     function openCardModal(cardId, options = {}) {
@@ -20973,6 +21018,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "upgrade") upgradeCard(cardId);
       if (action === "upgrade-all") upgradeCardToMax(cardId);
       if (action === "awaken") awakenCard(cardId);
+      if (action === "awaken-gems") awakenCardWithGems(cardId);
       if (action === "toggle-team") toggleTeam(cardId);
       if (action === "toggle-tower-team") toggleTowerTeam(cardId);
       if (action === "toggle-arena-team") toggleArenaTeam(cardId);
