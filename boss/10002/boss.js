@@ -5,7 +5,7 @@ ACC_REGISTER_BOSS({
   description: "ตัวอย่างบอสอีกตัว ใช้สุ่มประจำวันร่วมกับบอสอื่นใน manifest",
   rarity: "WORLD_BOSS",
   element: ["น้ำ", "น้ำแข็ง"],
-  image: "boss.png",
+  image: "10002.png",
   power: 2100000,
   hp: 78000000,
   defense: 610000,
