@@ -89,7 +89,6 @@ ACC_REGISTER_CARD({
           condition: {
             onOwnAttack: true,
             sourceRevived: true
-            ]
           },
           targetSelection: "random",
           targetCount: 5,
