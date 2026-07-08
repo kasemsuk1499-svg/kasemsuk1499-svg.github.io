@@ -97,7 +97,7 @@ ACC_REGISTER_CARD({
           targetSelection: "random",
           targetCount: 5,
           status: "freeze",
-          successRate: 0.5,
+          successRate: 1,
           durationTurns: 1
         }
       ],
