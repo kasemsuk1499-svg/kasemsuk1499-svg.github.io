@@ -102,7 +102,23 @@ ACC_REGISTER_CARD({
         }
       ],
       activeCutscene: {
-        enabled: false
+    enabled: true,
+    triggerOn: "death",
+    kicker: "WILL OF COURAGE",
+    quote: "ฉันจะไม่ยอมแพ้... จนกว่าจะไปถึงเธอ!",
+    subtitle: "Revive Skill Cutscene",
+    video: "card/3001/Willop.mp4",
+    poster: "card/3001/3001.png",
+    accent: "#e0f7ff",
+    accent2: "#ffffff",
+    introMs: 1500,
+    maxVideoMs: 65000,
+    revealMs: 2500,
+    objectFit: "cover",
+    objectPosition: "center center",
+    muted: false,
+    volume: 0.5,
+    showCardAfterVideo: false
       }
     }
   ],
