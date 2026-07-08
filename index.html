@@ -768,6 +768,7 @@
     .rarity-jjks { --fx-opacity: .25; --rarity-fx: linear-gradient(120deg, rgba(250,204,21,.75), transparent 35%, rgba(249,115,22,.72)); }
     .rarity-sc { --fx-opacity: .28; --rarity-fx: linear-gradient(115deg, #22d3ee, transparent 28%, #f472b6 53%, transparent 72%, #facc15); }
     .rarity-ex { --fx-opacity: .32; --rarity-fx: conic-gradient(from 180deg, #22d3ee, #a78bfa, #f472b6, #facc15, #22d3ee); }
+    .rarity-god { --fx-opacity: .36; --rarity-fx: conic-gradient(from 210deg, #020617, #ffffff 18%, #d4af37 35%, #0f172a 52%, #fff8dc 70%, #facc15 86%, #020617); }
 
     .reveal-panel .rarity-sr::before,
     .reveal-panel .rarity-ssr::before,
@@ -777,7 +778,8 @@
     .reveal-panel .rarity-jjkc::before,
     .reveal-panel .rarity-jjks::before,
     .reveal-panel .rarity-ex::before,
-    .reveal-panel .rarity-sc::before {
+    .reveal-panel .rarity-sc::before,
+    .reveal-panel .rarity-god::before {
       animation: rarity-shimmer 2.6s ease-in-out infinite;
     }
 
@@ -2876,6 +2878,18 @@
 
     .sc-cutscene.phase-intro .sc-cutscene-shade,
     .sc-cutscene.phase-reveal .sc-cutscene-shade { opacity: 1; }
+
+    .sc-cutscene.rarity-god .sc-cutscene-shade {
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255,255,255,.14), transparent 0 24%, rgba(212,175,55,.16) 43%, rgba(1,2,8,.78) 100%),
+        linear-gradient(135deg, rgba(255,255,255,.18), rgba(1,2,8,.68) 42%, rgba(250,204,21,.22));
+    }
+
+    .sc-cutscene.rarity-god .sc-cutscene-card {
+      border-color: rgba(250,204,21,.92);
+      background: linear-gradient(145deg, #020617, #ffffff 38%, #d4af37 70%, #111827);
+      box-shadow: 0 0 0 5px rgba(255,255,255,.10), 0 24px 80px rgba(0,0,0,.64), 0 0 74px rgba(250,204,21,.52);
+    }
 
     .sc-cutscene::after {
       content: "";
@@ -6984,10 +6998,10 @@
     </div>
   </div>
 
-  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดพิเศษ EX / SC">
+  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดพิเศษ EX / SC / GOD">
     <video class="sc-cutscene-video" id="scCutsceneVideo" playsinline preload="auto"></video>
     <div class="sc-cutscene-shade" aria-hidden="true"></div>
-    <button class="sc-skip" data-action="skip-sc-cutscene" aria-label="ข้ามคัทซีน SC">ข้ามคัทซีน · ESC</button>
+    <button class="sc-skip" data-action="skip-sc-cutscene" aria-label="ข้ามคัทซีนการ์ดพิเศษ">ข้ามคัทซีน · ESC</button>
 
     <div class="sc-intro" id="scCutsceneIntro" aria-live="polite">
       <p class="sc-intro-kicker" id="scCutsceneIntroKicker">Astral Convergence</p>
@@ -7562,7 +7576,8 @@
   gradient: "linear-gradient(135deg, #ff77d9 0%, #9c8cff 16%, #65e8ff 32%, #75ffbf 48%, #fff18a 64%, #ff9f76 80%, #ffffff 92%, #ff77d9 100%)",
   glow: "#f4caff",
   textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 27000,  baseHp: 135000,  baseDefense: 10800, baseSpeed: 103, baseIncome: 275, maxLevel: 250, upgradeDustBase: 1723,   upgradeDustGrowth: 1.016, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 20,  awakenCopies: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], powerBonus: 0.035, incomeBonus: 0.023 },
-      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 1107,   upgradeDustGrowth: 1.017, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 }
+      EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 1107,   upgradeDustGrowth: 1.017, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 },
+      GOD: { label: "GOD",       color: "#f8fafc", colors: ["#020617", "#ffffff", "#d4af37", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #020617 0%, #ffffff 18%, #d4af37 42%, #111827 68%, #facc15 100%)", glow: "#fff7c2", textColor: "#111827", borderColor: "#facc15", order: 8, stars: 13, dust: 250000, basePower: 31500, baseHp: 157500, baseDefense: 12600, baseSpeed: 108, baseIncome: 350, maxLevel: 350, upgradeDustBase: 1800, upgradeDustGrowth: 1.0175, powerPerLevel: .0285, incomePerLevel: .0195, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.042, incomeBonus: 0.026 }
     });
 
     // เพิ่มโดยอลิซ v5: ปรับเบสทุกระดับให้ใกล้กัน และย้ายการ์ดเก่าเข้าสเกลใหม่โดยรักษาความต่างรายใบไว้ไม่เกิน ±10%
@@ -7571,7 +7586,8 @@
       N:{power:1000,hp:5000,defense:400,income:35}, R:{power:3000,hp:15000,defense:1200,income:100},
       SR:{power:9000,hp:45000,defense:3600,income:280}, SSR:{power:27000,hp:135000,defense:10800,income:800},
       UR:{power:81000,hp:405000,defense:32400,income:2300}, LR:{power:243000,hp:1215000,defense:97200,income:6500},
-      SC:{power:729000,hp:3645000,defense:291600,income:18000}, EX:{power:2187000,hp:10935000,defense:874800,income:50000}
+      SC:{power:729000,hp:3645000,defense:291600,income:18000}, EX:{power:2187000,hp:10935000,defense:874800,income:50000},
+      GOD:{power:2296350,hp:11481750,defense:918540,income:52500}
     });
 
     function getBalancedCardBase(card, statKey, rarityKey) {
@@ -7615,11 +7631,11 @@
     }
 
     // เพิ่มโดยอลิซ v76: เรทแพ็คสุ่มในกระเป๋าใช้ระบบ "น้ำหนัก" แล้ว normalize ใหม่ทุกครั้ง
-    // ตั้งให้ EX / SC หายากขึ้นมาก เพื่อไม่ให้การเปิดรวดเดียวจำนวนมากดรอปถี่เกินไป
-    const ITEM_PACK_RATES = Object.freeze({ N: 58, R: 29, SR: 10, SSR: 2.65, UR: .30, LR: .048, EX: .0015, SC: .0005 });
+    // ตั้งให้ EX / SC / GOD หายากขึ้นมาก เพื่อไม่ให้การเปิดรวดเดียวจำนวนมากดรอปถี่เกินไป
+    const ITEM_PACK_RATES = Object.freeze({ N: 58, R: 29, SR: 10, SSR: 2.65, UR: .30, LR: .048, EX: .0015, SC: .0005, GOD: .00005 });
     // เพดานเรทสุดท้ายหลังรวมโบนัสทีม/สกิลกาชา หน่วยเป็นเปอร์เซ็นต์จริงหลัง normalize
-    // เช่น EX: .01 = ไม่เกิน 0.01% ต่อการเปิด 1 ใบ แม้มีสกิลเพิ่มเรทหลายใบ
-    const GACHA_EFFECTIVE_RATE_CAPS = Object.freeze({ EX: .01, SC: .002 });
+    // เช่น GOD: .0001 = ไม่เกิน 0.0001% ต่อการเปิด 1 ใบ แม้มีสกิลเพิ่มเรทหลายใบ
+    const GACHA_EFFECTIVE_RATE_CAPS = Object.freeze({ EX: .01, SC: .002, GOD: .0001 });
     const ITEM_INVENTORY_VERSION = 1;
 
     /*
@@ -7696,7 +7712,7 @@
   {
     "id": "eventKONO",
     "name": "Konosuba Rate UP",
-    "description": "ตู้เพิ่มเรทตัวละคร Konosuba • ระบบน้ำหนัก v76 ลดโอกาส EX/SC ไม่ให้เทหน้าตักแล้วออกถี่เกินไป",
+    "description": "ตู้เพิ่มเรทตัวละคร Konosuba • GOD มีเรทลับหายากมาก ไม่มีการันตีในตู้",
     "image": "",
     "images": [
       "assets/banners/KONOSUBAban.mp4"
@@ -7711,11 +7727,13 @@
       "UR": 0.45,
       "LR": 0.048,
       "EX": 0.0005,
-      "SC": 0.0015
+      "SC": 0.0015,
+      "GOD": 0.00005
     },
     "effectiveRateCaps": {
       "EX": 0.01,
-      "SC": 0.002
+      "SC": 0.002,
+      "GOD": 0.0001
     },
     "rateUpCards": {
     },
@@ -7736,7 +7754,7 @@
   {
     "id": "legend",
     "name": "Legend Rate Up",
-    "description": "ตู้เพิ่มโอกาส UR/LR แบบควบคุม EX/SC ด้วยน้ำหนัก v76",
+    "description": "ตู้เพิ่มโอกาส UR/LR แบบควบคุม EX/SC/GOD ด้วยน้ำหนัก v76",
     "image": "",
     "images": [
       "assets/banners/LR1.mp4"
@@ -7751,11 +7769,13 @@
       "UR": 0.45,
       "LR": 0.048,
       "EX": 0.0005,
-      "SC": 0.0015
+      "SC": 0.0015,
+      "GOD": 0.00005
     },
     "effectiveRateCaps": {
       "EX": 0.012,
-      "SC": 0.003
+      "SC": 0.003,
+      "GOD": 0.0001
     },
     "rateUpCards": {},
     "guarantee": {
@@ -22527,13 +22547,13 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     // เพิ่มโดยอลิซ v62: การ์ดที่ต้องเล่นคัทซีนเมื่อได้รับ ไม่จำกัดเฉพาะช่องทางกาชา
-    // - EX / SC เล่นคัทซีนเสมอ
+    // - EX / SC / GOD เล่นคัทซีนเสมอ
     // - ระดับอื่นที่กำหนด card.scCutscene เอง ก็เล่นคัทซีนได้เช่นกัน
     function isAcquisitionCutsceneCard(card) {
       if (!card || typeof card !== "object") return false;
       const rarity = String(card.rarity || "").toUpperCase();
       const hasCustomCutscene = Boolean(card.scCutscene && typeof card.scCutscene === "object");
-      return hasCustomCutscene || rarity === "EX" || rarity === "SC";
+      return hasCustomCutscene || rarity === "EX" || rarity === "SC" || rarity === "GOD";
     }
 
     function getAcquisitionCutsceneResults(results = []) {
@@ -22554,14 +22574,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const rarityName = getAcquisitionCutsceneRarityName(card);
       const isEX = rarity === "EX";
       const isSC = rarity === "SC";
+      const isGOD = rarity === "GOD";
       return {
-        kicker: String(custom.kicker || (isEX ? "EXCEED AWAKENING" : isSC ? "ASTRAL CONVERGENCE" : `${rarityName} MANIFESTATION`)),
+        kicker: String(custom.kicker || (isGOD ? "DIVINE JUDGEMENT" : isEX ? "EXCEED AWAKENING" : isSC ? "ASTRAL CONVERGENCE" : `${rarityName} MANIFESTATION`)),
         quote: String(custom.quote || `${card && card.name ? card.name : rarityName} ได้ตอบรับการอัญเชิญ`),
-        subtitle: String(custom.subtitle || (isEX ? "An Exceed Card Has Answered" : isSC ? "A Supreme Card Has Answered" : "A Special Card Has Answered")),
+        subtitle: String(custom.subtitle || (isGOD ? "A God Card Has Descended" : isEX ? "An Exceed Card Has Answered" : isSC ? "A Supreme Card Has Answered" : "A Special Card Has Answered")),
         video: resolveAsset(custom.video || (card && card.video), "card"),
         poster: resolveAsset(custom.poster || (card && (card.poster || card.image || card.icon)), "card"),
-        accent: String(custom.accent || (isEX ? "#22d3ee" : isSC ? "#a78bfa" : "#ffd166")),
-        accent2: String(custom.accent2 || (isEX ? "#facc15" : "#22d3ee")),
+        accent: String(custom.accent || (isGOD ? "#facc15" : isEX ? "#22d3ee" : isSC ? "#a78bfa" : "#ffd166")),
+        accent2: String(custom.accent2 || (isGOD ? "#ffffff" : isEX ? "#facc15" : "#22d3ee")),
         introMs: clampSCCutsceneNumber(custom.introMs, 2200, 500, 12000),
         maxVideoMs: clampSCCutsceneNumber(custom.maxVideoMs, 14000, 1000, 120000),
         revealMs: clampSCCutsceneNumber(custom.revealMs, 1900, 400, 12000),
@@ -22570,7 +22591,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         muted: custom.muted === undefined ? false : Boolean(custom.muted),
         volume: clampSCCutsceneNumber(custom.volume, 0.9, 0, 1),
         showCardAfterVideo: custom.showCardAfterVideo !== false,
-        revealKicker: String(custom.revealKicker || (isEX ? "EXCEED MANIFESTATION" : isSC ? "SUPREME CONVERGENCE" : `${rarityName} MANIFESTATION`)),
+        revealKicker: String(custom.revealKicker || (isGOD ? "ANGELIC GOD MANIFESTATION" : isEX ? "EXCEED MANIFESTATION" : isSC ? "SUPREME CONVERGENCE" : `${rarityName} MANIFESTATION`)),
         revealTitle: String(custom.revealTitle || `${rarityName} ACQUIRED`),
         revealText: String(custom.revealText || "")
       };
@@ -22612,7 +22633,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
       const screen = document.getElementById("scCutscene");
       if (screen) {
-        screen.classList.remove("phase-intro", "phase-video", "phase-reveal", "no-video");
+        screen.classList.remove("phase-intro", "phase-video", "phase-reveal", "no-video", "rarity-ex", "rarity-sc", "rarity-god");
         screen.classList.add("hidden");
       }
 
@@ -22753,8 +22774,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         video.load();
       }
 
-      screen.classList.remove("hidden", "phase-video", "phase-reveal", "no-video");
-      screen.classList.add("phase-intro");
+      screen.classList.remove("hidden", "phase-video", "phase-reveal", "no-video", "rarity-ex", "rarity-sc", "rarity-god");
+      screen.classList.add("phase-intro", `rarity-${selectedRarity.toLowerCase().replace(/[^a-z0-9_-]/g, "")}`);
       if (!config.video) screen.classList.add("no-video");
       document.body.style.overflow = "hidden";
 
