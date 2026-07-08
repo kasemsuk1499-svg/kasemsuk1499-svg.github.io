@@ -3,7 +3,7 @@ ACC_REGISTER_CARD({
   name: "มิยะโกะ ซีซี่",
   rarity: "GOD",
   element: [
-    "ไร้ธาตุ",
+    "ไฟ",
     "ความมืด",
     "มิติ",
     "แสง"
