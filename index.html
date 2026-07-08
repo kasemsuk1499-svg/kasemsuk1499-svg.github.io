@@ -8253,6 +8253,13 @@
     let lastWorldBossCombat = null;
     let lastWorldBossSummary = null;
     let worldBossAnimating = false;
+    // เพิ่มโดยอลิซ v86: สถานะ World Boss แบบเซิร์ฟเวอร์กลาง
+    let worldBossServerState = null;
+    let worldBossServerSyncPromise = null;
+    let worldBossServerListeningKey = "";
+    let worldBossServerUnsubscribe = null;
+    let worldBossServerLastEnsureAt = 0;
+    let worldBossServerWarningShown = false;
     // เพิ่มโดยอลิซ: สถานะเรียงลำดับคลังและหน้าต่างเลือกทีม
     let collectionSortMode = "power";
     let collectionSortDirection = "desc";
@@ -8660,7 +8667,11 @@
           ref: databaseModule.ref,
           get: databaseModule.get,
           set: databaseModule.set,
-          update: databaseModule.update
+          update: databaseModule.update,
+          runTransaction: databaseModule.runTransaction,
+          onValue: databaseModule.onValue,
+          off: databaseModule.off,
+          serverTimestamp: databaseModule.serverTimestamp
         };
         cloudApp = cloudModules.getApps().length
           ? cloudModules.getApps()[0]
@@ -20225,8 +20236,201 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function getTodayWorldBoss(dateKey = worldBossDateKey()) {
       const pool = WORLD_BOSSES.length ? WORLD_BOSSES : WORLD_BOSS_FALLBACKS;
+      const serverBossId = worldBossServerState && String(worldBossServerState.date || "") === String(dateKey || "")
+        ? String(worldBossServerState.bossId || "")
+        : "";
+      if (serverBossId) {
+        const serverBoss = WORLD_BOSS_BY_ID.get(serverBossId) || pool.find(boss => String(boss && boss.id || "") === serverBossId);
+        if (serverBoss) return serverBoss;
+      }
       const rand = seededWorldBossNumber(`world-boss:${dateKey}`);
       return pool[Math.floor(rand() * pool.length)] || pool[0] || null;
+    }
+
+    function worldBossDailyPath(dateKey = worldBossDateKey()) {
+      return `worldBossDaily/${String(dateKey || worldBossDateKey()).replace(/[^0-9-]/g, "")}`;
+    }
+
+    function makeWorldBossServerDefault(dateKey = worldBossDateKey(), boss = null) {
+      const selectedBoss = boss || getTodayWorldBoss(dateKey);
+      const stats = getWorldBossBaseStats(selectedBoss);
+      const now = Date.now();
+      return {
+        date: String(dateKey || worldBossDateKey()),
+        bossId: String(selectedBoss && selectedBoss.id || ""),
+        bossName: String(selectedBoss && selectedBoss.name || "World Boss"),
+        maxHp: Math.max(1, Math.floor(Number(stats.hp) || 1)),
+        currentHp: Math.max(1, Math.floor(Number(stats.hp) || 1)),
+        totalDamage: 0,
+        totalScore: 0,
+        attempts: 0,
+        broken: false,
+        createdAt: now,
+        updatedAt: now,
+        players: {}
+      };
+    }
+
+    function normalizeWorldBossServerState(raw = null, dateKey = worldBossDateKey()) {
+      const fallbackBoss = getTodayWorldBoss(dateKey);
+      const bossId = String(raw && raw.bossId || fallbackBoss && fallbackBoss.id || "");
+      const boss = WORLD_BOSS_BY_ID.get(bossId) || fallbackBoss;
+      const stats = getWorldBossBaseStats(boss);
+      const maxHp = Math.max(1, Math.floor(Number(raw && raw.maxHp) || Number(stats.hp) || 1));
+      const currentHp = Math.max(0, Math.min(maxHp, Math.floor(Number(raw && (raw.currentHp ?? raw.hpRemaining ?? raw.remainingHp)) || maxHp)));
+      return {
+        date: String(raw && raw.date || dateKey || worldBossDateKey()),
+        bossId: String(boss && boss.id || bossId || ""),
+        bossName: String(raw && raw.bossName || boss && boss.name || "World Boss"),
+        maxHp,
+        currentHp,
+        totalDamage: Math.max(0, Math.floor(Number(raw && raw.totalDamage) || 0)),
+        totalScore: Math.max(0, Math.floor(Number(raw && raw.totalScore) || 0)),
+        attempts: Math.max(0, Math.floor(Number(raw && raw.attempts) || 0)),
+        broken: currentHp <= 0 || Boolean(raw && raw.broken),
+        createdAt: Number(raw && raw.createdAt) || Date.now(),
+        updatedAt: Number(raw && raw.updatedAt) || Date.now(),
+        players: raw && raw.players && typeof raw.players === "object" ? raw.players : {}
+      };
+    }
+
+    function getActiveWorldBossServerState(dateKey = worldBossDateKey()) {
+      if (worldBossServerState && String(worldBossServerState.date || "") === String(dateKey || "")) return worldBossServerState;
+      return normalizeWorldBossServerState(null, dateKey);
+    }
+
+    function updateWorldBossServerCache(raw, dateKey = worldBossDateKey()) {
+      worldBossServerState = normalizeWorldBossServerState(raw, dateKey);
+      return worldBossServerState;
+    }
+
+    async function ensureWorldBossServerDay(dateKey = worldBossDateKey()) {
+      if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.runTransaction) return null;
+      const selectedBoss = getTodayWorldBoss(dateKey);
+      const dailyRef = cloudModules.ref(cloudDb, worldBossDailyPath(dateKey));
+      const result = await cloudModules.runTransaction(dailyRef, current => {
+        if (current && typeof current === "object" && current.bossId) {
+          const normalized = normalizeWorldBossServerState(current, dateKey);
+          return {
+            ...current,
+            date: normalized.date,
+            bossId: normalized.bossId,
+            bossName: normalized.bossName,
+            maxHp: normalized.maxHp,
+            currentHp: normalized.currentHp,
+            totalDamage: normalized.totalDamage,
+            totalScore: normalized.totalScore,
+            attempts: normalized.attempts,
+            broken: normalized.currentHp <= 0 || Boolean(current.broken),
+            players: current.players && typeof current.players === "object" ? current.players : {},
+            updatedAt: current.updatedAt || Date.now()
+          };
+        }
+        return makeWorldBossServerDefault(dateKey, selectedBoss);
+      });
+      if (result && result.snapshot) return updateWorldBossServerCache(result.snapshot.val(), dateKey);
+      return null;
+    }
+
+    function subscribeWorldBossServer(dateKey = worldBossDateKey()) {
+      if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.onValue) return;
+      const path = worldBossDailyPath(dateKey);
+      if (worldBossServerListeningKey === path) return;
+      if (worldBossServerUnsubscribe) {
+        try { worldBossServerUnsubscribe(); } catch (error) { try { cloudModules.off(cloudModules.ref(cloudDb, worldBossServerListeningKey)); } catch (_) {} }
+        worldBossServerUnsubscribe = null;
+      }
+      worldBossServerListeningKey = path;
+      const dailyRef = cloudModules.ref(cloudDb, path);
+      worldBossServerUnsubscribe = cloudModules.onValue(dailyRef, snapshot => {
+        if (snapshot.exists()) {
+          updateWorldBossServerCache(snapshot.val(), dateKey);
+          if (activeTab === "worldBoss") {
+            window.requestAnimationFrame(() => renderWorldBoss());
+          }
+        }
+      }, error => {
+        console.warn("World Boss server listener skipped:", error);
+      });
+    }
+
+    async function syncWorldBossServer(force = false) {
+      const dateKey = worldBossDateKey();
+      if (!activeCloudUid) return null;
+      if (!force && worldBossServerSyncPromise) return worldBossServerSyncPromise;
+      const now = Date.now();
+      if (!force && now - worldBossServerLastEnsureAt < 12000 && worldBossServerState && worldBossServerState.date === dateKey) return worldBossServerState;
+      worldBossServerLastEnsureAt = now;
+      worldBossServerSyncPromise = (async () => {
+        try {
+          if (!cloudReady) await initFirebase();
+          if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.runTransaction) return null;
+          const synced = await ensureWorldBossServerDay(dateKey);
+          subscribeWorldBossServer(dateKey);
+          return synced;
+        } catch (error) {
+          if (!worldBossServerWarningShown) {
+            worldBossServerWarningShown = true;
+            console.warn("World Boss server sync failed:", error);
+          }
+          return null;
+        } finally {
+          worldBossServerSyncPromise = null;
+        }
+      })();
+      return worldBossServerSyncPromise;
+    }
+
+    function scheduleWorldBossServerSync(force = false) {
+      if (window.location.protocol === "file:") return;
+      syncWorldBossServer(force);
+    }
+
+    async function applyWorldBossServerDamage(stats, combat, score = 0) {
+      if (!activeCloudUid) return null;
+      if (!cloudReady) await initFirebase();
+      if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.runTransaction) return null;
+      const dateKey = worldBossDateKey();
+      const boss = stats && stats.boss || getTodayWorldBoss(dateKey);
+      const bossStats = getWorldBossBaseStats(boss);
+      const damage = Math.max(0, Math.floor(Number(combat && combat.playerTotalDamage) || 0));
+      const scoreGain = Math.max(0, Math.floor(Number(score) || 0));
+      const uid = String(activeCloudUid || "guest");
+      const username = String(activeCloudUsername || state && state.profile && state.profile.username || "Guest").slice(0, 40);
+      const dailyRef = cloudModules.ref(cloudDb, worldBossDailyPath(dateKey));
+      const result = await cloudModules.runTransaction(dailyRef, current => {
+        let next = current && typeof current === "object" ? { ...current } : makeWorldBossServerDefault(dateKey, boss);
+        const normalized = normalizeWorldBossServerState(next, dateKey);
+        next = {
+          ...next,
+          date: normalized.date,
+          bossId: normalized.bossId || String(boss && boss.id || ""),
+          bossName: normalized.bossName || String(boss && boss.name || "World Boss"),
+          maxHp: normalized.maxHp || Math.max(1, Math.floor(Number(bossStats.hp) || 1)),
+          currentHp: Math.max(0, normalized.currentHp - damage),
+          totalDamage: normalized.totalDamage + damage,
+          totalScore: normalized.totalScore + scoreGain,
+          attempts: normalized.attempts + 1,
+          updatedAt: Date.now(),
+          players: next.players && typeof next.players === "object" ? { ...next.players } : {}
+        };
+        next.broken = next.currentHp <= 0;
+        const previousPlayer = next.players[uid] && typeof next.players[uid] === "object" ? next.players[uid] : {};
+        next.players[uid] = {
+          uid,
+          username,
+          damage: Math.max(0, Math.floor(Number(previousPlayer.damage) || 0)) + damage,
+          score: Math.max(0, Math.floor(Number(previousPlayer.score) || 0)) + scoreGain,
+          attempts: Math.max(0, Math.floor(Number(previousPlayer.attempts) || 0)) + 1,
+          bestScore: Math.max(Math.max(0, Math.floor(Number(previousPlayer.bestScore) || 0)), scoreGain),
+          lastDamage: damage,
+          lastScore: scoreGain,
+          lastAt: Date.now()
+        };
+        return next;
+      });
+      if (result && result.snapshot) return updateWorldBossServerCache(result.snapshot.val(), dateKey);
+      return null;
     }
 
     function normalizeWorldBossState(raw = {}) {
@@ -20947,6 +21151,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function renderWorldBoss() {
       if (!document.getElementById("worldBossView")) return;
+      scheduleWorldBossServerSync();
       const stats = getWorldBossTeamStats();
       const boss = stats.boss;
       const bossState = normalizeWorldBossStateForToday();
@@ -20966,8 +21171,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           enemyCards: [{ ...boss, image: getWorldBossImage(boss), elements: stats.bossElements, power: stats.bossStats.attack, hp: stats.bossStats.hp, defense: stats.bossStats.defense, speed: stats.bossStats.speed }]
         });
       }
-      const remainingHp = result && String(result.bossId) === String(boss.id) ? Math.max(0, Number(result.remainingHp) || 0) : stats.bossStats.hp;
-      const hpPercent = Math.max(0, Math.min(100, remainingHp / Math.max(1, stats.bossStats.hp) * 100));
+      const serverBoss = getActiveWorldBossServerState(bossState.date);
+      const useServerHp = serverBoss && String(serverBoss.bossId || "") === String(boss.id || "");
+      const remainingHp = useServerHp ? Math.max(0, Number(serverBoss.currentHp) || 0) : (result && String(result.bossId) === String(boss.id) ? Math.max(0, Number(result.remainingHp) || 0) : stats.bossStats.hp);
+      const maxHpForMeter = useServerHp ? Math.max(1, Number(serverBoss.maxHp) || stats.bossStats.hp) : Math.max(1, stats.bossStats.hp);
+      const hpPercent = Math.max(0, Math.min(100, remainingHp / maxHpForMeter * 100));
       const image = getWorldBossImage(boss);
       const bg = document.getElementById("worldBossBg");
       if (bg) bg.style.backgroundImage = image && !isVideo(image)
@@ -20979,15 +21187,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       setText("worldBossDateText", `Daily Raid • ${bossState.date}`);
       setText("worldBossName", boss.name || "World Boss");
       setText("worldBossDescription", boss.description || boss.title || "บอสโลกประจำวัน");
-      setText("worldBossHpText", `HP ${formatNumber(remainingHp)} / ${formatNumber(stats.bossStats.hp)}`);
-      setText("worldBossBreakText", remainingHp <= 0 ? "BREAK — ยังตีเก็บคะแนนต่อได้" : "HP หมดแล้วไม่หาย ตีต่อเพื่อคะแนน");
+      setText("worldBossHpText", `HP ${formatNumber(remainingHp)} / ${formatNumber(maxHpForMeter)}`);
+      setText("worldBossBreakText", remainingHp <= 0 ? "BREAK ทั้งเซิร์ฟ — ยังตีเก็บคะแนนต่อได้" : (useServerHp ? "เลือดรวมทั้งเซิร์ฟแบบเรียลไทม์" : "โหมดสำรอง: เลือดนี้ยังเป็นของเครื่องนี้"));
       setText("worldBossAtkText", formatNumber(stats.bossStats.attack));
       setText("worldBossMaxHpText", formatNumber(stats.bossStats.hp));
       setText("worldBossDefText", formatNumber(stats.bossStats.defense));
       setText("worldBossElementText", stats.bossElements.map(elementLabel).join(" / "));
       setText("worldBossTotalScoreText", formatNumber(bossState.totalScore));
       setText("worldBossBestScoreText", formatNumber(bossState.bestScore));
-      setText("worldBossAttemptText", `${formatNumber(bossState.attempts)} ครั้ง`);
+      setText("worldBossAttemptText", `${formatNumber(bossState.attempts)} ครั้ง${useServerHp ? ` • เซิร์ฟรวม ${formatNumber(serverBoss.attempts || 0)}` : ""}`);
       setText("worldBossTeamPowerText", formatNumber(stats.totalCombatPower));
       setText("worldBossScaleText", `ATK +${Math.round(WORLD_BOSS_CONFIG.turnAttackGrowthRate * 100)}%/เทิร์น • DEF +${Math.round(WORLD_BOSS_CONFIG.turnDefenseGrowthRate * 1000) / 10}%/เทิร์น • โบนัสคะแนน +${Math.round(WORLD_BOSS_CONFIG.turnScoreBonusRate * 1000) / 10}%/เทิร์น • ทุก ${WORLD_BOSS_CONFIG.hitGainEveryTurns} เทิร์น เพิ่มฮิตบอส +1 สูงสุด +${WORLD_BOSS_CONFIG.maxBonusHits}`);
       const hpMeter = document.getElementById("worldBossHpMeter");
@@ -21056,7 +21264,18 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           stage.classList.add(combat.playerRemainingHp > 0 ? "battle-win" : "battle-lose");
         }
         const score = Math.floor(Number(combat.worldBossScore) || 0);
-        const text = worldBossResultSummaryText(combat, stats);
+        let serverAfterHit = null;
+        try {
+          serverAfterHit = await applyWorldBossServerDamage(stats, combat, score);
+        } catch (serverError) {
+          console.warn("World Boss shared HP update skipped:", serverError);
+          if (!worldBossServerWarningShown) {
+            worldBossServerWarningShown = true;
+            showToast("บันทึกเลือดบอสรวมไม่สำเร็จ ใช้ผลในเครื่องนี้ชั่วคราว");
+          }
+        }
+        const serverRemainingHp = serverAfterHit && String(serverAfterHit.bossId || "") === String(stats.boss.id || "") ? Math.max(0, Number(serverAfterHit.currentHp) || 0) : Math.max(0, Number(combat.enemyRemainingHp) || 0);
+        const text = worldBossResultSummaryText({ ...combat, enemyRemainingHp: serverRemainingHp, worldBossBroken: combat.worldBossBroken || serverRemainingHp <= 0 }, stats);
         const bossState = normalizeWorldBossStateForToday();
         bossState.totalScore += score;
         bossState.bestScore = Math.max(bossState.bestScore, score);
@@ -21065,7 +21284,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           bossId: String(stats.boss.id),
           score,
           totalDamage: Math.floor(Number(combat.playerTotalDamage) || 0),
-          remainingHp: Math.max(0, Number(combat.enemyRemainingHp) || 0),
+          remainingHp: serverRemainingHp,
           turns: combat.rounds,
           broke: Boolean(combat.worldBossBroken),
           at: Date.now(),
