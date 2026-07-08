@@ -8000,7 +8000,7 @@
       "SC": 0.002,
       "GOD": 0.0001
     },
-    "rateUpCards": { "3001":2
+    "rateUpCards": {
     },
     "guarantee": {
       "enabled": true,
@@ -8150,6 +8150,7 @@
        - v95: condition รองรับ sourceRevived/sourceReviveActive แล้ว
        - v94: condition รองรับชื่อการ์ดแล้ว เช่น anyTeammateCardNames:["เอลฟาเรีย","จูเรียส"] ใช้ได้ตอนยังไม่รู้ ID
        - v94: reviveTimedUndying รองรับ reviveAttackHits และ reviveAttackTargetCount เพื่อเปลี่ยนรูปแบบโจมตีหลังคืนชีพ
+       - v97: หากสกิลย่อย onOwnAttack ทำงานหลังคืนชีพ แต่ไม่ได้กำหนด attackTargetCount เอง จะใช้ normalAttackTargetCount หลังคืนชีพแทนค่า default 1
        - blockRate = โอกาสบล็อกของการ์ดเป้าหมาย; เมื่อสำเร็จลดดาเมจส่วนของการ์ดนั้น 50% หลังโล่/คริติคอล/DEF
        - damageTakenRate = ตัวคูณดาเมจรับขั้นสุดท้าย; -0.20 = รับลดลง 20%, +0.20 = รับเพิ่มขึ้น 20%
        - dodgeRate = โอกาสหลบของการ์ดเป้าหมาย; ส่วนดาเมจตามสัดส่วน HP ของการ์ดที่หลบจะหายไปก่อนคำนวณ DEF
@@ -14562,7 +14563,7 @@
         const sum = key => fired.reduce((total, trigger) => total + (Number(trigger[key]) || 0), 0);
         return {
           fired, details, names: fired.map(trigger => trigger.name),
-          attackTargetCount: Math.max(1, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 1), ...abilityArray(trigger.multiElementAttacks).map(rule=>Math.floor(Number(rule.targetCount)||1)), ...abilityArray(trigger.followUpAttacks).map(rule=>Math.floor(Number(rule.targetCount)||1))), 1))),
+          attackTargetCount: Math.max(0, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 0), ...abilityArray(trigger.multiElementAttacks).map(rule=>Math.floor(Number(rule.targetCount)||0)), ...abilityArray(trigger.followUpAttacks).map(rule=>Math.floor(Number(rule.targetCount)||0))), 0))),
           reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
           speedTargetRules: fired.flatMap(trigger => abilityArray(trigger.speedTargetRules).map(rule => ({ ...rule }))),
           tauntRules: fired.flatMap(trigger => abilityArray(trigger.tauntRules).map(rule => ({ ...rule }))),
@@ -15144,7 +15145,8 @@
 
           armHpThresholdTriggers(team, actor, target);
           const activation = makeActivation(team, actor, target);
-          const requestedAttackTargets = activation.fired.length ? activation.attackTargetCount : actor.normalAttackTargetCount;
+          const explicitAttackTargetCount = Math.max(0, Math.min(5, Math.floor(Number(activation.attackTargetCount) || 0)));
+          const requestedAttackTargets = explicitAttackTargetCount > 0 ? explicitAttackTargetCount : actor.normalAttackTargetCount;
           const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex);
           target = attackTargets[0] || target;
           applyRateMaps(team, activation.blockRateChanges, "blockRate");
@@ -16491,7 +16493,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             statusApplyRules: [],
             removeAllEnemyShield: false,
             sourceAbilityRuntimeKey: String(record.abilityRuntimeKey || ""),
-            attackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 1))),
+            attackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 0))),
             abilityTransfers: [],
             attackBonus: 0,
             healHp: 0,
@@ -16536,7 +16538,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           });
         }
         const group = grouped.get(key);
-        group.attackTargetCount = Math.max(Number(group.attackTargetCount) || 1, Math.max(1, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 1))));
+        {
+          const abilityTargetCount = Math.max(0, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 0)));
+          if (abilityTargetCount > 0) group.attackTargetCount = Math.max(Number(group.attackTargetCount) || 0, abilityTargetCount);
+        }
         group.durationTurns = Math.max(Number(group.durationTurns || 0), Math.max(0, Math.floor(Number(effect.durationTurns) || 0)));
         group.durationRounds = Math.max(Number(group.durationRounds || 0), Math.max(0, Math.floor(Number(effect.durationRounds) || 0)));
         if (group.isDomainActivationGroup && effectType !== CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN) {
