@@ -5793,7 +5793,7 @@
     .battle-unit{will-change:transform,filter,opacity;transform-origin:center bottom}.battle-unit.is-acting{z-index:20!important;filter:drop-shadow(0 0 18px rgba(92,232,255,.8));}.battle-unit.is-target{z-index:19!important;filter:drop-shadow(0 0 20px rgba(251,113,133,.85));}.battle-unit.is-hit{animation:battle-unit-hit .32s ease}.battle-unit.is-dead{filter:grayscale(1) brightness(.42)!important;opacity:.55!important;pointer-events:none}.battle-unit.is-dead::before{content:"หมดสภาพ";position:absolute;z-index:20;inset:0;display:grid;place-items:center;color:#fff;font-size:.72rem;font-weight:1000;letter-spacing:.08em;background:rgba(3,5,12,.42)}.battle-unit.is-reviving{animation:battle-revive-glow .75s ease}
     .battle-unit-state{position:absolute;z-index:15;top:5px;left:5px;right:5px;display:flex;justify-content:space-between;gap:4px;pointer-events:none}.battle-unit-status,.battle-unit-special{border-radius:999px;padding:3px 5px;color:#fff;font-size:.48rem;line-height:1;background:rgba(3,5,12,.78);text-shadow:0 1px 2px #000}.battle-unit-special{color:#fde68a}
     .battle-unit-hp{position:absolute;z-index:16;left:6px;right:6px;bottom:25px;height:5px;border-radius:999px;overflow:hidden;background:rgba(0,0,0,.62);box-shadow:0 0 0 1px rgba(255,255,255,.12)}.battle-unit-hp i{display:block;width:100%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#22c55e,#a3e635);transition:width .22s ease}
-    .battle-moving-clone{position:fixed!important;z-index:9999!important;margin:0!important;pointer-events:none!important;transform:none!important;filter:drop-shadow(0 20px 25px rgba(0,0,0,.55))}.battle-floating-number{position:fixed;z-index:10000;pointer-events:none;color:#fff;font-weight:1000;font-size:clamp(.9rem,2vw,1.3rem);text-shadow:0 2px 4px #000,0 0 14px rgba(251,113,133,.9);animation:battle-float-number .72s ease forwards}.battle-floating-number.heal{color:#86efac;text-shadow:0 2px 4px #000,0 0 14px rgba(34,197,94,.9)}.battle-floating-number.revive{color:#fde68a;text-shadow:0 2px 4px #000,0 0 18px rgba(250,204,21,.95)}.battle-floating-number.speed{color:#93c5fd;text-shadow:0 2px 4px #000,0 0 18px rgba(59,130,246,.95)}
+    .battle-moving-clone{position:fixed!important;z-index:9999!important;margin:0!important;pointer-events:none!important;transform:none!important;filter:drop-shadow(0 20px 25px rgba(0,0,0,.55))}.battle-floating-number{position:fixed;z-index:10000;pointer-events:none;color:#fff;font-weight:1000;font-size:clamp(.9rem,2vw,1.3rem);text-shadow:0 2px 4px #000,0 0 14px rgba(251,113,133,.9);animation:battle-float-number .72s ease forwards}.battle-floating-number.heal{color:#bbf7d0;text-shadow:0 2px 4px #000,0 0 14px rgba(34,197,94,.95),0 0 26px rgba(86,227,159,.55)}.battle-floating-number.revive{color:#fde68a;text-shadow:0 2px 4px #000,0 0 18px rgba(250,204,21,.95)}.battle-floating-number.speed{color:#93c5fd;text-shadow:0 2px 4px #000,0 0 18px rgba(59,130,246,.95)}
     @keyframes battle-unit-hit{0%,100%{transform:translateX(0) rotate(var(--model-tilt))}25%{transform:translateX(-7px) rotate(-3deg)}55%{transform:translateX(8px) rotate(3deg)}}@keyframes battle-revive-glow{0%{filter:grayscale(1) brightness(.4)}45%{filter:brightness(1.8) drop-shadow(0 0 28px #fde68a);transform:scale(1.12)}100%{filter:none;transform:scale(1)}}@keyframes battle-float-number{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}20%{opacity:1;transform:translate(-50%,0) scale(1.12)}100%{opacity:0;transform:translate(-50%,-48px) scale(.92)}}
     @media(max-width:760px){.battle-turn-order{top:6px;width:96%;justify-content:flex-start;overflow:auto}.battle-turn-chip{min-width:58px}.battle-unit-hp{bottom:22px}}
 
@@ -6075,6 +6075,73 @@
     .battle-result.readable b { color: #071019; background: linear-gradient(135deg, var(--cyan), var(--violet)); }
     .battle-result.readable .result-chip:nth-child(3n) { color: #fde68a; }
     .battle-result.readable .result-chip:nth-child(4n) { color: #bbf7d0; }
+
+
+    /* เพิ่มโดยอลิซ v94: แยกสีตัวเลข/ตัวหนังสือในระบบต่อสู้ให้อ่านง่าย */
+    .battle-result.readable .result-chip,
+    .battle-result.readable b { gap: 4px; }
+    .battle-result.readable .battle-text-number,
+    .battle-summary-metric .battle-text-number,
+    .battle-turn-cell .battle-text-number,
+    .battle-report-number .battle-text-number {
+      display: inline-flex;
+      align-items: center;
+      min-height: 18px;
+      border-radius: 999px;
+      padding: 1px 5px;
+      color: #ffffff;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .015em;
+      background: rgba(255,255,255,.11);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.10), 0 0 12px rgba(255,255,255,.08);
+    }
+    .battle-result.readable .result-chip.turn { color: #bae6fd; border-color: rgba(92,232,255,.24); background: rgba(8,145,178,.14); }
+    .battle-result.readable .result-chip.actor { color: #ddd6fe; border-color: rgba(167,139,250,.28); background: rgba(109,40,217,.14); }
+    .battle-result.readable .result-chip.hit { color: #bfdbfe; border-color: rgba(96,165,250,.28); background: rgba(37,99,235,.13); }
+    .battle-result.readable .result-chip.crit { color: #fef08a; border-color: rgba(250,204,21,.42); background: rgba(202,138,4,.18); box-shadow: 0 0 18px rgba(250,204,21,.12); }
+    .battle-result.readable .result-chip.damage { color: #fecdd3; border-color: rgba(251,113,133,.38); background: rgba(190,24,93,.18); }
+    .battle-result.readable .result-chip.heal { color: #bbf7d0; border-color: rgba(86,227,159,.42); background: rgba(22,101,52,.18); }
+    .battle-result.readable .result-chip.shield { color: #c4b5fd; border-color: rgba(167,139,250,.38); background: rgba(91,33,182,.16); }
+    .battle-result.readable .result-chip.speed { color: #bfdbfe; border-color: rgba(59,130,246,.34); background: rgba(30,64,175,.16); }
+    .battle-result.readable .result-chip.status { color: #fed7aa; border-color: rgba(249,115,22,.38); background: rgba(154,52,18,.18); }
+    .battle-result.readable .result-chip.remain { color: #e0f2fe; border-color: rgba(14,165,233,.30); background: rgba(12,74,110,.16); }
+    .battle-result.readable .result-chip.skill { color: #fde68a; border-color: rgba(255,209,102,.36); background: rgba(120,74,0,.20); }
+    .battle-result.readable .result-chip.damage .battle-text-number { color: #fff1f2; background: rgba(251,113,133,.32); }
+    .battle-result.readable .result-chip.heal .battle-text-number { color: #ecfdf5; background: rgba(34,197,94,.30); }
+    .battle-result.readable .result-chip.shield .battle-text-number { color: #f5f3ff; background: rgba(139,92,246,.30); }
+    .battle-result.readable .result-chip.crit .battle-text-number { color: #422006; background: #fde68a; }
+
+    .battle-turn-cell,
+    .battle-report-number {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      width: fit-content;
+      max-width: 100%;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 999px;
+      padding: 4px 7px;
+      color: #e5edf8;
+      background: rgba(255,255,255,.045);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .battle-turn-cell.turn { color: #bae6fd; background: rgba(8,145,178,.13); }
+    .battle-turn-cell.hit { color: #bfdbfe; background: rgba(37,99,235,.14); }
+    .battle-turn-cell.block,
+    .battle-turn-cell.shield { color: #ddd6fe; background: rgba(91,33,182,.16); }
+    .battle-turn-cell.damage,
+    .battle-report-number.damage { color: #fecdd3; border-color: rgba(251,113,133,.30); background: rgba(190,24,93,.18); }
+    .battle-turn-cell.heal,
+    .battle-report-number.heal { color: #bbf7d0; border-color: rgba(86,227,159,.34); background: rgba(22,101,52,.18); }
+    .battle-turn-cell.hp,
+    .battle-report-number.hp { color: #e0f2fe; background: rgba(12,74,110,.18); }
+    .battle-turn-cell.speed,
+    .battle-report-number.speed { color: #bfdbfe; background: rgba(30,64,175,.16); }
+    .battle-report-number.shield { color: #ddd6fe; background: rgba(91,33,182,.16); }
+    .battle-report-number.skill { color: #fde68a; background: rgba(120,74,0,.20); }
 
     .battle-cinematic-hud {
       position: absolute;
@@ -7710,12 +7777,12 @@
     /* ===================== [SECTION 04 GACHA-BANNERS] ====================== */
     const BANNERS = [
   {
-    "id": "eventKONO",
-    "name": "Konosuba Rate UP",
-    "description": "ตู้เพิ่มเรทตัวละคร Konosuba • GOD มีเรทลับหายากมาก ไม่มีการันตีในตู้",
+    "id": "event",
+    "name": "WISTORIA WAND AND SWORD!",
+    "description": "ตู้เพิ่มเรทตัวละคร จาก WISTORIA WAND AND SWORD",
     "image": "",
     "images": [
-      "assets/banners/KONOSUBAban.mp4"
+      "assets/banners/EVENTgc.mp4"
     ],
     "singlePullCost": 3,
     "tenPullCost": 30,
@@ -7757,7 +7824,7 @@
     "description": "ตู้เพิ่มโอกาส UR/LR แบบควบคุม EX/SC/GOD ด้วยน้ำหนัก v76",
     "image": "",
     "images": [
-      "assets/banners/LR1.mp4"
+      "assets/banners/GC.mp4"
     ],
     "singlePullCost": 3,
     "tenPullCost": 30,
@@ -14570,6 +14637,7 @@
 
         let requestedHeal = 0;
         let heal = 0;
+        const healEvents = [];
         if (abilityArray(activation.healTargetRules).length) {
           abilityArray(activation.healTargetRules).forEach(rule => {
             const recipients = resolveRuntimeTargets(rule, ownerTeam, defenderTeam, actor, currentTarget);
@@ -14582,8 +14650,10 @@
               if (actual > 0) {
                 recipient.currentHp += actual;
                 recipient.healingDone += actual;
-                (String(rule.side || "self") === "enemy" ? defenderTeam : ownerTeam).totalHealing += actual;
+                const healTeam = String(rule.side || "self") === "enemy" ? defenderTeam : ownerTeam;
+                healTeam.totalHealing += actual;
                 heal += actual;
+                healEvents.push({ targetCardId: recipient.id, targetName: recipient.name, amount: actual, side: healTeam.side });
               }
             });
           });
@@ -14657,6 +14727,7 @@
           maxHpGain: activation.maxHpGain || 0,
           requestedHealHp: requestedHeal,
           healHp: heal,
+          healEvents,
           shieldChange: selfShieldChange,
           enemyShieldChange,
           shieldGain: Math.max(0, selfShieldChange),
@@ -14982,6 +15053,7 @@
 
           let requestedHeal = 0;
           let heal = 0;
+          const healEvents = [];
           if (abilityArray(activation.healTargetRules).length) {
             abilityArray(activation.healTargetRules).forEach(rule => {
               const recipients = resolveRuntimeTargets(rule, team, defenderTeam, actor, target);
@@ -14994,15 +15066,17 @@
                 if (actual > 0) {
                   recipient.currentHp += actual;
                   recipient.healingDone += actual;
-                  (String(rule.side || "self") === "enemy" ? defenderTeam : team).totalHealing += actual;
+                  const healTeam = String(rule.side || "self") === "enemy" ? defenderTeam : team;
+                  healTeam.totalHealing += actual;
                   heal += actual;
+                  healEvents.push({ targetCardId: recipient.id, targetName: recipient.name, amount: actual, side: healTeam.side });
                 }
               });
             });
           } else {
             requestedHeal = Math.max(0, Number(activation.healHp) || 0);
             heal = Math.max(0, Math.min(actor.maxHp - actor.currentHp, requestedHeal * Math.max(0,1+actor.healingRate)));
-            if (heal > 0) { actor.currentHp += heal; actor.healingDone += heal; team.totalHealing += heal; }
+            if (heal > 0) { actor.currentHp += heal; actor.healingDone += heal; team.totalHealing += heal; healEvents.push({ targetCardId: actor.id, targetName: actor.name, amount: heal, side: team.side }); }
           }
           const maxHpGain = Math.max(0, Number(activation.maxHpGain) || 0);
           if (maxHpGain > 0) { actor.maxHp += maxHpGain; actor.currentHp += maxHpGain; }
@@ -15033,7 +15107,7 @@
             suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:resistanceActivationEvents, transferEvents:[], stackEvents:[], statusEvents,
             blindMiss:attackMissedByBlind,
             attackBonus:activation.attackBonus, attackStackGain:activation.attackStackGain, maxHpGain,
-            requestedHealHp:requestedHeal, healingMultiplier:Math.max(0,1+actor.healingRate), healHp:heal,
+            requestedHealHp:requestedHeal, healingMultiplier:Math.max(0,1+actor.healingRate), healHp:heal, healEvents,
             shieldChange:selfShieldChange, enemyShieldChange, shieldGain:Math.max(0,selfShieldChange), shieldLoss:Math.max(0,-selfShieldChange),
             enemyShieldGain:Math.max(0,enemyShieldChange), enemyShieldLoss:Math.max(0,-enemyShieldChange),
             healingRate:actor.healingRate, enemyHealingRate:target.healingRate, shieldRecoveryRate:actor.shieldRecoveryRate,
@@ -15608,6 +15682,27 @@
       }
     }
 
+    function battleTextTone(text = "") {
+      const value = String(text || "");
+      if (/^รอบ|^เทิร์น|^#|^R\d+/i.test(value)) return "turn";
+      if (/วิ่งเข้าโจมตี|ตั้งรับ|ถูก|โจมตี|เป้าหมาย/.test(value)) return "actor";
+      if (/CRITICAL|คริติคอล|💥/i.test(value)) return "crit";
+      if (/ดาเมจ|ตัดชีวิต|หมดสภาพ|ตาย|DEATH/i.test(value)) return "damage";
+      if (/ฟื้น|ฮีล|HEAL|HP \+|\+\d[\d,]*\s*HP/i.test(value)) return "heal";
+      if (/โล่|บล็อก|BLOCK/i.test(value)) return "shield";
+      if (/ฮิต|HIT/i.test(value)) return "hit";
+      if (/SPD|สปีด/i.test(value)) return "speed";
+      if (/สถานะ|ตาบอด|พลาด|DODGE|RESIST|MISS|ยกเลิก|ขโมย|ก็อป|ชิงร่าง|คืนศพ|STATUS/i.test(value)) return "status";
+      if (/เหลือ|HP เรา|HP ศัตรู/i.test(value)) return "remain";
+      if (/สกิล|ACTIVE|⚡/i.test(value)) return "skill";
+      return "neutral";
+    }
+
+    function battleColorTextHTML(text = "") {
+      const safe = escapeHTML(String(text || ""));
+      return safe.replace(/([+-]?\d[\d,]*(?:\.\d+)?%?|x\d+(?:\.\d+)?|R\d+)/gi, '<span class="battle-text-number">$1</span>');
+    }
+
     function beautifyBattleResult(result) {
       if (!result) return;
       const text = String(result.textContent || "").trim();
@@ -15615,7 +15710,9 @@
       result.dataset.rawBattleText = text;
       const parts = text.split(" • ").map(part => part.trim()).filter(Boolean);
       result.classList.add("readable");
-      result.innerHTML = parts.map((part, index) => index === 0 ? `<b>${escapeHTML(part)}</b>` : `<span class="result-chip">${escapeHTML(part)}</span>`).join("");
+      result.innerHTML = parts.map((part, index) => index === 0
+        ? `<b class="battle-result-main ${battleTextTone(part)}">${battleColorTextHTML(part)}</b>`
+        : `<span class="result-chip ${battleTextTone(part)}">${battleColorTextHTML(part)}</span>`).join("");
     }
 
     function showTriggeredAbilityEvent(stage, detail, turn, labels = {}) {
@@ -15754,6 +15851,17 @@
         const node = battleUnitNode(stage, side, event.targetCardId);
         if (node) floatBattleText(node, `SPD ${event.change >= 0 ? "+" : ""}${event.change}`, "speed");
       });
+      const healEvents = abilityArray(turn.healEvents);
+      if (healEvents.length) {
+        healEvents.forEach(event => {
+          const side = event.side || (battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : targetSide);
+          const node = battleUnitNode(stage, side, event.targetCardId);
+          if (node && Number(event.amount || 0) > 0) floatBattleText(node, `+${formatNumber(event.amount)} HP`, "heal");
+        });
+      } else if (Number(turn.healHp || 0) > 0) {
+        const node = battleUnitNode(stage, turn.side, turn.actorCardId);
+        if (node) floatBattleText(node, `+${formatNumber(turn.healHp)} HP`, "heal");
+      }
       abilityArray(turn.reviveEvents).forEach(event => {
         const side = battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : targetSide;
         const node = battleUnitNode(stage, side, event.targetCardId);
@@ -21701,7 +21809,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     function battleCharacterReportHTML(members, title) {
       const rows = abilityArray(members);
       const header = `<div class="battle-character-row header"><span>ตัวละคร</span><span>SPD</span><span>ดาเมจ</span><span>ฮีล</span><span>โล่สร้าง</span><span>สกิล</span><span>HP เหลือ</span></div>`;
-      const body = rows.length ? rows.map(member => `<div class="battle-character-row"><span class="battle-character-name ${member.ko ? "ko" : ""}">${escapeHTML(member.name)} • ${member.row === "front" ? "หน้า" : "หลัง"}</span><span>${formatNumber(member.speed)}</span><span>${formatNumber(member.damage)}</span><span>${formatNumber(member.healing)}</span><span>${formatNumber(member.shieldCreated)}</span><span>${formatNumber(member.skillActivations)}</span><span>${formatNumber(member.currentHp)}/${formatNumber(member.maxHp)}</span></div>`).join("") : `<div class="empty-state" style="min-height:80px">ไม่มีข้อมูลรายตัว</div>`;
+      const body = rows.length ? rows.map(member => `<div class="battle-character-row"><span class="battle-character-name ${member.ko ? "ko" : ""}">${escapeHTML(member.name)} • ${member.row === "front" ? "หน้า" : "หลัง"}</span><span class="battle-report-number speed">${battleColorTextHTML(formatNumber(member.speed))}</span><span class="battle-report-number damage">${battleColorTextHTML(formatNumber(member.damage))}</span><span class="battle-report-number heal">${battleColorTextHTML(formatNumber(member.healing))}</span><span class="battle-report-number shield">${battleColorTextHTML(formatNumber(member.shieldCreated))}</span><span class="battle-report-number skill">${battleColorTextHTML(formatNumber(member.skillActivations))}</span><span class="battle-report-number hp">${battleColorTextHTML(`${formatNumber(member.currentHp)}/${formatNumber(member.maxHp)}`)}</span></div>`).join("") : `<div class="empty-state" style="min-height:80px">ไม่มีข้อมูลรายตัว</div>`;
       return `<div class="battle-character-report"><h4>${escapeHTML(title)}</h4>${header}${body}</div>`;
     }
 
@@ -21750,13 +21858,13 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const targetName = turn.targetName || (turn.side === "player" ? summary.enemyLabel : summary.playerLabel);
         const skills = turn.triggerActivated ? abilityArray(turn.triggeredSkills).join(" • ") : (turn.suddenBreak ? "Sudden Break" : "-");
         const shieldText = `${Number(turn.shieldChange || 0) >= 0 ? "+" : ""}${formatNumber(turn.shieldChange || 0)} / ศัตรู ${Number(turn.enemyShieldChange || 0) >= 0 ? "+" : ""}${formatNumber(turn.enemyShieldChange || 0)}`;
-        return `<div class="battle-turn-row ${turn.side === "enemy" ? "enemy" : ""} ${turn.triggerActivated ? "active" : ""}"><span>#${index + 1} / R${turn.round}</span><strong>${escapeHTML(attacker)} → ${escapeHTML(targetName)}</strong><span>${turn.command === "guard" ? "ตั้งรับ" : `${formatNumber(turn.hits)} ฮิต`}</span><span>${formatNumber(turn.blockedHits)} บล็อก</span><span>${formatNumber(turn.damage)}</span><span>+${formatNumber(turn.healHp || 0)}</span><span>${escapeHTML(shieldText)}</span><span>${formatNumber(turn.playerRemaining)}</span><span>${formatNumber(turn.enemyRemaining)}</span><span class="battle-turn-skill">${escapeHTML(skills)}</span></div>`;
+        return `<div class="battle-turn-row ${turn.side === "enemy" ? "enemy" : ""} ${turn.triggerActivated ? "active" : ""}"><span class="battle-turn-cell turn">#${battleColorTextHTML(index + 1)} / R${battleColorTextHTML(turn.round)}</span><strong>${escapeHTML(attacker)} → ${escapeHTML(targetName)}</strong><span class="battle-turn-cell hit">${turn.command === "guard" ? "ตั้งรับ" : `${battleColorTextHTML(formatNumber(turn.hits))} ฮิต`}</span><span class="battle-turn-cell block">${battleColorTextHTML(formatNumber(turn.blockedHits))} บล็อก</span><span class="battle-turn-cell damage">${battleColorTextHTML(formatNumber(turn.damage))}</span><span class="battle-turn-cell heal">+${battleColorTextHTML(formatNumber(turn.healHp || 0))}</span><span class="battle-turn-cell shield">${battleColorTextHTML(shieldText)}</span><span class="battle-turn-cell hp">${battleColorTextHTML(formatNumber(turn.playerRemaining))}</span><span class="battle-turn-cell hp">${battleColorTextHTML(formatNumber(turn.enemyRemaining))}</span><span class="battle-turn-skill">${escapeHTML(skills)}</span></div>`;
       }).join("");
       target.innerHTML = `
         <div class="battle-summary-head"><p class="eyebrow">${summary.mode === "arena" ? "Arena Battle Report" : summary.mode === "worldBoss" ? "World Boss Report" : "Tower Battle Report"}</p><h2>${escapeHTML(summary.title)}</h2><p>${escapeHTML(summary.playerLabel)} ปะทะ ${escapeHTML(summary.enemyLabel)}</p></div>
         <div class="battle-summary-body">
           <div class="battle-summary-result ${summary.tone}"><strong>${escapeHTML(summary.outcomeText || (combat.winner === "player" ? "ชัยชนะ" : "พ่ายแพ้"))}</strong><span>${escapeHTML(summary.rewardText || "สรุปข้อมูลจากการต่อสู้ล่าสุด")}</span></div>
-          <div class="battle-summary-metrics">${metrics.map(([label, value]) => `<div class="battle-summary-metric"><span>${escapeHTML(label)}</span><strong title="${escapeHTML(value)}">${escapeHTML(value)}</strong></div>`).join("")}</div>
+          <div class="battle-summary-metrics">${metrics.map(([label, value]) => `<div class="battle-summary-metric"><span>${escapeHTML(label)}</span><strong title="${escapeHTML(value)}">${battleColorTextHTML(value)}</strong></div>`).join("")}</div>
           <div class="battle-summary-section"><h3>ไฮไลต์รายตัว</h3><div class="battle-mvp-strip"><div class="battle-mvp-card"><span>ทำดาเมจสูงสุด</span><strong>${escapeHTML(topDamage ? `${topDamage.name} • ${formatNumber(topDamage.damage)}` : "-")}</strong></div><div class="battle-mvp-card"><span>ฮีลสูงสุด</span><strong>${escapeHTML(topHeal ? `${topHeal.name} • ${formatNumber(topHeal.healing)}` : "-")}</strong></div><div class="battle-mvp-card"><span>สร้างโล่สูงสุด</span><strong>${escapeHTML(topShield ? `${topShield.name} • ${formatNumber(topShield.shieldCreated)}` : "-")}</strong></div><div class="battle-mvp-card"><span>สกิลใช้บ่อยที่สุด</span><strong>${escapeHTML(mostSkill.count ? `${mostSkill.name} • ${formatNumber(mostSkill.count)} ครั้ง` : "-")}</strong></div></div><div class="battle-character-report-grid">${battleCharacterReportHTML(combat.playerMembers, summary.playerLabel)}${battleCharacterReportHTML(combat.enemyMembers, summary.enemyLabel)}</div></div>
           <div class="battle-summary-section"><h3>สมาชิกทั้งสองฝ่าย</h3><div class="battle-summary-team-grid">${battleSummaryTeamHTML(summary.playerCards, summary.playerLabel)}${battleSummaryTeamHTML(summary.enemyCards, summary.enemyLabel)}</div></div>
           <div class="battle-summary-section"><h3>สรุปฮิตและ ACTIVE Skill</h3>${combatHitReportHTML(combat, { player: summary.playerLabel, enemy: summary.enemyLabel })}</div>
