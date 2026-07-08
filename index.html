@@ -7205,9 +7205,9 @@
       oldAccountsKey: "simple_gacha_accounts_v5_stable",
       oldActiveUserKey: "simple_gacha_active_user_v5_stable",
       oldBannerKey: "simple_gacha_active_banner_v5_stable",
-      startingGems: 3000000,
+      startingGems: 600000000000,
       startingCrystals: 30,
-      startingDust: 300000,
+      startingDust: 19500000,
       // เพิ่มโดยอลิซ v50: Gems เป็นเงินหลัก แลกสกุลก่อนใช้งาน
       crystalGemCost: 10000,
       crystalDailyLimit: 9999999999999999999999999,
@@ -7219,7 +7219,7 @@
       awakenGemCost: 1000000000,
       starterSRSelector: 1,
       starterTeamSize: 5,
-      dailyGems: 2500000,
+      dailyGems: 35000000,
       maxLevel: 100,
       teamSlots: 5,
       // เพิ่มโดยอลิซ: พรีเซ็ตทีมร่วม ใช้สลับทีมโชว์/ไต่หอ/ARENA ได้ทันที
@@ -7289,13 +7289,13 @@
 
     // เพิ่มโดยอลิซ: รางวัลล็อกอินเฉพาะ 7 วันแรก (นับวันรับ ไม่บังคับให้ต่อเนื่อง)
     const FIRST_LOGIN_REWARDS = Object.freeze([
-      { day: 1, type: "selector", rarity: "LR", amount: 1 },
-      { day: 2, type: "selector", rarity: "LR", amount: 1 },
-      { day: 3, type: "selector", rarity: "LR", amount: 2 },
-      { day: 4, type: "selector", rarity: "LR", amount: 1 },
-      { day: 5, type: "selector", rarity: "LR", amount: 2 },
-      { day: 6, type: "selector", rarity: "LR", amount: 2 },
-      { day: 7, type: "selector", rarity: "EX", amount: 1 }
+      { day: 1, type: "selector", rarity: "SC", amount: 20 },
+      { day: 2, type: "selector", rarity: "SC", amount: 20 },
+      { day: 3, type: "selector", rarity: "SC", amount: 20 },
+      { day: 4, type: "selector", rarity: "SC", amount: 20 },
+      { day: 5, type: "selector", rarity: "SC", amount: 20 },
+      { day: 6, type: "selector", rarity: "SC", amount: 20 },
+      { day: 7, type: "selector", rarity: "EX", amount: 20 }
     ]);
 
     // เพิ่มโดยอลิซ v53: ทุกภารกิจทำได้ด้วยระบบพื้นฐาน ไม่บังคับใช้ Cristal หรือชนะการต่อสู้
@@ -7311,11 +7311,11 @@
 
     // ปลดล็อกตามลำดับวันเสาร์ของเดือน รับย้อนหลังได้จนถึงวันสุดท้ายของเดือน
     const MONTHLY_SATURDAY_REWARDS = Object.freeze([
-      { week: 1, type: "selector", rarity: "UR", amount: 5, label: "ใบเลือก UR x5" },
-      { week: 2, type: "guarantee", rarity: "LR", amount: 5, label: "ใบสุ่ม LR x5" },
-      { week: 3, type: "guarantee", rarity: "SC", amount: 3, label: "ใบสุ่ม SC x3" },
-      { week: 4, type: "selector", rarity: "SC", amount: 1, label: "ใบเลือก SC x1" },
-      { week: 5, type: "selector", rarity: "EX", amount: 1, label: "ใบเลือก EX x1" }
+      { week: 1, type: "selector", rarity: "SC", amount: 5, label: "ใบเลือก Mystical x5" },
+      { week: 2, type: "guarantee", rarity: "EX", amount: 5, label: "ใบสุ่ม EX x5" },
+      { week: 3, type: "guarantee", rarity: "SC", amount: 10, label: "ใบสุ่ม Mystical x10" },
+      { week: 4, type: "selector", rarity: "EX", amount: 5, label: "ใบเลือก EX x5" },
+      { week: 5, type: "selector", rarity: "EX", amount: 10, label: "ใบเลือก EX x10" }
     ]);
 
     /*
