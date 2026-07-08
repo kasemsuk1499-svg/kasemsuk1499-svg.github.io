@@ -10447,8 +10447,8 @@
       const mode = String(value || "").trim().toLowerCase();
       if (["team", "showcase", "show", "display"].includes(mode)) return "team";
       if (["tower", "battle", "pve"].includes(mode)) return "tower";
+      if (["worldboss", "world-boss", "boss", "raid", "บอสโลก"].includes(mode)) return "tower";
       if (["arena", "pvp"].includes(mode)) return "arena";
-      if (["worldboss", "world-boss", "boss", "raid", "บอสโลก"].includes(mode)) return "arena";
       return mode;
     }
 
@@ -13559,7 +13559,35 @@
       const teamHp = team => alive(team).reduce((sum, member) => sum + member.currentHp, 0);
       const teamMaxHp = team => team.members.reduce((sum, member) => sum + member.maxHp, 0);
       const teamShield = team => alive(team).reduce((sum, member) => sum + member.shieldHits, 0);
-      const isDefeated = team => alive(team).length === 0;
+      const isUndyingSide = side => Boolean(options[`${side}KeepFightingAfterDefeat`] || options[`${side}Undying`] || options[`${side}WorldBossMode`]);
+      const isDefeated = team => isUndyingSide(team.side) ? false : alive(team).length === 0;
+      function keepUndyingMemberAlive(member, team) {
+        if (!member || !team || !isUndyingSide(team.side) || member.currentHp > 0) return false;
+        member.currentHp = 1;
+        member.ko = false;
+        member.deathReason = "";
+        return true;
+      }
+      function applyWorldBossRoundGrowth(team, round) {
+        const side = String(options.worldBossGrowthSide || "").toLowerCase();
+        if (!side || !team || String(team.side).toLowerCase() !== side) return;
+        const cfg = options.worldBossGrowthConfig || {};
+        const attackRate = Number(cfg.turnAttackGrowthRate ?? (typeof WORLD_BOSS_CONFIG !== "undefined" ? WORLD_BOSS_CONFIG.turnAttackGrowthRate : 0)) || 0;
+        const defenseRate = Number(cfg.turnDefenseGrowthRate ?? (typeof WORLD_BOSS_CONFIG !== "undefined" ? WORLD_BOSS_CONFIG.turnDefenseGrowthRate : 0)) || 0;
+        const hitEvery = Math.max(1, Math.floor(Number(cfg.hitGainEveryTurns ?? (typeof WORLD_BOSS_CONFIG !== "undefined" ? WORLD_BOSS_CONFIG.hitGainEveryTurns : 999999)) || 999999));
+        const maxBonus = Math.max(0, Math.floor(Number(cfg.maxBonusHits ?? (typeof WORLD_BOSS_CONFIG !== "undefined" ? WORLD_BOSS_CONFIG.maxBonusHits : 0)) || 0));
+        const safeRound = Math.max(1, Math.floor(Number(round) || 1));
+        const bonusHits = Math.min(maxBonus, Math.floor((safeRound - 1) / hitEvery));
+        abilityArray(team.members).forEach(member => {
+          if (!member) return;
+          if (member._worldBossBasePower === undefined) member._worldBossBasePower = Number(member.power) || 1;
+          if (member._worldBossBaseDefense === undefined) member._worldBossBaseDefense = Number(member.defense) || 0;
+          if (member._worldBossBaseAttackHits === undefined) member._worldBossBaseAttackHits = Math.max(1, Math.round(Number(member.attackHits) || 1));
+          member.power = Math.max(1, Number(member._worldBossBasePower) * (1 + (safeRound - 1) * attackRate));
+          member.defense = Math.max(0, Number(member._worldBossBaseDefense) * (1 + (safeRound - 1) * defenseRate));
+          member.attackHits = Math.max(1, Math.round(Number(member._worldBossBaseAttackHits) + bonusHits));
+        });
+      }
 
 
       const BATTLE_STATUS_LABELS = {
@@ -14503,6 +14531,8 @@
       for (let round = 1; round <= maxRounds && !isDefeated(player) && !isDefeated(enemy); round += 1) {
         lastRound = round;
         const resistanceTurnEvents = [...tickStatusResistanceTurns(player, "round"), ...tickStatusResistanceTurns(enemy, "round")];
+        applyWorldBossRoundGrowth(player, round);
+        applyWorldBossRoundGrowth(enemy, round);
         const queue = [...alive(player).map(member => ({ side:"player", member })), ...alive(enemy).map(member => ({ side:"enemy", member }))]
           .sort((a,b) => b.member.speed - a.member.speed || (a.side === b.side ? a.member.slot - b.member.slot : a.side === "player" ? -1 : 1));
         if (round === 1 && queue[0]) firstSide = queue[0].side;
@@ -14658,18 +14688,19 @@
                 const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxHpRate || .10), .01 + Math.max(0, round-fatigueStart)*.003);
                 damage = Math.max(damage, target.maxHp * fatigueRate);
               }
-              damage = Math.max(1, Math.min(target.currentHp, damage));
+              damage = Math.max(1, isUndyingSide(defenderTeam.side) ? damage : Math.min(target.currentHp, damage));
             }
           }
           if (dodged) { target.dodges += 1; defenderTeam.totalDodges += 1; }
           if (blocked) { target.blocks += 1; defenderTeam.totalBlocks += 1; defenderTeam.totalBlockedDamage += damage; }
           target.currentHp = Math.max(0, target.currentHp - damage);
+          const keptAliveByUndying = keepUndyingMemberAlive(target, defenderTeam);
           // ชีวิตแบบนับฮิต: ฮิตที่โล่รับยังถือว่าโดนโจมตี แต่ฮิตที่หลบสำเร็จไม่นับ
           const receivedHitsForReviveLife = blockedHits + (dodged ? 0 : unblockedHits);
-          const reviveSurvival = applyReviveSurvivalAfterHit(target, receivedHitsForReviveLife);
+          const reviveSurvival = keptAliveByUndying ? { expired:false, hitLifeConsumed:0 } : applyReviveSurvivalAfterHit(target, receivedHitsForReviveLife);
           if (!reviveSurvival.expired) {
             if (target.currentHp <= 0 && target.reviveTurnsRemaining > 0) target.currentHp = 1;
-            target.ko = target.currentHp <= 0;
+            target.ko = keptAliveByUndying ? false : target.currentHp <= 0;
             if (target.ko) target.deathReason = "damage";
           }
           const targetResults = [{
@@ -14710,17 +14741,18 @@
                   const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxHpRate || .10), .01 + Math.max(0, round-fatigueStart)*.003);
                   extraDamage = Math.max(extraDamage, extraTarget.maxHp * fatigueRate);
                 }
-                extraDamage = Math.max(1, Math.min(extraTarget.currentHp, extraDamage));
+                extraDamage = Math.max(1, isUndyingSide(defenderTeam.side) ? extraDamage : Math.min(extraTarget.currentHp, extraDamage));
               }
             }
             if (extraDodged) { extraTarget.dodges += 1; defenderTeam.totalDodges += 1; }
             if (extraBlocked) { extraTarget.blocks += 1; defenderTeam.totalBlocks += 1; defenderTeam.totalBlockedDamage += extraDamage; }
             extraTarget.currentHp = Math.max(0, extraTarget.currentHp - extraDamage);
+            const extraKeptAliveByUndying = keepUndyingMemberAlive(extraTarget, defenderTeam);
             const extraReceivedHits = extraBlockedHits + (extraDodged ? 0 : extraUnblockedHits);
-            const extraReviveSurvival = applyReviveSurvivalAfterHit(extraTarget, extraReceivedHits);
+            const extraReviveSurvival = extraKeptAliveByUndying ? { expired:false, hitLifeConsumed:0 } : applyReviveSurvivalAfterHit(extraTarget, extraReceivedHits);
             if (!extraReviveSurvival.expired) {
               if (extraTarget.currentHp <= 0 && extraTarget.reviveTurnsRemaining > 0) extraTarget.currentHp = 1;
-              extraTarget.ko = extraTarget.currentHp <= 0;
+              extraTarget.ko = extraKeptAliveByUndying ? false : extraTarget.currentHp <= 0;
               if (extraTarget.ko) extraTarget.deathReason = "damage";
             }
             if (extraTarget.guardTurns > 0) extraTarget.guardTurns -= 1;
@@ -20777,7 +20809,20 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const bossState = normalizeWorldBossStateForToday();
       const boss = WORLD_BOSS_BY_ID.get(String(bossState.bossId)) || getTodayWorldBoss();
       const teamIds = getTowerTeamIds();
-      const abilitySummary = getTeamAbilitySummary(teamIds, "tower");
+      const bossCard = worldBossAsBattleCard(boss);
+      if (bossCard && bossCard.id) {
+        // ให้ระบบสกิลหลักอ่านบอสเหมือนการ์ด 1 ใบ แต่ยังไม่เพิ่มเข้า CARDS/คอลเลกชัน/กาชา
+        CARD_BY_ID.set(String(bossCard.id), bossCard);
+      }
+      const bossTeamIds = bossCard && bossCard.id ? [String(bossCard.id)] : [];
+      const bossProgressByCardId = bossCard && bossCard.id ? {
+        [String(bossCard.id)]: { level: 1, duplicateRank: 0, awaken: 0 }
+      } : {};
+      const paired = bossTeamIds.length
+        ? getPairedAbilitySummaries(teamIds, bossTeamIds, "tower", {}, { progressByCardId: bossProgressByCardId })
+        : { ally: getTeamAbilitySummary(teamIds, "tower"), enemy: getTeamAbilitySummary([], "tower") };
+      const abilitySummary = paired.ally;
+      const enemyAbilitySummary = paired.enemy;
       const elementSummary = getTeamElementSummary(teamIds);
       const bossElements = getBossElements(boss);
       const bossStats = getWorldBossBaseStats(boss);
@@ -20788,20 +20833,48 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const elementAttack = rawAttack * elementSummary.powerRate;
       const abilityAttack = rawAttack * abilitySummary.teamPowerRate;
       const preElementAttack = rawAttack + elementAttack + abilityAttack;
-      const effectiveAttack = Math.max(0, preElementAttack * (1 + matchup.modifier));
-      const effectiveHp = Math.max(1, rawHp * (1 + abilitySummary.teamHpRate));
-      const effectiveDefense = Math.max(0, rawDefense * (1 + abilitySummary.teamDefenseRate));
-      const attackHits = getCombatAttackHits(abilitySummary);
-      const shieldHits = getCombatShieldHits(abilitySummary);
-      const healingRate = getCombatHealingRate(abilitySummary);
-      const shieldRecoveryRate = getCombatShieldRecoveryRate(abilitySummary);
+      const effectiveAttack = Math.max(0, preElementAttack * (1 + matchup.modifier) * (1 + enemyAbilitySummary.enemyPowerRate));
+      const effectiveHp = Math.max(1, rawHp * (1 + abilitySummary.teamHpRate) * (1 + enemyAbilitySummary.enemyHpRate));
+      const effectiveDefense = Math.max(0, rawDefense * (1 + abilitySummary.teamDefenseRate) * (1 + enemyAbilitySummary.enemyDefenseRate));
+      const attackHits = getCombatAttackHits(abilitySummary, enemyAbilitySummary.enemyAttackHits);
+      const shieldHits = getCombatShieldHits(abilitySummary, enemyAbilitySummary.enemyShieldHits);
+      const healingRate = getCombatHealingRate(abilitySummary, enemyAbilitySummary.enemyHealingRate);
+      const shieldRecoveryRate = getCombatShieldRecoveryRate(abilitySummary, enemyAbilitySummary.enemyShieldRecoveryRate);
       const criticalRate = getTeamCriticalRate(teamIds, abilitySummary, false);
       const playerMembers = buildBattleDefenseMembers(teamIds, abilitySummary, false);
+      const bossBaseAttack = Math.max(1, (bossStats.attack + enemyAbilitySummary.teamPowerFlat) * (1 + enemyAbilitySummary.teamPowerRate) * (1 + abilitySummary.enemyPowerRate));
+      const bossBaseHp = Math.max(1, (bossStats.hp + enemyAbilitySummary.teamHpFlat) * (1 + enemyAbilitySummary.teamHpRate) * (1 + abilitySummary.enemyHpRate));
+      const bossBaseDefense = Math.max(0, (bossStats.defense + enemyAbilitySummary.teamDefenseFlat) * (1 + enemyAbilitySummary.teamDefenseRate) * (1 + abilitySummary.enemyDefenseRate));
+      const bossMember = bossCard ? {
+        id: String(bossCard.id), name: bossCard.name, rarity: bossCard.rarity, elements: bossElements,
+        power: bossBaseAttack, hp: bossBaseHp, defense: bossBaseDefense, speed: bossStats.speed,
+        attackTargetCount: getWorldBossAttackTargetCount(boss), normalAttackTargetCount: getWorldBossAttackTargetCount(boss),
+        level: 1, awaken: 0
+      } : null;
+      const bossBattleTeam = bossMember ? [bossMember] : [];
+      const enemyMembers = buildBattleDefenseMembers(bossBattleTeam, enemyAbilitySummary, true);
+      if (bossMember && !enemyMembers.length) enemyMembers.push({ ...bossMember, blockRate: 0, dodgeRate: 0, damageTakenRate: 0 });
+      const enemyBaseAttackHits = Math.max(bossStats.attackHits, getCombatAttackHits(enemyAbilitySummary));
+      const enemyBaseShieldHits = Math.max(bossStats.shieldHits, getCombatShieldHits(enemyAbilitySummary));
+      const enemyAttackHits = applyCombatAttackHitModifier(enemyBaseAttackHits, abilitySummary.enemyAttackHits);
+      const enemyShieldHits = applyCombatShieldHitModifier(enemyBaseShieldHits, abilitySummary.enemyShieldHits);
+      const enemyHealingRate = getCombatHealingRate(enemyAbilitySummary, abilitySummary.enemyHealingRate);
+      const enemyShieldRecoveryRate = getCombatShieldRecoveryRate(enemyAbilitySummary, abilitySummary.enemyShieldRecoveryRate);
+      const enemyCriticalRate = bossTeamIds.length ? getTeamCriticalRate(bossTeamIds, enemyAbilitySummary, true) : bossStats.criticalRate;
       const totalCombatPower = calculateCombatPower(effectiveAttack, effectiveHp, effectiveDefense, attackHits, shieldHits);
+      const enemyCombatPower = calculateCombatPower(bossBaseAttack, bossBaseHp, bossBaseDefense, enemyAttackHits, enemyShieldHits);
       return {
-        bossState, boss, teamIds, abilitySummary, elementSummary, bossElements, bossStats, matchup,
+        bossState, boss, bossCard, bossTeamIds, teamIds, abilitySummary, enemyAbilitySummary, elementSummary, bossElements, bossStats, matchup,
         rawAttack, rawHp, rawDefense, effectiveAttack, effectiveHp, effectiveDefense,
-        attackHits, shieldHits, healingRate, shieldRecoveryRate, criticalRate, playerMembers, totalCombatPower
+        attackHits, shieldHits, healingRate, shieldRecoveryRate, criticalRate, playerMembers, totalCombatPower,
+        enemyMembers, enemyAttack: bossBaseAttack, enemyHp: bossBaseHp, enemyDefense: bossBaseDefense, enemyAttackHits, enemyShieldHits,
+        enemyHealingRate, enemyShieldRecoveryRate, enemyCriticalRate, enemyCombatPower,
+        playerActiveTriggers: buildTeamBattleTriggerConfigs(teamIds, abilitySummary, false),
+        enemyActiveTriggers: buildTeamBattleTriggerConfigs(bossBattleTeam, enemyAbilitySummary, true),
+        playerAbilityRoster: buildBattleAbilityRoster(teamIds, abilitySummary, false),
+        enemyAbilityRoster: buildBattleAbilityRoster(bossBattleTeam, enemyAbilitySummary, true),
+        playerCaptureRules: buildTeamCaptureReviveConfigs(abilitySummary),
+        enemyCaptureRules: buildTeamCaptureReviveConfigs(enemyAbilitySummary)
       };
     }
 
@@ -20924,217 +20997,104 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function buildWorldBossCombat(stats) {
-      const turns = [];
-      const bossStats = stats.bossStats;
-      let playerHp = Math.max(1, stats.effectiveHp);
-      let bossVisibleHp = Math.max(1, bossStats.hp);
-      let bossBroken = false;
-      let playerShield = Math.max(0, stats.shieldHits);
-      let bossShield = Math.max(0, bossStats.shieldHits);
-      let totalScore = 0;
-      let totalDamageToBoss = 0;
-      let totalDamageToPlayer = 0;
-      let playerCriticalHits = 0;
-      let bossCriticalHits = 0;
-      let bossSkillCount = 0;
-      const bossTargetCount = getWorldBossAttackTargetCount(stats.boss);
-      const initialStates = makeWorldBossBattleStates(stats, playerHp, bossVisibleHp, playerShield, bossShield);
-      for (let turn = 1; turn <= WORLD_BOSS_CONFIG.maxTurns && playerHp > 0; turn += 1) {
-        const bossHpRate = Math.max(0, bossVisibleHp) / Math.max(1, bossStats.hp);
-        const growth = worldBossTurnGrowth(turn);
-        const skillPayload = getWorldBossSkillEffectsForTurn(stats.boss, turn, bossHpRate);
-        bossSkillCount += skillPayload.names.length;
-        const activePlayer = stats.playerMembers.length ? stats.playerMembers[(turn - 1) % stats.playerMembers.length] : null;
-        const activePlayerId = activePlayer ? String(activePlayer.id) : "tower-team";
-        const activePlayerName = activePlayer ? String(activePlayer.name || "ทีมไต่หอของคุณ") : "ทีมไต่หอของคุณ";
-        const bossRuntimeId = String(stats.boss.id || "world-boss");
-        const bossDefense = Math.max(0, bossStats.defense * growth.defenseMultiplier * Math.max(0, 1 + skillPayload.defenseRate));
-        const playerCritical = rollCriticalHit(stats.criticalRate);
-        if (playerCritical) playerCriticalHits += 1;
-        const playerExchange = resolveCombatExchange(
-          stats.effectiveAttack,
-          bossDefense,
-          stats.attackHits,
-          bossShield,
-          playerCritical ? CONFIG.combatCriticalDamageMultiplier : 1,
-          { members: [{ id: String(stats.boss.id), name: stats.boss.name, hp: Math.max(1, bossVisibleHp), blockRate: 0, dodgeRate: 0, damageTakenRate: 0 }], rollDefensiveEffects: true }
-        );
-        const playerDamage = Math.max(0, Number(playerExchange.damage || 0) * Math.max(0, 1 + Number(skillPayload.bossDamageTakenRate || 0)));
-        const scoreMultiplier = bossStats.scoreMultiplier * growth.scoreMultiplier * Math.max(0, 1 + skillPayload.scoreRate) * (bossBroken ? 1 + WORLD_BOSS_CONFIG.breakScoreBonusRate : 1);
-        const scoreGain = playerDamage * scoreMultiplier;
-        totalDamageToBoss += playerDamage;
-        totalScore += scoreGain;
-        bossShield = Math.max(0, bossShield - playerExchange.blockedHits);
-        bossVisibleHp = Math.max(0, bossVisibleHp - playerDamage);
-        if (!bossBroken && bossVisibleHp <= 0) bossBroken = true;
-        turns.push({
-          round: turn,
-          side: "player",
-          actorCardId: activePlayerId,
-          actorName: activePlayerName,
-          actorSpeed: activePlayer ? Math.max(1, Number(activePlayer.speed) || 1) : 1,
-          targetCardId: bossRuntimeId,
-          targetName: stats.boss.name,
-          targetResults: [{ targetCardId: bossRuntimeId, targetName: stats.boss.name, damage: playerDamage, dodged: false, blocked: playerExchange.unblockedHits <= 0 }],
-          targetCount: 1,
-          hits: playerExchange.hits,
-          baseHits: stats.attackHits,
-          passiveBaseHits: stats.attackHits,
-          pendingHitChange: 0,
-          activeHitChange: 0,
-          extraHits: 0,
-          hitReduction: 0,
-          blockedHits: playerExchange.blockedHits,
-          unblockedHits: playerExchange.unblockedHits,
-          damage: playerDamage,
-          scoreGain,
-          critical: playerCritical,
-          criticalRate: stats.criticalRate,
-          criticalMultiplier: playerCritical ? CONFIG.combatCriticalDamageMultiplier : 1,
-          defenderDefense: bossDefense,
-          triggerActivated: skillPayload.names.length > 0,
-          triggeredSkills: skillPayload.names,
-          triggeredDetails: abilityArray(skillPayload.details).map(text => ({ name: text })),
-          attackBonus: 0,
-          healHp: 0,
-          shieldChange: 0,
-          enemyShieldChange: -playerExchange.blockedHits,
-          playerRemaining: playerHp,
-          enemyRemaining: bossVisibleHp,
-          playerShieldRemaining: playerShield,
-          enemyShieldRemaining: bossShield,
-          worldBossBreak: bossBroken,
-          memberStates: makeWorldBossBattleStates(stats, playerHp, bossVisibleHp, playerShield, bossShield)
-        });
-        if (playerHp <= 0) break;
-
-        const bossAttack = Math.max(1, bossStats.attack * growth.attackMultiplier * Math.max(0, 1 + skillPayload.attackRate));
-        const bossHits = Math.max(1, bossStats.attackHits + growth.bonusHits + Math.round(skillPayload.attackHits));
-        const bossCritical = rollCriticalHit(bossStats.criticalRate);
-        if (bossCritical) bossCriticalHits += 1;
-        const bossExchange = resolveCombatExchange(
-          bossAttack,
-          stats.effectiveDefense,
-          bossHits,
-          playerShield,
-          (bossCritical ? CONFIG.combatCriticalDamageMultiplier : 1) * Math.max(0, 1 + skillPayload.playerDamageRate),
-          { members: stats.playerMembers, rollDefensiveEffects: true }
-        );
-        const fixedDamage = Math.max(0, stats.effectiveHp * Math.max(0, skillPayload.fixedDamageRateToPlayerHp));
-        const bossTargetResults = abilityArray(bossExchange.memberResults).filter(Boolean)
-          .sort((a, b) => Number(b.finalDamage || 0) - Number(a.finalDamage || 0))
-          .slice(0, bossTargetCount)
-          .map(item => ({ targetCardId: String(item.id), targetName: item.name, damage: Math.max(0, Number(item.finalDamage || 0)), dodged: Boolean(item.dodged), blocked: Boolean(item.blocked) }));
-        if (!bossTargetResults.length && stats.playerMembers[0]) bossTargetResults.push({ targetCardId: String(stats.playerMembers[0].id), targetName: stats.playerMembers[0].name, damage: 0, dodged: false, blocked: false });
-        const bossDamage = Math.min(playerHp, Math.max(0, Number(bossExchange.damage || 0) + fixedDamage));
-        playerHp = Math.max(0, playerHp - bossDamage);
-        totalDamageToPlayer += bossDamage;
-        playerShield = Math.max(0, playerShield - bossExchange.blockedHits);
-        turns.push({
-          round: turn,
-          side: "enemy",
-          actorCardId: bossRuntimeId,
-          actorName: stats.boss.name,
-          actorSpeed: bossStats.speed,
-          targetCardId: bossTargetResults[0] ? bossTargetResults[0].targetCardId : activePlayerId,
-          targetName: bossTargetResults[0] ? bossTargetResults[0].targetName : "ทีมไต่หอของคุณ",
-          targetResults: bossTargetResults,
-          targetCount: bossTargetResults.length || bossTargetCount,
-          hits: bossExchange.hits,
-          baseHits: bossHits,
-          passiveBaseHits: bossStats.attackHits,
-          pendingHitChange: 0,
-          activeHitChange: Math.max(0, bossHits - bossStats.attackHits),
-          extraHits: Math.max(0, bossHits - bossStats.attackHits),
-          hitReduction: 0,
-          blockedHits: bossExchange.blockedHits,
-          unblockedHits: bossExchange.unblockedHits,
-          damage: bossDamage,
-          critical: bossCritical,
-          criticalRate: bossStats.criticalRate,
-          criticalMultiplier: bossCritical ? CONFIG.combatCriticalDamageMultiplier : 1,
-          defenderDefense: stats.effectiveDefense,
-          triggerActivated: skillPayload.names.length > 0,
-          triggeredSkills: skillPayload.names,
-          triggeredDetails: abilityArray(skillPayload.details).map(text => ({ name: text })),
-          attackBonus: bossAttack - bossStats.attack,
-          healHp: 0,
-          shieldChange: -bossExchange.blockedHits,
-          enemyShieldChange: 0,
-          playerRemaining: playerHp,
-          enemyRemaining: bossVisibleHp,
-          playerShieldRemaining: playerShield,
-          enemyShieldRemaining: bossShield,
-          worldBossBreak: bossBroken,
-          memberStates: makeWorldBossBattleStates(stats, playerHp, bossVisibleHp, playerShield, bossShield)
-        });
-      }
-      const combat = {
-        winner: totalScore > 0 ? "player" : "enemy",
-        playerFirst: true,
-        turns,
-        rounds: turns.length ? Math.max(...turns.map(turn => Number(turn.round) || 0)) : 0,
+      const boss = stats && stats.boss || getTodayWorldBoss();
+      const bossStats = stats && stats.bossStats || getWorldBossBaseStats(boss);
+      const combat = buildIndividualTurnBasedCombat({
         playerAttack: stats.effectiveAttack,
-        enemyAttack: bossStats.attack,
+        playerHp: stats.effectiveHp,
         playerDefense: stats.effectiveDefense,
-        enemyDefense: bossStats.defense,
-        playerMaxHp: stats.effectiveHp,
-        enemyMaxHp: bossStats.hp,
-        playerRemainingHp: playerHp,
-        enemyRemainingHp: bossVisibleHp,
-        playerInitialShieldHits: stats.shieldHits,
-        enemyInitialShieldHits: bossStats.shieldHits,
-        playerShieldRemaining: playerShield,
-        enemyShieldRemaining: bossShield,
-        playerInitialHealingRate: stats.healingRate,
-        enemyInitialHealingRate: 0,
+        playerAttackHits: stats.attackHits,
+        playerShieldHits: stats.shieldHits,
         playerHealingRate: stats.healingRate,
-        enemyHealingRate: 0,
-        playerInitialShieldRecoveryRate: stats.shieldRecoveryRate,
-        enemyInitialShieldRecoveryRate: 0,
         playerShieldRecoveryRate: stats.shieldRecoveryRate,
-        enemyShieldRecoveryRate: 0,
-        playerInitialCriticalRate: stats.criticalRate,
-        enemyInitialCriticalRate: bossStats.criticalRate,
+        enemyAttack: stats.enemyAttack,
+        enemyHp: stats.enemyHp,
+        enemyDefense: stats.enemyDefense,
+        enemyAttackHits: stats.enemyAttackHits,
+        enemyShieldHits: stats.enemyShieldHits,
+        enemyHealingRate: stats.enemyHealingRate,
+        enemyShieldRecoveryRate: stats.enemyShieldRecoveryRate,
         playerCriticalRate: stats.criticalRate,
-        enemyCriticalRate: bossStats.criticalRate,
-        criticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
-        playerTotalDamage: totalDamageToBoss,
-        enemyTotalDamage: totalDamageToPlayer,
-        playerTotalHealing: 0,
-        enemyTotalHealing: 0,
-        playerTotalShieldCreated: 0,
-        enemyTotalShieldCreated: 0,
-        playerTotalCriticalHits: playerCriticalHits,
-        enemyTotalCriticalHits: bossCriticalHits,
-        playerTotalBlocks: 0,
-        enemyTotalBlocks: 0,
-        playerTotalDodges: 0,
-        enemyTotalDodges: 0,
-        playerTotalBlockedDamage: 0,
-        enemyTotalBlockedDamage: 0,
-        playerTriggerActivations: 0,
-        enemyTriggerActivations: bossSkillCount,
-        worldBossScore: totalScore,
-        worldBossBroken: bossBroken,
-        copiedAbilityEvents: [],
-        playerCopiedAbilitiesRemaining: [],
-        enemyCopiedAbilitiesRemaining: []
-      };
-      const members = summarizeWorldBossMembers(stats, combat, playerHp);
-      combat.worldBossId = String(stats.boss.id || "");
-      combat.playerInitialMembers = initialStates.player;
-      combat.enemyInitialMembers = initialStates.enemy;
-      combat.playerMembers = members.playerMembers;
-      combat.enemyMembers = members.enemyMembers;
-      combat.playerMostUsedSkill = { name: "-", count: 0 };
-      combat.enemyMostUsedSkill = { name: bossSkillCount ? "Boss Skill" : "-", count: bossSkillCount };
+        enemyCriticalRate: stats.enemyCriticalRate,
+        playerMembers: stats.playerMembers,
+        enemyMembers: stats.enemyMembers,
+        playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
+        enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
+        mode: "tower",
+        maxRounds: WORLD_BOSS_CONFIG.maxTurns,
+        playerActiveTriggers: stats.playerActiveTriggers,
+        enemyActiveTriggers: stats.enemyActiveTriggers,
+        playerAbilityRoster: stats.playerAbilityRoster,
+        enemyAbilityRoster: stats.enemyAbilityRoster,
+        playerCaptureRules: stats.playerCaptureRules,
+        enemyCaptureRules: stats.enemyCaptureRules,
+        statusResolutionSeed: makeAbilityResolutionSeed("worldBoss", stats.teamIds, [boss && boss.id], worldBossDateKey()),
+        playerFormationFront: state.battle.formationFront,
+        playerFormationSize: CONFIG.towerTeamSlots,
+        enemyFormationFront: 1,
+        enemyFormationSize: 1,
+        playerCommandStrategy: state.battle.commandStrategy,
+        playerTargetStrategy: state.battle.targetStrategy,
+        enemyCommandStrategy: "balanced",
+        enemyTargetStrategy: "highAtk",
+        enemyKeepFightingAfterDefeat: true,
+        enemyWorldBossMode: true,
+        worldBossGrowthSide: "enemy",
+        worldBossGrowthConfig: WORLD_BOSS_CONFIG,
+        playerVariance: () => .90 + Math.random() * .20,
+        enemyVariance: () => .90 + Math.random() * .20
+      });
+
+      let localBossHp = Math.max(1, Number(bossStats.hp) || Number(stats.enemyHp) || 1);
+      let broken = false;
+      let totalScore = 0;
+      abilityArray(combat.turns).forEach(turn => {
+        if (turn.side !== "player") {
+          turn.worldBossBreak = broken;
+          turn.enemyRemaining = localBossHp;
+          if (turn.memberStates && Array.isArray(turn.memberStates.enemy) && turn.memberStates.enemy[0]) {
+            turn.memberStates.enemy[0].currentHp = localBossHp;
+            turn.memberStates.enemy[0].ko = false;
+          }
+          return;
+        }
+        const damage = Math.max(0, Number(turn.damage) || 0);
+        const growth = worldBossTurnGrowth(turn.round || 1);
+        const scoreMultiplier = bossStats.scoreMultiplier * growth.scoreMultiplier * (broken ? 1 + WORLD_BOSS_CONFIG.breakScoreBonusRate : 1);
+        const scoreGain = damage * scoreMultiplier;
+        totalScore += scoreGain;
+        localBossHp = Math.max(0, localBossHp - damage);
+        if (!broken && localBossHp <= 0) broken = true;
+        turn.scoreGain = scoreGain;
+        turn.worldBossBreak = broken;
+        turn.enemyRemaining = localBossHp;
+        if (turn.memberStates && Array.isArray(turn.memberStates.enemy) && turn.memberStates.enemy[0]) {
+          turn.memberStates.enemy[0].currentHp = localBossHp;
+          turn.memberStates.enemy[0].ko = false;
+        }
+      });
+      combat.winner = "player";
+      combat.worldBossId = String(boss && boss.id || "");
+      combat.worldBossScore = totalScore;
+      combat.worldBossBroken = broken;
+      combat.enemyMaxHp = Math.max(1, Number(bossStats.hp) || Number(combat.enemyMaxHp) || 1);
+      combat.enemyRemainingHp = localBossHp;
+      combat.enemyAttack = stats.enemyAttack;
+      combat.enemyDefense = stats.enemyDefense;
+      combat.enemyInitialCriticalRate = stats.enemyCriticalRate;
+      combat.enemyCriticalRate = stats.enemyCriticalRate;
+      combat.enemyCombatPower = stats.enemyCombatPower;
+      combat.playerCombatPower = stats.totalCombatPower;
+      combat.initialTransferEvents = abilityArray(stats.abilitySummary && stats.abilitySummary.transferResults)
+        .concat(abilityArray(stats.enemyAbilitySummary && stats.enemyAbilitySummary.transferResults));
+      combat.playerMostUsedSkill = combat.playerMostUsedSkill || { name: "-", count: 0 };
+      combat.enemyMostUsedSkill = combat.enemyMostUsedSkill || { name: "Boss Skill", count: combat.enemyTriggerActivations || 0 };
       return combat;
     }
 
     function worldBossResultSummaryText(combat, stats) {
       const bossBroken = combat.worldBossBroken ? " • บอสเข้าสู่ Break แล้ว แต่ยังนับคะแนนต่อ" : "";
-      return `ทำคะแนน ${formatNumber(combat.worldBossScore)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} • อยู่ได้ ${formatNumber(combat.rounds)} เทิร์น • HP เราเหลือ ${formatNumber(combat.playerRemainingHp)}/${formatNumber(combat.playerMaxHp)}${bossBroken}`;
+      return `ทำคะแนน ${formatNumber(combat.worldBossScore)} • ดาเมจรวม ${formatNumber(combat.playerTotalDamage)} • อยู่ได้ ${formatNumber(combat.rounds)} รอบ • HP เราเหลือ ${formatNumber(combat.playerRemainingHp)}/${formatNumber(combat.playerMaxHp)}${bossBroken}`;
     }
 
     function renderWorldBossLogFromResult(result = null) {
