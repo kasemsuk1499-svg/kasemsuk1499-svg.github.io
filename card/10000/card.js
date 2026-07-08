@@ -13,7 +13,7 @@ ACC_REGISTER_CARD({
   hp: 2000000,
   defense: 3000000,
   speed: 9876,
-  incomePerSec: 14031499,
+  incomePerSec: 1403149,
   normalAttackTargetCount: 3,
   upgradeDustBase: 1800,
   upgradeDustGrowth: 1.0175,
