@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-09-blue-ui-border-comfort">
+  <meta name="gacha-app-build" content="2026-07-09-skill-condition-runtime-v94">
   <title>Anime Card Collection · World Boss v90 Clean Collection Detail Tags</title>
   <style>
     :root {
@@ -8147,6 +8147,8 @@
        - activeSkillCostPermanent = ปรับคอสถาวรตลอดการต่อสู้ และมีผลกับรอบถัดไปทุกครั้ง
        - activeSkillCost เดิมยังรองรับเป็น alias ของ activeSkillCostCycle เพื่อไม่ให้การ์ดเก่าพัง
        - เอฟเฟกต์คอสไม่ใส่ตัวกรอง = ทั้งฝ่าย; ใส่ targetCardIds / targetElements / targetRarities เพื่อเจาะจงได้
+       - v94: condition รองรับชื่อการ์ดแล้ว เช่น anyTeammateCardNames:["เอลฟาเรีย","จูเรียส"] ใช้ได้ตอนยังไม่รู้ ID
+       - v94: reviveTimedUndying รองรับ reviveAttackHits และ reviveAttackTargetCount เพื่อเปลี่ยนรูปแบบโจมตีหลังคืนชีพ
        - blockRate = โอกาสบล็อกของการ์ดเป้าหมาย; เมื่อสำเร็จลดดาเมจส่วนของการ์ดนั้น 50% หลังโล่/คริติคอล/DEF
        - damageTakenRate = ตัวคูณดาเมจรับขั้นสุดท้าย; -0.20 = รับลดลง 20%, +0.20 = รับเพิ่มขึ้น 20%
        - dodgeRate = โอกาสหลบของการ์ดเป้าหมาย; ส่วนดาเมจตามสัดส่วน HP ของการ์ดที่หลบจะหายไปก่อนคำนวณ DEF
@@ -9961,6 +9963,47 @@
       return [...new Set(abilityArray(value).map(item => String(item)).filter(Boolean))];
     }
 
+    // เพิ่มโดยอลิซ v94: เงื่อนไขสกิลด้วย “ชื่อการ์ด/ชื่อตัวละคร” สำหรับเวลายังไม่รู้ ID ในแอพสร้างการ์ด
+    // ตัวอย่าง: condition: { anyTeammateCardNames: ["เอลฟาเรีย", "จูเรียส"] }
+    function normalizeAbilityNameKey(value) {
+      return String(value === undefined || value === null ? "" : value)
+        .normalize("NFKC")
+        .toLowerCase()
+        .replace(/[\s,;:|/+&•·()[\]{}<>"'`~!@#$%^*=?.\\_-]+/g, "")
+        .trim();
+    }
+
+    function normalizeAbilityCardNames(value) {
+      return [...new Set(abilityArray(value)
+        .flatMap(item => String(item || "").split(/\s*(?:,|\||\+|\/|&|•)\s*/))
+        .map(normalizeAbilityNameKey)
+        .filter(Boolean)
+      )];
+    }
+
+    function cardNameMatchesAbilityName(card, wantedName = "") {
+      const needle = normalizeAbilityNameKey(wantedName);
+      if (!needle || !card) return false;
+      const names = [
+        card.name,
+        card.title,
+        card.displayName,
+        card.characterName,
+        card.jpName,
+        card.enName,
+        card.thName
+      ].map(normalizeAbilityNameKey).filter(Boolean);
+      return names.some(name => name === needle || name.includes(needle));
+    }
+
+    function contextHasCardName(context, wantedName = "", options = {}) {
+      const sourceId = cardIdString(options && options.excludeSourceId);
+      return Boolean(context && abilityArray(context.cards).some(card => {
+        if (sourceId && cardIdString(card && card.id) === sourceId) return false;
+        return cardNameMatchesAbilityName(card, wantedName);
+      }));
+    }
+
     // รองรับ Card ID 0: ห้ามใช้ value || "" เพราะเลข 0 จะถูกมองว่าไม่มีค่า
     function cardIdString(value) {
       return value === null || value === undefined || value === "" ? "" : String(value);
@@ -9975,6 +10018,16 @@
           ?? rule.allowedTeamCardIds
           ?? rule.teamCardIdsOnly
           ?? rule.onlyWithCardIds
+      );
+    }
+
+    function getAllowedTeammateCardNames(condition = {}) {
+      const rule = condition && typeof condition === "object" ? condition : {};
+      return normalizeAbilityCardNames(
+        rule.allowedTeammateCardNames
+          ?? rule.allowedTeamCardNames
+          ?? rule.teamCardNamesOnly
+          ?? rule.onlyWithCardNames
       );
     }
 
@@ -10944,10 +10997,17 @@
 
       // อยู่เดี่ยวได้ หรืออยู่กับการ์ดที่ระบุเท่านั้น: ไม่บังคับให้ต้องมีการ์ดที่อนุญาต
       const allowedTeammateCardIds = getAllowedTeammateCardIds(rule);
-      if (allowedTeammateCardIds.length) {
+      const allowedTeammateCardNames = getAllowedTeammateCardNames(rule);
+      if (allowedTeammateCardIds.length || allowedTeammateCardNames.length) {
         const allowedSet = new Set(allowedTeammateCardIds);
         const sourceId = String(sourceCard.id);
-        const hasForbiddenTeammate = context.ids.some(id => String(id) !== sourceId && !allowedSet.has(String(id)));
+        const hasForbiddenTeammate = context.cards.some(card => {
+          const id = String(card && card.id);
+          if (id === sourceId) return false;
+          const idAllowed = allowedSet.has(id);
+          const nameAllowed = allowedTeammateCardNames.some(name => cardNameMatchesAbilityName(card, name));
+          return !(idAllowed || nameAllowed);
+        });
         if (hasForbiddenTeammate) return false;
       }
 
@@ -11002,6 +11062,18 @@
       if (anyCardIds.length && !anyCardIds.some(id => context.cardIdSet.has(id))) return false;
       const withoutCardIds = normalizeAbilityCardIds(rule.withoutCardIds ?? rule.excludedCardIds ?? rule.forbiddenCardIds);
       if (withoutCardIds.some(id => context.cardIdSet.has(id))) return false;
+
+      // v94: เงื่อนไขด้วยชื่อการ์ด/ชื่อตัวละคร ใช้ได้ทั้งระดับ ability และระดับ effect.condition
+      const requiredCardNames = normalizeAbilityCardNames(rule.requiredCardNames ?? rule.requiredNames ?? rule.requiredCharacters ?? rule.requiredCharacterNames);
+      if (requiredCardNames.some(name => !contextHasCardName(context, name))) return false;
+      const anyCardNames = normalizeAbilityCardNames(rule.anyCardNames ?? rule.anyNames ?? rule.anyCharacters ?? rule.anyCharacterNames);
+      if (anyCardNames.length && !anyCardNames.some(name => contextHasCardName(context, name))) return false;
+      const requiredTeammateCardNames = normalizeAbilityCardNames(rule.requiredTeammateCardNames ?? rule.requiredTeammateNames);
+      if (requiredTeammateCardNames.some(name => !contextHasCardName(context, name, { excludeSourceId: sourceCard.id }))) return false;
+      const anyTeammateCardNames = normalizeAbilityCardNames(rule.anyTeammateCardNames ?? rule.anyTeammateNames);
+      if (anyTeammateCardNames.length && !anyTeammateCardNames.some(name => contextHasCardName(context, name, { excludeSourceId: sourceCard.id }))) return false;
+      const withoutCardNames = normalizeAbilityCardNames(rule.withoutCardNames ?? rule.excludedCardNames ?? rule.forbiddenCardNames);
+      if (withoutCardNames.some(name => contextHasCardName(context, name))) return false;
 
       const sourceId = String(sourceCard.id);
       const progress = context.progressByCardId[sourceId] || getOwned(sourceId) || {};
@@ -12386,6 +12458,22 @@
           enemyCriticalRateChange: Math.max(-1, Number(item.enemyCriticalRateChange) || 0),
           nextAttackCriticalRate: clampTemporaryCriticalRate(item.nextAttackCriticalRate),
           enemyNextAttackCriticalRate: clampTemporaryCriticalRate(item.enemyNextAttackCriticalRate),
+          durationTurns: Math.max(0, Math.floor(Number(item.durationTurns) || 0)),
+          durationRounds: Math.max(0, Math.floor(Number(item.durationRounds) || 0)),
+          attackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(item.attackTargetCount) || 1))),
+          criticalDamageRate: Number(item.criticalDamageRate) || 0,
+          defensePenetrationRate: Math.max(0, Math.min(1, Number(item.defensePenetrationRate) || 0)),
+          healTargetRules: abilityArray(item.healTargetRules).map(rule => ({ ...rule })),
+          hitTargetRules: abilityArray(item.hitTargetRules).map(rule => ({ ...rule })),
+          shieldTargetRules: abilityArray(item.shieldTargetRules).map(rule => ({ ...rule })),
+          reviveRules: abilityArray(item.reviveRules).map(rule => ({ ...rule })),
+          speedTargetRules: abilityArray(item.speedTargetRules).map(rule => ({ ...rule })),
+          tauntRules: abilityArray(item.tauntRules).map(rule => ({ ...rule })),
+          statusApplyRules: abilityArray(item.statusApplyRules).map(rule => ({ ...rule })),
+          followUpAttacks: abilityArray(item.followUpAttacks).map(rule => ({ ...rule })),
+          counterAttacks: abilityArray(item.counterAttacks).map(rule => ({ ...rule })),
+          adaptiveElement: item.adaptiveElement && typeof item.adaptiveElement === "object" ? { ...item.adaptiveElement } : null,
+          multiElementAttacks: abilityArray(item.multiElementAttacks).map(rule => ({ ...rule })),
           maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
           attackStackGain: Math.max(0, Number(item.attackStackGain || 0)),
           stackEffects: abilityArray(item.stackEffects).map(effect => effect && typeof effect === "object" ? { ...effect } : effect).filter(Boolean),
@@ -14651,6 +14739,24 @@
         toTeam.abilityRoster.push(...movedRoster);
       }
 
+      function applyReviveCombatForm(member, rule) {
+        if (!member || !rule) return null;
+        const nextHits = Math.max(0, Math.floor(Number(rule.reviveAttackHits ?? rule.reviveNormalAttackHits) || 0));
+        const nextTargetCount = Math.max(0, Math.min(5, Math.floor(Number(rule.reviveAttackTargetCount ?? rule.reviveNormalAttackTargetCount) || 0)));
+        const before = {
+          attackHits: Math.max(1, Math.round(Number(member.attackHits) || 1)),
+          normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(member.normalAttackTargetCount) || 1)))
+        };
+        if (nextHits > 0) member.attackHits = Math.max(1, nextHits);
+        if (nextTargetCount > 0) member.normalAttackTargetCount = Math.max(1, Math.min(5, nextTargetCount));
+        const after = {
+          attackHits: Math.max(1, Math.round(Number(member.attackHits) || 1)),
+          normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(member.normalAttackTargetCount) || 1)))
+        };
+        if (before.attackHits === after.attackHits && before.normalAttackTargetCount === after.normalAttackTargetCount) return null;
+        return { before, after };
+      }
+
       function reviveCapturedMember(member, rule) {
         member.currentHp = Math.max(1, Math.min(member.maxHp, member.maxHp * Math.max(.01, Number(rule.hpRate) || .30)));
         member.ko = false; member.deathReason = "";
@@ -14658,6 +14764,7 @@
         member.reviveTurnsRemaining = member.reviveMode === "reviveTimedUndying" ? Math.max(1, Math.floor(Number(rule.durationTurns) || 1)) : 0;
         member.reviveHitLifeRemaining = member.reviveMode === "reviveHitLife" ? Math.max(1, Math.floor(Number(rule.surviveHits) || 1)) : 0;
         member.shieldHits = 0; member.guardTurns = 0; member.tauntTurnsRemaining = 0; member.tauntRoundsRemaining = 0; member.tauntSourceCardId = "";
+        applyReviveCombatForm(member, rule);
       }
 
       function applyCaptureReviveRules(ownerTeam, defenderTeam, actor, killedMembers, seedBase = 0) {
@@ -14749,10 +14856,12 @@
               ? Math.max(1, Math.floor(Number(rule.durationTurns) || 1)) : 0;
             recipient.reviveHitLifeRemaining = recipient.reviveMode === "reviveHitLife"
               ? Math.max(1, Math.floor(Number(rule.surviveHits) || 1)) : 0;
+            const reviveForm = applyReviveCombatForm(recipient, rule);
             events.push({
               targetCardId: recipient.id, targetName: recipient.name, hp: recipient.currentHp, maxHp: recipient.maxHp,
               reviveType: recipient.reviveMode, turnsRemaining: recipient.reviveTurnsRemaining,
-              hitLifeRemaining: recipient.reviveHitLifeRemaining, count: recipient.reviveCount
+              hitLifeRemaining: recipient.reviveHitLifeRemaining, count: recipient.reviveCount,
+              reviveForm
             });
           });
         });
@@ -16426,6 +16535,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns) || 0)),
             surviveHits: Math.max(0, Math.floor(Number(effect.surviveHits) || 0)),
             maxTriggers: Math.max(1, Math.floor(Number(effect.maxTriggers) || 1)),
+            reviveAttackHits: Math.max(0, Math.floor(Number(effect.reviveAttackHits ?? effect.reviveNormalAttackHits) || 0)),
+            reviveAttackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(effect.reviveAttackTargetCount ?? effect.reviveNormalAttackTargetCount) || 0))),
             reviveType: effectType,
             ruleKey: String(record._runtimeEffectKey || record.key || `${baseKey}:${effectType}`)
           }));
@@ -16729,7 +16840,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         healTargetRules: abilityArray(item.healTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities) })),
         hitTargetRules: abilityArray(item.hitTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         shieldTargetRules: abilityArray(item.shieldTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
-        reviveRules: abilityArray(item.reviveRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), hpRate: Math.max(.01, Number(rule && rule.hpRate) || .3), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), surviveHits: Math.max(0, Math.floor(Number(rule && rule.surviveHits) || 0)), maxTriggers: Math.max(1, Math.floor(Number(rule && rule.maxTriggers) || 1)) })),
+        reviveRules: abilityArray(item.reviveRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), hpRate: Math.max(.01, Number(rule && rule.hpRate) || .3), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), surviveHits: Math.max(0, Math.floor(Number(rule && rule.surviveHits) || 0)), maxTriggers: Math.max(1, Math.floor(Number(rule && rule.maxTriggers) || 1)), reviveAttackHits: Math.max(0, Math.floor(Number(rule && rule.reviveAttackHits) || 0)), reviveAttackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(rule && rule.reviveAttackTargetCount) || 0))) })),
         speedTargetRules: abilityArray(item.speedTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0), maxStacks: Math.max(1, Math.floor(Number(rule && rule.maxStacks) || 1)) })).filter(rule => rule.value),
         tauntRules: abilityArray(item.tauntRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), durationRounds: Math.max(0, Math.floor(Number(rule && rule.durationRounds) || 0)) })),
         statusApplyRules: abilityArray(item.statusApplyRules).map(rule => ({ ...rule })),
@@ -19927,7 +20038,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       nullifyCardAbilities: "ยกเลิกสกิล ลบสกิล ปิดสกิล ความสามารถไร้ผล nullify",
       activateDomain: "กางอาณาเขต เปิดอาณาเขต domain field",
       taunt: "ยั่วยุ taunt provoke aggro บังคับเป้าหมาย เล็งก่อน แทงค์ tank",
-      ignoreAbilityConditions: "ยกเลิกเงื่อนไข ไม่สนเงื่อนไข ปลดเงื่อนไข ignore condition"
+      ignoreAbilityConditions: "ยกเลิกเงื่อนไข ไม่สนเงื่อนไข ปลดเงื่อนไข ignore condition",
+      reviveTimedUndying: "คืนชีพ อมตะ revive undying ฟื้นกลับมา เปลี่ยนร่างหลังตาย",
+      revive: "คืนชีพ revive ฟื้นกลับมา",
+      applyStatus: "ติดสถานะ status abnormal freeze burn bleed shock death สตั้น แช่แข็ง",
+      nextAttackTargetCount: "จำนวนเป้าหมาย โจมตีหลายเป้าหมาย target count aoe"
     });
 
     const ABILITY_FIELD_SEARCH_ALIASES = Object.freeze({
@@ -19951,7 +20066,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       sourceMinAwaken: "อเวกขั้นต่ำ awaken",
       requiredCardIds: "ต้องจัดทีมร่วมกับ การ์ดที่ต้องมี",
       anyCardIds: "มีการ์ดอย่างใดอย่างหนึ่ง จัดทีมร่วมกับ",
+      requiredCardNames: "ต้องมีชื่อตัวละคร ต้องมีชื่อการ์ด จัดทีมร่วมกับ แบบไม่รู้ ID",
+      anyCardNames: "มีชื่อตัวละครอย่างใดอย่างหนึ่ง มีชื่อการ์ดอย่างใดอย่างหนึ่ง",
+      requiredTeammateCardNames: "ต้องมีเพื่อนร่วมทีมชื่อนี้ ไม่รวมตัวเอง",
+      anyTeammateCardNames: "มีเพื่อนร่วมทีมชื่อใดชื่อหนึ่ง ไม่รวมตัวเอง",
       allowedTeammateCardIds: "สมาชิกที่อนุญาต อยู่เดี่ยวได้ whitelist",
+      allowedTeammateCardNames: "สมาชิกชื่อที่อนุญาต อยู่เดี่ยวได้ whitelist แบบชื่อ",
       targetCardIds: "การ์ดเป้าหมาย เกี่ยวข้องกับตัวละคร",
       targetElements: "ธาตุเป้าหมาย",
       targetRarities: "ระดับเป้าหมาย rarity",
@@ -19972,6 +20092,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       { id: "shield", emoji: "🛡️", label: "โล่/กันตี", color: "#a78bfa", aliases: "โล่ shield block เกราะ กันตี ป้องกัน", patterns: [/shieldhits/i, /restoreshieldhits/i, /blockrate/i, /shieldrecovery/i] },
       { id: "crit", emoji: "🎯", label: "คริติคอล", color: "#facc15", aliases: "คริ คริติคอล critical crit", patterns: [/critical/i] },
       { id: "heal", emoji: "💚", label: "ฮีล/ฟื้นฟู", color: "#56e39f", aliases: "ฮีล ฟื้นฟู heal healing recover เลือด", patterns: [/heal/i, /healing/i, /recover/i] },
+      { id: "revive", emoji: "🕊️", label: "คืนชีพ/อมตะ", color: "#7dd3fc", aliases: "คืนชีพ อมตะ revive undying ตายแล้วฟื้น เปลี่ยนร่างหลังตาย", patterns: [/revive/i, /undying/i] },
       { id: "buff-atk", emoji: "🔥", label: "บัฟ ATK", color: "#fb7185", aliases: "บัฟ atk power เพิ่มพลังโจมตี เพิ่มโจมตี", patterns: [/(^|[^a-z])power(rate|flat|baserate|baseflat)?$/i, /powerratestack/i, /nextattackpower/i, /increaseattack/i, /teampower/i, /selfpower/i, /cardpower/i, /elementpower/i, /raritypower/i] },
       { id: "buff-hp", emoji: "❤️", label: "บัฟ HP", color: "#f472b6", aliases: "บัฟ hp เลือด พลังชีวิต", patterns: [/hprate/i, /hpflat/i, /increasemaxhp/i, /teamhp/i, /selfhp/i, /cardhp/i, /elementhp/i, /rarityhp/i] },
       { id: "buff-def", emoji: "💠", label: "บัฟ DEF", color: "#818cf8", aliases: "บัฟ def defense เกราะ ป้องกัน", patterns: [/defense/i, /blockrate/i] },
