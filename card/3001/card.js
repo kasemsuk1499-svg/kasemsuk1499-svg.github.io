@@ -88,10 +88,7 @@ ACC_REGISTER_CARD({
           targetSide: "enemy",
           condition: {
             onOwnAttack: true,
-            sourceRevived: true,
-            anyTeammateCardNames: [
-              "เอลฟาเรีย",
-              "จูเรียส"
+            sourceRevived: true
             ]
           },
           targetSelection: "random",
