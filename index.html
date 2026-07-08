@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-08-world-boss-v90-clean-collection-detail-tags">
+  <meta name="gacha-app-build" content="2026-07-08-world-boss-v92-mode-and-collection-fix">
   <title>Anime Card Collection · World Boss v90 Clean Collection Detail Tags</title>
   <style>
     :root {
@@ -801,133 +801,23 @@
 
     .card-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
 
-    /* v91: หน้า Collection ให้รูปทุกใบดูเท่ากันมากขึ้น โดยใช้ภาพเต็มแบบ contain + ฉากหลังเบลอจากภาพเดียวกัน */
+    /* v92: หน้า Collection ใช้ crop แบบมาตรฐานเพื่อให้รูปการ์ดดูใกล้เคียงกันและโหลดเร็ว */
     #collectionGrid .game-card .card-art {
-      aspect-ratio: 3 / 4.2;
-      isolation: isolate;
-    }
-
-    #collectionGrid .game-card .card-art::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      background-image: var(--art-bg, none);
-      background-size: cover;
-      background-position: center;
-      filter: blur(18px) saturate(1.08) brightness(.86);
-      transform: scale(1.08);
-      opacity: .72;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
     }
 
     #collectionGrid .game-card .card-art img {
-      position: relative;
-      z-index: 1;
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      object-position: center center;
-      padding: 6px 6px 0;
-      filter: drop-shadow(0 8px 18px rgba(0,0,0,.34));
+      object-fit: cover;
+      object-position: center 18%;
+      transform: scale(1.01);
     }
 
     #collectionGrid .game-card .card-art::after {
-      z-index: 2;
-      background: linear-gradient(to top, rgba(6,8,18,.78), rgba(6,8,18,.18) 35%, transparent 62%);
-    }
-
-    #collectionGrid .game-card .rarity-badge,
-    #collectionGrid .game-card .copy-badge,
-    #collectionGrid .game-card .card-id-badge,
-    #collectionGrid .game-card .awaken-corner {
-      z-index: 3;
-    }
-    .card-art::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
       background: linear-gradient(to top, rgba(6,8,18,.88), transparent 42%);
     }
-
-    .rarity-badge, .copy-badge {
-      position: absolute;
-      z-index: 3;
-      top: 9px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 999px;
-      padding: 5px 8px;
-      font-size: .64rem;
-      font-weight: 1000;
-      backdrop-filter: blur(8px);
-    }
-
-    .rarity-badge {
-      left: 9px;
-      color: var(--rarity-text, #071019);
-      background: var(--rarity-gradient, var(--rarity));
-      box-shadow: 0 0 18px color-mix(in srgb, var(--rarity-glow, var(--rarity)) 32%, transparent);
-    }
-    .copy-badge { right: 9px; color: white; background: rgba(5,8,18,.72); }
-    .card-id-badge {
-      position: absolute;
-      z-index: 5;
-      left: 9px;
-      bottom: 9px;
-      border: 1px solid rgba(255,255,255,.22);
-      border-radius: 999px;
-      padding: 4px 7px;
-      color: #eaf8ff;
-      font-size: .58rem;
-      font-weight: 1000;
-      letter-spacing: .035em;
-      background: rgba(5,8,18,.78);
-      box-shadow: 0 5px 14px rgba(0,0,0,.30);
-      backdrop-filter: blur(8px);
-      pointer-events: none;
-    }
-    .team-slot-name small { display:block; margin-top:3px; color:var(--cyan); font-size:.58rem; letter-spacing:.04em; }
-
-    /* เพิ่มโดยอลิซ: สถานะอเวกแบบตีบวกที่มุมขวาบนของการ์ด */
-    .awaken-corner {
-      position: absolute;
-      z-index: 5;
-      top: 9px;
-      right: 9px;
-      min-width: 34px;
-      height: 28px;
-      display: inline-grid;
-      place-items: center;
-      border: 1px solid rgba(255,255,255,.28);
-      border-radius: 999px;
-      padding: 0 8px;
-      color: #fff;
-      font-size: .72rem;
-      font-weight: 1000;
-      line-height: 1;
-      background: linear-gradient(135deg, rgba(7,10,19,.94), rgba(126,34,206,.92));
-      box-shadow: 0 0 18px rgba(167,139,250,.34), inset 0 0 0 1px rgba(255,255,255,.05);
-      backdrop-filter: blur(8px);
-      pointer-events: none;
-    }
-
-    .awaken-corner.max {
-      width: 34px;
-      min-width: 34px;
-      height: 34px;
-      border: 1px solid rgba(255,236,153,.78);
-      padding: 0;
-      color: #fff3b0;
-      font-size: 1.18rem;
-      background: linear-gradient(135deg, #312e81, #0e7490);
-      box-shadow: 0 0 0 2px rgba(8,11,23,.72), 0 5px 14px rgba(14,116,144,.24);
-      text-shadow: 0 1px 2px rgba(0,0,0,.65);
-    }
-
-    .game-card.has-awaken-corner .copy-badge { top: 48px; }
-    .battle-model-card .awaken-corner { top: 5px; right: 5px; min-width: 28px; height: 23px; padding: 0 6px; font-size: .6rem; }
-    .battle-model-card .awaken-corner.max { width: 28px; min-width: 28px; height: 28px; padding: 0; font-size: 1.42rem; }
-
 
     .card-body { padding: 11px; }
     .card-name {
@@ -7934,7 +7824,7 @@
        - minCombinedElementCount: { "elements": ["ดิน", "เหล็ก"], "count": 5 } = การ์ดที่มีดินหรือเหล็กรวมกันอย่างน้อย 5 ใบ (การ์ดหลายธาตุนับใบละ 1)
        - teamElementsOnly: ["ดิน", "เหล็ก"] = ทุกธาตุบนการ์ดทุกใบในทีมต้องอยู่ในรายการนี้เท่านั้น; มักใช้ร่วมกับ minTeamSize: 5
        - allowedTeammateCardIds: [1032] = การ์ดเจ้าของสกิลอยู่เดี่ยวได้ หรืออยู่ร่วมกับ ID ที่กำหนดเท่านั้น; ไม่ได้บังคับว่าต้องใส่การ์ดนั้น
-       - activeIn: team/showcase = ทีมโชว์/รายได้/โบนัสกาชาจากทีมโชว์, tower/battle = ไต่หอ, arena/pvp = อารีน่า/โบนัสกาชาจากทีมอารีน่า
+       - activeIn: team/showcase = ทีมโชว์/รายได้/โบนัสกาชาจากทีมโชว์, tower/battle = ไต่หอ, arena/pvp = อารีน่า/โบนัสกาชาจากทีมอารีน่า, worldBoss/world-boss/boss/raid = บอสโลก
        - ไม่มี ability ก็เล่นได้ตามปกติ ไม่ต้องแก้ข้อมูลการ์ดเก่า
 
        ระบบคัดลอก / ขโมย / ต้านสถานะ (เพิ่ม 2026-06-23)
@@ -8145,7 +8035,7 @@
       CARD_ABILITY_EFFECT_TYPES.SELF_INCOME_RATE_STACK
     ]);
 
-    const CARD_ABILITY_MODES = Object.freeze(["team", "tower", "arena"]);
+    const CARD_ABILITY_MODES = Object.freeze(["team", "tower", "arena", "worldBoss"]);
 
     /* ==================== [SECTION 05A SC-CUTSCENE] ====================
        จุดปรับคัทซีนเฉพาะ “การ์ด Mystical (รหัสภายใน SC) แต่ละใบ”
@@ -10627,7 +10517,7 @@
       const mode = String(value || "").trim().toLowerCase();
       if (["team", "showcase", "show", "display"].includes(mode)) return "team";
       if (["tower", "battle", "pve"].includes(mode)) return "tower";
-      if (["worldboss", "world-boss", "boss", "raid", "บอสโลก"].includes(mode)) return "tower";
+      if (["worldboss", "world-boss", "world_boss", "boss", "raid", "บอสโลก"].includes(mode)) return "worldBoss";
       if (["arena", "pvp"].includes(mode)) return "arena";
       return mode;
     }
@@ -17818,7 +17708,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         enemyMembers: stats.enemyMembers,
         playerCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
         enemyCriticalDamageMultiplier: CONFIG.combatCriticalDamageMultiplier,
-        mode: "tower",
+        mode: "worldBoss",
         playerActiveTriggers: stats.activeTriggers,
         enemyActiveTriggers: stats.enemyActiveTriggers,
         playerAbilityRoster: stats.playerAbilityRoster,
@@ -19320,7 +19210,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const tag = displayOnly ? "div" : "button";
       return `
         <${tag} class="game-card ${rarityClass} ${owned ? "" : "locked"}${awakenBadge ? " has-awaken-corner" : ""}${extraClass}" style="${rarityStyleVars(rarity)}"${actionData}>
-          <div class="card-art"${image ? ` style="--art-bg:url('${escapeHTML(image)}')"` : ""}>
+          <div class="card-art">
             ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" onerror="this.remove()">` : ""}
             <span class="rarity-badge">${escapeHTML(rarity.label)}</span>
             <span class="card-id-badge">ID ${escapeHTML(card.id)}</span>
@@ -19647,7 +19537,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     const ABILITY_FIELD_SEARCH_ALIASES = Object.freeze({
       name: "ชื่อสกิล ความสามารถ",
       description: "รายละเอียดสกิล คำอธิบายความสามารถ",
-      activeIn: "โหมดที่ทำงาน ทีมโชว์ ไต่หอ อารีน่า",
+      activeIn: "โหมดที่ทำงาน ทีมโชว์ ไต่หอ อารีน่า บอสโลก",
       condition: "เงื่อนไขสกิล เงื่อนไขการทำงาน",
       effects: "เอฟเฟกต์ ผลความสามารถ",
       requiredElements: "ต้องมีธาตุ ธาตุที่ต้องการ",
@@ -20590,9 +20480,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const inactiveAbilityHTML = inactiveTowerAbilities.length
         ? inactiveTowerAbilities.map(entry => `<div class="combo-card inactive-skill"><strong>${entry.nullified ? "🚫 ถูกยกเลิก" : "⏸ ยังไม่ทำงาน"} • ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong><span>${entry.nullified ? "ความสามารถของการ์ดนี้ถูกสกิลอื่นยกเลิก" : `เงื่อนไข: ${escapeHTML(abilityConditionText(entry.ability.condition || {}))}`}</span></div>`).join("")
         : `<div class="combo-card inactive-skill"><strong>ไม่มีสกิลที่รอเงื่อนไข</strong><span>สกิลสำหรับโหมดไต่หอทั้งหมดในทีมกำลังทำงานแล้ว</span></div>`;
-      const rawAttack = getRawTeamPower(teamIds, "tower", abilitySummary) + abilitySummary.teamPowerFlat;
-      const rawHp = getRawTeamHp(teamIds, "tower", abilitySummary) + abilitySummary.teamHpFlat;
-      const rawDefense = getRawTeamDefense(teamIds, "tower", abilitySummary) + abilitySummary.teamDefenseFlat;
+      const rawAttack = getRawTeamPower(teamIds, "worldBoss", abilitySummary) + abilitySummary.teamPowerFlat;
+      const rawHp = getRawTeamHp(teamIds, "worldBoss", abilitySummary) + abilitySummary.teamHpFlat;
+      const rawDefense = getRawTeamDefense(teamIds, "worldBoss", abilitySummary) + abilitySummary.teamDefenseFlat;
       const previewAttack = Math.max(0, rawAttack * (1 + summary.powerRate + abilitySummary.teamPowerRate));
       const previewHp = Math.max(1, rawHp * (1 + abilitySummary.teamHpRate));
       const previewDefense = Math.max(0, rawDefense * (1 + abilitySummary.teamDefenseRate));
@@ -20959,7 +20849,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         attackTargetCount: getWorldBossAttackTargetCount(boss),
         abilities: getWorldBossAbilities(boss).map(ability => ({
           ...ability,
-          activeIn: abilityArray(ability && ability.activeIn).length ? ability.activeIn : ["tower", "arena", "team"],
+          activeIn: abilityArray(ability && ability.activeIn).length ? ability.activeIn : ["worldBoss"],
           effects: abilityArray(ability && ability.effects).map(effect => effect && typeof effect === "object" ? { ...effect } : effect)
         }))
       };
@@ -21202,8 +21092,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         [String(bossCard.id)]: { level: 1, duplicateRank: 0, awaken: 0 }
       } : {};
       const paired = bossTeamIds.length
-        ? getPairedAbilitySummaries(teamIds, bossTeamIds, "tower", {}, { progressByCardId: bossProgressByCardId })
-        : { ally: getTeamAbilitySummary(teamIds, "tower"), enemy: getTeamAbilitySummary([], "tower") };
+        ? getPairedAbilitySummaries(teamIds, bossTeamIds, "worldBoss", {}, { progressByCardId: bossProgressByCardId })
+        : { ally: getTeamAbilitySummary(teamIds, "worldBoss"), enemy: getTeamAbilitySummary([], "worldBoss") };
       const abilitySummary = paired.ally;
       const enemyAbilitySummary = paired.enemy;
       const elementSummary = getTeamElementSummary(teamIds);
