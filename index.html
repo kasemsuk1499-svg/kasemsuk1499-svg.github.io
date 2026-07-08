@@ -8147,10 +8147,11 @@
        - activeSkillCostPermanent = ปรับคอสถาวรตลอดการต่อสู้ และมีผลกับรอบถัดไปทุกครั้ง
        - activeSkillCost เดิมยังรองรับเป็น alias ของ activeSkillCostCycle เพื่อไม่ให้การ์ดเก่าพัง
        - เอฟเฟกต์คอสไม่ใส่ตัวกรอง = ทั้งฝ่าย; ใส่ targetCardIds / targetElements / targetRarities เพื่อเจาะจงได้
+       - v98: แก้ sourceRevived หลังคืนชีพให้ตรวจติดสถานะได้จริง
        - v95: condition รองรับ sourceRevived/sourceReviveActive แล้ว
        - v94: condition รองรับชื่อการ์ดแล้ว เช่น anyTeammateCardNames:["เอลฟาเรีย","จูเรียส"] ใช้ได้ตอนยังไม่รู้ ID
        - v94: reviveTimedUndying รองรับ reviveAttackHits และ reviveAttackTargetCount เพื่อเปลี่ยนรูปแบบโจมตีหลังคืนชีพ
-       - v97: หากสกิลย่อย onOwnAttack ทำงานหลังคืนชีพ แต่ไม่ได้กำหนด attackTargetCount เอง จะใช้ normalAttackTargetCount หลังคืนชีพแทนค่า default 1
+       - v98: หากสกิลย่อย onOwnAttack ทำงานหลังคืนชีพ แต่ไม่ได้กำหนด attackTargetCount เอง จะใช้ normalAttackTargetCount หลังคืนชีพแทนค่า default 1
        - blockRate = โอกาสบล็อกของการ์ดเป้าหมาย; เมื่อสำเร็จลดดาเมจส่วนของการ์ดนั้น 50% หลังโล่/คริติคอล/DEF
        - damageTakenRate = ตัวคูณดาเมจรับขั้นสุดท้าย; -0.20 = รับลดลง 20%, +0.20 = รับเพิ่มขึ้น 20%
        - dodgeRate = โอกาสหลบของการ์ดเป้าหมาย; ส่วนดาเมจตามสัดส่วน HP ของการ์ดที่หลบจะหายไปก่อนคำนวณ DEF
@@ -14461,7 +14462,13 @@
         if (trigger.sourceHpAboveRate !== null && trigger.sourceHpAboveRate !== undefined && sourceRate < Number(trigger.sourceHpAboveRate)) return false;
         if (trigger.targetHpBelowRate !== null && trigger.targetHpBelowRate !== undefined && targetRate > Number(trigger.targetHpBelowRate)) return false;
         if (trigger.targetHpAboveRate !== null && trigger.targetHpAboveRate !== undefined && targetRate < Number(trigger.targetHpAboveRate)) return false;
-        if (trigger.sourceRevived && Math.max(0, Number(source.reviveCount) || 0) <= 0) return false;
+        const sourceHasRevived = Math.max(0, Number(source.reviveCount) || 0) > 0
+          || source.hasRevived === true
+          || Boolean(source.revivedOnce)
+          || String(source.reviveMode || "")
+          || Number(source.reviveTurnsRemaining || 0) > 0
+          || Number(source.reviveHitLifeRemaining || 0) > 0;
+        if (trigger.sourceRevived && !sourceHasRevived) return false;
         if (trigger.sourceReviveActive && !(String(source.reviveMode || "") || Number(source.reviveTurnsRemaining || 0) > 0 || Number(source.reviveHitLifeRemaining || 0) > 0)) return false;
         if (trigger.sourceReviveMode && String(source.reviveMode || "") !== String(trigger.sourceReviveMode || "")) return false;
         if (trigger.maxActivations > 0 && trigger.activations >= trigger.maxActivations) return false;
@@ -14778,6 +14785,7 @@
         member.currentHp = Math.max(1, Math.min(member.maxHp, member.maxHp * Math.max(.01, Number(rule.hpRate) || .30)));
         member.ko = false; member.deathReason = "";
         member.reviveCount = Math.max(0, Number(member.reviveCount) || 0) + 1;
+        member.hasRevived = true;
         member.reviveMode = String(rule.reviveType || "revive");
         member.reviveTurnsRemaining = member.reviveMode === "reviveTimedUndying" ? Math.max(1, Math.floor(Number(rule.durationTurns) || 1)) : 0;
         member.reviveHitLifeRemaining = member.reviveMode === "reviveHitLife" ? Math.max(1, Math.floor(Number(rule.surviveHits) || 1)) : 0;
@@ -14865,7 +14873,8 @@
             const maxTriggers = Math.max(1, Math.floor(Number(rule.maxTriggers) || 1));
             if (used >= maxTriggers || (!recipient.ko && recipient.currentHp > 0)) return;
             recipient.reviveUses[key] = used + 1;
-            recipient.reviveCount += 1;
+            recipient.reviveCount = Math.max(0, Number(recipient.reviveCount) || 0) + 1;
+            recipient.hasRevived = true;
             recipient.currentHp = Math.max(1, Math.min(recipient.maxHp, recipient.maxHp * Math.max(.01, Number(rule.hpRate) || .3)));
             recipient.ko = false;
             recipient.deathReason = "";
