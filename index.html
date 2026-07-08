@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-08-world-boss-v85-status-immunity-death-trigger">
-  <title>Anime Card Collection · World Boss v85 Status Immunity Death Trigger</title>
+  <meta name="gacha-app-build" content="2026-07-08-world-boss-v88-skill-tags">
+  <title>Anime Card Collection · World Boss v88 Skill Tags</title>
   <style>
     :root {
       color-scheme: dark;
@@ -557,6 +557,80 @@
     }
 
     .rarity-chip.active span { color: color-mix(in srgb, var(--rarity-text, #071019) 78%, transparent); }
+
+
+    /* เพิ่มโดยอลิซ v88: TAG Skill สำหรับคอลเล็กชั่นและปุ่มค้นหาตามสกิล */
+    .skill-tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 8px 0 4px;
+    }
+
+    .skill-tag {
+      --skill-tag-color: #5ce8ff;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      max-width: 100%;
+      min-height: 24px;
+      border: 1px solid color-mix(in srgb, var(--skill-tag-color) 45%, rgba(255,255,255,.10));
+      border-radius: 999px;
+      padding: 4px 7px;
+      color: #ecfeff;
+      font-size: .58rem;
+      font-weight: 1000;
+      line-height: 1;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--skill-tag-color) 24%, rgba(5,8,18,.76)), rgba(5,8,18,.70));
+      box-shadow: 0 0 14px color-mix(in srgb, var(--skill-tag-color) 15%, transparent);
+      white-space: nowrap;
+    }
+
+    button.skill-tag {
+      cursor: pointer;
+      transition: transform .16s ease, filter .16s ease;
+    }
+
+    button.skill-tag:hover { transform: translateY(-1px); filter: brightness(1.12); }
+    .skill-tag.more { color: var(--muted); border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.045); box-shadow: none; }
+    .card-ability-tags { margin: 8px 0 0; }
+
+    .skill-tag-filter-row {
+      flex: 1 1 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+      padding-top: 2px;
+    }
+
+    .skill-tag-chip {
+      --skill-tag-color: #5ce8ff;
+      min-height: 34px;
+      border: 1px solid color-mix(in srgb, var(--skill-tag-color) 42%, rgba(255,255,255,.10));
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: #e5edff;
+      font-size: .70rem;
+      font-weight: 1000;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--skill-tag-color) 15%, rgba(255,255,255,.04)), rgba(255,255,255,.026));
+    }
+
+    .skill-tag-chip span {
+      margin-left: 4px;
+      color: var(--muted);
+      font-size: .62rem;
+      font-weight: 900;
+    }
+
+    .skill-tag-chip.active {
+      color: #071019;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--skill-tag-color), #dbeafe);
+      box-shadow: 0 8px 22px color-mix(in srgb, var(--skill-tag-color) 26%, transparent);
+    }
+
+    .skill-tag-chip.active span { color: rgba(7,16,25,.70); }
     .field {
       min-height: 42px;
       border: 1px solid var(--line);
@@ -6379,6 +6453,7 @@
               เพื่อให้เวลาเพิ่มระดับใหม่ใน RARITIES ไม่ต้องมานั่งแก้ HTML ซ้ำ
             -->
             <div class="rarity-filter-row" id="rarityQuickFilters" aria-label="ปุ่มแยกระดับการ์ด"></div>
+            <div class="skill-tag-filter-row" id="skillTagQuickFilters" aria-label="ปุ่มค้นหาตาม TAG skill"></div>
           </div>
         </div>
 
@@ -8263,6 +8338,7 @@
     // เพิ่มโดยอลิซ: สถานะเรียงลำดับคลังและหน้าต่างเลือกทีม
     let collectionSortMode = "power";
     let collectionSortDirection = "desc";
+    let collectionSkillTagFilter = "";
     let teamPickerSortMode = "power";
     let teamPickerSortDirection = "desc";
     let teamPickerContext = { mode: "showcase", slotIndex: 0 };
@@ -11743,6 +11819,7 @@
               <span class="card-ability-status">${escapeHTML(statusText)}</span>
             </div>
             <p class="card-ability-description">${escapeHTML(ability.description || "คุณสามารถใส่คำอธิบายความสามารถของการ์ดใบนี้ได้เอง")}</p>
+            ${skillTagPillsHTML(getAbilitySkillTags(ability), 6, { clickable: true, className: "card-ability-tags" })}
             <div class="card-ability-effects">${effectHTML}</div>
             <p class="card-ability-condition">เงื่อนไข: ${escapeHTML(conditionText)} • ทำงานเฉพาะ: ${escapeHTML(modes.map(abilityModeLabel).join(" / "))}</p>
           </div>`;
@@ -19143,6 +19220,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                 <span class="card-element-list">${elementChipsHTML(elements, "card-element")}</span>
                 <span class="stars">${"★".repeat(Math.min(rarity.stars, 8))}${rarity.stars > 8 ? "+" : ""}</span>
               </div>
+              ${cardSkillTagsHTML(card, 4)}
               ${cardUpgradeMiniHTML(card)}
             </div>
           `}
@@ -19487,6 +19565,84 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     const CARD_SEARCH_CACHE = new Map();
     const CARD_ABILITY_SEARCH_CACHE = new Map();
 
+
+    // เพิ่มโดยอลิซ v88: TAG Skill กลาง ใช้ทั้งโชว์บนการ์ด ค้นหา และอัปเดตชีท
+    const SKILL_TAG_DEFINITIONS = Object.freeze([
+      { id: "attack-hit", emoji: "⚔️", label: "โจมตี/Hit", color: "#38bdf8", aliases: "โจมตี hit multi hit หลายฮิต attack hits ตีหลายครั้ง", patterns: [/attackhits/i, /nextattackhits/i, /bossattackhits/i, /followupattack/i, /counterattack/i] },
+      { id: "shield", emoji: "🛡️", label: "โล่/กันตี", color: "#a78bfa", aliases: "โล่ shield block เกราะ กันตี ป้องกัน", patterns: [/shieldhits/i, /restoreshieldhits/i, /blockrate/i, /shieldrecovery/i] },
+      { id: "crit", emoji: "🎯", label: "คริติคอล", color: "#facc15", aliases: "คริ คริติคอล critical crit", patterns: [/critical/i] },
+      { id: "heal", emoji: "💚", label: "ฮีล/ฟื้นฟู", color: "#56e39f", aliases: "ฮีล ฟื้นฟู heal healing recover เลือด", patterns: [/heal/i, /healing/i, /recover/i] },
+      { id: "buff-atk", emoji: "🔥", label: "บัฟ ATK", color: "#fb7185", aliases: "บัฟ atk power เพิ่มพลังโจมตี เพิ่มโจมตี", patterns: [/(^|[^a-z])power(rate|flat|baserate|baseflat)?$/i, /powerratestack/i, /nextattackpower/i, /increaseattack/i, /teampower/i, /selfpower/i, /cardpower/i, /elementpower/i, /raritypower/i] },
+      { id: "buff-hp", emoji: "❤️", label: "บัฟ HP", color: "#f472b6", aliases: "บัฟ hp เลือด พลังชีวิต", patterns: [/hprate/i, /hpflat/i, /increasemaxhp/i, /teamhp/i, /selfhp/i, /cardhp/i, /elementhp/i, /rarityhp/i] },
+      { id: "buff-def", emoji: "💠", label: "บัฟ DEF", color: "#818cf8", aliases: "บัฟ def defense เกราะ ป้องกัน", patterns: [/defense/i, /blockrate/i] },
+      { id: "debuff", emoji: "🔻", label: "ดีบัฟศัตรู", color: "#f97316", aliases: "ดีบัฟ ลดศัตรู enemy debuff ลดพลัง ลดเกราะ", patterns: [/enemy/i, /damagetaken/i] },
+      { id: "cost", emoji: "🔵", label: "ลดคอส", color: "#22d3ee", aliases: "ลดคอส active cost mana ใช้สกิลถูก", patterns: [/activeskillcost/i] },
+      { id: "income", emoji: "💰", label: "เงิน/กาชา", color: "#f59e0b", aliases: "เงิน รายได้ income salary กาชา gacha เรท", patterns: [/income/i, /gacha/i] },
+      { id: "status", emoji: "🧿", label: "สถานะ", color: "#c084fc", aliases: "สถานะ กันสถานะ immune status ผิดปกติ stun burn freeze blind bleed shock death", patterns: [/status/i, /applystatus/i] },
+      { id: "skill-control", emoji: "🚫", label: "คุมสกิล", color: "#ef4444", aliases: "ยกเลิกสกิล ปิดสกิล ขโมยสกิล ก็อปปี้สกิล copy steal nullify ignore condition", patterns: [/nullify/i, /ignoreability/i, /stealabilities/i, /copyabilities/i] },
+      { id: "speed", emoji: "💨", label: "สปีด", color: "#93c5fd", aliases: "สปีด speed turn เทิร์น", patterns: [/speed/i] },
+      { id: "domain", emoji: "🌌", label: "อาณาเขต", color: "#d946ef", aliases: "อาณาเขต domain สนาม", patterns: [/domain/i, /activatedomain/i] }
+    ]);
+
+    const SKILL_TAG_BY_ID = new Map(SKILL_TAG_DEFINITIONS.map(tag => [tag.id, tag]));
+    const CARD_SKILL_TAG_CACHE = new Map();
+
+    function getSkillTagDefinition(tagId = "") {
+      return SKILL_TAG_BY_ID.get(String(tagId || "")) || null;
+    }
+
+    function abilityEffectTypeList(ability) {
+      return abilityArray(ability && ability.effects)
+        .filter(effect => effect && typeof effect === "object")
+        .map(effect => String(effect.type || "").trim())
+        .filter(Boolean);
+    }
+
+    function getAbilitySkillTags(ability) {
+      const types = abilityEffectTypeList(ability);
+      if (!types.length) return [];
+      const lowerTypes = types.map(type => type.toLowerCase());
+      return SKILL_TAG_DEFINITIONS.filter(tag => tag.patterns.some(pattern => lowerTypes.some(type => pattern.test(type))));
+    }
+
+    function getCardSkillTags(card) {
+      const id = cardIdString(card && card.id);
+      if (CARD_SKILL_TAG_CACHE.has(id)) return CARD_SKILL_TAG_CACHE.get(id);
+      const byId = new Map();
+      getCardAbilities(card).forEach(ability => getAbilitySkillTags(ability).forEach(tag => byId.set(tag.id, tag)));
+      const result = SKILL_TAG_DEFINITIONS.filter(tag => byId.has(tag.id));
+      CARD_SKILL_TAG_CACHE.set(id, result);
+      return result;
+    }
+
+    function skillTagStyle(tag) {
+      return `--skill-tag-color:${escapeHTML(tag && tag.color || "#5ce8ff")}`;
+    }
+
+    function skillTagPillsHTML(tags = [], limit = 5, options = {}) {
+      const list = abilityArray(tags).filter(Boolean);
+      if (!list.length) return "";
+      const max = Math.max(1, Number(limit) || 5);
+      const visible = list.slice(0, max);
+      const click = options.clickable !== false;
+      const pills = visible.map(tag => {
+        const tagName = click ? "button" : "span";
+        const action = click ? ` type="button" data-action="filter-skill-tag" data-skill-tag="${escapeHTML(tag.id)}" title="ค้นหาการ์ด TAG ${escapeHTML(tag.label)}"` : "";
+        return `<${tagName} class="skill-tag" style="${skillTagStyle(tag)}"${action}>${escapeHTML(tag.emoji)} ${escapeHTML(tag.label)}</${tagName}>`;
+      });
+      if (list.length > visible.length) pills.push(`<span class="skill-tag more">+${list.length - visible.length}</span>`);
+      return `<div class="skill-tag-row${options.className ? ` ${escapeHTML(options.className)}` : ""}">${pills.join("")}</div>`;
+    }
+
+    function cardSkillTagsHTML(card, limit = 4) {
+      return skillTagPillsHTML(getCardSkillTags(card), limit, { clickable: true });
+    }
+
+    function cardMatchesSkillTag(card, tagId = "") {
+      if (!tagId) return true;
+      return getCardSkillTags(card).some(tag => tag.id === tagId);
+    }
+
     function normalizeCardSearchText(value) {
       return String(value === undefined || value === null ? "" : value)
         .normalize("NFKC")
@@ -19554,6 +19710,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (CARD_ABILITY_SEARCH_CACHE.has(id)) return CARD_ABILITY_SEARCH_CACHE.get(id);
       const parts = [];
       getCardAbilities(card).forEach(ability => collectAbilitySearchParts(ability, parts));
+      getCardSkillTags(card).forEach(tag => parts.push(tag.id, tag.label, tag.emoji, tag.aliases));
       const result = normalizeCardSearchText(parts.filter(Boolean).join(" "));
       CARD_ABILITY_SEARCH_CACHE.set(id, result);
       return result;
@@ -19581,6 +19738,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const filtered = CARDS
         .filter(card => cardSearchMatches(getCardSearchText(card), query))
         .filter(card => cardSearchMatches(getCardAbilitySearchText(card), abilityQuery))
+        .filter(card => cardMatchesSkillTag(card, collectionSkillTagFilter))
         .filter(card => !element || getCardElements(card).includes(element))
         .filter(card => !rarity || card.rarity === rarity);
       return sortCardsForView(filtered, collectionSortMode, collectionSortDirection, true);
@@ -19597,7 +19755,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     function renderCollection() {
       const cards = getFilteredCards();
       const uniqueOwned = Object.keys(state.owned).filter(id => CARD_BY_ID.has(id)).length;
-      document.getElementById("collectionText").textContent = `สะสมแล้ว ${uniqueOwned} จาก ${CARDS.length} ใบ (${Math.round(uniqueOwned / Math.max(1, CARDS.length) * 100)}%) • แสดง ${cards.length} ใบ • เรียงตาม${getSortLabel()} ${getSortDirectionText()}`;
+      const activeSkillTag = getSkillTagDefinition(collectionSkillTagFilter);
+      const tagText = activeSkillTag ? ` • TAG ${activeSkillTag.emoji} ${activeSkillTag.label}` : "";
+      document.getElementById("collectionText").textContent = `สะสมแล้ว ${uniqueOwned} จาก ${CARDS.length} ใบ (${Math.round(uniqueOwned / Math.max(1, CARDS.length) * 100)}%) • แสดง ${cards.length} ใบ${tagText} • เรียงตาม${getSortLabel()} ${getSortDirectionText()}`;
       document.getElementById("collectionGrid").innerHTML = cards.length
         ? cards.map(card => cardHTML(card)).join("")
         : `<div class="empty-state">ไม่พบการ์ดที่ตรงกับตัวกรอง</div>`;
@@ -21706,7 +21866,41 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       // เพิ่มโดยอลิซ: หลังสร้างดรอปดาวน์แล้ว ให้สร้าง/อัปเดตปุ่มแยกระดับการ์ดด้วยเสมอ
       // เหตุผล: จำนวนการ์ดที่สะสมจะเปลี่ยนหลังเปิดแพ็ก จึงต้องอัปเดตตัวเลขบนปุ่มทุกครั้งที่ renderAll() ทำงาน
       renderRarityQuickFilters();
+      renderSkillTagQuickFilters();
       renderSortDirectionButtons();
+    }
+
+
+    function getSkillTagProgressText(tagId = "") {
+      const cards = tagId ? CARDS.filter(card => cardMatchesSkillTag(card, tagId)) : CARDS;
+      const owned = cards.filter(card => getOwned(card.id)).length;
+      return `${owned}/${cards.length}`;
+    }
+
+    function renderSkillTagQuickFilters() {
+      const row = document.getElementById("skillTagQuickFilters");
+      if (!row) return;
+      const buttons = [
+        { id: "", emoji: "🔎", label: "ทุก TAG", color: "#5ce8ff" },
+        ...SKILL_TAG_DEFINITIONS.map(tag => ({ id: tag.id, emoji: tag.emoji, label: tag.label, color: tag.color }))
+      ];
+      row.innerHTML = buttons.map(tag => `
+        <button
+          type="button"
+          class="skill-tag-chip ${String(tag.id || "") === String(collectionSkillTagFilter || "") ? "active" : ""}"
+          style="--skill-tag-color:${escapeHTML(tag.color || "#5ce8ff")}"
+          data-action="filter-skill-tag"
+          data-skill-tag="${escapeHTML(tag.id || "")}"
+          title="ค้นหาตาม TAG skill: ${escapeHTML(tag.label)}">
+          ${escapeHTML(tag.emoji)} ${escapeHTML(tag.label)} <span>${escapeHTML(getSkillTagProgressText(tag.id || ""))}</span>
+        </button>
+      `).join("");
+    }
+
+    function setActiveSkillTagFilter(tagId = "") {
+      collectionSkillTagFilter = getSkillTagDefinition(tagId) ? String(tagId) : "";
+      renderCollection();
+      renderSkillTagQuickFilters();
     }
 
     function getRarityProgressText(rarityKey = "") {
@@ -22934,6 +23128,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "spar-friend") sparFriend(friendId);
       // เพิ่มโดยอลิซ: เมื่อกดปุ่มแยกระดับการ์ด ให้ตั้งค่าตัวกรองและรีเฟรชคลังทันที
       if (action === "filter-rarity") setActiveRarityFilter(event.target.closest("[data-rarity]")?.dataset.rarity || "");
+      if (action === "filter-skill-tag") setActiveSkillTagFilter(event.target.closest("[data-skill-tag]")?.dataset.skillTag || "");
     });
 
     document.getElementById("bannerSelect").addEventListener("change", event => {
