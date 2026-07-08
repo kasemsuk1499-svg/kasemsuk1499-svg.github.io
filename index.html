@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-08-world-boss-v93-mode-only-ui-restored">
+  <meta name="gacha-app-build" content="2026-07-09-blue-ui-border-comfort">
   <title>Anime Card Collection · World Boss v90 Clean Collection Detail Tags</title>
   <style>
     :root {
@@ -6372,6 +6372,204 @@
       #arenaView .battle-model-stack.v72-rowed { row-gap: 12px; padding-inline: 12px !important; }
       .battle-row-line { gap: 9px; }
       .battle-transfer-toast { grid-template-columns: 64px minmax(0,1fr) 54px !important; }
+    }
+
+  
+
+    /* =====================================================================
+       [ACC-BLUE-BORDER-COMFORT]
+       ปรับขอบ UI เป็นโทนฟ้า-น้ำเงินเข้ม ลดความขาวจ้าให้อ่านสบายตาขึ้น
+       ===================================================================== */
+    :root {
+      --line: rgba(22, 78, 119, .42);
+      --cyan: #38bdf8;
+      --acc-border-blue: rgba(12, 74, 110, .56);
+      --acc-border-blue-strong: rgba(8, 47, 73, .72);
+      --acc-border-blue-soft: rgba(14, 116, 144, .36);
+      --acc-panel-blue-tint: rgba(219, 238, 250, .46);
+      --acc-shadow-blue: rgba(8, 47, 73, .18);
+    }
+
+    .topbar,
+    .side-panel,
+    .workspace,
+    .bottom-nav,
+    .panel,
+    .modal-panel,
+    .login-gate-card,
+    .profile-panel,
+    .mailbox,
+    .world-boss-sidebar,
+    .world-boss-info,
+    .world-boss-stage {
+      border-color: var(--acc-border-blue) !important;
+      box-shadow:
+        0 16px 34px var(--acc-shadow-blue),
+        inset 0 1px 0 rgba(255,255,255,.58),
+        inset 0 0 0 1px rgba(56,189,248,.10) !important;
+    }
+
+    .topbar,
+    .side-panel,
+    .workspace,
+    .bottom-nav {
+      background:
+        linear-gradient(180deg, rgba(232, 244, 253, .76), rgba(212, 232, 247, .58)),
+        var(--acc-panel-blue-tint) !important;
+    }
+
+    .mini-card,
+    .side-stat,
+    .resource,
+    .account-button,
+    .team-preset-panel,
+    .arena-team-zone,
+    .upgrade-status-panel,
+    .element-panel,
+    .battle-card,
+    .friend-card,
+    .guide-card,
+    .login-reward-section,
+    .system-summary > div,
+    .battle-summary-section,
+    .card-visible-stat,
+    .team-slot-stat,
+    .exchange-status,
+    .fast-toggle,
+    .guarantee-box,
+    .detail-combat-panel,
+    .world-boss-skill,
+    .world-boss-log,
+    .mail-item,
+    .profile-card,
+    .profile-cover,
+    .profile-team,
+    .notice-card,
+    .login-reward-day,
+    .team-picker-entry {
+      border-color: var(--acc-border-blue-soft) !important;
+      background-color: rgba(222, 239, 251, .36) !important;
+      box-shadow:
+        0 8px 20px rgba(8, 47, 73, .08),
+        inset 0 1px 0 rgba(255,255,255,.56),
+        inset 0 0 0 1px rgba(14,116,144,.07) !important;
+    }
+
+    .btn,
+    .tab,
+    .field,
+    input,
+    select,
+    textarea,
+    .season-tag,
+    .pill,
+    .rarity-chip,
+    .skill-tag-chip,
+    .utility-fab,
+    .mail-fab,
+    .side-utility-button,
+    .sort-direction-switch,
+    .bottom-nav button {
+      border-color: var(--acc-border-blue-soft) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.52),
+        0 6px 16px rgba(8,47,73,.08) !important;
+    }
+
+    .btn:not(.btn-primary):not(.btn-gold):not(.btn-danger):not(.btn-upgrade-all):not(.btn-awaken-gems):not(.btn-all-in),
+    .tab:not(.active),
+    .field,
+    input,
+    select,
+    textarea,
+    .season-tag,
+    .pill,
+    .sort-direction-switch {
+      background:
+        linear-gradient(180deg, rgba(241, 248, 255, .82), rgba(218, 235, 249, .68)) !important;
+      color: #16324a !important;
+    }
+
+    .btn-primary,
+    .tab.active,
+    .sort-direction-button.active,
+    .team-picker-actions .assign-current {
+      color: #062337 !important;
+      background: linear-gradient(135deg, #67d9ff, #38bdf8 48%, #2563eb) !important;
+      box-shadow:
+        0 10px 24px rgba(14, 116, 144, .18),
+        inset 0 1px 0 rgba(255,255,255,.50) !important;
+    }
+
+    .btn-gold {
+      border-color: rgba(12, 74, 110, .38) !important;
+      box-shadow:
+        0 10px 22px rgba(8,47,73,.10),
+        inset 0 1px 0 rgba(255,255,255,.55) !important;
+    }
+
+    .account-button,
+    .resource {
+      background:
+        linear-gradient(180deg, rgba(236, 247, 255, .86), rgba(212, 232, 247, .72)) !important;
+    }
+
+    .banner,
+    .battle-arena,
+    .world-boss-battle-arena {
+      border-color: var(--acc-border-blue-strong) !important;
+      box-shadow:
+        0 18px 42px rgba(8,47,73,.18),
+        inset 0 0 0 1px rgba(56,189,248,.12) !important;
+    }
+
+    .progress-line,
+    .guarantee-meter,
+    .upgrade-progress-track,
+    .card-mini-meter,
+    .power-meter,
+    .world-boss-hp-bar {
+      background: rgba(8, 47, 73, .14) !important;
+      border: 1px solid rgba(14,116,144,.22) !important;
+    }
+
+    .field:focus,
+    input:focus,
+    select:focus,
+    textarea:focus,
+    #abilitySearchInput:focus,
+    #teamPickerAbilitySearch:focus {
+      border-color: rgba(2, 132, 199, .78) !important;
+      box-shadow:
+        0 0 0 3px rgba(2,132,199,.13),
+        inset 0 1px 0 rgba(255,255,255,.58) !important;
+    }
+
+    .topbar .eyebrow,
+    .side-panel h2,
+    .workspace h2,
+    .account-button span,
+    .team-slot-change,
+    .workspace .support-badge {
+      color: #075985 !important;
+    }
+
+    .divider,
+    .auth-divider::after,
+    .battle-summary-head,
+    .modal-panel header,
+    .drawer-head {
+      border-color: var(--acc-border-blue-soft) !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(14,116,144,.42);
+      border: 2px solid rgba(232,244,253,.72);
+      border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(219,238,250,.35);
     }
 
   </style>
