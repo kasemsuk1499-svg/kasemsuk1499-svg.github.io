@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-08-world-boss-v88-skill-tags">
-  <title>Anime Card Collection · World Boss v88 Skill Tags</title>
+  <meta name="gacha-app-build" content="2026-07-08-world-boss-v89-skill-tags-layout-combat-stats">
+  <title>Anime Card Collection · World Boss v89 Skill Tags Layout Fix</title>
   <style>
     :root {
       color-scheme: dark;
@@ -586,14 +586,44 @@
       white-space: nowrap;
     }
 
-    button.skill-tag {
+    .skill-tag[data-action] {
       cursor: pointer;
+      user-select: none;
       transition: transform .16s ease, filter .16s ease;
     }
 
-    button.skill-tag:hover { transform: translateY(-1px); filter: brightness(1.12); }
+    .skill-tag[data-action]:hover { transform: translateY(-1px); filter: brightness(1.12); }
+    .skill-tag[data-action]:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     .skill-tag.more { color: var(--muted); border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.045); box-shadow: none; }
     .card-ability-tags { margin: 8px 0 0; }
+    .game-card .skill-tag-row { max-width: 100%; min-width: 0; overflow: hidden; }
+    .game-card .skill-tag { overflow: hidden; text-overflow: ellipsis; }
+    .card-combat-tags { margin: 8px 0 0; }
+    .card-combat-tags .skill-tag { min-height: 23px; font-size: .56rem; }
+
+    .detail-combat-panel {
+      display: grid;
+      gap: 10px;
+      margin: -4px 0 20px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(92,232,255,.11), transparent 38%),
+        rgba(255,255,255,.035);
+    }
+
+    .detail-combat-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .detail-combat-head strong { display: block; font-size: .92rem; }
+    .detail-combat-head span { display: block; margin-top: 3px; color: var(--muted); font-size: .72rem; line-height: 1.45; }
+    .detail-combat-tags { margin: 0; }
+    .detail-combat-tags .skill-tag { min-height: 30px; padding: 7px 10px; font-size: .72rem; }
 
     .skill-tag-filter-row {
       flex: 1 1 100%;
@@ -19220,6 +19250,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                 <span class="card-element-list">${elementChipsHTML(elements, "card-element")}</span>
                 <span class="stars">${"★".repeat(Math.min(rarity.stars, 8))}${rarity.stars > 8 ? "+" : ""}</span>
               </div>
+              ${cardCombatTagsHTML(card)}
               ${cardSkillTagsHTML(card, 4)}
               ${cardUpgradeMiniHTML(card)}
             </div>
@@ -19626,8 +19657,13 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const visible = list.slice(0, max);
       const click = options.clickable !== false;
       const pills = visible.map(tag => {
-        const tagName = click ? "button" : "span";
-        const action = click ? ` type="button" data-action="filter-skill-tag" data-skill-tag="${escapeHTML(tag.id)}" title="ค้นหาการ์ด TAG ${escapeHTML(tag.label)}"` : "";
+        // v89: ห้ามใช้ <button> ซ้อนใน .game-card ที่เป็นปุ่มใหญ่ เพราะ browser จะตัด DOM จนแถวการ์ดแตก
+        const tagName = String(options.tagName || "span").toLowerCase() === "button" && !options.insideCard ? "button" : "span";
+        const action = click
+          ? tagName === "button"
+            ? ` type="button" data-action="filter-skill-tag" data-skill-tag="${escapeHTML(tag.id)}" title="ค้นหาการ์ด TAG ${escapeHTML(tag.label)}"`
+            : ` role="button" tabindex="0" data-action="filter-skill-tag" data-skill-tag="${escapeHTML(tag.id)}" title="ค้นหาการ์ด TAG ${escapeHTML(tag.label)}"`
+          : "";
         return `<${tagName} class="skill-tag" style="${skillTagStyle(tag)}"${action}>${escapeHTML(tag.emoji)} ${escapeHTML(tag.label)}</${tagName}>`;
       });
       if (list.length > visible.length) pills.push(`<span class="skill-tag more">+${list.length - visible.length}</span>`);
@@ -19635,7 +19671,111 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function cardSkillTagsHTML(card, limit = 4) {
-      return skillTagPillsHTML(getCardSkillTags(card), limit, { clickable: true });
+      return skillTagPillsHTML(getCardSkillTags(card), limit, { clickable: true, insideCard: true });
+    }
+
+    function getCardNormalAttackTargetCount(card) {
+      const raw = card && (card.normalAttackTargetCount ?? card.attackTargetCount ?? card.targetCount);
+      return Math.max(1, Math.min(5, Math.floor(Number(raw) || 1)));
+    }
+
+    function getCardBaseNormalAttackHits(card) {
+      const raw = card && (card.normalAttackHits ?? card.attackHits);
+      return Math.max(1, Math.round(Number(raw) || 1));
+    }
+
+    function getCardBaseShieldHits(card) {
+      const raw = card && (card.baseShieldHits ?? card.shieldHits);
+      return Math.max(0, Math.round(Number(raw) || 0));
+    }
+
+    const CARD_COMBAT_TAG_CACHE = new Map();
+
+    function getCardPassiveCombatBonuses(card, mode = "tower") {
+      const safeMode = String(mode || "tower");
+      const id = cardIdString(card && card.id);
+      if (!id || !card) return { attackHits: 0, shieldHits: 0 };
+      const cacheKey = `${id}:${safeMode}`;
+      if (CARD_COMBAT_TAG_CACHE.has(cacheKey)) return CARD_COMBAT_TAG_CACHE.get(cacheKey);
+      const result = { attackHits: 0, shieldHits: 0 };
+      try {
+        const context = buildAbilityContext([id], safeMode);
+        getRuntimeCardAbilityEntries(card).forEach(({ ability }) => {
+          if (!ability || !getAbilityModes(ability).includes(context.mode)) return;
+          if (normalizeBattleTriggerRule(ability.condition || {})) return;
+          if (!isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, card)) return;
+          abilityArray(ability.effects).forEach(rawEffect => {
+            if (!rawEffect || typeof rawEffect !== "object") return;
+            if (normalizeBattleTriggerRule(rawEffect.condition || {})) return;
+            if (!isAbilityConditionMet(getStaticAbilityCondition(rawEffect.condition || {}), context, card)) return;
+            const effect = normalizeAbilityStackEffect(rawEffect);
+            const type = normalizeAbilityEffectType(effect.type);
+            const side = normalizeAbilityTargetSide(effect.targetSide);
+            if (side === "enemy") return;
+            if (type === CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS) result.attackHits += Number(effect.value || 0);
+            if (type === CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS) result.shieldHits += Number(effect.value || 0);
+          });
+        });
+      } catch (error) {
+        console.warn("Card combat tag summary failed", error);
+      }
+      CARD_COMBAT_TAG_CACHE.set(cacheKey, result);
+      return result;
+    }
+
+    function getCardStandaloneCombatSummary(card, mode = "tower") {
+      const baseTargets = getCardNormalAttackTargetCount(card);
+      const baseHits = getCardBaseNormalAttackHits(card);
+      const baseShield = getCardBaseShieldHits(card);
+      const bonuses = getCardPassiveCombatBonuses(card, mode);
+      const passiveHitBonus = Number(bonuses.attackHits || 0);
+      const passiveShieldBonus = Number(bonuses.shieldHits || 0);
+      const attackHits = applyCombatAttackHitModifier(baseHits + passiveHitBonus, 0);
+      const shieldHits = applyCombatShieldHitModifier(baseShield + passiveShieldBonus, 0);
+      return {
+        mode,
+        normalAttackTargetCount: baseTargets,
+        attackHits,
+        shieldHits,
+        baseHits,
+        baseShield,
+        passiveHitBonus,
+        passiveShieldBonus
+      };
+    }
+
+    function cardCombatTagsHTML(card, options = {}) {
+      const summary = getCardStandaloneCombatSummary(card, options.mode || "tower");
+      const smallNote = options.showModeNote === true
+        ? `<span class="skill-tag more">โหมดต่อสู้</span>`
+        : "";
+      return `
+        <div class="skill-tag-row card-combat-tags${options.className ? ` ${escapeHTML(options.className)}` : ""}">
+          <span class="skill-tag" style="--skill-tag-color:#38bdf8" title="จำนวนเป้าหมายของการโจมตีปกติ">🎯 ตีปกติ ${formatNumber(summary.normalAttackTargetCount)} เป้า</span>
+          <span class="skill-tag" style="--skill-tag-color:#22d3ee" title="จำนวนฮิตของการโจมตีปกติ รวมสกิลติดตัวที่ทำงานได้ตอนต่อสู้">⚔️ ${formatNumber(summary.attackHits)} hit</span>
+          <span class="skill-tag" style="--skill-tag-color:#a78bfa" title="จำนวนโล่เริ่มต้น รวมสกิลติดตัวที่ทำงานได้ตอนต่อสู้">🛡️ โล่ ${formatNumber(summary.shieldHits)} hit</span>
+          ${smallNote}
+        </div>`;
+    }
+
+    function cardDetailCombatPanelHTML(card) {
+      const summary = getCardStandaloneCombatSummary(card, "tower");
+      const hitNote = summary.passiveHitBonus
+        ? ` • ฮิตจากสกิล ${summary.passiveHitBonus > 0 ? "+" : ""}${formatNumber(summary.passiveHitBonus)}`
+        : "";
+      const shieldNote = summary.passiveShieldBonus
+        ? ` • โล่จากสกิล ${summary.passiveShieldBonus > 0 ? "+" : ""}${formatNumber(summary.passiveShieldBonus)}`
+        : "";
+      return `
+        <div class="detail-combat-panel">
+          <div class="detail-combat-head">
+            <div>
+              <strong>แท็กการต่อสู้พื้นฐาน</strong>
+              <span>คำนวณจากค่าพื้นฐานของการ์ด + สกิลติดตัวที่ทำงานในโหมดต่อสู้${escapeHTML(hitNote + shieldNote)}</span>
+            </div>
+          </div>
+          ${cardCombatTagsHTML(card, { className: "detail-combat-tags", showModeNote: true })}
+        </div>`;
     }
 
     function cardMatchesSkillTag(card, tagId = "") {
@@ -22071,6 +22211,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                 <div class="stat stat-income"><span>Salary / day</span><strong id="cardDetailIncome">${formatNumber(getCardDailySalary(card))}</strong></div>
                 <div class="stat stat-element"><span>Element</span><strong class="card-element-list">${elementChipsHTML(elements, "element-chip")}</strong></div>
               </div>
+              ${cardDetailCombatPanelHTML(card)}
               <div id="cardDetailUpgradePanel">${upgradeStatusPanelHTML(card, inTeam)}</div>
               <div class="detail-actions">
                 ${owned ? `
@@ -23129,6 +23270,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       // เพิ่มโดยอลิซ: เมื่อกดปุ่มแยกระดับการ์ด ให้ตั้งค่าตัวกรองและรีเฟรชคลังทันที
       if (action === "filter-rarity") setActiveRarityFilter(event.target.closest("[data-rarity]")?.dataset.rarity || "");
       if (action === "filter-skill-tag") setActiveSkillTagFilter(event.target.closest("[data-skill-tag]")?.dataset.skillTag || "");
+    });
+
+    document.addEventListener("keydown", event => {
+      const target = event.target.closest && event.target.closest(".skill-tag[data-action]");
+      if (!target) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      target.click();
     });
 
     document.getElementById("bannerSelect").addEventListener("change", event => {
