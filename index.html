@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-08-world-boss-v89-skill-tags-layout-combat-stats">
-  <title>Anime Card Collection · World Boss v89 Skill Tags Layout Fix</title>
+  <meta name="gacha-app-build" content="2026-07-08-world-boss-v90-clean-collection-detail-tags">
+  <title>Anime Card Collection · World Boss v90 Clean Collection Detail Tags</title>
   <style>
     :root {
       color-scheme: dark;
@@ -910,6 +910,38 @@
     }
 
     .stars { color: var(--gold); letter-spacing: -.08em; white-space: nowrap; }
+
+    /* v90: หน้า Collection ให้การ์ดสะอาดและรูปเท่ากัน — ซ่อนแท็ก/สเตตัสยาวไว้ดูในรายละเอียดแทน */
+    .card-collection-mini-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+      color: #dbeafe;
+      font-size: .66rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-collection-mini-row span,
+    .card-collection-mini-note {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(3,5,12,.34);
+    }
+
+    .card-collection-mini-note {
+      width: fit-content;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .62rem;
+      font-weight: 900;
+    }
     .empty-state {
       grid-column: 1 / -1;
       min-height: 220px;
@@ -19213,6 +19245,17 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       `;
     }
 
+    function cardCollectionMiniStatusHTML(card) {
+      const owned = getOwned(card && card.id);
+      const status = getCardProgressStatus(card);
+      if (!owned) return `<div class="card-collection-mini-note">แตะเพื่อดูรายละเอียด</div>`;
+      return `
+        <div class="card-collection-mini-row">
+          <span>Lv.${formatNumber(status.level)}/${formatNumber(status.maxLevel)}</span>
+          <span>+${formatNumber(status.rank)}</span>
+        </div>`;
+    }
+
     function cardHTML(card, options = {}) {
       const owned = getOwned(card.id);
       const rarity = getRarity(card);
@@ -19250,9 +19293,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                 <span class="card-element-list">${elementChipsHTML(elements, "card-element")}</span>
                 <span class="stars">${"★".repeat(Math.min(rarity.stars, 8))}${rarity.stars > 8 ? "+" : ""}</span>
               </div>
-              ${cardCombatTagsHTML(card)}
-              ${cardSkillTagsHTML(card, 4)}
-              ${cardUpgradeMiniHTML(card)}
+              ${cardCollectionMiniStatusHTML(card)}
             </div>
           `}
         </${tag}>
