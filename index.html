@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-08-world-boss-v83-arena-detail">
-  <title>Anime Card Collection · World Boss v83 Arena Detail</title>
+  <meta name="gacha-app-build" content="2026-07-08-world-boss-v85-status-immunity-death-trigger">
+  <title>Anime Card Collection · World Boss v85 Status Immunity Death Trigger</title>
   <style>
     :root {
       color-scheme: dark;
@@ -7809,10 +7809,13 @@
        - value / successRate / resistRate = อัตราต้านสำเร็จ; 9 = 9%, 100 = 100%, 150 = 150% และ 0.50 ยังรองรับเป็น 50%
        - resistEffectTypes = ระบุ type ที่ต้องการต้านโดยตรง
        - resistCategories: "all", "cost", "transfer", "abilityControl", "statReduction",
-         "hitReduction", "healingReduction", "shieldReduction"
-       - resistAbilityNames = ต้านเฉพาะชื่อสกิลที่กำหนด
+         "hitReduction", "healingReduction", "shieldReduction", "abnormalStatus"
+       - abnormalStatusResistance = ต้านเฉพาะสถานะผิดปกติแบบสมบูรณ์ ไม่ต้องใส่ value และตั้ง unmodifiable:true อัตโนมัติ
+       - resistStatuses / statuses = ต้านเจาะจงเฉพาะสถานะ เช่น ["stun","freeze","death"]\n       - resistAbilityNames = ต้านเฉพาะชื่อสกิลที่กำหนด
        - resistSourceCardIds = ต้านเฉพาะสกิลที่มาจากการ์ด ID ที่กำหนด
        - scope:"field" = มีสิทธิ์ยกเลิกเอฟเฟกต์ที่กระทบทั้งสนาม
+       - durationTurns / durationAttacks / durationHits = หมดตามเทิร์นหรือจำนวนครั้งที่โดนตี
+       - expireOnSourceDeath:true = เจ้าของสกิลตายแล้วบาเรียต้านสถานะหมด
        - resistBeneficial:true = ให้ต้านเอฟเฟกต์บวกด้วย (ค่าเริ่มต้นต้านเฉพาะผลเสีย/ควบคุม)
        ===================================================================== */
     const CARD_ABILITY_EFFECT_TYPES = Object.freeze({
@@ -7871,6 +7874,7 @@
       COPY_ABILITIES: "copyAbilities",
       STEAL_ABILITIES: "stealAbilities",
       STATUS_RESISTANCE: "statusResistance",
+      ABNORMAL_STATUS_RESISTANCE: "abnormalStatusResistance",
       NULLIFY_CARD_ABILITIES: "nullifyCardAbilities",
       IGNORE_ABILITY_CONDITIONS: "ignoreAbilityConditions",
       ACTIVATE_DOMAIN: "activateDomain",
@@ -9601,6 +9605,7 @@
       if (nested.onCritical === true || String(nested.triggerOn || "").toLowerCase() === "critical") return result("critical", nested.afterCriticalHits || 1, { onCritical:true });
       if (nested.onAllyActiveSkill === true || String(nested.triggerOn || "").toLowerCase() === "allyactiveskill") return result("allyActiveSkill", nested.afterActiveSkills || 1, { onAllyActiveSkill:true });
       if (nested.onKill === true || String(nested.triggerOn || "").toLowerCase() === "kill") return result("kill", nested.afterKills || 1, { onKill:true });
+      if (nested.onDeath === true || nested.onDead === true || String(nested.triggerOn || "").toLowerCase() === "death" || String(nested.triggerOn || "").toLowerCase() === "dead") return result("death", nested.afterDeaths || nested.afterDeathCount || 1, { onDeath:true, repeat:false });
       if (common.sourceHpBelowRate !== null || common.sourceHpAboveRate !== null || String(nested.triggerOn || "").toLowerCase() === "hpthreshold") return result("hpThreshold", 1);
       const onOwnAttack = nested.onOwnAttack === true || nested.triggerOnOwnAttack === true || String(nested.triggerOn || "").trim().toLowerCase() === "ownattack";
       if (onOwnAttack) return result("ownAttack", 1, { repeat:true });
@@ -9625,7 +9630,7 @@
       delete result.domainActive;
       delete result.requiredDomainId;
       delete result.afterDomainAttacks;
-      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","maxActivations","maxTriggers"].forEach(key => delete result[key]);
+      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","maxActivations","maxTriggers"].forEach(key => delete result[key]);
       return result;
     }
 
@@ -9674,6 +9679,11 @@
         stealSkill: CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES,
         statusResist: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE,
         statusResistanceRate: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE,
+        abnormalResist: CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE,
+        abnormalStatusResist: CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE,
+        abnormalStatusResistanceRate: CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE,
+        statusImmunity: CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE,
+        abnormalStatusImmunity: CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE,
         powerRate: CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE,
         hpRate: CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE,
         ignoreAbilityCondition: CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS,
@@ -9739,7 +9749,12 @@
     }
 
     function isStatusResistanceEffect(effect) {
-      return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE);
+      const type = normalizeAbilityEffectType(effect && effect.type);
+      return Boolean(effect && (type === CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE || type === CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE));
+    }
+
+    function isAbnormalStatusResistanceEffect(effect) {
+      return Boolean(effect && normalizeAbilityEffectType(effect.type) === CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE);
     }
 
     function hasAbilityTransferLifetimeControl(effect = {}) {
@@ -9861,6 +9876,7 @@
 
     function getAbilityEffectResistanceCategory(effect = {}) {
       const type = normalizeAbilityEffectType(effect.type);
+      if (type === CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS) return "abnormalStatus";
       const value = Number(effect.value || 0);
       if (CARD_ABILITY_STACK_EFFECT_TYPES.has(type)) {
         const stack = normalizeAbilityStackEffect(effect);
@@ -9903,6 +9919,7 @@
         if (stack.type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE_STACK) return value > 0;
         return value < 0;
       }
+      if (type === CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS) return true;
       if ([CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES, CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES, CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES, CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS].includes(type)) return true;
       if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT].includes(type)) return value > 0;
       if (type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE) return value > 0;
@@ -9925,20 +9942,68 @@
       return false;
     }
 
+    function normalizeResistanceStatusName(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+      const key = raw.toLowerCase().replace(/[\s_]+/g, "-");
+      const aliases = {
+        "dead":"death", "doom":"death", "execute":"death", "เดธ":"death",
+        "stun":"stun", "stunned":"stun", "สตั้น":"stun", "มึน":"stun",
+        "blind":"blind", "miss":"blind", "ตาบอด":"blind",
+        "freeze":"freeze", "frozen":"freeze", "ice":"freeze", "แช่แข็ง":"freeze",
+        "burn":"burn", "burning":"burn", "fire":"burn", "เผาไหม้":"burn",
+        "bleed":"bleed", "bleeding":"bleed", "เลือดไหล":"bleed",
+        "shock":"shock", "electric":"shock", "paralyze":"shock", "ไฟช็อต":"shock",
+        "poison":"poison", "poisoned":"poison", "toxic":"poison", "พิษ":"poison",
+        "sleep":"sleep", "asleep":"sleep", "หลับ":"sleep",
+        "silence":"silence", "silenced":"silence", "mute":"silence", "ใบ้":"silence", "ห้ามใช้สกิล":"silence",
+        "confuse":"confuse", "confused":"confuse", "confusion":"confuse", "สับสน":"confuse",
+        "curse":"curse", "cursed":"curse", "คำสาป":"curse",
+        "slow":"slow", "slowed":"slow", "speed-down":"slow", "ช้า":"slow",
+        "seal":"seal", "sealed":"seal", "ผนึก":"seal",
+        "conditioncancel":"condition-cancel", "condition-cancel":"condition-cancel", "cancel-condition":"condition-cancel", "ignore-condition":"condition-cancel", "ignore-conditions":"condition-cancel", "ignoreabilityconditions":"condition-cancel", "ignore-ability-conditions":"condition-cancel", "ยกเลิกเงื่อนไข":"condition-cancel", "โดนยกเลิกเงื่อนไข":"condition-cancel",
+        "skillcancel":"skill-cancel", "skill-cancel":"skill-cancel", "cancel-skill":"skill-cancel", "nullify":"skill-cancel", "nullifycardabilities":"skill-cancel", "nullify-card-abilities":"skill-cancel", "ยกเลิกสกิล":"skill-cancel", "ปิดสกิล":"skill-cancel",
+        "skillstolen":"skill-stolen", "skill-stolen":"skill-stolen", "steal-skill":"skill-stolen", "stealskill":"skill-stolen", "stealabilities":"skill-stolen", "steal-abilities":"skill-stolen", "ขโมยสกิล":"skill-stolen", "โดนขโมยสกิล":"skill-stolen",
+        "skillcopied":"skill-copied", "skill-copied":"skill-copied", "copy-skill":"skill-copied", "copyskill":"skill-copied", "copyabilities":"skill-copied", "copy-abilities":"skill-copied", "คัดลอกสกิล":"skill-copied", "ก็อปปี้สกิล":"skill-copied", "ก๊อปปี้สกิล":"skill-copied"
+      };
+      return aliases[key] || key;
+    }
+
+    function normalizeResistanceStatusList(value) {
+      return normalizeAbilityStringList(value).map(normalizeResistanceStatusName).filter(Boolean);
+    }
+
     function makeStatusResistanceRule(effect = {}, meta = {}) {
-      const rawRate = effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value ?? 0;
+      const abnormalOnly = isAbnormalStatusResistanceEffect(effect) || effect.abnormalOnly === true || effect.onlyAbnormalStatus === true || String(effect.resistCategory || "").trim() === "abnormalStatus";
+      const rawRate = abnormalOnly ? 1 : (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value ?? 0);
       const scopeRaw = String(effect.scope || effect.resistanceScope || "target").trim().toLowerCase();
+      const durationTurns = Math.max(0, Math.floor(Number(effect.durationTurns ?? effect.turns ?? effect.resistanceTurns ?? 0) || 0));
+      const durationHits = Math.max(0, Math.floor(Number(effect.durationHits ?? effect.durationAttacks ?? effect.attacksRemaining ?? effect.hitsRemaining ?? effect.resistanceHits ?? 0) || 0));
+      const explicitEffectTypes = normalizeAbilityStringList(effect.resistEffectTypes || effect.statusEffectTypes || effect.effectTypes).map(normalizeAbilityEffectType);
+      const explicitCategories = normalizeAbilityStringList(effect.resistCategories || effect.categories || effect.resistCategory).map(item => String(item).trim());
+      const explicitStatuses = normalizeResistanceStatusList(
+        effect.resistStatuses || effect.statuses || effect.statusTypes || effect.abnormalStatuses || effect.resistAbnormalStatuses || effect.abnormalStatusTypes || effect.status
+      );
       return {
-        rate: normalizeStatusResistanceRate(rawRate, 0),
-        effectTypes: normalizeAbilityStringList(effect.resistEffectTypes || effect.statusEffectTypes || effect.effectTypes).map(normalizeAbilityEffectType),
-        categories: normalizeAbilityStringList(effect.resistCategories || effect.categories).map(item => String(item).trim()),
+        // v85: abnormalStatusResistance = ต้านสถานะผิดปกติแบบสมบูรณ์ ไม่ต้องใส่ value และไม่ถูกลดค่า
+        rate: abnormalOnly ? 1 : normalizeStatusResistanceRate(rawRate, 0),
+        effectTypes: abnormalOnly && !explicitEffectTypes.length ? [CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS] : explicitEffectTypes,
+        categories: abnormalOnly && !explicitCategories.length ? ["abnormalStatus"] : explicitCategories,
+        statuses: explicitStatuses,
+        abnormalStatusOnly: Boolean(abnormalOnly),
+        unmodifiable: abnormalOnly || effect.unmodifiable === true || effect.unreducible === true || effect.cannotBeReduced === true,
         abilityNames: normalizeAbilityStringList(effect.resistAbilityNames || effect.abilityNames),
         sourceCardIds: normalizeAbilityCardIds(effect.resistSourceCardIds || effect.sourceCardIds),
         scope: ["field", "battlefield", "สนาม", "ทั้งสนาม"].includes(scopeRaw) ? "field" : "target",
         resistBeneficial: effect.resistBeneficial === true,
-        sourceCardId: cardIdString(meta.sourceCard && meta.sourceCard.id),
-        sourceAbilityName: String(meta.ability && meta.ability.name || ""),
-        key: String(meta.key || "")
+        sourceCardId: cardIdString(meta.sourceCard && meta.sourceCard.id || effect.sourceCardId || effect._sourceCardId),
+        sourceAbilityName: String(meta.ability && meta.ability.name || effect.sourceAbilityName || effect._sourceAbilityName || ""),
+        key: String(meta.key || effect._runtimeEffectKey || ""),
+        durationTurns,
+        turnsRemaining: durationTurns,
+        durationHits,
+        hitsRemaining: durationHits,
+        expireOnSourceDeath: effect.expireOnSourceDeath !== false && (abnormalOnly || effect.expireOnSourceDeath === true || effect.removeOnSourceDeath === true)
       };
     }
 
@@ -9964,21 +10029,32 @@
       const categories = abilityArray(rule.categories).map(item => String(item || "").trim());
       const abilityNames = abilityArray(rule.abilityNames).map(item => String(item || "").trim().toLowerCase());
       const sourceCardIds = normalizeAbilityCardIds(rule.sourceCardIds);
+      const statuses = normalizeResistanceStatusList(rule.statuses);
+      const effectStatus = normalizeResistanceStatusName(effect.status || effect.statusType || effect.abnormalStatus || "");
+      const isAbnormalStatusEffect = effectType === CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS || category === "abnormalStatus" || Boolean(effectStatus);
+      if (rule.abnormalStatusOnly && !isAbnormalStatusEffect) return false;
+      if (statuses.length && (!effectStatus || !statuses.includes(effectStatus))) return false;
       if (!rule.resistBeneficial && !isHarmfulAbilityEffect(effect)) return false;
       if (effectTypes.length && !effectTypes.includes(effectType)) return false;
-      if (categories.length && !categories.includes("all") && !categories.includes(category)) return false;
+      if (categories.length && !categories.includes("all") && !categories.includes(category) && !(categories.includes("abnormalStatus") && isAbnormalStatusEffect)) return false;
       if (abilityNames.length && !abilityNames.includes(String(effect._sourceAbilityName || "").trim().toLowerCase())) return false;
       if (sourceCardIds.length && !sourceCardIds.includes(String(effect._sourceCardId || ""))) return false;
       return true;
     }
 
     function getStatusResistanceRate(rules, effect = {}, scope = "target") {
-      const total = abilityArray(rules)
+      const matched = abilityArray(rules)
+        .filter(rule => !(rule && rule.expired))
         .filter(rule => (scope !== "field" || String(rule && rule.scope || "target") === "field"))
-        .filter(rule => statusResistanceRuleMatches(rule, effect))
+        .filter(rule => statusResistanceRuleMatches(rule, effect));
+      const locked = matched
+        .filter(rule => rule && rule.unmodifiable && Number(rule.rate) > 0)
+        .reduce((sum, rule) => sum + (Number(rule.rate) || 0), 0);
+      const flexible = matched
+        .filter(rule => !(rule && rule.unmodifiable && Number(rule.rate) > 0))
         .reduce((sum, rule) => sum + (Number(rule && rule.rate) || 0), 0);
-      // Unlimited v58: เก็บค่าต้านสำรองได้ไม่จำกัด; ตอนสุ่ม ค่า >= 1 คือการต้านสำเร็จแน่นอน
-      return Math.max(0, total);
+      // Unlimited v84: abnormalStatusResistance แบบ unmodifiable จะไม่ถูกค่าลบลดลง
+      return Math.max(0, locked + (locked > 0 ? Math.max(0, flexible) : flexible));
     }
 
     function shouldAbilityEffectBeResisted(rules, effect, seed, key, scope = "target") {
@@ -10361,6 +10437,7 @@
       if (["team", "showcase", "show", "display"].includes(mode)) return "team";
       if (["tower", "battle", "pve"].includes(mode)) return "tower";
       if (["arena", "pvp"].includes(mode)) return "arena";
+      if (["worldboss", "world-boss", "boss", "raid", "บอสโลก"].includes(mode)) return "arena";
       return mode;
     }
 
@@ -10529,7 +10606,7 @@
             if (!isAbilityConditionMet(getStaticAbilityCondition(rawEffect.condition || {}), context, sourceCard)) return;
             const effect = {
               ...rawEffect,
-              type: CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE,
+              type: normalizeAbilityEffectType(rawEffect.type),
               _sourceCardId: String(sourceCard.id),
               _sourceAbilityName: String(ability.name || ""),
               _runtimeEffectKey: `${runtimeKey}:${effectIndex}`
@@ -10957,6 +11034,7 @@
               case CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES:
               case CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES:
               case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE:
+              case CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE:
               case CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES:
               case CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS:
                 break;
@@ -11458,7 +11536,7 @@
     }
 
     function abilityModeLabel(mode) {
-      return ({ team: "ทีมโชว์", tower: "ไต่หอ", arena: "ARENA" })[String(mode || "").toLowerCase()] || String(mode || "");
+      return ({ team: "ทีมโชว์", tower: "ไต่หอ", arena: "ARENA", worldboss: "บอสโลก", "world-boss": "บอสโลก", worldBoss: "บอสโลก" })[String(mode || "").toLowerCase()] || String(mode || "");
     }
 
     function formatRatePercent(value) {
@@ -11513,6 +11591,7 @@
         copyAbilities: `คัดลอกสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.copyRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         stealAbilities: `ขโมยสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         statusResistance: `ต้านสถานะ ${targetText} ${signedPercent(normalizeStatusResistanceRate(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value), 0))}${String(effect && (effect.scope || "")).toLowerCase() === "field" ? " • ทั้งสนาม" : ""}`,
+        abnormalStatusResistance: `ต้านสถานะผิดปกติ ${targetText} ${signedPercent(normalizeStatusResistanceRate(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value ?? 100), 1))} • ไม่ถูกลดค่า${Math.max(0, Math.floor(Number(effect && (effect.durationTurns ?? effect.turns)) || 0)) ? ` • ${Math.max(0, Math.floor(Number(effect && (effect.durationTurns ?? effect.turns)) || 0))} เทิร์น` : ""}${Math.max(0, Math.floor(Number(effect && (effect.durationHits ?? effect.durationAttacks ?? effect.attacksRemaining ?? effect.hitsRemaining)) || 0)) ? ` • ${Math.max(0, Math.floor(Number(effect && (effect.durationHits ?? effect.durationAttacks ?? effect.attacksRemaining ?? effect.hitsRemaining)) || 0))} ครั้งที่โดนตี` : ""}`,
         nullifyCardAbilities: `ยกเลิกความสามารถ ${targetText}`,
         ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
         nextAttackPowerRate: `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
@@ -11829,6 +11908,7 @@
       function runtimeTriggerMode(item = {}) {
         const raw = String(item.triggerOn || "").trim().toLowerCase();
         if (item.onBattleStart || raw === "battlestart" || raw === "battle_start" || raw === "start") return "battleStart";
+        if (item.onDeath || item.onDead || raw === "death" || raw === "dead") return "death";
         if (item.onOwnAttack || raw === "ownattack") return "ownAttack";
         return "nextAttack";
       }
@@ -11844,6 +11924,7 @@
           sourceCardElements: normalizeAbilityElements(item.sourceCardElements).length ? normalizeAbilityElements(item.sourceCardElements) : ["ไร้ธาตุ"],
           cutscene: item.cutscene && typeof item.cutscene === "object" ? { ...item.cutscene } : {},
           onBattleStart: runtimeTriggerMode(item) === "battleStart",
+          onDeath: runtimeTriggerMode(item) === "death",
           onOwnAttack: runtimeTriggerMode(item) === "ownAttack",
           activateImmediately: Boolean(item.activateImmediately),
           triggerOn: runtimeTriggerMode(item),
@@ -12373,7 +12454,8 @@
             members.forEach(member => changeRuntimeNumber(member, field, value, instance, clamp));
             break;
           }
-          case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE: {
+          case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE:
+          case CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE: {
             const rule = makeStatusResistanceRule(effect, {
               sourceCard: runtimeRosterItem(owner, sourceCardId) && runtimeRosterItem(owner, sourceCardId).card,
               ability: { name: String(effect._sourceAbilityName || "คัดลอก") },
@@ -12864,8 +12946,9 @@
               ability: { name: String(effect._sourceAbilityName || "Active Skill") },
               key: String(effect._runtimeEffectKey || "runtime-status")
             });
+            if (!Array.isArray(member.statusResistanceRules)) member.statusResistanceRules = [];
             member.statusResistanceRules.push(rule);
-            events.push({ targetCardId: String(member.id), resisted: false, value: Number(rule.rate || 0) });
+            events.push({ targetCardId: String(member.id), resisted: false, value: Number(rule.rate || 0), abnormalStatusOnly: Boolean(rule.abnormalStatusOnly), unmodifiable: Boolean(rule.unmodifiable), turnsRemaining: rule.turnsRemaining, hitsRemaining: rule.hitsRemaining });
           });
         });
         return events;
@@ -13314,8 +13397,8 @@
       const criticalRateOf = side => clampCriticalRate(options[`${side}CriticalRate`] ?? CONFIG.combatBaseCriticalRate);
 
       function normalizeTrigger(item = {}, index = 0) {
-        const allowedModes = new Set(["battleStart","ownAttack","nextAttack","damaged","critical","allyActiveSkill","kill","hpThreshold"]);
-        const requested = String(item.triggerOn || (item.onBattleStart ? "battleStart" : item.onOwnAttack ? "ownAttack" : "nextAttack"));
+        const allowedModes = new Set(["battleStart","ownAttack","nextAttack","damaged","critical","allyActiveSkill","kill","death","hpThreshold"]);
+        const requested = String(item.triggerOn || (item.onBattleStart ? "battleStart" : (item.onDeath || item.onDead) ? "death" : item.onOwnAttack ? "ownAttack" : "nextAttack"));
         const mode = allowedModes.has(requested) ? requested : "nextAttack";
         const baseCost = mode === "nextAttack" ? Math.max(1, Math.floor(Number(item.baseAfterOwnAttacks ?? item.afterOwnAttacks) || 1)) : 0;
         const permanent = Math.round(Number(item.permanentCostChange) || 0);
@@ -13415,6 +13498,7 @@
             tauntSourceCardId: "",
             statusEffects: [],
             statusSerial: 0,
+            statusResistanceRules: abilityArray(item.statusResistanceRules).map(rule => ({ ...rule })),
             cardId: cardIdString(item.id || `${side}-${index}`),
             originalSide: side, originalSlot: slotNumber, originalRow: row, capturedBySide: "", captureOwnerCardId: "", captureUses: {}
           };
@@ -13544,6 +13628,47 @@
         member.statusEffects.push(instance);
         return { status:"applied", statusType:instance.status, statusLabel:instance.label, targetCardId:member.id, targetName:member.name, sourceCardId:String(source && source.id || ""), sourceName:String(source && source.name || ""), abilityName:instance.sourceAbilityName, reason, turnsRemaining:instance.turnsRemaining, attacksRemaining:instance.attacksRemaining, chainAfterHits:instance.chainAfterHits };
       }
+      function compactStatusResistanceRules(member, ownerTeam = null, reason = "") {
+        if (!member) return [];
+        const expired = [];
+        const rules = abilityArray(member.statusResistanceRules).filter(Boolean);
+        rules.forEach(rule => {
+          if (rule.expired) return;
+          if (rule.expireOnSourceDeath && ownerTeam) {
+            const owner = ownerTeam.members.find(item => String(item.id) === String(rule.sourceCardId));
+            if (owner && owner.ko) { rule.expired = true; expired.push({ status:"resistanceExpired", reason:"source-death", targetCardId:member.id, targetName:member.name, sourceCardId:rule.sourceCardId, sourceAbilityName:rule.sourceAbilityName }); return; }
+          }
+          if (Number(rule.turnsRemaining) <= 0 && Number(rule.durationTurns) > 0) {
+            rule.expired = true; expired.push({ status:"resistanceExpired", reason:"turns", targetCardId:member.id, targetName:member.name, sourceCardId:rule.sourceCardId, sourceAbilityName:rule.sourceAbilityName });
+          }
+          if (Number(rule.hitsRemaining) <= 0 && Number(rule.durationHits) > 0) {
+            rule.expired = true; expired.push({ status:"resistanceExpired", reason:"hits", targetCardId:member.id, targetName:member.name, sourceCardId:rule.sourceCardId, sourceAbilityName:rule.sourceAbilityName });
+          }
+        });
+        member.statusResistanceRules = rules.filter(rule => !rule.expired);
+        return expired;
+      }
+
+      function tickStatusResistanceTurns(team, reason = "turn") {
+        const events = [];
+        abilityArray(team && team.members).forEach(member => {
+          abilityArray(member.statusResistanceRules).forEach(rule => {
+            if (Number(rule.turnsRemaining) > 0) rule.turnsRemaining -= 1;
+          });
+          events.push(...compactStatusResistanceRules(member, team, reason));
+        });
+        return events;
+      }
+
+      function consumeStatusResistanceHits(member, ownerTeam = null, hitCount = 1) {
+        const count = Math.max(0, Math.floor(Number(hitCount) || 0));
+        if (!member || count <= 0) return [];
+        abilityArray(member.statusResistanceRules).forEach(rule => {
+          if (Number(rule.hitsRemaining) > 0) rule.hitsRemaining = Math.max(0, Number(rule.hitsRemaining) - count);
+        });
+        return compactStatusResistanceRules(member, ownerTeam, "hits");
+      }
+
       function tickStatusDurations(member, reason) {
         const expired = [];
         abilityArray(member && member.statusEffects).forEach(effect => {
@@ -13572,6 +13697,7 @@
       function onBattleStatusHit(targetTeam, attackerTeam, target, hitCount, actor) {
         const events = [];
         if (!target || hitCount <= 0) return events;
+        events.push(...consumeStatusResistanceHits(target, targetTeam, hitCount));
         activeStatusEffects(target,"freeze").forEach(effect => { effect.expired = true; events.push({ status:"broken", statusType:"freeze", statusLabel:effect.label, targetCardId:target.id, targetName:target.name, broken:true }); });
         activeStatusEffects(target,"shock").forEach(effect => { effect.hitCounter = Math.max(0,Number(effect.hitCounter)||0)+hitCount; if (effect.hitCounter >= effect.chainAfterHits) { effect.hitCounter = 0; const allies = alive(targetTeam).filter(member => member !== target && !activeStatusEffects(member,"shock").length); for (let i=0;i<Math.min(effect.chainCount,allies.length);i+=1) { const picked = allies.splice(Math.floor(Math.random()*allies.length),1)[0]; const copied = { ...effect, turnsRemaining:Math.max(1,Number(effect.turnsRemaining)||1), hitCounter:0, expired:false }; picked.statusEffects.push(copied); events.push({ status:"chain", statusType:"shock", statusLabel:effect.label, targetCardId:picked.id, targetName:picked.name, chainedFrom:target.name }); } } });
         compactBattleStatuses(target); return events;
@@ -13601,6 +13727,8 @@
 
           candidates = selectAbilityItems(candidates, selection, count, seed, "targets");
           candidates.forEach(member => {
+            if (!Array.isArray(member.statusResistanceRules)) member.statusResistanceRules = [];
+            events.push(...compactStatusResistanceRules(member, side === "enemy" ? defenderTeam : ownerTeam, "before-status"));
             const resistance = shouldAbilityEffectBeResisted(
               member.statusResistanceRules,
               { ...rule, type:CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS },
@@ -13623,6 +13751,54 @@
         });
         return events;
       }
+      function applyStatusResistanceEffects(effects, ownerTeam, defenderTeam, actor, currentTarget, reason = "skill") {
+        const events = [];
+        abilityArray(effects).forEach((rawEffect, effectIndex) => {
+          if (!rawEffect || typeof rawEffect !== "object") return;
+          const effectType = normalizeAbilityEffectType(rawEffect.type || CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE);
+          const effect = { ...rawEffect, type: effectType };
+          const targetSide = normalizeAbilityTargetSide(effect.targetSide || "self");
+          const filter = getAbilityTargetFilter(effect);
+          const runtimeRule = {
+            side: targetSide,
+            ids: filter.ids,
+            elements: filter.elements,
+            rarities: filter.rarities,
+            match: filter.match,
+            selection: normalizeAbilitySelectionMode(effect.targetSelection || effect.selection, targetSide === "enemy" ? "current" : "self"),
+            excludeSelf: Boolean(effect.excludeSelf),
+            includeKo: Boolean(effect.includeKo || effect.includeDead || effect.targetKo)
+          };
+          const recipients = resolveRuntimeTargets(runtimeRule, ownerTeam, defenderTeam, actor, currentTarget);
+          const rule = makeStatusResistanceRule(effect, {
+            sourceCard: { id: effect.sourceCardId || effect._sourceCardId || actor.id, name: effect.sourceName || actor.name },
+            ability: { name: effect.sourceAbilityName || effect._sourceAbilityName || "Status Resistance" },
+            key: effect._runtimeEffectKey || `${reason}:resist:${effectIndex}`
+          });
+          recipients.forEach(member => {
+            if (!Array.isArray(member.statusResistanceRules)) member.statusResistanceRules = [];
+            compactStatusResistanceRules(member, targetSide === "enemy" ? defenderTeam : ownerTeam, "before-resist");
+            member.statusResistanceRules.push({ ...rule });
+            events.push({
+              status: "resistanceApplied",
+              statusType: rule.abnormalStatusOnly ? "abnormalStatusResistance" : "statusResistance",
+              statusLabel: rule.abnormalStatusOnly ? "ต้านสถานะผิดปกติ" : "ต้านเอฟเฟกต์",
+              targetCardId: member.id,
+              targetName: member.name,
+              sourceCardId: rule.sourceCardId,
+              sourceName: actor.name,
+              abilityName: rule.sourceAbilityName,
+              rate: rule.rate,
+              statuses: abilityArray(rule.statuses),
+              turnsRemaining: rule.turnsRemaining,
+              hitsRemaining: rule.hitsRemaining,
+              reason
+            });
+          });
+        });
+        return events;
+      }
+
 
       function eligibleTargets(team) {
         const living = alive(team);
@@ -13709,7 +13885,9 @@
       }
 
       function runtimeTriggerConditionMet(trigger, source, target) {
-        if (!source || source.currentHp <= 0 || source.ko) return false;
+        const isDeathTrigger = String(trigger && trigger.triggerOn || "") === "death" || trigger && trigger.onDeath;
+        if (!source) return false;
+        if (!isDeathTrigger && (source.currentHp <= 0 || source.ko)) return false;
         const sourceRate = source.currentHp / Math.max(1, source.maxHp);
         const targetRate = target ? target.currentHp / Math.max(1, target.maxHp) : 1;
         if (trigger.sourceHpBelowRate !== null && trigger.sourceHpBelowRate !== undefined && sourceRate > Number(trigger.sourceHpBelowRate)) return false;
@@ -13725,7 +13903,9 @@
         team.triggers.forEach(trigger => {
           if (trigger.completed || trigger.triggerOn !== eventName) return;
           const owner = team.members.find(member => member.id === trigger.sourceCardId);
-          if (!owner || owner.currentHp <= 0 || owner.ko) return;
+          const isDeathEvent = String(eventName || "") === "death" || String(trigger.triggerOn || "") === "death";
+          if (!owner) return;
+          if (!isDeathEvent && (owner.currentHp <= 0 || owner.ko)) return;
           if (!allSources && sourceMember && trigger.sourceCardId && trigger.sourceCardId !== sourceMember.id) return;
           if (!runtimeTriggerConditionMet(trigger, owner, targetMember)) return;
           trigger.eventCharge += Math.max(1, Math.floor(Number(amount) || 1));
@@ -13845,7 +14025,14 @@
             _runtimeEffectKey: rule._runtimeEffectKey || `${t.key}:status`
           }))),
           // สำรองสำหรับเอฟเฟกต์ขั้นสูงที่อาจถูกใช้ต่อใน engine รายตัวในอนาคต
-          statusResistanceEffects: fired.flatMap(t => abilityArray(t.statusResistanceEffects).map(effect => ({ ...effect }))),
+          statusResistanceEffects: fired.flatMap(t => abilityArray(t.statusResistanceEffects).map(effect => ({
+            ...effect,
+            sourceCardId: effect.sourceCardId || t.sourceCardId,
+            sourceAbilityName: effect.sourceAbilityName || t.name,
+            _sourceCardId: effect._sourceCardId || t.sourceCardId,
+            _sourceAbilityName: effect._sourceAbilityName || t.name,
+            _runtimeEffectKey: effect._runtimeEffectKey || `${t.key}:resist`
+          }))),
           nullifyRules: fired.flatMap(t => abilityArray(t.nullifyRules).map(rule => ({ ...rule }))),
           abilityTransfers: fired.flatMap(t => abilityArray(t.abilityTransfers).map(record => ({ ...record }))),
           domainActivations: fired.flatMap(t => abilityArray(t.domainActivations).map(rule => ({ ...rule }))),
@@ -14169,12 +14356,142 @@
         };
       }
 
+
+      function applySupportActivationEffects(ownerTeam, defenderTeam, actor, currentTarget, activation, turnIndex, reason = "trigger") {
+        const alliedShieldBefore = teamShield(ownerTeam);
+        const enemyShieldBefore = teamShield(defenderTeam);
+        applyRateMaps(ownerTeam, activation.blockRateChanges, "blockRate");
+        applyRateMaps(ownerTeam, activation.damageTakenRateChanges, "damageTakenRate");
+        applyRateMaps(ownerTeam, activation.dodgeRateChanges, "dodgeRate");
+
+        const resistanceActivationEvents = applyStatusResistanceEffects(activation.statusResistanceEffects, ownerTeam, defenderTeam, actor, currentTarget, reason);
+        const speedEvents = applySpeedRules(activation.speedTargetRules, ownerTeam, defenderTeam, actor, currentTarget);
+        const tauntEvents = applyTauntRules(activation.tauntRules, ownerTeam, defenderTeam, actor, currentTarget);
+
+        let requestedHeal = 0;
+        let heal = 0;
+        if (abilityArray(activation.healTargetRules).length) {
+          abilityArray(activation.healTargetRules).forEach(rule => {
+            const recipients = resolveRuntimeTargets(rule, ownerTeam, defenderTeam, actor, currentTarget);
+            recipients.forEach(recipient => {
+              const requested = rule.mode === "rate"
+                ? recipient.maxHp * Math.max(0, Number(rule.value) || 0)
+                : Math.max(0, Number(rule.value) || 0);
+              const actual = Math.max(0, Math.min(recipient.maxHp - recipient.currentHp, requested * Math.max(0, 1 + recipient.healingRate)));
+              requestedHeal += requested;
+              if (actual > 0) {
+                recipient.currentHp += actual;
+                recipient.healingDone += actual;
+                (String(rule.side || "self") === "enemy" ? defenderTeam : ownerTeam).totalHealing += actual;
+                heal += actual;
+              }
+            });
+          });
+        }
+
+        if (abilityArray(activation.shieldTargetRules).length) {
+          abilityArray(activation.shieldTargetRules).forEach(rule => {
+            const recipients = resolveRuntimeTargets(rule, ownerTeam, defenderTeam, actor, currentTarget);
+            recipients.forEach(recipient => {
+              const requested = Math.round(Number(rule.value) || 0);
+              const adjusted = requested > 0 ? Math.round(requested * Math.max(0, 1 + recipient.shieldRecoveryRate)) : requested;
+              const before = recipient.shieldHits;
+              recipient.shieldHits = Math.max(0, recipient.shieldHits + adjusted);
+              const change = recipient.shieldHits - before;
+              if (change > 0) {
+                recipient.shieldCreated += change;
+                (String(rule.side || "self") === "enemy" ? defenderTeam : ownerTeam).totalShieldCreated += change;
+              }
+            });
+          });
+        }
+
+        if (activation.attackStackGain > 0 && actor && actor.currentHp > 0 && !actor.ko) actor.power += activation.attackStackGain;
+        if (activation.maxHpGain > 0 && actor && actor.currentHp > 0 && !actor.ko) { actor.maxHp += activation.maxHpGain; actor.currentHp += activation.maxHpGain; }
+        applyCostChanges(ownerTeam, activation.permanentTriggerCostChanges, true);
+        applyCostChanges(ownerTeam, activation.triggerCostChanges, false);
+        const reviveEvents = applyReviveRules(activation.reviveRules, ownerTeam, defenderTeam, actor, currentTarget);
+        const statusApplyEvents = applyAttackStatusRules(activation.statusApplyRules, ownerTeam, defenderTeam, actor, [], turnIndex);
+        finishTriggers(ownerTeam, actor, activation);
+        const selfShieldChange = teamShield(ownerTeam) - alliedShieldBefore;
+        const enemyShieldChange = teamShield(defenderTeam) - enemyShieldBefore;
+        const statusEvents = [...resistanceActivationEvents, ...statusApplyEvents];
+        return {
+          round: lastRound || 0,
+          side: ownerTeam.side,
+          command: reason === "death" ? "deathSkill" : "supportSkill",
+          actorCardId: actor.id,
+          actorName: actor.name,
+          actorSpeed: actor.speed || 0,
+          actorRow: actor.row,
+          targetCardId: currentTarget && currentTarget.id || "",
+          targetName: currentTarget && currentTarget.name || "ทั้งสนาม",
+          hits: 0,
+          baseHits: 0,
+          passiveBaseHits: actor.attackHits || 0,
+          pendingHitChange: 0,
+          activeHitChange: 0,
+          extraHits: 0,
+          hitReduction: 0,
+          requestedExtraHits: 0,
+          enemyNextAttackHits: activation.enemyNextAttackHits || 0,
+          blockedHits: 0,
+          unblockedHits: 0,
+          damage: 0,
+          critical: false,
+          criticalRate: actor.criticalRate || 0,
+          criticalMultiplier: 1,
+          defenderDefense: currentTarget && currentTarget.defense || 0,
+          triggerActivated: activation.fired.length > 0,
+          triggeredSkills: activation.names,
+          triggeredDetails: activation.details,
+          suppressedAbilities: [],
+          domainEvents: [],
+          nullifyEvents: [],
+          statusResistanceEvents: resistanceActivationEvents,
+          transferEvents: [],
+          stackEvents: [],
+          statusEvents,
+          attackBonus: activation.attackBonus || 0,
+          attackStackGain: activation.attackStackGain || 0,
+          maxHpGain: activation.maxHpGain || 0,
+          requestedHealHp: requestedHeal,
+          healHp: heal,
+          shieldChange: selfShieldChange,
+          enemyShieldChange,
+          shieldGain: Math.max(0, selfShieldChange),
+          shieldLoss: Math.max(0, -selfShieldChange),
+          enemyShieldGain: Math.max(0, enemyShieldChange),
+          enemyShieldLoss: Math.max(0, -enemyShieldChange),
+          playerRemaining: teamHp(player),
+          enemyRemaining: teamHp(enemy),
+          playerShieldRemaining: teamShield(player),
+          enemyShieldRemaining: teamShield(enemy),
+          actorRemaining: actor.currentHp,
+          targetRemaining: currentTarget && currentTarget.currentHp || 0,
+          reviveEvents,
+          captureEvents: [],
+          captureReleaseEvents: [],
+          speedEvents,
+          tauntEvents,
+          counterEvents: [],
+          followUpEvents: [],
+          multiElementEvents: [],
+          adaptiveElement: activation.adaptiveElement,
+          defensePenetrationRate: activation.defensePenetrationRate || 0,
+          criticalDamageRate: activation.criticalDamageRate || 0,
+          hitLifeConsumed: 0,
+          hitLifeExpired: false
+        };
+      }
+
       const turns = [];
       let firstSide = "player";
       let turnIndex = 0;
       let lastRound = 0;
       for (let round = 1; round <= maxRounds && !isDefeated(player) && !isDefeated(enemy); round += 1) {
         lastRound = round;
+        const resistanceTurnEvents = [...tickStatusResistanceTurns(player, "round"), ...tickStatusResistanceTurns(enemy, "round")];
         const queue = [...alive(player).map(member => ({ side:"player", member })), ...alive(enemy).map(member => ({ side:"enemy", member }))]
           .sort((a,b) => b.member.speed - a.member.speed || (a.side === b.side ? a.member.slot - b.member.slot : a.side === "player" ? -1 : 1));
         if (round === 1 && queue[0]) firstSide = queue[0].side;
@@ -14187,6 +14504,7 @@
           let target = pickTarget(team, defenderTeam, turnIndex);
           if (!target) break;
           turnIndex += 1;
+          const roundStartResistanceEvents = resistanceTurnEvents.length ? resistanceTurnEvents.splice(0) : [];
           tickTimed(actor, false);
           const controlStatus = battleControlStatus(actor);
           if (controlStatus && controlStatus.prevented) {
@@ -14198,7 +14516,7 @@
               defenderDefense:target.defense, triggerActivated:false, triggeredSkills:[], triggeredDetails:[], attackBonus:0,
               healHp:0, shieldChange:0, enemyShieldChange:0, shieldGain:0, shieldLoss:0,
               playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
-              actorRemaining:actor.currentHp, targetRemaining:target.currentHp, statusEvents:[{ status:"control", statusType:controlStatus.statusType, statusLabel:controlStatus.statusLabel, targetCardId:actor.id, targetName:actor.name }, ...abilityArray(controlStatus.expired)]
+              actorRemaining:actor.currentHp, targetRemaining:target.currentHp, statusEvents:[...roundStartResistanceEvents, { status:"control", statusType:controlStatus.statusType, statusLabel:controlStatus.statusLabel, targetCardId:actor.id, targetName:actor.name }, ...abilityArray(controlStatus.expired)]
             });
             turns[turns.length - 1].memberStates = battleMemberStates();
             continue;
@@ -14245,6 +14563,7 @@
           });
           const speedEvents = applySpeedRules(activation.speedTargetRules, team, defenderTeam, actor, target);
           const tauntEvents = applyTauntRules(activation.tauntRules, team, defenderTeam, actor, target);
+          const resistanceActivationEvents = applyStatusResistanceEffects(activation.statusResistanceEffects, team, defenderTeam, actor, target, "skill");
 
           let targetedCurrentHitChange = 0;
           if (abilityArray(activation.hitTargetRules).length) {
@@ -14424,7 +14743,7 @@
           const statusApplyEvents = applyAttackStatusRules(activation.statusApplyRules, team, defenderTeam, actor, targetResults, turnIndex);
           const burnTickEvents = tickBattleBurnOnAttack();
           const doomEvents = tickBattleDoomAfterAttack(actor);
-          const statusEvents = [...statusHitEvents, ...statusApplyEvents, ...burnTickEvents, ...doomEvents];
+          const statusEvents = [...roundStartResistanceEvents, ...resistanceActivationEvents, ...statusHitEvents, ...statusApplyEvents, ...burnTickEvents, ...doomEvents];
           statusEvents.forEach(event => {
             const result = targetResults.find(item => String(item.targetCardId) === String(event.targetCardId));
             if (result) {
@@ -14439,6 +14758,17 @@
           if (critical) chargeRuntimeEvent(team, "critical", actor, target, 1);
           const killedMembers = targetResults.filter(item => item.ko).map(item => defenderTeam.members.find(member => String(member.id) === String(item.targetCardId))).filter(Boolean);
           if (killedMembers.length) chargeRuntimeEvent(team, "kill", actor, target, killedMembers.length);
+          const deathTriggerTurns = [];
+          killedMembers.forEach(deadMember => {
+            chargeRuntimeEvent(defenderTeam, "death", deadMember, actor, 1, false);
+            const deathActivation = makeActivation(defenderTeam, deadMember, actor);
+            if (deathActivation.fired.length) {
+              const deathTurn = applySupportActivationEffects(defenderTeam, team, deadMember, actor, deathActivation, turnIndex, "death");
+              deathTurn.round = round;
+              deathTurn.memberStates = battleMemberStates();
+              deathTriggerTurns.push(deathTurn);
+            }
+          });
           const counterEvents = executeCounterAttacks(defenderTeam, team, damagedMembers, actor, entry.side);
           const captureEvents = applyCaptureReviveRules(team, defenderTeam, actor, killedMembers, turnIndex);
           const captureReleaseEvents = [
@@ -14496,7 +14826,7 @@
             blockedMembers:targetResults.filter(item=>item.blocked).map(item=>({id:item.targetCardId,name:item.targetName,finalDamage:item.damage})), dodgedHpRate:targetResults.some(item=>item.dodged)?1:0,
             blockDamageReduced:0, damageBeforeBlock:totalDamage, damageAfterBlock:totalDamage,
             triggerActivated:activation.fired.length>0, triggeredSkills:activation.names, triggeredDetails:activation.details,
-            suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:[], transferEvents:[], stackEvents:[], statusEvents,
+            suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:resistanceActivationEvents, transferEvents:[], stackEvents:[], statusEvents,
             blindMiss:attackMissedByBlind,
             attackBonus:activation.attackBonus, attackStackGain:activation.attackStackGain, maxHpGain,
             requestedHealHp:requestedHeal, healingMultiplier:Math.max(0,1+actor.healingRate), healHp:heal,
@@ -14515,6 +14845,7 @@
             hitLifeExpired:anyHitLifeExpired, timedReviveExpired
           });
           turns[turns.length - 1].memberStates = battleMemberStates();
+          if (deathTriggerTurns && deathTriggerTurns.length) turns.push(...deathTriggerTurns);
         }
         [...player.members, ...enemy.members].forEach(member => tickTimed(member, true));
         tickTauntRound(player);
@@ -15803,7 +16134,16 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             });
             break;
           case CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE:
-            group.statusResistanceEffects.push({ ...effect, type: effectType });
+          case CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE:
+            group.statusResistanceEffects.push({
+              ...effect,
+              type: effectType,
+              sourceCardId: sourceRuntimeId,
+              sourceAbilityName: String(record.ability && record.ability.name || ""),
+              _sourceCardId: sourceRuntimeId,
+              _sourceAbilityName: String(record.ability && record.ability.name || ""),
+              _runtimeEffectKey: String(record.key || effect._runtimeEffectKey || "")
+            });
             break;
           case CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES:
           case CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES:
@@ -19994,7 +20334,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         power: stats.attack,
         hp: stats.hp,
         defense: stats.defense,
-        speed: stats.speed
+        speed: stats.speed,
+        attackHits: stats.attackHits,
+        normalAttackTargetCount: getWorldBossAttackTargetCount(boss),
+        attackTargetCount: getWorldBossAttackTargetCount(boss),
+        abilities: getWorldBossAbilities(boss).map(ability => ({
+          ...ability,
+          activeIn: abilityArray(ability && ability.activeIn).length ? ability.activeIn : ["tower", "arena", "team"],
+          effects: abilityArray(ability && ability.effects).map(effect => effect && typeof effect === "object" ? { ...effect } : effect)
+        }))
       };
     }
 
@@ -20038,7 +20386,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const items = abilities.map(skill => {
         const effects = abilityArray(skill.effects).filter(effect => effect && typeof effect === "object");
         const effectHTML = effects.length
-          ? effects.map(effect => `<span class="card-ability-effect ${Number(effect.value || 0) < 0 ? "negative" : ""}">${escapeHTML(worldBossEffectText(effect))}</span>`).join("")
+          ? effects.map(effect => `<span class="card-ability-effect ${Number(effect.value || 0) < 0 ? "negative" : ""}">${escapeHTML(abilityEffectText(effect))}</span>`).join("")
           : `<span class="card-ability-effect">ไม่มี effect แต่ใช้คำอธิบายจากไฟล์บอส</span>`;
         const targetCount = getWorldBossSkillTargetCount(skill, boss);
         return `
@@ -20280,20 +20628,56 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function getWorldBossSkillEffectsForTurn(boss, turn, bossHpRate) {
-      const payload = { attackRate: 0, defenseRate: 0, attackHits: 0, playerDamageRate: 0, scoreRate: 0, fixedDamageRateToPlayerHp: 0, names: [] };
+      const payload = { attackRate: 0, defenseRate: 0, attackHits: 0, playerDamageRate: 0, scoreRate: 0, fixedDamageRateToPlayerHp: 0, bossDamageTakenRate: 0, names: [], details: [] };
+      const asSide = effect => normalizeAbilityTargetSide(effect && effect.targetSide || "self");
+      const addName = (skill, effect, label) => {
+        payload.details.push(label || abilityEffectText(effect));
+        return true;
+      };
       getWorldBossAbilities(boss).forEach(skill => {
         if (!worldBossSkillConditionMet(skill, turn, bossHpRate)) return;
         let activated = false;
-        abilityArray(skill.effects).forEach(effect => {
-          if (!effect || typeof effect !== "object") return;
-          const type = String(effect.type || "").trim();
+        abilityArray(skill.effects).forEach(rawEffect => {
+          if (!rawEffect || typeof rawEffect !== "object") return;
+          const effect = normalizeAbilityStackEffect(rawEffect);
+          const type = normalizeAbilityEffectType(effect.type);
           const value = Number(effect.value || 0);
-          if (["bossPowerRate", "bossAttackRate", "powerRate", "teamPowerRate"].includes(type)) { payload.attackRate += value; activated = true; }
-          else if (["bossDefenseRate", "defenseRate", "teamDefenseRate"].includes(type)) { payload.defenseRate += value; activated = true; }
-          else if (["bossAttackHits", "attackHits"].includes(type)) { payload.attackHits += Math.round(value); activated = true; }
-          else if (["playerDamageTakenRate", "playerDamageRate", "damageRate"].includes(type)) { payload.playerDamageRate += value; activated = true; }
-          else if (["scoreRate", "scoreMultiplierRate"].includes(type)) { payload.scoreRate += value; activated = true; }
-          else if (["fixedDamageRateToPlayerHp", "playerHpDamageRate"].includes(type)) { payload.fixedDamageRateToPlayerHp += value; activated = true; }
+          const side = asSide(effect);
+          if (["bossPowerRate", "bossAttackRate", "powerRate", "teamPowerRate"].includes(String(rawEffect.type || ""))) { payload.attackRate += value; activated = addName(skill, effect, `ATK บอส ${signedPercent(value)}`); return; }
+          if (["bossDefenseRate", "defenseRate", "teamDefenseRate"].includes(String(rawEffect.type || ""))) { payload.defenseRate += value; activated = addName(skill, effect, `DEF บอส ${signedPercent(value)}`); return; }
+          if (["bossAttackHits", "attackHits"].includes(String(rawEffect.type || ""))) { payload.attackHits += Math.round(value); activated = addName(skill, effect, `ฮิตบอส ${value >= 0 ? "+" : ""}${formatNumber(value)}`); return; }
+          if (["playerDamageTakenRate", "playerDamageRate", "damageRate"].includes(String(rawEffect.type || ""))) { payload.playerDamageRate += value; activated = addName(skill, effect, `ดาเมจที่ผู้เล่นได้รับ ${signedPercent(value)}`); return; }
+          if (["scoreRate", "scoreMultiplierRate"].includes(String(rawEffect.type || ""))) { payload.scoreRate += value; activated = addName(skill, effect, `คะแนนที่ได้รับ ${signedPercent(value)}`); return; }
+          if (["fixedDamageRateToPlayerHp", "playerHpDamageRate"].includes(String(rawEffect.type || ""))) { payload.fixedDamageRateToPlayerHp += value; activated = addName(skill, effect, `ดาเมจคงที่ตาม Max HP ผู้เล่น ${signedPercent(value)}`); return; }
+
+          if ([CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.RARITY_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.ELEMENT_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.POWER_RATE_STACK].includes(type)) {
+            if (side === "enemy") payload.playerDamageRate += Math.max(-0.95, value);
+            else payload.attackRate += value;
+            activated = addName(skill, effect);
+            return;
+          }
+          if ([CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.SELF_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.CARD_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.RARITY_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.ELEMENT_DEFENSE_RATE, CARD_ABILITY_EFFECT_TYPES.DEFENSE_RATE_STACK].includes(type)) {
+            if (side === "enemy") payload.playerDamageRate += Math.max(-0.95, -value);
+            else payload.defenseRate += value;
+            activated = addName(skill, effect);
+            return;
+          }
+          if ([CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS_STACK].includes(type)) {
+            if (side !== "enemy") payload.attackHits += Math.round(value);
+            activated = addName(skill, effect);
+            return;
+          }
+          if (type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE || type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE_STACK) {
+            if (side === "enemy") payload.playerDamageRate += value;
+            else payload.bossDamageTakenRate += value;
+            activated = addName(skill, effect);
+            return;
+          }
+          if ([CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.LUCK_RATE, CARD_ABILITY_EFFECT_TYPES.HEALING_RATE, CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE, CARD_ABILITY_EFFECT_TYPES.STATUS_RESISTANCE, CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE, CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS, CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES, CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES, CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES].includes(type)) {
+            // v84: บอสอ่าน effect ชุดเดียวกับการ์ดคอลเลกชันเพื่อแสดงผล/นับการเปิดสกิล แม้เอฟเฟกต์บางชนิดไม่มีผลกับสูตรคะแนนบอสแบบย่อโดยตรง
+            activated = addName(skill, effect);
+            return;
+          }
         });
         if (activated || !abilityArray(skill.effects).length) payload.names.push(String(skill.name || "Boss Skill"));
       });
@@ -20371,7 +20755,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           playerCritical ? CONFIG.combatCriticalDamageMultiplier : 1,
           { members: [{ id: String(stats.boss.id), name: stats.boss.name, hp: Math.max(1, bossVisibleHp), blockRate: 0, dodgeRate: 0, damageTakenRate: 0 }], rollDefensiveEffects: true }
         );
-        const playerDamage = Math.max(0, Number(playerExchange.damage || 0));
+        const playerDamage = Math.max(0, Number(playerExchange.damage || 0) * Math.max(0, 1 + Number(skillPayload.bossDamageTakenRate || 0)));
         const scoreMultiplier = bossStats.scoreMultiplier * growth.scoreMultiplier * Math.max(0, 1 + skillPayload.scoreRate) * (bossBroken ? 1 + WORLD_BOSS_CONFIG.breakScoreBonusRate : 1);
         const scoreGain = playerDamage * scoreMultiplier;
         totalDamageToBoss += playerDamage;
@@ -20406,7 +20790,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           defenderDefense: bossDefense,
           triggerActivated: skillPayload.names.length > 0,
           triggeredSkills: skillPayload.names,
-          triggeredDetails: [],
+          triggeredDetails: abilityArray(skillPayload.details).map(text => ({ name: text })),
           attackBonus: 0,
           healHp: 0,
           shieldChange: 0,
@@ -20468,7 +20852,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           defenderDefense: stats.effectiveDefense,
           triggerActivated: skillPayload.names.length > 0,
           triggeredSkills: skillPayload.names,
-          triggeredDetails: [],
+          triggeredDetails: abilityArray(skillPayload.details).map(text => ({ name: text })),
           attackBonus: bossAttack - bossStats.attack,
           healHp: 0,
           shieldChange: -bossExchange.blockedHits,
@@ -20626,7 +21010,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (skillList) {
         const abilities = getWorldBossAbilities(boss);
         skillList.innerHTML = abilities.length
-          ? abilities.map(skill => `<div class="world-boss-skill"><strong>${escapeHTML(skill.name || "Boss Skill")} • ${formatNumber(getWorldBossSkillTargetCount(skill, boss))} เป้า</strong><span>${escapeHTML(skill.description || abilityArray(skill.effects).map(worldBossEffectText).join(" • ") || "สกิลบอส")}</span></div>`).join("")
+          ? abilities.map(skill => `<div class="world-boss-skill"><strong>${escapeHTML(skill.name || "Boss Skill")} • ${formatNumber(getWorldBossSkillTargetCount(skill, boss))} เป้า</strong><span>${escapeHTML(skill.description || abilityArray(skill.effects).map(abilityEffectText).join(" • ") || "สกิลบอส")}</span></div>`).join("")
           : `<div class="world-boss-skill"><strong>ไม่มีสกิลบอส</strong><span>ใส่ abilities หรือ skills ในไฟล์บอสเพื่อเพิ่มสกิลได้</span></div>`;
       }
       renderWorldBossLogFromResult(result);
