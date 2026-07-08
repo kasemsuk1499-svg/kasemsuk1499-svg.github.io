@@ -123,6 +123,6 @@ ACC_REGISTER_CARD({
     "volume": 0.5,
     "showCardAfterVideo": true,
     "revealKicker": "HOPE OF WISTORIA",
-    "revealTitle": "MYSTICAL · Wil Serfors"
+    "revealTitle": "EX · Wil Serfors"
   }
 });
