@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-09-skill-condition-runtime-v94">
+  <meta name="gacha-app-build" con๐tent="2026-07-09-skill-condition-runtime-v94">
   <title>Anime Card Collection · World Boss v90 Clean Collection Detail Tags</title>
   <style>
     :root {
@@ -8147,6 +8147,7 @@
        - activeSkillCostPermanent = ปรับคอสถาวรตลอดการต่อสู้ และมีผลกับรอบถัดไปทุกครั้ง
        - activeSkillCost เดิมยังรองรับเป็น alias ของ activeSkillCostCycle เพื่อไม่ให้การ์ดเก่าพัง
        - เอฟเฟกต์คอสไม่ใส่ตัวกรอง = ทั้งฝ่าย; ใส่ targetCardIds / targetElements / targetRarities เพื่อเจาะจงได้
+       - v95: condition รองรับ sourceRevived/sourceReviveActive แล้ว
        - v94: condition รองรับชื่อการ์ดแล้ว เช่น anyTeammateCardNames:["เอลฟาเรีย","จูเรียส"] ใช้ได้ตอนยังไม่รู้ ID
        - v94: reviveTimedUndying รองรับ reviveAttackHits และ reviveAttackTargetCount เพื่อเปลี่ยนรูปแบบโจมตีหลังคืนชีพ
        - blockRate = โอกาสบล็อกของการ์ดเป้าหมาย; เมื่อสำเร็จลดดาเมจส่วนของการ์ดนั้น 50% หลังโล่/คริติคอล/DEF
@@ -10083,7 +10084,10 @@
         sourceHpBelowRate: Number.isFinite(Number(nested.sourceHpBelowRate)) ? Math.max(0, Math.min(1, Number(nested.sourceHpBelowRate))) : null,
         sourceHpAboveRate: Number.isFinite(Number(nested.sourceHpAboveRate)) ? Math.max(0, Math.min(1, Number(nested.sourceHpAboveRate))) : null,
         targetHpBelowRate: Number.isFinite(Number(nested.targetHpBelowRate)) ? Math.max(0, Math.min(1, Number(nested.targetHpBelowRate))) : null,
-        targetHpAboveRate: Number.isFinite(Number(nested.targetHpAboveRate)) ? Math.max(0, Math.min(1, Number(nested.targetHpAboveRate))) : null
+        targetHpAboveRate: Number.isFinite(Number(nested.targetHpAboveRate)) ? Math.max(0, Math.min(1, Number(nested.targetHpAboveRate))) : null,
+        sourceRevived: nested.sourceRevived === true || nested.afterRevive === true || nested.afterRevived === true || nested.afterDeathRevive === true,
+        sourceReviveActive: nested.sourceReviveActive === true || nested.whileRevived === true || nested.reviveActive === true,
+        sourceReviveMode: String(nested.sourceReviveMode || nested.requiredReviveMode || nested.reviveModeRequired || "").trim()
       };
       const result = (triggerOn, eventEvery = 1, extra = {}) => ({
         onOwnAttack: triggerOn === "ownAttack", afterOwnAttacks: triggerOn === "nextAttack" ? Math.min(cap, Math.max(1, Math.floor(Number(eventEvery) || 1))) : 0,
@@ -10119,7 +10123,7 @@
       delete result.domainActive;
       delete result.requiredDomainId;
       delete result.afterDomainAttacks;
-      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","maxActivations","maxTriggers"].forEach(key => delete result[key]);
+      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","sourceRevived","afterRevive","afterRevived","afterDeathRevive","sourceReviveActive","whileRevived","reviveActive","sourceReviveMode","requiredReviveMode","reviveModeRequired","maxActivations","maxTriggers"].forEach(key => delete result[key]);
       return result;
     }
 
@@ -12190,6 +12194,8 @@
       if (requiredIds.length) parts.push(`ต้องมีการ์ด ID ${requiredIds.join(", ")}`);
       const anyIds = normalizeAbilityCardIds(condition.anyCardIds);
       if (anyIds.length) parts.push(`มีการ์ดอย่างน้อยหนึ่งใบจาก ID ${anyIds.join(", ")}`);
+      if (condition.sourceRevived === true || condition.afterRevive === true || condition.afterRevived === true || condition.afterDeathRevive === true) parts.push("เจ้าของสกิลต้องเคยตายและคืนชีพแล้ว");
+      if (condition.sourceReviveActive === true || condition.whileRevived === true || condition.reviveActive === true) parts.push("เจ้าของสกิลต้องกำลังอยู่ในสถานะคืนชีพ/อมตะ");
       const battleTrigger = normalizeBattleTriggerRule(condition);
       if (battleTrigger && battleTrigger.onOwnAttack) {
         parts.push("ทำงานทุกครั้งที่เจ้าของสกิลโจมตี ตั้งแต่การโจมตีครั้งแรก");
@@ -13940,6 +13946,7 @@
           repeat: mode === "ownAttack" ? true : item.repeat !== false,
           sourceHpBelowRate: item.sourceHpBelowRate, sourceHpAboveRate: item.sourceHpAboveRate,
           targetHpBelowRate: item.targetHpBelowRate, targetHpAboveRate: item.targetHpAboveRate,
+          sourceRevived: Boolean(item.sourceRevived), sourceReviveActive: Boolean(item.sourceReviveActive), sourceReviveMode: String(item.sourceReviveMode || ""),
           durationTurns: Math.max(0, Math.floor(Number(item.durationTurns) || 0)), durationRounds: Math.max(0, Math.floor(Number(item.durationRounds) || 0))
         };
       }
@@ -14447,6 +14454,9 @@
         if (trigger.sourceHpAboveRate !== null && trigger.sourceHpAboveRate !== undefined && sourceRate < Number(trigger.sourceHpAboveRate)) return false;
         if (trigger.targetHpBelowRate !== null && trigger.targetHpBelowRate !== undefined && targetRate > Number(trigger.targetHpBelowRate)) return false;
         if (trigger.targetHpAboveRate !== null && trigger.targetHpAboveRate !== undefined && targetRate < Number(trigger.targetHpAboveRate)) return false;
+        if (trigger.sourceRevived && Math.max(0, Number(source.reviveCount) || 0) <= 0) return false;
+        if (trigger.sourceReviveActive && !(String(source.reviveMode || "") || Number(source.reviveTurnsRemaining || 0) > 0 || Number(source.reviveHitLifeRemaining || 0) > 0)) return false;
+        if (trigger.sourceReviveMode && String(source.reviveMode || "") !== String(trigger.sourceReviveMode || "")) return false;
         if (trigger.maxActivations > 0 && trigger.activations >= trigger.maxActivations) return false;
         return true;
       }
@@ -14760,6 +14770,7 @@
       function reviveCapturedMember(member, rule) {
         member.currentHp = Math.max(1, Math.min(member.maxHp, member.maxHp * Math.max(.01, Number(rule.hpRate) || .30)));
         member.ko = false; member.deathReason = "";
+        member.reviveCount = Math.max(0, Number(member.reviveCount) || 0) + 1;
         member.reviveMode = String(rule.reviveType || "revive");
         member.reviveTurnsRemaining = member.reviveMode === "reviveTimedUndying" ? Math.max(1, Math.floor(Number(rule.durationTurns) || 1)) : 0;
         member.reviveHitLifeRemaining = member.reviveMode === "reviveHitLife" ? Math.max(1, Math.floor(Number(rule.surviveHits) || 1)) : 0;
@@ -16452,6 +16463,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             sourceHpAboveRate: record.trigger.sourceHpAboveRate,
             targetHpBelowRate: record.trigger.targetHpBelowRate,
             targetHpAboveRate: record.trigger.targetHpAboveRate,
+            sourceRevived: Boolean(record.trigger.sourceRevived),
+            sourceReviveActive: Boolean(record.trigger.sourceReviveActive),
+            sourceReviveMode: String(record.trigger.sourceReviveMode || ""),
             baseAfterOwnAttacks: String(record.trigger.triggerOn || "") === "nextAttack"
               ? Math.max(1, Number(record.trigger.afterOwnAttacks || 1))
               : 0,
@@ -16813,6 +16827,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         sourceHpAboveRate: item.sourceHpAboveRate,
         targetHpBelowRate: item.targetHpBelowRate,
         targetHpAboveRate: item.targetHpAboveRate,
+        sourceRevived: Boolean(item.sourceRevived),
+        sourceReviveActive: Boolean(item.sourceReviveActive),
+        sourceReviveMode: String(item.sourceReviveMode || ""),
         // ไม่มีเพดานค่าบวกของอัตรา/สแต็ก ผู้ใช้สามารถสะสมเกิน 100% เพื่อเผื่อการลดอัตรา
         maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
         attackStackGain: Math.max(0, Number(item.attackStackGain || 0)),
