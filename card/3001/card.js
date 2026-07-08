@@ -110,7 +110,7 @@ ACC_REGISTER_CARD({
     "kicker": "จะรีบไปอยู่ข้างเธอเอลฟี่...",
     "quote": "ไม่ว่าจะต้องทำอะไร... ฉันจะไม่ยอมแพ้แล้วไปหาเธอ!",
     "subtitle": "WIZ Active call!",
-    "video": "Willop.mp4",
+    "video": "card/3001/Willop.mp4",
     "poster": "",
 "accent": "#e0f7ff",
 "accent2": "#ffffff",
