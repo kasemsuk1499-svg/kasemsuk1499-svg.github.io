@@ -8,7 +8,7 @@ ACC_REGISTER_CARD({
   originalCardId: 3001,
   abilityIdentityId: 3001,
   transformOnly: true,
-  power: 7500,
+  power: 17500,
   hp: 250000,
   defense: 20000,
   speed: 109,
