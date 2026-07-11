@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-11-worldboss-fullscreen-cutscene-v97">
-  <title>Anime Card Collection · Runtime v97 · Fullscreen MP4 Cutscene</title>
+  <meta name="gacha-app-build" content="2026-07-11-hit-targets-all-effects-v99">
+  <title>Anime Card Collection · Runtime v99 · Hit Targets For All Effects</title>
   <style>
     :root {
       color-scheme: dark;
@@ -2016,6 +2016,8 @@
 
 
     /* v97: ไฟล์คัทซีน .mp4 แสดงวิดีโอเต็มจอ และย้ายรายละเอียดไว้แท็บล่าง */
+    /* v99: targetSelection: "hitTargets" ใช้เป้าหมายของการโจมตีปกติครั้งปัจจุบันกับเอฟเฟกต์ที่เลือกเป้าหมายทุกชนิด */
+    /* v98: targetSelection ระดับการ์ดกำหนดผู้ที่โดนการโจมตีปกติ โดยไม่เปลี่ยนเป้าหมาย Active Skill */
     .active-skill-cutscene.video-fullscreen {
       display: block;
       padding: 0;
@@ -8121,7 +8123,7 @@
       "SC": 0.002,
       "GOD": 0.0001
     },
-    "rateUpCards": { "3001": 2
+    "rateUpCards": {
     },
     "guarantee": {
       "enabled": true,
@@ -10451,6 +10453,7 @@
 
     function normalizeAbilitySelectionMode(value, fallback = "random") {
       const mode = String(value || fallback).trim().toLowerCase();
+      if (["hittargets", "hit-targets", "hit_targets", "attackedtargets", "attacktargets", "เป้าหมายที่โดนโจมตี", "ผู้ที่โดนโจมตี"].includes(mode)) return "hitTargets";
       if (["all", "everyone", "ทุกคน", "ทั้งหมด"].includes(mode)) return "all";
       if (["specific", "selected", "เจาะจง", "กำหนด"].includes(mode)) return "specific";
       return "random";
@@ -10484,7 +10487,7 @@
     function selectAbilityItems(items, mode, count, seed, key = "") {
       const list = abilityArray(items).filter(Boolean);
       const normalizedMode = normalizeAbilitySelectionMode(mode, "random");
-      if (normalizedMode === "all") return list;
+      if (normalizedMode === "all" || normalizedMode === "hitTargets") return list;
       const safeCount = Math.max(1, Math.min(list.length || 1, Math.floor(Number(count) || 1)));
       if (normalizedMode === "specific") return list.slice(0, safeCount);
       return deterministicAbilityShuffle(list, seed, key).slice(0, safeCount);
@@ -11448,6 +11451,12 @@
               && (sourceIgnoresConditions || isAbilityConditionMet(getStaticAbilityCondition(effect.condition || {}), context, sourceCard));
             const effectActive = conditionActive && (nullifyControl || !sourceNullified);
             const effectType = normalizeAbilityEffectType(effect.type);
+            const usesHitTargets = normalizeAbilitySelectionMode(effect.targetSelection, "") === "hitTargets";
+            // hitTargets ต้องมีบริบทการโจมตี จึงให้เอฟเฟกต์ทั่วไปทำงานทุกครั้งที่เจ้าของโจมตีโดยอัตโนมัติ
+            // captureRevive มีจังหวะหลังสังหารของตัวเอง จึงไม่บังคับ onOwnAttack ซ้ำ
+            if (usesHitTargets && !effectTrigger && effectType !== CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE) {
+              effectTrigger = normalizeBattleTriggerRule({ onOwnAttack:true });
+            }
             const value = Number(effect.value || 0);
             const record = {
               ...effect,
@@ -12118,6 +12127,18 @@
       return card ? clampDamageTakenRate(abilitySummary.cardDamageTakenRates && abilitySummary.cardDamageTakenRates[String(card.id)]) : 0;
     }
 
+    const NORMAL_ATTACK_TARGET_SELECTIONS = new Set(["default","random","lowHp","highAtk","front","back","specific"]);
+    function normalizeNormalAttackTargetSelection(value) {
+      const key = String(value || "default").trim();
+      const aliases = { lowestHp:"lowHp", lowhp:"lowHp", hpLowest:"lowHp", highestAtk:"highAtk", highatk:"highAtk", atkHighest:"highAtk", frontline:"front", backline:"back" };
+      const normalized = aliases[key] || key;
+      return NORMAL_ATTACK_TARGET_SELECTIONS.has(normalized) ? normalized : "default";
+    }
+    function normalAttackTargetFilterValues(value, numeric = false) {
+      const values = abilityArray(value).map(item => numeric ? String(Math.floor(Number(item))) : String(item).trim()).filter(item => item && item !== "NaN");
+      return [...new Set(values)];
+    }
+
     function buildBattleDefenseMembers(team = [], abilitySummary = {}, snapshotMode = false) {
       return abilityArray(team).map((item, sourceIndex) => {
         if (!item) return null;
@@ -12132,6 +12153,11 @@
           defense: Math.max(0, getBattleItemStat(item, abilitySummary, "defense", snapshotMode)),
           speed: Math.max(1, Number(item && item.speed) || getCardSpeed(card)),
           normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number((item && (item.normalAttackTargetCount ?? item.attackTargetCount)) ?? card.normalAttackTargetCount ?? card.attackTargetCount ?? 1) || 1))),
+          targetSelection: normalizeNormalAttackTargetSelection((item && item.targetSelection) ?? card.targetSelection),
+          targetCardIds: normalAttackTargetFilterValues((item && item.targetCardIds) ?? card.targetCardIds, true),
+          targetElements: normalAttackTargetFilterValues((item && item.targetElements) ?? card.targetElements),
+          targetRarities: normalAttackTargetFilterValues((item && item.targetRarities) ?? card.targetRarities),
+          targetMatch: String((item && item.targetMatch) ?? card.targetMatch ?? "any") === "all" ? "all" : "any",
           rarity: String(card.rarity || item && item.rarity || "N"),
           elements: getCardElements(card),
           level: Math.max(1, Math.floor(Number(item && item.level || getOwned(id) && getOwned(id).level || 1))),
@@ -12243,7 +12269,7 @@
         cardHpRate: `HP ${targetText} ${signedPercent(value)}`,
         cardDefenseRate: `DEF ${targetText} ${signedPercent(value)}`,
         cardIncomeRate: `เงินเดือน ${targetText} ${signedPercent(value)}`,
-        applyStatus: `ติดสถานะ ${String(effect && (effect.status || effect.statusType || effect.abnormalStatus || "stun"))} ${targetText} • ${Math.max(1, Math.min(5, Math.floor(Number(effect && effect.targetCount) || 1)))} เป้า • โอกาส ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.statusRate ?? effect.chance ?? effect.rate ?? effect.value), 1))}`,
+        applyStatus: `ติดสถานะ ${String(effect && (effect.status || effect.statusType || effect.abnormalStatus || "stun"))} ${targetText} • ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random") === "hitTargets" ? "เป้าที่โดนโจมตี" : `${Math.max(1, Math.min(5, Math.floor(Number(effect && effect.targetCount) || 1)))} เป้า`} • โอกาส ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.statusRate ?? effect.chance ?? effect.rate ?? effect.value), 1))}`,
         copyAbilities: `คัดลอกสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.copyRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         stealAbilities: `ขโมยสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         statusResistance: `ต้านสถานะ ${targetText} ${signedPercent(normalizeStatusResistanceRate(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value), 0))}${String(effect && (effect.scope || "")).toLowerCase() === "field" ? " • ทั้งสนาม" : ""}`,
@@ -12758,6 +12784,7 @@
           domainEvents: [],
           nullifyEvents: [],
           copiedTransferEvents: [],
+          currentHitTargetIds: [],
           attackCount: 0,
           totalDamage: 0,
           totalHealing: 0,
@@ -12812,6 +12839,10 @@
           || normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).length
           || normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).length;
         const mode = normalizeAbilitySelectionMode(effect && effect.targetSelection, hasFilters ? "specific" : "random");
+        if (mode === "hitTargets") {
+          const hitIds = new Set(abilityArray(fighter && fighter.currentHitTargetIds).map(String));
+          list = list.filter(item => hitIds.has(String(item.id)));
+        }
         return selectAbilityItems(list, mode, effect && effect.targetCount || (mode === "specific" ? list.length : 1), seed, key);
       }
 
@@ -12827,6 +12858,10 @@
         if (filter.excludeSelf) list = list.filter(item => String(item.id) !== String(sourceCardId));
         const hasFilters = normalizeAbilityCardIds(filter.targetCardIds).length || normalizeAbilityElements(filter.targetElements).length || normalizeAbilityRarities(filter.targetRarities).length;
         const mode = normalizeAbilitySelectionMode(effect && effect.recipientSelection, hasFilters ? "specific" : "random");
+        if (mode === "hitTargets") {
+          const hitIds = new Set(abilityArray(recipientFighter && recipientFighter.currentHitTargetIds).map(String));
+          list = list.filter(item => hitIds.has(String(item.id)));
+        }
         list = selectAbilityItems(list, mode, effect && effect.recipientCount || (mode === "specific" ? list.length : 1), seed, key);
         return { fighter: recipientFighter, opponent: recipientOpponent, items: list };
       }
@@ -12854,6 +12889,10 @@
         });
         if (side === "self") members = members.filter(member => String(member.id) === String(sourceCardId));
         if (effect.excludeSelf) members = members.filter(member => String(member.id) !== String(sourceCardId));
+        if (normalizeAbilitySelectionMode(effect.targetSelection, "random") === "hitTargets") {
+          const hitIds = new Set(abilityArray(fighter && fighter.currentHitTargetIds).map(String));
+          members = members.filter(member => hitIds.has(String(member.id)));
+        }
         return members;
       }
 
@@ -13339,6 +13378,9 @@
           if (targetMode === "self") donorPairs = donorPairs.filter(pair => pair.fighter === sourceFighter && String(pair.item.id) === sourceCardId);
           if (effect.excludeSelf) donorPairs = donorPairs.filter(pair => !(pair.fighter === sourceFighter && String(pair.item.id) === sourceCardId));
           const donorMode = normalizeAbilitySelectionMode(effect.targetSelection, "random");
+          if (donorMode === "hitTargets") {
+            donorPairs = donorPairs.filter(pair => new Set(abilityArray(pair.fighter && pair.fighter.currentHitTargetIds).map(String)).has(String(pair.item && pair.item.id)));
+          }
           const seed = `${options.statusResolutionSeed || "runtime"}|${actingSide}|${turnIndex}|${sourceKey}`;
           donorPairs = selectAbilityItems(donorPairs, donorMode, effect.targetCount || (donorMode === "specific" ? donorPairs.length : 1), seed, `${sourceKey}:donors`);
           const recipient = runtimeRecipientRoster(sourceFighter, oppositeFighter, effect, sourceCardId, seed, `${sourceKey}:recipients`);
@@ -13816,6 +13858,8 @@
         const round = Math.floor(turnIndex / 2) + 1;
         const attacker = actingSide === "player" ? player : enemy;
         const defender = actingSide === "player" ? enemy : player;
+        attacker.currentHitTargetIds = [];
+        defender.currentHitTargetIds = abilityArray(defender.members).map(member => String(member.id));
         const variance = actingSide === "player" ? playerVariance(round, turnIndex) : enemyVariance(round, turnIndex);
         const activation = prepareTriggerActivation(attacker);
         const transferEvents = processRuntimeAbilityTransfers(attacker, defender, activation.abilityTransfers, turnIndex, actingSide);
@@ -14146,6 +14190,11 @@
             baseSpeed: Math.max(1, Math.round(Number(item.speed) || 90)),
             speed: Math.max(1, Math.round(Number(item.speed) || 90)),
             normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(item.normalAttackTargetCount ?? item.attackTargetCount ?? 1) || 1))),
+            targetSelection: normalizeNormalAttackTargetSelection(item.targetSelection),
+            targetCardIds: normalAttackTargetFilterValues(item.targetCardIds, true),
+            targetElements: normalAttackTargetFilterValues(item.targetElements),
+            targetRarities: normalAttackTargetFilterValues(item.targetRarities),
+            targetMatch: String(item.targetMatch || "any") === "all" ? "all" : "any",
             speedStacks: {},
             attackHits: attackHitsOf(side),
             shieldHits: 0,
@@ -14204,6 +14253,7 @@
           spawnSerial: 0,
           commandStrategy: commandOf(side),
           targetStrategy: targetOf(side),
+          currentHitTargetIds: [],
           triggers: abilityArray(options[`${side}ActiveTriggers`]).map(normalizeTrigger),
           abilityRoster: abilityArray(options[`${side}AbilityRoster`]),
           captureRules: abilityArray(options[`${side}CaptureRules`]).map(rule => ({ ...rule })),
@@ -14288,6 +14338,11 @@
           defense: member.baseDefense,
           speed: member.baseSpeed,
           normalAttackTargetCount: member.normalAttackTargetCount,
+          targetSelection: member.targetSelection,
+          targetCardIds: [...member.targetCardIds],
+          targetElements: [...member.targetElements],
+          targetRarities: [...member.targetRarities],
+          targetMatch: member.targetMatch,
           abilities
         };
         CARD_BY_ID.set(String(member.id), runtimeCard);
@@ -14326,6 +14381,11 @@
         const baseId = String(identityCard.id);
         const runtimeId = `${baseId}@${isSummon ? "SM" : "CL"}${team.side}-${team.spawnSerial}`;
         const normalAttackTargetCount = Math.max(1, Math.min(5, Math.floor(Number(rule.normalAttackTargetCount) || Number(identityCard.normalAttackTargetCount) || 1)));
+        const targetSelection = normalizeNormalAttackTargetSelection(isSummon ? identityCard.targetSelection : actor.targetSelection || identityCard.targetSelection);
+        const targetCardIds = normalAttackTargetFilterValues(isSummon ? identityCard.targetCardIds : actor.targetCardIds || identityCard.targetCardIds, true);
+        const targetElements = normalAttackTargetFilterValues(isSummon ? identityCard.targetElements : actor.targetElements || identityCard.targetElements);
+        const targetRarities = normalAttackTargetFilterValues(isSummon ? identityCard.targetRarities : actor.targetRarities || identityCard.targetRarities);
+        const targetMatch = String((isSummon ? identityCard.targetMatch : actor.targetMatch || identityCard.targetMatch) || "any") === "all" ? "all" : "any";
         const attackHits = rule.attackHits !== null && rule.attackHits !== undefined
           ? Math.max(1, Math.floor(Number(rule.attackHits)))
           : isSummon
@@ -14337,7 +14397,7 @@
           rarity: String(identityCard.rarity || actor.rarity || "N"),
           elements: getCardElements(identityCard),
           row, slot, basePower, power, maxHp, currentHp:maxHp, baseDefense, defense, baseSpeed, speed:baseSpeed,
-          normalAttackTargetCount, speedStacks:{}, attackHits, shieldHits:0, initialShieldHits:0,
+          normalAttackTargetCount, targetSelection, targetCardIds, targetElements, targetRarities, targetMatch, speedStacks:{}, attackHits, shieldHits:0, initialShieldHits:0,
           healingRate:isSummon ? healingRateOf(team.side) : actor.healingRate,
           shieldRecoveryRate:isSummon ? shieldRecoveryRateOf(team.side) : actor.shieldRecoveryRate,
           criticalRate:isSummon ? criticalRateOf(team.side) : actor.criticalRate,
@@ -14402,7 +14462,7 @@
       }
       const initialMemberState = member => ({
         id: member.id, cardId: member.cardId || member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
-        normalAttackTargetCount: member.normalAttackTargetCount,
+        normalAttackTargetCount: member.normalAttackTargetCount, targetSelection:member.targetSelection,
         maxHp: member.maxHp, currentHp: member.currentHp, shieldHits: member.shieldHits, ko: false,
         reviveMode: "", reviveTurnsRemaining: 0, reviveHitLifeRemaining: 0,
         tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0,
@@ -14607,12 +14667,15 @@
           const seed = `${options.statusResolutionSeed || "runtime-status"}:${rule._runtimeEffectKey || "status"}:${turnIndex}:${ruleIndex}`;
           let candidates = [];
 
-          if (side === "enemy") {
-            // v78: สถานะผิดปกติควรเลือกเป้าหมายจากฝั่งศัตรูตาม targetSelection/targetCount โดยตรง
-            // ไม่ผูกกับ attackResults อย่างเดียว เพราะถ้าการโจมตีจริงโดนแค่ 1 เป้า สถานะ AOE จะดูเหมือนไม่ทำงาน
+          if (selection === "hitTargets") {
+            const resultIds = new Set(abilityArray(attackResults).filter(item => !item.ko).map(item => String(item.targetCardId)));
+            const targetTeam = side === "enemy" ? defenderTeam : ownerTeam;
+            candidates = targetTeam.members.filter(member => resultIds.has(String(member.id)) && memberMatchesRuntimeRule(member, rule));
+          } else if (side === "enemy") {
+            // v78: สถานะผิดปกติแบบ random/specific/all เลือกจากฝ่ายศัตรูตามตัวกรองโดยตรง
             candidates = resolveRuntimeTargets({ ...rule, side:"enemy", selection:"all" }, ownerTeam, defenderTeam, actor, null);
 
-            // ถ้ามีการระบุ current/target แบบข้อมูลเก่า และไม่มีเป้าจากตัวกรอง ให้ fallback ไปหาเป้าหมายที่โดนโจมตีจริง
+            // ข้อมูลเก่าที่หาเป้าจากตัวกรองไม่ได้ จะ fallback ไปหาเป้าหมายของการโจมตีครั้งนี้
             if (!candidates.length) {
               const resultIds = new Set(abilityArray(attackResults).filter(item => !item.ko).map(item => String(item.targetCardId)));
               candidates = defenderTeam.members.filter(member => resultIds.has(String(member.id)) && memberMatchesRuntimeRule(member, rule));
@@ -14621,7 +14684,7 @@
             candidates = resolveRuntimeTargets({ ...rule, selection:"all" }, ownerTeam, defenderTeam, actor, null);
           }
 
-          candidates = selectAbilityItems(candidates, selection, count, seed, "targets");
+          candidates = selectAbilityItems(candidates, selection === "hitTargets" ? "all" : selection, count, seed, "targets");
           candidates.forEach(member => {
             if (!Array.isArray(member.statusResistanceRules)) member.statusResistanceRules = [];
             events.push(...compactStatusResistanceRules(member, side === "enemy" ? defenderTeam : ownerTeam, "before-status"));
@@ -14715,15 +14778,57 @@
         return source.sort((a,b) => a.currentHp - b.currentHp || b.power - a.power || a.slot - b.slot);
       }
 
-      function pickTargets(attackerTeam, defenderTeam, requestedCount = 1, seed = 0) {
+      function normalAttackMemberMatches(member, actor) {
+        const ids = normalAttackTargetFilterValues(actor && actor.targetCardIds, true);
+        const elements = normalAttackTargetFilterValues(actor && actor.targetElements);
+        const rarities = normalAttackTargetFilterValues(actor && actor.targetRarities);
+        const checks = [];
+        if (ids.length) checks.push(ids.includes(String(member.cardId || member.id).split("@")[0]) || ids.includes(String(member.id)));
+        if (elements.length) checks.push(abilityArray(member.elements).some(element => elements.includes(String(element))));
+        if (rarities.length) checks.push(rarities.includes(String(member.rarity)));
+        if (!checks.length) return false;
+        return String(actor && actor.targetMatch || "any") === "all" ? checks.every(Boolean) : checks.some(Boolean);
+      }
+
+      function orderedNormalAttackPool(pool, actor, attackerTeam, seed = 0) {
+        const selection = normalizeNormalAttackTargetSelection(actor && actor.targetSelection);
+        const source = [...pool];
+        if (selection === "specific") {
+          const matched = source.filter(member => normalAttackMemberMatches(member, actor));
+          if (matched.length) return [...matched.sort((a,b)=>a.slot-b.slot), ...source.filter(member=>!matched.includes(member))];
+          return source;
+        }
+        if (selection === "lowHp") return source.sort((a,b) => (a.currentHp/Math.max(1,a.maxHp))-(b.currentHp/Math.max(1,b.maxHp)) || a.currentHp-b.currentHp || a.slot-b.slot);
+        if (selection === "highAtk") return source.sort((a,b) => b.power-a.power || a.currentHp-b.currentHp || a.slot-b.slot);
+        if (selection === "front") return source.sort((a,b) => (a.row === "front" ? 0 : 1)-(b.row === "front" ? 0 : 1) || a.slot-b.slot);
+        if (selection === "back") return source.sort((a,b) => (a.row === "back" ? 0 : 1)-(b.row === "back" ? 0 : 1) || a.slot-b.slot);
+        if (selection === "random") {
+          let state = Math.abs(Math.floor(Number(seed) || 1)) + source.length * 193;
+          for (let i=source.length-1;i>0;i-=1) { state=(state*9301+49297)%233280; const j=Math.floor((state/233280)*(i+1)); [source[i],source[j]]=[source[j],source[i]]; }
+          return source;
+        }
+        return source;
+      }
+
+      function pickTargets(attackerTeam, defenderTeam, requestedCount = 1, seed = 0, normalAttackActor = null) {
         const living = alive(defenderTeam);
         if (!living.length) return [];
         const count = Math.max(1, Math.min(5, Math.floor(Number(requestedCount) || 1), living.length));
+        const selection = normalizeNormalAttackTargetSelection(normalAttackActor && normalAttackActor.targetSelection);
         const taunters = sortRuntimeTargets(living.filter(member => Number(member.tauntTurnsRemaining || 0) > 0 || Number(member.tauntRoundsRemaining || 0) > 0), attackerTeam.targetStrategy, seed - 37);
         const selected = [];
         const selectedIds = new Set();
         taunters.slice(0, count).forEach(member => { selected.push(member); selectedIds.add(member.id); });
         let pool = living.filter(member => !selectedIds.has(member.id));
+        if (selection !== "default") {
+          const ordered = orderedNormalAttackPool(pool, normalAttackActor, attackerTeam, seed);
+          while (selected.length < count && ordered.length) {
+            const picked = ordered.shift();
+            if (!picked || selectedIds.has(picked.id)) continue;
+            selected.push(picked); selectedIds.add(picked.id);
+          }
+          return selected;
+        }
         while (selected.length < count && pool.length) {
           const totalHp = pool.reduce((sum, member) => sum + Math.max(1, member.currentHp), 0);
           const totalAtk = pool.reduce((sum, member) => sum + Math.max(1, member.power), 0);
@@ -14742,8 +14847,8 @@
         return selected;
       }
 
-      function pickTarget(attackerTeam, defenderTeam, seed = 0) {
-        return pickTargets(attackerTeam, defenderTeam, 1, seed)[0] || null;
+      function pickTarget(attackerTeam, defenderTeam, seed = 0, normalAttackActor = null) {
+        return pickTargets(attackerTeam, defenderTeam, 1, seed, normalAttackActor)[0] || null;
       }
 
       function memberMatchesRuntimeRule(member, rule) {
@@ -14768,7 +14873,14 @@
         if (side !== "enemy" && rule && rule.excludeSelf) candidates = candidates.filter(member => member.id !== actor.id);
         if (side === "self") return candidates.some(member => member.id === actor.id) && actor.currentHp > 0 && !actor.ko ? [actor] : [];
         const hasFilter = abilityArray(rule && rule.ids).length || abilityArray(rule && rule.elements).length || abilityArray(rule && rule.rarities).length;
-        const selection = String(rule && rule.selection || (includeKo ? "firstKo" : side === "enemy" ? "current" : "self")).toLowerCase();
+        const selectionRaw = String(rule && rule.selection || (includeKo ? "firstKo" : side === "enemy" ? "current" : "self")).trim();
+        const selection = normalizeAbilitySelectionMode(selectionRaw, selectionRaw || "random") === "hitTargets" ? "hitTargets" : selectionRaw.toLowerCase();
+        if (selection === "hitTargets") {
+          const hitOrder = abilityArray(targetTeam && targetTeam.currentHitTargetIds).map(String);
+          if (!hitOrder.length) return [];
+          const byId = new Map(candidates.map(member => [String(member.id), member]));
+          return hitOrder.map(id => byId.get(id)).filter(Boolean);
+        }
         if (!hasFilter && !includeKo) {
           if (side === "enemy" && selection !== "all" && selection !== "random") return currentTarget && currentTarget.currentHp > 0 && !currentTarget.ko ? [currentTarget] : [];
           if (side !== "enemy" && selection !== "all" && selection !== "random") return actor.currentHp > 0 && !actor.ko ? [actor] : [];
@@ -15139,7 +15251,9 @@
           const selection = normalizeAbilitySelectionMode(rule.targetSelection, "random");
           const strategy = selection === "random" ? "random" : ownerTeam.targetStrategy;
           const ordered = sortRuntimeTargets(matching, strategy, seedBase + ruleIndex * 71);
-          const count = Math.max(1, Math.min(5, Math.floor(Number(rule.targetCount) || 1), ordered.length, maxTriggers - used));
+          const count = selection === "hitTargets"
+            ? Math.max(0, Math.min(ordered.length, maxTriggers - used))
+            : Math.max(1, Math.min(5, Math.floor(Number(rule.targetCount) || 1), ordered.length, maxTriggers - used));
           let capturedCount = 0;
           for (const member of ordered) {
             if (capturedCount >= count || Math.max(0, Number(actor.captureUses[key]) || 0) >= maxTriggers) break;
@@ -15274,7 +15388,7 @@
       function summarizeMember(member) {
         return {
           id: member.id, name: member.name, rarity: member.rarity, row: member.row, slot: member.slot,
-          speed: member.speed, baseSpeed: member.baseSpeed, normalAttackTargetCount: member.normalAttackTargetCount, power: member.power, defense: member.defense, maxHp: member.maxHp,
+          speed: member.speed, baseSpeed: member.baseSpeed, normalAttackTargetCount: member.normalAttackTargetCount, targetSelection:member.targetSelection, power: member.power, defense: member.defense, maxHp: member.maxHp,
           currentHp: Math.max(0, member.currentHp), shieldRemaining: member.shieldHits,
           reviveMode: member.reviveMode, reviveTurnsRemaining: member.reviveTurnsRemaining,
           reviveHitLifeRemaining: member.reviveHitLifeRemaining, reviveCount: member.reviveCount, deathReason: member.deathReason,
@@ -15438,6 +15552,8 @@
           if (isDefeated(player) || isDefeated(enemy)) break;
           const team = teamBySide[entry.side];
           const defenderTeam = opposing(entry.side);
+          team.currentHitTargetIds = [];
+          defenderTeam.currentHitTargetIds = [];
           const actor = entry.member;
           if (actor.currentHp <= 0) continue;
           let target = pickTarget(team, defenderTeam, turnIndex);
@@ -15488,7 +15604,8 @@
           const activation = makeActivation(team, actor, target);
           const explicitAttackTargetCount = Math.max(0, Math.min(5, Math.floor(Number(activation.attackTargetCount) || 0)));
           const requestedAttackTargets = explicitAttackTargetCount > 0 ? explicitAttackTargetCount : actor.normalAttackTargetCount;
-          const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex);
+          const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex, explicitAttackTargetCount > 0 ? null : actor);
+          defenderTeam.currentHitTargetIds = attackTargets.map(member => String(member.id));
           target = attackTargets[0] || target;
           applyRateMaps(team, activation.blockRateChanges, "blockRate");
           applyRateMaps(team, activation.damageTakenRateChanges, "damageTakenRate");
@@ -16788,7 +16905,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const value = Number(effect.value || 0);
         const effectType = normalizeAbilityEffectType(effect.type);
         const sourceRuntimeId = cardIdString(record.sourceCard && record.sourceCard.id);
-        const targetSelection = String(effect.targetSelection || "").trim().toLowerCase();
+        const targetSelectionRaw = String(effect.targetSelection || "").trim();
+        const targetSelection = targetSelectionRaw ? normalizeAbilitySelectionMode(targetSelectionRaw, "random") : "";
         // สำหรับฮิต/โล่/ฮีลในระบบรายตัว: ถ้าไม่ระบุเป้าหมาย จะถือว่าเป็นเจ้าของสกิล
         const runtimeTargetRule = {
           side,
@@ -20681,6 +20799,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return `
         <div class="skill-tag-row card-combat-tags${options.className ? ` ${escapeHTML(options.className)}` : ""}">
           <span class="skill-tag" style="--skill-tag-color:#38bdf8" title="จำนวนเป้าหมายของการโจมตีปกติ">🎯 ตีปกติ ${formatNumber(summary.normalAttackTargetCount)} เป้า</span>
+          <span class="skill-tag" style="--skill-tag-color:#a78bfa" title="ผู้ที่โดนการโจมตีปกติ">🧭 เป้า ${escapeHTML(normalizeNormalAttackTargetSelection(card && card.targetSelection))}</span>
           <span class="skill-tag" style="--skill-tag-color:#22d3ee" title="จำนวนฮิตของการโจมตีปกติ รวมสกิลติดตัวที่ทำงานได้ตอนต่อสู้">⚔️ ${formatNumber(summary.attackHits)} hit</span>
           <span class="skill-tag" style="--skill-tag-color:#a78bfa" title="จำนวนโล่เริ่มต้น รวมสกิลติดตัวที่ทำงานได้ตอนต่อสู้">🛡️ โล่ ${formatNumber(summary.shieldHits)} hit</span>
           ${smallNote}
