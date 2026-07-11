@@ -83,18 +83,19 @@ ACC_REGISTER_CARD({
             maxTriggers: 1
           }
         },
-        {
+       {
           type: "applyStatus",
           targetSide: "enemy",
           condition: {
-            onOwnAttack: true,
-            sourceRevived: true
+            requiredCardNames: [
+              "เอลฟาเรีย",
+              "จูเลียส"
+            ]
           },
-          targetSelection: "random",
-          targetCount: 5,
+          targetSelection: "hitTargets",
           status: "freeze",
-          successRate: 1,
-          durationTurns: 1
+          successRate: 0.5,
+          targetCount: 5
         }
       ],
       activeCutscene: {
