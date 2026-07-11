@@ -25,22 +25,44 @@ ACC_REGISTER_CARD({
   abilities: [
     {
       name: "พรสวรรค์แห่งดาบ",
-      description: "คัดลอกร่สงต้น",
+      description: "เพิ่มอัตราติดคริ 75% และความเสียหายคริ 200% เพิ่มต้านสถานะ 80% ตลอดเวลา และเพิ่ม ATK 2% ทุกครั้งที่โจมตี",
       activeIn: [
         "team",
         "tower",
         "arena",
         "worldBoss"
       ],
-      attackTargetCount: 1,
       effects: [
         {
-          type: "teamPowerRate",
-          value: 0.03,
-          effectOperation: "increase",
-          targetSelection: "all"
+          type: "criticalRate",
+          value: 0.75,
+          targetSide: "self"
+        },
+        {
+          type: "criticalDamageRate",
+          value: 2,
+          targetSide: "self"
+        },
+        {
+          type: "statusResistance",
+          value: 0.8,
+          targetSide: "self",
+          scope: "target"
+        },
+        {
+          type: "powerRateStack",
+          value: 0.02,
+          targetSide: "self",
+          condition: {
+            onOwnAttack: true
+          },
+          maxStacks: 99,
+          stackKey: "will-sword-talent-atk"
         }
-      ]
+      ],
+      activeCutscene: {
+        enabled: false
+      }
     },
     {
       name: "วิสเวทมนต์แห่งความกล้า",
