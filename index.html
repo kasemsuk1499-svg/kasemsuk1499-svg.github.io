@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-11-hit-targets-all-effects-v99">
-  <title>Anime Card Collection · Runtime v99 · Hit Targets For All Effects</title>
+  <meta name="gacha-app-build" content="2026-07-11-awaken-transformation-v100">
+  <title>Anime Card Collection · Runtime v100 · AWAKEN Transformation</title>
   <style>
     :root {
       color-scheme: dark;
@@ -400,6 +400,15 @@
       box-shadow: 0 10px 28px rgba(217,70,239,.18);
     }
     .btn-awaken-gems .cost { color: #fff7ed; opacity: .9; }
+    .btn-awaken-transform {
+      color: #fff;
+      border-color: rgba(216,180,254,.62);
+      background: linear-gradient(135deg, #2e1065, #7c3aed 42%, #c084fc 72%, #4c1d95);
+      box-shadow: 0 0 0 1px rgba(240,171,252,.12), 0 12px 34px rgba(126,34,206,.34), inset 0 0 24px rgba(240,171,252,.13);
+      text-shadow: 0 1px 2px rgba(0,0,0,.55);
+    }
+    .btn-awaken-transform .cost { color:#f5d0fe; opacity:.94; }
+    .awaken-transform-note { margin-top:10px; padding:11px 12px; border:1px solid rgba(216,180,254,.28); border-radius:14px; color:#eadcff; background:linear-gradient(135deg,rgba(76,29,149,.24),rgba(30,10,55,.38)); font-size:.72rem; line-height:1.55; }
     .cost { display: block; font-size: .69rem; opacity: .76; margin-top: 2px; }
 
     .side-panel {
@@ -775,7 +784,10 @@
     .rarity-jjks { --fx-opacity: .25; --rarity-fx: linear-gradient(120deg, rgba(250,204,21,.75), transparent 35%, rgba(249,115,22,.72)); }
     .rarity-sc { --fx-opacity: .28; --rarity-fx: linear-gradient(115deg, #22d3ee, transparent 28%, #f472b6 53%, transparent 72%, #facc15); }
     .rarity-ex { --fx-opacity: .32; --rarity-fx: conic-gradient(from 180deg, #22d3ee, #a78bfa, #f472b6, #facc15, #22d3ee); }
+    .rarity-awaken { --fx-opacity: .38; --rarity-fx: conic-gradient(from 190deg, #12051f, #7c3aed 18%, #d8b4fe 36%, #8b5cf6 52%, #f0abfc 70%, #5b21b6 86%, #12051f); }
+    .rarity-awaken::after { content:""; position:absolute; inset:-35%; z-index:1; pointer-events:none; opacity:.32; background:radial-gradient(circle, rgba(240,171,252,.72), transparent 36%); animation:awaken-magic-pulse 2.2s ease-in-out infinite; }
     .rarity-god { --fx-opacity: .36; --rarity-fx: conic-gradient(from 210deg, #020617, #ffffff 18%, #d4af37 35%, #0f172a 52%, #fff8dc 70%, #facc15 86%, #020617); }
+    @keyframes awaken-magic-pulse { 0%,100%{transform:scale(.72) rotate(0deg);opacity:.18} 50%{transform:scale(1.08) rotate(18deg);opacity:.48} }
 
     .reveal-panel .rarity-sr::before,
     .reveal-panel .rarity-ssr::before,
@@ -785,6 +797,7 @@
     .reveal-panel .rarity-jjkc::before,
     .reveal-panel .rarity-jjks::before,
     .reveal-panel .rarity-ex::before,
+    .reveal-panel .rarity-awaken::before,
     .reveal-panel .rarity-sc::before,
     .reveal-panel .rarity-god::before {
       animation: rarity-shimmer 2.6s ease-in-out infinite;
@@ -7679,8 +7692,10 @@
       // แก้โดยอลิซ v51: ผู้เล่นยืนยันอัตราแลก Dust โดยคำนึงถึงรายได้ของ EX ที่สูงกว่า SC
       // ใช้ 100 Gems แลก 1 Dust: เงินเดือน 1,000M Gems แลกได้ 10M Dust พออัป EX จาก Lv.1 ถึงเลเวลตัน 1 ใบ
       dustGemCost: 100,
-      // เพิ่มโดยอลิซ v77: ใช้ Gems 1B เพื่ออเวกการ์ด +1 ขั้นทันที โดยไม่ต้องใช้การ์ดซ้ำ
+      // ใช้ Gems อเวกการ์ดปกติ +1 ขั้นทันที (ระดับ AWAKEN ห้ามใช้ระบบนี้)
       awakenGemCost: 1000000000,
+      // v100: ค่าเปลี่ยนร่างจากร่างต้นที่เลเวลตันและอเวกตันเป็นระดับ AWAKEN
+      awakenTransformGemCost: 50000000000,
       starterSRSelector: 1,
       starterTeamSize: 5,
       dailyGems: 35000000,
@@ -7965,7 +7980,8 @@
   glow: "#f4caff",
   textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 27000,  baseHp: 135000,  baseDefense: 10800, baseSpeed: 103, baseIncome: 275, maxLevel: 250, upgradeDustBase: 1723,   upgradeDustGrowth: 1.016, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 20,  awakenCopies: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], powerBonus: 0.035, incomeBonus: 0.023 },
       EX:  { label: "EX",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 1107,   upgradeDustGrowth: 1.017, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 },
-      GOD: { label: "GOD",       color: "#f8fafc", colors: ["#020617", "#ffffff", "#d4af37", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #020617 0%, #ffffff 18%, #d4af37 42%, #111827 68%, #facc15 100%)", glow: "#fff7c2", textColor: "#111827", borderColor: "#facc15", order: 8, stars: 13, dust: 250000, basePower: 31500, baseHp: 157500, baseDefense: 12600, baseSpeed: 108, baseIncome: 350, maxLevel: 350, upgradeDustBase: 1800, upgradeDustGrowth: 1.0175, powerPerLevel: .0285, incomePerLevel: .0195, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.042, incomeBonus: 0.026 }
+      AWAKEN: { label: "AWAKEN", color: "#c084fc", colors: ["#12051f", "#5b21b6", "#8b5cf6", "#d8b4fe", "#f0abfc", "#4c1d95"], gradient: "linear-gradient(135deg, #12051f 0%, #5b21b6 22%, #8b5cf6 44%, #d8b4fe 63%, #f0abfc 79%, #4c1d95 100%)", glow: "#d8b4fe", textColor: "#fff7ff", borderColor: "#e9d5ff", order: 8, stars: 13, dust: 180000, basePower: 31200, baseHp: 156000, baseDefense: 12480, baseSpeed: 107, baseIncome: 345, maxLevel: 350, upgradeDustBase: 1450, upgradeDustGrowth: 1.0175, powerPerLevel: .033, incomePerLevel: .022, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.041, incomeBonus: 0.0255, transformOnly: true, moneyAwaken: false },
+      GOD: { label: "GOD",       color: "#f8fafc", colors: ["#020617", "#ffffff", "#d4af37", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #020617 0%, #ffffff 18%, #d4af37 42%, #111827 68%, #facc15 100%)", glow: "#fff7c2", textColor: "#111827", borderColor: "#facc15", order: 9, stars: 14, dust: 250000, basePower: 31500, baseHp: 157500, baseDefense: 12600, baseSpeed: 108, baseIncome: 350, maxLevel: 350, upgradeDustBase: 1800, upgradeDustGrowth: 1.0175, powerPerLevel: .0285, incomePerLevel: .0195, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.042, incomeBonus: 0.026 }
     });
 
     // เพิ่มโดยอลิซ v5: ปรับเบสทุกระดับให้ใกล้กัน และย้ายการ์ดเก่าเข้าสเกลใหม่โดยรักษาความต่างรายใบไว้ไม่เกิน ±10%
@@ -7974,7 +7990,7 @@
       N:{power:1000,hp:5000,defense:400,income:35}, R:{power:3000,hp:15000,defense:1200,income:100},
       SR:{power:9000,hp:45000,defense:3600,income:280}, SSR:{power:27000,hp:135000,defense:10800,income:800},
       UR:{power:81000,hp:405000,defense:32400,income:2300}, LR:{power:243000,hp:1215000,defense:97200,income:6500},
-      SC:{power:729000,hp:3645000,defense:291600,income:18000}, EX:{power:2187000,hp:10935000,defense:874800,income:50000},
+      SC:{power:729000,hp:3645000,defense:291600,income:18000}, EX:{power:2187000,hp:10935000,defense:874800,income:50000}, AWAKEN:{power:2274480,hp:11372400,defense:909792,income:51750},
       GOD:{power:2296350,hp:11481750,defense:918540,income:52500}
     });
 
@@ -8123,7 +8139,7 @@
       "SC": 0.002,
       "GOD": 0.0001
     },
-    "rateUpCards": {
+    "rateUpCards": { "3001":2
     },
     "guarantee": {
       "enabled": true,
@@ -8609,6 +8625,8 @@
        - ตั้ง "enabled": false เมื่อต้องการปิดคัทซีนเฉพาะสกิลนั้น
        - video/image ชื่อไฟล์สั้นจะอ่านจาก assets/cards/ และรองรับ URL/path เต็ม
        - ระบบขึ้นคัทซีน “ทุกครั้ง” ที่ ACTIVE ทำงาน รวมถึงรอบถัดไปของสกิล repeat
+       - v100 AWAKEN: ไฟล์ร่างปลุกพลังใช้ id: "AK-IDเดิม", rarity: "AWAKEN", awakenSourceId: IDเดิม
+       - ร่าง AWAKEN หาไม่ได้จากกาชา/ตั๋ว/รางวัล; เปลี่ยนร่างใช้ร่างต้นเลเวลตัน+อเวกตันและ 50B Gems
     */
 
     /* ======================== [SECTION 06 CARD-DATA] ======================== */
@@ -8624,21 +8642,48 @@
     function buildCardDatabase() {
       const baseCards = Array.isArray(window.ACC_CARD_DATA) ? window.ACC_CARD_DATA : [];
       const extraCards = Array.isArray(window.ACC_EXTRA_CARD_DATA) ? window.ACC_EXTRA_CARD_DATA : [];
+      const rawCards = [...baseCards, ...extraCards].filter(card => card && typeof card === "object");
       const byId = new Map();
-      [...baseCards, ...extraCards].forEach(rawCard => {
-        if (!rawCard || typeof rawCard !== "object") return;
+      const normalizeId = rawId => {
+        const numericId = Number(rawId);
+        return Number.isFinite(numericId) && String(rawId).trim() !== "" ? numericId : String(rawId || "").trim();
+      };
+
+      // รอบแรกเก็บร่างต้นทั้งหมดก่อน เพื่อให้ไฟล์ AK-ID สามารถดึงข้อมูลจากร่างต้นได้แม้โหลดมาก่อน/หลังกัน
+      rawCards.forEach(rawCard => {
         const rawId = rawCard.id;
         if (rawId === undefined || rawId === null || rawId === "") return;
-        const numericId = Number(rawId);
-        const card = {
-          ...rawCard,
-          id: Number.isFinite(numericId) && String(rawId).trim() !== "" ? numericId : rawId
-        };
+        const rarityKey = String(rawCard.rarity || "").toUpperCase();
+        if (rarityKey === "AWAKEN" || String(rawId).toUpperCase().startsWith("AK-")) return;
+        const card = { ...rawCard, id: normalizeId(rawId) };
         byId.set(String(card.id), card);
       });
-      if (!baseCards.length && !extraCards.length) {
-        console.warn("ไม่พบข้อมูลการ์ด: โปรดตรวจสอบว่าโหลด card/card-data.js สำเร็จ");
-      }
+
+      // รอบสองประกอบร่าง AWAKEN: ค่าที่ไม่ได้ใส่ใหม่จะ fallback จากร่างต้น ส่วนค่าที่ใส่ในไฟล์ AK จะมีสิทธิ์สูงกว่า
+      rawCards.forEach(rawCard => {
+        const rarityKey = String(rawCard.rarity || "").toUpperCase();
+        const awakenIdSyntax = String(rawCard.id || "").toUpperCase().startsWith("AK-");
+        const rawSource = rawCard.awakenSourceId ?? rawCard.originalCardId ?? (awakenIdSyntax ? String(rawCard.id).slice(3) : "");
+        if (rarityKey !== "AWAKEN" && !awakenIdSyntax) return;
+        const sourceId = String(rawSource || "").trim();
+        if (!sourceId) return;
+        const source = byId.get(sourceId) || null;
+        const awakenId = `AK-${sourceId}`;
+        const merged = {
+          ...(source || {}),
+          ...rawCard,
+          id: awakenId,
+          rarity: "AWAKEN",
+          awakenSourceId: normalizeId(sourceId),
+          originalCardId: normalizeId(sourceId),
+          abilityIdentityId: normalizeId(sourceId),
+          transformOnly: true,
+          name: String(rawCard.name || (source ? `${source.name} — ร่างปลุกพลัง` : awakenId))
+        };
+        byId.set(awakenId, merged);
+      });
+
+      if (!baseCards.length && !extraCards.length) console.warn("ไม่พบข้อมูลการ์ด: โปรดตรวจสอบว่าโหลด card/card-data.js สำเร็จ");
       return Array.from(byId.values());
     }
 
@@ -8999,11 +9044,16 @@
     function normalizeTeamSlotArray(value, limit, ownedMap = {}) {
       const size = Math.max(1, Math.floor(Number(limit) || 5));
       const source = Array.isArray(value) ? value : [];
-      const seen = new Set();
+      const seenIds = new Set();
+      const seenForms = new Set();
       const result = Array.from({ length: Math.min(size, source.length) }, (_, index) => {
         const id = String(source[index] || "");
-        if (!id || seen.has(id) || !ownedMap[id] || !CARD_BY_ID.has(id)) return "";
-        seen.add(id);
+        const card = CARD_BY_ID.get(id);
+        if (!id || seenIds.has(id) || !ownedMap[id] || !card) return "";
+        const identity = getCardFormIdentityId(card);
+        if (seenForms.has(identity)) return "";
+        seenIds.add(id);
+        seenForms.add(identity);
         return id;
       });
       return trimTrailingTeamSlots(result);
@@ -9811,6 +9861,118 @@
 
     function getRarity(card) {
       return RARITIES[card && card.rarity] || RARITIES.N;
+    }
+
+
+    // ===================== [v100 AWAKEN TRANSFORMATION] =====================
+    function isAwakenCard(card) {
+      return String(card && card.rarity || "").toUpperCase() === "AWAKEN" || String(card && card.id || "").toUpperCase().startsWith("AK-");
+    }
+
+    function getAwakenSourceId(card) {
+      if (!card) return "";
+      const raw = card.awakenSourceId ?? card.originalCardId ?? (String(card.id || "").toUpperCase().startsWith("AK-") ? String(card.id).slice(3) : "");
+      return String(raw || "").trim();
+    }
+
+    function getAwakenCardId(sourceId) {
+      const id = String(sourceId || "").trim();
+      return id ? `AK-${id}` : "";
+    }
+
+    function getCardFormIdentityId(card) {
+      return isAwakenCard(card) ? (getAwakenSourceId(card) || String(card.id || "")) : String(card && card.id || "");
+    }
+
+    function getAwakenTargetCard(sourceCard) {
+      if (!sourceCard || isAwakenCard(sourceCard)) return null;
+      return CARD_BY_ID.get(getAwakenCardId(sourceCard.id)) || null;
+    }
+
+    function getAwakenSourceCard(awakenCard) {
+      const sourceId = getAwakenSourceId(awakenCard);
+      return sourceId ? CARD_BY_ID.get(sourceId) || null : null;
+    }
+
+    function isCardProgressMaxed(card, owned = card ? getOwned(card.id) : null) {
+      if (!card || !owned) return false;
+      return Number(owned.level || 1) >= getCardMaxLevel(card) && Number(owned.duplicateRank || 0) >= getCardAwakenMax(card);
+    }
+
+    function getAwakenTransformationStatus(awakenCard) {
+      const sourceCard = getAwakenSourceCard(awakenCard);
+      const sourceOwned = sourceCard ? getOwned(sourceCard.id) : null;
+      const cost = Math.max(1, Math.floor(Number(CONFIG.awakenTransformGemCost) || 50000000000));
+      const targetOwned = awakenCard ? getOwned(awakenCard.id) : null;
+      let reason = "พร้อมเปลี่ยนร่าง";
+      if (!awakenCard || !isAwakenCard(awakenCard)) reason = "ไม่ใช่การ์ดระดับ AWAKEN";
+      else if (!sourceCard) reason = "ไม่พบข้อมูลร่างต้น";
+      else if (targetOwned) reason = "มีร่าง AWAKEN แล้ว — ใช้ร่างต้นที่ตันเพื่ออเวก +1 แทน";
+      else if (!sourceOwned) reason = `ยังไม่มีร่างต้น ${sourceCard.name}`;
+      else if (Number(sourceOwned.level || 1) < getCardMaxLevel(sourceCard)) reason = `ร่างต้นต้องเลเวลตัน ${getCardMaxLevel(sourceCard)}`;
+      else if (Number(sourceOwned.duplicateRank || 0) < getCardAwakenMax(sourceCard)) reason = `ร่างต้นต้องอเวกตัน +${getCardAwakenMax(sourceCard)}`;
+      else if (Number(state.gems || 0) < cost) reason = `Gems ไม่พอ ต้องใช้ ${formatNumber(cost)} Gems`;
+      return { awakenCard, sourceCard, sourceOwned, targetOwned, cost, eligible: reason === "พร้อมเปลี่ยนร่าง", reason };
+    }
+
+    function teamHasFormConflict(team = [], candidateId, ignoreIndex = -1) {
+      const candidate = CARD_BY_ID.get(String(candidateId));
+      if (!candidate) return false;
+      const identity = getCardFormIdentityId(candidate);
+      return abilityArray(team).some((id, index) => {
+        if (index === ignoreIndex || !id) return false;
+        const card = CARD_BY_ID.get(String(id));
+        return card && getCardFormIdentityId(card) === identity && String(card.id) !== String(candidate.id);
+      });
+    }
+
+    function removeCardFromAllPlayerSystems(cardId) {
+      const id = String(cardId || "");
+      if (!id) return;
+      delete state.owned[id];
+      state.collectionOrder = abilityArray(state.collectionOrder).map(String).filter(item => item !== id);
+      state.recent = abilityArray(state.recent).map(String).filter(item => item !== id);
+      const cleanTeam = team => trimTrailingTeamSlots(abilityArray(team).map(item => String(item || "") === id ? "" : item));
+      state.team = cleanTeam(state.team);
+      if (state.battle) state.battle.team = cleanTeam(state.battle.team);
+      if (state.arena) state.arena.team = cleanTeam(state.arena.team);
+      if (Array.isArray(state.teamPresets)) {
+        state.teamPresets = state.teamPresets.map(preset => {
+          if (!preset) return null;
+          const cards = cleanTeam(preset.cards || preset.team);
+          if (!cards.some(Boolean)) return null;
+          return { ...preset, cards, leaderId: normalizeTeamLeaderId(preset.leaderId, cards), updatedAt: Date.now() };
+        });
+      }
+      state.teamLeaderId = normalizeTeamLeaderId(state.teamLeaderId, state.team);
+      if (state.battle) state.battle.leaderId = normalizeTeamLeaderId(state.battle.leaderId, state.battle.team);
+      if (state.arena) state.arena.leaderId = normalizeTeamLeaderId(state.arena.leaderId, state.arena.team);
+      if (state.profile && String(state.profile.supportCardId || "") === id) state.profile.supportCardId = "";
+    }
+
+    function transformCardToAwaken(awakenCardId) {
+      if (cardUpgradeBusy) return;
+      const awakenCard = CARD_BY_ID.get(String(awakenCardId));
+      const status = getAwakenTransformationStatus(awakenCard);
+      if (!status.eligible) return showToast(status.reason);
+      cardUpgradeBusy = true;
+      try {
+        updateIncome();
+        const latest = getAwakenTransformationStatus(awakenCard);
+        if (!latest.eligible) return showToast(latest.reason);
+        state.gems -= latest.cost;
+        removeCardFromAllPlayerSystems(latest.sourceCard.id);
+        state.owned[String(awakenCard.id)] = { count: 1, level: 1, duplicateRank: 0, acquiredAt: Date.now(), transformedFrom: String(latest.sourceCard.id) };
+        state.collectionOrder = abilityArray(state.collectionOrder).map(String).filter(id => id !== String(awakenCard.id));
+        state.collectionOrder.push(String(awakenCard.id));
+        saveState(true);
+        renderAll();
+        modalCardId = String(awakenCard.id);
+        renderCardDetail(awakenCard.id);
+        showToast(`ปลุกพลังสำเร็จ • ${latest.sourceCard.name} เปลี่ยนเป็น ${awakenCard.name} ด้วย ${formatNumber(latest.cost)} Gems`);
+      } finally {
+        cardUpgradeBusy = false;
+      }
     }
 
     // ชื่อแสดงผลใหม่ โดยคงรหัส LR/SC ภายในไว้เพื่อให้เซฟ ตู้กาชา และข้อมูลการ์ดเก่ายังใช้ได้
@@ -12005,6 +12167,7 @@
       const rarityKeys = new Set([...Object.keys(baseRates), ...Object.keys(gachaSummary.rarityRateBonuses || {})]);
 
       rarityKeys.forEach(rarity => {
+        if (String(rarity).toUpperCase() === "AWAKEN") return;
         const base = Math.max(0, Number(baseRates[rarity]) || 0);
         const bonus = normalizeGachaWeightBonus(gachaSummary.rarityRateBonuses[rarity] || 0);
         const delta = Math.abs(bonus) <= 1 ? base * bonus : bonus;
@@ -17725,6 +17888,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function addCardToCollection(card, grantDustOnDuplicate = true) {
       if (!card) return { card: null, duplicate: false, dustEarned: 0, maxAwakenBonus: 0, convertedCopies: 0 };
+      // ระดับ AWAKEN ห้ามได้จากกาชา ตั๋ว จดหมาย Selector หรือรางวัลทุกชนิด
+      if (isAwakenCard(card)) return { card, duplicate: false, dustEarned: 0, maxAwakenBonus: 0, convertedCopies: 0, blockedAwaken: true };
       const key = String(card.id);
       const duplicate = Boolean(state.owned[key]);
       let dustEarned = 0;
@@ -19097,8 +19262,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function randomCard(rarity, banner, guaranteed = false) {
-      let pool = CARDS.filter(card => card.rarity === rarity);
-      if (!pool.length) pool = CARDS;
+      const gachaPool = CARDS.filter(card => !isAwakenCard(card) && card.transformOnly !== true);
+      let pool = gachaPool.filter(card => card.rarity === rarity);
+      if (!pool.length) pool = gachaPool;
       const guaranteeRates = guaranteed && banner.guarantee ? banner.guarantee.cardRates || {} : {};
       const hasGuaranteeCards = pool.some(card => Number(guaranteeRates[card.id]) > 0);
       const weights = {};
@@ -19107,8 +19273,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           ? Number(guaranteeRates[card.id]) || 0
           : Number((banner.rateUpCards || {})[card.id]) || 1;
       });
-      const id = weightedKey(weights, String(pool[0].id));
-      return CARD_BY_ID.get(String(id)) || pool[0];
+      const id = weightedKey(weights, pool[0] ? String(pool[0].id) : "");
+      return CARD_BY_ID.get(String(id)) || pool[0] || null;
     }
 
     function pullCards(times, options = {}) {
@@ -20060,6 +20226,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function getAwakenCost(card) {
+      if (isAwakenCard(card)) return 1;
       const owned = getOwned(card.id);
       const rarity = getRarity(card);
       const maxRank = getCardAwakenMax(card);
@@ -20074,6 +20241,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function getAwakenGemCost(card) {
+      if (isAwakenCard(card)) return 0;
       return Math.max(1, Math.floor(Number(CONFIG.awakenGemCost) || 1000000000));
     }
 
@@ -20083,6 +20251,24 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!card || !owned) return;
       const maxRank = getCardAwakenMax(card);
       if (owned.duplicateRank >= maxRank) return showToast("ปลุกพลังเต็มแล้ว");
+
+      // ระดับ AWAKEN ต้องใช้ร่างต้นใบเดิมที่เลเวลตันและอเวกตันเป็นวัตถุดิบทุก +1
+      if (isAwakenCard(card)) {
+        const sourceCard = getAwakenSourceCard(card);
+        const sourceOwned = sourceCard ? getOwned(sourceCard.id) : null;
+        if (!sourceCard) return showToast("ไม่พบข้อมูลร่างต้นของการ์ด AWAKEN ใบนี้");
+        if (!sourceOwned) return showToast(`ต้องสะสม ${sourceCard.name} ร่างต้นใหม่ก่อน`);
+        if (Number(sourceOwned.level || 1) < getCardMaxLevel(sourceCard)) return showToast(`ร่างต้นต้องเลเวลตัน ${getCardMaxLevel(sourceCard)}`);
+        if (Number(sourceOwned.duplicateRank || 0) < getCardAwakenMax(sourceCard)) return showToast(`ร่างต้นต้องอเวกตัน +${getCardAwakenMax(sourceCard)}`);
+        updateIncome();
+        removeCardFromAllPlayerSystems(sourceCard.id);
+        owned.duplicateRank = Math.min(maxRank, Math.max(0, Math.floor(Number(owned.duplicateRank) || 0)) + 1);
+        saveState(true);
+        refreshCardProgressUI(card.id);
+        showToast(`AWAKEN +${owned.duplicateRank} สำเร็จ • ใช้ ${sourceCard.name} เลเวลตัน/อเวกตัน 1 ใบ`);
+        return;
+      }
+
       const cost = getAwakenCost(card);
       if (owned.count - 1 < cost) return showToast(`ต้องใช้การ์ดซ้ำ ${cost} ใบ`);
       updateIncome();
@@ -20091,9 +20277,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const converted = convertMaxAwakenStockToDust(card, owned);
       saveState();
       refreshCardProgressUI(card.id);
-      if (converted.copies > 0) {
-        showToast(`อเวกเต็มแล้ว • แปลงการ์ดซ้ำค้าง ${formatNumber(converted.copies)} ใบ เป็นโบนัส Dust +${formatNumber(converted.dust)}`);
-      }
+      if (converted.copies > 0) showToast(`อเวกเต็มแล้ว • แปลงการ์ดซ้ำค้าง ${formatNumber(converted.copies)} ใบ เป็นโบนัส Dust +${formatNumber(converted.dust)}`);
     }
 
     function awakenCardWithGems(cardId) {
@@ -20101,6 +20285,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const card = CARD_BY_ID.get(String(cardId));
       const owned = card && getOwned(card.id);
       if (!card || !owned) return;
+      if (isAwakenCard(card)) return showToast("ระดับ AWAKEN ไม่สามารถใช้เงินอเวกได้ ต้องใช้ร่างต้นที่เลเวลตันและอเวกตันเท่านั้น");
       const maxRank = getCardAwakenMax(card);
       if (owned.duplicateRank >= maxRank) return showToast("ปลุกพลังเต็มแล้ว");
       const cost = getAwakenGemCost(card);
@@ -20116,9 +20301,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         refreshCardProgressUI(card.id);
         const convertText = converted.copies > 0 ? ` • อเวกเต็ม แปลงซ้ำค้าง ${formatNumber(converted.copies)} ใบเป็น Dust +${formatNumber(converted.dust)}` : "";
         showToast(`ใช้เงิน ${formatNumber(cost)} Gems อเวก ${card.name} เป็น +${owned.duplicateRank} สำเร็จ${convertText}`);
-      } finally {
-        cardUpgradeBusy = false;
-      }
+      } finally { cardUpgradeBusy = false; }
     }
 
     function toggleCardInModeTeam(mode, cardId) {
@@ -20130,6 +20313,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       updateIncome();
       if (existing >= 0) team[existing] = "";
       else {
+        if (teamHasFormConflict(team, id)) return showToast("ร่างต้นและร่าง AWAKEN ของการ์ดเดียวกันไม่สามารถอยู่ในทีมเดียวกันได้");
         let empty = -1;
         for (let index = 0; index < limit; index += 1) if (!team[index]) { empty = index; break; }
         if (empty < 0) return showToast(`${teamPresetModeLabel(mode)}เต็มแล้ว เอาการ์ดใบอื่นออกก่อน`);
@@ -20209,23 +20393,29 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function upgradeStatusPanelHTML(card, inTeam = false) {
       const status = getCardProgressStatus(card);
+      const awaken = isAwakenCard(card);
+      const source = awaken ? getAwakenSourceCard(card) : null;
       if (!status.owned) {
+        const awakenInfo = awaken
+          ? `ต้องใช้ ${source ? source.name : "ร่างต้น"} ที่เลเวลตันและอเวกตัน พร้อม Gems ${formatNumber(CONFIG.awakenTransformGemCost)} เพื่อเปลี่ยนร่าง`
+          : "ต้องเปิดได้ก่อนจึงจะอัปเกรดได้";
         return `
           <div class="upgrade-status-panel">
             <div class="upgrade-status-head"><span>สถานะพัฒนาการ์ด</span><strong>ยังไม่ได้ครอบครอง</strong></div>
             <div class="upgrade-progress-track"><i style="width:0%"></i></div>
             <div class="upgrade-status-grid">
-              <div class="upgrade-status-card"><span>Level</span><strong>0/${status.maxLevel}</strong><small>ต้องเปิดได้ก่อนจึงจะอัปเกรดได้</small></div>
-              <div class="upgrade-status-card"><span>Awaken</span><strong>0/${status.maxRank}</strong><small>ใช้การ์ดซ้ำในการปลุกพลัง</small></div>
-              <div class="upgrade-status-card"><span>สถานะทีม</span><strong>ยังไม่พร้อมใช้งาน</strong><small>เปิดจากตู้กาชาก่อน</small></div>
+              <div class="upgrade-status-card"><span>Level</span><strong>0/${status.maxLevel}</strong><small>${escapeHTML(awakenInfo)}</small></div>
+              <div class="upgrade-status-card"><span>Awaken</span><strong>0/${status.maxRank}</strong><small>${awaken ? "หาไม่ได้จากกาชา/ตั๋ว/รางวัล" : "ใช้การ์ดซ้ำในการปลุกพลัง"}</small></div>
+              <div class="upgrade-status-card"><span>สถานะทีม</span><strong>ยังไม่พร้อมใช้งาน</strong><small>${awaken ? "เปลี่ยนร่างจากร่างต้นเท่านั้น" : "เปิดจากตู้กาชาก่อน"}</small></div>
             </div>
-          </div>
-        `;
+          </div>`;
       }
       const levelNote = status.level >= status.maxLevel ? "เลเวลเต็มแล้ว" : `เลเวลถัดไปใช้ ${formatNumber(status.upgradeCost)} Dust`;
       const awakenNote = status.rank >= status.maxRank
-        ? `ปลุกพลังเต็มแล้ว • การ์ดซ้ำใหม่แปลงเป็น Dust x${formatNumber(CONFIG.maxAwakenDuplicateDustMultiplier)}`
-        : `ขั้นถัดไปใช้ซ้ำ ${formatNumber(status.awakenCost)} ใบ • มีซ้ำ ${formatNumber(status.availableDuplicates)} ใบ • หรือใช้เงิน ${formatNumber(status.awakenGemCost)} Gems เพื่ออเวก +1`;
+        ? (awaken ? "AWAKEN เต็ม +20" : `ปลุกพลังเต็มแล้ว • การ์ดซ้ำใหม่แปลงเป็น Dust x${formatNumber(CONFIG.maxAwakenDuplicateDustMultiplier)}`)
+        : awaken
+          ? `ขั้นถัดไปต้องใช้ ${source ? source.name : "ร่างต้น"} ที่เลเวลตันและอเวกตัน 1 ใบ • ห้ามใช้เงินอเวก`
+          : `ขั้นถัดไปใช้ซ้ำ ${formatNumber(status.awakenCost)} ใบ • มีซ้ำ ${formatNumber(status.availableDuplicates)} ใบ • หรือใช้เงิน ${formatNumber(status.awakenGemCost)} Gems เพื่ออเวก +1`;
       const supportActive = String(state.profile.supportCardId || "") === String(card.id);
       return `
         <div class="upgrade-status-panel">
@@ -20236,8 +20426,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             <div class="upgrade-status-card"><span>Awaken Progress</span><strong>${status.rank}/${status.maxRank} (${status.awakenPercent}%)</strong><small>${escapeHTML(awakenNote)}</small></div>
             <div class="upgrade-status-card"><span>สถานะใช้งาน</span><strong>${inTeam ? "อยู่ในทีมโชว์" : "ยังไม่ได้ใส่ทีม"}</strong><small>${supportActive ? "ตั้งเป็น Support โปรไฟล์แล้ว" : "ยังไม่ได้ตั้งเป็น Support"}</small></div>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
     function cardCollectionMiniStatusHTML(card) {
@@ -21227,15 +21416,13 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const team = getTeamArrayByMode(mode);
       while (team.length <= targetIndex) team.push("");
       const existingIndex = team.indexOf(id);
-      if (existingIndex === targetIndex) {
-        closeTeamPicker();
-        return showToast("การ์ดใบนี้อยู่ในช่องที่เลือกแล้ว");
-      }
+      if (existingIndex === targetIndex) { closeTeamPicker(); return showToast("การ์ดใบนี้อยู่ในช่องที่เลือกแล้ว"); }
+      if (teamHasFormConflict(team, id, targetIndex)) return showToast("ร่างต้นและร่าง AWAKEN ของการ์ดเดียวกันไม่สามารถอยู่ในทีมเดียวกันได้");
       updateIncome();
       const targetId = String(team[targetIndex] || "");
       if (existingIndex >= 0) team[existingIndex] = targetId;
       team[targetIndex] = id;
-      const normalized = trimTrailingTeamSlots(team);
+      const normalized = normalizeTeamSlotArray(team, limit, state.owned);
       team.splice(0, team.length, ...normalized);
       ensureModeLeader(mode);
       resetModeBattleCache(mode);
@@ -23201,6 +23388,18 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const availableDuplicates = status.availableDuplicates;
       const upgradeCost = status.upgradeCost;
       const awakenCost = status.awakenCost;
+      const isAwaken = isAwakenCard(card);
+      const awakenSourceCard = isAwaken ? getAwakenSourceCard(card) : null;
+      const awakenTargetCard = !isAwaken ? getAwakenTargetCard(card) : null;
+      const transformStatus = isAwaken ? getAwakenTransformationStatus(card) : (awakenTargetCard ? getAwakenTransformationStatus(awakenTargetCard) : null);
+      const awakenMaterialOwned = awakenSourceCard ? getOwned(awakenSourceCard.id) : null;
+      const awakenMaterialReady = Boolean(awakenSourceCard && isCardProgressMaxed(awakenSourceCard, awakenMaterialOwned));
+      const awakenButtonText = isAwaken ? "อเวก AWAKEN +1" : "ปลุกพลัง";
+      const awakenCostText = rank >= maxRank ? "เต็มแล้ว" : isAwaken
+        ? `${awakenMaterialReady ? "วัตถุดิบพร้อม" : `ต้องใช้ ${awakenSourceCard ? awakenSourceCard.name : "ร่างต้น"} เลเวลตัน/อเวกตัน`}`
+        : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`;
+      const awakenGemButtonHTML = isAwaken ? "" : `<button id="cardAwakenGemButton" class="btn btn-awaken-gems" data-action="awaken-gems" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>ใช้เงินอเวก +1 <span id="cardAwakenGemCost" class="cost">${rank >= maxRank ? "เต็มแล้ว" : `${formatNumber(getAwakenGemCost(card))} Gems`}</span></button>`;
+      const transformationButtonHTML = transformStatus ? `<button class="btn btn-awaken-transform" data-action="transform-awaken" data-card-id="${escapeHTML((isAwaken ? card : awakenTargetCard).id)}" ${transformStatus.eligible ? "" : "disabled"}>💜 เปลี่ยนร่างเป็น AWAKEN <span class="cost">${transformStatus.eligible ? `${formatNumber(transformStatus.cost)} Gems • ร่างต้นจะหายจากคลัง` : escapeHTML(transformStatus.reason)}</span></button>` : "";
       const inTeam = state.team.includes(String(card.id));
       const inTowerTeam = getTowerTeamIds().includes(String(card.id));
       const inArenaTeam = Boolean(state.arena && Array.isArray(state.arena.team) && state.arena.team.includes(String(card.id)));
@@ -23212,7 +23411,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const changeTeamCardButton = validTeamDetailContext
         ? `<button class="btn btn-primary" data-action="change-team-card" data-team-mode="${escapeHTML(validTeamDetailContext.mode)}" data-slot-index="${validTeamDetailContext.slotIndex}">🔄 เปลี่ยนตัวละครในช่องนี้</button>`
         : "";
-      const selectorButton = selectorCount > 0
+      const selectorButton = !isAwaken && selectorCount > 0
         ? `<button class="btn btn-primary" data-action="use-selector" data-card-id="${escapeHTML(card.id)}">ใช้ใบเลือก ${escapeHTML(card.rarity)} <span class="cost">มี ${formatNumber(selectorCount)} ใบ</span></button>`
         : "";
       const abilityCount = getCardAbilities(card).length;
@@ -23236,6 +23435,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               <h2>${escapeHTML(card.name)}</h2>
               <p class="detail-sub"><strong style="color:var(--cyan)">Card ID: ${escapeHTML(card.id)}</strong> • ${escapeHTML(elementDetail)} ${owned ? `• มี ${owned.count} ใบ` : "• ยังไม่ได้ครอบครอง"}</p>
               ${membershipHTML}
+              ${isAwaken ? `<div class="awaken-transform-note">💜 ร่างปลุกพลังของ Card ID ${escapeHTML(getAwakenSourceId(card))} • หาไม่ได้จากกาชา ตั๋ว Selector จดหมาย หรือรางวัล • เลเวลตัน 350 / อเวกตัน 20</div>` : ""}
             </div>
 
             <div class="detail-tabbar" role="tablist" aria-label="หมวดรายละเอียดการ์ด">
@@ -23270,18 +23470,17 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                   <button id="cardUpgradeAllButton" class="btn btn-upgrade-all" data-action="upgrade-all" data-card-id="${escapeHTML(card.id)}" ${level >= maxLevel ? "disabled" : ""}>
                     อัปทีเดียวถึงเลเวลตัน <span id="cardUpgradeAllCost" class="cost">${level >= maxLevel ? "เลเวลเต็ม" : `${formatNumber(getUpgradeCostToMax(card))} Dust`}</span>
                   </button>
-                  <button id="cardAwakenButton" class="btn btn-gold" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
-                    ปลุกพลัง <span id="cardAwakenCost" class="cost">${rank >= maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`}</span>
+                  <button id="cardAwakenButton" class="btn ${isAwaken ? "btn-awaken-transform" : "btn-gold"}" data-action="awaken" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank || (isAwaken && !awakenMaterialReady) ? "disabled" : ""}>
+                    ${awakenButtonText} <span id="cardAwakenCost" class="cost">${escapeHTML(awakenCostText)}</span>
                   </button>
-                  <button id="cardAwakenGemButton" class="btn btn-awaken-gems" data-action="awaken-gems" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>
-                    ใช้เงินอเวก +1 <span id="cardAwakenGemCost" class="cost">${rank >= maxRank ? "เต็มแล้ว" : `${formatNumber(getAwakenGemCost(card))} Gems`}</span>
-                  </button>
+                  ${awakenGemButtonHTML}
+                  ${!isAwaken ? transformationButtonHTML : ""}
                   <button class="btn" data-action="toggle-team" data-card-id="${escapeHTML(card.id)}">${inTeam ? "นำออกจากทีมโชว์" : "เพิ่มเข้าทีมโชว์"}</button>
                   <button class="btn ${inTowerTeam ? "btn-danger" : "btn-gold"}" data-action="toggle-tower-team" data-card-id="${escapeHTML(card.id)}">${inTowerTeam ? "นำออกจากทีมไต่หอ" : "เพิ่มเข้าทีมไต่หอ"}</button>
                   <button class="btn ${inArenaTeam ? "btn-danger" : "btn-primary"}" data-action="toggle-arena-team" data-card-id="${escapeHTML(card.id)}">${inArenaTeam ? "นำออกจากทีม ARENA" : "เพิ่มเข้าทีม ARENA"}</button>
                   <button class="btn btn-gold" data-action="set-support-card" data-card-id="${escapeHTML(card.id)}">${String(state.profile.supportCardId || "") === String(card.id) ? "เป็น Support อยู่" : "ตั้งเป็น Support โปรไฟล์"}</button>
                   ${selectorButton}
-                ` : `${selectorButton || `<button class="btn" disabled>เปิดได้จากตู้กาชา</button>`}`}
+                ` : `${transformationButtonHTML || selectorButton || `<button class="btn" disabled>${isAwaken ? "ต้องเปลี่ยนร่างจากการ์ดต้นฉบับ" : "เปิดได้จากตู้กาชา"}</button>`}`}
               </div>
             </section>
 
@@ -23325,12 +23524,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const awakenGemButton = document.getElementById("cardAwakenGemButton");
       if (oneButton) oneButton.disabled = status.level >= status.maxLevel;
       if (allButton) allButton.disabled = status.level >= status.maxLevel;
-      if (awakenButton) awakenButton.disabled = status.rank >= status.maxRank;
-      if (awakenGemButton) awakenGemButton.disabled = status.rank >= status.maxRank;
+      const awakenSource = isAwakenCard(card) ? getAwakenSourceCard(card) : null;
+      const awakenMaterialReady = Boolean(awakenSource && isCardProgressMaxed(awakenSource));
+      if (awakenButton) awakenButton.disabled = status.rank >= status.maxRank || (isAwakenCard(card) && !awakenMaterialReady);
+      if (awakenGemButton) awakenGemButton.disabled = status.rank >= status.maxRank || isAwakenCard(card);
       setText("cardUpgradeOneCost", status.level >= status.maxLevel ? "เลเวลเต็ม" : `${formatNumber(status.upgradeCost)} Dust`);
       setText("cardUpgradeAllCost", status.level >= status.maxLevel ? "เลเวลเต็ม" : `${formatNumber(getUpgradeCostToMax(card))} Dust`);
-      setText("cardAwakenCost", status.rank >= status.maxRank ? "เต็มแล้ว" : `ใช้ซ้ำ ${status.awakenCost} ใบ / มี ${status.availableDuplicates}`);
-      setText("cardAwakenGemCost", status.rank >= status.maxRank ? "เต็มแล้ว" : `${formatNumber(status.awakenGemCost)} Gems`);
+      setText("cardAwakenCost", status.rank >= status.maxRank ? "เต็มแล้ว" : isAwakenCard(card) ? (awakenMaterialReady ? "วัตถุดิบร่างต้นพร้อม" : `ต้องใช้ ${awakenSource ? awakenSource.name : "ร่างต้น"} เลเวลตัน/อเวกตัน`) : `ใช้ซ้ำ ${status.awakenCost} ใบ / มี ${status.availableDuplicates}`);
+      setText("cardAwakenGemCost", isAwakenCard(card) ? "AWAKEN ห้ามใช้เงินอเวก" : status.rank >= status.maxRank ? "เต็มแล้ว" : `${formatNumber(status.awakenGemCost)} Gems`);
     }
 
     function openCardModal(cardId, options = {}) {
@@ -24295,6 +24496,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "upgrade-all") upgradeCardToMax(cardId);
       if (action === "awaken") awakenCard(cardId);
       if (action === "awaken-gems") awakenCardWithGems(cardId);
+      if (action === "transform-awaken") transformCardToAwaken(cardId);
       if (action === "toggle-team") toggleTeam(cardId);
       if (action === "toggle-tower-team") toggleTowerTeam(cardId);
       if (action === "toggle-arena-team") toggleArenaTeam(cardId);
