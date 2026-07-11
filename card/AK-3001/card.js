@@ -142,35 +142,37 @@ ACC_REGISTER_CARD({
         }
       ]
     },
+{
+  name: "ความหวัง",
+  description: "เมื่อหมดสภาพจากการต่อสู้ จะคืนชีพตัวเองด้วย HP 1% และเป็นอมตะ 5 เทิร์น พร้อมมอบโล่ 10 ฮิตให้พวกพ้องทั้งหมด",
+  activeIn: [
+    "team",
+    "tower",
+    "arena",
+    "worldBoss"
+  ],
+  attackTargetCount: 1,
+
+  condition: {
+    onDeath: true,
+    maxTriggers: 1
+  },
+
+  effects: [
     {
-      name: "ความหวัง",
-      description: "เมื่อหมดสภาพจากการต่อสู้จะคืนชีพตัวเองเป็นอมตะ 5 เทิร์น และฟื้นโล่ให่ฝ่ายเรา 10 ครั้ง",
-      activeIn: [
-        "team",
-        "tower",
-        "arena",
-        "worldBoss"
-      ],
-      attackTargetCount: 1,
-      effects: [
-        {
-          type: "reviveTimedUndying",
-          value: 0.01,
-          targetSide: "self",
-          durationTurns: 5,
-          maxTriggers: 1,
-          targetSelection: "all"
-        },
-        {
-          type: "shieldHits",
-          value: 10,
-          targetSide: "teammates",
-          condition: {
-            sourceRevived: true
-          },
-          targetSelection: "all"
-        }
-      ]
+      type: "reviveTimedUndying",
+      value: 0.01,
+      targetSide: "self",
+      durationTurns: 5,
+      maxTriggers: 1
+    },
+    {
+      type: "shieldHits",
+      value: 10,
+      targetSide: "teammates",
+      targetSelection: "all"
+    }
+  ]
     }
   ],
   "scCutscene": {
