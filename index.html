@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-09-skill-condition-runtime-v94">
-  <title>Anime Card Collection · World Boss v90 Clean Collection Detail Tags</title>
+  <meta name="gacha-app-build" content="2026-07-11-split-summon-runtime-v96">
+  <title>Anime Card Collection · Split & Summon Runtime v96</title>
   <style>
     :root {
       color-scheme: dark;
@@ -194,6 +194,13 @@
       font-size: .78rem;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .top-logout-button {
+      min-height: 48px;
+      white-space: nowrap;
+      border-color: rgba(251,113,133,.34);
+      background: rgba(190,24,93,.24);
     }
 
     .hero-grid {
@@ -6637,6 +6644,7 @@
           <strong id="accountButtonText">Local Guest</strong>
         </span>
       </button>
+      <button class="btn btn-danger top-logout-button hidden" id="topLogoutButton" data-action="logout" type="button" aria-label="ล็อกเอ้าเพื่อเปลี่ยนบัญชี">ล็อกเอ้า</button>
       <div class="resource-bar" aria-label="ทรัพยากรผู้เล่น">
         <div class="resource gems"><span>Gems / เงิน</span><strong id="gemsText">0</strong></div>
         <div class="resource cristal"><span>Cristal</span><strong id="crystalsText">0</strong></div>
@@ -8321,6 +8329,8 @@
       SPEED_FLAT_STACK: "speedFlatStack",
       TAUNT: "taunt",
       CAPTURE_REVIVE: "captureRevive",
+      SPLIT_CLONE: "splitClone",
+      SUMMON_CARD: "summonCard",
       INCREASE_MAX_HP_BASE_RATE: "increaseMaxHpBaseRate",
       INCREASE_ATTACK_RATE_STACK: "increaseAttackRateStack",
       SELF_TRIGGER_REDUCTION: "selfTriggerReduction", // รองรับข้อมูลเก่า: ทำงานเป็นคอสชั่วคราวรอบปัจจุบัน
@@ -8962,9 +8972,11 @@
       const accountText = document.getElementById("accountButtonText");
       const accountAvatar = document.getElementById("accountAvatar");
       const logoutButton = document.getElementById("logoutButton");
+      const topLogoutButton = document.getElementById("topLogoutButton");
       if (accountText) accountText.textContent = label;
       if (accountAvatar) accountAvatar.outerHTML = avatarHTML(profile, "account-avatar").replace("<span", "<span id=\"accountAvatar\"");
       if (logoutButton) logoutButton.disabled = !activeCloudUid;
+      if (topLogoutButton) topLogoutButton.classList.toggle("hidden", !activeCloudUid);
     }
 
     function setAuthBusy(busy) {
@@ -9090,7 +9102,8 @@
           GoogleAuthProvider: authModule.GoogleAuthProvider,
           FacebookAuthProvider: authModule.FacebookAuthProvider,
           setPersistence: authModule.setPersistence,
-          inMemoryPersistence: authModule.inMemoryPersistence,
+          browserLocalPersistence: authModule.browserLocalPersistence,
+          browserSessionPersistence: authModule.browserSessionPersistence,
           signOut: authModule.signOut,
           onAuthStateChanged: authModule.onAuthStateChanged,
           getDatabase: databaseModule.getDatabase,
@@ -9107,12 +9120,12 @@
           ? cloudModules.getApps()[0]
           : cloudModules.initializeApp(FIREBASE_CONFIG);
         cloudAuth = cloudModules.getAuth(cloudApp);
-        // แก้โดยอลิซ: ใช้ Firebase Auth แบบไม่เก็บสถานะล็อกอินในเครื่อง
-        // รีเฟรชหน้าเว็บแล้วต้องล็อกอินใหม่ แต่จะไม่ลากเซฟเก่าจากเครื่องกลับมาอีก
+        // v96: จดจำการล็อกอินในอุปกรณ์นี้จนกว่าผู้เล่นจะกดล็อกเอ้า
         try {
-          await cloudModules.setPersistence(cloudAuth, cloudModules.inMemoryPersistence);
+          await cloudModules.setPersistence(cloudAuth, cloudModules.browserLocalPersistence);
         } catch (persistenceError) {
-          console.warn("Firebase in-memory persistence fallback:", persistenceError);
+          console.warn("Firebase local persistence fallback:", persistenceError);
+          try { await cloudModules.setPersistence(cloudAuth, cloudModules.browserSessionPersistence); } catch (sessionError) { console.warn("Firebase session persistence fallback:", sessionError); }
         }
         cloudDb = cloudModules.getDatabase(cloudApp);
         cloudReady = true;
@@ -10187,6 +10200,12 @@
         aggro: CARD_ABILITY_EFFECT_TYPES.TAUNT,
         soulCapture: CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE,
         captureEnemyRevive: CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE,
+        clone: CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE,
+        split: CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE,
+        createClone: CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE,
+        summon: CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD,
+        summonUnit: CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD,
+        summonCharacter: CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD,
         triggerCostModifier: CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_MODIFIER,
         triggerPermanentModifier: CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_PERMANENT_MODIFIER,
         aoeTargetCount: CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_TARGET_COUNT,
@@ -10950,6 +10969,7 @@
         getCardElements(card).forEach(element => { elementCounts[element] = (elementCounts[element] || 0) + 1; });
         rarityCounts[card.rarity] = (rarityCounts[card.rarity] || 0) + 1;
       });
+      const identityIds = cards.flatMap(card => [String(card.id), String(card.abilityIdentityId || card.originalCardId || "")]).filter(Boolean);
       return {
         mode: String(mode || "team").toLowerCase(),
         ids,
@@ -10959,7 +10979,7 @@
         elementCounts,
         rarityCounts,
         uniqueElements: THAI_ELEMENTS.filter(element => elementCounts[element] > 0),
-        cardIdSet: new Set(ids),
+        cardIdSet: new Set(identityIds),
         progressByCardId: options && typeof options.progressByCardId === "object" ? options.progressByCardId : {}
       };
     }
@@ -11380,9 +11400,18 @@
               CARD_ABILITY_EFFECT_TYPES.ADAPTIVE_ELEMENT,
               CARD_ABILITY_EFFECT_TYPES.MULTI_ELEMENT_ATTACK,
               CARD_ABILITY_EFFECT_TYPES.CRITICAL_DAMAGE_RATE,
-              CARD_ABILITY_EFFECT_TYPES.DEFENSE_PENETRATION_RATE
+              CARD_ABILITY_EFFECT_TYPES.DEFENSE_PENETRATION_RATE,
+              CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE,
+              CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD
             ].includes(effectType)) {
-              effectTrigger = normalizeBattleTriggerRule(effectType === CARD_ABILITY_EFFECT_TYPES.COUNTER_ATTACK ? { onDamaged:true, repeat:true } : { onOwnAttack:true });
+              const spawnAtStart = [CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE, CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD].includes(effectType);
+              effectTrigger = normalizeBattleTriggerRule(
+                spawnAtStart
+                  ? { onBattleStart:true, repeat:false, triggerOn:"battleStart" }
+                  : effectType === CARD_ABILITY_EFFECT_TYPES.COUNTER_ATTACK
+                    ? { onDamaged:true, repeat:true }
+                    : { onOwnAttack:true }
+              );
             }
 
             // Active Skill แบบนับจำนวนครั้งโจมตี/เหตุการณ์: เก็บไว้ให้ battle engineประมวลผล ไม่ใช้เป็น Passive ทันที
@@ -13922,6 +13951,8 @@
        ================================================================ */
     function buildIndividualTurnBasedCombat(options = {}) {
       const sideKeys = ["player", "enemy"];
+      const battleMode = normalizeAbilityMode(options.mode || "tower");
+      const temporarySpawnCardIds = new Set();
       const clampRate = value => Math.max(-1, Number(value) || 0);
       const maxRounds = Math.max(10, Math.floor(Number(options.maxRounds) || 60));
       const commandOf = side => String(options[`${side}CommandStrategy`] || (side === "player" ? "balanced" : "balanced"));
@@ -14040,6 +14071,9 @@
             statusSerial: 0,
             statusResistanceRules: abilityArray(item.statusResistanceRules).map(rule => ({ ...rule })),
             cardId: cardIdString(item.id || `${side}-${index}`),
+            spawnDepth: Math.max(0, Math.floor(Number(item.spawnDepth) || 0)),
+            spawnKind: String(item.spawnKind || ""),
+            spawnSourceId: String(item.spawnSourceId || ""),
             originalSide: side, originalSlot: slotNumber, originalRow: row, capturedBySide: "", captureOwnerCardId: "", captureUses: {}
           };
         });
@@ -14052,7 +14086,9 @@
           side,
           members,
           frontCount,
+          formationSize,
           formationRule: rule,
+          spawnSerial: 0,
           commandStrategy: commandOf(side),
           targetStrategy: targetOf(side),
           triggers: abilityArray(options[`${side}ActiveTriggers`]).map(normalizeTrigger),
@@ -14072,6 +14108,185 @@
 
       const player = makeTeam("player");
       const enemy = makeTeam("enemy");
+
+      function runtimeIdentityCard(member) {
+        if (!member) return null;
+        const id = String(member.cardId || member.id || "").split("@")[0];
+        return CARD_BY_ID.get(id) || null;
+      }
+
+      function removeRuntimeMember(team, member) {
+        if (!team || !member) return;
+        team.members = team.members.filter(item => item !== member);
+        team.triggers = team.triggers.filter(trigger => String(trigger.sourceCardId) !== String(member.id));
+        team.captureRules = team.captureRules.filter(rule => String(rule.sourceCardId) !== String(member.id));
+        team.abilityRoster = team.abilityRoster.filter(item => String(item && item.id) !== String(member.id));
+      }
+
+      function allocateSpawnSlot(team, policy) {
+        const safePolicy = ["newSlot", "emptySlot", "defeatedSlot", "emptyOrDefeated", "anyAvailable"].includes(String(policy)) ? String(policy) : "emptyOrDefeated";
+        const emptySlot = () => {
+          for (let slot = 1; slot <= Math.max(1, Number(team.formationSize) || 1); slot += 1) {
+            if (!team.members.some(member => Number(member.slot) === slot)) return { slot, replaced:null, kind:"emptySlot" };
+          }
+          return null;
+        };
+        const defeatedSlot = () => {
+          const defeated = team.members.filter(member => member.ko || member.currentHp <= 0).sort((a,b) => a.slot - b.slot)[0];
+          return defeated ? { slot:defeated.slot, replaced:defeated, kind:"defeatedSlot" } : null;
+        };
+        const newSlot = () => ({ slot:Math.max(0, ...team.members.map(member => Number(member.slot) || 0)) + 1, replaced:null, kind:"newSlot" });
+        if (safePolicy === "newSlot") return newSlot();
+        if (safePolicy === "emptySlot") return emptySlot();
+        if (safePolicy === "defeatedSlot") return defeatedSlot();
+        if (safePolicy === "anyAvailable") return emptySlot() || defeatedSlot() || newSlot();
+        return emptySlot() || defeatedSlot();
+      }
+
+      function spawnAbilitiesForRule(rule, identityCard) {
+        if (!rule || rule.canUseAbilities === false || !identityCard) return [];
+        const baseAbilities = rule.type === CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD
+          ? (rule.useBaseAbilities === false ? [] : getCardAbilities(identityCard))
+          : (rule.inheritAbilities === true ? getCardAbilities(identityCard) : []);
+        const extraAbilities = rule.type === CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD
+          ? abilityArray(rule.summonedAbilities)
+          : abilityArray(rule.cloneAbilities);
+        return [...baseAbilities, ...extraAbilities]
+          .filter(ability => ability && typeof ability === "object")
+          .map(ability => ({
+            ...ability,
+            activeIn: abilityArray(ability.activeIn).length ? abilityArray(ability.activeIn).map(String) : [battleMode],
+            condition: ability.condition && typeof ability.condition === "object" ? { ...ability.condition } : {},
+            effects: abilityArray(ability.effects).map(effect => effect && typeof effect === "object" ? ({ ...effect, condition:effect.condition && typeof effect.condition === "object" ? { ...effect.condition } : undefined }) : effect)
+          }));
+      }
+
+      function attachSpawnAbilities(team, member, rule, identityCard) {
+        const abilities = spawnAbilitiesForRule(rule, identityCard);
+        if (!abilities.length) return;
+        const runtimeCard = {
+          ...identityCard,
+          id: String(member.id),
+          abilityIdentityId: String(identityCard.id),
+          originalCardId: String(identityCard.id),
+          name: member.name,
+          power: member.basePower,
+          hp: member.maxHp,
+          defense: member.baseDefense,
+          speed: member.baseSpeed,
+          normalAttackTargetCount: member.normalAttackTargetCount,
+          abilities
+        };
+        CARD_BY_ID.set(String(member.id), runtimeCard);
+        temporarySpawnCardIds.add(String(member.id));
+        const contextIds = [...new Set(team.members.map(item => {
+          if (CARD_BY_ID.has(String(item.id))) return String(item.id);
+          const baseId = String(item.cardId || item.id || "").split("@")[0];
+          return CARD_BY_ID.has(baseId) ? baseId : "";
+        }).filter(Boolean))];
+        const progressByCardId = Object.fromEntries(team.members.map(item => [String(item.id), { level:1, duplicateRank:0, awaken:0 }]));
+        const summary = getTeamAbilitySummary(contextIds, battleMode, { progressByCardId, leaderId:String(member.id) });
+        const triggers = buildTeamBattleTriggerConfigs(contextIds, summary, false)
+          .filter(trigger => String(trigger.sourceCardId) === String(member.id))
+          .map((trigger, index) => normalizeTrigger(trigger, team.triggers.length + index));
+        team.triggers.push(...triggers);
+        team.captureRules.push(...buildTeamCaptureReviveConfigs(summary).filter(item => String(item.sourceCardId) === String(member.id)));
+        team.abilityRoster.push(...buildBattleAbilityRoster(contextIds, summary, false).filter(item => String(item.id) === String(member.id)));
+        member.statusResistanceRules.push(...abilityArray(summary.statusResistanceByCardId && summary.statusResistanceByCardId[String(member.id)]).map(item => ({ ...item })));
+      }
+
+      function createSpawnMember(team, actor, rule, identityCard, slotInfo, spawnIndex) {
+        const isSummon = rule.type === CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD;
+        const sourcePower = isSummon ? getCardPower(identityCard) : actor.basePower;
+        const sourceHp = isSummon ? getCardHp(identityCard) : actor.maxHp;
+        const sourceDefense = isSummon ? getCardDefense(identityCard) : actor.baseDefense;
+        const sourceSpeed = isSummon ? getCardSpeed(identityCard) : actor.baseSpeed;
+        const basePower = rule.basePower !== null && rule.basePower !== undefined ? Math.max(1, Number(rule.basePower)) : Math.max(1, Number(sourcePower) * Math.max(0, Number(rule.powerRate) || 0));
+        const maxHp = rule.baseHp !== null && rule.baseHp !== undefined ? Math.max(1, Number(rule.baseHp)) : Math.max(1, Number(sourceHp) * Math.max(0, Number(rule.hpRate) || 0));
+        const baseDefense = rule.baseDefense !== null && rule.baseDefense !== undefined ? Math.max(0, Number(rule.baseDefense)) : Math.max(0, Number(sourceDefense) * Math.max(0, Number(rule.defenseRate) || 0));
+        const baseSpeed = rule.baseSpeed !== null && rule.baseSpeed !== undefined ? Math.max(1, Math.round(Number(rule.baseSpeed))) : Math.max(1, Math.round(Number(sourceSpeed) * Math.max(0, Number(rule.speedRate) || 0)));
+        const slot = Math.max(1, Number(slotInfo.slot) || 1);
+        const row = slot <= team.frontCount ? "front" : "back";
+        const power = basePower * (row === "back" ? 1 + team.formationRule.backAttackRate : 1);
+        const defense = baseDefense * (row === "front" ? 1 + team.formationRule.frontDefenseRate : 1);
+        team.spawnSerial += 1;
+        const baseId = String(identityCard.id);
+        const runtimeId = `${baseId}@${isSummon ? "SM" : "CL"}${team.side}-${team.spawnSerial}`;
+        const normalAttackTargetCount = Math.max(1, Math.min(5, Math.floor(Number(rule.normalAttackTargetCount) || Number(identityCard.normalAttackTargetCount) || 1)));
+        const attackHits = rule.attackHits !== null && rule.attackHits !== undefined
+          ? Math.max(1, Math.floor(Number(rule.attackHits)))
+          : isSummon
+            ? Math.max(1, Math.floor(Number(identityCard.attackHits || identityCard.normalAttackHits) || attackHitsOf(team.side)))
+            : Math.max(1, Math.floor(Number(actor.attackHits) || attackHitsOf(team.side)));
+        return {
+          id: runtimeId,
+          name: isSummon ? String(identityCard.name || `Summon ${baseId}`) : `${actor.name} · ร่างแยก ${spawnIndex + 1}`,
+          rarity: String(identityCard.rarity || actor.rarity || "N"),
+          elements: getCardElements(identityCard),
+          row, slot, basePower, power, maxHp, currentHp:maxHp, baseDefense, defense, baseSpeed, speed:baseSpeed,
+          normalAttackTargetCount, speedStacks:{}, attackHits, shieldHits:0, initialShieldHits:0,
+          healingRate:isSummon ? healingRateOf(team.side) : actor.healingRate,
+          shieldRecoveryRate:isSummon ? shieldRecoveryRateOf(team.side) : actor.shieldRecoveryRate,
+          criticalRate:isSummon ? criticalRateOf(team.side) : actor.criticalRate,
+          pendingAttackHits:0, pendingCriticalRateChange:0,
+          blockRate:isSummon ? Math.max(0, Number(identityCard.blockRate) || 0) : actor.blockRate,
+          dodgeRate:isSummon ? Math.max(0, Number(identityCard.dodgeRate) || 0) : actor.dodgeRate,
+          damageTakenRate:isSummon ? Number(identityCard.damageTakenRate) || 0 : actor.damageTakenRate,
+          guardTurns:0, timedEffects:[], attackCount:0, damageDealt:0, healingDone:0, shieldCreated:0, shieldConsumed:0,
+          skillActivations:0, totalHits:0, criticalHits:0, blocks:0, dodges:0, ko:false, deathReason:"",
+          reviveMode:"", reviveTurnsRemaining:0, reviveHitLifeRemaining:0, reviveUses:{}, reviveCount:0,
+          tauntTurnsRemaining:0, tauntRoundsRemaining:0, tauntSourceCardId:"", statusEffects:[], statusSerial:0,
+          statusResistanceRules:[], cardId:baseId, spawnDepth:Math.max(0, Number(actor.spawnDepth) || 0) + 1,
+          spawnKind:isSummon ? "summon" : "clone", spawnSourceId:String(actor.id), originalSide:team.side,
+          originalSlot:slot, originalRow:row, capturedBySide:"", captureOwnerCardId:"", captureUses:{}
+        };
+      }
+
+      function applySpawnRules(rules, ownerTeam, defenderTeam, actor, currentTarget, turnIndex) {
+        const events = [];
+        abilityArray(rules).forEach((rawRule, ruleIndex) => {
+          const rule = rawRule && typeof rawRule === "object" ? rawRule : {};
+          const type = normalizeAbilityEffectType(rule.type);
+          const isSummon = type === CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD;
+          if (![CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE, CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD].includes(type)) return;
+          const maxDepth = Math.max(1, Math.min(10, Math.floor(Number(rule.maxSpawnDepth) || 1)));
+          if (Math.max(0, Number(actor.spawnDepth) || 0) >= maxDepth) {
+            events.push({ status:"depthLimit", type, sourceCardId:actor.id, sourceName:actor.name, maxSpawnDepth:maxDepth });
+            return;
+          }
+          const identityCard = isSummon ? CARD_BY_ID.get(cardIdString(rule.summonCardId)) : runtimeIdentityCard(actor);
+          if (!identityCard) {
+            events.push({ status:"missingCard", type, sourceCardId:actor.id, sourceName:actor.name, summonCardId:String(rule.summonCardId || "") });
+            return;
+          }
+          const count = Math.max(1, Math.min(20, Math.floor(Number(rule.count) || 1)));
+          for (let index = 0; index < count; index += 1) {
+            if (Math.random() > Math.max(0, Math.min(1, Number(rule.successRate) || 0))) {
+              events.push({ status:"failed", type, sourceCardId:actor.id, sourceName:actor.name, cardId:String(identityCard.id) });
+              continue;
+            }
+            const slotInfo = allocateSpawnSlot(ownerTeam, rule.slotPolicy);
+            if (!slotInfo) {
+              events.push({ status:"noSlot", type, sourceCardId:actor.id, sourceName:actor.name, slotPolicy:String(rule.slotPolicy || "") });
+              continue;
+            }
+            if (slotInfo.replaced) removeRuntimeMember(ownerTeam, slotInfo.replaced);
+            const member = createSpawnMember(ownerTeam, actor, { ...rule, type }, identityCard, slotInfo, index);
+            ownerTeam.members.push(member);
+            attachSpawnAbilities(ownerTeam, member, { ...rule, type }, identityCard);
+            events.push({
+              status:"success", type, spawnKind:member.spawnKind, sourceCardId:actor.id, sourceName:actor.name,
+              targetCardId:member.id, targetName:member.name, cardId:member.cardId, slot:member.slot, row:member.row,
+              slotPolicy:String(rule.slotPolicy || "emptyOrDefeated"), usedSlotKind:slotInfo.kind,
+              replacedCardId:slotInfo.replaced && slotInfo.replaced.id || "", replacedName:slotInfo.replaced && slotInfo.replaced.name || "",
+              power:member.power, hp:member.currentHp, maxHp:member.maxHp, defense:member.defense, speed:member.speed,
+              normalAttackTargetCount:member.normalAttackTargetCount, attackHits:member.attackHits,
+              canUseAbilities:rule.canUseAbilities !== false, turnIndex, ruleIndex
+            });
+          }
+        });
+        return events;
+      }
       const initialMemberState = member => ({
         id: member.id, cardId: member.cardId || member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
         normalAttackTargetCount: member.normalAttackTargetCount,
@@ -14572,6 +14787,7 @@
           fired, details, names: fired.map(trigger => trigger.name),
           attackTargetCount: Math.max(0, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 0), ...abilityArray(trigger.multiElementAttacks).map(rule=>Math.floor(Number(rule.targetCount)||0)), ...abilityArray(trigger.followUpAttacks).map(rule=>Math.floor(Number(rule.targetCount)||0))), 0))),
           reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
+          spawnRules: fired.flatMap(trigger => abilityArray(trigger.spawnRules).map(rule => ({ ...rule }))),
           speedTargetRules: fired.flatMap(trigger => abilityArray(trigger.speedTargetRules).map(rule => ({ ...rule }))),
           tauntRules: fired.flatMap(trigger => abilityArray(trigger.tauntRules).map(rule => ({ ...rule }))),
           healTargetRules: fired.flatMap(trigger => abilityArray(trigger.healTargetRules).map(rule => ({ ...rule }))),
@@ -14950,6 +15166,7 @@
           reviveMode: member.reviveMode, reviveTurnsRemaining: member.reviveTurnsRemaining,
           reviveHitLifeRemaining: member.reviveHitLifeRemaining, reviveCount: member.reviveCount, deathReason: member.deathReason,
           tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0, capturedBySide: member.capturedBySide || "", cardId: member.cardId || member.id,
+          spawnDepth: member.spawnDepth || 0, spawnKind: member.spawnKind || "", spawnSourceId: member.spawnSourceId || "",
           statusEffects: compactBattleStatuses(member).map(effect => ({ status:effect.status, label:effect.label, icon:statusEmojiText(effect), text:statusIconText(effect) })),
           damage: member.damageDealt, healing: member.healingDone, shieldCreated: member.shieldCreated,
           skillActivations: member.skillActivations, attacks: member.attackCount, totalHits: member.totalHits,
@@ -15015,6 +15232,7 @@
         applyCostChanges(ownerTeam, activation.permanentTriggerCostChanges, true);
         applyCostChanges(ownerTeam, activation.triggerCostChanges, false);
         const reviveEvents = applyReviveRules(activation.reviveRules, ownerTeam, defenderTeam, actor, currentTarget);
+        const spawnEvents = applySpawnRules(activation.spawnRules, ownerTeam, defenderTeam, actor, currentTarget, turnIndex);
         const statusApplyEvents = applyAttackStatusRules(activation.statusApplyRules, ownerTeam, defenderTeam, actor, [], turnIndex);
         finishTriggers(ownerTeam, actor, activation);
         const selfShieldChange = teamShield(ownerTeam) - alliedShieldBefore;
@@ -15075,6 +15293,7 @@
           actorRemaining: actor.currentHp,
           targetRemaining: currentTarget && currentTarget.currentHp || 0,
           reviveEvents,
+          spawnEvents,
           captureEvents: [],
           captureReleaseEvents: [],
           speedEvents,
@@ -15421,6 +15640,7 @@
           applyCostChanges(team, activation.permanentTriggerCostChanges, true);
           applyCostChanges(team, activation.triggerCostChanges, false);
           const reviveEvents = applyReviveRules(activation.reviveRules, team, defenderTeam, actor, target);
+          const spawnEvents = applySpawnRules(activation.spawnRules, team, defenderTeam, actor, target, turnIndex);
           finishTriggers(team, actor, activation);
           const timedReviveExpired = tickReviveTurn(actor);
 
@@ -15450,7 +15670,7 @@
             enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activation.nextAttackCriticalRate,
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
             actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
-            reviveEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, counterEvents,
+            reviveEvents, spawnEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, counterEvents,
             followUpEvents: abilityArray(activation.followUpAttacks).map(rule=>({powerRate:rule.powerRate,hits:rule.hits,targetCount:rule.targetCount})),
             multiElementEvents: abilityArray(activation.multiElementAttacks).map(rule=>({attackElements:rule.attackElements,hitsPerElement:rule.hitsPerElement,targetCount:rule.targetCount})),
             adaptiveElement: activation.adaptiveElement, defensePenetrationRate:activation.defensePenetrationRate, criticalDamageRate:activation.criticalDamageRate,
@@ -15476,6 +15696,7 @@
       const playerMembers = player.members.map(summarizeMember);
       const enemyMembers = enemy.members.map(summarizeMember);
       const mostUsed = team => Object.entries(team.skillUsage).sort((a,b)=>b[1]-a[1])[0] || ["-",0];
+      temporarySpawnCardIds.forEach(id => CARD_BY_ID.delete(String(id)));
       return {
         winner:isDefeated(enemy)?"player":"enemy", playerFirst:firstSide==="player", turns,
         rounds:turns.length?Math.max(...turns.map(turn=>Number(turn.round)||0)):0,
@@ -15809,8 +16030,12 @@
       return stage.querySelector(`.battle-unit[data-battle-side="${side}"][data-battle-card-id="${safeId}"]`);
     }
 
+    function runtimeBaseCardId(cardId) {
+      return String(cardId || "").split("@")[0];
+    }
+
     function battleCardImage(cardId) {
-      const baseId = String(cardId || "").split("@C")[0];
+      const baseId = runtimeBaseCardId(cardId);
       const card = CARD_BY_ID.get(baseId);
       if (card) return getCardImage(card);
       const boss = typeof getWorldBossByAnyId === "function" ? getWorldBossByAnyId(baseId) : null;
@@ -15822,7 +16047,7 @@
       if (node || !stage || !state) return node;
       const stack = stage.querySelector(side === "player" ? "#battlePlayerModels, #arenaPlayerModels, #worldBossPlayerModels" : "#battleEnemyModels, #arenaEnemyModels, #worldBossEnemyModels");
       if (!stack) return null;
-      const baseId = String(state.cardId || state.id || "").split("@C")[0];
+      const baseId = runtimeBaseCardId(state.cardId || state.id);
       const bossCard = typeof getWorldBossByAnyId === "function" ? worldBossAsBattleCard(getWorldBossByAnyId(baseId)) : null;
       const card = CARD_BY_ID.get(baseId) || bossCard || { id:baseId, name:state.name || baseId, rarity:"N" };
       const holder = document.createElement("div");
@@ -15831,7 +16056,7 @@
       if (!node) return null;
       node.dataset.battleCardId = String(state.id);
       node.dataset.battleSide = side;
-      node.dataset.dynamicCapture = "true";
+      node.dataset.dynamicRuntimeUnit = "true";
       stack.appendChild(node);
       return node;
     }
@@ -15930,7 +16155,7 @@
 
     function getBattleInfoCard(cardId, fallbackName = "") {
       const rawId = String(cardId || "");
-      const baseId = rawId.split("@C")[0];
+      const baseId = runtimeBaseCardId(rawId);
       const card = CARD_BY_ID.get(baseId);
       const boss = !card && typeof getWorldBossByAnyId === "function" ? getWorldBossByAnyId(baseId) : null;
       return {
@@ -16207,6 +16432,18 @@
           window.setTimeout(()=>node.classList.remove("is-reviving"),800);
         }
       });
+      abilityArray(turn.spawnEvents).forEach(event => {
+        if (event.status !== "success") return;
+        const state = abilityArray(turn.memberStates && turn.memberStates[turn.side]).find(item => String(item.id) === String(event.targetCardId))
+          || { id:event.targetCardId, cardId:event.cardId, name:event.targetName, maxHp:event.maxHp, currentHp:event.hp, speed:event.speed, row:event.row, slot:event.slot };
+        const node = ensureBattleUnitNode(stage, turn.side, state);
+        if (node) {
+          node.classList.remove("is-dead");
+          node.classList.add("is-reviving");
+          floatBattleText(node, event.spawnKind === "summon" ? "SUMMON" : "CLONE", "revive");
+          window.setTimeout(()=>node.classList.remove("is-reviving"),900);
+        }
+      });
       abilityArray(turn.captureEvents).forEach(event => {
         if (event.status !== "success") return;
         const oldNode = battleUnitNode(stage, targetSide, event.cardId || event.targetCardId);
@@ -16264,6 +16501,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const remaining = turn.side === "player" ? turn.enemyRemaining : turn.playerRemaining;
         const reviveText = abilityArray(turn.reviveEvents).length ? ` • ✨ คืนชีพ ${turn.reviveEvents.map(item=>item.targetName).join(", ")}` : "";
         const speedText = abilityArray(turn.speedEvents).length ? ` • SPD ${turn.speedEvents.map(item=>`${item.targetName} ${item.change>=0?"+":""}${item.change}`).join(", ")}` : "";
+        const spawnSuccess = abilityArray(turn.spawnEvents).filter(item => item.status === "success");
+        const spawnText = spawnSuccess.length ? ` • ${spawnSuccess.map(item => item.spawnKind === "summon" ? `🔮 ซัมม่อน ${item.targetName}` : `👥 แยกร่าง ${item.targetName}`).join(", ")}` : "";
         const captureText = abilityArray(turn.captureEvents).length ? ` • 👻 ${turn.captureEvents.map(item=>item.status==="success"?`ชิงร่าง ${item.targetName}`:`ชิงร่าง ${item.targetName} ล้มเหลว`).join(", ")}` : "";
         const captureReleaseText = abilityArray(turn.captureReleaseEvents).length ? ` • ↩ คืนศพ ${turn.captureReleaseEvents.map(item=>item.targetName).join(", ")}` : "";
         const lifeText = turn.hitLifeConsumed ? ` • ตัดชีวิต ${turn.hitLifeConsumed} HIT${turn.hitLifeExpired ? " และหมดสภาพ" : ""}` : "";
@@ -16276,7 +16515,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           result.textContent = `รอบ ${turn.round} • ${attackerLabel} ถูก ${abilityArray(turn.statusEvents)[0]?.statusLabel || "สถานะผิดปกติ"} จึงข้ามเทิร์น${statusText} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         } else result.textContent = turn.command === "guard"
           ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
-          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${spawnText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         beautifyBattleResult(result);
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
@@ -16514,6 +16753,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             enemyShieldHitsChange: 0,
             shieldTargetRules: [],
             reviveRules: [],
+            spawnRules: [],
             speedTargetRules: [],
             tauntRules: [],
             healingRateChange: 0,
@@ -16639,6 +16879,41 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             else group.restoreShieldHits += Math.round(value);
             group.shieldTargetRules.push({ ...runtimeTargetRule, value: Math.round(value) });
             break;
+          case CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE:
+          case CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD: {
+            const isSummon = effectType === CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD;
+            const slotPolicyRaw = String(effect.slotPolicy || effect.spawnSlotPolicy || "emptyOrDefeated");
+            const slotPolicy = ["newSlot", "emptySlot", "defeatedSlot", "emptyOrDefeated", "anyAvailable"].includes(slotPolicyRaw)
+              ? slotPolicyRaw : "emptyOrDefeated";
+            const cloneAbilities = abilityArray(effect.cloneAbilities || effect.spawnAbilities).filter(item => item && typeof item === "object").map(item => ({ ...item }));
+            const summonedAbilities = abilityArray(effect.summonedAbilities || effect.summonAbilities || effect.spawnAbilities).filter(item => item && typeof item === "object").map(item => ({ ...item }));
+            group.spawnRules.push({
+              type: effectType,
+              sourceCardId: sourceRuntimeId,
+              sourceAbilityName: String(record.ability && record.ability.name || ""),
+              count: Math.max(1, Math.min(20, Math.floor(Number(effect.count ?? effect.cloneCount ?? effect.summonCount) || 1))),
+              slotPolicy,
+              summonCardId: isSummon ? cardIdString(effect.summonCardId ?? effect.cardId ?? effect.targetCardId) : "",
+              successRate: normalizeAbilityChance(effect.successRate ?? effect.chance ?? 1, 1),
+              powerRate: Math.max(0, Number(effect.powerRate ?? effect.basePowerRate ?? 1) || 0),
+              hpRate: Math.max(0, Number(effect.hpRate ?? effect.baseHpRate ?? 1) || 0),
+              defenseRate: Math.max(0, Number(effect.defenseRate ?? effect.baseDefenseRate ?? 1) || 0),
+              speedRate: Math.max(0, Number(effect.speedRate ?? effect.baseSpeedRate ?? 1) || 0),
+              basePower: Number.isFinite(Number(effect.basePower)) ? Math.max(1, Number(effect.basePower)) : null,
+              baseHp: Number.isFinite(Number(effect.baseHp)) ? Math.max(1, Number(effect.baseHp)) : null,
+              baseDefense: Number.isFinite(Number(effect.baseDefense)) ? Math.max(0, Number(effect.baseDefense)) : null,
+              baseSpeed: Number.isFinite(Number(effect.baseSpeed)) ? Math.max(1, Number(effect.baseSpeed)) : null,
+              normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.normalAttackTargetCount ?? effect.attackTargetCount) || 1))),
+              attackHits: Number.isFinite(Number(effect.attackHits)) ? Math.max(1, Math.floor(Number(effect.attackHits))) : null,
+              canUseAbilities: effect.canUseAbilities !== undefined ? effect.canUseAbilities !== false : isSummon,
+              inheritAbilities: effect.inheritAbilities === true,
+              useBaseAbilities: effect.useBaseAbilities !== false,
+              cloneAbilities,
+              summonedAbilities,
+              maxSpawnDepth: Math.max(1, Math.min(10, Math.floor(Number(effect.maxSpawnDepth) || 1)))
+            });
+            break;
+          }
           case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_TARGET_COUNT:
             group.attackTargetCount = Math.max(group.attackTargetCount, Math.max(1, Math.min(5, Math.floor(value || effect.targetCount || 1))));
             break;
@@ -16878,6 +17153,16 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         hitTargetRules: abilityArray(item.hitTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         shieldTargetRules: abilityArray(item.shieldTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         reviveRules: abilityArray(item.reviveRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), hpRate: Math.max(.01, Number(rule && rule.hpRate) || .3), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), surviveHits: Math.max(0, Math.floor(Number(rule && rule.surviveHits) || 0)), maxTriggers: Math.max(1, Math.floor(Number(rule && rule.maxTriggers) || 1)), reviveAttackHits: Math.max(0, Math.floor(Number(rule && rule.reviveAttackHits) || 0)), reviveAttackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(rule && rule.reviveAttackTargetCount) || 0))) })),
+        spawnRules: abilityArray(item.spawnRules).map(rule => ({
+          ...rule,
+          type: normalizeAbilityEffectType(rule && rule.type),
+          count: Math.max(1, Math.min(20, Math.floor(Number(rule && rule.count) || 1))),
+          slotPolicy: ["newSlot", "emptySlot", "defeatedSlot", "emptyOrDefeated", "anyAvailable"].includes(String(rule && rule.slotPolicy)) ? String(rule.slotPolicy) : "emptyOrDefeated",
+          normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(rule && rule.normalAttackTargetCount) || 1))),
+          maxSpawnDepth: Math.max(1, Math.min(10, Math.floor(Number(rule && rule.maxSpawnDepth) || 1))),
+          cloneAbilities: abilityArray(rule && rule.cloneAbilities).map(ability => ({ ...ability })),
+          summonedAbilities: abilityArray(rule && rule.summonedAbilities).map(ability => ({ ...ability }))
+        })),
         speedTargetRules: abilityArray(item.speedTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0), maxStacks: Math.max(1, Math.floor(Number(rule && rule.maxStacks) || 1)) })).filter(rule => rule.value),
         tauntRules: abilityArray(item.tauntRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), durationRounds: Math.max(0, Math.floor(Number(rule && rule.durationRounds) || 0)) })),
         statusApplyRules: abilityArray(item.statusApplyRules).map(rule => ({ ...rule })),
@@ -16888,7 +17173,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.statusApplyRules).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.spawnRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.statusApplyRules).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
     }
 
 
@@ -17552,7 +17837,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const aiDefense = Math.max(0, playerDefense * scale * (.97 + Math.random() * .06));
       const attackHits = Math.max(1, Math.round(playerTraits.attackHits + (Math.random() < .22 ? (Math.random() < .5 ? -1 : 1) : 0)));
       const shieldHits = Math.max(0, Math.round(playerTraits.shieldHits + (Math.random() < .18 ? (Math.random() < .5 ? -1 : 1) : 0)));
-      const shuffled = CARDS.slice().sort(() => Math.random() - .5);
+      const shuffled = CARDS.filter(card => String(card.rarity || "").toUpperCase() !== "GOD").sort(() => Math.random() - .5);
       const chosen = shuffled.slice(0, CONFIG.arenaTeamSlots);
       const slotCount = Math.max(1, chosen.length);
       const cards = chosen.map((card, index) => {
@@ -19777,10 +20062,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function getBattleEnemyCard(stage) {
-      if (!CARDS.length) return null;
+      const aiCards = CARDS.filter(card => String(card.rarity || "").toUpperCase() !== "GOD");
+      if (!aiCards.length) return null;
       const targetOrder = Math.min(10, Math.max(0, Math.floor((stage - 1) / 2)));
-      const candidates = CARDS.filter(card => getRarity(card).order >= targetOrder - 1 && getRarity(card).order <= targetOrder + 2);
-      const pool = candidates.length ? candidates : CARDS;
+      const candidates = aiCards.filter(card => getRarity(card).order >= targetOrder - 1 && getRarity(card).order <= targetOrder + 2);
+      const pool = candidates.length ? candidates : aiCards;
       return pool[(stage * 13 + 7) % pool.length];
     }
 
