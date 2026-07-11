@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-11-split-summon-runtime-v96">
-  <title>Anime Card Collection · Split & Summon Runtime v96</title>
+  <meta name="gacha-app-build" content="2026-07-11-worldboss-fullscreen-cutscene-v97">
+  <title>Anime Card Collection · Runtime v97 · Fullscreen MP4 Cutscene</title>
   <style>
     :root {
       color-scheme: dark;
@@ -2012,6 +2012,119 @@
       font-weight: 1000;
       background: rgba(3,5,13,.68);
       backdrop-filter: blur(10px);
+    }
+
+
+    /* v97: ไฟล์คัทซีน .mp4 แสดงวิดีโอเต็มจอ และย้ายรายละเอียดไว้แท็บล่าง */
+    .active-skill-cutscene.video-fullscreen {
+      display: block;
+      padding: 0;
+      background: #000;
+    }
+    .active-skill-cutscene.video-fullscreen .active-skill-media {
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 1;
+      filter: none;
+      background: #000;
+    }
+    .active-skill-cutscene.video-fullscreen .active-skill-image { display: none !important; }
+    .active-skill-cutscene.video-fullscreen .active-skill-backdrop {
+      z-index: 1;
+      background: linear-gradient(to top, rgba(2,4,12,.97) 0%, rgba(2,4,12,.78) 19%, rgba(2,4,12,.22) 38%, transparent 58%);
+      backdrop-filter: none;
+      pointer-events: none;
+    }
+    .active-skill-cutscene.video-fullscreen::before,
+    .active-skill-cutscene.video-fullscreen::after { display: none; }
+    .active-skill-cutscene.video-fullscreen .active-skill-panel {
+      position: absolute;
+      z-index: 3;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      min-height: 0;
+      display: block;
+      border: 0;
+      border-top: 1px solid color-mix(in srgb, var(--active-accent) 52%, rgba(255,255,255,.14));
+      border-radius: 26px 26px 0 0;
+      padding: clamp(15px, 2.6vw, 28px) clamp(18px, 4vw, 56px) max(clamp(15px, 2.6vw, 28px), env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(5,8,18,.58), rgba(3,5,13,.94));
+      box-shadow: 0 -22px 70px rgba(0,0,0,.48), 0 -1px 34px color-mix(in srgb, var(--active-accent) 18%, transparent);
+      backdrop-filter: blur(14px);
+      animation: active-skill-bottom-tab-in .32s cubic-bezier(.2,.84,.22,1) both;
+    }
+    .active-skill-cutscene.video-fullscreen .active-skill-card { display: none; }
+    .active-skill-cutscene.video-fullscreen .active-skill-copy {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, auto);
+      grid-template-areas:
+        "kicker hit"
+        "title hit"
+        "source hit"
+        "quote hit";
+      column-gap: clamp(18px, 4vw, 54px);
+      align-items: end;
+    }
+    .active-skill-cutscene.video-fullscreen .active-skill-kicker { grid-area: kicker; margin-bottom: 5px; }
+    .active-skill-cutscene.video-fullscreen .active-skill-title {
+      grid-area: title;
+      font-size: clamp(1.65rem, 4.8vw, 4.2rem);
+      line-height: .92;
+    }
+    .active-skill-cutscene.video-fullscreen .active-skill-source { grid-area: source; margin-top: 8px; }
+    .active-skill-cutscene.video-fullscreen .active-skill-quote {
+      grid-area: quote;
+      max-width: 880px;
+      margin-top: 7px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .active-skill-cutscene.video-fullscreen .active-skill-hit-row {
+      grid-area: hit;
+      align-self: center;
+      justify-content: flex-end;
+      margin: 0;
+      max-width: min(48vw, 660px);
+    }
+    .active-skill-cutscene.video-fullscreen .active-skill-effect-list {
+      justify-content: flex-end;
+      max-height: 78px;
+      overflow: hidden;
+    }
+    @keyframes active-skill-bottom-tab-in {
+      from { opacity: 0; transform: translateY(100%); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 760px) {
+      .active-skill-cutscene.video-fullscreen .active-skill-panel {
+        border-radius: 20px 20px 0 0;
+        padding: 13px 14px max(13px, env(safe-area-inset-bottom));
+      }
+      .active-skill-cutscene.video-fullscreen .active-skill-copy {
+        grid-template-columns: 1fr;
+        grid-template-areas: "kicker" "title" "source" "quote" "hit";
+        gap: 0;
+      }
+      .active-skill-cutscene.video-fullscreen .active-skill-title { font-size: clamp(1.35rem, 8vw, 2.7rem); }
+      .active-skill-cutscene.video-fullscreen .active-skill-source { font-size: .78rem; }
+      .active-skill-cutscene.video-fullscreen .active-skill-quote { font-size: .7rem; -webkit-line-clamp: 1; }
+      .active-skill-cutscene.video-fullscreen .active-skill-hit-row {
+        justify-content: flex-start;
+        max-width: 100%;
+        margin-top: 9px;
+      }
+      .active-skill-cutscene.video-fullscreen .active-skill-hit-badge { padding: 7px 9px; }
+      .active-skill-cutscene.video-fullscreen .active-skill-effect-list {
+        justify-content: flex-start;
+        max-height: 54px;
+      }
     }
 
     /* เพิ่มโดยอลิซ: รายงานจำนวนฮิตหลังจบไฟต์ */
@@ -15798,7 +15911,7 @@
       const screen = document.getElementById("activeSkillCutscene");
       if (screen) {
         screen.classList.add("hidden");
-        screen.classList.remove("player-side", "enemy-side");
+        screen.classList.remove("player-side", "enemy-side", "video-fullscreen");
       }
       const done = activeSkillCutsceneFinish;
       activeSkillCutsceneFinish = null;
@@ -15856,8 +15969,10 @@
 
       screen.style.setProperty("--active-accent", config.accent);
       screen.style.setProperty("--active-accent-2", config.accent2);
-      screen.classList.remove("hidden", "player-side", "enemy-side");
+      const isMp4Cutscene = /\.mp4(?:$|[?#])/i.test(String(config.video || ""));
+      screen.classList.remove("hidden", "player-side", "enemy-side", "video-fullscreen");
       screen.classList.add(side === "enemy" ? "enemy-side" : "player-side");
+      if (isMp4Cutscene) screen.classList.add("video-fullscreen");
       if (kickerNode) kickerNode.textContent = config.kicker;
       if (titleNode) titleNode.textContent = config.title || detail.name;
       if (sourceNode) sourceNode.textContent = `${sourceName} • ${side === "enemy" ? "ฝ่ายตรงข้าม" : "ฝ่ายคุณ"}`;
@@ -15910,6 +16025,7 @@
         video.onended = finishActiveSkillCutscene;
         video.onerror = () => {
           stopActiveSkillCutsceneMedia();
+          screen.classList.remove("video-fullscreen");
           if (image) image.classList.toggle("hidden", !sourceImage);
           useStaticTimer();
         };
