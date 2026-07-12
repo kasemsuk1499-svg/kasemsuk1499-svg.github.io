@@ -22,7 +22,7 @@ ACC_REGISTER_CARD({
     kicker: "The Secluded Ice Princess",
     quote: "จากนี้ไม่ต้องพยายามอยู่คนเดียวแล้วนะ วิล ฉันจะอยู่ข้างนายเอง",
     subtitle: "Albis Vina",
-    video: "card/3002/3002.mp4",
+    video: "card/3002/elfa.mp4",
     revealKicker: "Albis Vina",
     revealTitle: "EX เอลฟาเรีย",
     accent: "#8adaf5",
