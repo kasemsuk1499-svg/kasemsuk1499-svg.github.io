@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-12-active-clone-limit-v106">
-  <title>Anime Card Collection · Runtime v106 · Active Clone Limit</title>
+  <meta name="gacha-app-build" content="2026-07-12-clone-front-of-source-v107">
+  <title>Anime Card Collection · Runtime v107 · Clone Front Of Source</title>
   <style>
     :root {
       color-scheme: dark;
@@ -6686,6 +6686,89 @@
     #arenaView .fighter.player .battle-row-line.front { align-self: end; }
     #battleView .fighter.player .battle-row-line.back,
     #arenaView .fighter.player .battle-row-line.back { align-self: start; }
+
+
+    /* v107 · ร่างแยกอยู่ด้านหน้าของร่างต้นและเรียงแนวนอน
+       ไม่ผูกกับตำแหน่งแนวหน้าของทีม และไม่ append ลงท้าย battle stack */
+    .battle-source-formation {
+      position: relative;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: max-content;
+      overflow: visible;
+      isolation: isolate;
+    }
+
+    .battle-source-formation > .battle-model-card {
+      position: relative;
+      z-index: 5;
+    }
+
+    .battle-source-clone-lane {
+      position: absolute;
+      z-index: 12;
+      left: 50%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: clamp(4px, .55vw, 9px);
+      width: max-content;
+      max-width: min(82vw, 880px);
+      overflow: visible;
+      pointer-events: none;
+      transform: translateX(-50%);
+    }
+
+    #battleView .fighter.player .battle-source-clone-lane,
+    #arenaView .fighter.player .battle-source-clone-lane,
+    #worldBossView .fighter.player .battle-source-clone-lane {
+      bottom: calc(100% + clamp(8px, 1.2vh, 16px));
+    }
+
+    #battleView .fighter.enemy .battle-source-clone-lane,
+    #arenaView .fighter.enemy .battle-source-clone-lane,
+    #worldBossView .fighter.enemy .battle-source-clone-lane {
+      top: calc(100% + clamp(8px, 1.2vh, 16px));
+      align-items: flex-start;
+    }
+
+    #battleView .battle-source-clone-lane .battle-model-card,
+    #arenaView .battle-source-clone-lane .battle-model-card,
+    #worldBossView .battle-source-clone-lane .battle-model-card {
+      width: clamp(54px, 6.3vw, 88px) !important;
+      margin: 0 !important;
+      flex: 0 0 auto;
+      --model-lift: 0px !important;
+      --model-tilt: 0deg !important;
+      --row-offset: 0px !important;
+      --row-scale: 1 !important;
+      pointer-events: auto;
+      transform: none !important;
+      box-shadow: 0 12px 28px rgba(0,0,0,.42), 0 0 18px rgba(92,232,255,.18);
+    }
+
+    .battle-source-clone-lane .battle-row-badge { display: none; }
+    .battle-source-clone-lane .battle-model-card span {
+      left: 4px !important;
+      right: 4px !important;
+      bottom: 4px !important;
+      padding: 3px 4px !important;
+      font-size: clamp(.42rem, .55vw, .56rem) !important;
+    }
+
+    .battle-source-clone-lane .battle-model-card.is-acting {
+      transform: translateY(-7px) scale(1.08) !important;
+    }
+
+    @media (max-width: 760px) {
+      .battle-source-clone-lane { gap: 3px; max-width: 94vw; }
+      #battleView .battle-source-clone-lane .battle-model-card,
+      #arenaView .battle-source-clone-lane .battle-model-card,
+      #worldBossView .battle-source-clone-lane .battle-model-card {
+        width: clamp(46px, 13vw, 66px) !important;
+      }
+    }
 
     .battle-transfer-toast {
       width: min(680px, 92%) !important;
@@ -15182,7 +15265,9 @@
         maxHp: member.maxHp, currentHp: member.currentHp, shieldHits: member.shieldHits, ko: false,
         reviveMode: "", reviveTurnsRemaining: 0, reviveHitLifeRemaining: 0,
         tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0,
-        statusEffects: []
+        statusEffects: [],
+        spawnKind: member.spawnKind || "", spawnSourceId: member.spawnSourceId || "",
+        spawnRootSourceId: member.spawnRootSourceId || "", spawnGroupKey: member.spawnGroupKey || ""
       });
       const playerInitialMembers = player.members.map(initialMemberState);
       const enemyInitialMembers = enemy.members.map(initialMemberState);
@@ -16091,7 +16176,9 @@
           tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0,
           statusEffects: compactBattleStatuses(member).map(effect => ({ status:effect.status, label:effect.label, icon:statusEmojiText(effect), text:statusIconText(effect), turnsRemaining:effect.turnsRemaining, attacksRemaining:effect.attacksRemaining, hitCounter:effect.hitCounter, chainAfterHits:effect.chainAfterHits })),
           statusControlled: activeStatusEffects(member).some(effect => ["stun","freeze","shock","sleep"].includes(effect.status)),
-          capturedBySide: member.capturedBySide || "", originalSide: member.originalSide || ""
+          capturedBySide: member.capturedBySide || "", originalSide: member.originalSide || "",
+          spawnKind: member.spawnKind || "", spawnSourceId: member.spawnSourceId || "",
+          spawnRootSourceId: member.spawnRootSourceId || "", spawnGroupKey: member.spawnGroupKey || ""
         });
         return { player: player.members.map(snap), enemy: enemy.members.map(snap) };
       }
@@ -16992,22 +17079,85 @@
       return boss ? getWorldBossImage(boss) : "";
     }
 
+    function battleSpawnAnchorId(state) {
+      return String(state && (state.spawnRootSourceId || state.spawnSourceId) || "");
+    }
+
+    function cleanupBattleSourceFormation(formation) {
+      if (!formation || !formation.classList || !formation.classList.contains("battle-source-formation")) return;
+      const lane = formation.querySelector(".battle-source-clone-lane");
+      if (lane && lane.children.length) return;
+      const sourceNode = Array.from(formation.children).find(child => child.classList && child.classList.contains("battle-model-card"));
+      const parent = formation.parentNode;
+      if (sourceNode && parent) parent.insertBefore(sourceNode, formation);
+      formation.remove();
+    }
+
+    function removeBattleRuntimeUnitNode(node) {
+      if (!node) return;
+      const formation = node.closest && node.closest(".battle-source-formation");
+      node.remove();
+      if (formation) cleanupBattleSourceFormation(formation);
+    }
+
+    function ensureBattleSourceCloneLane(stage, side, state) {
+      const anchorId = battleSpawnAnchorId(state);
+      if (!stage || !anchorId) return null;
+      const sourceNode = battleUnitNode(stage, side, anchorId);
+      if (!sourceNode || sourceNode.dataset.spawnKind === "clone") return null;
+      let formation = sourceNode.closest(".battle-source-formation");
+      if (!formation || String(formation.dataset.spawnAnchorId || "") !== anchorId) {
+        const parent = sourceNode.parentNode;
+        if (!parent) return null;
+        formation = document.createElement("div");
+        formation.className = `battle-source-formation ${side}`;
+        formation.dataset.spawnAnchorId = anchorId;
+        parent.insertBefore(formation, sourceNode);
+        const lane = document.createElement("div");
+        lane.className = "battle-source-clone-lane";
+        lane.dataset.spawnAnchorId = anchorId;
+        formation.appendChild(lane);
+        formation.appendChild(sourceNode);
+      }
+      return formation.querySelector(".battle-source-clone-lane");
+    }
+
     function ensureBattleUnitNode(stage, side, state) {
       let node = battleUnitNode(stage, side, state && state.id);
-      if (node || !stage || !state) return node;
+      if (!stage || !state) return node;
+      const isDeadClone = String(state.spawnKind || "") === "clone" && Boolean(state.ko || Number(state.currentHp) <= 0);
+      if (isDeadClone) {
+        if (node) removeBattleRuntimeUnitNode(node);
+        return null;
+      }
+      if (node) return node;
       const stack = stage.querySelector(side === "player" ? "#battlePlayerModels, #arenaPlayerModels, #worldBossPlayerModels" : "#battleEnemyModels, #arenaEnemyModels, #worldBossEnemyModels");
       if (!stack) return null;
       const baseId = runtimeBaseCardId(state.cardId || state.id);
       const bossCard = typeof getWorldBossByAnyId === "function" ? worldBossAsBattleCard(getWorldBossByAnyId(baseId)) : null;
       const card = CARD_BY_ID.get(baseId) || bossCard || { id:baseId, name:state.name || baseId, rarity:"N" };
       const holder = document.createElement("div");
-      holder.innerHTML = battleModelHTML(card, stack.children.length, side === "enemy", Math.max(1, stack.children.length + 1), state.row || "front", state.slot || stack.children.length + 1);
+      holder.innerHTML = battleModelHTML(card, stack.querySelectorAll(".battle-unit").length, side === "enemy", Math.max(1, stack.querySelectorAll(".battle-unit").length + 1), state.row || "front", state.slot || stack.querySelectorAll(".battle-unit").length + 1);
       node = holder.firstElementChild;
       if (!node) return null;
       node.dataset.battleCardId = String(state.id);
       node.dataset.battleSide = side;
       node.dataset.dynamicRuntimeUnit = "true";
-      stack.appendChild(node);
+      node.dataset.spawnKind = String(state.spawnKind || "");
+      node.dataset.spawnSourceId = String(state.spawnSourceId || "");
+      node.dataset.spawnRootSourceId = String(state.spawnRootSourceId || "");
+
+      if (String(state.spawnKind || "") === "clone") {
+        const lane = ensureBattleSourceCloneLane(stage, side, state);
+        if (lane) lane.appendChild(node);
+        else {
+          const row = String(state.row || "front") === "back" ? "back" : "front";
+          (stack.querySelector(`.battle-row-line.${row}`) || stack).appendChild(node);
+        }
+      } else {
+        const row = String(state.row || "front") === "back" ? "back" : "front";
+        (stack.querySelector(`.battle-row-line.${row}`) || stack).appendChild(node);
+      }
       return node;
     }
 
@@ -17073,9 +17223,10 @@
       abilityArray(states.enemy).forEach(state => setBattleUnitState(stage, "enemy", state));
       ["player","enemy"].forEach(side => {
         const ids = new Set(abilityArray(states[side]).map(item => String(item.id)));
-        stage.querySelectorAll(`.battle-unit[data-battle-side="${side}"][data-dynamic-capture="true"]`).forEach(node => {
-          if (!ids.has(String(node.dataset.battleCardId))) node.remove();
+        stage.querySelectorAll(`.battle-unit[data-battle-side="${side}"][data-dynamic-runtime-unit="true"], .battle-unit[data-battle-side="${side}"][data-dynamic-capture="true"]`).forEach(node => {
+          if (!ids.has(String(node.dataset.battleCardId))) removeBattleRuntimeUnitNode(node);
         });
+        stage.querySelectorAll(`.battle-source-formation.${side}`).forEach(cleanupBattleSourceFormation);
       });
     }
 
@@ -17386,6 +17537,10 @@
         if (event.status !== "success") return;
         const state = abilityArray(turn.memberStates && turn.memberStates[turn.side]).find(item => String(item.id) === String(event.targetCardId))
           || { id:event.targetCardId, cardId:event.cardId, name:event.targetName, maxHp:event.maxHp, currentHp:event.hp, speed:event.speed, row:event.row, slot:event.slot };
+        state.spawnKind = state.spawnKind || event.spawnKind || "";
+        state.spawnSourceId = state.spawnSourceId || event.sourceCardId || "";
+        state.spawnRootSourceId = state.spawnRootSourceId || event.spawnRootSourceId || event.sourceCardId || "";
+        state.spawnGroupKey = state.spawnGroupKey || event.cloneGroupKey || "";
         const node = ensureBattleUnitNode(stage, turn.side, state);
         if (node) {
           node.classList.remove("is-dead");
