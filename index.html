@@ -6534,11 +6534,13 @@
     .battle-event-feed {
       position: absolute;
       top: 116px;
-      right: 12px;
-      width: min(360px, 38vw);
+      left: 50%;
+      right: auto;
+      width: min(420px, 34vw);
       display: grid;
       gap: 8px;
-      justify-items: end;
+      justify-items: center;
+      transform: translateX(-50%);
     }
     .battle-event-card {
       width: min(360px, 100%);
@@ -6624,7 +6626,7 @@
       .battle-action-ribbon { top: 48px; grid-template-columns: 34px minmax(0,1fr); border-radius: 18px; }
       .battle-action-ribbon .battle-action-actor { width: 34px; height: 34px; }
       .battle-action-targets { display: none; }
-      .battle-event-feed { top: 100px; right: 8px; width: min(320px, 56vw); }
+      .battle-event-feed { top: 100px; left: 50%; right: auto; width: min(320px, 74vw); transform: translateX(-50%); }
       .battle-skill-toast { grid-template-columns: 58px minmax(0,1fr); }
       .battle-skill-portrait { width: 58px; height: 58px; }
       .battle-skill-target { display: none; }
@@ -7347,39 +7349,47 @@
 
     #arenaView .battle-model-stack.arena-side-grid .battle-source-clone-lane {
       position: absolute !important;
-      z-index: 6;
-      left: 50% !important;
+      z-index: 4;
       top: 50% !important;
       right: auto !important;
       bottom: auto !important;
-      width: clamp(170px, 18vw, 250px) !important;
-      min-width: clamp(170px, 18vw, 250px) !important;
-      max-width: clamp(170px, 18vw, 250px) !important;
-      min-height: clamp(54px, 6vw, 86px) !important;
+      width: clamp(42px, 4.6vw, 62px) !important;
+      min-width: clamp(42px, 4.6vw, 62px) !important;
+      max-width: clamp(42px, 4.6vw, 62px) !important;
+      min-height: clamp(136px, 18vh, 208px) !important;
       display: grid !important;
-      grid-template-columns: repeat(6, minmax(24px, 1fr));
-      align-items: center;
+      grid-template-columns: 1fr;
+      grid-auto-rows: minmax(20px, auto);
+      align-content: center;
       justify-items: center;
-      gap: 3px;
-      transform: translate(-50%, -50%) !important;
+      gap: 5px;
       pointer-events: none;
+      transform: translateY(-50%) !important;
+    }
+
+    #arenaView .fighter.player .battle-model-stack.arena-side-grid .battle-source-clone-lane {
+      left: calc(100% + clamp(10px, 1vw, 14px)) !important;
+    }
+
+    #arenaView .fighter.enemy .battle-model-stack.arena-side-grid .battle-source-clone-lane {
+      left: auto !important;
+      right: calc(100% + clamp(10px, 1vw, 14px)) !important;
     }
 
     #arenaView .battle-model-stack.arena-side-grid .battle-source-clone-lane .battle-model-card {
-      width: clamp(25px, 2.8vw, 40px) !important;
+      width: clamp(24px, 2.5vw, 34px) !important;
       margin: 0 !important;
       border-radius: 10px;
       pointer-events: auto;
+      transform: none !important;
     }
-    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(1) { grid-column: 1; }
-    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(2) { grid-column: 6; }
-    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(3) { grid-column: 2; }
-    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(4) { grid-column: 5; }
-    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(5) { grid-column: 3; }
 
     #arenaView .battle-model-stack.arena-side-grid .battle-source-formation[data-reserve-clone-lane="true"] .battle-source-clone-lane:empty {
-      min-height: clamp(54px, 6vw, 86px) !important;
-      height: clamp(54px, 6vw, 86px) !important;
+      min-height: clamp(136px, 18vh, 208px) !important;
+      height: clamp(136px, 18vh, 208px) !important;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(245,158,11,.16), rgba(245,158,11,.08));
+      box-shadow: inset 0 0 0 1px rgba(245,158,11,.26);
     }
 
     @media (max-width: 980px) {
