@@ -17,7 +17,7 @@ ACC_REGISTER_CARD({
   icon: "",
   image: "card/3001/3001.png",
   poster: "card/3001/3001.png",
-  video: "card/3001/3001.mp4",
+
   abilities: [
     {
       name: "พรสวรรค์แห่งดาบ",
