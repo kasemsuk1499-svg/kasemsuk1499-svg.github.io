@@ -1601,66 +1601,6 @@ window.ACC_CARD_DATA = [
 ]
   },
   {
-    "id": 1041,
-    "name": "Satoru Gojo+Yuji Itadori",
-    "rarity": "EX",
-    "element": [
-      "น้ำ",
-      "เหล็ก"
-    ],
-    "power": 2160000,
-        "hp": 10800000,
-        "defense": 864000,
-    "incomePerSec": 49400,
-    "upgradeDustBase": 20000,
-    "upgradeDustGrowth": 1.102,
-    "awakenMax": 3,
-    "icon": "",
-    "image": "1041.png",
-    "video": "1041.mp4",
-    "poster": "1041.png"
-  },
-  {
-    "id": 1042,
-    "name": "Sukuna+Dabura Karaba",
-    "rarity": "EX",
-    "element": [
-      "ความมืด",
-      "มิติ"
-    ],
-    "power": 2160000,
-        "hp": 10800000,
-        "defense": 864000,
-    "incomePerSec": 49400,
-    "upgradeDustBase": 20000,
-    "upgradeDustGrowth": 1.102,
-    "awakenMax": 3,
-    "icon": "",
-    "image": "1042.png",
-    "video": "1042.mp4",
-    "poster": "1042.png"
-  },
-  {
-    "id": 1043,
-    "name": "Yuka Okkotsu+Tsurugi Okkotsu",
-    "rarity": "EX",
-    "element": [
-      "ไฟ",
-      "ลม"
-    ],
-    "power": 2163000,
-        "hp": 10814000,
-        "defense": 865000,
-    "incomePerSec": 49400,
-    "upgradeDustBase": 20000,
-    "upgradeDustGrowth": 1.102,
-    "awakenMax": 3,
-    "icon": "",
-    "image": "1043.png",
-    "video": "1043.mp4",
-    "poster": "1043.png"
-  },
-  {
     "id": 38,
     "name": "EX Frieren",
     "rarity": "EX",
