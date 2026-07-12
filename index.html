@@ -7236,7 +7236,169 @@
       }
     }
 
-  </style>
+  
+
+    /* v116: ARENA — เขียวคือเรา / แดงคือศัตรู
+       ฝั่งเรา: หลังอยู่นอกซ้าย, หน้าอยู่ด้านในขวา
+       ฝั่งศัตรู: หน้าอยู่ด้านในซ้าย, หลังอยู่นอกขวา
+       ช่องรอบแนวหน้าสงวนไว้สำหรับร่างแยก */
+    #arenaView .battle-arena {
+      padding: clamp(34px, 4.2vh, 48px) clamp(12px, 1.8vw, 22px) clamp(76px, 9vh, 98px) !important;
+    }
+
+    #arenaView .battle-sides {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+      grid-template-rows: minmax(0, 1fr) !important;
+      gap: clamp(18px, 2.4vw, 42px) !important;
+      align-items: stretch !important;
+      padding: 2px 0 !important;
+    }
+
+    #arenaView .fighter.player { grid-column: 1; grid-row: 1; text-align: left; }
+    #arenaView .fighter.enemy { grid-column: 2; grid-row: 1; text-align: right; }
+
+    #arenaView .fighter h3 {
+      top: 2px !important;
+      bottom: auto !important;
+      max-width: min(22vw, 280px);
+      padding: 6px 10px !important;
+      font-size: clamp(.7rem, .95vw, .88rem) !important;
+    }
+    #arenaView .fighter.player h3 { left: 4px !important; right: auto !important; }
+    #arenaView .fighter.enemy h3 { right: 4px !important; left: auto !important; }
+
+    #arenaView .fighter-power {
+      bottom: 2px !important;
+      top: auto !important;
+      max-width: min(23vw, 320px);
+      padding: 6px 9px !important;
+      font-size: clamp(.66rem, .9vw, .82rem) !important;
+    }
+    #arenaView .fighter.player .fighter-power { left: 4px !important; right: auto !important; justify-content: flex-start !important; }
+    #arenaView .fighter.enemy .fighter-power { right: 4px !important; left: auto !important; justify-content: flex-end !important; }
+
+    #arenaView .battle-model-stack.arena-side-grid {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(42px, 1fr)) !important;
+      grid-template-rows: repeat(5, minmax(56px, 1fr)) !important;
+      justify-items: center !important;
+      align-items: center !important;
+      align-content: center !important;
+      width: min(100%, 520px);
+      margin-inline: auto !important;
+      padding: clamp(24px, 3vh, 34px) clamp(8px, 1vw, 14px) !important;
+      gap: 0 !important;
+      row-gap: 0 !important;
+      column-gap: clamp(7px, .8vw, 13px) !important;
+      overflow: visible !important;
+    }
+
+    #arenaView .battle-model-stack.arena-side-grid > .battle-row-line { display: contents !important; }
+
+    #arenaView .battle-model-stack.arena-side-grid .battle-row-line > .battle-model-card,
+    #arenaView .battle-model-stack.arena-side-grid .battle-row-line > .battle-source-formation {
+      align-self: center;
+      justify-self: center;
+    }
+
+    #arenaView .battle-model-stack.arena-side-grid .battle-model-card {
+      width: clamp(62px, 7vw, 100px) !important;
+      transform: translateY(0) rotate(var(--model-tilt, 0deg)) scale(1) !important;
+      z-index: 5;
+    }
+
+    #arenaView .battle-model-stack.arena-side-grid .battle-position-front,
+    #arenaView .battle-model-stack.arena-side-grid .battle-position-back {
+      --row-offset: 0px !important;
+      --row-scale: 1 !important;
+    }
+
+    /* พื้นที่สำรองร่างแยกประกบแนวหน้า 2 ด้าน */
+    #arenaView .battle-model-stack.arena-side-grid::before,
+    #arenaView .battle-model-stack.arena-side-grid::after {
+      content: "";
+      grid-row: 1 / 6;
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(245,158,11,.055), rgba(245,158,11,.018));
+      box-shadow: inset 0 0 0 1px rgba(245,158,11,.075);
+      z-index: 0;
+    }
+    #arenaView .fighter.player .battle-model-stack.arena-side-grid::before { grid-column: 2; }
+    #arenaView .fighter.player .battle-model-stack.arena-side-grid::after { grid-column: 4; }
+    #arenaView .fighter.enemy .battle-model-stack.arena-side-grid::before { grid-column: 1; }
+    #arenaView .fighter.enemy .battle-model-stack.arena-side-grid::after { grid-column: 3; }
+
+    #arenaView .battle-model-stack.arena-side-grid .battle-source-formation {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: max-content;
+      overflow: visible;
+      isolation: isolate;
+    }
+
+    #arenaView .battle-model-stack.arena-side-grid .battle-source-formation > .battle-model-card {
+      position: relative;
+      z-index: 8;
+    }
+
+    #arenaView .battle-model-stack.arena-side-grid .battle-source-clone-lane {
+      position: absolute !important;
+      z-index: 6;
+      left: 50% !important;
+      top: 50% !important;
+      right: auto !important;
+      bottom: auto !important;
+      width: clamp(170px, 18vw, 250px) !important;
+      min-width: clamp(170px, 18vw, 250px) !important;
+      max-width: clamp(170px, 18vw, 250px) !important;
+      min-height: clamp(54px, 6vw, 86px) !important;
+      display: grid !important;
+      grid-template-columns: repeat(6, minmax(24px, 1fr));
+      align-items: center;
+      justify-items: center;
+      gap: 3px;
+      transform: translate(-50%, -50%) !important;
+      pointer-events: none;
+    }
+
+    #arenaView .battle-model-stack.arena-side-grid .battle-source-clone-lane .battle-model-card {
+      width: clamp(25px, 2.8vw, 40px) !important;
+      margin: 0 !important;
+      border-radius: 10px;
+      pointer-events: auto;
+    }
+    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(1) { grid-column: 1; }
+    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(2) { grid-column: 6; }
+    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(3) { grid-column: 2; }
+    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(4) { grid-column: 5; }
+    #arenaView .battle-source-clone-lane .battle-model-card:nth-child(5) { grid-column: 3; }
+
+    #arenaView .battle-model-stack.arena-side-grid .battle-source-formation[data-reserve-clone-lane="true"] .battle-source-clone-lane:empty {
+      min-height: clamp(54px, 6vw, 86px) !important;
+      height: clamp(54px, 6vw, 86px) !important;
+    }
+
+    @media (max-width: 980px) {
+      #arenaView .battle-sides {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) !important;
+        gap: 12px !important;
+      }
+      #arenaView .fighter.player { grid-column: 1; grid-row: 2; }
+      #arenaView .fighter.enemy { grid-column: 1; grid-row: 1; }
+      #arenaView .battle-model-stack.arena-side-grid {
+        width: min(100%, 420px);
+        grid-template-columns: repeat(4, minmax(38px, 1fr)) !important;
+      }
+      #arenaView .fighter h3,
+      #arenaView .fighter-power { max-width: 46vw; }
+    }
+
+</style>
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
@@ -17527,6 +17689,10 @@
         });
         stage.querySelectorAll(`.battle-source-formation.${side}`).forEach(cleanupBattleSourceFormation);
       });
+      if (stage.id === "arenaView" || stage.querySelector("#arenaPlayerModels, #arenaEnemyModels")) {
+        layoutArenaSideGrid(stage.querySelector("#arenaPlayerModels"), "player");
+        layoutArenaSideGrid(stage.querySelector("#arenaEnemyModels"), "enemy");
+      }
     }
 
     function renderBattleTurnOrder(stage, combat, currentIndex, labels = {}) {
@@ -24494,6 +24660,41 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderCombatHitReport("battleHitReport", lastBattleCombat, { player: "ทีมของคุณ", enemy: `Tower ชั้น ${lastBattleCombat ? stats.stage - (battleResult && battleResult.tone === "win" ? 1 : 0) : stats.stage}` });
     }
 
+
+        function arenaGridRowsForCount(count) {
+      const safe = Math.max(0, Math.min(5, Math.floor(Number(count) || 0)));
+      if (safe <= 0) return [];
+      if (safe === 1) return [3];
+      if (safe === 2) return [2, 4];
+      if (safe === 3) return [1, 3, 5];
+      if (safe === 4) return [1, 2, 4, 5];
+      return [1, 2, 3, 4, 5];
+    }
+
+        function layoutArenaSideGrid(stack, side = "player") {
+      if (!stack) return;
+      stack.classList.add("arena-side-grid");
+      const playerSide = side !== "enemy";
+      const columnFor = row => playerSide
+        ? (row === "front" ? 3 : 1)
+        : (row === "front" ? 2 : 4);
+
+      ["front", "back"].forEach(row => {
+        const rowLine = stack.querySelector(`:scope > .battle-row-line.${row}`);
+        if (!rowLine) return;
+        const items = Array.from(rowLine.children).filter(node =>
+          node.classList && (node.classList.contains("battle-model-card") || node.classList.contains("battle-source-formation"))
+        );
+        const rows = arenaGridRowsForCount(items.length);
+        items.forEach((node, index) => {
+          node.style.gridColumn = String(columnFor(row));
+          node.style.gridRow = String(rows[index] || Math.min(5, index + 1));
+          node.dataset.arenaFormationRow = row;
+          node.dataset.arenaFormationOrder = String(index + 1);
+        });
+      });
+    }
+
         function renderArenaTeam() {
       const grid = document.getElementById("arenaTeamGrid");
       const panel = document.getElementById("arenaElementPanel");
@@ -24534,8 +24735,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!playerModels || !enemyModels) return;
 
       if (forceModels || !arenaAnimating || !playerModels.children.length || !enemyModels.children.length) {
-        playerModels.classList.add("v72-rowed");
-        enemyModels.classList.add("v72-rowed");
+        playerModels.classList.add("v72-rowed", "arena-side-grid");
+        enemyModels.classList.add("v72-rowed", "arena-side-grid");
         const playerFrontCount = normalizeFormationFront(state.arena && state.arena.formationFront, CONFIG.arenaTeamSlots || 5);
         const playerRecords = state.arena.team.map((id, index) => ({ card: CARD_BY_ID.get(String(id)), slot: index + 1 })).filter(item => item.card);
         playerModels.innerHTML = playerRecords.length
@@ -24551,6 +24752,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           : `<div class="arena-secret-model">?</div><div class="arena-secret-model">?</div><div class="arena-secret-model">?</div>`;
         reserveBattleCloneFormations(playerModels, "player");
         reserveBattleCloneFormations(enemyModels, "enemy");
+        layoutArenaSideGrid(playerModels, "player");
+        layoutArenaSideGrid(enemyModels, "enemy");
       }
 
       const maxHp = Math.max(1, stats.effectiveHp, stats.enemyEffectiveHp || 0);
