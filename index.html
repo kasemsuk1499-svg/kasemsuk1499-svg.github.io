@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-12-clone-front-of-source-no-overlap-v108">
-  <title>Anime Card Collection · Runtime v107 · Clone Front Of Source</title>
+  <meta name="gacha-app-build" content="2026-07-12-freeze-true-damage-v110">
+  <title>Anime Card Collection · Runtime v109 · Resource Transfer + Freeze Shatter</title>
   <style>
     :root {
       color-scheme: dark;
@@ -2617,6 +2617,11 @@
     .friend-meta { margin-top: 4px; color: var(--muted); font-size: .72rem; line-height: 1.45; }
     .friend-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
     .friend-actions .btn { min-height: 36px; padding: 7px 10px; font-size: .72rem; }
+    .friend-transfer-panel { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(150px,.75fr) minmax(150px,1fr) auto; gap: 7px; align-items: end; padding: 10px; border: 1px solid rgba(92,232,255,.16); border-radius: 14px; background: rgba(3,5,12,.30); }
+    .friend-transfer-panel label { display: block; margin-bottom: 4px; color: var(--muted); font-size: .62rem; font-weight: 900; }
+    .friend-transfer-panel .field { width: 100%; min-width: 0; min-height: 38px; }
+    .friend-transfer-panel .btn { min-height: 38px; white-space: nowrap; }
+    .friend-transfer-note { grid-column: 1 / -1; color: var(--muted); font-size: .61rem; line-height: 1.45; }
     .support-badge { color: var(--cyan); font-size: .68rem; font-weight: 900; }
     .login-required { padding: 24px; border: 1px dashed var(--line); border-radius: 18px; color: var(--muted); text-align: center; }
 
@@ -4236,6 +4241,8 @@
       .friends-toolbar .field { grid-column: 1 / -1; }
       .friend-card { grid-template-columns: 1fr; }
       .friend-actions { justify-content: flex-start; }
+      .friend-transfer-panel { grid-template-columns: 1fr 1fr; }
+      .friend-transfer-panel .btn { grid-column: 1 / -1; }
       .detail { grid-template-columns: 1fr; }
       .detail-art { min-height: min(62vh, 540px); }
       .detail-copy { padding: 24px 18px; }
@@ -9146,6 +9153,7 @@
     let friendRequests = [];
     let friendProfiles = [];
     let friendsBusy = false;
+    let resourceTransferBusy = false;
     let battleResult = null;
     let battleAnimating = false;
     let arenaResult = null;
@@ -15379,7 +15387,7 @@
       function makeBattleStatusInstance(rule, source) {
         const status = normalizeBattleStatusName(rule && rule.status) || "stun";
         const duration = Math.max(0, Math.floor(Number(rule.durationTurns ?? rule.turns ?? (status === "freeze" || status === "bleed" ? 0 : 1)) || 0));
-        return { id:`${Date.now().toString(36)}:${Math.random().toString(36).slice(2,7)}`, status, label:BATTLE_STATUS_LABELS[status] || status, sourceCardId:String(source && source.id || rule && rule.sourceCardId || ""), sourceName:String(source && source.name || rule && rule.sourceName || ""), sourceAbilityName:String(rule && rule.sourceAbilityName || ""), turnsRemaining:duration, attacksRemaining:Math.max(1,Math.floor(Number(rule && rule.deathAfterAttacks)||1)), missRate:Math.max(0,Math.min(1,Number(rule && rule.missRate)||0)), damageFlat:Math.max(0,Number(rule && rule.damageFlat)||0), damageRate:Math.max(0,Number(rule && rule.damageRate)||0), hpLossFlat:Math.max(0,Number(rule && rule.hpLossFlat)||0), hpLossRate:Math.max(0,Number(rule && rule.hpLossRate)||0), chainAfterHits:Math.max(1,Math.floor(Number(rule && rule.chainAfterHits)||3)), chainCount:Math.max(1,Math.min(4,Math.floor(Number(rule && rule.chainCount)||1))), hitCounter:0, expired:false };
+        return { id:`${Date.now().toString(36)}:${Math.random().toString(36).slice(2,7)}`, status, label:BATTLE_STATUS_LABELS[status] || status, sourceCardId:String(source && source.id || rule && rule.sourceCardId || ""), sourceName:String(source && source.name || rule && rule.sourceName || ""), sourceAbilityName:String(rule && rule.sourceAbilityName || ""), turnsRemaining:duration, attacksRemaining:Math.max(1,Math.floor(Number(rule && rule.deathAfterAttacks)||1)), missRate:Math.max(0,Math.min(1,Number(rule && rule.missRate)||0)), damageFlat:Math.max(0,Number(rule && rule.damageFlat)||0), damageRate:Math.max(0,Number(rule && rule.damageRate)||0), sourcePower:Math.max(0,Number(source && source.power)||Number(rule && rule.sourcePower)||0), freezeBreakPowerRate:Math.max(0,Number((rule && rule.freezeBreakPowerRate) ?? 2)||0), freezeBreakSuccessRate:normalizeAbilityChance(rule && (rule.freezeBreakSuccessRate ?? rule.shatterSuccessRate ?? 1),1), hpLossFlat:Math.max(0,Number(rule && rule.hpLossFlat)||0), hpLossRate:Math.max(0,Number(rule && rule.hpLossRate)||0), chainAfterHits:Math.max(1,Math.floor(Number(rule && rule.chainAfterHits)||3)), chainCount:Math.max(1,Math.min(4,Math.floor(Number(rule && rule.chainCount)||1))), hitCounter:0, expired:false };
       }
       function applyBattleStatus(member, rule, source, sourceTeam, targetTeam, reason = "skill") {
         if (!member || member.ko || member.currentHp <= 0) return null;
@@ -15463,7 +15471,29 @@
         const events = [];
         if (!target || hitCount <= 0) return events;
         events.push(...consumeStatusResistanceHits(target, targetTeam, hitCount));
-        activeStatusEffects(target,"freeze").forEach(effect => { effect.expired = true; events.push({ status:"broken", statusType:"freeze", statusLabel:effect.label, targetCardId:target.id, targetName:target.name, broken:true }); });
+        activeStatusEffects(target,"freeze").forEach(effect => {
+          const sourceMember = [...abilityArray(player.members), ...abilityArray(enemy.members)].find(member => String(member && member.id || "") === String(effect.sourceCardId || ""));
+          const sourcePower = Math.max(0, Number(sourceMember && sourceMember.power) || Number(effect.sourcePower) || 0);
+          const powerRate = Math.max(0, Number(effect.freezeBreakPowerRate ?? 2) || 0);
+          const successRate = normalizeAbilityChance(effect.freezeBreakSuccessRate ?? 1, 1);
+          let actual = 0;
+          let triggered = false;
+          if (target.currentHp > 0 && sourcePower > 0 && powerRate > 0 && Math.random() < successRate) {
+            triggered = true;
+            // Freeze shatter is true damage: use the status applier's ATK directly and ignore target DEF.
+            const rawDamage = Math.max(1, sourcePower * powerRate);
+            actual = Math.max(1, Math.min(target.currentHp, rawDamage));
+            target.currentHp = Math.max(0, target.currentHp - actual);
+            if (target.currentHp <= 0) { target.ko = true; target.deathReason = "freeze-shatter"; }
+            if (sourceMember) {
+              sourceMember.damageDealt = Math.max(0, Number(sourceMember.damageDealt) || 0) + actual;
+              const sourceTeam = player.members.includes(sourceMember) ? player : enemy;
+              sourceTeam.totalDamage = Math.max(0, Number(sourceTeam.totalDamage) || 0) + actual;
+            }
+          }
+          effect.expired = true;
+          events.push({ status:triggered?"shatter":"broken", statusType:"freeze", statusLabel:triggered?"น้ำแข็งแตก":"แช่แข็งแตก", targetCardId:target.id, targetName:target.name, sourceCardId:String(effect.sourceCardId||""), sourceName:String(effect.sourceName||""), broken:true, damage:actual, powerRate, successRate, ignoreDefense:true, remaining:target.currentHp, ko:target.ko });
+        });
         activeStatusEffects(target,"shock").forEach(effect => { effect.hitCounter = Math.max(0,Number(effect.hitCounter)||0)+hitCount; if (effect.hitCounter >= effect.chainAfterHits) { effect.hitCounter = 0; const allies = alive(targetTeam).filter(member => member !== target && !activeStatusEffects(member,"shock").length); for (let i=0;i<Math.min(effect.chainCount,allies.length);i+=1) { const picked = allies.splice(Math.floor(Math.random()*allies.length),1)[0]; const copied = { ...effect, turnsRemaining:Math.max(1,Number(effect.turnsRemaining)||1), hitCounter:0, expired:false }; picked.statusEffects.push(copied); events.push({ status:"chain", statusType:"shock", statusLabel:effect.label, targetCardId:picked.id, targetName:picked.name, chainedFrom:target.name }); } } });
         compactBattleStatuses(target); return events;
       }
@@ -17858,7 +17888,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             statusApplyRules: [],
             removeAllEnemyShield: false,
             sourceAbilityRuntimeKey: String(record.abilityRuntimeKey || ""),
-            attackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 0))),
+            attackTargetCount: (!record.trigger.onOwnAttack || record.effect?.affectNormalAttack === true || record.effect?.affectsNormalAttack === true) ? Math.max(0, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 0))) : 0,
             abilityTransfers: [],
             attackBonus: 0,
             healHp: 0,
@@ -17905,7 +17935,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         }
         const group = grouped.get(key);
         {
-          const abilityTargetCount = Math.max(0, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 0)));
+          const mayAffectNormalAttack = !record.trigger.onOwnAttack || record.effect?.affectNormalAttack === true || record.effect?.affectsNormalAttack === true;
+          const abilityTargetCount = mayAffectNormalAttack ? Math.max(0, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 0))) : 0;
           if (abilityTargetCount > 0) group.attackTargetCount = Math.max(Number(group.attackTargetCount) || 0, abilityTargetCount);
         }
         group.durationTurns = Math.max(Number(group.durationTurns || 0), Math.max(0, Math.floor(Number(effect.durationTurns) || 0)));
@@ -18447,7 +18478,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     function normalizeRewardPayload(reward = {}) {
       const type = String(reward.type || "");
       const amount = Math.max(0, Math.floor(Number(reward.amount) || 0));
-      if ((type === "gems" || type === "dust") && amount > 0) return { type, amount };
+      if ((type === "gems" || type === "dust" || type === "crystals" || type === "cristal") && amount > 0) return { type:type === "cristal" ? "crystals" : type, amount };
       if (type === "item" && getItemMeta(reward.itemId) && amount > 0) return { type, itemId: String(reward.itemId), amount };
       return null;
     }
@@ -18553,6 +18584,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     function applyMailReward(reward) {
       if (!reward) return;
       if (reward.type === "gems") state.gems += Math.max(0, Number(reward.amount) || 0);
+      if (reward.type === "crystals" || reward.type === "cristal") state.crystals += Math.max(0, Number(reward.amount) || 0);
       if (reward.type === "dust") state.dust += Math.max(0, Number(reward.amount) || 0);
       if (reward.type === "item") addInventoryItem(reward.itemId, reward.amount);
     }
@@ -19779,6 +19811,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!requireFriendsLogin() || friendsBusy) return;
       friendsBusy = true;
       try {
+        await syncIncomingResourceTransfers(showNotice);
         const [friendsSnapshot, requestsSnapshot] = await Promise.all([
           cloudModules.get(cloudModules.ref(cloudDb, `friends/${activeCloudUid}`)),
           cloudModules.get(cloudModules.ref(cloudDb, `friendRequests/${activeCloudUid}`))
@@ -19894,6 +19927,123 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderFriends();
       renderBattle();
       showToast("เลือก Friend Support แล้ว");
+    }
+
+    const FRIEND_RESOURCE_TRANSFER_TYPES = Object.freeze({
+      gems: { stateKey:"gems", label:"Gems", icon:"💎" },
+      crystals: { stateKey:"crystals", label:"Cristal", icon:"🔮" },
+      dust: { stateKey:"dust", label:"Dust", icon:"✨" }
+    });
+
+    function friendResourceTransferConfig(type = "") {
+      return FRIEND_RESOURCE_TRANSFER_TYPES[String(type || "").toLowerCase()] || null;
+    }
+
+    async function transferResourceToFriend(friendUid) {
+      if (!requireFriendsLogin() || resourceTransferBusy) return;
+      const profile = friendProfiles.find(item => String(item.uid) === String(friendUid));
+      if (!profile) return showToast("ไม่พบเพื่อนคนนี้ในรายชื่อ");
+      const panel = document.querySelector(`.friend-transfer-panel[data-friend-id="${CSS.escape(String(friendUid))}"]`);
+      const type = panel?.querySelector('.friend-transfer-type')?.value || "";
+      const config = friendResourceTransferConfig(type);
+      const amount = Math.max(0, Math.floor(Number(panel?.querySelector('.friend-transfer-amount')?.value) || 0));
+      if (!config || amount < 1) return showToast("กรุณาเลือกทรัพยากรและใส่จำนวนอย่างน้อย 1");
+      const localBalance = Math.max(0, Math.floor(Number(state[config.stateKey]) || 0));
+      if (localBalance < amount) return showToast(`${config.label} ไม่พอ • มี ${formatNumber(localBalance)}`);
+      if (!window.confirm(`โอน ${formatNumber(amount)} ${config.label} ให้ ${profile.username || "เพื่อน"} ใช่ไหม?`)) return;
+
+      resourceTransferBusy = true;
+      const balanceRef = cloudModules.ref(cloudDb, `users/${activeCloudUid}/save/${config.stateKey}`);
+      let deducted = false;
+      try {
+        const debit = await cloudModules.runTransaction(balanceRef, current => {
+          const balance = Math.max(0, Math.floor(Number(current) || 0));
+          if (balance < amount) return;
+          return balance - amount;
+        });
+        if (!debit.committed) throw new Error("transfer-insufficient");
+        deducted = true;
+        state[config.stateKey] = Math.max(0, Math.floor(Number(debit.snapshot.val()) || 0));
+
+        const now = Date.now();
+        const transferId = `gift-${now.toString(36)}-${String(activeCloudUid).slice(0,6)}-${Math.random().toString(36).slice(2,8)}`;
+        const payload = {
+          id: transferId,
+          senderUid: activeCloudUid,
+          senderUsername: activeCloudUsername || state.profile?.username || "Player",
+          recipientUid: String(friendUid),
+          recipientUsername: String(profile.username || "Player"),
+          resourceType: type,
+          amount,
+          createdAt: now,
+          deliveredAt: 0
+        };
+        await cloudModules.set(cloudModules.ref(cloudDb, `resourceTransfers/${friendUid}/${transferId}`), payload);
+        await writeCloudSave({ lastResourceTransferAt: now });
+        renderAll();
+        showToast(`โอน ${config.icon} ${formatNumber(amount)} ${config.label} ให้ ${profile.username || "เพื่อน"} แล้ว`);
+      } catch (error) {
+        if (deducted) {
+          try {
+            const refund = await cloudModules.runTransaction(balanceRef, current => Math.max(0, Math.floor(Number(current) || 0)) + amount);
+            if (refund.committed) state[config.stateKey] = Math.max(0, Math.floor(Number(refund.snapshot.val()) || 0));
+            await writeCloudSave();
+          } catch (refundError) { console.error("Resource transfer refund failed:", refundError); }
+        }
+        if (String(error && error.message) === "transfer-insufficient") showToast(`${config.label} ใน Cloud Save ไม่พอ กรุณารีเฟรชแล้วลองใหม่`);
+        else showToast(firebaseErrorMessage(error, "โอนทรัพยากร"));
+      } finally {
+        resourceTransferBusy = false;
+      }
+    }
+
+    async function syncIncomingResourceTransfers(showNotice = false) {
+      if (!cloudReady || !activeCloudUid || resourceTransferBusy) return 0;
+      resourceTransferBusy = true;
+      try {
+        const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, `resourceTransfers/${activeCloudUid}`));
+        if (!snapshot.exists()) return 0;
+        const transfers = Object.entries(snapshot.val() || {});
+        const deliveredUpdates = {};
+        let created = 0;
+        const now = Date.now();
+        transfers.forEach(([transferId, raw]) => {
+          const transfer = raw && typeof raw === "object" ? raw : {};
+          if (Number(transfer.deliveredAt) > 0) return;
+          if (String(transfer.recipientUid || activeCloudUid) !== String(activeCloudUid)) return;
+          const config = friendResourceTransferConfig(transfer.resourceType);
+          const amount = Math.max(0, Math.floor(Number(transfer.amount) || 0));
+          if (!config || amount < 1) return;
+          const uniqueKey = `friend-resource-transfer:${transferId}`;
+          const alreadyExists = abilityArray(state.mailbox).some(mail => String(mail.uniqueKey || "") === uniqueKey);
+          if (!alreadyExists) {
+            const sender = String(transfer.senderUsername || "เพื่อน").slice(0, 40);
+            const mail = createSystemMail({
+              uniqueKey,
+              title: `${config.icon} ของขวัญจาก ${sender}`,
+              message: `${sender} โอน ${formatNumber(amount)} ${config.label} มาให้คุณ`,
+              source: "friend-transfer",
+              rewards: [{ type:transfer.resourceType, amount }]
+            });
+            if (mail) created += 1;
+          }
+          deliveredUpdates[`resourceTransfers/${activeCloudUid}/${transferId}/deliveredAt`] = now;
+          deliveredUpdates[`resourceTransfers/${activeCloudUid}/${transferId}/deliveredBy`] = activeCloudUid;
+        });
+        if (created > 0) await writeCloudSave({ resourceTransfersSyncedAt: now });
+        if (Object.keys(deliveredUpdates).length) await cloudModules.update(cloudModules.ref(cloudDb), deliveredUpdates);
+        if (created > 0) {
+          renderAll();
+          if (showNotice) showToast(`ได้รับของขวัญจากเพื่อน ${formatNumber(created)} รายการ • ตรวจกล่องจดหมายได้เลย`);
+        }
+        return created;
+      } catch (error) {
+        console.warn("Incoming resource transfer sync skipped:", error);
+        if (showNotice) showToast(firebaseErrorMessage(error, "รับทรัพยากรจากเพื่อน"));
+        return 0;
+      } finally {
+        resourceTransferBusy = false;
+      }
     }
 
     // ระบบเงินเดือนรายวัน
@@ -20305,6 +20455,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function rewardPayloadLabel(reward) {
       if (reward.type === "gems") return `💎 ${formatNumber(reward.amount)} Gems`;
+      if (reward.type === "crystals" || reward.type === "cristal") return `🔮 ${formatNumber(reward.amount)} Cristal`;
       if (reward.type === "dust") return `✨ ${formatNumber(reward.amount)} Dust`;
       const meta = getItemMeta(reward.itemId);
       return meta ? `${meta.icon} ${meta.name} x${formatNumber(reward.amount)}` : "ไอเทม";
@@ -24112,6 +24263,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
                 <button class="btn btn-gold" data-action="spar-friend" data-friend-id="${escapeHTML(profile.uid)}">ประลอง</button>
                 <button class="btn btn-danger" data-action="remove-friend" data-friend-id="${escapeHTML(profile.uid)}">ลบ</button>
               </div>
+              <div class="friend-transfer-panel" data-friend-id="${escapeHTML(profile.uid)}">
+                <div><label>ทรัพยากร</label><select class="field friend-transfer-type"><option value="gems">💎 Gems</option><option value="crystals">🔮 Cristal</option><option value="dust">✨ Dust</option></select></div>
+                <div><label>จำนวนที่ต้องการโอน</label><input class="field friend-transfer-amount" type="number" inputmode="numeric" min="1" step="1" placeholder="ใส่จำนวน"></div>
+                <button class="btn btn-primary" data-action="transfer-resource" data-friend-id="${escapeHTML(profile.uid)}">โอนให้เพื่อน</button>
+                <div class="friend-transfer-note">ระบบหักยอดผู้ส่งก่อน แล้วส่งเข้ากล่องจดหมายของผู้รับ • ผู้รับกดรับภายหลังได้</div>
+              </div>
             </div>
           `;
         }).join("")
@@ -25430,6 +25587,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "remove-friend") removeFriend(friendId);
       if (action === "select-support") selectFriendSupport(friendId);
       if (action === "spar-friend") sparFriend(friendId);
+      if (action === "transfer-resource") transferResourceToFriend(friendId);
       // เพิ่มโดยอลิซ: เมื่อกดปุ่มแยกระดับการ์ด ให้ตั้งค่าตัวกรองและรีเฟรชคลังทันที
       if (action === "filter-rarity") setActiveRarityFilter(event.target.closest("[data-rarity]")?.dataset.rarity || "");
       if (action === "filter-skill-tag") setActiveSkillTagFilter(event.target.closest("[data-skill-tag]")?.dataset.skillTag || "");
