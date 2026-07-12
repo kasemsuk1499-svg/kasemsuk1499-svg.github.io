@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-12-freeze-true-damage-v110">
-  <title>Anime Card Collection · Runtime v109 · Resource Transfer + Freeze Shatter</title>
+  <meta name="gacha-app-build" content="2026-07-12-worldboss-skill-fix-v112">
+  <title>Anime Card Collection · Runtime v112 · World Boss Skill Fix</title>
   <style>
     :root {
       color-scheme: dark;
@@ -6773,7 +6773,31 @@
     }
 
     .battle-source-clone-lane .battle-model-card.is-acting {
-      transform: translateY(-7px) scale(1.08) !important;
+      transform: translateY(-4px) scale(1.035) !important;
+    }
+
+    /* v111 · ล็อกเลย์เอาต์สนาม ไม่ให้หน้าเว็บดีดตอนเพิ่ม/ลบร่างแยก */
+    #battleView .battle-arena,
+    #arenaView .battle-arena,
+    #worldBossView .battle-arena,
+    #battleView .battle-model-stack,
+    #arenaView .battle-model-stack,
+    #worldBossView .battle-model-stack,
+    .battle-row-line,
+    .battle-source-formation,
+    .battle-source-clone-lane {
+      overflow-anchor: none;
+    }
+
+    /* จองพื้นที่ของแถวร่างแยกตั้งแต่เริ่มไฟต์สำหรับการ์ดที่มี splitClone */
+    .battle-source-formation[data-reserve-clone-lane="true"] .battle-source-clone-lane:empty {
+      display: block;
+      width: 1px;
+      min-width: 1px;
+      height: clamp(54px, 6.3vw, 88px);
+      min-height: clamp(54px, 6.3vw, 88px);
+      visibility: hidden;
+      pointer-events: none;
     }
 
     @media (max-width: 760px) {
@@ -6782,6 +6806,10 @@
       #arenaView .battle-source-clone-lane .battle-model-card,
       #worldBossView .battle-source-clone-lane .battle-model-card {
         width: clamp(46px, 13vw, 66px) !important;
+      }
+      .battle-source-formation[data-reserve-clone-lane="true"] .battle-source-clone-lane:empty {
+        height: clamp(46px, 13vw, 66px);
+        min-height: clamp(46px, 13vw, 66px);
       }
     }
 
@@ -11738,7 +11766,8 @@
       });
       const identityIds = cards.flatMap(card => [String(card.id), String(card.abilityIdentityId || card.originalCardId || "")]).filter(Boolean);
       return {
-        mode: String(mode || "team").toLowerCase(),
+        // v112: ห้าม lower-case worldBoss เป็น worldboss เพราะ activeIn ถูก normalize เป็น worldBoss
+        mode: normalizeAbilityMode(mode || "team"),
         ids,
         cards,
         teamSize: cards.length,
@@ -13495,7 +13524,7 @@
           rarity: item && item.rarity,
           element: item && item.elements
         }).filter(Boolean);
-        return { cards, mode: String(options.mode || "arena") };
+        return { cards, mode: normalizeAbilityMode(options.mode || "arena") };
       }
 
       function scaleRuntimeAbilityEffectByParty(fighter, sourceCardId, effect = {}) {
@@ -13998,7 +14027,7 @@
       }
 
       function copiedAbilityConditionRecords(fighter, recipientItem, ability, runtimeAbilityKey, transferEffect) {
-        const mode = String(options.mode || "arena");
+        const mode = normalizeAbilityMode(options.mode || "arena");
         if (!getAbilityModes(ability).includes(mode)) return { passiveEffects: [], triggeredRecords: [] };
         const context = runtimeAbilityContext(fighter);
         const sourceCard = recipientItem.card || CARD_BY_ID.get(String(recipientItem.id || ""));
@@ -14130,7 +14159,7 @@
         const context = runtimeAbilityContext(fighter);
         const sourceCard = rosterItem.card || CARD_BY_ID.get(cardIdString(rosterItem.id));
         const ability = entry.ability;
-        if (!sourceCard || !ability || !getAbilityModes(ability).includes(String(options.mode || "arena"))) return;
+        if (!sourceCard || !ability || !getAbilityModes(ability).includes(normalizeAbilityMode(options.mode || "arena"))) return;
         if (!isAbilityConditionMet(getStaticAbilityCondition(ability.condition || {}), context, sourceCard)) return;
         const parentTrigger = normalizeBattleTriggerRule(ability.condition || {});
         abilityArray(ability.effects).forEach(rawEffect => {
@@ -17125,10 +17154,42 @@
       if (!formation || !formation.classList || !formation.classList.contains("battle-source-formation")) return;
       const lane = formation.querySelector(".battle-source-clone-lane");
       if (lane && lane.children.length) return;
+      // v111: ถ้าเป็นช่องที่จองพื้นที่ไว้ ให้คง wrapper และแถวว่างไว้เพื่อป้องกันหน้าต่อสู้ดีด
+      if (String(formation.dataset.reserveCloneLane || "") === "true") return;
       const sourceNode = Array.from(formation.children).find(child => child.classList && child.classList.contains("battle-model-card"));
       const parent = formation.parentNode;
       if (sourceNode && parent) parent.insertBefore(sourceNode, formation);
       formation.remove();
+    }
+
+    function battleCardUsesSplitClone(card) {
+      return abilityArray(card && card.abilities).some(ability =>
+        abilityArray(ability && ability.effects).some(effect =>
+          normalizeAbilityEffectType(effect && effect.type) === CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE
+        )
+      );
+    }
+
+    function reserveBattleCloneFormations(stack, side = "player") {
+      if (!stack) return;
+      stack.querySelectorAll('.battle-unit:not([data-spawn-kind="clone"])').forEach(sourceNode => {
+        if (sourceNode.closest('.battle-source-formation')) return;
+        const baseId = runtimeBaseCardId(sourceNode.dataset.battleCardId || "");
+        const card = CARD_BY_ID.get(baseId);
+        if (!battleCardUsesSplitClone(card)) return;
+        const parent = sourceNode.parentNode;
+        if (!parent) return;
+        const formation = document.createElement("div");
+        formation.className = `battle-source-formation ${side}`;
+        formation.dataset.spawnAnchorId = String(sourceNode.dataset.battleCardId || baseId);
+        formation.dataset.reserveCloneLane = "true";
+        const lane = document.createElement("div");
+        lane.className = "battle-source-clone-lane";
+        lane.dataset.spawnAnchorId = formation.dataset.spawnAnchorId;
+        parent.insertBefore(formation, sourceNode);
+        formation.appendChild(lane);
+        formation.appendChild(sourceNode);
+      });
     }
 
     function removeBattleRuntimeUnitNode(node) {
@@ -17150,6 +17211,7 @@
         formation = document.createElement("div");
         formation.className = `battle-source-formation ${side}`;
         formation.dataset.spawnAnchorId = anchorId;
+        formation.dataset.reserveCloneLane = "false";
         parent.insertBefore(formation, sourceNode);
         const lane = document.createElement("div");
         lane.className = "battle-source-clone-lane";
@@ -17492,6 +17554,29 @@
       });
       const a = actorNode.getBoundingClientRect();
       const t = primaryTargetNode.getBoundingClientRect();
+      const isRuntimeClone = String(actorNode.dataset.spawnKind || "") === "clone";
+      const actorOnScreen = a.right > 0 && a.left < window.innerWidth && a.bottom > 0 && a.top < window.innerHeight;
+      const targetOnScreen = t.right > 0 && t.left < window.innerWidth && t.bottom > 0 && t.top < window.innerHeight;
+
+      // v111: ร่างแยกโจมตีอยู่กับที่ และถ้าตัวละคร/เป้าหมายอยู่นอก viewport จะไม่สร้างการ์ดวิ่งแบบ fixed
+      // ป้องกันการ์ดดีดออกนอกจอและป้องกันหน้าเว็บสั่นจากพิกัดที่เปลี่ยนระหว่างจัดแถวร่างแยก
+      if (isRuntimeClone || !actorOnScreen || !targetOnScreen) {
+        actorNode.animate?.([
+          { opacity: 1, filter: "brightness(1)" },
+          { opacity: .72, filter: "brightness(1.55) drop-shadow(0 0 18px rgba(92,232,255,.75))" },
+          { opacity: 1, filter: "brightness(1)" }
+        ], { duration: Math.max(150, Math.floor(duration * .72)), easing: "ease" });
+        await wait(Math.max(70, Math.floor(duration * .42)));
+        targetEntries.forEach(({node, result}) => {
+          node.classList.add("is-hit");
+          const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
+          floatBattleText(node, text);
+        });
+        await wait(Math.max(80, Math.floor(duration * .38)));
+        targetEntries.forEach(({node}) => node.classList.remove("is-hit", "is-target", "is-multi-target"));
+        actorNode.classList.remove("is-acting");
+        return;
+      }
       const clone = actorNode.cloneNode(true);
       clone.classList.add("battle-moving-clone", "v67-runner");
       clone.classList.remove("is-dead");
@@ -21419,6 +21504,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (enemyStack) enemyStack.innerHTML = enemyCard
         ? battleRowedModelRowsHTML([{ card: enemyCard, slot: 1, row: "front", model: true }], true, (item, rowIndex, rowTotal, row) => battleModelHTML(item.card, rowIndex, true, rowTotal, row, item.slot))
         : `<div class="arena-secret-model">?</div>`;
+      reserveBattleCloneFormations(playerStack, "player");
+      reserveBattleCloneFormations(enemyStack, "enemy");
     }
 
     // เพิ่มโดยอลิซ v105: คำนวณโอกาสออกของการ์ดแต่ละใบด้วยสูตรเดียวกับ randomCard()
@@ -23366,6 +23453,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       enemyStack.innerHTML = bossCard
         ? battleRowedModelRowsHTML([{ card: bossCard, slot: 1, row: "front", model: true }], true, (item, rowIndex, rowTotal, row) => battleModelHTML(item.card, rowIndex, true, rowTotal, row, item.slot))
         : `<div class="arena-secret-model">?</div>`;
+      reserveBattleCloneFormations(playerStack, "player");
+      reserveBattleCloneFormations(enemyStack, "enemy");
       const states = combat && combat.playerMembers && combat.enemyMembers
         ? { player: combat.playerMembers, enemy: combat.enemyMembers }
         : makeWorldBossBattleStates(stats, stats.effectiveHp, stats.bossStats.hp, stats.shieldHits, stats.bossStats.shieldHits);
@@ -24142,6 +24231,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         enemyModels.innerHTML = enemyRecords.length
           ? battleRowedModelRowsHTML(enemyRecords, true, (record, rowIndex, rowTotal, row) => arenaSnapshotModelHTML(record.item, rowIndex, true, rowIndex, rowTotal, record.slot, row))
           : `<div class="arena-secret-model">?</div><div class="arena-secret-model">?</div><div class="arena-secret-model">?</div>`;
+        reserveBattleCloneFormations(playerModels, "player");
+        reserveBattleCloneFormations(enemyModels, "enemy");
       }
 
       const maxHp = Math.max(1, stats.effectiveHp, stats.enemyEffectiveHp || 0);
