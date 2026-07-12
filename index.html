@@ -7890,13 +7890,13 @@
       normalTicketAmount: 10,
       milestoneEvery: 10,
       milestoneRewards: [
-        { minFloor: 10,  maxFloor: 49,  type: "guaranteeTicket", rarity: "SSR",  amount: 1 },
-        { minFloor: 50,  maxFloor: 99,  type: "selector",        rarity: "SSR",  amount: 1 },
-        { minFloor: 100, maxFloor: 149, type: "guaranteeTicket", rarity: "UR", amount: 1 },
-        { minFloor: 150, maxFloor: 199, type: "selector",        rarity: "UR", amount: 1 },
-        { minFloor: 200, maxFloor: 299, type: "guaranteeTicket", rarity: "LR",  amount: 1 },
-        { minFloor: 300, maxFloor: 399, type: "selector",        rarity: "LR",  amount: 1 },
-        { minFloor: 400, maxFloor: Infinity, type: "selector",   rarity: "EX",  amount: 1 }
+        { minFloor: 10,  maxFloor: 49,  type: "guaranteeTicket", rarity: "SC",  amount: 10 },
+        { minFloor: 50,  maxFloor: 99,  type: "selector",        rarity: "SC",  amount: 10 },
+        { minFloor: 100, maxFloor: 149, type: "guaranteeTicket", rarity: "EX", amount: 10 },
+        { minFloor: 150, maxFloor: 199, type: "selector",        rarity: "EX", amount: 10 },
+        { minFloor: 200, maxFloor: 299, type: "guaranteeTicket", rarity: "EX",  amount: 20 },
+        { minFloor: 300, maxFloor: 399, type: "selector",        rarity: "EX",  amount: 20 },
+        { minFloor: 400, maxFloor: Infinity, type: "selector",   rarity: "EX",  amount: 40 }
       ]
     });
 
@@ -8162,15 +8162,15 @@
       "GOD": 0.00005
     },
     "effectiveRateCaps": {
-      "EX": 0.01,
-      "SC": 0.002,
+      "EX": 0.002,
+      "SC": 0.01,
       "GOD": 0.0001
     },
     "rateUpCards": { "3001":2
     },
     "guarantee": {
       "enabled": true,
-      "every": 8000,
+      "every": 5000,
       "rarityRates": {
 
         "EX": 10,
@@ -8204,14 +8204,14 @@
       "GOD": 0.00005
     },
     "effectiveRateCaps": {
-      "EX": 0.012,
-      "SC": 0.003,
+      "EX": 0.003,
+      "SC": 0.012,
       "GOD": 0.0001
     },
     "rateUpCards": {},
     "guarantee": {
       "enabled": true,
-      "every": 6000,
+      "every": 5000,
       "rarityRates": {
 
         "EX": 10,
