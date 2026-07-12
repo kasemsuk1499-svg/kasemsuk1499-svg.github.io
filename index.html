@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-11-universal-party-scaling-v102">
-  <title>Anime Card Collection · Runtime v102 · Universal Party Scaling</title>
+  <meta name="gacha-app-build" content="2026-07-12-awaken-acquisition-cutscene-v104">
+  <title>Anime Card Collection · Runtime v104 · AWAKEN Acquisition Cutscene</title>
   <style>
     :root {
       color-scheme: dark;
@@ -3024,6 +3024,33 @@
       border-color: rgba(250,204,21,.92);
       background: linear-gradient(145deg, #020617, #ffffff 38%, #d4af37 70%, #111827);
       box-shadow: 0 0 0 5px rgba(255,255,255,.10), 0 24px 80px rgba(0,0,0,.64), 0 0 74px rgba(250,204,21,.52);
+    }
+
+    /* เพิ่มโดยอลิซ v104: ธีมคัทซีนเฉพาะระดับ AWAKEN */
+    .sc-cutscene.rarity-awaken .sc-cutscene-shade {
+      background:
+        radial-gradient(circle at 50% 42%, rgba(240,171,252,.24), transparent 0 23%, rgba(124,58,237,.20) 44%, rgba(1,2,8,.82) 100%),
+        linear-gradient(135deg, rgba(46,16,101,.72), rgba(1,2,8,.58) 46%, rgba(192,132,252,.22));
+    }
+
+    .sc-cutscene.rarity-awaken .sc-cutscene-card {
+      border-color: rgba(233,213,255,.96);
+      background: linear-gradient(145deg, #12051f, #5b21b6 30%, #8b5cf6 56%, #f0abfc 82%, #4c1d95);
+      box-shadow:
+        0 0 0 5px rgba(216,180,254,.10),
+        0 24px 80px rgba(0,0,0,.66),
+        0 0 82px rgba(192,132,252,.58);
+      animation: awaken-cutscene-card-pulse 1.45s ease-in-out infinite alternate;
+    }
+
+    .sc-cutscene.rarity-awaken .sc-cutscene-title,
+    .sc-cutscene.rarity-awaken .sc-cutscene-name {
+      text-shadow: 0 0 20px rgba(240,171,252,.78), 0 4px 30px rgba(0,0,0,.92);
+    }
+
+    @keyframes awaken-cutscene-card-pulse {
+      from { transform: translateY(0) scale(1); filter: saturate(1); }
+      to { transform: translateY(-5px) scale(1.018); filter: saturate(1.16) brightness(1.06); }
     }
 
     .sc-cutscene::after {
@@ -7399,7 +7426,7 @@
     </div>
   </div>
 
-  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดพิเศษ EX / SC / GOD">
+  <div class="sc-cutscene hidden" id="scCutscene" role="dialog" aria-modal="true" aria-label="คัทซีนการ์ดพิเศษ EX / AWAKEN / SC / GOD">
     <video class="sc-cutscene-video" id="scCutsceneVideo" playsinline preload="auto"></video>
     <div class="sc-cutscene-shade" aria-hidden="true"></div>
     <button class="sc-skip" data-action="skip-sc-cutscene" aria-label="ข้ามคัทซีนการ์ดพิเศษ">ข้ามคัทซีน · ESC</button>
@@ -8538,7 +8565,7 @@
     const CARD_ABILITY_MODES = Object.freeze(["team", "tower", "arena", "worldBoss"]);
 
     /* ==================== [SECTION 05A SC-CUTSCENE] ====================
-       จุดปรับคัทซีนเฉพาะ “การ์ด Mystical (รหัสภายใน SC) แต่ละใบ”
+       จุดปรับคัทซีนตอนรับการ์ดเฉพาะใบ (รองรับ EX / AWAKEN / SC / GOD และระดับอื่น)
        ใส่ object ชื่อ scCutscene ไว้ในข้อมูลการ์ดใบนั้น เช่น
 
        "scCutscene": {
@@ -8564,7 +8591,8 @@
 
        หมายเหตุ
        - กด Escape หรือปุ่ม “ข้ามคัทซีน · ESC” ได้ทุกช่วง
-       - ถ้าไม่ใส่ scCutscene ระบบจะใช้ค่าเริ่มต้นและ card.video เดิม
+       - ถ้าไม่ใส่ scCutscene ระบบจะใช้ค่าเริ่มต้นและ card.video เดิม; AWAKEN เล่นอัตโนมัติหลังเปลี่ยนร่างสำเร็จ
+       - ใส่ "enabled": false เมื่อต้องการปิดคัทซีนตอนรับเฉพาะการ์ดใบนั้น
        - ชื่อไฟล์ เช่น "999.mp4" จะอ่านจาก assets/cards/999.mp4
        - path เช่น "assets/cutscenes/999.mp4" หรือ URL เต็ม จะใช้ตามนั้นโดยตรง
        ===================================================================== */
@@ -9968,9 +9996,20 @@
         state.collectionOrder.push(String(awakenCard.id));
         saveState(true);
         renderAll();
-        modalCardId = String(awakenCard.id);
-        renderCardDetail(awakenCard.id);
-        showToast(`ปลุกพลังสำเร็จ • ${latest.sourceCard.name} เปลี่ยนเป็น ${awakenCard.name} ด้วย ${formatNumber(latest.cost)} Gems`);
+
+        const result = {
+          card: awakenCard,
+          duplicate: false,
+          guaranteed: true,
+          transformed: true,
+          transformedFrom: String(latest.sourceCard.id)
+        };
+        const finish = () => {
+          modalCardId = String(awakenCard.id);
+          renderCardDetail(awakenCard.id);
+          showToast(`ปลุกพลังสำเร็จ • ${latest.sourceCard.name} เปลี่ยนเป็น ${awakenCard.name} ด้วย ${formatNumber(latest.cost)} Gems`);
+        };
+        if (!playAcquisitionCutsceneSequence([result], finish)) finish();
       } finally {
         cardUpgradeBusy = false;
       }
@@ -19977,7 +20016,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     // เพิ่มโดยอลิซ v62: เทหน้าตักใช้ Cristal และเปิดต่อจน Cristal หมด
-    // เมื่อพบการ์ดที่มีคัทซีน (EX / SC / การ์ดที่กำหนด scCutscene) จะหยุดคิวชั่วคราว
+    // เมื่อพบการ์ดที่มีคัทซีน (EX / AWAKEN / SC / GOD / การ์ดที่กำหนด scCutscene) จะหยุดคิวชั่วคราว
     // เล่นคัทซีนให้จบก่อน แล้วจึงเปิดต่อ โดยไม่ข้ามแม้เป็นการ์ดซ้ำ
     // หากผู้เล่นกดข้าม finishSCCutscene() จะ resolve ทันทีและคิวจะไหลต่อทันที
     function playSCCutsceneAsync(results = []) {
@@ -24016,14 +24055,19 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return Math.min(max, Math.max(min, number));
     }
 
-    // เพิ่มโดยอลิซ v62: การ์ดที่ต้องเล่นคัทซีนเมื่อได้รับ ไม่จำกัดเฉพาะช่องทางกาชา
-    // - EX / SC / GOD เล่นคัทซีนเสมอ
+    // เพิ่มโดยอลิซ v104: การ์ดที่ต้องเล่นคัทซีนเมื่อได้รับ ไม่จำกัดเฉพาะช่องทางกาชา
+    // - EX / AWAKEN / SC / GOD เล่นคัทซีนเสมอ
     // - ระดับอื่นที่กำหนด card.scCutscene เอง ก็เล่นคัทซีนได้เช่นกัน
+    // - กำหนด scCutscene: { enabled: false } เพื่อปิดเฉพาะใบนั้นได้
     function isAcquisitionCutsceneCard(card) {
       if (!card || typeof card !== "object") return false;
       const rarity = String(card.rarity || "").toUpperCase();
-      const hasCustomCutscene = Boolean(card.scCutscene && typeof card.scCutscene === "object");
-      return hasCustomCutscene || rarity === "EX" || rarity === "SC" || rarity === "GOD";
+      const customCutscene = card.scCutscene && typeof card.scCutscene === "object"
+        ? card.scCutscene
+        : null;
+      if (customCutscene && customCutscene.enabled === false) return false;
+      const hasCustomCutscene = Boolean(customCutscene);
+      return hasCustomCutscene || rarity === "EX" || rarity === "AWAKEN" || rarity === "SC" || rarity === "GOD";
     }
 
     function getAcquisitionCutsceneResults(results = []) {
@@ -24043,16 +24087,20 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const rarity = String(card && card.rarity || "").toUpperCase();
       const rarityName = getAcquisitionCutsceneRarityName(card);
       const isEX = rarity === "EX";
+      const isAWAKEN = rarity === "AWAKEN";
       const isSC = rarity === "SC";
       const isGOD = rarity === "GOD";
+      const defaultQuote = isAWAKEN
+        ? `${card && card.name ? card.name : rarityName} ได้ก้าวข้ามขีดจำกัดเดิม`
+        : `${card && card.name ? card.name : rarityName} ได้ตอบรับการอัญเชิญ`;
       return {
-        kicker: String(custom.kicker || (isGOD ? "DIVINE JUDGEMENT" : isEX ? "EXCEED AWAKENING" : isSC ? "ASTRAL CONVERGENCE" : `${rarityName} MANIFESTATION`)),
-        quote: String(custom.quote || `${card && card.name ? card.name : rarityName} ได้ตอบรับการอัญเชิญ`),
-        subtitle: String(custom.subtitle || (isGOD ? "A God Card Has Descended" : isEX ? "An Exceed Card Has Answered" : isSC ? "A Supreme Card Has Answered" : "A Special Card Has Answered")),
+        kicker: String(custom.kicker || (isGOD ? "DIVINE JUDGEMENT" : isAWAKEN ? "SOUL EVOLUTION" : isEX ? "EXCEED AWAKENING" : isSC ? "ASTRAL CONVERGENCE" : `${rarityName} MANIFESTATION`)),
+        quote: String(custom.quote || defaultQuote),
+        subtitle: String(custom.subtitle || (isGOD ? "A God Card Has Descended" : isAWAKEN ? "An Awakened Form Has Been Born" : isEX ? "An Exceed Card Has Answered" : isSC ? "A Supreme Card Has Answered" : "A Special Card Has Answered")),
         video: resolveAsset(custom.video || (card && card.video), "card"),
         poster: resolveAsset(custom.poster || (card && (card.poster || card.image || card.icon)), "card"),
-        accent: String(custom.accent || (isGOD ? "#facc15" : isEX ? "#22d3ee" : isSC ? "#a78bfa" : "#ffd166")),
-        accent2: String(custom.accent2 || (isGOD ? "#ffffff" : isEX ? "#facc15" : "#22d3ee")),
+        accent: String(custom.accent || (isGOD ? "#facc15" : isAWAKEN ? "#c084fc" : isEX ? "#22d3ee" : isSC ? "#a78bfa" : "#ffd166")),
+        accent2: String(custom.accent2 || (isGOD ? "#ffffff" : isAWAKEN ? "#e9d5ff" : isEX ? "#facc15" : "#22d3ee")),
         introMs: clampSCCutsceneNumber(custom.introMs, 2200, 500, 12000),
         maxVideoMs: clampSCCutsceneNumber(custom.maxVideoMs, 14000, 1000, 120000),
         revealMs: clampSCCutsceneNumber(custom.revealMs, 1900, 400, 12000),
@@ -24061,8 +24109,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         muted: custom.muted === undefined ? false : Boolean(custom.muted),
         volume: clampSCCutsceneNumber(custom.volume, 0.9, 0, 1),
         showCardAfterVideo: custom.showCardAfterVideo !== false,
-        revealKicker: String(custom.revealKicker || (isGOD ? "ANGELIC GOD MANIFESTATION" : isEX ? "EXCEED MANIFESTATION" : isSC ? "SUPREME CONVERGENCE" : `${rarityName} MANIFESTATION`)),
-        revealTitle: String(custom.revealTitle || `${rarityName} ACQUIRED`),
+        revealKicker: String(custom.revealKicker || (isGOD ? "ANGELIC GOD MANIFESTATION" : isAWAKEN ? "AWAKENING COMPLETE" : isEX ? "EXCEED MANIFESTATION" : isSC ? "SUPREME CONVERGENCE" : `${rarityName} MANIFESTATION`)),
+        revealTitle: String(custom.revealTitle || (isAWAKEN ? "AWAKEN ACQUIRED" : `${rarityName} ACQUIRED`)),
         revealText: String(custom.revealText || "")
       };
     }
@@ -24103,7 +24151,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
       const screen = document.getElementById("scCutscene");
       if (screen) {
-        screen.classList.remove("phase-intro", "phase-video", "phase-reveal", "no-video", "rarity-ex", "rarity-sc", "rarity-god");
+        screen.classList.remove("phase-intro", "phase-video", "phase-reveal", "no-video", "rarity-ex", "rarity-awaken", "rarity-sc", "rarity-god");
         screen.classList.add("hidden");
       }
 
@@ -24244,7 +24292,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         video.load();
       }
 
-      screen.classList.remove("hidden", "phase-video", "phase-reveal", "no-video", "rarity-ex", "rarity-sc", "rarity-god");
+      screen.classList.remove("hidden", "phase-video", "phase-reveal", "no-video", "rarity-ex", "rarity-awaken", "rarity-sc", "rarity-god");
       screen.classList.add("phase-intro", `rarity-${selectedRarity.toLowerCase().replace(/[^a-z0-9_-]/g, "")}`);
       if (!config.video) screen.classList.add("no-video");
       document.body.style.overflow = "hidden";
