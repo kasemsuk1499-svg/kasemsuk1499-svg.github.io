@@ -122,50 +122,42 @@ ACC_REGISTER_CARD({
         showHitCount: true
       }
     },
+{
+  name: "สเตลลาส นาเทีย",
+  description: "ทุกการโจมตีครั้งที่ 5 จะโจมตีด้วยหอกน้ำแข็ง ดาเมจ 3500% เจาะเกราะ 80% และแช่แข็ง 100% 1 เป้าหมาย",
+  activeIn: [
+    "team",
+    "tower",
+    "arena",
+    "worldBoss"
+  ],
+  effects: [
     {
-      name: "สเตลลาส นาเทีย",
-      description: "ทุกการโจมตีครั้งที่ 5 จะโจมตีด้วยหอกน้ำแข็ง ดาเมจ 3500% เจาะเกราะ 80% และแช่แข็ง 100% 1 เป้าหมาย",
-      activeIn: [
-        "team",
-        "tower",
-        "arena",
-        "worldBoss"
-      ],
-      effects: [
-        {
-          type: "nextAttackPowerRate",
-          value: 35,
-          effectOperation: "increase",
-          targetSide: "self",
-          targetSelection: "specific",
-          targetCount: 1
-        },
-        {
-          type: "defensePenetrationRate",
-          value: 0.8,
-          effectOperation: "increase",
-          targetSide: "enemy",
-          condition: {
-            onOwnAttack: true
-          },
-          targetSelection: "hitTargets"
-        },
-        {
-          type: "applyStatus",
-          targetSide: "enemy",
-          condition: {
-            onOwnAttack: true
-          },
-          targetSelection: "hitTargets",
-          status: "freeze",
-          successRate: 1,
-          targetCount: 1
-        }
-      ],
-      attackTargetCount: 1,
-      condition: {
-        afterOwnAttacks: 4
-      },
+      type: "nextAttackPowerRate",
+      value: 35,
+      effectOperation: "increase",
+      targetSide: "self"
+    },
+    {
+      type: "defensePenetrationRate",
+      value: 0.8,
+      effectOperation: "increase",
+      targetSide: "enemy",
+      targetSelection: "hitTargets"
+    },
+    {
+      type: "applyStatus",
+      targetSide: "enemy",
+      targetSelection: "hitTargets",
+      status: "freeze",
+      successRate: 1,
+      targetCount: 1
+    }
+  ],
+  attackTargetCount: 1,
+  condition: {
+    afterOwnAttacks: 4
+  },
       activeCutscene: {
         enabled: true,
         kicker: "ACTIVE SKILL",
