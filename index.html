@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-12-clone-front-of-source-v107">
+  <meta name="gacha-app-build" content="2026-07-12-clone-front-of-source-no-overlap-v108">
   <title>Anime Card Collection · Runtime v107 · Clone Front Of Source</title>
   <style>
     :root {
@@ -6643,7 +6643,7 @@
       justify-items: center !important;
       align-items: center !important;
       align-content: center !important;
-      row-gap: clamp(14px, 2.9vh, 42px);
+      row-gap: clamp(24px, 4.8vh, 72px);
       padding-inline: clamp(18px, 5vw, 96px) !important;
       overflow: visible;
     }
@@ -6693,11 +6693,18 @@
     .battle-source-formation {
       position: relative;
       flex: 0 0 auto;
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(8px, 1.2vh, 16px);
       width: max-content;
       overflow: visible;
       isolation: isolate;
+    }
+
+    .battle-source-formation.enemy {
+      flex-direction: column-reverse;
     }
 
     .battle-source-formation > .battle-model-card {
@@ -6706,9 +6713,11 @@
     }
 
     .battle-source-clone-lane {
-      position: absolute;
+      position: relative;
       z-index: 12;
-      left: 50%;
+      left: auto;
+      top: auto;
+      bottom: auto;
       display: flex;
       align-items: flex-end;
       justify-content: center;
@@ -6717,19 +6726,18 @@
       max-width: min(82vw, 880px);
       overflow: visible;
       pointer-events: none;
-      transform: translateX(-50%);
+      transform: none;
     }
 
     #battleView .fighter.player .battle-source-clone-lane,
     #arenaView .fighter.player .battle-source-clone-lane,
     #worldBossView .fighter.player .battle-source-clone-lane {
-      bottom: calc(100% + clamp(8px, 1.2vh, 16px));
+      align-items: flex-end;
     }
 
     #battleView .fighter.enemy .battle-source-clone-lane,
     #arenaView .fighter.enemy .battle-source-clone-lane,
     #worldBossView .fighter.enemy .battle-source-clone-lane {
-      top: calc(100% + clamp(8px, 1.2vh, 16px));
       align-items: flex-start;
     }
 
@@ -6792,7 +6800,7 @@
 
     @media(max-width:900px){
       #battleView .battle-model-stack.v72-rowed,
-      #arenaView .battle-model-stack.v72-rowed { row-gap: 12px; padding-inline: 12px !important; }
+      #arenaView .battle-model-stack.v72-rowed { row-gap: 18px; padding-inline: 12px !important; }
       .battle-row-line { gap: 9px; }
       .battle-transfer-toast { grid-template-columns: 64px minmax(0,1fr) 54px !important; }
     }
