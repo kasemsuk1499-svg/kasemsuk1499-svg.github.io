@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-12-worldboss-skill-fix-v112">
-  <title>Anime Card Collection · Runtime v112 · World Boss Skill Fix</title>
+  <meta name="gacha-app-build" content="2026-07-12-single-screen-multiline-battle-v114">
+  <title>Anime Card Collection · Runtime v114 · Single-Screen Multi-Line Battle</title>
   <style>
     :root {
       color-scheme: dark;
@@ -7038,6 +7038,204 @@
       background: rgba(219,238,250,.35);
     }
 
+  
+
+    /* v114 · สนามต่อสู้พอดีหนึ่งหน้าจอ + เส้นโจมตีตามเป้าหมายจริง */
+    #battleView .battle-layout,
+    #arenaView .battle-layout,
+    #worldBossView .battle-layout {
+      min-height: 0 !important;
+      gap: 10px !important;
+    }
+
+    #battleView .battle-arena,
+    #arenaView .battle-arena,
+    #worldBossView .battle-arena {
+      height: clamp(500px, calc(100dvh - 150px), 690px);
+      min-height: 0 !important;
+      max-height: calc(100dvh - 132px);
+      padding: clamp(38px, 5vh, 54px) clamp(8px, 1.7vw, 20px) clamp(72px, 10vh, 92px) !important;
+      overflow: hidden !important;
+    }
+
+    #battleView .battle-sides,
+    #arenaView .battle-sides,
+    #worldBossView .battle-sides {
+      min-height: 0 !important;
+      height: 100% !important;
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) !important;
+    }
+
+    #battleView .fighter,
+    #arenaView .fighter,
+    #worldBossView .fighter {
+      min-height: 0 !important;
+    }
+
+    #battleView .battle-model-stack,
+    #arenaView .battle-model-stack,
+    #worldBossView .battle-model-stack {
+      min-height: 0 !important;
+      height: 100% !important;
+      padding: clamp(12px, 2vh, 22px) clamp(6px, 1.4vw, 18px) !important;
+      row-gap: clamp(7px, 1.4vh, 16px) !important;
+    }
+
+    #battleView .battle-row-line,
+    #arenaView .battle-row-line,
+    #worldBossView .battle-row-line {
+      gap: clamp(6px, 1.15vw, 17px) !important;
+    }
+
+    #battleView .battle-model-card,
+    #arenaView .battle-model-card,
+    #worldBossView .battle-model-card {
+      width: clamp(58px, 6.4vw, 96px) !important;
+      margin-left: 0 !important;
+    }
+
+    #battleView .battle-source-clone-lane .battle-model-card,
+    #arenaView .battle-source-clone-lane .battle-model-card,
+    #worldBossView .battle-source-clone-lane .battle-model-card {
+      width: clamp(42px, 4.7vw, 68px) !important;
+    }
+
+    #battleView .battle-source-formation[data-reserve-clone-lane="true"] .battle-source-clone-lane:empty,
+    #arenaView .battle-source-formation[data-reserve-clone-lane="true"] .battle-source-clone-lane:empty,
+    #worldBossView .battle-source-formation[data-reserve-clone-lane="true"] .battle-source-clone-lane:empty {
+      height: clamp(42px, 4.7vw, 68px) !important;
+      min-height: clamp(42px, 4.7vw, 68px) !important;
+    }
+
+    #battleView .fighter h3,
+    #arenaView .fighter h3,
+    #worldBossView .fighter h3 {
+      padding: 5px 9px !important;
+      font-size: clamp(.66rem, 1vw, .82rem) !important;
+    }
+
+    #battleView .fighter-power,
+    #arenaView .fighter-power,
+    #worldBossView .fighter-power {
+      padding: 5px 9px !important;
+      font-size: clamp(.62rem, .95vw, .78rem) !important;
+    }
+
+    #battleView .battle-turn-order,
+    #arenaView .battle-turn-order,
+    #worldBossView .battle-turn-order {
+      top: 6px !important;
+      max-width: calc(100% - 16px) !important;
+      padding: 5px 7px !important;
+    }
+
+    #battleView .battle-actions,
+    #arenaView .battle-actions,
+    #worldBossView .battle-actions {
+      left: 7px !important;
+      right: 7px !important;
+      bottom: 7px !important;
+      gap: 6px !important;
+      padding: 6px !important;
+      border-radius: 14px !important;
+      grid-template-columns: auto auto minmax(160px, auto) minmax(0, 1fr) !important;
+    }
+
+    #battleView .battle-actions .btn,
+    #arenaView .battle-actions .btn,
+    #worldBossView .battle-actions .btn {
+      min-height: 36px !important;
+      padding: 6px 10px !important;
+      font-size: .68rem !important;
+    }
+
+    #battleView .battle-result,
+    #arenaView .battle-result,
+    #worldBossView .battle-result {
+      min-height: 38px !important;
+      max-height: 58px !important;
+      padding: 7px 9px !important;
+      font-size: .67rem !important;
+    }
+
+    /* เส้นฝ่ายเรา = ฟ้า, ฝ่ายศัตรู = แดง และสร้างหนึ่งเส้นต่อหนึ่งเป้าหมาย */
+    .battle-attack-path {
+      --path-duration: 680ms;
+      --path-delay: 0ms;
+      height: 7px !important;
+      border: 1px solid rgba(255,255,255,.72);
+      background: linear-gradient(90deg, rgba(34,211,238,.08), #22d3ee 28%, #ffffff 72%, rgba(59,130,246,.08)) !important;
+      box-shadow: 0 0 10px rgba(34,211,238,.95), 0 0 26px rgba(59,130,246,.72), 0 0 48px rgba(34,211,238,.30) !important;
+      animation: battle-path-flash var(--path-duration) cubic-bezier(.18,.72,.25,1) var(--path-delay) both !important;
+    }
+
+    .battle-attack-path::before {
+      content: "";
+      position: absolute;
+      left: -5px;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #67e8f9;
+      box-shadow: 0 0 14px #22d3ee, 0 0 26px rgba(59,130,246,.8);
+      transform: translateY(-50%);
+    }
+
+    .battle-attack-path::after {
+      content: "";
+      position: absolute;
+      right: -2px;
+      top: 50%;
+      width: 0;
+      height: 0;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      border-left: 13px solid #ffffff;
+      filter: drop-shadow(0 0 6px #22d3ee);
+      transform: translateY(-50%);
+    }
+
+    .battle-attack-path.enemy {
+      background: linear-gradient(90deg, rgba(251,113,133,.08), #fb7185 28%, #fff7ed 72%, rgba(249,115,22,.08)) !important;
+      box-shadow: 0 0 10px rgba(251,113,133,.95), 0 0 26px rgba(249,115,22,.72), 0 0 48px rgba(190,24,93,.30) !important;
+    }
+
+    .battle-attack-path.enemy::before {
+      background: #fb7185;
+      box-shadow: 0 0 14px #fb7185, 0 0 26px rgba(249,115,22,.8);
+    }
+
+    .battle-attack-path.enemy::after {
+      border-left-color: #fff7ed;
+      filter: drop-shadow(0 0 6px #fb7185);
+    }
+
+    @media (max-width: 900px) {
+      #battleView .battle-arena,
+      #arenaView .battle-arena,
+      #worldBossView .battle-arena {
+        height: calc(100dvh - 118px);
+        min-height: 520px !important;
+        max-height: none;
+        padding-top: 42px !important;
+        padding-bottom: 112px !important;
+      }
+      #battleView .battle-actions,
+      #arenaView .battle-actions,
+      #worldBossView .battle-actions {
+        grid-template-columns: 1fr 1fr !important;
+      }
+      #battleView .battle-playback-controls,
+      #arenaView .battle-playback-controls,
+      #worldBossView .battle-playback-controls,
+      #battleView .battle-result,
+      #arenaView .battle-result,
+      #worldBossView .battle-result {
+        grid-column: 1 / -1;
+      }
+    }
+
   </style>
 </head>
 <body class="auth-locked">
@@ -9637,6 +9835,7 @@
           runTransaction: databaseModule.runTransaction,
           onValue: databaseModule.onValue,
           off: databaseModule.off,
+          increment: databaseModule.increment,
           serverTimestamp: databaseModule.serverTimestamp
         };
         cloudApp = cloudModules.getApps().length
@@ -17531,6 +17730,46 @@
       pushBattleEventCard(stage, { tone: "status", cardId: target.id, cardName: target.name, title, body, duration: 4200 });
     }
 
+
+
+    function drawBattleAttackPaths(actorNode, targetEntries, side, duration) {
+      if (!actorNode || !targetEntries || !targetEntries.length) return [];
+      const actorRect = actorNode.getBoundingClientRect();
+      const total = targetEntries.length;
+      const paths = [];
+      targetEntries.forEach((entry, index) => {
+        const node = entry && entry.node;
+        if (!node) return;
+        const targetRect = node.getBoundingClientRect();
+        const spread = (index - (total - 1) / 2) * Math.min(8, Math.max(3, 18 / Math.max(1, total)));
+        const rawDx = (targetRect.left + targetRect.width / 2) - (actorRect.left + actorRect.width / 2);
+        const rawDy = (targetRect.top + targetRect.height / 2) - (actorRect.top + actorRect.height / 2);
+        const distanceRaw = Math.max(1, Math.hypot(rawDx, rawDy));
+        const perpX = -rawDy / distanceRaw;
+        const perpY = rawDx / distanceRaw;
+        const fromX = actorRect.left + actorRect.width / 2 + perpX * spread;
+        const fromY = actorRect.top + actorRect.height / 2 + perpY * spread;
+        const toX = targetRect.left + targetRect.width / 2 + perpX * spread;
+        const toY = targetRect.top + targetRect.height / 2 + perpY * spread;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const distance = Math.max(20, Math.hypot(dx, dy));
+        const path = document.createElement("div");
+        path.className = `battle-attack-path ${side === "enemy" ? "enemy" : "player"}`;
+        path.dataset.targetIndex = String(index + 1);
+        path.style.left = `${fromX}px`;
+        path.style.top = `${fromY}px`;
+        path.style.width = `${distance}px`;
+        path.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+        path.style.setProperty("--path-duration", `${Math.max(620, Math.floor(Number(duration || 480) * 1.18))}ms`);
+        path.style.setProperty("--path-delay", `${index * 45}ms`);
+        document.body.appendChild(path);
+        paths.push(path);
+        window.setTimeout(() => path.remove(), Math.max(760, Number(duration || 480) * 1.35 + index * 45));
+      });
+      return paths;
+    }
+
     async function animateIndividualBattleAction(stage, turn, duration) {
       if (!stage || battleSkipAnimations || !turn || turn.command === "suddenBreak") return;
       const actorNode = battleUnitNode(stage, turn.side, turn.actorCardId);
@@ -17561,6 +17800,7 @@
       // v111: ร่างแยกโจมตีอยู่กับที่ และถ้าตัวละคร/เป้าหมายอยู่นอก viewport จะไม่สร้างการ์ดวิ่งแบบ fixed
       // ป้องกันการ์ดดีดออกนอกจอและป้องกันหน้าเว็บสั่นจากพิกัดที่เปลี่ยนระหว่างจัดแถวร่างแยก
       if (isRuntimeClone || !actorOnScreen || !targetOnScreen) {
+        drawBattleAttackPaths(actorNode, targetEntries, turn.side, duration);
         actorNode.animate?.([
           { opacity: 1, filter: "brightness(1)" },
           { opacity: .72, filter: "brightness(1.55) drop-shadow(0 0 18px rgba(92,232,255,.75))" },
@@ -17592,17 +17832,7 @@
       actorNode.style.opacity = ".28";
       const dx = (t.left + t.width/2) - (a.left + a.width/2);
       const dy = (t.top + t.height/2) - (a.top + a.height/2);
-      const path = document.createElement("div");
-      path.className = `battle-attack-path ${turn.side === "enemy" ? "enemy" : "player"}`;
-      const fromX = a.left + a.width / 2;
-      const fromY = a.top + a.height / 2;
-      const distance = Math.max(20, Math.hypot(dx, dy));
-      path.style.left = `${fromX}px`;
-      path.style.top = `${fromY}px`;
-      path.style.width = `${distance}px`;
-      path.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
-      document.body.appendChild(path);
-      window.setTimeout(() => path.remove(), Math.max(520, duration));
+      drawBattleAttackPaths(actorNode, targetEntries, turn.side, duration);
       const travel = Math.max(140, Math.floor(duration * .72));
       if (clone.animate) {
         await clone.animate([{transform:"translate(0,0) scale(1)"},{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`}],{duration:travel,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}).finished.catch(()=>{});
@@ -17699,7 +17929,7 @@
       });
     }
 
-async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180) {
+async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180, hooks = {}) {
       updateTurnBattleDisplay(display, combat);
       const playerLabel = labels.player || "ทีมของคุณ";
       const enemyLabel = labels.enemy || "ศัตรู";
@@ -17759,8 +17989,16 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         animateBattleEvents(stage, turn);
         syncBattleBoard(stage, turn.memberStates);
         updateTurnBattleDisplay(display, combat, turn);
+        if (hooks && typeof hooks.onTurnApplied === "function") {
+          try {
+            const hookResult = hooks.onTurnApplied(turn, turnIndex, combat);
+            if (hooks.awaitTurnCallbacks && hookResult && typeof hookResult.then === "function") await hookResult;
+          } catch (hookError) {
+            console.warn("Battle turn hook skipped:", hookError);
+          }
+        }
         if (turn.suddenBreak) { result.textContent = `${result.dataset.rawBattleText || result.textContent} • Sudden Break!`; beautifyBattleResult(result); }
-        if (!battleSkipAnimations) await wait(Math.max(20, Math.floor(speed * .25)));
+        if (!battleSkipAnimations) await wait(Math.max(35, Math.floor(speed * .38)));
       }
       renderBattleTurnOrder(stage, combat, combat.turns.length, labels);
     }
@@ -19373,7 +19611,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const stage = document.getElementById("arenaBattleStage");
       const result = document.getElementById("arenaBattleResult");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 175;
+      const phaseDuration = reducedMotion ? 20 : 220;
       arenaAnimating = true;
       battleSkipAnimations = false;
       state.battle.energy -= 1;
@@ -19752,7 +19990,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
       const arena = document.querySelector("#battleView .battle-arena");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 175;
+      const phaseDuration = reducedMotion ? 20 : 220;
       battleAnimating = true;
       battleSkipAnimations = false;
       state.battle.energy -= 1;
@@ -22982,7 +23220,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const boss = WORLD_BOSS_BY_ID.get(bossId) || fallbackBoss;
       const stats = getWorldBossBaseStats(boss);
       const maxHp = Math.max(1, Math.floor(Number(raw && raw.maxHp) || Number(stats.hp) || 1));
-      const currentHp = Math.max(0, Math.min(maxHp, Math.floor(Number(raw && (raw.currentHp ?? raw.hpRemaining ?? raw.remainingHp)) || maxHp)));
+      const rawCurrentHp = raw && (raw.currentHp ?? raw.hpRemaining ?? raw.remainingHp);
+      const currentHp = rawCurrentHp === undefined || rawCurrentHp === null || rawCurrentHp === ""
+        ? maxHp
+        : Math.max(0, Math.min(maxHp, Math.floor(Number(rawCurrentHp) || 0)));
       return {
         date: String(raw && raw.date || dateKey || worldBossDateKey()),
         bossId: String(boss && boss.id || bossId || ""),
@@ -23010,37 +23251,48 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     async function ensureWorldBossServerDay(dateKey = worldBossDateKey()) {
-      if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.runTransaction) return null;
+      if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.get || !cloudModules.set) return null;
       const selectedBoss = getTodayWorldBoss(dateKey);
       const dailyRef = cloudModules.ref(cloudDb, worldBossDailyPath(dateKey));
-      const result = await cloudModules.runTransaction(dailyRef, current => {
-        if (current && typeof current === "object" && current.bossId) {
-          const normalized = normalizeWorldBossServerState(current, dateKey);
-          return {
-            ...current,
-            date: normalized.date,
-            bossId: normalized.bossId,
-            bossName: normalized.bossName,
-            maxHp: normalized.maxHp,
-            currentHp: normalized.currentHp,
-            totalDamage: normalized.totalDamage,
-            totalScore: normalized.totalScore,
-            attempts: normalized.attempts,
-            broken: normalized.currentHp <= 0 || Boolean(current.broken),
-            players: current.players && typeof current.players === "object" ? current.players : {},
-            updatedAt: current.updatedAt || Date.now()
-          };
-        }
-        return makeWorldBossServerDefault(dateKey, selectedBoss);
-      });
-      if (result && result.snapshot) return updateWorldBossServerCache(result.snapshot.val(), dateKey);
-      return null;
+      try {
+        const existing = await cloudModules.get(dailyRef);
+        if (existing.exists()) return updateWorldBossServerCache(existing.val(), dateKey);
+        const initial = makeWorldBossServerDefault(dateKey, selectedBoss);
+        await cloudModules.set(dailyRef, initial);
+        return updateWorldBossServerCache(initial, dateKey);
+      } catch (error) {
+        // มีผู้เล่นอีกคนสร้างข้อมูลวันนี้พร้อมกัน ให้โหลดค่าที่ถูกสร้างแล้วกลับมาแทน
+        try {
+          const retry = await cloudModules.get(dailyRef);
+          if (retry.exists()) return updateWorldBossServerCache(retry.val(), dateKey);
+        } catch (_) {}
+        throw error;
+      }
+    }
+
+    function renderWorldBossServerHpOnly() {
+      const bossState = normalizeWorldBossStateForToday();
+      const stats = getWorldBossTeamStats();
+      const boss = stats.boss;
+      const serverBoss = getActiveWorldBossServerState(bossState.date);
+      if (!serverBoss || String(serverBoss.bossId || "") !== String(boss && boss.id || "")) return;
+      const remainingHp = Math.max(0, Number(serverBoss.currentHp) || 0);
+      const maxHp = Math.max(1, Number(serverBoss.maxHp) || Number(stats.bossStats.hp) || 1);
+      const hpPercent = Math.max(0, Math.min(100, remainingHp / maxHp * 100));
+      const hpText = document.getElementById("worldBossHpText");
+      const hpMeter = document.getElementById("worldBossHpMeter");
+      const breakText = document.getElementById("worldBossBreakText");
+      const attemptText = document.getElementById("worldBossAttemptText");
+      if (hpText) hpText.textContent = `HP ${formatNumber(remainingHp)} / ${formatNumber(maxHp)}`;
+      if (hpMeter) hpMeter.style.width = `${hpPercent}%`;
+      if (breakText) breakText.textContent = remainingHp <= 0 ? "BREAK ทั้งเซิร์ฟ — ยังตีเก็บคะแนนต่อได้" : "เลือดรวมทั้งเซิร์ฟแบบเรียลไทม์";
+      if (attemptText) attemptText.textContent = `${formatNumber(bossState.attempts)} ครั้ง • เซิร์ฟรวม ${formatNumber(serverBoss.attempts || 0)}`;
     }
 
     function subscribeWorldBossServer(dateKey = worldBossDateKey()) {
       if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.onValue) return;
       const path = worldBossDailyPath(dateKey);
-      if (worldBossServerListeningKey === path) return;
+      if (worldBossServerListeningKey === path && worldBossServerUnsubscribe) return;
       if (worldBossServerUnsubscribe) {
         try { worldBossServerUnsubscribe(); } catch (error) { try { cloudModules.off(cloudModules.ref(cloudDb, worldBossServerListeningKey)); } catch (_) {} }
         worldBossServerUnsubscribe = null;
@@ -23048,11 +23300,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       worldBossServerListeningKey = path;
       const dailyRef = cloudModules.ref(cloudDb, path);
       worldBossServerUnsubscribe = cloudModules.onValue(dailyRef, snapshot => {
-        if (snapshot.exists()) {
-          updateWorldBossServerCache(snapshot.val(), dateKey);
-          if (activeTab === "worldBoss") {
-            window.requestAnimationFrame(() => renderWorldBoss());
-          }
+        if (!snapshot.exists()) return;
+        updateWorldBossServerCache(snapshot.val(), dateKey);
+        if (activeTab === "worldBoss") {
+          window.requestAnimationFrame(() => {
+            // ระหว่างเล่นอนิเมชัน อัปเดตเฉพาะเลือดเพื่อไม่ให้สนามถูกสร้างใหม่และกระตุก
+            if (worldBossAnimating) renderWorldBossServerHpOnly();
+            else renderWorldBoss();
+          });
         }
       }, error => {
         console.warn("World Boss server listener skipped:", error);
@@ -23064,12 +23319,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!activeCloudUid) return null;
       if (!force && worldBossServerSyncPromise) return worldBossServerSyncPromise;
       const now = Date.now();
-      if (!force && now - worldBossServerLastEnsureAt < 12000 && worldBossServerState && worldBossServerState.date === dateKey) return worldBossServerState;
+      if (!force && now - worldBossServerLastEnsureAt < 12000 && worldBossServerState && worldBossServerState.date === dateKey) {
+        subscribeWorldBossServer(dateKey);
+        return worldBossServerState;
+      }
       worldBossServerLastEnsureAt = now;
       worldBossServerSyncPromise = (async () => {
         try {
           if (!cloudReady) await initFirebase();
-          if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.runTransaction) return null;
+          if (!cloudReady || !cloudDb || !cloudModules) return null;
           const synced = await ensureWorldBossServerDay(dateKey);
           subscribeWorldBossServer(dateKey);
           return synced;
@@ -23091,51 +23349,82 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       syncWorldBossServer(force);
     }
 
-    async function applyWorldBossServerDamage(stats, combat, score = 0) {
+    async function readWorldBossServerDay(dateKey = worldBossDateKey()) {
+      const dailyRef = cloudModules.ref(cloudDb, worldBossDailyPath(dateKey));
+      const snapshot = await cloudModules.get(dailyRef);
+      return snapshot.exists() ? updateWorldBossServerCache(snapshot.val(), dateKey) : null;
+    }
+
+    async function applyWorldBossServerDamageChunk(stats, rawDamage = 0) {
       if (!activeCloudUid) return null;
       if (!cloudReady) await initFirebase();
       if (!cloudReady || !cloudDb || !cloudModules || !cloudModules.runTransaction) return null;
+      const damage = Math.max(0, Math.floor(Number(rawDamage) || 0));
+      if (!damage) return getActiveWorldBossServerState(worldBossDateKey());
       const dateKey = worldBossDateKey();
-      const boss = stats && stats.boss || getTodayWorldBoss(dateKey);
-      const bossStats = getWorldBossBaseStats(boss);
-      const damage = Math.max(0, Math.floor(Number(combat && combat.playerTotalDamage) || 0));
-      const scoreGain = Math.max(0, Math.floor(Number(score) || 0));
-      const uid = String(activeCloudUid || "guest");
+      await ensureWorldBossServerDay(dateKey);
+      const uid = String(activeCloudUid);
       const username = String(activeCloudUsername || state && state.profile && state.profile.username || "Guest").slice(0, 40);
-      const dailyRef = cloudModules.ref(cloudDb, worldBossDailyPath(dateKey));
-      const result = await cloudModules.runTransaction(dailyRef, current => {
-        let next = current && typeof current === "object" ? { ...current } : makeWorldBossServerDefault(dateKey, boss);
-        const normalized = normalizeWorldBossServerState(next, dateKey);
-        next = {
-          ...next,
-          date: normalized.date,
-          bossId: normalized.bossId || String(boss && boss.id || ""),
-          bossName: normalized.bossName || String(boss && boss.name || "World Boss"),
-          maxHp: normalized.maxHp || Math.max(1, Math.floor(Number(bossStats.hp) || 1)),
-          currentHp: Math.max(0, normalized.currentHp - damage),
-          totalDamage: normalized.totalDamage + damage,
-          totalScore: normalized.totalScore + scoreGain,
-          attempts: normalized.attempts + 1,
-          updatedAt: Date.now(),
-          players: next.players && typeof next.players === "object" ? { ...next.players } : {}
-        };
-        next.broken = next.currentHp <= 0;
-        const previousPlayer = next.players[uid] && typeof next.players[uid] === "object" ? next.players[uid] : {};
-        next.players[uid] = {
-          uid,
-          username,
-          damage: Math.max(0, Math.floor(Number(previousPlayer.damage) || 0)) + damage,
-          score: Math.max(0, Math.floor(Number(previousPlayer.score) || 0)) + scoreGain,
-          attempts: Math.max(0, Math.floor(Number(previousPlayer.attempts) || 0)) + 1,
-          bestScore: Math.max(Math.max(0, Math.floor(Number(previousPlayer.bestScore) || 0)), scoreGain),
-          lastDamage: damage,
-          lastScore: scoreGain,
-          lastAt: Date.now()
-        };
-        return next;
+      const dayPath = worldBossDailyPath(dateKey);
+      const hpRef = cloudModules.ref(cloudDb, `${dayPath}/currentHp`);
+      const hpResult = await cloudModules.runTransaction(hpRef, current => {
+        const safeCurrent = Math.max(0, Math.floor(Number(current) || 0));
+        return Math.max(0, safeCurrent - damage);
       });
-      if (result && result.snapshot) return updateWorldBossServerCache(result.snapshot.val(), dateKey);
-      return null;
+      const remainingHp = hpResult && hpResult.snapshot ? Math.max(0, Number(hpResult.snapshot.val()) || 0) : 0;
+      const updates = {};
+      updates[`${dayPath}/totalDamage`] = cloudModules.increment(damage);
+      updates[`${dayPath}/updatedAt`] = cloudModules.serverTimestamp();
+      if (remainingHp <= 0) updates[`${dayPath}/broken`] = true;
+      updates[`${dayPath}/players/${uid}/uid`] = uid;
+      updates[`${dayPath}/players/${uid}/username`] = username;
+      updates[`${dayPath}/players/${uid}/damage`] = cloudModules.increment(damage);
+      updates[`${dayPath}/players/${uid}/lastDamage`] = damage;
+      updates[`${dayPath}/players/${uid}/lastAt`] = cloudModules.serverTimestamp();
+      await cloudModules.update(cloudModules.ref(cloudDb), updates);
+      const cached = getActiveWorldBossServerState(dateKey);
+      worldBossServerState = {
+        ...cached,
+        currentHp: remainingHp,
+        broken: remainingHp <= 0 || Boolean(cached && cached.broken),
+        updatedAt: Date.now()
+      };
+      return worldBossServerState;
+    }
+
+    async function finalizeWorldBossServerAttempt(stats, score = 0, fightDamage = 0) {
+      if (!activeCloudUid) return null;
+      if (!cloudReady) await initFirebase();
+      if (!cloudReady || !cloudDb || !cloudModules) return null;
+      const dateKey = worldBossDateKey();
+      await ensureWorldBossServerDay(dateKey);
+      const uid = String(activeCloudUid);
+      const username = String(activeCloudUsername || state && state.profile && state.profile.username || "Guest").slice(0, 40);
+      const scoreGain = Math.max(0, Math.floor(Number(score) || 0));
+      const totalFightDamage = Math.max(0, Math.floor(Number(fightDamage) || 0));
+      const dayPath = worldBossDailyPath(dateKey);
+      const updates = {};
+      updates[`${dayPath}/totalScore`] = cloudModules.increment(scoreGain);
+      updates[`${dayPath}/attempts`] = cloudModules.increment(1);
+      updates[`${dayPath}/updatedAt`] = cloudModules.serverTimestamp();
+      updates[`${dayPath}/players/${uid}/uid`] = uid;
+      updates[`${dayPath}/players/${uid}/username`] = username;
+      updates[`${dayPath}/players/${uid}/score`] = cloudModules.increment(scoreGain);
+      updates[`${dayPath}/players/${uid}/attempts`] = cloudModules.increment(1);
+      updates[`${dayPath}/players/${uid}/lastDamage`] = totalFightDamage;
+      updates[`${dayPath}/players/${uid}/lastScore`] = scoreGain;
+      updates[`${dayPath}/players/${uid}/lastAt`] = cloudModules.serverTimestamp();
+      await cloudModules.update(cloudModules.ref(cloudDb), updates);
+      const bestRef = cloudModules.ref(cloudDb, `${dayPath}/players/${uid}/bestScore`);
+      await cloudModules.runTransaction(bestRef, current => Math.max(Math.max(0, Math.floor(Number(current) || 0)), scoreGain));
+      return readWorldBossServerDay(dateKey);
+    }
+
+    // Compatibility: ไฟล์/ส่วนเสริมเก่าที่เรียกฟังก์ชันเดิมยังใช้งานได้ แต่จะบันทึกดาเมจและสรุปไฟต์แยกกัน
+    async function applyWorldBossServerDamage(stats, combat, score = 0) {
+      const totalDamage = Math.max(0, Math.floor(Number(combat && combat.playerTotalDamage) || 0));
+      await applyWorldBossServerDamageChunk(stats, totalDamage);
+      return finalizeWorldBossServerAttempt(stats, score, totalDamage);
     }
 
     function normalizeWorldBossState(raw = {}) {
@@ -23825,7 +24114,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       setText("worldBossHpText", `HP ${formatNumber(remainingHp)} / ${formatNumber(maxHpForMeter)}`);
       setText("worldBossBreakText", remainingHp <= 0 ? "BREAK ทั้งเซิร์ฟ — ยังตีเก็บคะแนนต่อได้" : (useServerHp ? "เลือดรวมทั้งเซิร์ฟแบบเรียลไทม์" : "โหมดสำรอง: เลือดนี้ยังเป็นของเครื่องนี้"));
       setText("worldBossAtkText", formatNumber(stats.bossStats.attack));
-      setText("worldBossMaxHpText", formatNumber(stats.bossStats.hp));
+      setText("worldBossMaxHpText", formatNumber(maxHpForMeter));
       setText("worldBossDefText", formatNumber(stats.bossStats.defense));
       setText("worldBossElementText", stats.bossElements.map(elementLabel).join(" / "));
       setText("worldBossTotalScoreText", formatNumber(bossState.totalScore));
@@ -23867,7 +24156,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const stage = document.getElementById("worldBossBattleStage");
       const arenaResult = document.getElementById("worldBossBattleArenaResult");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const phaseDuration = reducedMotion ? 20 : 175;
+      const phaseDuration = reducedMotion ? 20 : 220;
       worldBossAnimating = true;
       battleSkipAnimations = false;
       if (stage) {
@@ -23887,6 +24176,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         combat.enemyCombatPower = calculateCombatPower(stats.bossStats.attack, stats.bossStats.hp, stats.bossStats.defense, stats.bossStats.attackHits, stats.bossStats.shieldHits);
         lastWorldBossCombat = combat;
         if (stage && arenaResult) {
+          let streamedDamage = 0;
+          let confirmedStreamedDamage = 0;
+          let damageQueue = Promise.resolve();
+          let streamError = null;
+          await syncWorldBossServer(true);
           await playTurnBasedCombat(stage, arenaResult, combat, {
             playerPower: document.getElementById("worldBossPlayerPower"),
             enemyPower: document.getElementById("worldBossEnemyPower"),
@@ -23895,13 +24189,37 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           }, {
             player: "ทีมไต่หอของคุณ",
             enemy: stats.boss.name
-          }, phaseDuration);
+          }, phaseDuration, {
+            onTurnApplied(turn) {
+              if (!turn || turn.side !== "player" || turn.command === "statusSkip" || turn.command === "guard") return;
+              const turnDamage = Math.max(0, Math.floor(Number(turn.damage) || 0));
+              if (!turnDamage) return;
+              streamedDamage += turnDamage;
+              damageQueue = damageQueue.then(async () => {
+                const server = await applyWorldBossServerDamageChunk(stats, turnDamage);
+                confirmedStreamedDamage += turnDamage;
+                if (server) renderWorldBossServerHpOnly();
+                return server;
+              }).catch(error => {
+                streamError = error;
+                console.warn("World Boss realtime damage chunk failed:", error);
+              });
+            }
+          });
+          await damageQueue;
+          combat._worldBossStreamedDamage = streamedDamage;
+          combat._worldBossConfirmedDamage = confirmedStreamedDamage;
+          combat._worldBossStreamError = streamError;
           stage.classList.add(combat.playerRemainingHp > 0 ? "battle-win" : "battle-lose");
         }
         const score = Math.floor(Number(combat.worldBossScore) || 0);
         let serverAfterHit = null;
         try {
-          serverAfterHit = await applyWorldBossServerDamage(stats, combat, score);
+          const totalDamage = Math.max(0, Math.floor(Number(combat.playerTotalDamage) || 0));
+          const confirmedDamage = Math.max(0, Math.floor(Number(combat._worldBossConfirmedDamage) || 0));
+          const missingDamage = Math.max(0, totalDamage - confirmedDamage);
+          if (missingDamage > 0) await applyWorldBossServerDamageChunk(stats, missingDamage);
+          serverAfterHit = await finalizeWorldBossServerAttempt(stats, score, totalDamage);
         } catch (serverError) {
           console.warn("World Boss shared HP update skipped:", serverError);
           if (!worldBossServerWarningShown) {
