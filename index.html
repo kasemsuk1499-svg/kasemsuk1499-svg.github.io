@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-12-per-card-gacha-rates-v105">
-  <title>Anime Card Collection · Runtime v105 · Per-Card Gacha Rates</title>
+  <meta name="gacha-app-build" content="2026-07-12-active-clone-limit-v106">
+  <title>Anime Card Collection · Runtime v106 · Active Clone Limit</title>
   <style>
     :root {
       color-scheme: dark;
@@ -14923,6 +14923,8 @@
             spawnDepth: Math.max(0, Math.floor(Number(item.spawnDepth) || 0)),
             spawnKind: String(item.spawnKind || ""),
             spawnSourceId: String(item.spawnSourceId || ""),
+            spawnRootSourceId: String(item.spawnRootSourceId || item.spawnSourceId || item.id || ""),
+            spawnGroupKey: String(item.spawnGroupKey || ""),
             originalSide: side, originalSlot: slotNumber, originalRow: row, capturedBySide: "", captureOwnerCardId: "", captureUses: {}
           };
         });
@@ -15097,9 +15099,19 @@
           reviveMode:"", reviveTurnsRemaining:0, reviveHitLifeRemaining:0, reviveUses:{}, reviveCount:0,
           tauntTurnsRemaining:0, tauntRoundsRemaining:0, tauntSourceCardId:"", statusEffects:[], statusSerial:0,
           statusResistanceRules:[], cardId:baseId, spawnDepth:Math.max(0, Number(actor.spawnDepth) || 0) + 1,
-          spawnKind:isSummon ? "summon" : "clone", spawnSourceId:String(actor.id), originalSide:team.side,
+          spawnKind:isSummon ? "summon" : "clone", spawnSourceId:String(actor.id),
+          spawnRootSourceId:String(rule._runtimeSpawnRootSourceId || actor.spawnRootSourceId || actor.id),
+          spawnGroupKey:String(rule._runtimeSpawnGroupKey || rule.cloneGroupKey || ""), originalSide:team.side,
           originalSlot:slot, originalRow:row, capturedBySide:"", captureOwnerCardId:"", captureUses:{}
         };
+      }
+
+      function activeCloneCount(team, groupKey) {
+        const safeKey = String(groupKey || "");
+        if (!team || !safeKey) return 0;
+        return abilityArray(team.members).filter(member =>
+          member && member.spawnKind === "clone" && !member.ko && Number(member.currentHp) > 0 && String(member.spawnGroupKey || "") === safeKey
+        ).length;
       }
 
       function applySpawnRules(rules, ownerTeam, defenderTeam, actor, currentTarget, turnIndex) {
@@ -15119,8 +15131,23 @@
             events.push({ status:"missingCard", type, sourceCardId:actor.id, sourceName:actor.name, summonCardId:String(rule.summonCardId || "") });
             return;
           }
+          const spawnRootSourceId = String(actor.spawnRootSourceId || actor.id);
+          const explicitCloneGroupKey = String(rule.cloneGroupKey || "").trim();
+          const cloneGroupKey = isSummon ? "" : (explicitCloneGroupKey || `${spawnRootSourceId}::${String(rule.sourceAbilityName || "splitClone")}::${ruleIndex}`);
+          const maxActiveClones = isSummon ? 0 : Math.max(0, Math.min(100, Math.floor(Number(rule.maxActiveClones) || 0)));
+          const runtimeRule = { ...rule, type, _runtimeSpawnGroupKey:cloneGroupKey, _runtimeSpawnRootSourceId:spawnRootSourceId };
           const count = Math.max(1, Math.min(20, Math.floor(Number(rule.count) || 1)));
           for (let index = 0; index < count; index += 1) {
+            if (!isSummon && maxActiveClones > 0) {
+              const currentActiveClones = activeCloneCount(ownerTeam, cloneGroupKey);
+              if (currentActiveClones >= maxActiveClones) {
+                events.push({
+                  status:"maxActiveLimit", type, sourceCardId:actor.id, sourceName:actor.name,
+                  maxActiveClones, activeClones:currentActiveClones, cloneGroupKey, turnIndex, ruleIndex
+                });
+                break;
+              }
+            }
             if (Math.random() > Math.max(0, Math.min(1, Number(rule.successRate) || 0))) {
               events.push({ status:"failed", type, sourceCardId:actor.id, sourceName:actor.name, cardId:String(identityCard.id) });
               continue;
@@ -15131,9 +15158,9 @@
               continue;
             }
             if (slotInfo.replaced) removeRuntimeMember(ownerTeam, slotInfo.replaced);
-            const member = createSpawnMember(ownerTeam, actor, { ...rule, type }, identityCard, slotInfo, index);
+            const member = createSpawnMember(ownerTeam, actor, runtimeRule, identityCard, slotInfo, index);
             ownerTeam.members.push(member);
-            attachSpawnAbilities(ownerTeam, member, { ...rule, type }, identityCard);
+            attachSpawnAbilities(ownerTeam, member, runtimeRule, identityCard);
             events.push({
               status:"success", type, spawnKind:member.spawnKind, sourceCardId:actor.id, sourceName:actor.name,
               targetCardId:member.id, targetName:member.name, cardId:member.cardId, slot:member.slot, row:member.row,
@@ -15141,7 +15168,9 @@
               replacedCardId:slotInfo.replaced && slotInfo.replaced.id || "", replacedName:slotInfo.replaced && slotInfo.replaced.name || "",
               power:member.power, hp:member.currentHp, maxHp:member.maxHp, defense:member.defense, speed:member.speed,
               normalAttackTargetCount:member.normalAttackTargetCount, attackHits:member.attackHits,
-              canUseAbilities:rule.canUseAbilities !== false, turnIndex, ruleIndex
+              canUseAbilities:rule.canUseAbilities !== false, maxActiveClones,
+              activeClones:!isSummon && cloneGroupKey ? activeCloneCount(ownerTeam, cloneGroupKey) : 0,
+              cloneGroupKey, turnIndex, ruleIndex
             });
           }
         });
@@ -16081,6 +16110,7 @@
           reviveHitLifeRemaining: member.reviveHitLifeRemaining, reviveCount: member.reviveCount, deathReason: member.deathReason,
           tauntTurnsRemaining: member.tauntTurnsRemaining || 0, tauntRoundsRemaining: member.tauntRoundsRemaining || 0, capturedBySide: member.capturedBySide || "", cardId: member.cardId || member.id,
           spawnDepth: member.spawnDepth || 0, spawnKind: member.spawnKind || "", spawnSourceId: member.spawnSourceId || "",
+          spawnRootSourceId: member.spawnRootSourceId || "", spawnGroupKey: member.spawnGroupKey || "",
           statusEffects: compactBattleStatuses(member).map(effect => ({ status:effect.status, label:effect.label, icon:statusEmojiText(effect), text:statusIconText(effect) })),
           damage: member.damageDealt, healing: member.healingDone, shieldCreated: member.shieldCreated,
           skillActivations: member.skillActivations, attacks: member.attackCount, totalHits: member.totalHits,
@@ -17422,7 +17452,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const reviveText = abilityArray(turn.reviveEvents).length ? ` • ✨ คืนชีพ ${turn.reviveEvents.map(item=>item.targetName).join(", ")}` : "";
         const speedText = abilityArray(turn.speedEvents).length ? ` • SPD ${turn.speedEvents.map(item=>`${item.targetName} ${item.change>=0?"+":""}${item.change}`).join(", ")}` : "";
         const spawnSuccess = abilityArray(turn.spawnEvents).filter(item => item.status === "success");
-        const spawnText = spawnSuccess.length ? ` • ${spawnSuccess.map(item => item.spawnKind === "summon" ? `🔮 ซัมม่อน ${item.targetName}` : `👥 แยกร่าง ${item.targetName}`).join(", ")}` : "";
+        const spawnText = spawnSuccess.length ? ` • ${spawnSuccess.map(item => item.spawnKind === "summon" ? `🔮 ซัมม่อน ${item.targetName}` : `👥 แยกร่าง ${item.targetName}${item.maxActiveClones ? ` (${item.activeClones}/${item.maxActiveClones})` : ""}`).join(", ")}` : "";
+        const cloneLimitEvents = abilityArray(turn.spawnEvents).filter(item => item.status === "maxActiveLimit");
+        const cloneLimitText = cloneLimitEvents.length ? ` • 👥 ร่างแยกเต็ม ${cloneLimitEvents.map(item => `${item.activeClones}/${item.maxActiveClones}`).join(", ")}` : "";
         const captureText = abilityArray(turn.captureEvents).length ? ` • 👻 ${turn.captureEvents.map(item=>item.status==="success"?`ชิงร่าง ${item.targetName}`:`ชิงร่าง ${item.targetName} ล้มเหลว`).join(", ")}` : "";
         const captureReleaseText = abilityArray(turn.captureReleaseEvents).length ? ` • ↩ คืนศพ ${turn.captureReleaseEvents.map(item=>item.targetName).join(", ")}` : "";
         const lifeText = turn.hitLifeConsumed ? ` • ตัดชีวิต ${turn.hitLifeConsumed} HIT${turn.hitLifeExpired ? " และหมดสภาพ" : ""}` : "";
@@ -17435,7 +17467,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           result.textContent = `รอบ ${turn.round} • ${attackerLabel} ถูก ${abilityArray(turn.statusEvents)[0]?.statusLabel || "สถานะผิดปกติ"} จึงข้ามเทิร์น${statusText} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         } else result.textContent = turn.command === "guard"
           ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
-          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${spawnText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${spawnText}${cloneLimitText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         beautifyBattleResult(result);
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
@@ -17832,6 +17864,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               useBaseAbilities: effect.useBaseAbilities !== false,
               cloneAbilities,
               summonedAbilities,
+              maxActiveClones: isSummon ? 0 : Math.max(0, Math.min(100, Math.floor(Number(effect.maxActiveClones) || 0))),
+              cloneGroupKey: isSummon ? "" : String(effect.cloneGroupKey || "").trim(),
               maxSpawnDepth: Math.max(1, Math.min(10, Math.floor(Number(effect.maxSpawnDepth) || 1)))
             });
             break;
@@ -18081,6 +18115,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           count: Math.max(1, Math.min(20, Math.floor(Number(rule && rule.count) || 1))),
           slotPolicy: ["newSlot", "emptySlot", "defeatedSlot", "emptyOrDefeated", "anyAvailable"].includes(String(rule && rule.slotPolicy)) ? String(rule.slotPolicy) : "emptyOrDefeated",
           normalAttackTargetCount: Math.max(1, Math.min(5, Math.floor(Number(rule && rule.normalAttackTargetCount) || 1))),
+          maxActiveClones: normalizeAbilityEffectType(rule && rule.type) === CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE ? Math.max(0, Math.min(100, Math.floor(Number(rule && rule.maxActiveClones) || 0))) : 0,
+          cloneGroupKey: normalizeAbilityEffectType(rule && rule.type) === CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE ? String(rule && rule.cloneGroupKey || "").trim() : "",
           maxSpawnDepth: Math.max(1, Math.min(10, Math.floor(Number(rule && rule.maxSpawnDepth) || 1))),
           cloneAbilities: abilityArray(rule && rule.cloneAbilities).map(ability => ({ ...ability })),
           summonedAbilities: abilityArray(rule && rule.summonedAbilities).map(ability => ({ ...ability }))
