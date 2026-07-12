@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-12-awaken-acquisition-cutscene-v104">
-  <title>Anime Card Collection · Runtime v104 · AWAKEN Acquisition Cutscene</title>
+  <meta name="gacha-app-build" content="2026-07-12-per-card-gacha-rates-v105">
+  <title>Anime Card Collection · Runtime v105 · Per-Card Gacha Rates</title>
   <style>
     :root {
       color-scheme: dark;
@@ -1237,6 +1237,184 @@
       color: #fce7f3 !important;
       background: linear-gradient(135deg, rgba(126,34,206,.30), rgba(190,24,93,.22)) !important;
       box-shadow: 0 0 20px rgba(244,114,182,.12);
+    }
+
+
+    /* เพิ่มโดยอลิซ v105: หน้าต่างแสดงเรทกาชารายใบของตู้ปัจจุบัน */
+    .btn-gacha-card-rates {
+      border-color: rgba(167,139,250,.42);
+      background: linear-gradient(135deg, rgba(49,46,129,.80), rgba(126,34,206,.66));
+      box-shadow: 0 10px 26px rgba(91,33,182,.18);
+    }
+
+    .gacha-rate-panel {
+      width: min(1180px, 100%);
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .gacha-rate-head { padding-right: 52px; }
+    .gacha-rate-head h2 { margin: 5px 0 6px; font-size: clamp(1.45rem, 4vw, 2.45rem); }
+    .gacha-rate-head p { margin: 0; color: var(--muted); line-height: 1.55; }
+
+    .gacha-rate-rarity-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 16px 0 12px;
+    }
+
+    .gacha-rate-rarity-chip {
+      --rate-rarity-color: var(--cyan);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 31px;
+      border: 1px solid color-mix(in srgb, var(--rate-rarity-color) 42%, rgba(255,255,255,.12));
+      border-radius: 999px;
+      padding: 6px 9px;
+      color: #f8fafc;
+      font-size: .68rem;
+      font-weight: 1000;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--rate-rarity-color) 23%, rgba(5,8,18,.78)), rgba(5,8,18,.70));
+      box-shadow: 0 0 16px color-mix(in srgb, var(--rate-rarity-color) 14%, transparent);
+    }
+
+    .gacha-rate-tools {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(150px, 210px);
+      gap: 9px;
+      margin-bottom: 10px;
+    }
+    .gacha-rate-tools .field { width: 100%; }
+
+    .gacha-rate-table-wrap {
+      max-height: min(62vh, 690px);
+      overflow: auto;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background: rgba(3,5,12,.26);
+    }
+
+    .gacha-rate-table-head,
+    .gacha-rate-row {
+      display: grid;
+      grid-template-columns: 58px minmax(200px, 1.5fr) 92px minmax(130px, .72fr) minmax(130px, .72fr);
+      gap: 10px;
+      align-items: center;
+      min-width: 760px;
+      padding: 9px 12px;
+    }
+
+    .gacha-rate-table-head {
+      position: sticky;
+      z-index: 3;
+      top: 0;
+      color: #dbeafe;
+      font-size: .66rem;
+      font-weight: 1000;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+      background: rgba(8,11,23,.96);
+      backdrop-filter: blur(12px);
+    }
+
+    .gacha-rate-row {
+      border-top: 1px solid rgba(255,255,255,.07);
+      transition: background .16s ease;
+    }
+    .gacha-rate-row:hover { background: rgba(92,232,255,.045); }
+
+    .gacha-rate-art {
+      width: 46px;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      background: linear-gradient(145deg, #1e293b, #070a13);
+    }
+    .gacha-rate-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .gacha-rate-art.missing::after { content: "CARD"; display: grid; place-items: center; height: 100%; color: var(--muted); font-size: .52rem; font-weight: 1000; }
+
+    .gacha-rate-card-copy { min-width: 0; }
+    .gacha-rate-card-copy strong { display: block; overflow: hidden; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+    .gacha-rate-card-copy small { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; color: var(--muted); font-size: .61rem; }
+
+    .gacha-rate-badge {
+      --rate-rarity-color: var(--cyan);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      border: 1px solid color-mix(in srgb, var(--rate-rarity-color) 45%, rgba(255,255,255,.12));
+      border-radius: 999px;
+      padding: 5px 8px;
+      color: var(--rate-rarity-color);
+      font-size: .64rem;
+      font-weight: 1000;
+      background: color-mix(in srgb, var(--rate-rarity-color) 12%, rgba(5,8,18,.72));
+    }
+
+    .gacha-rate-number {
+      color: var(--cyan);
+      font-size: .79rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      word-break: break-all;
+    }
+    .gacha-rate-number.guarantee { color: var(--gold); }
+    .gacha-rate-number.disabled { color: var(--muted); }
+
+    .gacha-rate-up-tag,
+    .gacha-guarantee-up-tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 6px;
+      font-size: .55rem;
+      font-weight: 1000;
+    }
+    .gacha-rate-up-tag { color: #fce7f3; background: rgba(190,24,93,.58); }
+    .gacha-guarantee-up-tag { color: #211500; background: linear-gradient(135deg, #fde68a, #f59e0b); }
+
+    .gacha-rate-note {
+      margin: 10px 2px 0;
+      color: var(--muted);
+      font-size: .68rem;
+      line-height: 1.55;
+    }
+
+    .gacha-rate-empty {
+      min-height: 180px;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .gacha-rate-panel { padding: 14px; }
+      .gacha-rate-tools { grid-template-columns: 1fr; }
+      .gacha-rate-table-wrap { max-height: min(66vh, 700px); }
+      .gacha-rate-table-head { display: none; }
+      .gacha-rate-row {
+        min-width: 0;
+        grid-template-columns: 48px minmax(0, 1fr) auto;
+        grid-template-areas:
+          "art card rarity"
+          "art normal normal"
+          "art guarantee guarantee";
+        gap: 5px 9px;
+        padding: 10px;
+      }
+      .gacha-rate-art { grid-area: art; width: 44px; align-self: start; }
+      .gacha-rate-card-copy { grid-area: card; }
+      .gacha-rate-row > .gacha-rate-badge { grid-area: rarity; }
+      .gacha-rate-row > .gacha-rate-number:not(.guarantee) { grid-area: normal; }
+      .gacha-rate-row > .gacha-rate-number.guarantee { grid-area: guarantee; }
+      .gacha-rate-number::before { content: "เรทปกติ: "; color: var(--muted); font-size: .61rem; }
+      .gacha-rate-number.guarantee::before { content: "ตอนการันตี: "; }
     }
 
     .income-panel {
@@ -6839,6 +7017,7 @@
                 เทหน้าตัก <span class="cost" id="allInCost">กำลังคำนวณ...</span>
               </button>
               <select class="field" id="bannerSelect" aria-label="เลือกตู้กาชา"></select>
+              <button class="btn btn-gacha-card-rates" data-action="open-gacha-rates" type="button" title="ดูเปอร์เซ็นต์สุ่มของการ์ดทุกใบในตู้ปัจจุบัน">📊 เรทการ์ดรายใบ</button>
               <div class="summon-extra-row">
                 <label class="fast-toggle" title="เปิดแล้วสรุปผลทันที ไม่เด้งหน้าผลลัพธ์ทีละใบ">
                   <input type="checkbox" id="fastRevealToggle" checked>
@@ -7361,6 +7540,29 @@
       </div>
       <div class="card-grid team-picker-grid" id="teamPickerGrid"></div>
       <p class="team-picker-note">ค้นหาได้ทั้งชื่อ, ID, ธาตุ และคำในสกิล เช่น “โล่”, “ATK”, “เรทกาชา” หรือชื่อตัวละครที่สกิลอ้างถึง • กด “ดูรายละเอียด” เพื่อเช็กสกิลก่อนเลือก</p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="gachaRateModal" role="dialog" aria-modal="true" aria-label="เรทกาชารายใบของตู้ปัจจุบัน">
+    <div class="modal-panel gacha-rate-panel">
+      <button class="close" data-action="close-gacha-rates" aria-label="ปิด">x</button>
+      <div class="gacha-rate-head">
+        <p class="eyebrow">Banner Probability</p>
+        <h2 id="gachaRateModalTitle">เรทกาชารายใบ</h2>
+        <p id="gachaRateModalSubtitle">คำนวณจากสูตรสุ่มจริงของตู้ปัจจุบัน</p>
+      </div>
+      <div class="gacha-rate-rarity-summary" id="gachaRateRaritySummary"></div>
+      <div class="gacha-rate-tools">
+        <input class="field" id="gachaRateSearch" type="search" placeholder="ค้นหาชื่อการ์ดหรือ ID..." autocomplete="off" aria-label="ค้นหาการ์ดในตารางเรท">
+        <select class="field" id="gachaRateRarityFilter" aria-label="กรองระดับการ์ดในตารางเรท"></select>
+      </div>
+      <div class="gacha-rate-table-wrap">
+        <div class="gacha-rate-table-head" aria-hidden="true">
+          <span>ภาพ</span><span>การ์ด</span><span>ระดับ</span><span>เรทปกติ</span><span>เมื่อการันตี</span>
+        </div>
+        <div id="gachaRateList"></div>
+      </div>
+      <p class="gacha-rate-note" id="gachaRateNote"></p>
     </div>
   </div>
 
@@ -20869,6 +21071,182 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         : `<div class="arena-secret-model">?</div>`;
     }
 
+    // เพิ่มโดยอลิซ v105: คำนวณโอกาสออกของการ์ดแต่ละใบด้วยสูตรเดียวกับ randomCard()
+    function formatDetailedRatePercent(value) {
+      const number = Math.max(0, Number(value) || 0);
+      if (!number) return "0";
+      if (number < 0.00000001) return number.toExponential(4);
+      const decimals = number >= 10 ? 2
+        : number >= 1 ? 4
+          : number >= 0.1 ? 5
+            : number >= 0.01 ? 6
+              : number >= 0.001 ? 7
+                : number >= 0.0001 ? 8
+                  : 10;
+      return number.toFixed(decimals).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function getBannerCardRateRows(banner = getActiveBanner()) {
+      const safeBanner = banner || getActiveBanner();
+      const gachaPool = CARDS.filter(card => !isAwakenCard(card) && card.transformOnly !== true);
+      const effective = getEffectiveBannerRates(safeBanner);
+      const rowsByCardId = new Map();
+
+      const ensureRow = card => {
+        const id = String(card.id);
+        if (!rowsByCardId.has(id)) {
+          rowsByCardId.set(id, {
+            card,
+            normalRate: 0,
+            guaranteeRate: 0,
+            rateUpWeight: Math.max(0, Number((safeBanner.rateUpCards || {})[id]) || 1),
+            guaranteeWeight: 0
+          });
+        }
+        return rowsByCardId.get(id);
+      };
+
+      const distributeRarityRates = (rarityPercentages, guaranteed = false) => {
+        Object.entries(rarityPercentages || {}).forEach(([rarity, rarityPercent]) => {
+          const rarityRate = Math.max(0, Number(rarityPercent) || 0);
+          if (rarityRate <= 0) return;
+
+          let pool = gachaPool.filter(card => String(card.rarity) === String(rarity));
+          if (!pool.length) pool = gachaPool;
+          if (!pool.length) return;
+
+          const guaranteeRates = safeBanner.guarantee && safeBanner.guarantee.cardRates && typeof safeBanner.guarantee.cardRates === "object"
+            ? safeBanner.guarantee.cardRates
+            : {};
+          const hasGuaranteeCards = guaranteed && pool.some(card => Number(guaranteeRates[card.id]) > 0);
+          const weightedCards = pool.map(card => {
+            const id = String(card.id);
+            const weight = guaranteed && hasGuaranteeCards
+              ? Math.max(0, Number(guaranteeRates[id]) || 0)
+              : Math.max(0, Number((safeBanner.rateUpCards || {})[id]) || 1);
+            return { card, weight };
+          }).filter(item => item.weight > 0);
+          const totalWeight = weightedCards.reduce((sum, item) => sum + item.weight, 0);
+          if (totalWeight <= 0) return;
+
+          weightedCards.forEach(item => {
+            const row = ensureRow(item.card);
+            const cardRate = rarityRate * item.weight / totalWeight;
+            if (guaranteed) {
+              row.guaranteeRate += cardRate;
+              row.guaranteeWeight = Math.max(row.guaranteeWeight, item.weight);
+            } else {
+              row.normalRate += cardRate;
+              row.rateUpWeight = Math.max(row.rateUpWeight, item.weight);
+            }
+          });
+        });
+      };
+
+      distributeRarityRates(effective.percentages, false);
+      const guarantee = getBannerGuarantee(safeBanner);
+      if (guarantee.enabled) {
+        distributeRarityRates(normalizeWeightMapToPercentages(guarantee.rarityRates), true);
+      }
+
+      return {
+        rows: [...rowsByCardId.values()].sort((a, b) => {
+          const rarityDiff = ((RARITIES[b.card.rarity] || RARITIES.N).order) - ((RARITIES[a.card.rarity] || RARITIES.N).order);
+          return rarityDiff || b.normalRate - a.normalRate || String(a.card.name || "").localeCompare(String(b.card.name || ""), "th");
+        }),
+        effective,
+        guarantee
+      };
+    }
+
+    function renderGachaRateModal() {
+      const modal = document.getElementById("gachaRateModal");
+      if (!modal) return;
+      const banner = getActiveBanner();
+      const result = getBannerCardRateRows(banner);
+      const searchInput = document.getElementById("gachaRateSearch");
+      const rarityFilter = document.getElementById("gachaRateRarityFilter");
+      const query = String(searchInput && searchInput.value || "").trim().toLocaleLowerCase("th");
+      const previousRarity = rarityFilter ? rarityFilter.value : "";
+      const presentRarities = [...new Set(result.rows.map(row => String(row.card.rarity || "N")))]
+        .sort((a, b) => ((RARITIES[b] || RARITIES.N).order) - ((RARITIES[a] || RARITIES.N).order));
+
+      if (rarityFilter) {
+        rarityFilter.innerHTML = `<option value="">ทุกระดับ</option>${presentRarities.map(rarity => `<option value="${escapeHTML(rarity)}">${escapeHTML(rarityDisplayName(rarity))}</option>`).join("")}`;
+        rarityFilter.value = presentRarities.includes(previousRarity) ? previousRarity : "";
+      }
+      const selectedRarity = rarityFilter ? rarityFilter.value : "";
+
+      const filteredRows = result.rows.filter(row => {
+        const card = row.card;
+        if (selectedRarity && String(card.rarity) !== selectedRarity) return false;
+        if (!query) return true;
+        return `${card.name || ""} ${card.id || ""} ${card.rarity || ""}`.toLocaleLowerCase("th").includes(query);
+      });
+
+      const title = document.getElementById("gachaRateModalTitle");
+      const subtitle = document.getElementById("gachaRateModalSubtitle");
+      const summary = document.getElementById("gachaRateRaritySummary");
+      const list = document.getElementById("gachaRateList");
+      const note = document.getElementById("gachaRateNote");
+      if (title) title.textContent = `เรทการ์ดรายใบ — ${banner.name}`;
+      if (subtitle) subtitle.textContent = `แสดง ${formatNumber(filteredRows.length)} จาก ${formatNumber(result.rows.length)} ใบ • เรทปัจจุบันรวมโบนัสทีมและ Rate Up ของตู้นี้แล้ว`;
+
+      if (summary) {
+        summary.innerHTML = Object.entries(result.effective.percentages)
+          .filter(([, rate]) => Number(rate) > 0)
+          .sort((a, b) => ((RARITIES[b[0]] || RARITIES.N).order) - ((RARITIES[a[0]] || RARITIES.N).order))
+          .map(([rarity, rate]) => `<span class="gacha-rate-rarity-chip" style="--rate-rarity-color:${escapeHTML((RARITIES[rarity] || RARITIES.N).color || "#5ce8ff")}">${escapeHTML(rarityDisplayName(rarity))} ${formatDetailedRatePercent(rate)}%</span>`)
+          .join("");
+      }
+
+      if (list) {
+        list.innerHTML = filteredRows.length ? filteredRows.map(row => {
+          const card = row.card;
+          const rarity = RARITIES[card.rarity] || RARITIES.N;
+          const image = getCardImage(card);
+          const rateUp = Number((banner.rateUpCards || {})[card.id]) || 1;
+          const guaranteeCardWeight = Number(result.guarantee.cardRates && result.guarantee.cardRates[card.id]) || 0;
+          const normalRateText = `${formatDetailedRatePercent(row.normalRate)}%`;
+          const guaranteeRateText = result.guarantee.enabled && row.guaranteeRate > 0 ? `${formatDetailedRatePercent(row.guaranteeRate)}%` : "—";
+          return `<div class="gacha-rate-row">
+            <div class="gacha-rate-art${image ? "" : " missing"}">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" onerror="this.parentElement.classList.add('missing');this.remove()">` : ""}</div>
+            <div class="gacha-rate-card-copy">
+              <strong>${escapeHTML(card.name || `Card ${card.id}`)}</strong>
+              <small><span>ID ${escapeHTML(card.id)}</span>${rateUp > 1 ? `<span class="gacha-rate-up-tag">RATE UP ×${formatDetailedRatePercent(rateUp)}</span>` : ""}${guaranteeCardWeight > 0 ? `<span class="gacha-guarantee-up-tag">การันตี Weight ${formatDetailedRatePercent(guaranteeCardWeight)}</span>` : ""}</small>
+            </div>
+            <span class="gacha-rate-badge" style="--rate-rarity-color:${escapeHTML(rarity.color || "#5ce8ff")}">${escapeHTML(rarity.label || card.rarity || "N")}</span>
+            <strong class="gacha-rate-number">${normalRateText}</strong>
+            <strong class="gacha-rate-number guarantee ${result.guarantee.enabled && row.guaranteeRate > 0 ? "" : "disabled"}">${guaranteeRateText}</strong>
+          </div>`;
+        }).join("") : `<div class="gacha-rate-empty">ไม่พบการ์ดที่ตรงกับคำค้นหาหรือตัวกรอง</div>`;
+      }
+
+      if (note) {
+        const guaranteeText = result.guarantee.enabled
+          ? `เมื่อครบ ${formatNumber(result.guarantee.every)} ครั้ง คอลัมน์ “เมื่อการันตี” จะแสดงโอกาสของการ์ดแต่ละใบภายในการสุ่มการันตีครั้งนั้น`
+          : "ตู้นี้ยังไม่ได้เปิดระบบการันตี จึงแสดง — ในคอลัมน์การันตี";
+        note.textContent = `เรทปกติคำนวณจากโอกาสระดับการ์ด × น้ำหนักของการ์ดในระดับเดียวกัน • ผลรวมเรทปกติของทุกใบเท่ากับ 100% • ${guaranteeText}`;
+      }
+    }
+
+    function openGachaRateModal() {
+      const modal = document.getElementById("gachaRateModal");
+      if (!modal) return;
+      const search = document.getElementById("gachaRateSearch");
+      const filter = document.getElementById("gachaRateRarityFilter");
+      if (search) search.value = "";
+      if (filter) filter.value = "";
+      renderGachaRateModal();
+      modal.classList.remove("hidden");
+      window.setTimeout(() => { if (search) search.focus(); }, 0);
+    }
+
+    function closeGachaRateModal() {
+      const modal = document.getElementById("gachaRateModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
     function renderBanner() {
       const banner = getActiveBanner();
       if (!banner) return;
@@ -24715,6 +25093,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const target = event.target.closest("[data-action], [data-tab]");
       if (!target) {
         if (event.target.id === "teamPickerModal") closeTeamPicker();
+        if (event.target.id === "gachaRateModal") closeGachaRateModal();
         if (event.target.id === "cardModal") closeModal();
         if (event.target.id === "authModal") closeAuthModal();
         if (event.target.id === "profileModal") closeProfileModal();
@@ -24741,6 +25120,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const friendId = target.dataset.friendId;
       if (action === "pull") openPack(Number(target.dataset.times) || 1);
       if (action === "pull-all-in") openAllInPack();
+      if (action === "open-gacha-rates") openGachaRateModal();
+      if (action === "close-gacha-rates") closeGachaRateModal();
       if (action === "pull-ticket") openPackWithNormalTickets(Number(target.dataset.times) || 1);
       if (action === "pull-guarantee-ticket") openPackWithBestGuaranteeTicket();
       if (action === "use-selector") useSelectorTicket(cardId);
@@ -24868,7 +25249,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       state.activeBannerId = event.target.value;
       saveState();
       renderAll();
+      const rateModal = document.getElementById("gachaRateModal");
+      if (rateModal && !rateModal.classList.contains("hidden")) renderGachaRateModal();
     });
+
+    document.getElementById("gachaRateSearch").addEventListener("input", renderGachaRateModal);
+    document.getElementById("gachaRateRarityFilter").addEventListener("change", renderGachaRateModal);
 
     document.getElementById("searchInput").addEventListener("input", renderCollection);
     document.getElementById("abilitySearchInput").addEventListener("input", renderCollection);
@@ -25012,6 +25398,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       else if (!document.getElementById("mailboxModal").classList.contains("hidden")) closeMailbox();
       else if (!document.getElementById("updateNoticeModal").classList.contains("hidden")) closeUpdateNotice();
       else if (!document.getElementById("battleSummaryModal").classList.contains("hidden")) closeBattleSummary();
+      else if (!document.getElementById("gachaRateModal").classList.contains("hidden")) closeGachaRateModal();
       else if (!document.getElementById("teamPickerModal").classList.contains("hidden")) closeTeamPicker();
       else if (!document.getElementById("revealScreen").classList.contains("hidden")) closeReveal();
       else if (!document.getElementById("authModal").classList.contains("hidden")) closeAuthModal();
