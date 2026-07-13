@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-13-friend-transfer-cloud-balance-sync-v115">
-  <title>Anime Card Collection · Runtime v115 · Friend Transfer Cloud Sync</title>
+  <meta name="gacha-app-build" content="2026-07-13-friend-transfer-transaction-null-fallback-v116">
+  <title>Anime Card Collection · Runtime v116 · Friend Transfer Transaction Fix</title>
   <style>
     :root {
       color-scheme: dark;
@@ -20470,12 +20470,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       resourceTransferBusy = true;
       const balanceRef = cloudModules.ref(cloudDb, `users/${activeCloudUid}/save/${config.stateKey}`);
       let deducted = false;
+      let transferCreated = false;
       try {
         // ยอดบนหน้าจอเป็นยอดล่าสุดของเกม จึงต้องรอให้ Cloud Save เขียนเสร็จก่อนค่อย Transaction หักเงินจริง
         await flushVisibleResourceBalanceToCloud(config);
 
-        // Firebase Transaction อาจเรียก callback ครั้งแรกด้วย null หาก path นี้ยังไม่อยู่ใน local cache
-        // จึงอ่านยอดจาก path จริงก่อน เพื่อไม่ให้ยอดที่มีอยู่ถูกตีความเป็น 0 แล้ว abort ผิดพลาด
+        // Firebase Transaction อาจส่ง current=null ในรอบแรก แม้ค่าบน Server จะมีอยู่จริง
+        // ห้าม return undefined ทันที เพราะจะทำให้ Transaction ยกเลิกและรายงานยอดเป็น 0
+        // จึงอ่านยอดจริงล่วงหน้า แล้วใช้เป็น fallback เฉพาะรอบที่ callback ยังได้รับ null
         const preflightSnapshot = await cloudModules.get(balanceRef);
         const preflightBalance = Math.max(0, Math.floor(Number(preflightSnapshot.val()) || 0));
         if (preflightBalance < amount) {
@@ -20485,10 +20487,13 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         }
 
         const debit = await cloudModules.runTransaction(balanceRef, current => {
-          const balance = Math.max(0, Math.floor(Number(current) || 0));
+          const hasConcreteCurrent = current !== null && current !== undefined && current !== "";
+          const balance = hasConcreteCurrent
+            ? Math.max(0, Math.floor(Number(current) || 0))
+            : preflightBalance;
           if (balance < amount) return;
           return balance - amount;
-        });
+        }, { applyLocally: false });
         if (!debit.committed) {
           const cloudBalanceSnapshot = await cloudModules.get(balanceRef);
           const cloudBalance = Math.max(0, Math.floor(Number(cloudBalanceSnapshot.val()) || 0));
@@ -20513,15 +20518,25 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           deliveredAt: 0
         };
         await cloudModules.set(cloudModules.ref(cloudDb, `resourceTransfers/${friendUid}/${transferId}`), payload);
-        await writeCloudSave({ lastResourceTransferAt: now });
+        transferCreated = true;
+
+        // ของขวัญถูกสร้างสำเร็จแล้ว จึงอัปเดตเซฟและหน้าจอโดยไม่ผูกกับขั้นตอนคืนเงิน
+        // ป้องกันกรณี Cloud Save รอบถัดไปสะดุดแล้วระบบคืนยอด ทั้งที่ผู้รับมีของขวัญอยู่แล้ว
+        state.lastResourceTransferAt = now;
+        saveState(true);
         renderAll();
         showToast(`โอน ${config.icon} ${formatNumber(amount)} ${config.label} ให้ ${profile.username || "เพื่อน"} แล้ว`);
       } catch (error) {
-        if (deducted) {
+        if (deducted && !transferCreated) {
           try {
-            const refund = await cloudModules.runTransaction(balanceRef, current => Math.max(0, Math.floor(Number(current) || 0)) + amount);
+            const refund = await cloudModules.runTransaction(balanceRef, current => {
+              const balance = current === null || current === undefined
+                ? Math.max(0, Math.floor(Number(state[config.stateKey]) || 0))
+                : Math.max(0, Math.floor(Number(current) || 0));
+              return balance + amount;
+            }, { applyLocally: false });
             if (refund.committed) state[config.stateKey] = Math.max(0, Math.floor(Number(refund.snapshot.val()) || 0));
-            await writeCloudSave();
+            saveState(true);
           } catch (refundError) { console.error("Resource transfer refund failed:", refundError); }
         }
         if (String(error && error.message) === "transfer-insufficient") {
