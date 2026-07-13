@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-12-single-screen-multiline-battle-v114">
-  <title>Anime Card Collection · Runtime v114 · Single-Screen Multi-Line Battle</title>
+  <meta name="gacha-app-build" content="2026-07-13-friend-transfer-cloud-balance-sync-v115">
+  <title>Anime Card Collection · Runtime v115 · Friend Transfer Cloud Sync</title>
   <style>
     :root {
       color-scheme: dark;
@@ -20438,6 +20438,22 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return FRIEND_RESOURCE_TRANSFER_TYPES[String(type || "").toLowerCase()] || null;
     }
 
+    // v115: ก่อนโอนทรัพยากร ให้บังคับส่งยอดที่ผู้เล่นเห็นอยู่ขึ้น Cloud Save ก่อน
+    // แก้กรณีรับรางวัล/แลกเงิน/ชนะด่านแล้ว UI มียอดใหม่ แต่ Cloud Save แบบหน่วงเวลา 900ms ยังเป็นยอดเก่า
+    async function flushVisibleResourceBalanceToCloud(config) {
+      if (!config || !cloudReady || !activeCloudUid) return false;
+      clearTimeout(saveTimer);
+      clearTimeout(cloudSaveTimer);
+      const visibleBalance = Math.max(0, Math.floor(Number(state[config.stateKey]) || 0));
+      state[config.stateKey] = visibleBalance;
+      const saved = await writeCloudSave({
+        resourceTransferBalanceSyncedAt: Date.now(),
+        resourceTransferBalanceSyncedType: config.stateKey
+      });
+      if (!saved) throw new Error("transfer-cloud-sync-failed");
+      return true;
+    }
+
     async function transferResourceToFriend(friendUid) {
       if (!requireFriendsLogin() || resourceTransferBusy) return;
       const profile = friendProfiles.find(item => String(item.uid) === String(friendUid));
@@ -20455,12 +20471,31 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const balanceRef = cloudModules.ref(cloudDb, `users/${activeCloudUid}/save/${config.stateKey}`);
       let deducted = false;
       try {
+        // ยอดบนหน้าจอเป็นยอดล่าสุดของเกม จึงต้องรอให้ Cloud Save เขียนเสร็จก่อนค่อย Transaction หักเงินจริง
+        await flushVisibleResourceBalanceToCloud(config);
+
+        // Firebase Transaction อาจเรียก callback ครั้งแรกด้วย null หาก path นี้ยังไม่อยู่ใน local cache
+        // จึงอ่านยอดจาก path จริงก่อน เพื่อไม่ให้ยอดที่มีอยู่ถูกตีความเป็น 0 แล้ว abort ผิดพลาด
+        const preflightSnapshot = await cloudModules.get(balanceRef);
+        const preflightBalance = Math.max(0, Math.floor(Number(preflightSnapshot.val()) || 0));
+        if (preflightBalance < amount) {
+          const insufficientError = new Error("transfer-insufficient");
+          insufficientError.cloudBalance = preflightBalance;
+          throw insufficientError;
+        }
+
         const debit = await cloudModules.runTransaction(balanceRef, current => {
           const balance = Math.max(0, Math.floor(Number(current) || 0));
           if (balance < amount) return;
           return balance - amount;
         });
-        if (!debit.committed) throw new Error("transfer-insufficient");
+        if (!debit.committed) {
+          const cloudBalanceSnapshot = await cloudModules.get(balanceRef);
+          const cloudBalance = Math.max(0, Math.floor(Number(cloudBalanceSnapshot.val()) || 0));
+          const insufficientError = new Error("transfer-insufficient");
+          insufficientError.cloudBalance = cloudBalance;
+          throw insufficientError;
+        }
         deducted = true;
         state[config.stateKey] = Math.max(0, Math.floor(Number(debit.snapshot.val()) || 0));
 
@@ -20489,8 +20524,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             await writeCloudSave();
           } catch (refundError) { console.error("Resource transfer refund failed:", refundError); }
         }
-        if (String(error && error.message) === "transfer-insufficient") showToast(`${config.label} ใน Cloud Save ไม่พอ กรุณารีเฟรชแล้วลองใหม่`);
-        else showToast(firebaseErrorMessage(error, "โอนทรัพยากร"));
+        if (String(error && error.message) === "transfer-insufficient") {
+          const cloudBalance = Math.max(0, Math.floor(Number(error && error.cloudBalance) || 0));
+          showToast(`${config.label} ใน Cloud Save ไม่พอ • Cloud มี ${formatNumber(cloudBalance)} • ระบบซิงก์ยอดแล้ว กรุณาลองอีกครั้ง`);
+        } else if (String(error && error.message) === "transfer-cloud-sync-failed") {
+          showToast("ซิงก์ยอดทรัพยากรขึ้น Cloud ไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่");
+        } else showToast(firebaseErrorMessage(error, "โอนทรัพยากร"));
       } finally {
         resourceTransferBusy = false;
       }
