@@ -7879,6 +7879,21 @@
     }
   </style>
 
+
+  <style id="v124-bleed-turn-stack-fix">
+    /* v124 เดิม · ถูกปรับต่อใน v125 ให้ durationTurns = จำนวนสแต็ก และลดฮีลสูงสุด 100% */
+    .battle-status-chip.bleed { box-shadow: 0 4px 14px rgba(0,0,0,.55), 0 0 14px rgba(225,29,72,.28) !important; }
+  </style>
+
+
+  <style id="v125-bleed-turn-equals-stack">
+    /* v125 · เลือดไหล: durationTurns = จำนวนสแต็ก, ลดฮีล 10% ต่อสแต็ก สูงสุด 100% */
+    .battle-status-chip.bleed {
+      border-color: rgba(251,113,133,.46) !important;
+      box-shadow: 0 4px 14px rgba(0,0,0,.55), 0 0 16px rgba(225,29,72,.34) !important;
+    }
+  </style>
+
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
@@ -16365,8 +16380,10 @@
         "condition-cancel": "🔓", "skill-cancel": "🚫", "skill-stolen": "🕸️", "skill-copied": "🧬"
       };
       const BATTLE_STICKY_STATUSES = new Set(["freeze", "death", "bleed", "condition-cancel", "skill-cancel", "skill-stolen", "skill-copied"]);
-      const BATTLE_BLEED_HEALING_REDUCTION_PER_STACK = 0.35;
-      const BATTLE_BLEED_HEALING_REDUCTION_CAP = 0.90;
+      const BATTLE_BLEED_DAMAGE_RATE_PER_STACK = 0.10;
+      const BATTLE_BLEED_DEFAULT_TURNS = 2;
+      const BATTLE_BLEED_HEALING_REDUCTION_PER_STACK = 0.10;
+      const BATTLE_BLEED_HEALING_REDUCTION_CAP = 1.00;
       function normalizeBattleStatusName(value) {
         const raw = String(value || "").trim();
         if (!raw) return "";
@@ -16397,12 +16414,14 @@
         const target = normalizeBattleStatusName(status);
         return abilityArray(member && member.statusEffects).filter(item => item && !item.expired && (!target || item.status === target));
       }
-      function getBleedHealingReduction(member) {
-        const total = activeStatusEffects(member, "bleed").reduce((sum, item) => {
-          const perStack = Math.max(0, Number(item && (item.healingReductionRate ?? item.healReductionRate ?? item.antiHealRate ?? BATTLE_BLEED_HEALING_REDUCTION_PER_STACK)) || 0);
-          return sum + perStack;
+      function getBleedStackCount(member) {
+        return activeStatusEffects(member, "bleed").reduce((sum, item) => {
+          return sum + Math.max(0, Math.floor(Number(item && item.turnsRemaining) || 0));
         }, 0);
-        return Math.max(0, Math.min(BATTLE_BLEED_HEALING_REDUCTION_CAP, total));
+      }
+      function getBleedHealingReduction(member) {
+        const totalStacks = getBleedStackCount(member);
+        return Math.max(0, Math.min(BATTLE_BLEED_HEALING_REDUCTION_CAP, totalStacks * BATTLE_BLEED_HEALING_REDUCTION_PER_STACK));
       }
       function getBattleHealingMultiplier(member) {
         const base = Math.max(0, 1 + Number(member && member.healingRate || 0));
@@ -16424,22 +16443,22 @@
         if (effect.status === "blind") return `${emoji} ${label}${Math.round((Number(effect.missRate)||0)*100)}%`;
         if (effect.status === "freeze") return `${emoji} ${label}`;
         if (effect.status === "burn") return `${emoji} ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
-        if (effect.status === "bleed") { const cut = Math.round((Number(effect.healingReductionRate ?? effect.healReductionRate ?? effect.antiHealRate ?? BATTLE_BLEED_HEALING_REDUCTION_PER_STACK) || 0) * 100); return `${emoji} ${label}${cut > 0 ? ` ↓ฮีล${cut}%` : ""}`; }
+        if (effect.status === "bleed") {
+          const stacks = Math.max(0, Math.floor(Number(effect.turnsRemaining) || 0));
+          const cut = Math.min(100, Math.round(stacks * BATTLE_BLEED_HEALING_REDUCTION_PER_STACK * 100));
+          return `${emoji} ${label} ×${stacks} ↓ฮีล${cut}%`;
+        }
         if (effect.status === "shock") return `${emoji} ${label}${effect.hitCounter || 0}/${effect.chainAfterHits || 1}`;
         return `${emoji} ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
       }
       function makeBattleStatusInstance(rule, source) {
         const status = normalizeBattleStatusName(rule && rule.status) || "stun";
-        const duration = Math.max(0, Math.floor(Number(rule.durationTurns ?? rule.turns ?? (status === "freeze" || status === "bleed" ? 0 : 1)) || 0));
-        return { id:`${Date.now().toString(36)}:${Math.random().toString(36).slice(2,7)}`, status, label:BATTLE_STATUS_LABELS[status] || status, sourceCardId:String(source && source.id || rule && rule.sourceCardId || ""), sourceName:String(source && source.name || rule && rule.sourceName || ""), sourceAbilityName:String(rule && rule.sourceAbilityName || ""), turnsRemaining:duration, attacksRemaining:Math.max(1,Math.floor(Number(rule && rule.deathAfterAttacks)||1)), missRate:Math.max(0,Math.min(1,Number(rule && rule.missRate)||0)), damageFlat:Math.max(0,Number(rule && rule.damageFlat)||0), damageRate:Math.max(0,Number(rule && rule.damageRate)||0), sourcePower:Math.max(0,Number(source && source.power)||Number(rule && rule.sourcePower)||0), freezeBreakPowerRate:Math.max(0,Number((rule && rule.freezeBreakPowerRate) ?? 2)||0), freezeBreakSuccessRate:normalizeAbilityChance(rule && (rule.freezeBreakSuccessRate ?? rule.shatterSuccessRate ?? 1),1), hpLossFlat:Math.max(0,Number(rule && rule.hpLossFlat)||0), hpLossRate:Math.max(0,Number(rule && rule.hpLossRate)||0), healingReductionRate:Math.max(0, Math.min(1, Number((rule && (rule.healingReductionRate ?? rule.healReductionRate ?? rule.antiHealRate)) ?? (status === "bleed" ? BATTLE_BLEED_HEALING_REDUCTION_PER_STACK : 0)) || 0)), chainAfterHits:Math.max(1,Math.floor(Number(rule && rule.chainAfterHits)||3)), chainCount:Math.max(1,Math.min(4,Math.floor(Number(rule && rule.chainCount)||1))), hitCounter:0, expired:false };
+        const duration = Math.max(0, Math.floor(Number(rule.durationTurns ?? rule.turns ?? (status === "freeze" ? 0 : status === "bleed" ? BATTLE_BLEED_DEFAULT_TURNS : 1)) || 0));
+        return { id:`${Date.now().toString(36)}:${Math.random().toString(36).slice(2,7)}`, status, label:BATTLE_STATUS_LABELS[status] || status, sourceCardId:String(source && source.id || rule && rule.sourceCardId || ""), sourceName:String(source && source.name || rule && rule.sourceName || ""), sourceAbilityName:String(rule && rule.sourceAbilityName || ""), turnsRemaining:duration, attacksRemaining:Math.max(1,Math.floor(Number(rule && rule.deathAfterAttacks)||1)), missRate:Math.max(0,Math.min(1,Number(rule && rule.missRate)||0)), damageFlat:Math.max(0,Number(rule && rule.damageFlat)||0), damageRate:Math.max(0,Number(rule && rule.damageRate)||0), sourcePower:Math.max(0,Number(source && source.power)||Number(rule && rule.sourcePower)||0), freezeBreakPowerRate:Math.max(0,Number((rule && rule.freezeBreakPowerRate) ?? 2)||0), freezeBreakSuccessRate:normalizeAbilityChance(rule && (rule.freezeBreakSuccessRate ?? rule.shatterSuccessRate ?? 1),1), hpLossFlat:Math.max(0,Number(rule && rule.hpLossFlat)||0), hpLossRate:Math.max(0,Number(rule && rule.hpLossRate)||0), healingReductionRate:status === "bleed" ? BATTLE_BLEED_HEALING_REDUCTION_PER_STACK : Math.max(0, Math.min(1, Number(rule && (rule.healingReductionRate ?? rule.healReductionRate ?? rule.antiHealRate)) || 0)), chainAfterHits:Math.max(1,Math.floor(Number(rule && rule.chainAfterHits)||3)), chainCount:Math.max(1,Math.min(4,Math.floor(Number(rule && rule.chainCount)||1))), hitCounter:0, expired:false };
       }
       function applyBattleStatus(member, rule, source, sourceTeam, targetTeam, reason = "skill") {
         if (!member || member.ko || member.currentHp <= 0) return null;
         const instance = makeBattleStatusInstance(rule, source);
-        if (instance.status === "bleed") {
-          const loss = Math.max(instance.hpLossFlat, member.maxHp * instance.hpLossRate);
-          if (loss > 0) { member.maxHp = Math.max(1, member.maxHp - loss); member.currentHp = Math.max(0, Math.min(member.currentHp - loss, member.maxHp)); if (member.currentHp <= 0) { member.ko = true; member.deathReason = "bleed"; } }
-        }
         const stackable = ["burn","bleed"].includes(instance.status);
         if (!stackable) member.statusEffects = abilityArray(member.statusEffects).filter(item => item.status !== instance.status);
         member.statusEffects.push(instance);
@@ -16505,6 +16524,41 @@
         const events = [];
         activeStatusEffects(actor,"death").forEach(effect => { effect.attacksRemaining = Math.max(0,Number(effect.attacksRemaining||0)-1); events.push({ status:"tick", statusType:"death", statusLabel:effect.label, targetCardId:actor.id, targetName:actor.name, attacksRemaining:effect.attacksRemaining }); if (effect.attacksRemaining <= 0 && actor.currentHp > 0) { actor.currentHp = 0; actor.ko = true; actor.deathReason = "death-status"; effect.expired = true; events.push({ status:"applied", statusType:"death", statusLabel:effect.label, targetCardId:actor.id, targetName:actor.name, instantDeath:true }); } });
         compactBattleStatuses(actor); return events;
+      }
+      function tickBattleBleedOnOwnAttack(actor) {
+        const events = [];
+        if (!actor || actor.ko || actor.currentHp <= 0) return events;
+        const effects = activeStatusEffects(actor, "bleed")
+          .filter(effect => Math.max(0, Math.floor(Number(effect.turnsRemaining) || 0)) > 0)
+          .sort((a, b) => String(a.id || "").localeCompare(String(b.id || "")));
+        if (!effects.length) return events;
+
+        // durationTurns คือจำนวนสแต็กเลือดไหลรวม: ทุกครั้งที่เจ้าของสถานะได้โจมตีจริง
+        // จะระเบิด 1 สแต็ก สร้างความเสียหาย 10% ของ HP สูงสุด แล้วเหลือสแต็กน้อยลง 1
+        const consuming = effects[0];
+        const stacksBefore = getBleedStackCount(actor);
+        const requestedDamage = Math.max(1, actor.maxHp * BATTLE_BLEED_DAMAGE_RATE_PER_STACK);
+        const damage = Math.max(0, Math.min(actor.currentHp, requestedDamage));
+        actor.currentHp = Math.max(0, actor.currentHp - damage);
+
+        consuming.turnsRemaining = Math.max(0, Math.floor(Number(consuming.turnsRemaining) || 0) - 1);
+        if (consuming.turnsRemaining <= 0) consuming.expired = true;
+
+        if (actor.currentHp <= 0) {
+          actor.ko = true;
+          actor.deathReason = "bleed";
+        }
+
+        compactBattleStatuses(actor);
+        const stacksAfter = getBleedStackCount(actor);
+        events.push({
+          status:"explode", statusType:"bleed", statusLabel:consuming.label || BATTLE_STATUS_LABELS.bleed,
+          targetCardId:actor.id, targetName:actor.name, damage, remaining:actor.currentHp, ko:Boolean(actor.ko),
+          consumedStacks:1, stacksBefore, stacksRemaining:stacksAfter,
+          healingReductionRate:Math.min(BATTLE_BLEED_HEALING_REDUCTION_CAP, stacksAfter * BATTLE_BLEED_HEALING_REDUCTION_PER_STACK),
+          damageRate:BATTLE_BLEED_DAMAGE_RATE_PER_STACK
+        });
+        return events;
       }
       function tickBattleBurnOnAttack() {
         const events = [];
@@ -17758,6 +17812,8 @@
           const reviveEvents = applyReviveRules(activation.reviveRules, team, defenderTeam, actor, target);
           const spawnEvents = applySpawnRules(activation.spawnRules, team, defenderTeam, actor, target, turnIndex);
           finishTriggers(team, actor, activation);
+          const bleedTurnEvents = tickBattleBleedOnOwnAttack(actor);
+          statusEvents.push(...bleedTurnEvents);
           const timedReviveExpired = tickReviveTurn(actor);
 
           const selfShieldChange = teamShield(team) - alliedShieldBefore;
@@ -18301,23 +18357,35 @@
       abilityArray(source).filter(Boolean).forEach(raw => {
         const effect = Object.assign({}, raw);
         const status = normalize(effect.status || effect.label || "status");
+        const effectStacks = status === "bleed"
+          ? Math.max(0, Math.floor(Number(effect.turnsRemaining) || 0))
+          : 1;
         const current = grouped.get(status);
         if (!current) {
-          grouped.set(status, Object.assign(effect, { status, stackCount:1 }));
+          grouped.set(status, Object.assign(effect, {
+            status,
+            stackCount:effectStacks,
+            turnsRemaining:status === "bleed" ? effectStacks : Number(effect.turnsRemaining) || 0
+          }));
           return;
         }
-        current.stackCount += 1;
-        current.turnsRemaining = Math.max(Number(current.turnsRemaining) || 0, Number(effect.turnsRemaining) || 0);
+        current.stackCount += effectStacks;
+        current.turnsRemaining = status === "bleed"
+          ? Number(current.stackCount) || 0
+          : Math.max(Number(current.turnsRemaining) || 0, Number(effect.turnsRemaining) || 0);
         current.attacksRemaining = Math.max(Number(current.attacksRemaining) || 0, Number(effect.attacksRemaining) || 0);
         current.hitCounter = Math.max(Number(current.hitCounter) || 0, Number(effect.hitCounter) || 0);
         current.chainAfterHits = Math.max(Number(current.chainAfterHits) || 0, Number(effect.chainAfterHits) || 0);
       });
       return [...grouped.values()].map(effect => {
-        let baseText = String(effect.text || effect.label || labels[effect.status] || effect.status || "STATUS");
-        if (!effect.text && Number(effect.turnsRemaining) > 0 && !baseText.match(/\d/)) baseText += ` ${Math.floor(Number(effect.turnsRemaining))}`;
+        const baseText = String(effect.label || labels[effect.status] || effect.status || "STATUS");
+        const stackCount = Math.max(0, Math.floor(Number(effect.stackCount) || 0));
+        const displayText = effect.status === "bleed"
+          ? `${baseText} ×${stackCount} ↓ฮีล${Math.min(100, stackCount * 10)}%`
+          : `${String(effect.text || baseText)}${stackCount > 1 ? ` ×${stackCount}` : ""}`;
         return Object.assign(effect, {
           icon:effect.icon || emojis[effect.status] || "💫",
-          displayText:`${baseText}${Number(effect.stackCount) > 1 ? ` ×${effect.stackCount}` : ""}`
+          displayText
         });
       });
     }
