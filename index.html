@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-13-mailbox-delivery-repair-v122">
-  <title>Anime Card Collection · Runtime v122 · Mailbox Delivery Repair</title>
+  <meta name="gacha-app-build" content="2026-07-13-mail-delivery-realtime-v127">
+  <title>Anime Card Collection · Runtime v127 · Mail Delivery Realtime Fix</title>
   <style>
     :root {
       color-scheme: dark;
@@ -7894,6 +7894,95 @@
     }
   </style>
 
+
+  <style id="v126-arena-compact-hud-fix">
+    /* v126 · ย่อแถบลำดับเทิร์นและแถบผู้โจมตี/เป้าหมายไม่ให้บังสนาม ARENA */
+    #arenaView .battle-turn-order {
+      width: min(52vw, 560px) !important;
+      max-width: min(52vw, 560px) !important;
+      min-height: 34px !important;
+      padding: 4px 8px !important;
+      gap: 5px !important;
+    }
+    #arenaView .battle-turn-chip {
+      max-width: 82px;
+      min-height: 28px;
+      padding: 4px 6px;
+    }
+    #arenaView .battle-turn-chip img { width: 22px; height: 22px; }
+    #arenaView .battle-turn-chip b { font-size: .63rem !important; }
+    #arenaView .battle-turn-chip small { font-size: .52rem !important; }
+
+    #arenaView .battle-cinematic-hud .battle-action-ribbon {
+      top: 46px !important;
+      width: min(48vw, 520px) !important;
+      min-height: 44px !important;
+      padding: 6px 10px !important;
+      grid-template-columns: 36px minmax(0, 1fr) auto !important;
+      gap: 8px !important;
+      border-radius: 18px !important;
+    }
+    #arenaView .battle-cinematic-hud .battle-action-ribbon .battle-action-actor {
+      width: 36px !important;
+      height: 36px !important;
+    }
+    #arenaView .battle-cinematic-hud .battle-action-main b {
+      font-size: .74rem !important;
+    }
+    #arenaView .battle-cinematic-hud .battle-action-main small {
+      font-size: .58rem !important;
+    }
+    #arenaView .battle-cinematic-hud .battle-action-targets img,
+    #arenaView .battle-cinematic-hud .battle-action-targets span {
+      width: 22px !important;
+      height: 22px !important;
+      font-size: .50rem !important;
+      margin-left: -5px !important;
+    }
+    #arenaView .battle-cinematic-hud .battle-event-feed {
+      top: 96px !important;
+      width: min(30vw, 340px) !important;
+    }
+    #arenaView .battle-cinematic-hud .battle-event-card {
+      width: min(300px, 100%) !important;
+      padding: 8px 9px !important;
+      gap: 8px !important;
+    }
+    #arenaView .battle-cinematic-hud .battle-event-portrait {
+      width: 36px !important;
+      height: 36px !important;
+    }
+    #arenaView .battle-cinematic-hud .battle-event-copy b { font-size: .68rem !important; }
+    #arenaView .battle-cinematic-hud .battle-event-copy span { font-size: .58rem !important; }
+
+    @media (max-width: 900px) {
+      #arenaView .battle-turn-order {
+        width: min(76vw, 460px) !important;
+        max-width: min(76vw, 460px) !important;
+      }
+      #arenaView .battle-cinematic-hud .battle-action-ribbon {
+        width: min(72vw, 420px) !important;
+      }
+      #arenaView .battle-cinematic-hud .battle-event-feed {
+        width: min(56vw, 300px) !important;
+      }
+    }
+
+    @media (max-width: 760px) {
+      #arenaView .battle-turn-order {
+        width: calc(100% - 16px) !important;
+        max-width: calc(100% - 16px) !important;
+      }
+      #arenaView .battle-cinematic-hud .battle-action-ribbon {
+        width: min(92vw, 420px) !important;
+        top: 44px !important;
+        grid-template-columns: 34px minmax(0, 1fr) !important;
+      }
+      #arenaView .battle-cinematic-hud .battle-action-targets { display: none !important; }
+      #arenaView .battle-cinematic-hud .battle-event-feed { width: min(72vw, 280px) !important; }
+    }
+  </style>
+
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
@@ -8674,7 +8763,7 @@
       <div class="system-panel-head">
         <p class="eyebrow">System Mail</p>
         <h2>📬 กล่องจดหมาย</h2>
-        <p>รางวัลจากกิจกรรม ล็อกอิน Battle Tower และ ARENA จะถูกส่งมาที่นี่ก่อน กดรับแล้วไอเทมจึงจะเข้ากระเป๋า</p>
+        <p>รางวัลจากกิจกรรม ของขวัญเพื่อน GM ล็อกอิน Battle Tower และ ARENA จะซิงก์เข้าที่นี่แบบเรียลไทม์ กดรับแล้วของจึงจะเข้ากระเป๋า</p>
       </div>
       <div class="mail-actions" style="margin:0 0 14px">
         <button class="btn btn-primary" data-action="claim-all-mail">รับจดหมายทั้งหมด</button>
@@ -10157,6 +10246,7 @@
     let gmDraftRewards = [];
     let liveEventMailUnsubscribers = [];
     let liveEventMailSaveTimer = 0;
+    let mailboxDeliverySyncTimer = 0;
     let battleResult = null;
     let battleAnimating = false;
     let arenaResult = null;
@@ -21270,29 +21360,48 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     async function writeOwnPublicOutboxEntry(entryId, payload) {
       if (!cloudReady || !activeCloudUid || !entryId) throw new Error("public-outbox-unavailable");
-      const entryRef = cloudModules.ref(cloudDb, `publicProfiles/${activeCloudUid}/outbox/${String(entryId)}`);
-      await cloudModules.set(
-        entryRef,
-        Object.assign({}, payload, { senderUid:String(activeCloudUid), deliveryVersion:3 })
-      );
-      // อ่านกลับทันทีเพื่อยืนยันว่า Firebase บันทึกจริง ไม่ใช่แค่คำสั่งฝั่งหน้าเว็บผ่านไป
-      const verifySnapshot = await cloudModules.get(entryRef);
-      if (!verifySnapshot.exists()) throw new Error("public-outbox-verify-failed");
-      return true;
+      const id = String(entryId);
+      const safePayload = Object.assign({}, payload, {
+        senderUid:String(activeCloudUid),
+        deliveryVersion:4,
+        enabled: payload && payload.enabled !== false
+      });
+      const updates = {};
+      // เขียนสองสำเนาใต้โปรไฟล์ของผู้ส่งเอง ซึ่งใช้ได้กับ Rules เดิมที่อนุญาตให้เจ้าของเขียน publicProfiles/$uid
+      updates[`publicProfiles/${activeCloudUid}/outbox/${id}`] = safePayload;
+      updates[`publicProfiles/${activeCloudUid}/mailOutbox/${id}`] = safePayload;
+      await cloudModules.update(cloudModules.ref(cloudDb), updates);
+
+      const [primarySnapshot, mirrorSnapshot] = await Promise.all([
+        cloudModules.get(cloudModules.ref(cloudDb, `publicProfiles/${activeCloudUid}/outbox/${id}`)).catch(() => null),
+        cloudModules.get(cloudModules.ref(cloudDb, `publicProfiles/${activeCloudUid}/mailOutbox/${id}`)).catch(() => null)
+      ]);
+      const primaryExists = Boolean(primarySnapshot && primarySnapshot.exists());
+      const mirrorExists = Boolean(mirrorSnapshot && mirrorSnapshot.exists());
+      if (!primaryExists && !mirrorExists) throw new Error("public-outbox-verify-failed");
+      return { primaryExists, mirrorExists };
     }
 
     async function cleanupOwnPublicOutbox(maxEntries = 180) {
       if (!cloudReady || !activeCloudUid) return;
       try {
-        const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, `publicProfiles/${activeCloudUid}/outbox`));
-        if (!snapshot.exists()) return;
+        const [primarySnapshot, mirrorSnapshot] = await Promise.all([
+          cloudModules.get(cloudModules.ref(cloudDb, `publicProfiles/${activeCloudUid}/outbox`)).catch(() => null),
+          cloudModules.get(cloudModules.ref(cloudDb, `publicProfiles/${activeCloudUid}/mailOutbox`)).catch(() => null)
+        ]);
+        const merged = Object.assign(
+          {},
+          primarySnapshot && primarySnapshot.exists() ? primarySnapshot.val() || {} : {},
+          mirrorSnapshot && mirrorSnapshot.exists() ? mirrorSnapshot.val() || {} : {}
+        );
         const now = Date.now();
-        const entries = Object.entries(snapshot.val() || {}).sort((a, b) => Number(b[1] && b[1].createdAt || 0) - Number(a[1] && a[1].createdAt || 0));
+        const entries = Object.entries(merged).sort((a, b) => Number(b[1] && b[1].createdAt || 0) - Number(a[1] && a[1].createdAt || 0));
         const updates = {};
         entries.forEach(([id, item], index) => {
           const createdAt = Math.max(0, Number(item && item.createdAt) || 0);
           if (index >= Math.max(20, Number(maxEntries) || 180) || (createdAt && now - createdAt > 180 * 86400000)) {
             updates[`publicProfiles/${activeCloudUid}/outbox/${id}`] = null;
+            updates[`publicProfiles/${activeCloudUid}/mailOutbox/${id}`] = null;
           }
         });
         if (Object.keys(updates).length) await cloudModules.update(cloudModules.ref(cloudDb), updates);
@@ -21395,7 +21504,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         try {
           await writeOwnPublicOutboxEntry(transferId, Object.assign({}, payload, {
             kind:"friend-resource",
-            deliveryVersion:3,
+            deliveryVersion:4,
             enabled:true,
             uniqueKey:`friend-resource-transfer:${transferId}`
           }));
@@ -21420,7 +21529,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         renderAll();
         const amountInput = panel?.querySelector('.friend-transfer-amount');
         if (amountInput) amountInput.value = "";
-        showToast(`โอน ${config.icon} ${formatNumber(amount)} ${config.label} ให้ ${profile.username || "เพื่อน"} แล้ว • ผู้รับเปิดกล่องจดหมายหรือกดรีเฟรชได้ทันที`);
+        const deliveryChannels = [legacyTransferCreated ? "กล่องรับตรง" : "", publicOutboxCreated ? "กล่องสำรอง" : ""].filter(Boolean).join(" + ");
+        showToast(`โอน ${config.icon} ${formatNumber(amount)} ${config.label} ให้ ${profile.username || "เพื่อน"} แล้ว • ${deliveryChannels || "บันทึกคิวแล้ว"}`);
       } catch (error) {
         if (deducted && !transferCreated) {
           try {
@@ -21460,7 +21570,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const rawProfiles = publicProfilesSnapshot && publicProfilesSnapshot.exists() ? publicProfilesSnapshot.val() || {} : {};
         const publicOutboxes = Object.entries(rawProfiles && typeof rawProfiles === "object" ? rawProfiles : {}).map(([senderUid, rawProfile]) => {
           const profile = rawProfile && typeof rawProfile === "object" ? rawProfile : {};
-          return { senderUid:String(senderUid), map:profile.outbox && typeof profile.outbox === "object" ? profile.outbox : {} };
+          const primary = profile.outbox && typeof profile.outbox === "object" ? profile.outbox : {};
+          const mirror = profile.mailOutbox && typeof profile.mailOutbox === "object" ? profile.mailOutbox : {};
+          return { senderUid:String(senderUid), map:Object.assign({}, mirror, primary) };
         });
 
         if (!state.processedPublicOutboxKeys || typeof state.processedPublicOutboxKeys !== "object") state.processedPublicOutboxKeys = {};
@@ -21483,8 +21595,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           const processedKey = source === "public" ? `public-outbox:friend:${senderUid}:${transferId}` : "";
           const alreadyExists = mailboxHasUniqueKey(uniqueKey);
           if (externalMailWasDeleted(uniqueKey)) return;
-          // forceRepair ใช้ตอนเปิด/กดรีเฟรชกล่องจดหมาย เพื่อซ่อม processed key รุ่นเก่าที่ถูกบันทึกผิดจังหวะ
-          if (!forceRepair && processedKey && state.processedPublicOutboxKeys[processedKey] && !alreadyExists) return;
+          // v127: processed key เป็นเพียงประวัติ ห้ามใช้บล็อกการสร้างจดหมาย
+          // แหล่งตัดสินซ้ำจริงคือ uniqueKey ใน mailbox และ tombstone หลังผู้เล่นรับ/ลบแล้วเท่านั้น
 
           let handled = alreadyExists;
           if (!alreadyExists) {
@@ -21503,8 +21615,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           }
           // สำคัญ: ห้ามทำเครื่องหมาย processed หากยังสร้างจดหมายไม่ได้
           if (handled && processedKey) {
-            state.processedPublicOutboxKeys[processedKey] = Math.max(1, Number(transfer.createdAt) || now);
-            processedChanged = true;
+            const processedAt = Math.max(1, Number(transfer.createdAt) || now);
+            if (Number(state.processedPublicOutboxKeys[processedKey]) !== processedAt) {
+              state.processedPublicOutboxKeys[processedKey] = processedAt;
+              processedChanged = true;
+            }
           }
           if (handled && source === "legacy") {
             deliveredUpdates[`resourceTransfers/${activeCloudUid}/${transferId}/deliveredAt`] = now;
@@ -26156,7 +26271,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     async function initializeLiveEventSystems() {
       await refreshGMAccess(true);
       if (gmAccess.isGM) ensureGMAllCards();
-      await syncLiveEventMailOnce();
+      // โหลดทั้งจดหมาย GM และของขวัญเพื่อนทันทีตอนล็อกอิน ไม่ต้องรอเปิดหน้ากล่องจดหมาย
+      await Promise.allSettled([
+        syncLiveEventMailOnce(true),
+        syncIncomingResourceTransfers(false, true)
+      ]);
       startLiveEventMailListeners();
       renderGMAccess();
     }
@@ -26172,10 +26291,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const key = String(item && item.uniqueKey || "");
         return key === uniqueKey || key.endsWith(`:${id}`) || String(item && item.id || "").endsWith(`-${id}`);
       });
-      if (mailboxHit || externalMailWasDeleted(uniqueKey)) return true;
-      if (forceRepair) return false;
-      return Object.keys(state.processedEventMailKeys && typeof state.processedEventMailKeys === "object" ? state.processedEventMailKeys : {})
-        .some(key => String(key) === uniqueKey || String(key).endsWith(`:${id}`));
+      // v127: processedEventMailKeys รุ่นเก่าเคยถูกบันทึกก่อนสร้าง mailbox สำเร็จ
+      // จึงไม่ใช้ processed key ปิดกั้นอีกต่อไป ป้องกันจดหมาย GM หายถาวร
+      return Boolean(mailboxHit || externalMailWasDeleted(uniqueKey));
     }
 
     function importPublicOutboxGMMails(rawProfiles = {}, forceRepair = false) {
@@ -26183,7 +26301,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const collected = {};
       Object.entries(rawProfiles && typeof rawProfiles === "object" ? rawProfiles : {}).forEach(([profileUid, profileRaw]) => {
         const profile = profileRaw && typeof profileRaw === "object" ? profileRaw : {};
-        const outbox = profile.outbox && typeof profile.outbox === "object" ? profile.outbox : {};
+        const primary = profile.outbox && typeof profile.outbox === "object" ? profile.outbox : {};
+        const mirror = profile.mailOutbox && typeof profile.mailOutbox === "object" ? profile.mailOutbox : {};
+        const outbox = Object.assign({}, mirror, primary);
         Object.entries(outbox).forEach(([mailId, raw]) => {
           const mail = raw && typeof raw === "object" ? raw : {};
           if (String(mail.kind || "") !== "gm-mail" || mail.enabled === false) return;
@@ -26265,18 +26385,40 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           cloudModules.get(cloudModules.ref(cloudDb, `userMails/${activeCloudUid}`)).catch(() => null),
           cloudModules.get(cloudModules.ref(cloudDb, "publicProfiles")).catch(() => null)
         ]);
-        return importLiveEventMailMap(serverSnapshot && serverSnapshot.exists() ? serverSnapshot.val() : {}, "server", forceRepair)
+        const created = importLiveEventMailMap(serverSnapshot && serverSnapshot.exists() ? serverSnapshot.val() : {}, "server", forceRepair)
           + importLiveEventMailMap(userSnapshot && userSnapshot.exists() ? userSnapshot.val() : {}, "user", forceRepair)
           + importPublicOutboxGMMails(publicProfilesSnapshot && publicProfilesSnapshot.exists() ? publicProfilesSnapshot.val() : {}, forceRepair);
+        if (created > 0) {
+          clearTimeout(liveEventMailSaveTimer);
+          await writeCloudSave({ liveEventMailSyncedAt:Date.now(), liveEventMailDeliveryVersion:4 });
+          renderAll();
+          if (!document.getElementById("mailboxModal").classList.contains("hidden")) renderMailbox();
+        }
+        return created;
       } catch (error) {
         console.warn("Live event mail sync skipped:", error);
         return 0;
       }
     }
 
+    function scheduleMailboxDeliverySync(delay = 120) {
+      clearTimeout(mailboxDeliverySyncTimer);
+      mailboxDeliverySyncTimer = setTimeout(() => {
+        Promise.allSettled([
+          syncIncomingResourceTransfers(false, true),
+          syncLiveEventMailOnce(true)
+        ]).then(() => {
+          renderUtilityDock();
+          if (!document.getElementById("mailboxModal").classList.contains("hidden")) renderMailbox();
+        });
+      }, Math.max(30, Number(delay) || 120));
+    }
+
     function stopLiveEventMailListeners() {
       liveEventMailUnsubscribers.forEach(unsubscribe => { try { unsubscribe(); } catch (_) {} });
       liveEventMailUnsubscribers = [];
+      clearTimeout(mailboxDeliverySyncTimer);
+      mailboxDeliverySyncTimer = 0;
     }
 
     function startLiveEventMailListeners() {
@@ -26292,12 +26434,24 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       };
       listen("serverMails", "server");
       listen(`userMails/${activeCloudUid}`, "user");
+
+      // เส้นทางหลักของขวัญเพื่อน: ผู้รับฟัง resourceTransfers ของตนเองแบบ Realtime
+      try {
+        const unsubscribe = cloudModules.onValue(cloudModules.ref(cloudDb, `resourceTransfers/${activeCloudUid}`), () => {
+          scheduleMailboxDeliverySync(50);
+        }, error => console.warn("Resource transfer listener:", error));
+        if (typeof unsubscribe === "function") liveEventMailUnsubscribers.push(unsubscribe);
+      } catch (error) { console.warn("Resource transfer listener unavailable:", error); }
+
+      // เส้นทางสำรองเดิม: ฟัง publicProfiles เพื่อรับทั้ง GM และของขวัญเพื่อนจาก outbox/mailOutbox
       try {
         const unsubscribe = cloudModules.onValue(cloudModules.ref(cloudDb, "publicProfiles"), snapshot => {
-          importPublicOutboxGMMails(snapshot.exists() ? snapshot.val() : {});
-        }, error => console.warn("Public outbox GM listener:", error));
+          const rawProfiles = snapshot.exists() ? snapshot.val() : {};
+          importPublicOutboxGMMails(rawProfiles, true);
+          scheduleMailboxDeliverySync(90);
+        }, error => console.warn("Public outbox mail listener:", error));
         if (typeof unsubscribe === "function") liveEventMailUnsubscribers.push(unsubscribe);
-      } catch (error) { console.warn("Public outbox GM listener unavailable:", error); }
+      } catch (error) { console.warn("Public outbox mail listener unavailable:", error); }
     }
 
     function gmCardOptionsHTML(selected = "") {
@@ -26527,7 +26681,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const now = Date.now();
         const mailId = `event-${now.toString(36)}-${Math.random().toString(36).slice(2,9)}`;
         const payload = {
-          id:mailId, kind:"gm-mail", sourceMailId:mailId, gmVerified:true, deliveryVersion:3,
+          id:mailId, kind:"gm-mail", sourceMailId:mailId, gmVerified:true, deliveryVersion:4,
           title, occasion, message, rewards:gmDraftRewards.map(reward => ({ ...reward })),
           enabled:true, createdAt:now, expiresAt:expiryDays > 0 ? now + Math.floor(expiryDays * 86400000) : 0,
           senderUid:activeCloudUid, senderUsername:activeCloudUsername || state.profile?.username || "GM",
@@ -26557,7 +26711,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         if (occasionInput) occasionInput.value = "";
         if (messageInput) messageInput.value = "";
         renderGMDraftRewards();
-        if (status) status.textContent = recipientUid ? `ส่งถึง UID ${recipientUid} สำเร็จ • เหตุผล: ${occasion}` : `ส่งถึงผู้เล่นทั้งเซิร์ฟสำเร็จ • เหตุผล: ${occasion} • Mail ID ${mailId}`;
+        const deliveryChannels = [legacyMailSent ? "กล่องรับตรง" : "", publicOutboxSent ? "กล่องสำรอง" : ""].filter(Boolean).join(" + ");
+        if (status) status.textContent = recipientUid
+          ? `ส่งถึง UID ${recipientUid} สำเร็จ • ${deliveryChannels} • เหตุผล: ${occasion}`
+          : `ส่งถึงผู้เล่นทั้งเซิร์ฟสำเร็จ • ${deliveryChannels} • เหตุผล: ${occasion} • Mail ID ${mailId}`;
         showToast(recipientUid ? "ส่งจดหมายให้ผู้เล่นแล้ว" : "ส่งจดหมายกิจกรรมทั้งเซิร์ฟแล้ว");
       } catch (error) {
         const messageText = String(error && error.message) === "gm-target-not-found"
