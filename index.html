@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-13-status-visible-profile-scroll-v121">
-  <title>Anime Card Collection · Runtime v121 · Status, Clone & Mail Delivery Fix</title>
+  <meta name="gacha-app-build" content="2026-07-13-mailbox-delivery-repair-v122">
+  <title>Anime Card Collection · Runtime v122 · Mailbox Delivery Repair</title>
   <style>
     :root {
       color-scheme: dark;
@@ -7649,6 +7649,9 @@
       }
     }
   </style>
+  <style id="v122-mailbox-delivery-repair">
+    /* v122: ปุ่มรีเฟรชกล่องจดหมายใช้สไตล์ .btn เดิม */
+  </style>
 
 
   <style id="v121-status-visible-profile-scroll-fix">
@@ -7819,6 +7822,59 @@
       #profileModal .profile-panel {
         max-height: calc(100dvh - 16px) !important;
         border-radius: 20px;
+      }
+    }
+  </style>
+
+
+  <style id="v123-arena-status-bleed-heal-fix">
+    /* v123 · สถานะใน Arena ไม่ลอยหลุดจนโดนขอบบนบัง และอ่านได้แม้ตัวอยู่แถวบนสุด */
+    #arenaView .battle-model-stack.arena-side-grid .battle-model-card .battle-unit-status-icons {
+      left: 4px !important;
+      right: 4px !important;
+      top: 4px !important;
+      bottom: auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: calc(100% - 8px) !important;
+      transform: none !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 3px !important;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,.68));
+    }
+    #arenaView .battle-model-stack.arena-side-grid .battle-model-card .battle-unit-status-icons > .battle-status-chip {
+      max-width: 100% !important;
+      padding: 3px 5px !important;
+      font-size: clamp(.42rem, .5vw, .53rem) !important;
+      line-height: 1.06 !important;
+      white-space: normal !important;
+      text-wrap: balance;
+      overflow-wrap: anywhere !important;
+    }
+    #arenaView .battle-model-stack.arena-side-grid .battle-model-card .battle-status-emoji-row {
+      top: 23px !important;
+      left: 4px !important;
+      right: 4px !important;
+      gap: 3px !important;
+    }
+    #arenaView .battle-model-stack.arena-side-grid .battle-model-card .battle-status-emoji-row > .battle-status-emoji {
+      width: clamp(18px, 1.7vw, 22px) !important;
+      height: clamp(18px, 1.7vw, 22px) !important;
+      font-size: clamp(.66rem, .82vw, .82rem) !important;
+    }
+    #arenaView .battle-model-stack.arena-side-grid,
+    #arenaView .battle-model-stack.arena-side-grid .battle-row-line,
+    #arenaView .battle-model-stack.arena-side-grid .battle-source-formation {
+      overflow: visible !important;
+    }
+    @media (max-width: 760px) {
+      #arenaView .battle-model-stack.arena-side-grid .battle-model-card .battle-unit-status-icons > .battle-status-chip {
+        font-size: .44rem !important;
+        padding: 3px 4px !important;
+      }
+      #arenaView .battle-model-stack.arena-side-grid .battle-model-card .battle-status-emoji-row {
+        top: 22px !important;
       }
     }
   </style>
@@ -8607,6 +8663,7 @@
       </div>
       <div class="mail-actions" style="margin:0 0 14px">
         <button class="btn btn-primary" data-action="claim-all-mail">รับจดหมายทั้งหมด</button>
+        <button class="btn" data-action="refresh-mailbox">🔄 รีเฟรชจดหมายจากเซิร์ฟเวอร์</button>
         <button class="btn" data-action="delete-claimed-mail">ลบจดหมายที่รับแล้ว</button>
       </div>
       <div class="mail-list" id="mailboxList"></div>
@@ -10245,6 +10302,9 @@
         mailbox: [],
         processedEventMailKeys: {},
         processedPublicOutboxKeys: {},
+        // v122: เก็บ tombstone ของจดหมายภายนอกที่ผู้เล่นรับและลบแล้ว
+        // เพื่อให้โหมดซ่อมกล่องจดหมายสามารถนำจดหมายที่เคยติดบั๊กกลับมาได้ โดยไม่ดึงฉบับที่ลบแล้วซ้ำ
+        externalMailTombstones: {},
         itemInventoryVersion: ITEM_INVENTORY_VERSION,
         profile: {
           username: "",
@@ -11021,6 +11081,13 @@
             .filter(([key]) => key)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 1200))
+        : {};
+      next.externalMailTombstones = next.externalMailTombstones && typeof next.externalMailTombstones === "object" && !Array.isArray(next.externalMailTombstones)
+        ? Object.fromEntries(Object.entries(next.externalMailTombstones)
+            .map(([key, at]) => [String(key), Math.max(0, Number(at) || 0)])
+            .filter(([key]) => key)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 1600))
         : {};
       // ย้ายตั๋วจากเซฟรุ่นเก่าเข้ากระเป๋าเพียงครั้งเดียว เพื่อไม่ให้ของผู้เล่นหายหรือเพิ่มซ้ำ
       if (Number(raw && raw.itemInventoryVersion || 0) < ITEM_INVENTORY_VERSION) {
@@ -14899,13 +14966,13 @@
           case CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS: changeRuntimeNumber(localTarget, "shieldHits", Math.round(value), instance, n => applyCombatShieldHitModifier(0, n)); break;
           case CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS: applyShieldChange(localTarget, Math.round(value)); break;
           case CARD_ABILITY_EFFECT_TYPES.HEAL_HP_RATE: {
-            const amount = Math.max(0, localTarget.maxHp * value * Math.max(0, 1 + localTarget.healingRate));
+            const amount = Math.max(0, localTarget.maxHp * value * getBattleHealingMultiplier(localTarget));
             localTarget.hp = Math.min(localTarget.maxHp, localTarget.hp + amount);
             localTarget.totalHealing += amount;
             break;
           }
           case CARD_ABILITY_EFFECT_TYPES.HEAL_HP_FLAT: {
-            const amount = Math.max(0, value * Math.max(0, 1 + localTarget.healingRate));
+            const amount = Math.max(0, value * getBattleHealingMultiplier(localTarget));
             localTarget.hp = Math.min(localTarget.maxHp, localTarget.hp + amount);
             localTarget.totalHealing += amount;
             break;
@@ -15672,7 +15739,7 @@
         attacker.totalDamage += damage;
 
         const requestedHealHp = Math.max(0, Number(activation.healHp || 0));
-        const healingMultiplier = Math.max(0, 1 + Number(attacker.healingRate || 0));
+        const healingMultiplier = getBattleHealingMultiplier(attacker);
         const modifiedHealHp = requestedHealHp * healingMultiplier;
         const healHp = Math.max(0, Math.min(attacker.maxHp - attacker.hp, modifiedHealHp));
         if (healHp > 0) {
@@ -16298,6 +16365,8 @@
         "condition-cancel": "🔓", "skill-cancel": "🚫", "skill-stolen": "🕸️", "skill-copied": "🧬"
       };
       const BATTLE_STICKY_STATUSES = new Set(["freeze", "death", "bleed", "condition-cancel", "skill-cancel", "skill-stolen", "skill-copied"]);
+      const BATTLE_BLEED_HEALING_REDUCTION_PER_STACK = 0.35;
+      const BATTLE_BLEED_HEALING_REDUCTION_CAP = 0.90;
       function normalizeBattleStatusName(value) {
         const raw = String(value || "").trim();
         if (!raw) return "";
@@ -16328,6 +16397,18 @@
         const target = normalizeBattleStatusName(status);
         return abilityArray(member && member.statusEffects).filter(item => item && !item.expired && (!target || item.status === target));
       }
+      function getBleedHealingReduction(member) {
+        const total = activeStatusEffects(member, "bleed").reduce((sum, item) => {
+          const perStack = Math.max(0, Number(item && (item.healingReductionRate ?? item.healReductionRate ?? item.antiHealRate ?? BATTLE_BLEED_HEALING_REDUCTION_PER_STACK)) || 0);
+          return sum + perStack;
+        }, 0);
+        return Math.max(0, Math.min(BATTLE_BLEED_HEALING_REDUCTION_CAP, total));
+      }
+      function getBattleHealingMultiplier(member) {
+        const base = Math.max(0, 1 + Number(member && member.healingRate || 0));
+        const bleedReduction = getBleedHealingReduction(member);
+        return Math.max(0, base * (1 - bleedReduction));
+      }
       function compactBattleStatuses(member) {
         if (!member) return [];
         member.statusEffects = abilityArray(member.statusEffects).filter(item => item && !item.expired && (BATTLE_STICKY_STATUSES.has(item.status) || Number(item.turnsRemaining ?? 1) !== 0));
@@ -16343,14 +16424,14 @@
         if (effect.status === "blind") return `${emoji} ${label}${Math.round((Number(effect.missRate)||0)*100)}%`;
         if (effect.status === "freeze") return `${emoji} ${label}`;
         if (effect.status === "burn") return `${emoji} ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
-        if (effect.status === "bleed") return `${emoji} ${label}`;
+        if (effect.status === "bleed") { const cut = Math.round((Number(effect.healingReductionRate ?? effect.healReductionRate ?? effect.antiHealRate ?? BATTLE_BLEED_HEALING_REDUCTION_PER_STACK) || 0) * 100); return `${emoji} ${label}${cut > 0 ? ` ↓ฮีล${cut}%` : ""}`; }
         if (effect.status === "shock") return `${emoji} ${label}${effect.hitCounter || 0}/${effect.chainAfterHits || 1}`;
         return `${emoji} ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
       }
       function makeBattleStatusInstance(rule, source) {
         const status = normalizeBattleStatusName(rule && rule.status) || "stun";
         const duration = Math.max(0, Math.floor(Number(rule.durationTurns ?? rule.turns ?? (status === "freeze" || status === "bleed" ? 0 : 1)) || 0));
-        return { id:`${Date.now().toString(36)}:${Math.random().toString(36).slice(2,7)}`, status, label:BATTLE_STATUS_LABELS[status] || status, sourceCardId:String(source && source.id || rule && rule.sourceCardId || ""), sourceName:String(source && source.name || rule && rule.sourceName || ""), sourceAbilityName:String(rule && rule.sourceAbilityName || ""), turnsRemaining:duration, attacksRemaining:Math.max(1,Math.floor(Number(rule && rule.deathAfterAttacks)||1)), missRate:Math.max(0,Math.min(1,Number(rule && rule.missRate)||0)), damageFlat:Math.max(0,Number(rule && rule.damageFlat)||0), damageRate:Math.max(0,Number(rule && rule.damageRate)||0), sourcePower:Math.max(0,Number(source && source.power)||Number(rule && rule.sourcePower)||0), freezeBreakPowerRate:Math.max(0,Number((rule && rule.freezeBreakPowerRate) ?? 2)||0), freezeBreakSuccessRate:normalizeAbilityChance(rule && (rule.freezeBreakSuccessRate ?? rule.shatterSuccessRate ?? 1),1), hpLossFlat:Math.max(0,Number(rule && rule.hpLossFlat)||0), hpLossRate:Math.max(0,Number(rule && rule.hpLossRate)||0), chainAfterHits:Math.max(1,Math.floor(Number(rule && rule.chainAfterHits)||3)), chainCount:Math.max(1,Math.min(4,Math.floor(Number(rule && rule.chainCount)||1))), hitCounter:0, expired:false };
+        return { id:`${Date.now().toString(36)}:${Math.random().toString(36).slice(2,7)}`, status, label:BATTLE_STATUS_LABELS[status] || status, sourceCardId:String(source && source.id || rule && rule.sourceCardId || ""), sourceName:String(source && source.name || rule && rule.sourceName || ""), sourceAbilityName:String(rule && rule.sourceAbilityName || ""), turnsRemaining:duration, attacksRemaining:Math.max(1,Math.floor(Number(rule && rule.deathAfterAttacks)||1)), missRate:Math.max(0,Math.min(1,Number(rule && rule.missRate)||0)), damageFlat:Math.max(0,Number(rule && rule.damageFlat)||0), damageRate:Math.max(0,Number(rule && rule.damageRate)||0), sourcePower:Math.max(0,Number(source && source.power)||Number(rule && rule.sourcePower)||0), freezeBreakPowerRate:Math.max(0,Number((rule && rule.freezeBreakPowerRate) ?? 2)||0), freezeBreakSuccessRate:normalizeAbilityChance(rule && (rule.freezeBreakSuccessRate ?? rule.shatterSuccessRate ?? 1),1), hpLossFlat:Math.max(0,Number(rule && rule.hpLossFlat)||0), hpLossRate:Math.max(0,Number(rule && rule.hpLossRate)||0), healingReductionRate:Math.max(0, Math.min(1, Number((rule && (rule.healingReductionRate ?? rule.healReductionRate ?? rule.antiHealRate)) ?? (status === "bleed" ? BATTLE_BLEED_HEALING_REDUCTION_PER_STACK : 0)) || 0)), chainAfterHits:Math.max(1,Math.floor(Number(rule && rule.chainAfterHits)||3)), chainCount:Math.max(1,Math.min(4,Math.floor(Number(rule && rule.chainCount)||1))), hitCounter:0, expired:false };
       }
       function applyBattleStatus(member, rule, source, sourceTeam, targetTeam, reason = "skill") {
         if (!member || member.ko || member.currentHp <= 0) return null;
@@ -17228,7 +17309,7 @@
               const requested = rule.mode === "rate"
                 ? recipient.maxHp * Math.max(0, Number(rule.value) || 0)
                 : Math.max(0, Number(rule.value) || 0);
-              const actual = Math.max(0, Math.min(recipient.maxHp - recipient.currentHp, requested * Math.max(0, 1 + recipient.healingRate)));
+              const actual = Math.max(0, Math.min(recipient.maxHp - recipient.currentHp, requested * getBattleHealingMultiplier(recipient)));
               requestedHeal += requested;
               if (actual > 0) {
                 recipient.currentHp += actual;
@@ -17650,7 +17731,7 @@
                 const requested = rule.mode === "rate"
                   ? recipient.maxHp * Math.max(0, Number(rule.value) || 0)
                   : Math.max(0, Number(rule.value) || 0);
-                const actual = Math.max(0, Math.min(recipient.maxHp - recipient.currentHp, requested * Math.max(0, 1 + recipient.healingRate)));
+                const actual = Math.max(0, Math.min(recipient.maxHp - recipient.currentHp, requested * getBattleHealingMultiplier(recipient)));
                 requestedHeal += requested;
                 if (actual > 0) {
                   recipient.currentHp += actual;
@@ -17664,7 +17745,7 @@
             });
           } else {
             requestedHeal = Math.max(0, Number(activation.healHp) || 0);
-            heal = Math.max(0, Math.min(actor.maxHp - actor.currentHp, requestedHeal * Math.max(0,1+actor.healingRate)));
+            heal = Math.max(0, Math.min(actor.maxHp - actor.currentHp, requestedHeal * getBattleHealingMultiplier(actor)));
             if (heal > 0) { actor.currentHp += heal; actor.healingDone += heal; team.totalHealing += heal; healEvents.push({ targetCardId: actor.id, targetName: actor.name, amount: heal, side: team.side }); }
           }
           const maxHpGain = Math.max(0, Number(activation.maxHpGain) || 0);
@@ -17697,7 +17778,7 @@
             suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:resistanceActivationEvents, transferEvents:[], stackEvents:[], statusEvents,
             blindMiss:attackMissedByBlind,
             attackBonus:activation.attackBonus, attackStackGain:activation.attackStackGain, maxHpGain,
-            requestedHealHp:requestedHeal, healingMultiplier:Math.max(0,1+actor.healingRate), healHp:heal, healEvents,
+            requestedHealHp:requestedHeal, healingMultiplier:getBattleHealingMultiplier(actor), healHp:heal, healEvents,
             shieldChange:selfShieldChange, enemyShieldChange, shieldGain:Math.max(0,selfShieldChange), shieldLoss:Math.max(0,-selfShieldChange),
             enemyShieldGain:Math.max(0,enemyShieldChange), enemyShieldLoss:Math.max(0,-enemyShieldChange),
             healingRate:actor.healingRate, enemyHealingRate:target.healingRate, shieldRecoveryRate:actor.shieldRecoveryRate,
@@ -19620,6 +19701,38 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       })).filter(mail => mail.rewards.length).slice(-120);
     }
 
+    // v122: ตัวช่วยซ่อมจดหมายภายนอก
+    // processed* รุ่นเก่าอาจถูกบันทึกก่อนสร้างจดหมายสำเร็จ ทำให้ระบบคิดว่าเคยรับแล้วทั้งที่กล่องว่าง
+    function ensureExternalMailTombstones() {
+      const map = state.externalMailTombstones && typeof state.externalMailTombstones === "object" && !Array.isArray(state.externalMailTombstones)
+        ? state.externalMailTombstones
+        : {};
+      state.externalMailTombstones = Object.fromEntries(Object.entries(map)
+        .map(([key, at]) => [String(key), Math.max(0, Number(at) || 0)])
+        .filter(([key]) => key)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 1600));
+      return state.externalMailTombstones;
+    }
+
+    function mailboxHasUniqueKey(uniqueKey = "") {
+      const key = String(uniqueKey || "");
+      return Boolean(key && abilityArray(state.mailbox).some(mail => String(mail && mail.uniqueKey || "") === key));
+    }
+
+    function externalMailWasDeleted(uniqueKey = "") {
+      const key = String(uniqueKey || "");
+      return Boolean(key && ensureExternalMailTombstones()[key]);
+    }
+
+    function rememberExternalMailDeletion(mail) {
+      const key = String(mail && mail.uniqueKey || "");
+      if (!key) return;
+      if (!["gm-event", "friend-transfer"].includes(String(mail && mail.source || ""))) return;
+      ensureExternalMailTombstones()[key] = Date.now();
+      ensureExternalMailTombstones();
+    }
+
     function getItemMeta(itemId = "") {
       const id = String(itemId || "");
       if (id === "pack:normal") return { id, kind: "pack", icon: "🎴", name: "แพ็คสุ่มการ์ดธรรมดา", description: "สุ่มการ์ด 1 ใบต่อ 1 ชิ้นจากเรทแพ็คกลาง แยกจากตู้กาชาและไม่เพิ่มการันตี • มีปุ่มเปิด x10 / เปิดทั้งหมด", color: "#5ce8ff" };
@@ -19766,6 +19879,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function deleteClaimedMail() {
       const before = (state.mailbox || []).length;
+      (state.mailbox || []).filter(mail => mail && mail.claimedAt).forEach(rememberExternalMailDeletion);
       state.mailbox = (state.mailbox || []).filter(mail => !mail.claimedAt);
       const removed = before - state.mailbox.length;
       saveState(true); renderAll(); renderMailbox();
@@ -21088,10 +21202,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     async function writeOwnPublicOutboxEntry(entryId, payload) {
       if (!cloudReady || !activeCloudUid || !entryId) throw new Error("public-outbox-unavailable");
+      const entryRef = cloudModules.ref(cloudDb, `publicProfiles/${activeCloudUid}/outbox/${String(entryId)}`);
       await cloudModules.set(
-        cloudModules.ref(cloudDb, `publicProfiles/${activeCloudUid}/outbox/${String(entryId)}`),
-        Object.assign({}, payload, { senderUid:String(activeCloudUid) })
+        entryRef,
+        Object.assign({}, payload, { senderUid:String(activeCloudUid), deliveryVersion:3 })
       );
+      // อ่านกลับทันทีเพื่อยืนยันว่า Firebase บันทึกจริง ไม่ใช่แค่คำสั่งฝั่งหน้าเว็บผ่านไป
+      const verifySnapshot = await cloudModules.get(entryRef);
+      if (!verifySnapshot.exists()) throw new Error("public-outbox-verify-failed");
       return true;
     }
 
@@ -21209,6 +21327,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         try {
           await writeOwnPublicOutboxEntry(transferId, Object.assign({}, payload, {
             kind:"friend-resource",
+            deliveryVersion:3,
             enabled:true,
             uniqueKey:`friend-resource-transfer:${transferId}`
           }));
@@ -21231,7 +21350,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         state.lastResourceTransferAt = now;
         saveState(true);
         renderAll();
-        showToast(`โอน ${config.icon} ${formatNumber(amount)} ${config.label} ให้ ${profile.username || "เพื่อน"} แล้ว`);
+        const amountInput = panel?.querySelector('.friend-transfer-amount');
+        if (amountInput) amountInput.value = "";
+        showToast(`โอน ${config.icon} ${formatNumber(amount)} ${config.label} ให้ ${profile.username || "เพื่อน"} แล้ว • ผู้รับเปิดกล่องจดหมายหรือกดรีเฟรชได้ทันที`);
       } catch (error) {
         if (deducted && !transferCreated) {
           try {
@@ -21258,26 +21379,21 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       }
     }
 
-    async function syncIncomingResourceTransfers(showNotice = false) {
+    async function syncIncomingResourceTransfers(showNotice = false, forceRepair = false) {
       if (!cloudReady || !activeCloudUid || resourceTransferBusy) return 0;
       resourceTransferBusy = true;
       try {
-        const [friendSnapshot, legacySnapshot] = await Promise.all([
-          cloudModules.get(cloudModules.ref(cloudDb, `friends/${activeCloudUid}`)).catch(() => null),
+        // v122: อ่าน publicProfiles ทั้งหมดแล้วกรองด้วย recipientUid
+        // ไม่ผูกกับการโหลดรายชื่อเพื่อนก่อน จึงรับของได้แม้ friends node โหลดช้าหรือกฎเก่าอ่านไม่ได้
+        const [publicProfilesSnapshot, legacySnapshot] = await Promise.all([
+          cloudModules.get(cloudModules.ref(cloudDb, "publicProfiles")).catch(() => null),
           cloudModules.get(cloudModules.ref(cloudDb, `resourceTransfers/${activeCloudUid}`)).catch(() => null)
         ]);
-        const friendIds = new Set([
-          ...Object.keys(friendSnapshot && friendSnapshot.exists() ? friendSnapshot.val() || {} : {}),
-          ...abilityArray(friendProfiles).map(profile => String(profile && profile.uid || "")).filter(Boolean)
-        ]);
-        const publicOutboxes = await Promise.all([...friendIds].map(async senderUid => {
-          try {
-            const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, `publicProfiles/${senderUid}/outbox`));
-            return { senderUid, map:snapshot.exists() ? snapshot.val() || {} : {} };
-          } catch (_) {
-            return { senderUid, map:{} };
-          }
-        }));
+        const rawProfiles = publicProfilesSnapshot && publicProfilesSnapshot.exists() ? publicProfilesSnapshot.val() || {} : {};
+        const publicOutboxes = Object.entries(rawProfiles && typeof rawProfiles === "object" ? rawProfiles : {}).map(([senderUid, rawProfile]) => {
+          const profile = rawProfile && typeof rawProfile === "object" ? rawProfile : {};
+          return { senderUid:String(senderUid), map:profile.outbox && typeof profile.outbox === "object" ? profile.outbox : {} };
+        });
 
         if (!state.processedPublicOutboxKeys || typeof state.processedPublicOutboxKeys !== "object") state.processedPublicOutboxKeys = {};
         const deliveredUpdates = {};
@@ -21289,15 +21405,20 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           const transfer = raw && typeof raw === "object" ? raw : {};
           if (source === "public" && String(transfer.kind || "") !== "friend-resource") return;
           if (transfer.enabled === false) return;
-          if (String(transfer.recipientUid || activeCloudUid) !== String(activeCloudUid)) return;
+          if (source === "public" && transfer.senderUid && String(transfer.senderUid) !== String(senderUid)) return;
+          if (String(transfer.recipientUid || "") !== String(activeCloudUid)) return;
           const config = friendResourceTransferConfig(transfer.resourceType);
           const amount = Math.max(0, Math.floor(Number(transfer.amount) || 0));
           if (!config || amount < 1) return;
 
           const uniqueKey = `friend-resource-transfer:${transferId}`;
           const processedKey = source === "public" ? `public-outbox:friend:${senderUid}:${transferId}` : "";
-          if (processedKey && state.processedPublicOutboxKeys[processedKey]) return;
-          const alreadyExists = abilityArray(state.mailbox).some(mail => String(mail.uniqueKey || "") === uniqueKey);
+          const alreadyExists = mailboxHasUniqueKey(uniqueKey);
+          if (externalMailWasDeleted(uniqueKey)) return;
+          // forceRepair ใช้ตอนเปิด/กดรีเฟรชกล่องจดหมาย เพื่อซ่อม processed key รุ่นเก่าที่ถูกบันทึกผิดจังหวะ
+          if (!forceRepair && processedKey && state.processedPublicOutboxKeys[processedKey] && !alreadyExists) return;
+
+          let handled = alreadyExists;
           if (!alreadyExists) {
             const sender = String(transfer.senderUsername || "เพื่อน").slice(0, 40);
             const mail = createSystemMail({
@@ -21310,13 +21431,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               createdAt:Math.max(1, Number(transfer.createdAt) || now),
               rewards: [{ type:transfer.resourceType, amount }]
             });
-            if (mail) created += 1;
+            if (mail) { created += 1; handled = true; }
           }
-          if (processedKey) {
+          // สำคัญ: ห้ามทำเครื่องหมาย processed หากยังสร้างจดหมายไม่ได้
+          if (handled && processedKey) {
             state.processedPublicOutboxKeys[processedKey] = Math.max(1, Number(transfer.createdAt) || now);
             processedChanged = true;
           }
-          if (source === "legacy") {
+          if (handled && source === "legacy") {
             deliveredUpdates[`resourceTransfers/${activeCloudUid}/${transferId}/deliveredAt`] = now;
             deliveredUpdates[`resourceTransfers/${activeCloudUid}/${transferId}/deliveredBy`] = activeCloudUid;
           }
@@ -21327,7 +21449,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         });
         Object.entries(legacySnapshot && legacySnapshot.exists() ? legacySnapshot.val() || {} : {})
           .forEach(([transferId, raw]) => {
-            if (Number(raw && raw.deliveredAt) > 0) return;
+            if (Number(raw && raw.deliveredAt) > 0 && !forceRepair) return;
             importTransfer(transferId, raw, "legacy", String(raw && raw.senderUid || ""));
           });
 
@@ -21752,7 +21874,24 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderMailbox();
       document.getElementById("mailboxModal").classList.remove("hidden");
       document.body.style.overflow = "hidden";
-      Promise.allSettled([syncIncomingResourceTransfers(false), syncLiveEventMailOnce()]).then(() => renderMailbox());
+      // forceRepair=true ซ่อมเคสรุ่นเก่าที่มี processed key แต่จดหมายไม่เคยถูกสร้างจริง
+      Promise.allSettled([syncIncomingResourceTransfers(false, true), syncLiveEventMailOnce(true)]).then(() => renderMailbox());
+    }
+
+    async function refreshMailboxFromServer(showNotice = true) {
+      if (!cloudReady || !activeCloudUid) {
+        if (showNotice) showToast("กรุณาล็อกอินก่อนรีเฟรชกล่องจดหมาย");
+        return 0;
+      }
+      const results = await Promise.allSettled([
+        syncIncomingResourceTransfers(false, true),
+        syncLiveEventMailOnce(true)
+      ]);
+      const total = results.reduce((sum, result) => sum + (result.status === "fulfilled" ? Math.max(0, Number(result.value) || 0) : 0), 0);
+      renderAll();
+      renderMailbox();
+      if (showNotice) showToast(total > 0 ? `📬 ดึงจดหมายที่ค้างอยู่กลับมาแล้ว ${formatNumber(total)} ฉบับ` : "รีเฟรชกล่องจดหมายแล้ว • ยังไม่พบจดหมายใหม่");
+      return total;
     }
     function closeMailbox() { document.getElementById("mailboxModal").classList.add("hidden"); restoreBodyScroll(); }
     function closeItemSelector() { activeSelectorItemId = ""; document.getElementById("itemSelectorModal").classList.add("hidden"); restoreBodyScroll(); }
@@ -25958,19 +26097,20 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return `gm-live-mail:${String(mailId || "")}`;
     }
 
-    function hasImportedGMMail(mailId = "") {
+    function hasImportedGMMail(mailId = "", forceRepair = false) {
       const id = String(mailId || "");
       const uniqueKey = gmMailUniqueKey(id);
       const mailboxHit = abilityArray(state.mailbox).some(item => {
         const key = String(item && item.uniqueKey || "");
         return key === uniqueKey || key.endsWith(`:${id}`) || String(item && item.id || "").endsWith(`-${id}`);
       });
-      if (mailboxHit) return true;
+      if (mailboxHit || externalMailWasDeleted(uniqueKey)) return true;
+      if (forceRepair) return false;
       return Object.keys(state.processedEventMailKeys && typeof state.processedEventMailKeys === "object" ? state.processedEventMailKeys : {})
         .some(key => String(key) === uniqueKey || String(key).endsWith(`:${id}`));
     }
 
-    function importPublicOutboxGMMails(rawProfiles = {}) {
+    function importPublicOutboxGMMails(rawProfiles = {}, forceRepair = false) {
       if (!activeCloudUid) return 0;
       const collected = {};
       Object.entries(rawProfiles && typeof rawProfiles === "object" ? rawProfiles : {}).forEach(([profileUid, profileRaw]) => {
@@ -25988,7 +26128,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           });
         });
       });
-      return importLiveEventMailMap(collected, "public-outbox");
+      return importLiveEventMailMap(collected, "public-outbox", forceRepair);
     }
 
     function trimProcessedEventMailKeys() {
@@ -26000,7 +26140,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         .slice(0, 600));
     }
 
-    function importLiveEventMailMap(rawMap, scope = "server") {
+    function importLiveEventMailMap(rawMap, scope = "server", forceRepair = false) {
       if (!activeCloudUid) return 0;
       const map = rawMap && typeof rawMap === "object" ? rawMap : {};
       if (!state.processedEventMailKeys || typeof state.processedEventMailKeys !== "object") state.processedEventMailKeys = {};
@@ -26012,7 +26152,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const expiresAt = Math.max(0, Number(mail.expiresAt) || 0);
         if (expiresAt && expiresAt < now) return;
         const uniqueKey = gmMailUniqueKey(mailId);
-        if (hasImportedGMMail(mailId)) {
+        if (hasImportedGMMail(mailId, forceRepair)) {
           if (!state.processedEventMailKeys[uniqueKey]) state.processedEventMailKeys[uniqueKey] = Math.max(1, Number(mail.createdAt) || now);
           return;
         }
@@ -26030,8 +26170,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           expiresAt,
           rewards
         });
-        state.processedEventMailKeys[uniqueKey] = Math.max(1, Number(mail.createdAt) || now);
-        if (added) created += 1;
+        // ห้ามบันทึก processed ก่อนสร้างจดหมายสำเร็จ มิฉะนั้นจดหมายจะหายถาวรในรอบถัดไป
+        if (added) {
+          state.processedEventMailKeys[uniqueKey] = Math.max(1, Number(mail.createdAt) || now);
+          created += 1;
+        }
       });
       trimProcessedEventMailKeys();
       if (created > 0) {
@@ -26046,7 +26189,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return created;
     }
 
-    async function syncLiveEventMailOnce() {
+    async function syncLiveEventMailOnce(forceRepair = false) {
       if (!cloudReady || !activeCloudUid || !cloudModules || !cloudDb) return 0;
       try {
         const [serverSnapshot, userSnapshot, publicProfilesSnapshot] = await Promise.all([
@@ -26054,9 +26197,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           cloudModules.get(cloudModules.ref(cloudDb, `userMails/${activeCloudUid}`)).catch(() => null),
           cloudModules.get(cloudModules.ref(cloudDb, "publicProfiles")).catch(() => null)
         ]);
-        return importLiveEventMailMap(serverSnapshot && serverSnapshot.exists() ? serverSnapshot.val() : {}, "server")
-          + importLiveEventMailMap(userSnapshot && userSnapshot.exists() ? userSnapshot.val() : {}, "user")
-          + importPublicOutboxGMMails(publicProfilesSnapshot && publicProfilesSnapshot.exists() ? publicProfilesSnapshot.val() : {});
+        return importLiveEventMailMap(serverSnapshot && serverSnapshot.exists() ? serverSnapshot.val() : {}, "server", forceRepair)
+          + importLiveEventMailMap(userSnapshot && userSnapshot.exists() ? userSnapshot.val() : {}, "user", forceRepair)
+          + importPublicOutboxGMMails(publicProfilesSnapshot && publicProfilesSnapshot.exists() ? publicProfilesSnapshot.val() : {}, forceRepair);
       } catch (error) {
         console.warn("Live event mail sync skipped:", error);
         return 0;
@@ -26316,7 +26459,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const now = Date.now();
         const mailId = `event-${now.toString(36)}-${Math.random().toString(36).slice(2,9)}`;
         const payload = {
-          id:mailId, kind:"gm-mail", sourceMailId:mailId, gmVerified:true,
+          id:mailId, kind:"gm-mail", sourceMailId:mailId, gmVerified:true, deliveryVersion:3,
           title, occasion, message, rewards:gmDraftRewards.map(reward => ({ ...reward })),
           enabled:true, createdAt:now, expiresAt:expiryDays > 0 ? now + Math.floor(expiryDays * 86400000) : 0,
           senderUid:activeCloudUid, senderUsername:activeCloudUsername || state.profile?.username || "GM",
@@ -27456,6 +27599,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "close-mailbox") closeMailbox();
       if (action === "claim-mail") claimMail(target.dataset.mailId);
       if (action === "claim-all-mail") claimAllMail();
+      if (action === "refresh-mailbox") refreshMailboxFromServer(true);
       if (action === "delete-claimed-mail") deleteClaimedMail();
       if (action === "open-gm-panel") openGMPanel();
       if (action === "close-gm-panel") closeGMPanel();
