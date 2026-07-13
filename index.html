@@ -7408,7 +7408,68 @@
       #arenaView .fighter-power { max-width: 46vw; }
     }
 
-</style>
+
+
+    /* เพิ่มโดยอลิซ v117: ศูนย์ควบคุม GM สำหรับทดสอบการ์ดและแจกกิจกรรมแบบเรียลไทม์ */
+    .gm-fab {
+      border-color: rgba(255,209,102,.56) !important;
+      background: linear-gradient(145deg, rgba(120,74,0,.92), rgba(76,29,149,.86)) !important;
+      box-shadow: 0 0 24px rgba(255,209,102,.18), 0 12px 30px rgba(0,0,0,.34) !important;
+    }
+    .gm-fab .utility-icon { filter: drop-shadow(0 0 8px rgba(255,209,102,.58)); }
+    #gmPanelModal { z-index: 96; }
+    .gm-panel { width: min(1280px, 100%); padding: 22px; overflow: hidden; }
+    .gm-panel-head { padding-right: 52px; }
+    .gm-panel-head h2 { margin: 5px 0 7px; font-size: clamp(1.55rem, 4vw, 2.65rem); }
+    .gm-panel-head p { color: var(--muted); line-height: 1.58; }
+    .gm-role-strip {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+      margin: 14px 0; padding: 12px 14px; border: 1px solid rgba(255,209,102,.28);
+      border-radius: 16px; background: linear-gradient(135deg, rgba(120,74,0,.20), rgba(76,29,149,.18));
+    }
+    .gm-role-strip strong { color: var(--gold); }
+    .gm-role-strip small { display:block; margin-top:3px; color:var(--muted); word-break:break-all; }
+    .gm-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
+    .gm-card {
+      min-width:0; padding:15px; border:1px solid rgba(255,255,255,.10); border-radius:19px;
+      background: radial-gradient(circle at 12% 0%, rgba(92,232,255,.08), transparent 40%), rgba(3,5,12,.34);
+    }
+    .gm-card.wide { grid-column:1 / -1; }
+    .gm-card h3 { margin:0 0 5px; font-size:1rem; }
+    .gm-card > p { margin:0 0 12px; color:var(--muted); font-size:.75rem; line-height:1.5; }
+    .gm-fields { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:8px; }
+    .gm-fields.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .gm-fields.one { grid-template-columns:1fr; }
+    .gm-field-label { display:grid; gap:5px; color:#dbeafe; font-size:.68rem; font-weight:900; }
+    .gm-field-label .field { width:100%; min-width:0; }
+    .gm-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .gm-actions .btn { min-height:40px; padding:8px 11px; font-size:.72rem; }
+    .gm-card-preview, .gm-status-box {
+      margin-top:10px; padding:10px 11px; border:1px solid rgba(255,255,255,.09); border-radius:13px;
+      color:#dbeafe; font-size:.7rem; line-height:1.55; background:rgba(5,8,18,.48);
+    }
+    .gm-card-preview b { color:var(--cyan); }
+    .gm-draft-list { display:grid; gap:7px; margin-top:10px; }
+    .gm-draft-row {
+      display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px; align-items:center;
+      padding:9px 10px; border:1px solid rgba(255,255,255,.09); border-radius:13px; background:rgba(255,255,255,.035);
+    }
+    .gm-draft-row span { min-width:0; color:#eef2ff; font-size:.72rem; line-height:1.45; }
+    .gm-draft-row button { min-height:32px; padding:5px 9px; }
+    .gm-send-layout { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:12px; }
+    .gm-divider { height:1px; margin:13px 0; background:rgba(255,255,255,.09); }
+    .gm-note { color:#fcd34d !important; }
+    @media (max-width: 900px) {
+      .gm-grid, .gm-send-layout { grid-template-columns:1fr; }
+      .gm-card.wide { grid-column:auto; }
+    }
+    @media (max-width: 640px) {
+      .gm-panel { padding:14px; }
+      .gm-fields, .gm-fields.two { grid-template-columns:1fr; }
+      .gm-role-strip { align-items:flex-start; }
+    }
+
+  </style>
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
@@ -8006,6 +8067,11 @@
       <span class="utility-label">จดหมาย</span>
       <span class="utility-badge empty" id="mailboxBadge">0</span>
     </button>
+    <button class="utility-fab gm-fab hidden" id="gmPanelFab" data-action="open-gm-panel" aria-label="เปิดศูนย์ควบคุม GM">
+      <span class="utility-icon">🛡️</span>
+      <span class="utility-label">GM</span>
+      <span class="utility-badge">LIVE</span>
+    </button>
   </aside>
 
   <div class="modal hidden" id="teamPickerModal" role="dialog" aria-modal="true" aria-label="เลือกการ์ดลงทีม">
@@ -8193,6 +8259,112 @@
       <div class="mail-list" id="mailboxList"></div>
     </div>
   </div>
+
+
+
+  <div class="modal hidden" id="gmPanelModal" role="dialog" aria-modal="true" aria-label="ศูนย์ควบคุม GM">
+    <div class="modal-panel gm-panel">
+      <button class="close" data-action="close-gm-panel" aria-label="ปิด">x</button>
+      <div class="gm-panel-head">
+        <p class="eyebrow">Game Master Control Center</p>
+        <h2>🛡️ ศูนย์ควบคุม GM และกิจกรรม</h2>
+        <p>ใช้เฉพาะบัญชีที่ได้รับสิทธิ์จาก Firebase เท่านั้น สามารถเตรียมคลังทดสอบ ปรับการ์ด และส่งจดหมายรางวัลแบบเรียลไทม์ให้ทั้งเซิร์ฟหรือผู้เล่นเฉพาะคนได้</p>
+      </div>
+      <div class="gm-role-strip">
+        <div><strong id="gmRoleStatus">กำลังตรวจสอบสิทธิ์...</strong><small id="gmUidText">UID: -</small></div>
+        <button class="btn" data-action="gm-refresh-role">รีเฟรชสิทธิ์</button>
+      </div>
+
+      <div class="gm-grid">
+        <section class="gm-card">
+          <h3>🎴 คลังทดสอบทุกการ์ด</h3>
+          <p>บัญชี GM จะเติมการ์ดที่ขาดให้อัตโนมัติทุกครั้งที่ล็อกอิน รวมถึงการ์ดใหม่ในอนาคต</p>
+          <div class="gm-actions">
+            <button class="btn btn-primary" data-action="gm-provision-all">รับการ์ดทุกใบ</button>
+            <button class="btn" data-action="gm-max-level-all">เลเวลตันทุกใบ</button>
+            <button class="btn" data-action="gm-max-awaken-all">อเวกตันทุกใบ</button>
+            <button class="btn btn-gold" data-action="gm-max-all">MAX ทุกใบ</button>
+            <button class="btn btn-danger" data-action="gm-reset-cards">รีเซ็ต Lv.1 / อเวก 0</button>
+          </div>
+          <div class="gm-status-box" id="gmCollectionSummary">กำลังอ่านคลัง...</div>
+        </section>
+
+        <section class="gm-card">
+          <h3>💎 ปรับทรัพยากรบัญชี GM</h3>
+          <p>ตั้งค่าแบบจำนวนแน่นอน ใช้สำหรับทดสอบกาชา อัปเกรด และระบบร้านค้า</p>
+          <div class="gm-fields">
+            <label class="gm-field-label">Gems<input class="field" id="gmSetGems" type="number" min="0" step="1"></label>
+            <label class="gm-field-label">Cristal<input class="field" id="gmSetCrystals" type="number" min="0" step="1"></label>
+            <label class="gm-field-label">Dust<input class="field" id="gmSetDust" type="number" min="0" step="1"></label>
+          </div>
+          <div class="gm-actions">
+            <button class="btn btn-primary" data-action="gm-apply-resources">ใช้ค่าที่กำหนด</button>
+            <button class="btn btn-gold" data-action="gm-fill-resources">เติม 999,999,999</button>
+          </div>
+        </section>
+
+        <section class="gm-card wide">
+          <h3>🧪 ปรับการ์ดรายใบอย่างอิสระ</h3>
+          <p>เลือกการ์ดทุกระดับ รวม AWAKEN/GOD แล้วกำหนดเลเวล อเวก และจำนวนสำเนาได้ตรง ๆ</p>
+          <div class="gm-fields">
+            <label class="gm-field-label">การ์ด<select class="field" id="gmCardSelect"></select></label>
+            <label class="gm-field-label">Level<input class="field" id="gmCardLevel" type="number" min="1" step="1"></label>
+            <label class="gm-field-label">Awaken<input class="field" id="gmCardAwaken" type="number" min="0" step="1"></label>
+            <label class="gm-field-label">จำนวนสำเนา<input class="field" id="gmCardCopies" type="number" min="1" step="1"></label>
+          </div>
+          <div class="gm-actions">
+            <button class="btn btn-primary" data-action="gm-apply-card">บันทึกค่าการ์ดนี้</button>
+            <button class="btn btn-gold" data-action="gm-max-card">MAX การ์ดนี้</button>
+          </div>
+          <div class="gm-card-preview" id="gmCardPreview">เลือกการ์ดเพื่อดูสถานะ</div>
+        </section>
+
+        <section class="gm-card wide">
+          <h3>📬 สร้างจดหมายกิจกรรมแบบเรียลไทม์</h3>
+          <p class="gm-note">จดหมายทั้งเซิร์ฟจะเข้าผู้เล่นที่ออนไลน์ทันที และผู้เล่นที่มาออนไลน์ภายหลังจะได้รับตราบใดที่จดหมายยังไม่หมดอายุ</p>
+          <div class="gm-send-layout">
+            <div>
+              <div class="gm-fields two">
+                <label class="gm-field-label">ผู้รับ
+                  <select class="field" id="gmMailTargetType"><option value="all">ผู้เล่นทั้งเซิร์ฟ</option><option value="user">ผู้เล่นเฉพาะคน</option></select>
+                </label>
+                <label class="gm-field-label">Username หรือ UID<input class="field" id="gmMailTarget" type="text" placeholder="ใช้เมื่อเลือกผู้เล่นเฉพาะคน"></label>
+                <label class="gm-field-label">หัวข้อ<input class="field" id="gmMailTitle" type="text" maxlength="100" value="รางวัลกิจกรรมจากทีมงาน"></label>
+                <label class="gm-field-label">หมดอายุภายในกี่วัน<input class="field" id="gmMailExpiryDays" type="number" min="0" max="365" value="7"></label>
+              </div>
+              <label class="gm-field-label" style="margin-top:8px">ข้อความ<textarea class="field" id="gmMailMessage" rows="4" maxlength="500" placeholder="รายละเอียดกิจกรรมหรือข้อความถึงผู้เล่น"></textarea></label>
+            </div>
+
+            <div>
+              <div class="gm-fields two">
+                <label class="gm-field-label">ประเภทรางวัล
+                  <select class="field" id="gmRewardType"><option value="gems">💎 Gems</option><option value="crystals">🔮 Cristal</option><option value="dust">✨ Dust</option><option value="item">🎁 ไอเทม</option><option value="card">🎴 การ์ด</option></select>
+                </label>
+                <label class="gm-field-label">จำนวน<input class="field" id="gmRewardAmount" type="number" min="1" step="1" value="1"></label>
+              </div>
+              <div class="gm-fields one" id="gmRewardItemFields" style="margin-top:8px">
+                <label class="gm-field-label">ไอเทม<select class="field" id="gmRewardItemSelect"></select></label>
+              </div>
+              <div class="gm-fields" id="gmRewardCardFields" style="margin-top:8px">
+                <label class="gm-field-label">การ์ด<select class="field" id="gmRewardCardSelect"></select></label>
+                <label class="gm-field-label">Level<input class="field" id="gmRewardCardLevel" type="number" min="1" step="1" value="1"></label>
+                <label class="gm-field-label">Awaken<input class="field" id="gmRewardCardAwaken" type="number" min="0" step="1" value="0"></label>
+              </div>
+              <div class="gm-actions"><button class="btn" data-action="gm-add-reward">เพิ่มรางวัลเข้าจดหมาย</button></div>
+              <div class="gm-draft-list" id="gmDraftRewardList"></div>
+            </div>
+          </div>
+          <div class="gm-divider"></div>
+          <div class="gm-actions">
+            <button class="btn btn-primary" data-action="gm-send-mail">🚀 ส่งจดหมายกิจกรรมตอนนี้</button>
+            <button class="btn" data-action="gm-clear-rewards">ล้างรายการรางวัล</button>
+          </div>
+          <div class="gm-status-box" id="gmMailStatus">พร้อมสร้างจดหมายใหม่</div>
+        </section>
+      </div>
+    </div>
+  </div>
+
 
   <div class="modal hidden" id="itemSelectorModal" role="dialog" aria-modal="true" aria-label="เลือกการ์ดจากไอเทม">
     <div class="modal-panel system-panel">
@@ -9552,6 +9724,13 @@
     let friendProfiles = [];
     let friendsBusy = false;
     let resourceTransferBusy = false;
+    // v117: สิทธิ์ GM, รายการรางวัลที่กำลังจัด และตัวฟังจดหมายกิจกรรม
+    let gmAccess = { isGM:false, isDEV:false, checked:false };
+    let gmPanelBusy = false;
+    let gmSelectedCardId = "";
+    let gmDraftRewards = [];
+    let liveEventMailUnsubscribers = [];
+    let liveEventMailSaveTimer = 0;
     let battleResult = null;
     let battleAnimating = false;
     let arenaResult = null;
@@ -9710,6 +9889,7 @@
         // เพิ่มโดยอลิซ: ไอเทมรางวัลทั้งหมดเก็บแยกจากตู้กาชา
         items: {},
         mailbox: [],
+        processedEventMailKeys: {},
         itemInventoryVersion: ITEM_INVENTORY_VERSION,
         profile: {
           username: "",
@@ -9861,7 +10041,7 @@
 
     function renderAccount() {
       const profile = getPlayerProfile();
-      const label = profile.username || "Local Guest";
+      const label = `${gmAccess && gmAccess.isGM ? "🛡️ GM • " : ""}${profile.username || "Local Guest"}`;
       const accountText = document.getElementById("accountButtonText");
       const accountAvatar = document.getElementById("accountAvatar");
       const logoutButton = document.getElementById("logoutButton");
@@ -10158,6 +10338,8 @@
       if (!user) {
         activeCloudUid = "";
         activeCloudUsername = "";
+        stopLiveEventMailListeners();
+        resetGMAccess();
         renderAccount();
         renderLoginGate(true);
         setCloudStatus("กรุณาล็อกอินก่อนเข้าเกม ระบบจะโหลดและบันทึกเซฟจาก Firebase เท่านั้น", "warn");
@@ -10178,6 +10360,7 @@
         state.profile.username = activeCloudUsername;
         state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || (user && user.photoURL) || "");
         state.profile.provider = state.profile.provider || "firebase";
+        await initializeLiveEventSystems();
         await processArenaWeeklyReset();
         await writeCloudSave(didServerReset ? { resetVersion: state.serverResetVersion || await getServerResetVersion() } : {});
         renderLoginGate(false);
@@ -10227,6 +10410,7 @@
         state = normalizeState(defaultState());
         state.profile.username = username;
         state.profile.provider = "username";
+        await initializeLiveEventSystems();
         await reserveUsernameForUid(activeCloudUid, username);
         await writeCloudSave({
           createdAt: Date.now(),
@@ -10268,12 +10452,14 @@
           state.profile.username = activeCloudUsername;
           state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || "");
           state.profile.provider = state.profile.provider || "username";
+          await initializeLiveEventSystems();
           await writeCloudSave();
         } else {
           // แก้โดยอลิซ: บัญชี Cloud ใหม่ที่ยังไม่มี save ต้องเริ่มใหม่ ไม่ดึงเซฟเก่าในเครื่อง
           state = normalizeState(defaultState());
           state.profile.username = activeCloudUsername;
           state.profile.provider = "username";
+          await initializeLiveEventSystems();
           await reserveUsernameForUid(activeCloudUid, activeCloudUsername);
           await writeCloudSave({
             createdAt: Date.now(),
@@ -10326,6 +10512,7 @@
         state.profile.username = username;
         state.profile.provider = providerName;
         state.profile.photoURL = sanitizeProfilePhoto((account && (account.photoURL || (account.profile && account.profile.photoURL))) || state.profile.photoURL || user.photoURL || "");
+        await initializeLiveEventSystems();
         await reserveUsernameForUid(activeCloudUid, username, account && account.username);
         await writeCloudSave({
           createdAt: account && account.createdAt || Date.now(),
@@ -10358,6 +10545,8 @@
         activeCloudUid = "";
         activeCloudUsername = "";
         activeProfileUid = "";
+        stopLiveEventMailListeners();
+        resetGMAccess();
         friendRequests = [];
         friendProfiles = [];
         arenaOpponentPool = [];
@@ -10426,7 +10615,7 @@
         item.duplicateRank = Math.min(maxRank, Math.max(0, Math.floor(Number(item.duplicateRank) || 0)));
         item.acquiredAt = Math.max(0, Number(item.acquiredAt) || 0);
 
-        if (card && item.duplicateRank >= maxRank && item.count > 1) {
+        if (card && item.duplicateRank >= maxRank && item.count > 1 && !item.gmTestCard) {
           const extraCopies = item.count - 1;
           const bonusPerCopy = Math.max(0, Math.floor(Number(getRarity(card).dust) || 0));
           const bonusDust = extraCopies * bonusPerCopy;
@@ -10459,6 +10648,13 @@
       next.tickets = normalizeTicketInventory(next.tickets || next.inventory || {});
       next.items = normalizeItemInventory(next.items || {});
       next.mailbox = normalizeMailbox(next.mailbox || []);
+      next.processedEventMailKeys = next.processedEventMailKeys && typeof next.processedEventMailKeys === "object" && !Array.isArray(next.processedEventMailKeys)
+        ? Object.fromEntries(Object.entries(next.processedEventMailKeys)
+            .map(([key, at]) => [String(key), Math.max(0, Number(at) || 0)])
+            .filter(([key]) => key)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 600))
+        : {};
       // ย้ายตั๋วจากเซฟรุ่นเก่าเข้ากระเป๋าเพียงครั้งเดียว เพื่อไม่ให้ของผู้เล่นหายหรือเพิ่มซ้ำ
       if (Number(raw && raw.itemInventoryVersion || 0) < ITEM_INVENTORY_VERSION) {
         if (next.tickets.normal > 0) next.items["pack:normal"] = (next.items["pack:normal"] || 0) + next.tickets.normal;
@@ -18979,6 +19175,17 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const amount = Math.max(0, Math.floor(Number(reward.amount) || 0));
       if ((type === "gems" || type === "dust" || type === "crystals" || type === "cristal") && amount > 0) return { type:type === "cristal" ? "crystals" : type, amount };
       if (type === "item" && getItemMeta(reward.itemId) && amount > 0) return { type, itemId: String(reward.itemId), amount };
+      if (type === "card") {
+        const card = CARD_BY_ID.get(String(reward.cardId || ""));
+        if (!card || amount < 1) return null;
+        return {
+          type,
+          cardId: String(card.id),
+          amount,
+          level: Math.min(getCardMaxLevel(card), Math.max(1, Math.floor(Number(reward.level) || 1))),
+          awaken: Math.min(getCardAwakenMax(card), Math.max(0, Math.floor(Number(reward.awaken) || 0)))
+        };
+      }
       return null;
     }
 
@@ -19059,19 +19266,19 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
     function getSelectorCount(rarity) { return RARITIES[rarity] ? getItemCount(`selector:${rarity}`) : 0; }
 
-    function createSystemMail({ uniqueKey = "", title = "รางวัลจากระบบ", message = "", source = "system", rewards = [] } = {}) {
+    function createSystemMail({ id = "", uniqueKey = "", title = "รางวัลจากระบบ", message = "", source = "system", createdAt = Date.now(), rewards = [] } = {}) {
       state.mailbox = normalizeMailbox(state.mailbox || []);
       const key = String(uniqueKey || "");
       if (key && state.mailbox.some(mail => mail.uniqueKey === key)) return null;
       const cleanRewards = rewards.map(normalizeRewardPayload).filter(Boolean);
       if (!cleanRewards.length) return null;
       const mail = {
-        id: `mail-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: String(id || `mail-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`),
         uniqueKey: key,
         title: String(title || "รางวัลจากระบบ"),
         message: String(message || ""),
         source: String(source || "system"),
-        createdAt: Date.now(),
+        createdAt: Math.max(0, Number(createdAt) || Date.now()),
         claimedAt: 0,
         rewards: cleanRewards
       };
@@ -19086,6 +19293,26 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (reward.type === "crystals" || reward.type === "cristal") state.crystals += Math.max(0, Number(reward.amount) || 0);
       if (reward.type === "dust") state.dust += Math.max(0, Number(reward.amount) || 0);
       if (reward.type === "item") addInventoryItem(reward.itemId, reward.amount);
+      if (reward.type === "card") {
+        const card = CARD_BY_ID.get(String(reward.cardId || ""));
+        if (!card) return;
+        const key = String(card.id);
+        const amount = Math.max(1, Math.floor(Number(reward.amount) || 1));
+        const level = Math.min(getCardMaxLevel(card), Math.max(1, Math.floor(Number(reward.level) || 1)));
+        const awaken = Math.min(getCardAwakenMax(card), Math.max(0, Math.floor(Number(reward.awaken) || 0)));
+        if (!state.owned[key]) {
+          state.owned[key] = { count:amount, level, duplicateRank:awaken, acquiredAt:Date.now(), grantedBy:"gm-mail" };
+          if (!Array.isArray(state.collectionOrder)) state.collectionOrder = [];
+          state.collectionOrder = state.collectionOrder.filter(id => String(id) !== key);
+          state.collectionOrder.push(key);
+        } else {
+          const owned = state.owned[key];
+          owned.count = Math.max(1, Math.floor(Number(owned.count) || 1)) + amount;
+          owned.level = Math.max(Math.floor(Number(owned.level) || 1), level);
+          owned.duplicateRank = Math.max(Math.floor(Number(owned.duplicateRank) || 0), awaken);
+          owned.grantedBy = "gm-mail";
+        }
+      }
     }
 
     function claimMail(mailId, silent = false) {
@@ -19128,7 +19355,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     // เพิ่มโดยอลิซ: แปลงการ์ดซ้ำที่ค้างอยู่หลังอเวกเต็มเป็น "โบนัส Dust" ทันที
     // หมายเหตุ: ตอนเปิดซ้ำ ผู้เล่นได้รับ Dust ปกติไปแล้ว ฟังก์ชันนี้จึงเพิ่มเฉพาะส่วนโบนัสอีก 1 เท่า
     function convertMaxAwakenStockToDust(card, owned = card ? getOwned(card.id) : null) {
-      if (!card || !owned) return { copies: 0, dust: 0 };
+      if (!card || !owned || owned.gmTestCard) return { copies: 0, dust: 0 };
       const maxRank = getCardAwakenMax(card);
       const rank = Math.max(0, Math.floor(Number(owned.duplicateRank) || 0));
       const extraCopies = Math.max(0, Math.floor(Number(owned.count) || 1) - 1);
@@ -21001,7 +21228,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     function closeItemSelector() { activeSelectorItemId = ""; document.getElementById("itemSelectorModal").classList.add("hidden"); restoreBodyScroll(); }
 
     function restoreBodyScroll() {
-      const openIds = ["teamPickerModal", "cardModal", "authModal", "profileModal", "revealScreen", "scCutscene", "activeSkillCutscene", "updateNoticeModal", "inventoryModal", "mailboxModal", "itemSelectorModal"];
+      const openIds = ["teamPickerModal", "cardModal", "authModal", "profileModal", "revealScreen", "scCutscene", "activeSkillCutscene", "updateNoticeModal", "inventoryModal", "mailboxModal", "gmPanelModal", "itemSelectorModal"];
       const anyOpen = openIds.some(id => { const node = document.getElementById(id); return node && !node.classList.contains("hidden"); });
       if (!anyOpen) document.body.style.overflow = "";
     }
@@ -21010,6 +21237,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (reward.type === "gems") return `💎 ${formatNumber(reward.amount)} Gems`;
       if (reward.type === "crystals" || reward.type === "cristal") return `🔮 ${formatNumber(reward.amount)} Cristal`;
       if (reward.type === "dust") return `✨ ${formatNumber(reward.amount)} Dust`;
+      if (reward.type === "card") {
+        const card = CARD_BY_ID.get(String(reward.cardId || ""));
+        return card ? `🎴 ${card.name} x${formatNumber(reward.amount)} • Lv.${formatNumber(reward.level)} • อเวก +${formatNumber(reward.awaken)}` : "🎴 การ์ด";
+      }
       const meta = getItemMeta(reward.itemId);
       return meta ? `${meta.icon} ${meta.name} x${formatNumber(reward.amount)}` : "ไอเทม";
     }
@@ -25074,6 +25305,402 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       document.getElementById("workspace").scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
+
+
+    /* ====================== [SECTION GM LIVE EVENT v117] ====================== */
+    function gmFlagEnabled(value) {
+      if (value === true) return true;
+      if (!value || typeof value !== "object") return false;
+      return value.enabled === true || value.active === true || String(value.role || "").toLowerCase() === "gm" || String(value.role || "").toLowerCase() === "dev";
+    }
+
+    function resetGMAccess() {
+      gmAccess = { isGM:false, isDEV:false, checked:false };
+      gmDraftRewards = [];
+      gmSelectedCardId = "";
+      renderGMAccess();
+    }
+
+    async function refreshGMAccess(silent = false) {
+      if (!cloudReady || !activeCloudUid || !cloudModules || !cloudDb) {
+        resetGMAccess();
+        return false;
+      }
+      const readFlag = async path => {
+        try {
+          const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, `${path}/${activeCloudUid}`));
+          return snapshot.exists() ? snapshot.val() : false;
+        } catch (_) { return false; }
+      };
+      const [gmFlag, devFlag] = await Promise.all([readFlag("gmAdmins"), readFlag("devAdmins")]);
+      gmAccess = { isGM:gmFlagEnabled(gmFlag) || gmFlagEnabled(devFlag), isDEV:gmFlagEnabled(devFlag), checked:true };
+      renderGMAccess();
+      if (!silent && !gmAccess.isGM) showToast("บัญชีนี้ยังไม่ได้รับสิทธิ์ GM ใน Firebase");
+      return gmAccess.isGM;
+    }
+
+    function renderGMAccess() {
+      const button = document.getElementById("gmPanelFab");
+      if (button) button.classList.toggle("hidden", !(activeCloudUid && gmAccess && gmAccess.isGM));
+      const status = document.getElementById("gmRoleStatus");
+      const uid = document.getElementById("gmUidText");
+      if (status) status.textContent = gmAccess && gmAccess.isGM ? (gmAccess.isDEV ? "✅ DEV / GM พร้อมใช้งาน" : "✅ GM พร้อมใช้งาน") : "⛔ ไม่มีสิทธิ์ GM";
+      if (uid) uid.textContent = `UID: ${activeCloudUid || "-"}`;
+    }
+
+    function ensureGMAllCards(options = {}) {
+      if (!gmAccess || !gmAccess.isGM) return false;
+      const maxLevel = Boolean(options.maxLevel);
+      const maxAwaken = Boolean(options.maxAwaken);
+      const reset = Boolean(options.reset);
+      let changed = false;
+      if (!state.owned || typeof state.owned !== "object") state.owned = {};
+      if (!Array.isArray(state.collectionOrder)) state.collectionOrder = [];
+      CARDS.forEach((card, index) => {
+        const id = String(card.id);
+        const current = state.owned[id];
+        if (!current) {
+          state.owned[id] = { count:1, level:maxLevel ? getCardMaxLevel(card) : 1, duplicateRank:maxAwaken ? getCardAwakenMax(card) : 0, acquiredAt:Date.now() + index, gmTestCard:true };
+          changed = true;
+        } else if (reset) {
+          current.count = 1;
+          current.level = 1;
+          current.duplicateRank = 0;
+          current.gmTestCard = true;
+          changed = true;
+        } else {
+          current.count = Math.max(1, Math.floor(Number(current.count) || 1));
+          if (maxLevel && current.level !== getCardMaxLevel(card)) { current.level = getCardMaxLevel(card); changed = true; }
+          if (maxAwaken && current.duplicateRank !== getCardAwakenMax(card)) { current.duplicateRank = getCardAwakenMax(card); changed = true; }
+          current.gmTestCard = true;
+        }
+        if (!state.collectionOrder.includes(id)) { state.collectionOrder.push(id); changed = true; }
+      });
+      state.collectionOrder = [...new Set(state.collectionOrder.map(String).filter(id => state.owned[id] && CARD_BY_ID.has(id)))];
+      state.gmTestProfile = Object.assign({}, state.gmTestProfile || {}, { enabled:true, provisionedAt:Date.now(), cardCatalogSize:CARDS.length });
+      return changed;
+    }
+
+    async function writeGMAudit(action, detail = {}) {
+      if (!gmAccess || !gmAccess.isGM || !cloudReady || !activeCloudUid) return false;
+      const id = `log-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
+      const payload = {
+        id, action:String(action || "gm-action").slice(0,60), detail,
+        gmUid:activeCloudUid, gmUsername:activeCloudUsername || state.profile?.username || "GM",
+        createdAt:Date.now(), createdAtText:new Date().toLocaleString("th-TH")
+      };
+      try {
+        await cloudModules.set(cloudModules.ref(cloudDb, `gmAuditLogs/${activeCloudUid}/${id}`), payload);
+        return true;
+      } catch (error) {
+        console.warn("GM audit log skipped:", error);
+        return false;
+      }
+    }
+
+    async function commitGMState(message, action, detail = {}) {
+      if (!gmAccess || !gmAccess.isGM) return showToast("ไม่มีสิทธิ์ GM");
+      saveState(true);
+      try {
+        clearTimeout(cloudSaveTimer);
+        await writeCloudSave({ gmLastAction:String(action || "gm-edit"), gmLastActionAt:Date.now() });
+        await writeGMAudit(action, detail);
+        renderAll();
+        renderGMPanel();
+        showToast(message);
+      } catch (error) {
+        showToast(firebaseErrorMessage(error, "บันทึกการแก้ไข GM"));
+      }
+    }
+
+    async function initializeLiveEventSystems() {
+      await refreshGMAccess(true);
+      if (gmAccess.isGM) ensureGMAllCards();
+      await syncLiveEventMailOnce();
+      startLiveEventMailListeners();
+      renderGMAccess();
+    }
+
+    function trimProcessedEventMailKeys() {
+      const map = state.processedEventMailKeys && typeof state.processedEventMailKeys === "object" ? state.processedEventMailKeys : {};
+      state.processedEventMailKeys = Object.fromEntries(Object.entries(map)
+        .map(([key, at]) => [String(key), Math.max(0, Number(at) || 0)])
+        .filter(([key]) => key)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 600));
+    }
+
+    function importLiveEventMailMap(rawMap, scope = "server") {
+      if (!activeCloudUid) return 0;
+      const map = rawMap && typeof rawMap === "object" ? rawMap : {};
+      if (!state.processedEventMailKeys || typeof state.processedEventMailKeys !== "object") state.processedEventMailKeys = {};
+      let created = 0;
+      const now = Date.now();
+      Object.entries(map).forEach(([mailId, raw]) => {
+        const mail = raw && typeof raw === "object" ? raw : {};
+        if (mail.enabled === false) return;
+        const expiresAt = Math.max(0, Number(mail.expiresAt) || 0);
+        if (expiresAt && expiresAt < now) return;
+        const uniqueKey = `gm-live-mail:${scope}:${mailId}`;
+        const alreadyInMailbox = abilityArray(state.mailbox).some(item => String(item.uniqueKey || "") === uniqueKey);
+        if (state.processedEventMailKeys[uniqueKey] || alreadyInMailbox) {
+          if (!state.processedEventMailKeys[uniqueKey]) state.processedEventMailKeys[uniqueKey] = Math.max(1, Number(mail.createdAt) || now);
+          return;
+        }
+        const rewards = abilityArray(mail.rewards).map(normalizeRewardPayload).filter(Boolean);
+        if (!rewards.length) return;
+        const added = createSystemMail({
+          id:`gm-${scope}-${mailId}`,
+          uniqueKey,
+          title:String(mail.title || "รางวัลกิจกรรมจากทีมงาน").slice(0,100),
+          message:String(mail.message || "").slice(0,500),
+          source:"gm-event",
+          createdAt:Math.max(1, Number(mail.createdAt) || now),
+          rewards
+        });
+        state.processedEventMailKeys[uniqueKey] = Math.max(1, Number(mail.createdAt) || now);
+        if (added) created += 1;
+      });
+      trimProcessedEventMailKeys();
+      if (created > 0) {
+        clearTimeout(liveEventMailSaveTimer);
+        liveEventMailSaveTimer = setTimeout(() => {
+          saveState(true);
+          renderAll();
+          if (!document.getElementById("mailboxModal").classList.contains("hidden")) renderMailbox();
+        }, 80);
+        showToast(`📬 ได้รับจดหมายกิจกรรมใหม่ ${formatNumber(created)} ฉบับ`);
+      }
+      return created;
+    }
+
+    async function syncLiveEventMailOnce() {
+      if (!cloudReady || !activeCloudUid || !cloudModules || !cloudDb) return 0;
+      try {
+        const [serverSnapshot, userSnapshot] = await Promise.all([
+          cloudModules.get(cloudModules.ref(cloudDb, "serverMails")).catch(() => null),
+          cloudModules.get(cloudModules.ref(cloudDb, `userMails/${activeCloudUid}`)).catch(() => null)
+        ]);
+        return importLiveEventMailMap(serverSnapshot && serverSnapshot.exists() ? serverSnapshot.val() : {}, "server")
+          + importLiveEventMailMap(userSnapshot && userSnapshot.exists() ? userSnapshot.val() : {}, "user");
+      } catch (error) {
+        console.warn("Live event mail sync skipped:", error);
+        return 0;
+      }
+    }
+
+    function stopLiveEventMailListeners() {
+      liveEventMailUnsubscribers.forEach(unsubscribe => { try { unsubscribe(); } catch (_) {} });
+      liveEventMailUnsubscribers = [];
+    }
+
+    function startLiveEventMailListeners() {
+      stopLiveEventMailListeners();
+      if (!cloudReady || !activeCloudUid || !cloudModules || !cloudDb) return;
+      const listen = (path, scope) => {
+        try {
+          const unsubscribe = cloudModules.onValue(cloudModules.ref(cloudDb, path), snapshot => {
+            importLiveEventMailMap(snapshot.exists() ? snapshot.val() : {}, scope);
+          }, error => console.warn(`Live event mail listener ${scope}:`, error));
+          if (typeof unsubscribe === "function") liveEventMailUnsubscribers.push(unsubscribe);
+        } catch (error) { console.warn(`Live event mail listener ${scope} unavailable:`, error); }
+      };
+      listen("serverMails", "server");
+      listen(`userMails/${activeCloudUid}`, "user");
+    }
+
+    function gmCardOptionsHTML(selected = "") {
+      return [...CARDS].sort((a, b) => (getRarity(b).order - getRarity(a).order) || Number(a.id) - Number(b.id))
+        .map(card => `<option value="${escapeHTML(card.id)}" ${String(card.id) === String(selected) ? "selected" : ""}>[${escapeHTML(card.rarity)}] #${escapeHTML(card.id)} • ${escapeHTML(card.name)}</option>`).join("");
+    }
+
+    function gmItemOptionsHTML(selected = "") {
+      const ids = ["pack:normal"];
+      Object.keys(RARITIES).filter(key => key !== "AWAKEN").forEach(rarity => {
+        ids.push(`pack:guarantee:${rarity}`, `selector:${rarity}`);
+      });
+      return ids.map(id => getItemMeta(id)).filter(Boolean)
+        .map(meta => `<option value="${escapeHTML(meta.id)}" ${meta.id === selected ? "selected" : ""}>${escapeHTML(meta.icon)} ${escapeHTML(meta.name)}</option>`).join("");
+    }
+
+    function gmRewardLabel(reward) {
+      return rewardPayloadLabel(reward);
+    }
+
+    function renderGMRewardEditor() {
+      const type = String(document.getElementById("gmRewardType")?.value || "gems");
+      const itemFields = document.getElementById("gmRewardItemFields");
+      const cardFields = document.getElementById("gmRewardCardFields");
+      if (itemFields) itemFields.classList.toggle("hidden", type !== "item");
+      if (cardFields) cardFields.classList.toggle("hidden", type !== "card");
+    }
+
+    function renderGMSelectedCard() {
+      const select = document.getElementById("gmCardSelect");
+      const id = String(select?.value || gmSelectedCardId || CARDS[0]?.id || "");
+      const card = CARD_BY_ID.get(id);
+      if (!card) return;
+      gmSelectedCardId = id;
+      const owned = state.owned[id] || { count:1, level:1, duplicateRank:0 };
+      const levelInput = document.getElementById("gmCardLevel");
+      const awakenInput = document.getElementById("gmCardAwaken");
+      const copiesInput = document.getElementById("gmCardCopies");
+      if (levelInput) { levelInput.max = String(getCardMaxLevel(card)); levelInput.value = String(Math.max(1, Number(owned.level) || 1)); }
+      if (awakenInput) { awakenInput.max = String(getCardAwakenMax(card)); awakenInput.value = String(Math.max(0, Number(owned.duplicateRank) || 0)); }
+      if (copiesInput) copiesInput.value = String(Math.max(1, Number(owned.count) || 1));
+      const preview = document.getElementById("gmCardPreview");
+      if (preview) preview.innerHTML = `<b>${escapeHTML(card.name)}</b> • ID ${escapeHTML(card.id)} • ${escapeHTML(card.rarity)}<br>ปัจจุบัน Lv.${formatNumber(owned.level || 1)}/${formatNumber(getCardMaxLevel(card))} • อเวก +${formatNumber(owned.duplicateRank || 0)}/${formatNumber(getCardAwakenMax(card))} • สำเนา ${formatNumber(owned.count || 1)}`;
+    }
+
+    function renderGMDraftRewards() {
+      const list = document.getElementById("gmDraftRewardList");
+      if (!list) return;
+      list.innerHTML = gmDraftRewards.length ? gmDraftRewards.map((reward, index) => `<div class="gm-draft-row"><span>${escapeHTML(gmRewardLabel(reward))}</span><button class="btn btn-danger" data-action="gm-remove-reward" data-index="${index}">ลบ</button></div>`).join("") : `<div class="gm-status-box">ยังไม่มีรางวัลในจดหมาย</div>`;
+    }
+
+    function renderGMPanel() {
+      renderGMAccess();
+      if (!gmAccess || !gmAccess.isGM) return;
+      const ownedCount = CARDS.filter(card => Boolean(state.owned[String(card.id)])).length;
+      const maxLevelCount = CARDS.filter(card => Number(state.owned[String(card.id)]?.level || 0) >= getCardMaxLevel(card)).length;
+      const maxAwakenCount = CARDS.filter(card => Number(state.owned[String(card.id)]?.duplicateRank || 0) >= getCardAwakenMax(card)).length;
+      const summary = document.getElementById("gmCollectionSummary");
+      if (summary) summary.textContent = `มีการ์ด ${formatNumber(ownedCount)}/${formatNumber(CARDS.length)} ใบ • เลเวลตัน ${formatNumber(maxLevelCount)} ใบ • อเวกตัน ${formatNumber(maxAwakenCount)} ใบ`;
+      const setValue = (id, value) => { const node = document.getElementById(id); if (node && document.activeElement !== node) node.value = String(Math.max(0, Math.floor(Number(value) || 0))); };
+      setValue("gmSetGems", state.gems);
+      setValue("gmSetCrystals", state.crystals);
+      setValue("gmSetDust", state.dust);
+      const cardSelect = document.getElementById("gmCardSelect");
+      const selected = gmSelectedCardId && CARD_BY_ID.has(gmSelectedCardId) ? gmSelectedCardId : String(CARDS[0]?.id || "");
+      if (cardSelect) cardSelect.innerHTML = gmCardOptionsHTML(selected);
+      const rewardCard = document.getElementById("gmRewardCardSelect");
+      if (rewardCard) rewardCard.innerHTML = gmCardOptionsHTML(String(rewardCard.value || selected));
+      const rewardItem = document.getElementById("gmRewardItemSelect");
+      if (rewardItem) rewardItem.innerHTML = gmItemOptionsHTML(String(rewardItem.value || "pack:normal"));
+      renderGMSelectedCard();
+      renderGMRewardEditor();
+      renderGMDraftRewards();
+    }
+
+    function openGMPanel() {
+      if (!activeCloudUid || !gmAccess || !gmAccess.isGM) return showToast("บัญชีนี้ไม่มีสิทธิ์ GM");
+      renderGMPanel();
+      document.getElementById("gmPanelModal")?.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeGMPanel() {
+      document.getElementById("gmPanelModal")?.classList.add("hidden");
+      restoreBodyScroll();
+    }
+
+    async function gmProvisionAll(mode = "all") {
+      if (gmPanelBusy || !gmAccess.isGM) return;
+      gmPanelBusy = true;
+      try {
+        const options = mode === "max-level" ? { maxLevel:true } : mode === "max-awaken" ? { maxAwaken:true } : mode === "max-all" ? { maxLevel:true, maxAwaken:true } : mode === "reset" ? { reset:true } : {};
+        ensureGMAllCards(options);
+        await commitGMState(mode === "reset" ? "รีเซ็ตการ์ดทดสอบเป็น Lv.1 / อเวก 0 แล้ว" : "อัปเดตคลังทดสอบ GM แล้ว", `gm-cards-${mode}`, { cardCount:CARDS.length });
+      } finally { gmPanelBusy = false; }
+    }
+
+    async function gmApplyResources(fill = false) {
+      if (!gmAccess.isGM) return;
+      const value = fill ? 999999999 : null;
+      const read = id => Math.max(0, Math.floor(Number(document.getElementById(id)?.value) || 0));
+      state.gems = value ?? read("gmSetGems");
+      state.crystals = value ?? read("gmSetCrystals");
+      state.dust = value ?? read("gmSetDust");
+      await commitGMState("ปรับทรัพยากรบัญชี GM แล้ว", "gm-set-resources", { gems:state.gems, crystals:state.crystals, dust:state.dust });
+    }
+
+    async function gmApplySelectedCard(maximize = false) {
+      if (!gmAccess.isGM) return;
+      const id = String(document.getElementById("gmCardSelect")?.value || gmSelectedCardId || "");
+      const card = CARD_BY_ID.get(id);
+      if (!card) return showToast("ไม่พบการ์ดที่เลือก");
+      const level = maximize ? getCardMaxLevel(card) : Math.min(getCardMaxLevel(card), Math.max(1, Math.floor(Number(document.getElementById("gmCardLevel")?.value) || 1)));
+      const awaken = maximize ? getCardAwakenMax(card) : Math.min(getCardAwakenMax(card), Math.max(0, Math.floor(Number(document.getElementById("gmCardAwaken")?.value) || 0)));
+      const count = Math.max(1, Math.floor(Number(document.getElementById("gmCardCopies")?.value) || 1));
+      if (!state.owned[id]) {
+        state.owned[id] = { count, level, duplicateRank:awaken, acquiredAt:Date.now(), gmTestCard:true };
+        state.collectionOrder.push(id);
+      } else Object.assign(state.owned[id], { count, level, duplicateRank:awaken, gmTestCard:true });
+      await commitGMState(`ปรับ ${card.name} เป็น Lv.${level} • อเวก +${awaken} แล้ว`, "gm-set-card", { cardId:id, level, awaken, count });
+    }
+
+    function gmAddDraftReward() {
+      if (!gmAccess.isGM) return;
+      const type = String(document.getElementById("gmRewardType")?.value || "gems");
+      const amount = Math.max(1, Math.floor(Number(document.getElementById("gmRewardAmount")?.value) || 1));
+      let reward = null;
+      if (["gems","crystals","dust"].includes(type)) reward = normalizeRewardPayload({ type, amount });
+      if (type === "item") reward = normalizeRewardPayload({ type, itemId:document.getElementById("gmRewardItemSelect")?.value, amount });
+      if (type === "card") reward = normalizeRewardPayload({
+        type, cardId:document.getElementById("gmRewardCardSelect")?.value, amount,
+        level:document.getElementById("gmRewardCardLevel")?.value,
+        awaken:document.getElementById("gmRewardCardAwaken")?.value
+      });
+      if (!reward) return showToast("ข้อมูลรางวัลไม่ถูกต้อง");
+      if (gmDraftRewards.length >= 20) return showToast("จดหมายหนึ่งฉบับใส่ได้สูงสุด 20 รายการ");
+      gmDraftRewards.push(reward);
+      renderGMDraftRewards();
+      showToast(`เพิ่ม ${gmRewardLabel(reward)} แล้ว`);
+    }
+
+    async function resolveGMTargetUid(value = "") {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+      try {
+        const usernameSnapshot = await cloudModules.get(cloudModules.ref(cloudDb, `usernameIndex/${normalizeUsernameKey(raw)}`));
+        if (usernameSnapshot.exists()) return String(usernameSnapshot.val() || "");
+      } catch (_) {}
+      try {
+        const userSnapshot = await cloudModules.get(cloudModules.ref(cloudDb, `publicProfiles/${raw}`));
+        if (userSnapshot.exists()) return raw;
+      } catch (_) {}
+      return "";
+    }
+
+    async function gmSendEventMail() {
+      if (gmPanelBusy || !gmAccess.isGM) return;
+      const title = String(document.getElementById("gmMailTitle")?.value || "รางวัลกิจกรรมจากทีมงาน").trim().slice(0,100);
+      const message = String(document.getElementById("gmMailMessage")?.value || "").trim().slice(0,500);
+      const targetType = String(document.getElementById("gmMailTargetType")?.value || "all");
+      const expiryDays = Math.min(365, Math.max(0, Number(document.getElementById("gmMailExpiryDays")?.value) || 0));
+      if (!title) return showToast("กรุณาใส่หัวข้อจดหมาย");
+      if (!gmDraftRewards.length) return showToast("กรุณาเพิ่มรางวัลอย่างน้อย 1 รายการ");
+      gmPanelBusy = true;
+      const status = document.getElementById("gmMailStatus");
+      try {
+        let recipientUid = "";
+        if (targetType === "user") {
+          recipientUid = await resolveGMTargetUid(document.getElementById("gmMailTarget")?.value || "");
+          if (!recipientUid) throw new Error("gm-target-not-found");
+        }
+        const now = Date.now();
+        const mailId = `event-${now.toString(36)}-${Math.random().toString(36).slice(2,9)}`;
+        const payload = {
+          id:mailId, title, message, rewards:gmDraftRewards.map(reward => ({ ...reward })),
+          enabled:true, createdAt:now, expiresAt:expiryDays > 0 ? now + Math.floor(expiryDays * 86400000) : 0,
+          senderUid:activeCloudUid, senderUsername:activeCloudUsername || state.profile?.username || "GM",
+          targetType:targetType === "user" ? "user" : "all", recipientUid:recipientUid || ""
+        };
+        const path = recipientUid ? `userMails/${recipientUid}/${mailId}` : `serverMails/${mailId}`;
+        await cloudModules.set(cloudModules.ref(cloudDb, path), payload);
+        await writeGMAudit("gm-send-event-mail", { mailId, targetType:payload.targetType, recipientUid, title, rewardCount:payload.rewards.length, expiresAt:payload.expiresAt });
+        gmDraftRewards = [];
+        renderGMDraftRewards();
+        if (status) status.textContent = recipientUid ? `ส่งถึง UID ${recipientUid} สำเร็จ • ผู้เล่นจะได้รับแบบเรียลไทม์` : `ส่งถึงผู้เล่นทั้งเซิร์ฟสำเร็จ • Mail ID ${mailId}`;
+        showToast(recipientUid ? "ส่งจดหมายให้ผู้เล่นแล้ว" : "ส่งจดหมายกิจกรรมทั้งเซิร์ฟแล้ว");
+      } catch (error) {
+        const messageText = String(error && error.message) === "gm-target-not-found" ? "ไม่พบ Username หรือ UID ของผู้เล่น" : firebaseErrorMessage(error, "ส่งจดหมาย GM");
+        if (status) status.textContent = messageText;
+        showToast(messageText);
+      } finally { gmPanelBusy = false; }
+    }
+
+
     function renderAll() {
       renderFilters();
       renderBanner();
@@ -25087,6 +25714,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderFriends();
       renderAccount();
       renderUtilityDock();
+      renderGMAccess();
+      if (!document.getElementById("gmPanelModal").classList.contains("hidden")) renderGMPanel();
       if (!document.getElementById("inventoryModal").classList.contains("hidden")) renderInventory();
       if (!document.getElementById("mailboxModal").classList.contains("hidden")) renderMailbox();
       if (!document.getElementById("teamPickerModal").classList.contains("hidden")) renderTeamPicker();
@@ -26132,6 +26761,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         if (event.target.id === "updateNoticeModal") closeUpdateNotice();
         if (event.target.id === "inventoryModal") closeInventory();
         if (event.target.id === "mailboxModal") closeMailbox();
+        if (event.target.id === "gmPanelModal") closeGMPanel();
         if (event.target.id === "itemSelectorModal") closeItemSelector();
         if (event.target.id === "battleSummaryModal") closeBattleSummary();
         return;
@@ -26168,6 +26798,22 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "claim-mail") claimMail(target.dataset.mailId);
       if (action === "claim-all-mail") claimAllMail();
       if (action === "delete-claimed-mail") deleteClaimedMail();
+      if (action === "open-gm-panel") openGMPanel();
+      if (action === "close-gm-panel") closeGMPanel();
+      if (action === "gm-refresh-role") refreshGMAccess(false).then(() => { if (gmAccess.isGM) { ensureGMAllCards(); renderGMPanel(); } });
+      if (action === "gm-provision-all") gmProvisionAll("all");
+      if (action === "gm-max-level-all") gmProvisionAll("max-level");
+      if (action === "gm-max-awaken-all") gmProvisionAll("max-awaken");
+      if (action === "gm-max-all") gmProvisionAll("max-all");
+      if (action === "gm-reset-cards") gmProvisionAll("reset");
+      if (action === "gm-apply-resources") gmApplyResources(false);
+      if (action === "gm-fill-resources") gmApplyResources(true);
+      if (action === "gm-apply-card") gmApplySelectedCard(false);
+      if (action === "gm-max-card") gmApplySelectedCard(true);
+      if (action === "gm-add-reward") gmAddDraftReward();
+      if (action === "gm-remove-reward") { gmDraftRewards.splice(Math.max(0, Number(target.dataset.index) || 0), 1); renderGMDraftRewards(); }
+      if (action === "gm-clear-rewards") { gmDraftRewards = []; renderGMDraftRewards(); }
+      if (action === "gm-send-mail") gmSendEventMail();
       if (action === "use-item-pack") useInventoryPack(target.dataset.itemId, Number(target.dataset.times) || 1);
       if (action === "open-item-selector") openItemSelector(target.dataset.itemId);
       if (action === "close-item-selector") closeItemSelector();
@@ -26340,6 +26986,18 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     document.addEventListener("change", event => {
       const id = String(event.target && event.target.id || "");
+      if (id === "gmCardSelect") { gmSelectedCardId = String(event.target.value || ""); renderGMSelectedCard(); return; }
+      if (id === "gmRewardType") { renderGMRewardEditor(); return; }
+      if (id === "gmRewardCardSelect") {
+        const card = CARD_BY_ID.get(String(event.target.value || ""));
+        if (card) {
+          const level = document.getElementById("gmRewardCardLevel");
+          const awaken = document.getElementById("gmRewardCardAwaken");
+          if (level) level.max = String(getCardMaxLevel(card));
+          if (awaken) awaken.max = String(getCardAwakenMax(card));
+        }
+        return;
+      }
       const map = {
         towerFormationSelect:["battle","formationFront"], towerCommandSelect:["battle","commandStrategy"], towerTargetSelect:["battle","targetStrategy"],
         arenaFormationSelect:["arena","formationFront"], arenaCommandSelect:["arena","commandStrategy"], arenaTargetSelect:["arena","targetStrategy"]
@@ -26429,6 +27087,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       else if (!document.getElementById("itemSelectorModal").classList.contains("hidden")) closeItemSelector();
       else if (!document.getElementById("inventoryModal").classList.contains("hidden")) closeInventory();
       else if (!document.getElementById("mailboxModal").classList.contains("hidden")) closeMailbox();
+      else if (!document.getElementById("gmPanelModal").classList.contains("hidden")) closeGMPanel();
       else if (!document.getElementById("updateNoticeModal").classList.contains("hidden")) closeUpdateNotice();
       else if (!document.getElementById("battleSummaryModal").classList.contains("hidden")) closeBattleSummary();
       else if (!document.getElementById("gachaRateModal").classList.contains("hidden")) closeGachaRateModal();
@@ -26439,6 +27098,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     });
 
     window.addEventListener("beforeunload", () => {
+      stopLiveEventMailListeners();
       updateIncome();
       persistLocalState();
       if (cloudReady && activeCloudUid) writeCloudSave().catch(() => {});
