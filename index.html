@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-13-status-clone-mail-v120">
-  <title>Anime Card Collection · Runtime v120 · Status, Clone & Mail Delivery Fix</title>
+  <meta name="gacha-app-build" content="2026-07-13-status-visible-profile-scroll-v121">
+  <title>Anime Card Collection · Runtime v121 · Status, Clone & Mail Delivery Fix</title>
   <style>
     :root {
       color-scheme: dark;
@@ -7649,6 +7649,180 @@
       }
     }
   </style>
+
+
+  <style id="v121-status-visible-profile-scroll-fix">
+    /* v121 · แก้ selector เดิมของ .battle-model-card span ที่บีบ/ซ้อนป้ายสถานะ */
+    .battle-unit.has-battle-status {
+      z-index: 48 !important;
+      overflow: visible !important;
+    }
+    .battle-source-formation:has(.battle-unit.has-battle-status),
+    .battle-row-line:has(.battle-unit.has-battle-status) {
+      position: relative;
+      z-index: 46 !important;
+      overflow: visible !important;
+    }
+
+    .battle-model-card .battle-unit-status-icons {
+      z-index: 72 !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      width: max-content !important;
+      min-width: max-content !important;
+      max-width: min(360px, 48vw) !important;
+      overflow: visible !important;
+      pointer-events: none !important;
+    }
+
+    .battle-model-card .battle-unit-status-icons > .battle-status-chip {
+      position: relative !important;
+      inset: auto !important;
+      left: auto !important;
+      right: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+      z-index: auto !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex: 0 0 auto !important;
+      width: max-content !important;
+      min-width: 0 !important;
+      max-width: 210px !important;
+      height: auto !important;
+      margin: 0 !important;
+      overflow: visible !important;
+      padding: 5px 8px !important;
+      color: #fff !important;
+      font-size: clamp(.53rem, .68vw, .68rem) !important;
+      font-weight: 1000 !important;
+      line-height: 1.1 !important;
+      text-align: center !important;
+      text-overflow: clip !important;
+      white-space: nowrap !important;
+      box-shadow: 0 4px 14px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08) !important;
+    }
+
+    .battle-model-card .battle-status-emoji-row {
+      z-index: 73 !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      overflow: visible !important;
+      pointer-events: none !important;
+    }
+
+    .battle-model-card .battle-status-emoji-row > .battle-status-emoji {
+      position: relative !important;
+      inset: auto !important;
+      left: auto !important;
+      right: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+      z-index: auto !important;
+      display: inline-grid !important;
+      place-items: center !important;
+      flex: 0 0 auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+      color: #fff !important;
+      text-align: center !important;
+      text-overflow: clip !important;
+      white-space: normal !important;
+    }
+
+    /* ทำให้อ่านได้แม้การ์ดอยู่ชิดขอบบนของ Arena */
+    #arenaView .battle-model-card .battle-unit-status-icons {
+      bottom: calc(100% + 9px) !important;
+      filter: drop-shadow(0 5px 12px rgba(0,0,0,.72));
+    }
+    #arenaView .battle-model-stack.arena-side-grid {
+      padding-top: clamp(42px, 5.2vh, 62px) !important;
+    }
+    #arenaView .battle-turn-order { z-index: 30 !important; }
+    #arenaView .battle-unit.has-battle-status,
+    #arenaView .battle-source-formation:has(.battle-unit.has-battle-status) {
+      z-index: 52 !important;
+    }
+
+    /* ร่างแยกยังแสดงชื่อสถานะได้ ไม่ถูก selector ชื่อการ์ดครอบ */
+    .battle-source-clone-lane .battle-unit-status-icons > .battle-status-chip {
+      position: relative !important;
+      inset: auto !important;
+      width: max-content !important;
+      max-width: 160px !important;
+      overflow: visible !important;
+      padding: 4px 6px !important;
+      font-size: clamp(.45rem, .55vw, .58rem) !important;
+    }
+    .battle-source-clone-lane .battle-status-emoji-row > .battle-status-emoji {
+      position: relative !important;
+      inset: auto !important;
+      overflow: visible !important;
+    }
+
+    /* v121 · หน้าโปรไฟล์มีลูกเลื่อนที่มองเห็นและใช้เมาส์วีลได้ */
+    #profileModal {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+    #profileModal .profile-panel {
+      max-height: calc(100dvh - 32px) !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable both-edges;
+      -webkit-overflow-scrolling: touch;
+    }
+    #profileModal .profile-layout,
+    #profileModal #profileDetail {
+      min-height: 0;
+    }
+    #profileModal .profile-panel {
+      scrollbar-width: auto;
+      scrollbar-color: #38bdf8 rgba(7,15,28,.78);
+    }
+    #profileModal .profile-panel::-webkit-scrollbar {
+      width: 14px;
+    }
+    #profileModal .profile-panel::-webkit-scrollbar-track {
+      margin: 10px 0;
+      border-radius: 999px;
+      background: rgba(7,15,28,.78);
+      box-shadow: inset 0 0 0 1px rgba(56,189,248,.16);
+    }
+    #profileModal .profile-panel::-webkit-scrollbar-thumb {
+      min-height: 54px;
+      border: 3px solid rgba(7,15,28,.78);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #5ce8ff, #818cf8 55%, #a78bfa);
+      box-shadow: 0 0 16px rgba(92,232,255,.32);
+    }
+    #profileModal .profile-panel::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #a5f3fc, #60a5fa 55%, #c4b5fd);
+    }
+
+    @media (max-width: 760px) {
+      .battle-model-card .battle-unit-status-icons {
+        max-width: min(280px, 82vw) !important;
+      }
+      .battle-model-card .battle-unit-status-icons > .battle-status-chip {
+        padding: 4px 6px !important;
+        font-size: .54rem !important;
+      }
+      #profileModal { padding: 8px !important; }
+      #profileModal .profile-panel {
+        max-height: calc(100dvh - 16px) !important;
+        border-radius: 20px;
+      }
+    }
+  </style>
+
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
