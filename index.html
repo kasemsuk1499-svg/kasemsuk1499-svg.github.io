@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-13-mail-delivery-realtime-v127">
-  <title>Anime Card Collection · Runtime v127 · Mail Delivery Realtime Fix</title>
+  <meta name="gacha-app-build" content="2026-07-14-cleanse-purge-turn-acceleration-v128">
+  <title>Anime Card Collection · Runtime v128 · Cleanse + Purge + Turn Acceleration</title>
   <style>
     :root {
       color-scheme: dark;
@@ -6179,10 +6179,10 @@
     .battle-unit-status-icons{position:absolute;z-index:18;left:6px;right:6px;bottom:38px;display:flex;flex-wrap:wrap;justify-content:center;gap:3px;pointer-events:none}
     .battle-status-chip{border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px 5px;color:#fff;font-size:.48rem;font-weight:1000;line-height:1;background:rgba(3,5,12,.82);text-shadow:0 1px 2px #000;box-shadow:0 0 10px rgba(0,0,0,.25)}
     .battle-status-chip.death{background:linear-gradient(135deg,#111827,#7f1d1d)}.battle-status-chip.stun{background:linear-gradient(135deg,#92400e,#f59e0b);color:#271600}.battle-status-chip.blind{background:linear-gradient(135deg,#1f2937,#6b7280)}.battle-status-chip.freeze{background:linear-gradient(135deg,#075985,#67e8f9);color:#03212c}.battle-status-chip.burn{background:linear-gradient(135deg,#b91c1c,#f97316)}.battle-status-chip.bleed{background:linear-gradient(135deg,#7f1d1d,#e11d48)}.battle-status-chip.shock{background:linear-gradient(135deg,#312e81,#facc15);color:#160f38}
-    .battle-status-chip.poison{background:linear-gradient(135deg,#14532d,#84cc16);color:#07180b}.battle-status-chip.sleep{background:linear-gradient(135deg,#312e81,#a78bfa)}.battle-status-chip.silence{background:linear-gradient(135deg,#0f172a,#64748b)}.battle-status-chip.confuse{background:linear-gradient(135deg,#581c87,#22d3ee)}.battle-status-chip.curse{background:linear-gradient(135deg,#3b0764,#e879f9)}.battle-status-chip.slow{background:linear-gradient(135deg,#064e3b,#38bdf8)}.battle-status-chip.seal{background:linear-gradient(135deg,#1e293b,#facc15);color:#211500}.battle-status-chip.condition-cancel{background:linear-gradient(135deg,#0f766e,#5eead4);color:#042f2e}.battle-status-chip.skill-cancel{background:linear-gradient(135deg,#7f1d1d,#fb7185)}.battle-status-chip.skill-stolen{background:linear-gradient(135deg,#2e1065,#f97316)}.battle-status-chip.skill-copied{background:linear-gradient(135deg,#075985,#22d3ee);color:#03212c}
+    .battle-status-chip.poison{background:linear-gradient(135deg,#14532d,#84cc16);color:#07180b}.battle-status-chip.sleep{background:linear-gradient(135deg,#312e81,#a78bfa)}.battle-status-chip.silence{background:linear-gradient(135deg,#0f172a,#64748b)}.battle-status-chip.confuse{background:linear-gradient(135deg,#581c87,#22d3ee)}.battle-status-chip.curse{background:linear-gradient(135deg,#3b0764,#e879f9)}.battle-status-chip.slow{background:linear-gradient(135deg,#064e3b,#38bdf8)}.battle-status-chip.seal{background:linear-gradient(135deg,#1e293b,#facc15);color:#211500}.battle-status-chip.condition-cancel{background:linear-gradient(135deg,#0f766e,#5eead4);color:#042f2e}.battle-status-chip.skill-cancel{background:linear-gradient(135deg,#7f1d1d,#fb7185)}.battle-status-chip.skill-stolen{background:linear-gradient(135deg,#2e1065,#f97316)}.battle-status-chip.skill-copied{background:linear-gradient(135deg,#075985,#22d3ee);color:#03212c}.battle-status-chip.purification{background:linear-gradient(135deg,#0f766e,#e0f2fe);color:#062a2a}
     .battle-status-emoji-row{position:absolute;z-index:24;left:6px;right:6px;top:33px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;pointer-events:none}
     .battle-status-emoji{width:24px;height:24px;display:inline-grid;place-items:center;border:1px solid rgba(255,255,255,.26);border-radius:999px;font-size:.9rem;line-height:1;background:rgba(3,5,12,.78);box-shadow:0 0 14px rgba(0,0,0,.38),0 0 12px rgba(250,204,21,.18);text-shadow:0 1px 3px #000;backdrop-filter:blur(8px)}
-    .battle-status-emoji.death{box-shadow:0 0 16px rgba(248,113,113,.35)}.battle-status-emoji.freeze{box-shadow:0 0 16px rgba(103,232,249,.36)}.battle-status-emoji.burn{box-shadow:0 0 16px rgba(249,115,22,.42)}.battle-status-emoji.shock{box-shadow:0 0 16px rgba(250,204,21,.42)}.battle-status-emoji.skill-cancel,.battle-status-emoji.skill-stolen{box-shadow:0 0 18px rgba(251,113,133,.45)}.battle-status-emoji.skill-copied,.battle-status-emoji.condition-cancel{box-shadow:0 0 18px rgba(34,211,238,.45)}
+    .battle-status-emoji.death{box-shadow:0 0 16px rgba(248,113,113,.35)}.battle-status-emoji.freeze{box-shadow:0 0 16px rgba(103,232,249,.36)}.battle-status-emoji.burn{box-shadow:0 0 16px rgba(249,115,22,.42)}.battle-status-emoji.shock{box-shadow:0 0 16px rgba(250,204,21,.42)}.battle-status-emoji.skill-cancel,.battle-status-emoji.skill-stolen{box-shadow:0 0 18px rgba(251,113,133,.45)}.battle-status-emoji.skill-copied,.battle-status-emoji.condition-cancel{box-shadow:0 0 18px rgba(34,211,238,.45)}.battle-status-emoji.purification{box-shadow:0 0 18px rgba(125,211,252,.55)}
     .battle-unit.has-battle-status{box-shadow:0 0 0 2px rgba(250,204,21,.24),0 18px 34px rgba(0,0,0,.36),0 0 30px color-mix(in srgb,var(--rarity-glow,var(--rarity)) 22%,transparent)}
     .battle-floating-number.status{color:#fef3c7;text-shadow:0 2px 4px #000,0 0 16px rgba(250,204,21,.95)}.battle-floating-number.miss{color:#c7d2fe;text-shadow:0 2px 4px #000,0 0 16px rgba(129,140,248,.95)}.battle-unit.is-status-controlled{filter:drop-shadow(0 0 16px rgba(250,204,21,.75)) saturate(1.18)}
     @media(max-width:900px){#battleView .battle-sidebar,#arenaView .battle-sidebar{grid-template-columns:1fr}#battleView .battle-sides,#arenaView .battle-sides{grid-template-columns:1fr;gap:18px}#battleView .battle-arena,#arenaView .battle-arena{min-height:auto}#battleView .battle-model-stack,#arenaView .battle-model-stack{min-height:220px}}
@@ -9908,6 +9908,9 @@
       MULTI_ELEMENT_ATTACK: "multiElementAttack",
       CRITICAL_DAMAGE_RATE: "criticalDamageRate",
       DEFENSE_PENETRATION_RATE: "defensePenetrationRate",
+      CLEANSE_STATUSES: "cleanseStatuses",
+      PURGE_BUFFS: "purgeBuffs",
+      ACCELERATE_TURN_EFFECTS: "accelerateTurnEffects",
       APPLY_STATUS: "applyStatus"
     });
 
@@ -12109,6 +12112,17 @@
         elementalSequence: CARD_ABILITY_EFFECT_TYPES.MULTI_ELEMENT_ATTACK,
         critDamageRate: CARD_ABILITY_EFFECT_TYPES.CRITICAL_DAMAGE_RATE,
         defensePenetration: CARD_ABILITY_EFFECT_TYPES.DEFENSE_PENETRATION_RATE,
+        cleanseStatus: CARD_ABILITY_EFFECT_TYPES.CLEANSE_STATUSES,
+        cleanseDebuffs: CARD_ABILITY_EFFECT_TYPES.CLEANSE_STATUSES,
+        removeStatus: CARD_ABILITY_EFFECT_TYPES.CLEANSE_STATUSES,
+        dispelDebuffs: CARD_ABILITY_EFFECT_TYPES.CLEANSE_STATUSES,
+        purgeBuff: CARD_ABILITY_EFFECT_TYPES.PURGE_BUFFS,
+        dispelBuffs: CARD_ABILITY_EFFECT_TYPES.PURGE_BUFFS,
+        removeBuffs: CARD_ABILITY_EFFECT_TYPES.PURGE_BUFFS,
+        purification: CARD_ABILITY_EFFECT_TYPES.PURGE_BUFFS,
+        accelerateBuffTurns: CARD_ABILITY_EFFECT_TYPES.ACCELERATE_TURN_EFFECTS,
+        advanceTurns: CARD_ABILITY_EFFECT_TYPES.ACCELERATE_TURN_EFFECTS,
+        fastForwardTurns: CARD_ABILITY_EFFECT_TYPES.ACCELERATE_TURN_EFFECTS,
         statusEffect: CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS,
         abnormalStatus: CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS,
         attackStatus: CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS,
@@ -12285,7 +12299,8 @@
 
     function getAbilityEffectResistanceCategory(effect = {}) {
       const type = normalizeAbilityEffectType(effect.type);
-      if (type === CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS) return "abnormalStatus";
+      if ([CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS, CARD_ABILITY_EFFECT_TYPES.PURGE_BUFFS].includes(type)) return "abnormalStatus";
+      if (type === CARD_ABILITY_EFFECT_TYPES.ACCELERATE_TURN_EFFECTS) return "abilityControl";
       const value = Number(effect.value || 0);
       if (CARD_ABILITY_STACK_EFFECT_TYPES.has(type)) {
         const stack = normalizeAbilityStackEffect(effect);
@@ -12328,7 +12343,7 @@
         if (stack.type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE_STACK) return value > 0;
         return value < 0;
       }
-      if (type === CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS) return true;
+      if ([CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS, CARD_ABILITY_EFFECT_TYPES.PURGE_BUFFS, CARD_ABILITY_EFFECT_TYPES.ACCELERATE_TURN_EFFECTS].includes(type)) return true;
       if ([CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES, CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES, CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES, CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS].includes(type)) return true;
       if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT].includes(type)) return value > 0;
       if (type === CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE) return value > 0;
@@ -12373,7 +12388,8 @@
         "conditioncancel":"condition-cancel", "condition-cancel":"condition-cancel", "cancel-condition":"condition-cancel", "ignore-condition":"condition-cancel", "ignore-conditions":"condition-cancel", "ignoreabilityconditions":"condition-cancel", "ignore-ability-conditions":"condition-cancel", "ยกเลิกเงื่อนไข":"condition-cancel", "โดนยกเลิกเงื่อนไข":"condition-cancel",
         "skillcancel":"skill-cancel", "skill-cancel":"skill-cancel", "cancel-skill":"skill-cancel", "nullify":"skill-cancel", "nullifycardabilities":"skill-cancel", "nullify-card-abilities":"skill-cancel", "ยกเลิกสกิล":"skill-cancel", "ปิดสกิล":"skill-cancel",
         "skillstolen":"skill-stolen", "skill-stolen":"skill-stolen", "steal-skill":"skill-stolen", "stealskill":"skill-stolen", "stealabilities":"skill-stolen", "steal-abilities":"skill-stolen", "ขโมยสกิล":"skill-stolen", "โดนขโมยสกิล":"skill-stolen",
-        "skillcopied":"skill-copied", "skill-copied":"skill-copied", "copy-skill":"skill-copied", "copyskill":"skill-copied", "copyabilities":"skill-copied", "copy-abilities":"skill-copied", "คัดลอกสกิล":"skill-copied", "ก็อปปี้สกิล":"skill-copied", "ก๊อปปี้สกิล":"skill-copied"
+        "skillcopied":"skill-copied", "skill-copied":"skill-copied", "copy-skill":"skill-copied", "copyskill":"skill-copied", "copyabilities":"skill-copied", "copy-abilities":"skill-copied", "คัดลอกสกิล":"skill-copied", "ก็อปปี้สกิล":"skill-copied", "ก๊อปปี้สกิล":"skill-copied",
+        "purification":"purification", "purified":"purification", "purge":"purification", "buff-purge":"purification", "ชำระล้าง":"purification", "ขจัดบัพ":"purification"
       };
       return aliases[key] || key;
     }
@@ -16167,6 +16183,19 @@
           const member = shieldOrder[i % Math.max(1, shieldOrder.length)];
           if (member) { member.shieldHits += 1; member.initialShieldHits += 1; }
         }
+        members.forEach(member => {
+          member.initialPower = Number(member.power) || 1;
+          member.initialMaxHp = Number(member.maxHp) || 1;
+          member.initialDefense = Number(member.defense) || 0;
+          member.initialSpeed = Number(member.speed) || 1;
+          member.initialAttackHits = Math.max(1, Math.round(Number(member.attackHits) || 1));
+          member.initialHealingRate = Number(member.healingRate) || 0;
+          member.initialShieldRecoveryRate = Number(member.shieldRecoveryRate) || 0;
+          member.initialCriticalRate = Number(member.criticalRate) || 0;
+          member.initialBlockRate = Number(member.blockRate) || 0;
+          member.initialDodgeRate = Number(member.dodgeRate) || 0;
+          member.initialDamageTakenRate = Number(member.damageTakenRate) || 0;
+        });
         return {
           side,
           members,
@@ -16336,7 +16365,14 @@
           spawnKind:isSummon ? "summon" : "clone", spawnSourceId:String(actor.id),
           spawnRootSourceId:String(rule._runtimeSpawnRootSourceId || actor.spawnRootSourceId || actor.id),
           spawnGroupKey:String(rule._runtimeSpawnGroupKey || rule.cloneGroupKey || ""), originalSide:team.side,
-          originalSlot:slot, originalRow:row, capturedBySide:"", captureOwnerCardId:"", captureUses:{}
+          originalSlot:slot, originalRow:row, capturedBySide:"", captureOwnerCardId:"", captureUses:{},
+          initialPower:power, initialMaxHp:maxHp, initialDefense:defense, initialSpeed:baseSpeed, initialAttackHits:attackHits,
+          initialHealingRate:isSummon ? healingRateOf(team.side) : actor.healingRate,
+          initialShieldRecoveryRate:isSummon ? shieldRecoveryRateOf(team.side) : actor.shieldRecoveryRate,
+          initialCriticalRate:isSummon ? criticalRateOf(team.side) : actor.criticalRate,
+          initialBlockRate:isSummon ? Math.max(0, Number(identityCard.blockRate) || 0) : actor.blockRate,
+          initialDodgeRate:isSummon ? Math.max(0, Number(identityCard.dodgeRate) || 0) : actor.dodgeRate,
+          initialDamageTakenRate:isSummon ? Number(identityCard.damageTakenRate) || 0 : actor.damageTakenRate
         };
       }
 
@@ -16462,14 +16498,16 @@
       const BATTLE_STATUS_LABELS = {
         death: "เดธ", stun: "สตั้น", blind: "ตาบอด", freeze: "แช่แข็ง", burn: "ไฟไหม้", bleed: "เลือดออก", shock: "ไฟช็อต",
         poison: "พิษ", sleep: "หลับ", silence: "ใบ้", confuse: "สับสน", curse: "คำสาป", slow: "ช้า", seal: "ผนึก",
-        "condition-cancel": "ยกเลิกเงื่อนไข", "skill-cancel": "ยกเลิกสกิล", "skill-stolen": "ขโมยสกิล", "skill-copied": "ก็อปปี้สกิล"
+        "condition-cancel": "ยกเลิกเงื่อนไข", "skill-cancel": "ยกเลิกสกิล", "skill-stolen": "ขโมยสกิล", "skill-copied": "ก็อปปี้สกิล",
+        purification: "ชำระล้าง"
       };
       const BATTLE_STATUS_EMOJIS = {
         death: "☠️", stun: "💫", blind: "👁️", freeze: "❄️", burn: "🔥", bleed: "🩸", shock: "⚡",
         poison: "☣️", sleep: "💤", silence: "🤐", confuse: "🌀", curse: "🔮", slow: "🐢", seal: "⛓️",
-        "condition-cancel": "🔓", "skill-cancel": "🚫", "skill-stolen": "🕸️", "skill-copied": "🧬"
+        "condition-cancel": "🔓", "skill-cancel": "🚫", "skill-stolen": "🕸️", "skill-copied": "🧬",
+        purification: "🫧"
       };
-      const BATTLE_STICKY_STATUSES = new Set(["freeze", "death", "bleed", "condition-cancel", "skill-cancel", "skill-stolen", "skill-copied"]);
+      const BATTLE_STICKY_STATUSES = new Set(["freeze", "death", "bleed", "condition-cancel", "skill-cancel", "skill-stolen", "skill-copied", "purification"]);
       const BATTLE_BLEED_DAMAGE_RATE_PER_STACK = 0.10;
       const BATTLE_BLEED_DEFAULT_TURNS = 2;
       const BATTLE_BLEED_HEALING_REDUCTION_PER_STACK = 0.10;
@@ -16496,7 +16534,8 @@
           "conditioncancel":"condition-cancel", "condition-cancel":"condition-cancel", "cancel-condition":"condition-cancel", "ignore-condition":"condition-cancel", "ignore-conditions":"condition-cancel", "ignoreabilityconditions":"condition-cancel", "ignore-ability-conditions":"condition-cancel", "ยกเลิกเงื่อนไข":"condition-cancel", "โดนยกเลิกเงื่อนไข":"condition-cancel",
           "skillcancel":"skill-cancel", "skill-cancel":"skill-cancel", "cancel-skill":"skill-cancel", "nullify":"skill-cancel", "nullifycardabilities":"skill-cancel", "nullify-card-abilities":"skill-cancel", "ยกเลิกสกิล":"skill-cancel", "ปิดสกิล":"skill-cancel",
           "skillstolen":"skill-stolen", "skill-stolen":"skill-stolen", "steal-skill":"skill-stolen", "stealskill":"skill-stolen", "stealabilities":"skill-stolen", "steal-abilities":"skill-stolen", "ขโมยสกิล":"skill-stolen", "โดนขโมยสกิล":"skill-stolen",
-          "skillcopied":"skill-copied", "skill-copied":"skill-copied", "copy-skill":"skill-copied", "copyskill":"skill-copied", "copyabilities":"skill-copied", "copy-abilities":"skill-copied", "คัดลอกสกิล":"skill-copied", "ก็อปปี้สกิล":"skill-copied", "ก๊อปปี้สกิล":"skill-copied"
+          "skillcopied":"skill-copied", "skill-copied":"skill-copied", "copy-skill":"skill-copied", "copyskill":"skill-copied", "copyabilities":"skill-copied", "copy-abilities":"skill-copied", "คัดลอกสกิล":"skill-copied", "ก็อปปี้สกิล":"skill-copied", "ก๊อปปี้สกิล":"skill-copied",
+          "purification":"purification", "purified":"purification", "purge":"purification", "buff-purge":"purification", "ชำระล้าง":"purification", "ขจัดบัพ":"purification"
         };
         return aliases[key] || key;
       }
@@ -16539,6 +16578,7 @@
           return `${emoji} ${label} ×${stacks} ↓ฮีล${cut}%`;
         }
         if (effect.status === "shock") return `${emoji} ${label}${effect.hitCounter || 0}/${effect.chainAfterHits || 1}`;
+        if (effect.status === "purification") return `${emoji} ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : " ∞"}`;
         return `${emoji} ${label}${effect.turnsRemaining ? ` ${effect.turnsRemaining}` : ""}`;
       }
       function makeBattleStatusInstance(rule, source) {
@@ -16554,6 +16594,261 @@
         member.statusEffects.push(instance);
         return { status:"applied", statusType:instance.status, statusLabel:instance.label, targetCardId:member.id, targetName:member.name, sourceCardId:String(source && source.id || ""), sourceName:String(source && source.name || ""), abilityName:instance.sourceAbilityName, reason, turnsRemaining:instance.turnsRemaining, attacksRemaining:instance.attacksRemaining, chainAfterHits:instance.chainAfterHits };
       }
+
+      function hasPurificationStatus(member) {
+        return activeStatusEffects(member, "purification").length > 0;
+      }
+      function clearPurificationOnRevive(member) {
+        if (!member) return [];
+        const removed = [];
+        abilityArray(member.statusEffects).forEach(effect => {
+          if (!effect || effect.expired || effect.status !== "purification") return;
+          effect.expired = true;
+          removed.push({ status:"expired", statusType:"purification", statusLabel:BATTLE_STATUS_LABELS.purification, targetCardId:member.id, targetName:member.name, reason:"revive" });
+        });
+        compactBattleStatuses(member);
+        return removed;
+      }
+      function isBeneficialTimedDelta(field, delta) {
+        const value = Number(delta) || 0;
+        if (!value) return false;
+        if (field === "damageTakenRate") return value < 0;
+        return ["power","attack","maxHp","defense","speed","attackHits","shieldHits","criticalRate","blockRate","dodgeRate","healingRate","shieldRecoveryRate"].includes(String(field)) && value > 0;
+      }
+      function revertTimedEffectNow(member, effect) {
+        if (!member || !effect) return;
+        member[effect.field] = Number(member[effect.field] || 0) - Number(effect.delta || 0);
+        if (effect.field === "speed") member.speed = Math.max(1, Math.round(member.speed));
+        if (effect.stackKey && member.speedStacks && member.speedStacks[effect.stackKey]) member.speedStacks[effect.stackKey] = Math.max(0, Number(member.speedStacks[effect.stackKey]) - 1);
+      }
+      function resetMemberPositiveBuffsToBaseline(member) {
+        if (!member) return;
+        const lowerToBaseline = (field, baselineField, minimum = -Infinity) => {
+          const baseline = Number(member[baselineField]);
+          if (!Number.isFinite(baseline)) return;
+          if (Number(member[field]) > baseline) member[field] = Math.max(minimum, baseline);
+        };
+        lowerToBaseline("power", "initialPower", 1);
+        lowerToBaseline("maxHp", "initialMaxHp", 1);
+        member.currentHp = Math.min(member.currentHp, member.maxHp);
+        lowerToBaseline("defense", "initialDefense", 0);
+        lowerToBaseline("speed", "initialSpeed", 1);
+        lowerToBaseline("attackHits", "initialAttackHits", 1);
+        lowerToBaseline("criticalRate", "initialCriticalRate", -1);
+        lowerToBaseline("blockRate", "initialBlockRate", -1);
+        lowerToBaseline("dodgeRate", "initialDodgeRate", -1);
+        lowerToBaseline("healingRate", "initialHealingRate", -1);
+        lowerToBaseline("shieldRecoveryRate", "initialShieldRecoveryRate", -1);
+        const baseDamageTaken = Number(member.initialDamageTakenRate);
+        if (Number.isFinite(baseDamageTaken) && Number(member.damageTakenRate) < baseDamageTaken) member.damageTakenRate = baseDamageTaken;
+      }
+      function purgeMemberBuffs(member, memberTeam) {
+        const removed = { shieldHits:0, pendingAttackHits:0, pendingCriticalRate:0, timedEffects:0, resistanceRules:0, copiedAbilities:0, forcedDeath:false };
+        if (!member) return removed;
+        removed.shieldHits = Math.max(0, Math.floor(Number(member.shieldHits) || 0));
+        member.shieldHits = 0;
+        if (Number(member.pendingAttackHits) > 0) { removed.pendingAttackHits = Number(member.pendingAttackHits); member.pendingAttackHits = 0; }
+        if (Number(member.pendingCriticalRateChange) > 0) { removed.pendingCriticalRate = Number(member.pendingCriticalRateChange); member.pendingCriticalRateChange = 0; }
+        member.timedEffects = abilityArray(member.timedEffects).filter(effect => {
+          if (!isBeneficialTimedDelta(effect.field, effect.delta)) return true;
+          revertTimedEffectNow(member, effect); removed.timedEffects += 1; return false;
+        });
+        removed.resistanceRules = abilityArray(member.statusResistanceRules).length;
+        member.statusResistanceRules = [];
+        member.speedStacks = {};
+        resetMemberPositiveBuffsToBaseline(member);
+        if (memberTeam && Array.isArray(memberTeam.copiedAbilityInstances)) {
+          abilityArray(memberTeam.copiedAbilityInstances).slice().forEach(instance => {
+            if (String(instance.recipientCardId || "") !== String(member.id)) return;
+            removed.copiedAbilities += 1;
+            expireCopiedAbilityInstance(memberTeam, instance, "purged");
+          });
+        }
+        member.reviveHitLifeRemaining = 0;
+        if (Number(member.reviveTurnsRemaining) > 0 || String(member.reviveMode || "") === "reviveTimedUndying") {
+          member.reviveTurnsRemaining = 0;
+          member.reviveMode = "";
+          member.currentHp = 0;
+          member.ko = true;
+          member.deathReason = "purification";
+          removed.forcedDeath = true;
+        }
+        return removed;
+      }
+      function expireAdvancedTimedEffect(member, effect, reason, events) {
+        if (!effect || effect.expired) return;
+        effect.expired = true;
+        events.push({ status:"expired", statusType:effect.status, statusLabel:effect.label, targetCardId:member.id, targetName:member.name, reason });
+      }
+      function accelerateMemberTurnEffects(member, turns, memberTeam) {
+        const steps = Math.max(1, Math.floor(Number(turns) || 1));
+        const events = [];
+        if (!member) return events;
+
+        // เดธนับตามจำนวนเทิร์นโจมตีที่เหลือ และต้องทำงานทันทีเมื่อถูกเร่งจนเหลือ 0
+        activeStatusEffects(member, "death").forEach(effect => {
+          effect.attacksRemaining = Math.max(0, Number(effect.attacksRemaining || 0) - steps);
+          events.push({ status:"accelerated", statusType:"death", statusLabel:effect.label, targetCardId:member.id, targetName:member.name, turnsAdvanced:steps, attacksRemaining:effect.attacksRemaining });
+          if (effect.attacksRemaining <= 0 && member.currentHp > 0) {
+            member.currentHp = 0;
+            member.ko = true;
+            member.deathReason = "death-status";
+            effect.expired = true;
+            events.push({ status:"applied", statusType:"death", statusLabel:effect.label, targetCardId:member.id, targetName:member.name, instantDeath:true, reason:"turn-acceleration" });
+          }
+        });
+
+        // เลือดไหลเดิมใช้ 1 สแต็กต่อเทิร์นโจมตี จึงระเบิดทันทีตามจำนวนเทิร์นที่ถูกเร่ง
+        if (!member.ko && member.currentHp > 0) {
+          let bleedTicks = steps;
+          const bleedEffects = activeStatusEffects(member, "bleed").sort((a, b) => String(a.id || "").localeCompare(String(b.id || "")));
+          let consumedStacks = 0;
+          let totalBleedDamage = 0;
+          while (bleedTicks > 0 && member.currentHp > 0) {
+            const effect = bleedEffects.find(item => !item.expired && Number(item.turnsRemaining) > 0);
+            if (!effect) break;
+            const damage = Math.max(1, member.maxHp * BATTLE_BLEED_DAMAGE_RATE_PER_STACK);
+            const actual = Math.max(0, Math.min(member.currentHp, damage));
+            member.currentHp = Math.max(0, member.currentHp - actual);
+            effect.turnsRemaining = Math.max(0, Math.floor(Number(effect.turnsRemaining) || 0) - 1);
+            if (effect.turnsRemaining <= 0) effect.expired = true;
+            totalBleedDamage += actual;
+            consumedStacks += 1;
+            bleedTicks -= 1;
+          }
+          if (member.currentHp <= 0 && consumedStacks) { member.ko = true; member.deathReason = "bleed"; }
+          if (consumedStacks) events.push({ status:"explode", statusType:"bleed", statusLabel:BATTLE_STATUS_LABELS.bleed, targetCardId:member.id, targetName:member.name, damage:totalBleedDamage, consumedStacks, turnsAdvanced:steps, remaining:member.currentHp, ko:Boolean(member.ko), reason:"turn-acceleration" });
+        }
+
+        // เผาไหม้สร้างดาเมจทุกช่วงเวลาที่ถูกข้าม ไม่ใช่เพียงลบตัวนับทิ้ง
+        if (!member.ko && member.currentHp > 0) {
+          activeStatusEffects(member, "burn").forEach(effect => {
+            const availableTicks = Math.max(0, Math.floor(Number(effect.turnsRemaining) || 0));
+            const tickCount = Math.min(steps, availableTicks);
+            if (!tickCount) return;
+            let totalDamage = 0;
+            for (let index = 0; index < tickCount && member.currentHp > 0; index += 1) {
+              const damage = Math.max(1, Number(effect.damageFlat) || member.maxHp * (Number(effect.damageRate) || 0.03));
+              const actual = Math.max(0, Math.min(member.currentHp, damage));
+              member.currentHp = Math.max(0, member.currentHp - actual);
+              totalDamage += actual;
+            }
+            effect.turnsRemaining = Math.max(0, availableTicks - tickCount);
+            if (effect.turnsRemaining <= 0) effect.expired = true;
+            if (member.currentHp <= 0) { member.ko = true; member.deathReason = "burn"; }
+            events.push({ status:"dot", statusType:"burn", statusLabel:effect.label, targetCardId:member.id, targetName:member.name, damage:totalDamage, ticksAdvanced:tickCount, turnsAdvanced:steps, turnsRemaining:effect.turnsRemaining, remaining:member.currentHp, ko:Boolean(member.ko), reason:"turn-acceleration" });
+          });
+        }
+
+        abilityArray(member.statusEffects).forEach(effect => {
+          if (!effect || effect.expired || ["freeze", "death", "bleed", "burn"].includes(effect.status)) return;
+          if (Number(effect.turnsRemaining) > 0) {
+            const before = Number(effect.turnsRemaining);
+            effect.turnsRemaining = Math.max(0, before - steps);
+            events.push({ status:"accelerated", statusType:effect.status, statusLabel:effect.label, targetCardId:member.id, targetName:member.name, turnsAdvanced:steps, turnsRemaining:effect.turnsRemaining });
+            if (effect.turnsRemaining <= 0) expireAdvancedTimedEffect(member, effect, "turn-acceleration", events);
+          }
+        });
+
+        member.timedEffects = abilityArray(member.timedEffects).filter(effect => {
+          if (Number(effect.turns) <= 0) return true;
+          effect.turns = Math.max(0, Number(effect.turns) - steps);
+          if (effect.turns > 0 || Number(effect.rounds) > 0) return true;
+          revertTimedEffectNow(member, effect);
+          events.push({ status:"buffExpired", statusType:"timed-buff", statusLabel:"เอฟเฟกต์ตามเทิร์นหมดเวลา", targetCardId:member.id, targetName:member.name, turnsAdvanced:steps, field:effect.field });
+          return false;
+        });
+
+        if (Number(member.guardTurns) > 0) {
+          member.guardTurns = Math.max(0, Number(member.guardTurns) - steps);
+          events.push({ status:"accelerated", statusType:"guard", statusLabel:"ป้องกัน", targetCardId:member.id, targetName:member.name, turnsAdvanced:steps, turnsRemaining:member.guardTurns });
+        }
+        if (Number(member.tauntTurnsRemaining) > 0) {
+          member.tauntTurnsRemaining = Math.max(0, Number(member.tauntTurnsRemaining) - steps);
+          events.push({ status:"accelerated", statusType:"taunt", statusLabel:"ยั่วยุ", targetCardId:member.id, targetName:member.name, turnsAdvanced:steps, turnsRemaining:member.tauntTurnsRemaining });
+        }
+        abilityArray(member.statusResistanceRules).forEach(rule => {
+          if (Number(rule.turnsRemaining) > 0) rule.turnsRemaining = Math.max(0, Number(rule.turnsRemaining) - steps);
+        });
+        events.push(...compactStatusResistanceRules(member, memberTeam, "turn-acceleration"));
+
+        if (memberTeam && Array.isArray(memberTeam.copiedAbilityInstances)) {
+          abilityArray(memberTeam.copiedAbilityInstances).slice().forEach(instance => {
+            if (String(instance.recipientCardId || "") !== String(member.id) || instance.expired || Number(instance.lifetime && instance.lifetime.durationTurns) <= 0) return;
+            instance.turnsElapsed += steps;
+            if (instance.turnsElapsed >= instance.lifetime.durationTurns) expireCopiedAbilityInstance(memberTeam, instance, "turn-acceleration");
+          });
+        }
+
+        if (Number(member.reviveTurnsRemaining) > 0) {
+          member.reviveTurnsRemaining = Math.max(0, Number(member.reviveTurnsRemaining) - steps);
+          events.push({ status:"accelerated", statusType:"reviveTimedUndying", statusLabel:"อมตะตามเทิร์น", targetCardId:member.id, targetName:member.name, turnsAdvanced:steps, turnsRemaining:member.reviveTurnsRemaining });
+          if (member.reviveTurnsRemaining <= 0) {
+            member.currentHp = 0;
+            member.ko = true;
+            member.deathReason = "timedReviveExpired";
+            member.reviveMode = "";
+            events.push({ status:"expired", statusType:"reviveTimedUndying", statusLabel:"อมตะหมดเวลา", targetCardId:member.id, targetName:member.name, instantDeath:true, reason:"turn-acceleration" });
+          }
+        }
+        compactBattleStatuses(member);
+        return events;
+      }
+      function selectStatusActionTargets(rule, ownerTeam, defenderTeam, actor, currentTarget, seed) {
+        const side = String(rule && rule.side || "self");
+        const selection = normalizeAbilitySelectionMode(rule && (rule.targetSelection || rule.selection), side === "enemy" ? "random" : "random");
+        const count = Math.max(1, Math.min(5, Math.floor(Number(rule && rule.targetCount) || 1)));
+        let candidates = resolveRuntimeTargets({ ...rule, side, selection:"all" }, ownerTeam, defenderTeam, actor, currentTarget);
+        return selectAbilityItems(candidates, selection, count, seed, "status-actions");
+      }
+      function applyStatusActionRules(activation, ownerTeam, defenderTeam, actor, currentTarget, turnIndex, reason = "skill") {
+        const cleanseEvents = [], purgeEvents = [], turnAccelerationEvents = [];
+        abilityArray(activation && activation.cleanseStatusRules).forEach((rule, index) => {
+          const recipients = selectStatusActionTargets(rule, ownerTeam, defenderTeam, actor, currentTarget, `cleanse:${turnIndex}:${index}`);
+          recipients.forEach(member => {
+            const allowed = new Set(abilityArray(rule.statuses || rule.cleanseStatuses).map(normalizeBattleStatusName).filter(Boolean));
+            const removed = [];
+            abilityArray(member.statusEffects).forEach(effect => {
+              if (!effect || effect.expired || effect.status === "purification") return;
+              if (allowed.size && !allowed.has(effect.status)) return;
+              effect.expired = true; removed.push(effect.status);
+            });
+            compactBattleStatuses(member);
+            cleanseEvents.push({ status:"cleanse", statusType:"cleanse", statusLabel:"ล้างสถานะ", targetCardId:member.id, targetName:member.name, removedStatuses:removed, reason });
+          });
+        });
+        abilityArray(activation && activation.purgeBuffRules).forEach((rule, index) => {
+          const recipients = selectStatusActionTargets(rule, ownerTeam, defenderTeam, actor, currentTarget, `purge:${turnIndex}:${index}`);
+          recipients.forEach(member => {
+            const memberTeam = String(rule.side || "enemy") === "enemy" ? defenderTeam : ownerTeam;
+            const resistance = shouldAbilityEffectBeResisted(member.statusResistanceRules, { ...rule, type:CARD_ABILITY_EFFECT_TYPES.PURGE_BUFFS, status:"purification", forceResistanceCheck:true }, `${options.statusResolutionSeed || "purge"}`, `${turnIndex}:${index}:${member.id}`);
+            if (resistance.resisted) { purgeEvents.push({ status:"resisted", statusType:"purification", statusLabel:BATTLE_STATUS_LABELS.purification, targetCardId:member.id, targetName:member.name, rate:resistance.rate }); return; }
+            if (Math.random() > Math.max(0, Math.min(1, Number(rule.successRate) || 0))) { purgeEvents.push({ status:"failed", statusType:"purification", statusLabel:BATTLE_STATUS_LABELS.purification, targetCardId:member.id, targetName:member.name, successRate:rule.successRate }); return; }
+            const removedBuffs = purgeMemberBuffs(member, memberTeam);
+            if (!member.ko) {
+              const applied = applyBattleStatus(member, { ...rule, status:"purification", durationTurns:Number(rule.durationTurns) > 0 ? Number(rule.durationTurns) : 0 }, actor, ownerTeam, defenderTeam, reason);
+              if (applied) purgeEvents.push({ ...applied, removedBuffs, persistentUntilRevive:!(Number(rule.durationTurns) > 0) });
+            } else {
+              purgeEvents.push({ status:"applied", statusType:"purification", statusLabel:BATTLE_STATUS_LABELS.purification, targetCardId:member.id, targetName:member.name, removedBuffs, instantDeath:true, reason });
+            }
+          });
+        });
+        abilityArray(activation && activation.turnAccelerationRules).forEach((rule, index) => {
+          const recipients = selectStatusActionTargets(rule, ownerTeam, defenderTeam, actor, currentTarget, `turn-acceleration:${turnIndex}:${index}`);
+          recipients.forEach(member => {
+            const memberTeam = String(rule.side || "enemy") === "enemy" ? defenderTeam : ownerTeam;
+            const resistance = shouldAbilityEffectBeResisted(member.statusResistanceRules, { ...rule, type:CARD_ABILITY_EFFECT_TYPES.ACCELERATE_TURN_EFFECTS, forceResistanceCheck:true }, `${options.statusResolutionSeed || "turn-acceleration"}`, `${turnIndex}:${index}:${member.id}`);
+            if (resistance.resisted) { turnAccelerationEvents.push({ status:"resisted", statusType:"turn-acceleration", statusLabel:"เร่งเทิร์น", targetCardId:member.id, targetName:member.name, rate:resistance.rate }); return; }
+            if (Math.random() > Math.max(0, Math.min(1, Number(rule.successRate) || 0))) { turnAccelerationEvents.push({ status:"failed", statusType:"turn-acceleration", statusLabel:"เร่งเทิร์น", targetCardId:member.id, targetName:member.name, successRate:rule.successRate }); return; }
+            const turns = Math.max(1, Math.floor(Number(rule.turns ?? rule.value) || 1));
+            const advanced = accelerateMemberTurnEffects(member, turns, memberTeam);
+            turnAccelerationEvents.push({ status:"accelerated", statusType:"turn-acceleration", statusLabel:"เร่งเทิร์น", targetCardId:member.id, targetName:member.name, turnsAdvanced:turns, affected:advanced.length });
+            turnAccelerationEvents.push(...advanced);
+          });
+        });
+        return { cleanseEvents, purgeEvents, turnAccelerationEvents, statusEvents:[...cleanseEvents, ...purgeEvents, ...turnAccelerationEvents] };
+      }
+
       function compactStatusResistanceRules(member, ownerTeam = null, reason = "") {
         if (!member) return [];
         const expired = [];
@@ -16762,6 +17057,10 @@
             key: effect._runtimeEffectKey || `${reason}:resist:${effectIndex}`
           });
           recipients.forEach(member => {
+            if (hasPurificationStatus(member)) {
+              events.push({ status:"buffBlocked", statusType:"purification", statusLabel:BATTLE_STATUS_LABELS.purification, targetCardId:member.id, targetName:member.name, abilityName:rule.sourceAbilityName, reason });
+              return;
+            }
             if (!Array.isArray(member.statusResistanceRules)) member.statusResistanceRules = [];
             compactStatusResistanceRules(member, targetSide === "enemy" ? defenderTeam : ownerTeam, "before-resist");
             member.statusResistanceRules.push({ ...rule });
@@ -17069,6 +17368,9 @@
             sourceAbilityName: rule.sourceAbilityName || t.name,
             _runtimeEffectKey: rule._runtimeEffectKey || `${t.key}:status`
           }))),
+          cleanseStatusRules: fired.flatMap(t => abilityArray(t.cleanseStatusRules).map(rule => ({ ...rule, sourceCardId:rule.sourceCardId || t.sourceCardId, sourceAbilityName:rule.sourceAbilityName || t.name, _runtimeEffectKey:rule._runtimeEffectKey || `${t.key}:cleanse` }))),
+          purgeBuffRules: fired.flatMap(t => abilityArray(t.purgeBuffRules).map(rule => ({ ...rule, sourceCardId:rule.sourceCardId || t.sourceCardId, sourceAbilityName:rule.sourceAbilityName || t.name, _runtimeEffectKey:rule._runtimeEffectKey || `${t.key}:purge` }))),
+          turnAccelerationRules: fired.flatMap(t => abilityArray(t.turnAccelerationRules).map(rule => ({ ...rule, sourceCardId:rule.sourceCardId || t.sourceCardId, sourceAbilityName:rule.sourceAbilityName || t.name, _runtimeEffectKey:rule._runtimeEffectKey || `${t.key}:turn-acceleration` }))),
           // สำรองสำหรับเอฟเฟกต์ขั้นสูงที่อาจถูกใช้ต่อใน engine รายตัวในอนาคต
           statusResistanceEffects: fired.flatMap(t => abilityArray(t.statusResistanceEffects).map(effect => ({
             ...effect,
@@ -17087,6 +17389,7 @@
 
       function applyTimedRate(member, field, delta, trigger) {
         if (!delta) return;
+        if (hasPurificationStatus(member) && isBeneficialTimedDelta(field, delta)) return;
         member[field] = Number(member[field] || 0) + delta;
         const turns = Math.max(0, Number(trigger && trigger.durationTurns) || 0);
         const rounds = Math.max(0, Number(trigger && trigger.durationRounds) || 0);
@@ -17110,16 +17413,23 @@
       function applyRateMaps(team, maps, field) {
         Object.entries(maps || {}).forEach(([id, change]) => {
           const member = team.members.find(item => item.id === String(id));
-          if (member) member[field] = Number(member[field] || 0) + Number(change || 0);
+          const delta = Number(change || 0);
+          if (!member || !delta) return;
+          if (hasPurificationStatus(member) && isBeneficialTimedDelta(field, delta)) return;
+          member[field] = Number(member[field] || 0) + delta;
         });
       }
 
       function applyCostChanges(team, maps, permanent = false) {
         Object.entries(maps || {}).forEach(([id, change]) => {
+          const delta = Math.round(Number(change) || 0);
           team.triggers.filter(trigger => !id || trigger.sourceCardId === String(id)).forEach(trigger => {
             if (trigger.triggerOn !== "nextAttack") return;
-            if (permanent) trigger.permanentCostChange += Math.round(Number(change) || 0);
-            else trigger.cycleCostChange += Math.round(Number(change) || 0);
+            const sourceMember = team.members.find(member => String(member.id) === String(trigger.sourceCardId));
+            // ค่าติดลบคือการลดคอสซึ่งเป็นบัพ จึงถูกสถานะชำระล้างปิดไว้
+            if (delta < 0 && sourceMember && hasPurificationStatus(sourceMember)) return;
+            if (permanent) trigger.permanentCostChange += delta;
+            else trigger.cycleCostChange += delta;
             trigger.cost = Math.max(1, trigger.baseCost + trigger.permanentCostChange + trigger.cycleCostChange);
             trigger.armed = trigger.charge >= trigger.cost;
           });
@@ -17160,6 +17470,7 @@
             }
             const before = recipient.speed;
             const delta = Math.round(Number(rule.value) || 0);
+            if (delta > 0 && hasPurificationStatus(recipient)) { events.push({ targetCardId:recipient.id, targetName:recipient.name, change:0, blockedByPurification:true }); return; }
             recipient.speed = Math.max(1, Math.round(recipient.speed + delta));
             const applied = recipient.speed - before;
             if ((Number(rule.durationTurns) || Number(rule.durationRounds)) && applied) {
@@ -17348,6 +17659,7 @@
             recipient.currentHp = Math.max(1, Math.min(recipient.maxHp, recipient.maxHp * Math.max(.01, Number(rule.hpRate) || .3)));
             recipient.ko = false;
             recipient.deathReason = "";
+            const purificationExpiredEvents = clearPurificationOnRevive(recipient);
             recipient.reviveMode = String(rule.reviveType || "revive");
             recipient.reviveTurnsRemaining = recipient.reviveMode === "reviveTimedUndying"
               ? Math.max(1, Math.floor(Number(rule.durationTurns) || 1)) : 0;
@@ -17358,7 +17670,7 @@
               targetCardId: recipient.id, targetName: recipient.name, hp: recipient.currentHp, maxHp: recipient.maxHp,
               reviveType: recipient.reviveMode, turnsRemaining: recipient.reviveTurnsRemaining,
               hitLifeRemaining: recipient.reviveHitLifeRemaining, count: recipient.reviveCount,
-              reviveForm
+              reviveForm, purificationExpiredEvents
             });
           });
         });
@@ -17442,6 +17754,7 @@
         const resistanceActivationEvents = applyStatusResistanceEffects(activation.statusResistanceEffects, ownerTeam, defenderTeam, actor, currentTarget, reason);
         const speedEvents = applySpeedRules(activation.speedTargetRules, ownerTeam, defenderTeam, actor, currentTarget);
         const tauntEvents = applyTauntRules(activation.tauntRules, ownerTeam, defenderTeam, actor, currentTarget);
+        const statusActionResult = applyStatusActionRules(activation, ownerTeam, defenderTeam, actor, currentTarget, turnIndex, reason);
 
         let requestedHeal = 0;
         let heal = 0;
@@ -17473,6 +17786,7 @@
             recipients.forEach(recipient => {
               const requested = Math.round(Number(rule.value) || 0);
               const adjusted = requested > 0 ? Math.round(requested * Math.max(0, 1 + recipient.shieldRecoveryRate)) : requested;
+              if (adjusted > 0 && hasPurificationStatus(recipient)) return;
               const before = recipient.shieldHits;
               recipient.shieldHits = Math.max(0, recipient.shieldHits + adjusted);
               const change = recipient.shieldHits - before;
@@ -17484,8 +17798,8 @@
           });
         }
 
-        if (activation.attackStackGain > 0 && actor && actor.currentHp > 0 && !actor.ko) actor.power += activation.attackStackGain;
-        if (activation.maxHpGain > 0 && actor && actor.currentHp > 0 && !actor.ko) { actor.maxHp += activation.maxHpGain; actor.currentHp += activation.maxHpGain; }
+        if (activation.attackStackGain > 0 && actor && actor.currentHp > 0 && !actor.ko && !hasPurificationStatus(actor)) actor.power += activation.attackStackGain;
+        if (activation.maxHpGain > 0 && actor && actor.currentHp > 0 && !actor.ko && !hasPurificationStatus(actor)) { actor.maxHp += activation.maxHpGain; actor.currentHp += activation.maxHpGain; }
         applyCostChanges(ownerTeam, activation.permanentTriggerCostChanges, true);
         applyCostChanges(ownerTeam, activation.triggerCostChanges, false);
         const reviveEvents = applyReviveRules(activation.reviveRules, ownerTeam, defenderTeam, actor, currentTarget);
@@ -17494,7 +17808,7 @@
         finishTriggers(ownerTeam, actor, activation);
         const selfShieldChange = teamShield(ownerTeam) - alliedShieldBefore;
         const enemyShieldChange = teamShield(defenderTeam) - enemyShieldBefore;
-        const statusEvents = [...resistanceActivationEvents, ...statusApplyEvents];
+        const statusEvents = [...resistanceActivationEvents, ...statusActionResult.statusEvents, ...statusApplyEvents];
         return {
           round: lastRound || 0,
           side: ownerTeam.side,
@@ -17531,6 +17845,7 @@
           transferEvents: [],
           stackEvents: [],
           statusEvents,
+          cleanseEvents:statusActionResult.cleanseEvents, purgeEvents:statusActionResult.purgeEvents, turnAccelerationEvents:statusActionResult.turnAccelerationEvents,
           attackBonus: activation.attackBonus || 0,
           attackStackGain: activation.attackStackGain || 0,
           maxHpGain: activation.maxHpGain || 0,
@@ -17632,6 +17947,7 @@
 
           armHpThresholdTriggers(team, actor, target);
           const activation = makeActivation(team, actor, target);
+          const actorPurified = hasPurificationStatus(actor);
           const explicitAttackTargetCount = Math.max(0, Math.min(5, Math.floor(Number(activation.attackTargetCount) || 0)));
           const requestedAttackTargets = explicitAttackTargetCount > 0 ? explicitAttackTargetCount : actor.normalAttackTargetCount;
           const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex, explicitAttackTargetCount > 0 ? null : actor);
@@ -17651,6 +17967,7 @@
           const speedEvents = applySpeedRules(activation.speedTargetRules, team, defenderTeam, actor, target);
           const tauntEvents = applyTauntRules(activation.tauntRules, team, defenderTeam, actor, target);
           const resistanceActivationEvents = applyStatusResistanceEffects(activation.statusResistanceEffects, team, defenderTeam, actor, target, "skill");
+          const statusActionResult = applyStatusActionRules(activation, team, defenderTeam, actor, target, turnIndex, "skill");
 
           let targetedCurrentHitChange = 0;
           if (abilityArray(activation.hitTargetRules).length) {
@@ -17658,6 +17975,7 @@
               const recipients = resolveRuntimeTargets(rule, team, defenderTeam, actor, target);
               recipients.forEach(recipient => {
                 const change = Math.round(Number(rule.value) || 0);
+                if (change > 0 && hasPurificationStatus(recipient)) return;
                 if (recipient === actor && String(rule.side || "self") !== "enemy") targetedCurrentHitChange += change;
                 else recipient.pendingAttackHits += change;
               });
@@ -17666,17 +17984,25 @@
           const pendingHitChange = Math.round(Number(actor.pendingAttackHits) || 0);
           actor.pendingAttackHits = 0;
           const baseHits = applyCombatAttackHitModifier(actor.attackHits, pendingHitChange);
-          const activeHitRuleChange = abilityArray(activation.hitTargetRules).length ? targetedCurrentHitChange : activation.extraHits;
-          const followUpHits = abilityArray(activation.followUpAttacks).filter(rule=>Math.random()<=Math.max(0,Math.min(1,Number(rule.successRate)||0))).reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hits)||1)),0);
+          const rawActiveHitRuleChange = abilityArray(activation.hitTargetRules).length ? targetedCurrentHitChange : activation.extraHits;
+          const activeHitRuleChange = actorPurified && Number(rawActiveHitRuleChange) > 0 ? 0 : Number(rawActiveHitRuleChange || 0);
+          const activeFollowUpRules = actorPurified ? [] : abilityArray(activation.followUpAttacks);
+          const followUpHits = activeFollowUpRules.filter(rule=>Math.random()<=Math.max(0,Math.min(1,Number(rule.successRate)||0))).reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hits)||1)),0);
           const multiElementHits = abilityArray(activation.multiElementAttacks).reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hitsPerElement)||1))*Math.max(1,abilityArray(rule.attackElements).length),0);
           const hits = applyCombatAttackHitModifier(baseHits, activeHitRuleChange + followUpHits + multiElementHits);
-          const nextCrit = Number(actor.pendingCriticalRateChange || 0) + Number(activation.nextAttackCriticalRate || 0);
+          const pendingCritChange = Number(actor.pendingCriticalRateChange || 0);
+          const activeNextCritChange = actorPurified && Number(activation.nextAttackCriticalRate) > 0 ? 0 : Number(activation.nextAttackCriticalRate || 0);
+          const nextCrit = pendingCritChange + activeNextCritChange;
           actor.pendingCriticalRateChange = 0;
           const effectiveCrit = clampCriticalRate(actor.criticalRate + nextCrit);
           const critical = rollCriticalHit(effectiveCrit);
-          const critMultiplier = critical ? Math.max(1, criticalDamageOf(entry.side) * Math.max(0, 1 + Number(activation.criticalDamageRate || 0))) : 1;
-          const followUpPowerBonus = abilityArray(activation.followUpAttacks).reduce((sum,rule)=>sum + actor.power * Math.max(0,Number(rule.powerRate)||0),0);
-          const activeAttack = Math.max(1, actor.power + Number(activation.attackBonus || 0) + Number(activation.attackStackGain || 0) + followUpPowerBonus);
+          const effectiveCriticalDamageRate = actorPurified && Number(activation.criticalDamageRate) > 0 ? 0 : Number(activation.criticalDamageRate || 0);
+          const effectiveDefensePenetrationRate = actorPurified && Number(activation.defensePenetrationRate) > 0 ? 0 : Number(activation.defensePenetrationRate || 0);
+          const critMultiplier = critical ? Math.max(1, criticalDamageOf(entry.side) * Math.max(0, 1 + effectiveCriticalDamageRate)) : 1;
+          const followUpPowerBonus = activeFollowUpRules.reduce((sum,rule)=>sum + actor.power * Math.max(0,Number(rule.powerRate)||0),0);
+          const activeAttackBonus = actorPurified && Number(activation.attackBonus) > 0 ? 0 : Number(activation.attackBonus || 0);
+          const activeAttackStackGain = actorPurified && Number(activation.attackStackGain) > 0 ? 0 : Number(activation.attackStackGain || 0);
+          const activeAttack = Math.max(1, actor.power + activeAttackBonus + activeAttackStackGain + followUpPowerBonus);
           const attackMissedByBlind = rollBattleBlindMiss(actor);
 
           const alliedShieldBefore = teamShield(team);
@@ -17688,6 +18014,7 @@
               recipients.forEach(recipient => {
                 const requested = Math.round(Number(rule.value) || 0);
                 const adjusted = requested > 0 ? Math.round(requested * Math.max(0, 1 + recipient.shieldRecoveryRate)) : requested;
+                if (adjusted > 0 && hasPurificationStatus(recipient)) return;
                 const before = recipient.shieldHits;
                 recipient.shieldHits = Math.max(0, recipient.shieldHits + adjusted);
                 const change = recipient.shieldHits - before;
@@ -17699,9 +18026,9 @@
             });
           } else {
             const enemyShieldRequested = Math.round(Number(activation.enemyShieldHitsChange) || 0);
-            if (enemyShieldRequested) target.shieldHits = Math.max(0, target.shieldHits + enemyShieldRequested);
+            if (enemyShieldRequested && !(enemyShieldRequested > 0 && hasPurificationStatus(target))) target.shieldHits = Math.max(0, target.shieldHits + enemyShieldRequested);
             const selfShieldRequested = Math.round(Number(activation.restoreShieldHits) || 0);
-            if (selfShieldRequested) {
+            if (selfShieldRequested && !(selfShieldRequested > 0 && hasPurificationStatus(actor))) {
               const adjusted = selfShieldRequested > 0 ? Math.round(selfShieldRequested * Math.max(0,1+actor.shieldRecoveryRate)) : selfShieldRequested;
               const before = actor.shieldHits;
               actor.shieldHits = Math.max(0, actor.shieldHits + adjusted);
@@ -17722,7 +18049,7 @@
             if (!dodged) {
               const elementMultiplier = Math.max(0, 1 + advancedElementModifier(actor, target, activation));
               const attackAfterShield = activeAttack * hitRate * varianceOf(entry.side) * critMultiplier * elementMultiplier;
-              const defenseApplied = target.defense * (1 - Math.max(0,Math.min(1,Number(activation.defensePenetrationRate)||0))) * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, hitRate);
+              const defenseApplied = target.defense * (1 - Math.max(0,Math.min(1,effectiveDefensePenetrationRate))) * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, hitRate);
               const minimum = activeAttack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)) * hitRate;
               damage = Math.max(minimum, attackAfterShield - defenseApplied);
               blocked = Math.random() < Math.max(0, target.blockRate);
@@ -17775,7 +18102,7 @@
               if (!extraDodged) {
                 const extraElementMultiplier = Math.max(0, 1 + advancedElementModifier(actor, extraTarget, activation));
                 const extraAttackAfterShield = activeAttack * extraHitRate * varianceOf(entry.side) * critMultiplier * extraElementMultiplier;
-                const extraDefenseApplied = extraTarget.defense * (1 - Math.max(0,Math.min(1,Number(activation.defensePenetrationRate)||0))) * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, extraHitRate);
+                const extraDefenseApplied = extraTarget.defense * (1 - Math.max(0,Math.min(1,effectiveDefensePenetrationRate))) * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, extraHitRate);
                 const extraMinimum = activeAttack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)) * extraHitRate;
                 extraDamage = Math.max(extraMinimum, extraAttackAfterShield - extraDefenseApplied);
                 extraBlocked = Math.random() < Math.max(0, extraTarget.blockRate);
@@ -17832,7 +18159,7 @@
           const statusApplyEvents = applyAttackStatusRules(activation.statusApplyRules, team, defenderTeam, actor, targetResults, turnIndex);
           const burnTickEvents = tickBattleBurnOnAttack();
           const doomEvents = tickBattleDoomAfterAttack(actor);
-          const statusEvents = [...roundStartResistanceEvents, ...resistanceActivationEvents, ...statusHitEvents, ...statusApplyEvents, ...burnTickEvents, ...doomEvents];
+          const statusEvents = [...roundStartResistanceEvents, ...resistanceActivationEvents, ...statusActionResult.statusEvents, ...statusHitEvents, ...statusApplyEvents, ...burnTickEvents, ...doomEvents];
           statusEvents.forEach(event => {
             const result = targetResults.find(item => String(item.targetCardId) === String(event.targetCardId));
             if (result) {
@@ -17892,11 +18219,11 @@
             heal = Math.max(0, Math.min(actor.maxHp - actor.currentHp, requestedHeal * getBattleHealingMultiplier(actor)));
             if (heal > 0) { actor.currentHp += heal; actor.healingDone += heal; team.totalHealing += heal; healEvents.push({ targetCardId: actor.id, targetName: actor.name, amount: heal, side: team.side }); }
           }
-          const maxHpGain = Math.max(0, Number(activation.maxHpGain) || 0);
+          const maxHpGain = hasPurificationStatus(actor) ? 0 : Math.max(0, Number(activation.maxHpGain) || 0);
           if (maxHpGain > 0) { actor.maxHp += maxHpGain; actor.currentHp += maxHpGain; }
-          if (activation.attackStackGain > 0) actor.power += activation.attackStackGain;
-          if (!abilityArray(activation.hitTargetRules).length) target.pendingAttackHits += Math.round(Number(activation.enemyNextAttackHits) || 0);
-          target.pendingCriticalRateChange += Number(activation.enemyNextAttackCriticalRate) || 0;
+          if (activation.attackStackGain > 0 && !hasPurificationStatus(actor)) actor.power += activation.attackStackGain;
+          if (!abilityArray(activation.hitTargetRules).length && !(Number(activation.enemyNextAttackHits) > 0 && hasPurificationStatus(target))) target.pendingAttackHits += Math.round(Number(activation.enemyNextAttackHits) || 0);
+          if (!(Number(activation.enemyNextAttackCriticalRate) > 0 && hasPurificationStatus(target))) target.pendingCriticalRateChange += Number(activation.enemyNextAttackCriticalRate) || 0;
           applyCostChanges(team, activation.permanentTriggerCostChanges, true);
           applyCostChanges(team, activation.triggerCostChanges, false);
           const reviveEvents = applyReviveRules(activation.reviveRules, team, defenderTeam, actor, target);
@@ -17922,20 +18249,21 @@
             blockDamageReduced:0, damageBeforeBlock:totalDamage, damageAfterBlock:totalDamage,
             triggerActivated:activation.fired.length>0, triggeredSkills:activation.names, triggeredDetails:activation.details,
             suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:resistanceActivationEvents, transferEvents:[], stackEvents:[], statusEvents,
+            cleanseEvents:statusActionResult.cleanseEvents, purgeEvents:statusActionResult.purgeEvents, turnAccelerationEvents:statusActionResult.turnAccelerationEvents,
             blindMiss:attackMissedByBlind,
-            attackBonus:activation.attackBonus, attackStackGain:activation.attackStackGain, maxHpGain,
+            attackBonus:activeAttackBonus, attackStackGain:activeAttackStackGain, maxHpGain,
             requestedHealHp:requestedHeal, healingMultiplier:getBattleHealingMultiplier(actor), healHp:heal, healEvents,
             shieldChange:selfShieldChange, enemyShieldChange, shieldGain:Math.max(0,selfShieldChange), shieldLoss:Math.max(0,-selfShieldChange),
             enemyShieldGain:Math.max(0,enemyShieldChange), enemyShieldLoss:Math.max(0,-enemyShieldChange),
             healingRate:actor.healingRate, enemyHealingRate:target.healingRate, shieldRecoveryRate:actor.shieldRecoveryRate,
             enemyShieldRecoveryRate:target.shieldRecoveryRate, criticalRateChange:activation.criticalRateChange,
-            enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activation.nextAttackCriticalRate,
+            enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activeNextCritChange,
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
             actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
             reviveEvents, spawnEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, counterEvents,
-            followUpEvents: abilityArray(activation.followUpAttacks).map(rule=>({powerRate:rule.powerRate,hits:rule.hits,targetCount:rule.targetCount})),
+            followUpEvents: activeFollowUpRules.map(rule=>({powerRate:rule.powerRate,hits:rule.hits,targetCount:rule.targetCount})),
             multiElementEvents: abilityArray(activation.multiElementAttacks).map(rule=>({attackElements:rule.attackElements,hitsPerElement:rule.hitsPerElement,targetCount:rule.targetCount})),
-            adaptiveElement: activation.adaptiveElement, defensePenetrationRate:activation.defensePenetrationRate, criticalDamageRate:activation.criticalDamageRate,
+            adaptiveElement: activation.adaptiveElement, defensePenetrationRate:effectiveDefensePenetrationRate, criticalDamageRate:effectiveCriticalDamageRate,
             hitLifeConsumed:totalHitLifeConsumed,
             hitLifeExpired:anyHitLifeExpired, timedReviveExpired
           });
@@ -19234,6 +19562,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             nullifyRules: [],
             statusResistanceEffects: [],
             statusApplyRules: [],
+            cleanseStatusRules: [],
+            purgeBuffRules: [],
+            turnAccelerationRules: [],
             removeAllEnemyShield: false,
             sourceAbilityRuntimeKey: String(record.abilityRuntimeKey || ""),
             attackTargetCount: (!record.trigger.onOwnAttack || record.effect?.affectNormalAttack === true || record.effect?.affectsNormalAttack === true) ? Math.max(0, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 0))) : 0,
@@ -19537,6 +19868,42 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           case CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES:
             group.nullifyRules.push({ ...effect, type: effectType });
             break;
+          case CARD_ABILITY_EFFECT_TYPES.CLEANSE_STATUSES:
+            group.cleanseStatusRules.push({
+              ...runtimeTargetRule,
+              side: (effect.targetSide === undefined && effect.side === undefined) ? "ally" : side,
+              selection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
+              targetSelection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
+              targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount || effect.count || 1) || 1))),
+              statuses: normalizeAbilityStringList(effect.statuses || effect.cleanseStatuses || effect.statusTypes),
+              _runtimeEffectKey: String(record.key || effect._runtimeEffectKey || "")
+            });
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.PURGE_BUFFS:
+            group.purgeBuffRules.push({
+              ...runtimeTargetRule,
+              side: (effect.targetSide === undefined && effect.side === undefined) ? "enemy" : side,
+              selection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
+              targetSelection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
+              targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount || effect.count || 1) || 1))),
+              successRate: normalizeAbilityChance(effect.successRate ?? effect.chance ?? effect.rate ?? 1, 1),
+              durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns ?? effect.turns ?? 0) || 0)),
+              _runtimeEffectKey: String(record.key || effect._runtimeEffectKey || "")
+            });
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.ACCELERATE_TURN_EFFECTS:
+            group.turnAccelerationRules.push({
+              ...runtimeTargetRule,
+              side: (effect.targetSide === undefined && effect.side === undefined) ? "enemy" : side,
+              selection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
+              targetSelection: normalizeAbilitySelectionMode(effect.targetSelection, "random"),
+              targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount || effect.count || 1) || 1))),
+              successRate: normalizeAbilityChance(effect.successRate ?? effect.chance ?? effect.rate ?? 1, 1),
+              turns: Math.max(1, Math.floor(Number(effect.turns ?? effect.value ?? 1) || 1)),
+              value: Math.max(1, Math.floor(Number(effect.value ?? effect.turns ?? 1) || 1)),
+              _runtimeEffectKey: String(record.key || effect._runtimeEffectKey || "")
+            });
+            break;
           case CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS:
             group.statusApplyRules.push({
               ...getAbilityTargetFilter(effect),
@@ -19666,6 +20033,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         speedTargetRules: abilityArray(item.speedTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0), maxStacks: Math.max(1, Math.floor(Number(rule && rule.maxStacks) || 1)) })).filter(rule => rule.value),
         tauntRules: abilityArray(item.tauntRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), durationRounds: Math.max(0, Math.floor(Number(rule && rule.durationRounds) || 0)) })),
         statusApplyRules: abilityArray(item.statusApplyRules).map(rule => ({ ...rule })),
+        cleanseStatusRules: abilityArray(item.cleanseStatusRules).map(rule => ({ ...rule })),
+        purgeBuffRules: abilityArray(item.purgeBuffRules).map(rule => ({ ...rule })),
+        turnAccelerationRules: abilityArray(item.turnAccelerationRules).map(rule => ({ ...rule })),
         abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} })),
         domainActivations: abilityArray(item.domainActivations).filter(rule => rule && rule.domainId).map(rule => ({ ...rule })),
         domainPassiveEffects: abilityArray(item.domainPassiveEffects).map(effect => ({ ...effect })),
@@ -19673,7 +20043,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.spawnRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.statusApplyRules).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.spawnRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.statusApplyRules).length || abilityArray(item.cleanseStatusRules).length || abilityArray(item.purgeBuffRules).length || abilityArray(item.turnAccelerationRules).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
     }
 
 
@@ -23479,7 +23849,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       ignoreAbilityConditions: "ยกเลิกเงื่อนไข ไม่สนเงื่อนไข ปลดเงื่อนไข ignore condition",
       reviveTimedUndying: "คืนชีพ อมตะ revive undying ฟื้นกลับมา เปลี่ยนร่างหลังตาย",
       revive: "คืนชีพ revive ฟื้นกลับมา",
-      applyStatus: "ติดสถานะ status abnormal freeze burn bleed shock death สตั้น แช่แข็ง",
+      applyStatus: "ติดสถานะ status abnormal freeze burn bleed shock death สตั้น แช่แข็ง ชำระล้าง",
+      cleanseStatuses: "ล้างสถานะ cleanse debuff remove status ตัวเอง เพื่อนร่วมทีม",
+      purgeBuffs: "ขจัดบัพ purge dispel buff ชำระล้าง โล่ ฮิต อมตะ",
+      accelerateTurnEffects: "เร่งเทิร์นบัพ accelerate turn fast forward เดธ อมตะ",
       nextAttackTargetCount: "จำนวนเป้าหมาย โจมตีหลายเป้าหมาย target count aoe"
     });
 
