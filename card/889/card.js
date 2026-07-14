@@ -15,7 +15,6 @@ ACC_REGISTER_CARD({
   awakenMax: 20,
   icon: "",
   image: "card/889/889.png",
-  poster: "card/889/889.png",
 
   abilities: [
     {
