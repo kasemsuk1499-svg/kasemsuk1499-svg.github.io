@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-14-cleanse-purge-turn-acceleration-v128">
-  <title>Anime Card Collection · Runtime v128 · Cleanse + Purge + Turn Acceleration</title>
+  <meta name="gacha-app-build" content="2026-07-14-cleanse-purge-turn-ui-labels-v129">
+  <title>Anime Card Collection · Runtime v129 · Cleanse/Purge/Turn UI Labels</title>
   <style>
     :root {
       color-scheme: dark;
@@ -14082,6 +14082,19 @@
       if (normalizeAbilityElements(effect && (effect.targetElements || effect.elements)).length) filterParts.push(`ธาตุ ${elementText}`);
       if (normalizeAbilityRarities(effect && (effect.targetRarities || effect.rarities)).length) filterParts.push(`ระดับ ${rarityText}`);
       const targetText = filterParts.length ? `${targetSideText} • ${filterParts.join(" • ")}` : targetSideText;
+      const selectionMode = normalizeAbilitySelectionMode(effect && effect.targetSelection, "random");
+      const targetCount = Math.max(1, Math.min(5, Math.floor(Number(effect && effect.targetCount) || 1)));
+      const selectionText = selectionMode === "all"
+        ? "ทุกเป้าหมายที่เข้าเงื่อนไข"
+        : selectionMode === "hitTargets"
+          ? "เป้าหมายที่โดนโจมตี"
+          : selectionMode === "specific"
+            ? `เจาะจง ${targetCount} เป้าหมาย`
+            : `สุ่ม ${targetCount} เป้าหมาย`;
+      const effectChance = normalizeAbilityChance(effect && (effect.successRate ?? effect.chance ?? effect.rate), 1);
+      const effectDurationTurns = Math.max(0, Math.floor(Number(effect && (effect.durationTurns ?? effect.turns)) || 0));
+      const cleanseStatusNames = normalizeAbilityStringList(effect && (effect.statuses || effect.cleanseStatuses || effect.statusTypes));
+      const cleanseStatusText = cleanseStatusNames.length ? cleanseStatusNames.join(" / ") : "สถานะผิดปกติทั้งหมด";
       const labels = {
         teamPowerRate: `ATK ฝ่ายเรา ${signedPercent(value)}`,
         teamHpRate: `HP ฝ่ายเรา ${signedPercent(value)}`,
@@ -14155,7 +14168,10 @@
         teamDefenseFlat: `DEF ทีม ${value >= 0 ? "+" : ""}${formatNumber(value)}`,
         shieldHits: `โล่เริ่มต้น ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         attackHits: `จำนวนฮิต ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
-        teamIncomeFlat: `ค่าฐานเงินเดือนทีม ${value >= 0 ? "+" : ""}${formatNumber(value)} (คูณ 86,400 ตอนจ่าย)`
+        teamIncomeFlat: `ค่าฐานเงินเดือนทีม ${value >= 0 ? "+" : ""}${formatNumber(value)} (คูณ 86,400 ตอนจ่าย)`,
+        cleanseStatuses: `✨ ล้าง ${cleanseStatusText} • ${targetText} • ${selectionText}`,
+        purgeBuffs: `🫧 ขจัดบัพและติดชำระล้าง • ${targetText} • ${selectionText} • โอกาส ${signedPercent(effectChance)}${effectDurationTurns > 0 ? ` • ${effectDurationTurns} เทิร์น` : " • จนกว่าจะตายแล้วคืนชีพ"} • หากมีอมตะตามเทิร์นจะตายทันที`,
+        accelerateTurnEffects: `⏩ เร่งตัวนับบัพ/ดีบัฟ ${Math.max(1, Math.floor(Number(effect && (effect.value ?? effect.turns)) || 1))} เทิร์น • ${targetText} • ${selectionText} • โอกาส ${signedPercent(effectChance)}`
       };
       const isRateValue = /(?:Rate|RateStack)$/i.test(String(effectType || ""));
       return labels[effectType]
@@ -23910,9 +23926,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       { id: "debuff", emoji: "🔻", label: "ดีบัฟศัตรู", color: "#f97316", aliases: "ดีบัฟ ลดศัตรู enemy debuff ลดพลัง ลดเกราะ", patterns: [/enemy/i, /damagetaken/i] },
       { id: "cost", emoji: "🔵", label: "ลดคอส", color: "#22d3ee", aliases: "ลดคอส active cost mana ใช้สกิลถูก", patterns: [/activeskillcost/i] },
       { id: "income", emoji: "💰", label: "เงิน/กาชา", color: "#f59e0b", aliases: "เงิน รายได้ income salary กาชา gacha เรท", patterns: [/income/i, /gacha/i] },
-      { id: "status", emoji: "🧿", label: "สถานะ", color: "#c084fc", aliases: "สถานะ กันสถานะ immune status ผิดปกติ stun burn freeze blind bleed shock death", patterns: [/status/i, /applystatus/i] },
+      { id: "status", emoji: "🧿", label: "สถานะ", color: "#c084fc", aliases: "สถานะ กันสถานะ immune status ผิดปกติ stun burn freeze blind bleed shock death", patterns: [/applystatus/i, /statusresistance/i, /abnormalstatus/i] },
+      { id: "cleanse", emoji: "✨", label: "ล้างสถานะ", color: "#67e8f9", aliases: "ล้างสถานะ cleanse remove debuff ชำระสถานะ", patterns: [/cleansestatuses/i] },
+      { id: "purge", emoji: "🫧", label: "ขจัดบัพ", color: "#34d399", aliases: "ขจัดบัพ purge dispel ชำระล้าง ลบโล่ ลบอมตะ", patterns: [/purgebuffs/i] },
+      { id: "turn-accelerate", emoji: "⏩", label: "เร่งเทิร์น", color: "#fbbf24", aliases: "เร่งเทิร์น accelerate turn fast forward ข้ามเทิร์น", patterns: [/accelerateturneffects/i] },
       { id: "skill-control", emoji: "🚫", label: "คุมสกิล", color: "#ef4444", aliases: "ยกเลิกสกิล ปิดสกิล ขโมยสกิล ก็อปปี้สกิล copy steal nullify ignore condition", patterns: [/nullify/i, /ignoreability/i, /stealabilities/i, /copyabilities/i] },
-      { id: "speed", emoji: "💨", label: "สปีด", color: "#93c5fd", aliases: "สปีด speed turn เทิร์น", patterns: [/speed/i] },
+      { id: "speed", emoji: "💨", label: "สปีด", color: "#93c5fd", aliases: "สปีด speed", patterns: [/speed/i] },
       { id: "domain", emoji: "🌌", label: "อาณาเขต", color: "#d946ef", aliases: "อาณาเขต domain สนาม", patterns: [/domain/i, /activatedomain/i] }
     ]);
 
