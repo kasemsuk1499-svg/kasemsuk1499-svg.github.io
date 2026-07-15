@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-15-after-revive-first-attack-v130">
-  <title>Anime Card Collection · Runtime v130 · After Revive First Attack</title>
+  <meta name="gacha-app-build" content="2026-07-15-battle-transform-v131">
+  <title>Anime Card Collection · Runtime v131 · Battle Transformation</title>
   <style>
     :root {
       color-scheme: dark;
@@ -9876,6 +9876,7 @@
       CAPTURE_REVIVE: "captureRevive",
       SPLIT_CLONE: "splitClone",
       SUMMON_CARD: "summonCard",
+      TRANSFORM: "transform",
       INCREASE_MAX_HP_BASE_RATE: "increaseMaxHpBaseRate",
       INCREASE_ATTACK_RATE_STACK: "increaseAttackRateStack",
       SELF_TRIGGER_REDUCTION: "selfTriggerReduction", // รองรับข้อมูลเก่า: ทำงานเป็นคอสชั่วคราวรอบปัจจุบัน
@@ -11862,7 +11863,9 @@
           || nested.afterReviveNextAttack === true || nested.onFirstAttackAfterRevive === true || nested.firstAttackAfterRevive === true,
         sourceReviveActive: nested.sourceReviveActive === true || nested.whileRevived === true || nested.reviveActive === true,
         sourceReviveMode: String(nested.sourceReviveMode || nested.requiredReviveMode || nested.reviveModeRequired || "").trim(),
-        afterReviveNextAttack: nested.afterReviveNextAttack === true || nested.onFirstAttackAfterRevive === true || nested.firstAttackAfterRevive === true
+        afterReviveNextAttack: nested.afterReviveNextAttack === true || nested.onFirstAttackAfterRevive === true || nested.firstAttackAfterRevive === true,
+        sourceTransformed: nested.sourceTransformed === true || nested.whileTransformed === true || nested.transformActive === true,
+        sourceTransformId: String(nested.sourceTransformId || nested.requiredTransformId || nested.transformIdRequired || "").trim()
       };
       const result = (triggerOn, eventEvery = 1, extra = {}) => ({
         onOwnAttack: triggerOn === "ownAttack", afterOwnAttacks: triggerOn === "nextAttack" ? Math.min(cap, Math.max(1, Math.floor(Number(eventEvery) || 1))) : 0,
@@ -11905,7 +11908,7 @@
       delete result.domainActive;
       delete result.requiredDomainId;
       delete result.afterDomainAttacks;
-      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","sourceRevived","afterRevive","afterRevived","afterDeathRevive","afterReviveNextAttack","onFirstAttackAfterRevive","firstAttackAfterRevive","sourceReviveActive","whileRevived","reviveActive","sourceReviveMode","requiredReviveMode","reviveModeRequired","maxActivations","maxTriggers"].forEach(key => delete result[key]);
+      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","sourceRevived","afterRevive","afterRevived","afterDeathRevive","afterReviveNextAttack","onFirstAttackAfterRevive","firstAttackAfterRevive","sourceReviveActive","whileRevived","reviveActive","sourceReviveMode","requiredReviveMode","reviveModeRequired","sourceTransformed","whileTransformed","transformActive","sourceTransformId","requiredTransformId","transformIdRequired","maxActivations","maxTriggers"].forEach(key => delete result[key]);
       return result;
     }
 
@@ -12113,6 +12116,10 @@
         summon: CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD,
         summonUnit: CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD,
         summonCharacter: CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD,
+        transformCard: CARD_ABILITY_EFFECT_TYPES.TRANSFORM,
+        changeForm: CARD_ABILITY_EFFECT_TYPES.TRANSFORM,
+        formChange: CARD_ABILITY_EFFECT_TYPES.TRANSFORM,
+        battleTransform: CARD_ABILITY_EFFECT_TYPES.TRANSFORM,
         triggerCostModifier: CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_MODIFIER,
         triggerPermanentModifier: CARD_ABILITY_EFFECT_TYPES.TRIGGER_THRESHOLD_PERMANENT_MODIFIER,
         aoeTargetCount: CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_TARGET_COUNT,
@@ -13339,11 +13346,12 @@
               CARD_ABILITY_EFFECT_TYPES.CRITICAL_DAMAGE_RATE,
               CARD_ABILITY_EFFECT_TYPES.DEFENSE_PENETRATION_RATE,
               CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE,
-              CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD
+              CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD,
+              CARD_ABILITY_EFFECT_TYPES.TRANSFORM
             ].includes(effectType)) {
-              const spawnAtStart = [CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE, CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD].includes(effectType);
+              const activateAtStart = [CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE, CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD, CARD_ABILITY_EFFECT_TYPES.TRANSFORM].includes(effectType);
               effectTrigger = normalizeBattleTriggerRule(
-                spawnAtStart
+                activateAtStart
                   ? { onBattleStart:true, repeat:false, triggerOn:"battleStart" }
                   : effectType === CARD_ABILITY_EFFECT_TYPES.COUNTER_ATTACK
                     ? { onDamaged:true, repeat:true }
@@ -14159,6 +14167,7 @@
         speedFlatStack: `SPD แบบสแต็ก ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)} ต่อชั้น • สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         taunt: `ยั่วยุ ${targetText} • บังคับฝ่ายตรงข้ามเล็งเป้าหมายนี้ก่อน ${Math.max(1, Math.floor(Number(effect && effect.durationTurns) || 1))} เทิร์นโจมตี`,
         captureRevive: `ชิงร่างศัตรูที่จัดการได้มาเข้าฝ่ายเรา • สูงสุด ${Math.max(1, Math.min(5, Math.floor(Number(effect && effect.targetCount) || 1)))} เป้าหมาย • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? 1), 1))} • ${String(effect && effect.reviveType || "revive")}`,
+        transform: `แปลงร่างเป็น ${String(effect && (effect.transformName || effect.formName || effect.name) || "ร่างใหม่")} • ${effectDurationTurns > 0 ? `${effectDurationTurns} เทิร์น` : "ถาวรจนจบการต่อสู้"} • เปลี่ยนภาพและเปิดใช้สกิลเฉพาะร่าง ${abilityArray(effect && (effect.transformedAbilities || effect.formAbilities)).length} สกิล`,
         increaseMaxHpBaseRate: `เพิ่ม HP สูงสุดและ HP ปัจจุบันจาก HP เบส ${signedPercent(Math.max(0, value))}`,
         increaseAttackRateStack: `สะสม ATK ถาวรระหว่างไฟต์ ${signedPercent(Math.max(0, value))} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         powerRateStack: `สะสม ATK ${targetText} ${signedPercent(value)} สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
@@ -14234,12 +14243,17 @@
       const afterReviveNextAttack = condition.afterReviveNextAttack === true
         || condition.onFirstAttackAfterRevive === true
         || condition.firstAttackAfterRevive === true;
+      if (condition.onDeath === true || condition.onDead === true || String(condition.triggerOn || "").toLowerCase() === "death") {
+        parts.push(`ทำงานทันทีหลังระบบตัดสินว่าเจ้าของสกิลตาย${Number(condition.afterDeaths || condition.afterDeathCount || 0) > 1 ? `ครบ ${Math.max(1, Number(condition.afterDeaths || condition.afterDeathCount))} ครั้ง` : ""} ก่อนเริ่มเทิร์นถัดไป`);
+      }
       if (afterReviveNextAttack) {
         parts.push("หลังคืนชีพ ทำงานกับการโจมตีครั้งแรกเพียงครั้งเดียว");
       } else if (condition.sourceRevived === true || condition.afterRevive === true || condition.afterRevived === true || condition.afterDeathRevive === true) {
         parts.push("เจ้าของสกิลต้องเคยตายและคืนชีพแล้ว");
       }
       if (condition.sourceReviveActive === true || condition.whileRevived === true || condition.reviveActive === true) parts.push("เจ้าของสกิลต้องกำลังอยู่ในสถานะคืนชีพ/อมตะ");
+      if (condition.sourceTransformed === true || condition.whileTransformed === true || condition.transformActive === true) parts.push("ทำงานเฉพาะขณะเจ้าของสกิลอยู่ในร่างแปลง");
+      if (String(condition.sourceTransformId || condition.requiredTransformId || condition.transformIdRequired || "").trim()) parts.push(`ต้องอยู่ในร่าง ${String(condition.sourceTransformId || condition.requiredTransformId || condition.transformIdRequired).trim()}`);
       const battleTrigger = normalizeBattleTriggerRule(condition);
       if (!afterReviveNextAttack && battleTrigger && battleTrigger.onOwnAttack) {
         parts.push("ทำงานทุกครั้งที่เจ้าของสกิลโจมตี ตั้งแต่การโจมตีครั้งแรก");
@@ -16123,6 +16137,8 @@
           targetHpBelowRate: item.targetHpBelowRate, targetHpAboveRate: item.targetHpAboveRate,
           sourceRevived: Boolean(item.sourceRevived), sourceReviveActive: Boolean(item.sourceReviveActive), sourceReviveMode: String(item.sourceReviveMode || ""),
           afterReviveNextAttack: Boolean(item.afterReviveNextAttack),
+          sourceTransformed: Boolean(item.sourceTransformed), sourceTransformId: String(item.sourceTransformId || ""),
+          transformToken: String(item.transformToken || ""),
           durationTurns: Math.max(0, Math.floor(Number(item.durationTurns) || 0)), durationRounds: Math.max(0, Math.floor(Number(item.durationRounds) || 0))
         };
       }
@@ -16238,6 +16254,17 @@
           member.initialBlockRate = Number(member.blockRate) || 0;
           member.initialDodgeRate = Number(member.dodgeRate) || 0;
           member.initialDamageTakenRate = Number(member.damageTakenRate) || 0;
+          const identityCard = runtimeIdentityCard(member);
+          member.baseName = member.name;
+          member.baseImage = identityCard ? getCardImage(identityCard) : "";
+          member.currentImage = member.baseImage;
+          member.transformActive = false;
+          member.transformId = "";
+          member.transformToken = "";
+          member.transformTurnsRemaining = 0;
+          member.transformPermanent = false;
+          member.transformSerial = 0;
+          member.transformDeltas = null;
         });
         return {
           side,
@@ -16358,6 +16385,163 @@
         member.statusResistanceRules.push(...abilityArray(summary.statusResistanceByCardId && summary.statusResistanceByCardId[String(member.id)]).map(item => ({ ...item })));
       }
 
+      function normalizeTransformBonusMap(rule = {}) {
+        const source = rule && rule.bonuses && typeof rule.bonuses === "object" ? rule.bonuses : {};
+        const number = (key, ...aliases) => {
+          for (const name of [key, ...aliases]) {
+            const value = source[name] ?? rule[name];
+            if (value !== undefined && value !== null && value !== "" && Number.isFinite(Number(value))) return Number(value);
+          }
+          return 0;
+        };
+        return {
+          powerRate:number("powerRate","attackRate","atkRate"), powerFlat:number("powerFlat","attackFlat","atkFlat"),
+          hpRate:number("hpRate"), hpFlat:number("hpFlat"), defenseRate:number("defenseRate","defRate"), defenseFlat:number("defenseFlat","defFlat"),
+          speedRate:number("speedRate","spdRate"), speedFlat:number("speedFlat","spdFlat"), attackHits:number("attackHits","extraHits"),
+          criticalRate:number("criticalRate"), dodgeRate:number("dodgeRate"), blockRate:number("blockRate"),
+          damageTakenRate:number("damageTakenRate"), healingRate:number("healingRate"), shieldRecoveryRate:number("shieldRecoveryRate")
+        };
+      }
+
+      function clearTransformedAbilities(team, member, token = "") {
+        const safeToken = String(token || member && member.transformToken || "");
+        if (!team || !member || !safeToken) return;
+        team.triggers = team.triggers.filter(trigger => String(trigger.transformToken || "") !== safeToken);
+        team.captureRules = team.captureRules.filter(rule => String(rule.transformToken || "") !== safeToken);
+        team.abilityRoster.forEach(item => {
+          if (String(item && item.id) !== String(member.id)) return;
+          item.abilities = abilityArray(item.abilities).filter(ability => String(ability && ability._transformToken || "") !== safeToken);
+        });
+        member.statusResistanceRules = abilityArray(member.statusResistanceRules).filter(rule => String(rule && rule.transformToken || "") !== safeToken);
+      }
+
+      function attachTransformedAbilities(team, member, rule, token) {
+        const abilities = abilityArray(rule && rule.transformedAbilities).filter(ability => ability && typeof ability === "object").map(ability => ({
+          ...ability,
+          activeIn: abilityArray(ability.activeIn).length ? abilityArray(ability.activeIn).map(String) : [battleMode],
+          condition: ability.condition && typeof ability.condition === "object" ? { ...ability.condition } : {},
+          effects: abilityArray(ability.effects).map(effect => effect && typeof effect === "object" ? ({ ...effect, condition:effect.condition && typeof effect.condition === "object" ? { ...effect.condition } : undefined }) : effect)
+        }));
+        if (!abilities.length) return;
+        const contextIds = [...new Set(team.members.map(item => {
+          if (CARD_BY_ID.has(String(item.id))) return String(item.id);
+          const baseId = String(item.cardId || item.id || "").split("@")[0];
+          return CARD_BY_ID.has(baseId) ? baseId : "";
+        }).filter(Boolean))];
+        const progressByCardId = Object.fromEntries(team.members.map(item => [String(item.id), { level:1, duplicateRank:0, awaken:0 }]));
+        const additionalAbilitiesByCardId = { [String(member.id)]: abilities };
+        const summary = getTeamAbilitySummary(contextIds, battleMode, {
+          progressByCardId, leaderId:String(member.id), additionalAbilitiesByCardId,
+          abilityResolutionSeed:`transform:${token}`, _skipAbilityTransferResolution:true
+        });
+        const triggers = buildTeamBattleTriggerConfigs(contextIds, summary, false)
+          .filter(trigger => String(trigger.sourceCardId) === String(member.id) && String(trigger.sourceAbilityRuntimeKey || "").includes(":transfer:"))
+          .map((trigger, index) => normalizeTrigger({ ...trigger, sourceTransformed:true, sourceTransformId:String(member.transformId || ""), transformToken:token }, team.triggers.length + index));
+        team.triggers.push(...triggers);
+        team.captureRules.push(...buildTeamCaptureReviveConfigs(summary)
+          .filter(item => String(item.sourceCardId) === String(member.id) && String(item.ruleKey || "").includes(":transfer:"))
+          .map(item => ({ ...item, transformToken:token })));
+        let roster = team.abilityRoster.find(item => String(item && item.id) === String(member.id));
+        if (!roster) {
+          const identity = runtimeIdentityCard(member) || {};
+          roster = { id:String(member.id), name:member.name, rarity:member.rarity, elements:[...member.elements], card:identity, snapshot:{ id:String(member.id), name:member.name }, abilities:[] };
+          team.abilityRoster.push(roster);
+        }
+        roster.abilities = [...abilityArray(roster.abilities), ...abilities.map(ability => ({ ...ability, _transformToken:token }))];
+        member.statusResistanceRules.push(...abilityArray(summary.statusResistanceByCardId && summary.statusResistanceByCardId[String(member.id)])
+          .filter(item => String(item && item._runtimeEffectKey || "").includes(":transfer:"))
+          .map(item => ({ ...item, transformToken:token })));
+      }
+
+      function revertTransformation(team, member, reason = "expired") {
+        if (!team || !member || !member.transformActive) return null;
+        const token = String(member.transformToken || "");
+        const deltas = member.transformDeltas && typeof member.transformDeltas === "object" ? member.transformDeltas : {};
+        clearTransformedAbilities(team, member, token);
+        ["power","maxHp","defense","speed","attackHits","criticalRate","dodgeRate","blockRate","damageTakenRate","healingRate","shieldRecoveryRate"].forEach(field => {
+          if (Number.isFinite(Number(deltas[field]))) member[field] = Number(member[field] || 0) - Number(deltas[field] || 0);
+        });
+        member.power = Math.max(1, Number(member.power) || 1);
+        member.maxHp = Math.max(1, Number(member.maxHp) || 1);
+        member.currentHp = Math.max(0, Math.min(member.maxHp, Number(member.currentHp) || 0));
+        member.defense = Math.max(0, Number(member.defense) || 0);
+        member.speed = Math.max(1, Math.round(Number(member.speed) || 1));
+        member.attackHits = Math.max(1, Math.round(Number(member.attackHits) || 1));
+        member.criticalRate = Math.max(0, Number(member.criticalRate) || 0);
+        member.dodgeRate = Math.max(0, Number(member.dodgeRate) || 0);
+        member.blockRate = Math.max(0, Number(member.blockRate) || 0);
+        member.name = String(member.baseName || member.name);
+        member.currentImage = String(member.baseImage || "");
+        if (Array.isArray(deltas.elements)) member.elements = [...deltas.elements];
+        if (Number.isFinite(Number(deltas.normalAttackTargetCount))) member.normalAttackTargetCount = Math.max(1, Math.min(5, Math.floor(Number(deltas.normalAttackTargetCount) || 1)));
+        const event = { status:"revert", reason, targetCardId:member.id, targetName:member.name, image:member.currentImage, transformId:String(member.transformId || ""), transformToken:token };
+        member.transformActive = false; member.transformId = ""; member.transformToken = "";
+        member.transformTurnsRemaining = 0; member.transformPermanent = false; member.transformDeltas = null;
+        return event;
+      }
+
+      function applyTransformRules(rules, ownerTeam, defenderTeam, actor, currentTarget, turnIndex) {
+        const events = [];
+        abilityArray(rules).forEach((rule, ruleIndex) => {
+          const recipients = resolveRuntimeTargets({ ...rule, side:rule.side || "self", selection:rule.selection || rule.targetSelection || "self" }, ownerTeam, defenderTeam, actor, currentTarget);
+          recipients.forEach(member => {
+            const targetTeam = ownerTeam.members.includes(member) ? ownerTeam : defenderTeam;
+            if (member.transformActive) {
+              const oldEvent = revertTransformation(targetTeam, member, "replaced");
+              if (oldEvent) events.push(oldEvent);
+            }
+            const bonuses = normalizeTransformBonusMap(rule);
+            const delta = {
+              power:Number(member.power || 0) * bonuses.powerRate + bonuses.powerFlat,
+              maxHp:Number(member.maxHp || 0) * bonuses.hpRate + bonuses.hpFlat,
+              defense:Number(member.defense || 0) * bonuses.defenseRate + bonuses.defenseFlat,
+              speed:Number(member.speed || 0) * bonuses.speedRate + bonuses.speedFlat,
+              attackHits:bonuses.attackHits,
+              criticalRate:bonuses.criticalRate, dodgeRate:bonuses.dodgeRate, blockRate:bonuses.blockRate,
+              damageTakenRate:bonuses.damageTakenRate, healingRate:bonuses.healingRate, shieldRecoveryRate:bonuses.shieldRecoveryRate,
+              elements:[...member.elements], normalAttackTargetCount:member.normalAttackTargetCount
+            };
+            member.power = Math.max(1, Number(member.power) + delta.power);
+            member.maxHp = Math.max(1, Number(member.maxHp) + delta.maxHp);
+            member.currentHp = Math.max(1, Number(member.currentHp) + Math.max(0, delta.maxHp));
+            member.defense = Math.max(0, Number(member.defense) + delta.defense);
+            member.speed = Math.max(1, Math.round(Number(member.speed) + delta.speed));
+            member.attackHits = Math.max(1, Math.round(Number(member.attackHits) + delta.attackHits));
+            member.criticalRate = Math.max(0, Number(member.criticalRate) + delta.criticalRate);
+            member.dodgeRate = Math.max(0, Number(member.dodgeRate) + delta.dodgeRate);
+            member.blockRate = Math.max(0, Number(member.blockRate) + delta.blockRate);
+            member.damageTakenRate = Number(member.damageTakenRate) + delta.damageTakenRate;
+            member.healingRate = Number(member.healingRate) + delta.healingRate;
+            member.shieldRecoveryRate = Number(member.shieldRecoveryRate) + delta.shieldRecoveryRate;
+            if (abilityArray(rule.transformedElements).length) member.elements = normalizeAbilityElements(rule.transformedElements);
+            if (Number(rule.normalAttackTargetCount) > 0) member.normalAttackTargetCount = Math.max(1, Math.min(5, Math.floor(Number(rule.normalAttackTargetCount))));
+            member.transformSerial = Math.max(0, Number(member.transformSerial) || 0) + 1;
+            const token = `${member.id}:transform:${member.transformSerial}`;
+            member.transformActive = true;
+            member.transformId = String(rule.transformId || "transform");
+            member.transformToken = token;
+            member.transformTurnsRemaining = Math.max(0, Math.floor(Number(rule.durationTurns) || 0));
+            member.transformPermanent = member.transformTurnsRemaining <= 0;
+            member.transformDeltas = delta;
+            if (String(rule.transformName || "").trim()) member.name = String(rule.transformName).trim();
+            if (String(rule.image || "").trim()) member.currentImage = resolveAsset(rule.image, "card");
+            attachTransformedAbilities(targetTeam, member, rule, token);
+            events.push({ status:"transform", sourceCardId:actor.id, sourceName:actor.name, targetCardId:member.id, targetName:member.name,
+              transformId:member.transformId, transformToken:token, image:member.currentImage, durationTurns:member.transformTurnsRemaining,
+              permanent:member.transformPermanent, transformedAbilityCount:abilityArray(rule.transformedAbilities).length, turnIndex, ruleIndex });
+          });
+        });
+        return events;
+      }
+
+      function tickTransformTurn(member, team) {
+        if (!member || !team || !member.transformActive || member.transformPermanent) return [];
+        member.transformTurnsRemaining = Math.max(0, Math.floor(Number(member.transformTurnsRemaining) || 0) - 1);
+        if (member.transformTurnsRemaining > 0) return [];
+        const event = revertTransformation(team, member, "durationExpired");
+        return event ? [event] : [];
+      }
+
       function createSpawnMember(team, actor, rule, identityCard, slotInfo, spawnIndex) {
         const isSummon = rule.type === CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD;
         const sourcePower = isSummon ? getCardPower(identityCard) : actor.basePower;
@@ -16415,7 +16599,11 @@
           initialCriticalRate:isSummon ? criticalRateOf(team.side) : actor.criticalRate,
           initialBlockRate:isSummon ? Math.max(0, Number(identityCard.blockRate) || 0) : actor.blockRate,
           initialDodgeRate:isSummon ? Math.max(0, Number(identityCard.dodgeRate) || 0) : actor.dodgeRate,
-          initialDamageTakenRate:isSummon ? Number(identityCard.damageTakenRate) || 0 : actor.damageTakenRate
+          initialDamageTakenRate:isSummon ? Number(identityCard.damageTakenRate) || 0 : actor.damageTakenRate,
+          baseName:isSummon ? String(identityCard.name || `Summon ${baseId}`) : `${actor.name} · ร่างแยก ${spawnIndex + 1}`,
+          baseImage:getCardImage(identityCard), currentImage:getCardImage(identityCard),
+          transformActive:false, transformId:"", transformToken:"", transformTurnsRemaining:0,
+          transformPermanent:false, transformSerial:0, transformDeltas:null
         };
       }
 
@@ -16490,7 +16678,8 @@
         return events;
       }
       const initialMemberState = member => ({
-        id: member.id, cardId: member.cardId || member.id, name: member.name, row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
+        id: member.id, cardId: member.cardId || member.id, name: member.name, image:member.currentImage || member.baseImage || "", row: member.row, slot: member.slot, speed: member.speed, baseSpeed: member.baseSpeed,
+        transformed:Boolean(member.transformActive), transformId:String(member.transformId || ""), transformTurnsRemaining:Number(member.transformTurnsRemaining || 0),
         normalAttackTargetCount: member.normalAttackTargetCount, targetSelection:member.targetSelection,
         maxHp: member.maxHp, currentHp: member.currentHp, shieldHits: member.shieldHits, ko: false,
         reviveMode: "", reviveTurnsRemaining: 0, reviveHitLifeRemaining: 0,
@@ -17280,6 +17469,9 @@
         if (trigger.sourceRevived && !sourceHasRevived) return false;
         if (trigger.sourceReviveActive && !(String(source.reviveMode || "") || Number(source.reviveTurnsRemaining || 0) > 0 || Number(source.reviveHitLifeRemaining || 0) > 0)) return false;
         if (trigger.sourceReviveMode && String(source.reviveMode || "") !== String(trigger.sourceReviveMode || "")) return false;
+        if (trigger.sourceTransformed && !source.transformActive) return false;
+        if (trigger.sourceTransformId && String(source.transformId || "") !== String(trigger.sourceTransformId || "")) return false;
+        if (trigger.transformToken && String(source.transformToken || "") !== String(trigger.transformToken || "")) return false;
         if (trigger.maxActivations > 0 && trigger.activations >= trigger.maxActivations) return false;
         return true;
       }
@@ -17382,6 +17574,7 @@
           attackTargetCount: Math.max(0, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 0), ...abilityArray(trigger.multiElementAttacks).map(rule=>Math.floor(Number(rule.targetCount)||0)), ...abilityArray(trigger.followUpAttacks).map(rule=>Math.floor(Number(rule.targetCount)||0))), 0))),
           reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
           spawnRules: fired.flatMap(trigger => abilityArray(trigger.spawnRules).map(rule => ({ ...rule }))),
+          transformRules: fired.flatMap(trigger => abilityArray(trigger.transformRules).map(rule => ({ ...rule }))),
           speedTargetRules: fired.flatMap(trigger => abilityArray(trigger.speedTargetRules).map(rule => ({ ...rule }))),
           tauntRules: fired.flatMap(trigger => abilityArray(trigger.tauntRules).map(rule => ({ ...rule }))),
           healTargetRules: fired.flatMap(trigger => abilityArray(trigger.healTargetRules).map(rule => ({ ...rule }))),
@@ -17749,7 +17942,8 @@
 
       function battleMemberStates() {
         const snap = member => ({
-          id: member.id, cardId: member.cardId || member.id, name: member.name, row: member.row, slot: member.slot,
+          id: member.id, cardId: member.cardId || member.id, name: member.name, image:member.currentImage || member.baseImage || "", row: member.row, slot: member.slot,
+          transformed:Boolean(member.transformActive), transformId:String(member.transformId || ""), transformTurnsRemaining:Number(member.transformTurnsRemaining || 0),
           speed: member.speed, baseSpeed: member.baseSpeed, maxHp: member.maxHp, currentHp: Math.max(0, member.currentHp),
           shieldHits: member.shieldHits, ko: Boolean(member.ko || member.currentHp <= 0), deathReason: member.deathReason || "",
           reviveMode: member.reviveMode || "", reviveTurnsRemaining: member.reviveTurnsRemaining || 0,
@@ -17771,7 +17965,8 @@
 
       function summarizeMember(member) {
         return {
-          id: member.id, name: member.name, rarity: member.rarity, row: member.row, slot: member.slot,
+          id: member.id, name: member.name, image:member.currentImage || member.baseImage || "", rarity: member.rarity, row: member.row, slot: member.slot,
+          transformed:Boolean(member.transformActive), transformId:String(member.transformId || ""), transformTurnsRemaining:Number(member.transformTurnsRemaining || 0),
           speed: member.speed, baseSpeed: member.baseSpeed, normalAttackTargetCount: member.normalAttackTargetCount, targetSelection:member.targetSelection, power: member.power, defense: member.defense, maxHp: member.maxHp,
           currentHp: Math.max(0, member.currentHp), shieldRemaining: member.shieldHits,
           reviveMode: member.reviveMode, reviveTurnsRemaining: member.reviveTurnsRemaining,
@@ -17790,6 +17985,7 @@
       function applySupportActivationEffects(ownerTeam, defenderTeam, actor, currentTarget, activation, turnIndex, reason = "trigger") {
         const alliedShieldBefore = teamShield(ownerTeam);
         const enemyShieldBefore = teamShield(defenderTeam);
+        const transformEvents = applyTransformRules(activation.transformRules, ownerTeam, defenderTeam, actor, currentTarget, turnIndex);
         applyRateMaps(ownerTeam, activation.blockRateChanges, "blockRate");
         applyRateMaps(ownerTeam, activation.damageTakenRateChanges, "damageTakenRate");
         applyRateMaps(ownerTeam, activation.dodgeRateChanges, "dodgeRate");
@@ -17909,6 +18105,8 @@
           targetRemaining: currentTarget && currentTarget.currentHp || 0,
           reviveEvents,
           spawnEvents,
+          transformEvents,
+          transformRevertEvents: [],
           captureEvents: [],
           captureReleaseEvents: [],
           speedEvents,
@@ -17952,7 +18150,7 @@
           const controlStatus = battleControlStatus(actor);
           if (controlStatus && controlStatus.prevented) {
             turns.push({
-              round, side:entry.side, command:"statusSkip", actorCardId:actor.id, actorName:actor.name, actorSpeed:actor.speed, actorRow:actor.row,
+              round, side:entry.side, command:"statusSkip", actorCardId:actor.id, actorName:actor.name, actorImage:actor.currentImage || actor.baseImage || "", actorSpeed:actor.speed, actorRow:actor.row,
               targetCardId:target.id, targetName:target.name, hits:0, baseHits:0, passiveBaseHits:actor.attackHits, pendingHitChange:0,
               activeHitChange:0, extraHits:0, hitReduction:0, requestedExtraHits:0, enemyNextAttackHits:0,
               blockedHits:0, unblockedHits:0, damage:0, critical:false, criticalRate:actor.criticalRate, criticalMultiplier:1,
@@ -17961,6 +18159,8 @@
               playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
               actorRemaining:actor.currentHp, targetRemaining:target.currentHp, statusEvents:[...roundStartResistanceEvents, { status:"control", statusType:controlStatus.statusType, statusLabel:controlStatus.statusLabel, targetCardId:actor.id, targetName:actor.name }, ...abilityArray(controlStatus.expired)]
             });
+            const transformRevertEvents = tickTransformTurn(actor, team);
+            turns[turns.length - 1].transformRevertEvents = transformRevertEvents;
             turns[turns.length - 1].memberStates = battleMemberStates();
             continue;
           }
@@ -17972,7 +18172,7 @@
             actor.shieldCreated += 1;
             team.totalShieldCreated += 1;
             turns.push({
-              round, side:entry.side, command:"guard", actorCardId:actor.id, actorName:actor.name, actorSpeed:actor.speed, actorRow:actor.row,
+              round, side:entry.side, command:"guard", actorCardId:actor.id, actorName:actor.name, actorImage:actor.currentImage || actor.baseImage || "", actorSpeed:actor.speed, actorRow:actor.row,
               targetCardId:target.id, targetName:target.name, hits:0, baseHits:0, passiveBaseHits:actor.attackHits, pendingHitChange:0,
               activeHitChange:0, extraHits:0, hitReduction:0, requestedExtraHits:0, enemyNextAttackHits:0,
               blockedHits:0, unblockedHits:0, damage:0, critical:false, criticalRate:actor.criticalRate, criticalMultiplier:1,
@@ -17982,8 +18182,10 @@
               actorRemaining:actor.currentHp, targetRemaining:target.currentHp
             });
             const guardTimedDeath = tickReviveTurn(actor);
+            const transformRevertEvents = tickTransformTurn(actor, team);
             const guardState = battleMemberStates();
             turns[turns.length - 1].timedReviveExpired = guardTimedDeath;
+            turns[turns.length - 1].transformRevertEvents = transformRevertEvents;
             turns[turns.length - 1].memberStates = guardState;
             continue;
           }
@@ -17996,6 +18198,7 @@
           const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex, explicitAttackTargetCount > 0 ? null : actor);
           defenderTeam.currentHitTargetIds = attackTargets.map(member => String(member.id));
           target = attackTargets[0] || target;
+          const transformEvents = applyTransformRules(activation.transformRules, team, defenderTeam, actor, target, turnIndex);
           applyRateMaps(team, activation.blockRateChanges, "blockRate");
           applyRateMaps(team, activation.damageTakenRateChanges, "damageTakenRate");
           applyRateMaps(team, activation.dodgeRateChanges, "dodgeRate");
@@ -18275,11 +18478,12 @@
           const bleedTurnEvents = tickBattleBleedOnOwnAttack(actor);
           statusEvents.push(...bleedTurnEvents);
           const timedReviveExpired = tickReviveTurn(actor);
+          const transformRevertEvents = tickTransformTurn(actor, team);
 
           const selfShieldChange = teamShield(team) - alliedShieldBefore;
           const enemyShieldChange = teamShield(defenderTeam) - enemyShieldBefore;
           turns.push({
-            round, side:entry.side, command:activation.fired.length?"skill":"attack", actorCardId:actor.id, actorName:actor.name,
+            round, side:entry.side, command:activation.fired.length?"skill":"attack", actorCardId:actor.id, actorName:actor.name, actorImage:actor.currentImage || actor.baseImage || "",
             actorSpeed:actor.speed, actorRow:actor.row, targetCardId:target.id, targetName:target.name, targetRow:target.row,
             targetCardIds:targetResults.map(item=>item.targetCardId), targetNames:targetResults.map(item=>item.targetName), targetCount:targetResults.length, targetResults,
             hits:totalAppliedHits, hitsPerTarget:hits, baseHits:baseHits*targetResults.length, baseHitsPerTarget:baseHits, passiveBaseHits:actor.attackHits, pendingHitChange, activeHitChange:(hits-baseHits)*targetResults.length,
@@ -18303,7 +18507,7 @@
             enemyCriticalRateChange:activation.enemyCriticalRateChange, nextAttackCriticalRate:activeNextCritChange,
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
             actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
-            reviveEvents, spawnEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, counterEvents,
+            reviveEvents, spawnEvents, transformEvents, transformRevertEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, counterEvents,
             followUpEvents: activeFollowUpRules.map(rule=>({powerRate:rule.powerRate,hits:rule.hits,targetCount:rule.targetCount})),
             multiElementEvents: abilityArray(activation.multiElementAttacks).map(rule=>({attackElements:rule.attackElements,hitsPerElement:rule.hitsPerElement,targetCount:rule.targetCount})),
             adaptiveElement: activation.adaptiveElement, defensePenetrationRate:effectiveDefensePenetrationRate, criticalDamageRate:effectiveCriticalDamageRate,
@@ -18870,6 +19074,11 @@
         if (rowBadge) rowBadge.textContent = safeRow === "front" ? "หน้า" : "หลัง";
       }
       if (state.slot !== undefined && state.slot !== null) node.dataset.battleSlot = String(state.slot);
+      const art = node.querySelector("img");
+      if (art && state.image && art.getAttribute("src") !== String(state.image)) art.setAttribute("src", String(state.image));
+      const nameNode = node.querySelector(".battle-model-name, .battle-unit-name, .team-slot-name");
+      if (nameNode && state.name && nameNode.textContent !== String(state.name)) nameNode.textContent = String(state.name);
+      node.classList.toggle("is-transformed", Boolean(state.transformed));
       const hp = node.querySelector(".battle-unit-hp i");
       if (hp && hp.dataset.stableWidth !== String(hpPercent)) {
         hp.dataset.stableWidth = String(hpPercent);
@@ -18888,6 +19097,7 @@
         if (Number(state.reviveHitLifeRemaining) > 0) parts.push(`HIT ${state.reviveHitLifeRemaining}`);
         if (Number(state.tauntTurnsRemaining) > 0 || Number(state.tauntRoundsRemaining) > 0) parts.push(`🎯 ยั่วยุ`);
         if (state.capturedBySide) parts.push(`👻 ชิงร่าง`);
+        if (state.transformed) parts.push(`✨ ${state.transformId || "ร่างแปลง"}${Number(state.transformTurnsRemaining) > 0 ? ` ${state.transformTurnsRemaining}T` : ""}`);
         const specialText = parts.join(" • ");
         if (special.textContent !== specialText) special.textContent = specialText;
       }
@@ -18906,6 +19116,18 @@
       if (!statusBox) { statusBox = document.createElement("div"); statusBox.className = "battle-unit-status-icons"; node.appendChild(statusBox); }
       const chips = activeStatusList.map(effect => `<span class="battle-status-chip ${escapeHTML(effect.status || "")}">${escapeHTML(effect.displayText || effect.text || effect.label || effect.status || "")}</span>`).join("");
       if (statusBox.innerHTML !== chips) statusBox.innerHTML = chips;
+    }
+
+    function applyBattleTransformEvents(stage, turn, events, reverting = false) {
+      abilityArray(events).forEach(event => {
+        const side = battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : (turn.side === "player" ? "enemy" : "player");
+        const node = battleUnitNode(stage, side, event.targetCardId);
+        if (!node) return;
+        const art = node.querySelector("img");
+        if (art && event.image) art.setAttribute("src", String(event.image));
+        node.classList.toggle("is-transformed", !reverting && event.status === "transform");
+        floatBattleText(node, reverting || event.status === "revert" ? "FORM END" : "TRANSFORM", reverting ? "status" : "revive");
+      });
     }
 
     function syncBattleBoard(stage, states) {
@@ -18930,7 +19152,7 @@
       if (!bar) return;
       const upcoming = abilityArray(combat && combat.turns).slice(currentIndex, currentIndex + 8);
       bar.innerHTML = upcoming.map((turn, index) => {
-        const image = battleCardImage(turn.actorCardId);
+        const image = turn.actorImage || battleCardImage(turn.actorCardId);
         const name = turn.actorName || (turn.side === "player" ? labels.player : labels.enemy) || turn.side;
         return `<div class="battle-turn-chip ${turn.side} ${index === 0 ? "current" : ""}">${image ? `<img src="${escapeHTML(image)}" alt="">` : `<span>⚔️</span>`}<div><b>${escapeHTML(name)}</b><small>SPD ${formatNumber(turn.actorSpeed || 0)}</small></div></div>`;
       }).join("");
@@ -19312,6 +19534,16 @@
         const node = state ? ensureBattleUnitNode(stage, returnedSide, state) : battleUnitNode(stage, returnedSide, event.targetCardId);
         if (node) floatBattleText(node, "CORPSE RETURN", "revive");
       });
+      abilityArray(turn.transformEvents).forEach(event => {
+        const side = battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : targetSide;
+        const node = battleUnitNode(stage, side, event.targetCardId);
+        if (node && event.status === "transform") floatBattleText(node, "TRANSFORM", "revive");
+      });
+      abilityArray(turn.transformRevertEvents).forEach(event => {
+        const side = battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : targetSide;
+        const node = battleUnitNode(stage, side, event.targetCardId);
+        if (node) floatBattleText(node, "FORM END", "status");
+      });
       abilityArray(turn.statusEvents).forEach(event => {
         const side = battleUnitNode(stage, turn.side, event.targetCardId) ? turn.side : targetSide;
         const node = battleUnitNode(stage, side, event.targetCardId);
@@ -19361,6 +19593,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const cloneLimitText = cloneLimitEvents.length ? ` • 👥 ร่างแยกเต็ม ${cloneLimitEvents.map(item => `${item.activeClones}/${item.maxActiveClones}`).join(", ")}` : "";
         const captureText = abilityArray(turn.captureEvents).length ? ` • 👻 ${turn.captureEvents.map(item=>item.status==="success"?`ชิงร่าง ${item.targetName}`:`ชิงร่าง ${item.targetName} ล้มเหลว`).join(", ")}` : "";
         const captureReleaseText = abilityArray(turn.captureReleaseEvents).length ? ` • ↩ คืนศพ ${turn.captureReleaseEvents.map(item=>item.targetName).join(", ")}` : "";
+        const transformText = abilityArray(turn.transformEvents).length ? ` • ✨ แปลงร่าง ${turn.transformEvents.filter(item=>item.status==="transform").map(item=>`${item.targetName}${item.permanent?" (ถาวร)":` (${item.durationTurns} เทิร์น)`}`).join(", ")}` : "";
+        const transformEndText = abilityArray(turn.transformRevertEvents).length ? ` • ↩ กลับร่าง ${turn.transformRevertEvents.map(item=>item.targetName).join(", ")}` : "";
         const lifeText = turn.hitLifeConsumed ? ` • ตัดชีวิต ${turn.hitLifeConsumed} HIT${turn.hitLifeExpired ? " และหมดสภาพ" : ""}` : "";
         const statusText = abilityArray(turn.statusEvents).length ? ` • 🧩 สถานะ: ${abilityArray(turn.statusEvents).slice(0, 4).map(event => `${event.targetName || "เป้าหมาย"}=${event.statusLabel || event.statusType || event.status || "STATUS"}${event.instantDeath ? "(ตาย)" : event.chainedFrom ? `(เชนจาก ${event.chainedFrom})` : ""}`).join(" / ")}` : "";
         const activeText = turn.triggerActivated
@@ -19371,7 +19605,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           result.textContent = `รอบ ${turn.round} • ${attackerLabel} ถูก ${abilityArray(turn.statusEvents)[0]?.statusLabel || "สถานะผิดปกติ"} จึงข้ามเทิร์น${statusText} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         } else result.textContent = turn.command === "guard"
           ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
-          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${spawnText}${cloneLimitText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${spawnText}${cloneLimitText}${transformText}${transformEndText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
         beautifyBattleResult(result);
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
@@ -19379,10 +19613,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             if (!battleSkipAnimations) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
           }
         }
+        applyBattleTransformEvents(stage, turn, turn.transformEvents, false);
         const baseSpeed = turn.round > 6 ? Math.max(55, Math.floor(phaseDuration * .55)) : phaseDuration;
         const speed = battleSkipAnimations ? 5 : Math.max(35, Math.floor(baseSpeed / battlePlaybackSpeed));
         await animateIndividualBattleAction(stage, turn, speed * 2.25);
         animateBattleEvents(stage, turn);
+        applyBattleTransformEvents(stage, turn, turn.transformRevertEvents, true);
         syncBattleBoard(stage, turn.memberStates);
         updateTurnBattleDisplay(display, combat, turn);
         if (hooks && typeof hooks.onTurnApplied === "function") {
@@ -19589,6 +19825,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             sourceReviveActive: Boolean(record.trigger.sourceReviveActive),
             sourceReviveMode: String(record.trigger.sourceReviveMode || ""),
             afterReviveNextAttack: Boolean(record.trigger.afterReviveNextAttack),
+            sourceTransformed: Boolean(record.trigger.sourceTransformed),
+            sourceTransformId: String(record.trigger.sourceTransformId || ""),
             baseAfterOwnAttacks: String(record.trigger.triggerOn || "") === "nextAttack"
               ? Math.max(1, Number(record.trigger.afterOwnAttacks || 1))
               : 0,
@@ -19624,6 +19862,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             shieldTargetRules: [],
             reviveRules: [],
             spawnRules: [],
+            transformRules: [],
             speedTargetRules: [],
             tauntRules: [],
             healingRateChange: 0,
@@ -19750,6 +19989,34 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             else group.restoreShieldHits += Math.round(value);
             group.shieldTargetRules.push({ ...runtimeTargetRule, value: Math.round(value) });
             break;
+          case CARD_ABILITY_EFFECT_TYPES.TRANSFORM: {
+            const rawBonuses = effect.bonuses && typeof effect.bonuses === "object" ? effect.bonuses : (effect.transformBonuses && typeof effect.transformBonuses === "object" ? effect.transformBonuses : {});
+            const transformedAbilities = abilityArray(effect.transformedAbilities || effect.formAbilities || effect.transformAbilities)
+              .filter(ability => ability && typeof ability === "object").map(ability => ({ ...ability }));
+            const transformCutscene = effect.transformCutscene && typeof effect.transformCutscene === "object"
+              ? effect.transformCutscene : effect.cutscene && typeof effect.cutscene === "object" ? effect.cutscene : null;
+            if (transformCutscene) group.cutscene = { ...(group.cutscene || {}), ...transformCutscene };
+            group.transformRules.push({
+              ...runtimeTargetRule,
+              type: effectType,
+              side: (effect.targetSide === undefined && effect.side === undefined) ? "self" : side,
+              selection: normalizeAbilitySelectionMode(effect.targetSelection, "self"),
+              targetSelection: normalizeAbilitySelectionMode(effect.targetSelection, "self"),
+              targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount || effect.count || 1) || 1))),
+              transformId: String(effect.transformId || effect.formId || record.abilityRuntimeKey || baseKey || "transform").trim(),
+              transformName: String(effect.transformName || effect.formName || "").trim(),
+              image: resolveAsset(effect.image || effect.transformImage || effect.formImage || "", "card"),
+              durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns ?? effect.turns ?? 0) || 0)),
+              bonuses: { ...rawBonuses },
+              transformedElements: normalizeAbilityElements(effect.transformedElements || effect.formElements),
+              normalAttackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(effect.normalAttackTargetCount ?? effect.attackTargetCount) || 0))),
+              transformedAbilities,
+              revertOnDeath: effect.revertOnDeath === true,
+              sourceAbilityName: String(record.ability && record.ability.name || ""),
+              _runtimeEffectKey: String(record.key || effect._runtimeEffectKey || "")
+            });
+            break;
+          }
           case CARD_ABILITY_EFFECT_TYPES.SPLIT_CLONE:
           case CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD: {
             const isSummon = effectType === CARD_ABILITY_EFFECT_TYPES.SUMMON_CARD;
@@ -20034,6 +20301,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         sourceRevived: Boolean(item.sourceRevived),
         sourceReviveActive: Boolean(item.sourceReviveActive),
         sourceReviveMode: String(item.sourceReviveMode || ""),
+        sourceTransformed: Boolean(item.sourceTransformed), sourceTransformId: String(item.sourceTransformId || ""),
         // ไม่มีเพดานค่าบวกของอัตรา/สแต็ก ผู้ใช้สามารถสะสมเกิน 100% เพื่อเผื่อการลดอัตรา
         maxHpGain: Math.max(0, Number(item.maxHpGain || 0)),
         attackStackGain: Math.max(0, Number(item.attackStackGain || 0)),
@@ -20062,6 +20330,18 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         hitTargetRules: abilityArray(item.hitTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         shieldTargetRules: abilityArray(item.shieldTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         reviveRules: abilityArray(item.reviveRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), hpRate: Math.max(.01, Number(rule && rule.hpRate) || .3), durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)), surviveHits: Math.max(0, Math.floor(Number(rule && rule.surviveHits) || 0)), maxTriggers: Math.max(1, Math.floor(Number(rule && rule.maxTriggers) || 1)), reviveAttackHits: Math.max(0, Math.floor(Number(rule && rule.reviveAttackHits) || 0)), reviveAttackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(rule && rule.reviveAttackTargetCount) || 0))) })),
+        transformRules: abilityArray(item.transformRules).map(rule => ({
+          ...rule,
+          type: CARD_ABILITY_EFFECT_TYPES.TRANSFORM,
+          transformId: String(rule && rule.transformId || "transform"),
+          transformName: String(rule && rule.transformName || ""),
+          image: String(rule && rule.image || ""),
+          durationTurns: Math.max(0, Math.floor(Number(rule && rule.durationTurns) || 0)),
+          bonuses: rule && rule.bonuses && typeof rule.bonuses === "object" ? { ...rule.bonuses } : {},
+          transformedElements: normalizeAbilityElements(rule && rule.transformedElements),
+          normalAttackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(rule && rule.normalAttackTargetCount) || 0))),
+          transformedAbilities: abilityArray(rule && rule.transformedAbilities).map(ability => ({ ...ability }))
+        })),
         spawnRules: abilityArray(item.spawnRules).map(rule => ({
           ...rule,
           type: normalizeAbilityEffectType(rule && rule.type),
@@ -20087,7 +20367,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.spawnRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.statusApplyRules).length || abilityArray(item.cleanseStatusRules).length || abilityArray(item.purgeBuffRules).length || abilityArray(item.turnAccelerationRules).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.spawnRules).length || abilityArray(item.transformRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.statusApplyRules).length || abilityArray(item.cleanseStatusRules).length || abilityArray(item.purgeBuffRules).length || abilityArray(item.turnAccelerationRules).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
     }
 
 
