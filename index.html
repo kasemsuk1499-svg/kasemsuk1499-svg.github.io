@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-14-cleanse-purge-turn-ui-labels-v129">
-  <title>Anime Card Collection · Runtime v129 · Cleanse/Purge/Turn UI Labels</title>
+  <meta name="gacha-app-build" content="2026-07-15-after-revive-first-attack-v130">
+  <title>Anime Card Collection · Runtime v130 · After Revive First Attack</title>
   <style>
     :root {
       color-scheme: dark;
@@ -9698,6 +9698,7 @@
        - activeSkillCostPermanent = ปรับคอสถาวรตลอดการต่อสู้ และมีผลกับรอบถัดไปทุกครั้ง
        - activeSkillCost เดิมยังรองรับเป็น alias ของ activeSkillCostCycle เพื่อไม่ให้การ์ดเก่าพัง
        - เอฟเฟกต์คอสไม่ใส่ตัวกรอง = ทั้งฝ่าย; ใส่ targetCardIds / targetElements / targetRarities เพื่อเจาะจงได้
+       - v130: condition { afterReviveNextAttack:true } ทำงานเฉพาะการโจมตีครั้งแรกหลังคืนชีพ และหยุดอัตโนมัติหลังใช้ 1 ครั้ง
        - v98: แก้ sourceRevived หลังคืนชีพให้ตรวจติดสถานะได้จริง
        - v95: condition รองรับ sourceRevived/sourceReviveActive แล้ว
        - v94: condition รองรับชื่อการ์ดแล้ว เช่น anyTeammateCardNames:["เอลฟาเรีย","จูเรียส"] ใช้ได้ตอนยังไม่รู้ ID
@@ -11857,13 +11858,22 @@
         sourceHpAboveRate: Number.isFinite(Number(nested.sourceHpAboveRate)) ? Math.max(0, Math.min(1, Number(nested.sourceHpAboveRate))) : null,
         targetHpBelowRate: Number.isFinite(Number(nested.targetHpBelowRate)) ? Math.max(0, Math.min(1, Number(nested.targetHpBelowRate))) : null,
         targetHpAboveRate: Number.isFinite(Number(nested.targetHpAboveRate)) ? Math.max(0, Math.min(1, Number(nested.targetHpAboveRate))) : null,
-        sourceRevived: nested.sourceRevived === true || nested.afterRevive === true || nested.afterRevived === true || nested.afterDeathRevive === true,
+        sourceRevived: nested.sourceRevived === true || nested.afterRevive === true || nested.afterRevived === true || nested.afterDeathRevive === true
+          || nested.afterReviveNextAttack === true || nested.onFirstAttackAfterRevive === true || nested.firstAttackAfterRevive === true,
         sourceReviveActive: nested.sourceReviveActive === true || nested.whileRevived === true || nested.reviveActive === true,
-        sourceReviveMode: String(nested.sourceReviveMode || nested.requiredReviveMode || nested.reviveModeRequired || "").trim()
+        sourceReviveMode: String(nested.sourceReviveMode || nested.requiredReviveMode || nested.reviveModeRequired || "").trim(),
+        afterReviveNextAttack: nested.afterReviveNextAttack === true || nested.onFirstAttackAfterRevive === true || nested.firstAttackAfterRevive === true
       };
       const result = (triggerOn, eventEvery = 1, extra = {}) => ({
         onOwnAttack: triggerOn === "ownAttack", afterOwnAttacks: triggerOn === "nextAttack" ? Math.min(cap, Math.max(1, Math.floor(Number(eventEvery) || 1))) : 0,
         eventEvery: Math.min(cap, Math.max(1, Math.floor(Number(eventEvery) || 1))), triggerOn, ...common, ...extra
+      });
+      // v130: ทำงานเฉพาะการโจมตีครั้งแรกหลังคืนชีพ เช่น อิทาจิโจมตี 1500% + สตันเพียงครั้งเดียว
+      if (common.afterReviveNextAttack) return result("ownAttack", 1, {
+        repeat: false,
+        maxActivations: Math.max(1, Math.floor(Number(nested.maxActivations || nested.maxTriggers) || 1)),
+        sourceRevived: true,
+        afterReviveNextAttack: true
       });
       if (nested.onBattleStart === true || String(nested.triggerOn || "").toLowerCase() === "battlestart") return result("battleStart", 1, { repeat:false, onBattleStart:true });
       if (nested.onDamaged === true || String(nested.triggerOn || "").toLowerCase() === "damaged") return result("damaged", nested.afterDamagedHits || 1, { onDamaged:true });
@@ -11895,7 +11905,7 @@
       delete result.domainActive;
       delete result.requiredDomainId;
       delete result.afterDomainAttacks;
-      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","sourceRevived","afterRevive","afterRevived","afterDeathRevive","sourceReviveActive","whileRevived","reviveActive","sourceReviveMode","requiredReviveMode","reviveModeRequired","maxActivations","maxTriggers"].forEach(key => delete result[key]);
+      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","sourceRevived","afterRevive","afterRevived","afterDeathRevive","afterReviveNextAttack","onFirstAttackAfterRevive","firstAttackAfterRevive","sourceReviveActive","whileRevived","reviveActive","sourceReviveMode","requiredReviveMode","reviveModeRequired","maxActivations","maxTriggers"].forEach(key => delete result[key]);
       return result;
     }
 
@@ -14095,6 +14105,11 @@
       const effectDurationTurns = Math.max(0, Math.floor(Number(effect && (effect.durationTurns ?? effect.turns)) || 0));
       const cleanseStatusNames = normalizeAbilityStringList(effect && (effect.statuses || effect.cleanseStatuses || effect.statusTypes));
       const cleanseStatusText = cleanseStatusNames.length ? cleanseStatusNames.join(" / ") : "สถานะผิดปกติทั้งหมด";
+      const effectCondition = effect && effect.condition && typeof effect.condition === "object" ? effect.condition : {};
+      const afterReviveNextAttack = effectCondition.afterReviveNextAttack === true
+        || effectCondition.onFirstAttackAfterRevive === true
+        || effectCondition.firstAttackAfterRevive === true;
+      const statusDurationText = effectDurationTurns > 0 ? ` • ${effectDurationTurns} เทิร์น` : "";
       const labels = {
         teamPowerRate: `ATK ฝ่ายเรา ${signedPercent(value)}`,
         teamHpRate: `HP ฝ่ายเรา ${signedPercent(value)}`,
@@ -14114,15 +14129,19 @@
         cardHpRate: `HP ${targetText} ${signedPercent(value)}`,
         cardDefenseRate: `DEF ${targetText} ${signedPercent(value)}`,
         cardIncomeRate: `เงินเดือน ${targetText} ${signedPercent(value)}`,
-        applyStatus: `ติดสถานะ ${String(effect && (effect.status || effect.statusType || effect.abnormalStatus || "stun"))} ${targetText} • ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random") === "hitTargets" ? "เป้าที่โดนโจมตี" : `${Math.max(1, Math.min(5, Math.floor(Number(effect && effect.targetCount) || 1)))} เป้า`} • โอกาส ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.statusRate ?? effect.chance ?? effect.rate ?? effect.value), 1))}`,
+        applyStatus: `${afterReviveNextAttack ? "การโจมตีแรกหลังคืนชีพทำให้" : "ติด"}สถานะ ${String(effect && (effect.status || effect.statusType || effect.abnormalStatus || "stun"))} ${targetText} • ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random") === "hitTargets" ? "เป้าที่โดนโจมตี" : `${Math.max(1, Math.min(5, Math.floor(Number(effect && effect.targetCount) || 1)))} เป้า`} • โอกาส ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.statusRate ?? effect.chance ?? effect.rate ?? effect.value), 1))}${statusDurationText}${afterReviveNextAttack ? " • ครั้งเดียว" : ""}`,
         copyAbilities: `คัดลอกสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.copyRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         stealAbilities: `ขโมยสกิลจาก ${normalizeAbilityTransferSide(effect && effect.targetSide) === "both" ? "ทั้งสองฝ่าย" : targetText} • เป้าหมาย ${normalizeAbilitySelectionMode(effect && effect.targetSelection, "random")} • สำเร็จ ${signedPercent(normalizeAbilityChance(effect && (effect.successRate ?? effect.stealRate ?? effect.chance ?? effect.rate ?? (Object.prototype.hasOwnProperty.call(effect || {}, "value") ? effect.value : 1)), 1))}${effect && effect.copiedAbilityExpireOnUse ? " • ใช้แล้วหาย" : ""}`,
         statusResistance: `ต้านสถานะ ${targetText} ${signedPercent(normalizeStatusResistanceRate(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value), 0))}${String(effect && (effect.scope || "")).toLowerCase() === "field" ? " • ทั้งสนาม" : ""}`,
         abnormalStatusResistance: `ต้านสถานะผิดปกติ ${targetText} ${signedPercent(normalizeStatusResistanceRate(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value ?? 100), 1))} • ไม่ถูกลดค่า${Math.max(0, Math.floor(Number(effect && (effect.durationTurns ?? effect.turns)) || 0)) ? ` • ${Math.max(0, Math.floor(Number(effect && (effect.durationTurns ?? effect.turns)) || 0))} เทิร์น` : ""}${Math.max(0, Math.floor(Number(effect && (effect.durationHits ?? effect.durationAttacks ?? effect.attacksRemaining ?? effect.hitsRemaining)) || 0)) ? ` • ${Math.max(0, Math.floor(Number(effect && (effect.durationHits ?? effect.durationAttacks ?? effect.attacksRemaining ?? effect.hitsRemaining)) || 0))} ครั้งที่โดนตี` : ""}`,
         nullifyCardAbilities: `ยกเลิกความสามารถ ${targetText}`,
         ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
-        nextAttackPowerRate: `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
-        nextAttackPowerFlat: `โจมตีครั้งที่สกิลทำงาน ATK +${formatNumber(value)}`,
+        nextAttackPowerRate: afterReviveNextAttack
+          ? `การโจมตีแรกหลังคืนชีพ ATK ${signedPercent(Math.max(0, value))} • ครั้งเดียว`
+          : `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
+        nextAttackPowerFlat: afterReviveNextAttack
+          ? `การโจมตีแรกหลังคืนชีพ ATK +${formatNumber(value)} • ครั้งเดียว`
+          : `โจมตีครั้งที่สกิลทำงาน ATK +${formatNumber(value)}`,
         nextAttackCriticalRate: `โจมตีครั้งที่สกิลทำงาน คริติคอล ${signedPercent(Math.max(-1, value))} (ชั่วคราว)`,
         blockRate: `อัตราบล็อก ${targetText} ${signedPercent(value)} (บล็อกแล้วดาเมจส่วนตัวลด 50%)`,
         damageTakenRate: `ดาเมจที่ได้รับขั้นสุดท้าย ${targetText} ${signedPercent(value)}`,
@@ -14135,7 +14154,7 @@
         nextAttackHits: `เมื่อสกิลทำงาน จำนวนฮิตครั้งถัดไปของ${targetSideText} ${Math.round(value) >= 0 ? "+" : ""}${Math.round(value)} ฮิต`,
         revive: `คืนชีพ ${targetText} ด้วย HP ${signedPercent(Math.max(0, value))}`,
         reviveTimedUndying: `คืนชีพอมตะชั่วคราว ${targetText} ด้วย HP ${signedPercent(Math.max(0, value))} • ตายเมื่อครบ ${Math.max(1, Math.floor(Number(effect && effect.durationTurns) || 1))} เทิร์น`,
-        reviveHitLife: `คืนชีพชีวิตตามฮิต ${targetText} ด้วย HP ${signedPercent(Math.max(0, value))} • รับได้ ${Math.max(1, Math.floor(Number(effect && effect.surviveHits) || 1))} ฮิต`,
+        reviveHitLife: `คืนชีพเป็นร่างชีวิตตามฮิต ${targetText} ด้วย HP ${signedPercent(Math.max(0, value))} • จะตายเมื่อถูกโจมตีสะสมครบ ${Math.max(1, Math.floor(Number(effect && effect.surviveHits) || 1))} ฮิต`,
         speedFlat: `SPD ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)}`,
         speedFlatStack: `SPD แบบสแต็ก ${targetText} ${value >= 0 ? "+" : ""}${Math.round(value)} ต่อชั้น • สูงสุด ${Math.max(1, Math.floor(Number(effect && effect.maxStacks) || 1))} ชั้น`,
         taunt: `ยั่วยุ ${targetText} • บังคับฝ่ายตรงข้ามเล็งเป้าหมายนี้ก่อน ${Math.max(1, Math.floor(Number(effect && effect.durationTurns) || 1))} เทิร์นโจมตี`,
@@ -14212,12 +14231,19 @@
       if (requiredIds.length) parts.push(`ต้องมีการ์ด ID ${requiredIds.join(", ")}`);
       const anyIds = normalizeAbilityCardIds(condition.anyCardIds);
       if (anyIds.length) parts.push(`มีการ์ดอย่างน้อยหนึ่งใบจาก ID ${anyIds.join(", ")}`);
-      if (condition.sourceRevived === true || condition.afterRevive === true || condition.afterRevived === true || condition.afterDeathRevive === true) parts.push("เจ้าของสกิลต้องเคยตายและคืนชีพแล้ว");
+      const afterReviveNextAttack = condition.afterReviveNextAttack === true
+        || condition.onFirstAttackAfterRevive === true
+        || condition.firstAttackAfterRevive === true;
+      if (afterReviveNextAttack) {
+        parts.push("หลังคืนชีพ ทำงานกับการโจมตีครั้งแรกเพียงครั้งเดียว");
+      } else if (condition.sourceRevived === true || condition.afterRevive === true || condition.afterRevived === true || condition.afterDeathRevive === true) {
+        parts.push("เจ้าของสกิลต้องเคยตายและคืนชีพแล้ว");
+      }
       if (condition.sourceReviveActive === true || condition.whileRevived === true || condition.reviveActive === true) parts.push("เจ้าของสกิลต้องกำลังอยู่ในสถานะคืนชีพ/อมตะ");
       const battleTrigger = normalizeBattleTriggerRule(condition);
-      if (battleTrigger && battleTrigger.onOwnAttack) {
+      if (!afterReviveNextAttack && battleTrigger && battleTrigger.onOwnAttack) {
         parts.push("ทำงานทุกครั้งที่เจ้าของสกิลโจมตี ตั้งแต่การโจมตีครั้งแรก");
-      } else if (battleTrigger) {
+      } else if (!afterReviveNextAttack && battleTrigger) {
         parts.push(`ฝ่ายเจ้าของสกิลโจมตีครบ ${battleTrigger.afterOwnAttacks} ครั้ง → ทำงานในการโจมตีครั้งถัดไป${battleTrigger.repeat ? " และวนลูป" : " ครั้งเดียว"}`);
       }
       return parts.length ? parts.join(" • ") : "เพียงจัดการ์ดนี้อยู่ในทีม";
@@ -16096,6 +16122,7 @@
           sourceHpBelowRate: item.sourceHpBelowRate, sourceHpAboveRate: item.sourceHpAboveRate,
           targetHpBelowRate: item.targetHpBelowRate, targetHpAboveRate: item.targetHpAboveRate,
           sourceRevived: Boolean(item.sourceRevived), sourceReviveActive: Boolean(item.sourceReviveActive), sourceReviveMode: String(item.sourceReviveMode || ""),
+          afterReviveNextAttack: Boolean(item.afterReviveNextAttack),
           durationTurns: Math.max(0, Math.floor(Number(item.durationTurns) || 0)), durationRounds: Math.max(0, Math.floor(Number(item.durationRounds) || 0))
         };
       }
@@ -19561,6 +19588,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             sourceRevived: Boolean(record.trigger.sourceRevived),
             sourceReviveActive: Boolean(record.trigger.sourceReviveActive),
             sourceReviveMode: String(record.trigger.sourceReviveMode || ""),
+            afterReviveNextAttack: Boolean(record.trigger.afterReviveNextAttack),
             baseAfterOwnAttacks: String(record.trigger.triggerOn || "") === "nextAttack"
               ? Math.max(1, Number(record.trigger.afterOwnAttacks || 1))
               : 0,
