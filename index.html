@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-15-battle-transform-v131">
-  <title>Anime Card Collection · Runtime v131 · Battle Transformation</title>
+  <meta name="gacha-app-build" content="2026-07-15-transform-detail-v132">
+  <title>Anime Card Collection · Runtime v132 · Transform Form Details</title>
   <style>
     :root {
       color-scheme: dark;
@@ -4526,6 +4526,84 @@
     #cardModal .card-ability-description { color: #d7def0; font-size: .84rem; line-height: 1.68; }
     #cardModal .card-ability-condition { font-size: .76rem; line-height: 1.58; }
     #cardModal .card-ability-effect { padding: 6px 9px; font-size: .72rem; line-height: 1.35; }
+
+    /* v132: หน้ารายละเอียดร่างแปลง — อ่านสกิลเฉพาะร่างและเห็นสแตตเดิม + โบนัส */
+    .detail-tabbar.has-transform { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .transform-form-list { display: grid; gap: 16px; }
+    .transform-form-card {
+      overflow: hidden;
+      border: 1px solid rgba(86,227,159,.28);
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(86,227,159,.10), transparent 36%),
+        radial-gradient(circle at 94% 0%, rgba(167,139,250,.13), transparent 40%),
+        rgba(3,5,12,.42);
+      box-shadow: 0 12px 34px rgba(0,0,0,.20);
+    }
+    .transform-form-head {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 14px;
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+    }
+    .transform-form-art {
+      position: relative;
+      min-height: 180px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      background: linear-gradient(145deg,#11162b,#070a13);
+    }
+    .transform-form-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+    .transform-form-art::after { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(to top,rgba(3,5,12,.62),transparent 48%); }
+    .transform-form-copy { min-width: 0; align-self: center; }
+    .transform-form-copy h3 { margin: 7px 0 6px; font-size: 1.22rem; line-height: 1.25; }
+    .transform-form-copy p { margin: 0; color: #cbd5e1; font-size: .79rem; line-height: 1.62; }
+    .transform-form-badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .transform-form-badge {
+      display:inline-flex; align-items:center; min-height:28px; border:1px solid rgba(255,255,255,.12);
+      border-radius:999px; padding:5px 8px; color:#dbeafe; font-size:.64rem; font-weight:1000;
+      background:rgba(255,255,255,.055);
+    }
+    .transform-form-badge.duration { color:#052015; border-color:transparent; background:linear-gradient(135deg,var(--green),#a7f3d0); }
+    .transform-form-badge.id { color:#eadcff; border-color:rgba(167,139,250,.28); background:rgba(126,34,206,.16); }
+    .transform-form-trigger { margin-top:10px !important; color:var(--gold) !important; font-size:.72rem !important; }
+    .transform-form-body { padding: 14px; }
+    .transform-stat-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-bottom:12px; }
+    .transform-stat {
+      min-height:76px; padding:12px 13px; border:1px solid rgba(255,255,255,.10); border-radius:14px;
+      background:rgba(255,255,255,.04);
+    }
+    .transform-stat > span { display:block; color:#aebbd9; font-size:.69rem; font-weight:900; letter-spacing:.035em; text-transform:uppercase; }
+    .transform-stat > strong { display:flex; flex-wrap:wrap; align-items:baseline; gap:7px; margin-top:6px; color:#f8fafc; font-size:1.04rem; line-height:1.25; }
+    .transform-stat-bonus { color:var(--green); font-size:.82em; font-style:normal; font-weight:1000; text-shadow:0 0 14px rgba(86,227,159,.28); }
+    .transform-stat-bonus.negative { color:var(--danger); text-shadow:0 0 14px rgba(251,113,133,.24); }
+    .transform-stat-bonus.zero { color:#71809e; text-shadow:none; }
+    .transform-form-elements {
+      display:grid; gap:7px; margin-bottom:13px; padding:11px 12px; border:1px solid rgba(255,255,255,.09);
+      border-radius:14px; background:rgba(3,5,12,.28);
+    }
+    .transform-form-elements > span { color:#aebbd9; font-size:.69rem; font-weight:900; text-transform:uppercase; }
+    .transform-form-elements strong { display:flex; flex-wrap:wrap; align-items:center; gap:7px; }
+    .transform-element-arrow { color:var(--green); font-size:.85rem; font-weight:1000; }
+    .transform-ability-block { margin-top: 12px; }
+    .transform-ability-block .card-ability-panel { border-color:rgba(86,227,159,.24); background:rgba(86,227,159,.045); }
+    .transform-ability-block .card-ability-item { opacity:1; border-color:rgba(86,227,159,.20); }
+    .transform-only-status { color:#052015 !important; background:var(--green) !important; }
+
+    @media (max-width: 680px) {
+      .transform-form-head { grid-template-columns: 108px minmax(0,1fr); gap:10px; padding:11px; }
+      .transform-form-art { min-height:145px; }
+      .transform-form-copy h3 { font-size:1rem; }
+      .transform-stat-grid { grid-template-columns:1fr 1fr; }
+      .transform-form-body { padding:11px; }
+    }
+    @media (max-width: 470px) {
+      .detail-tabbar.has-transform { grid-template-columns:1fr; }
+      .transform-form-head { grid-template-columns:1fr; }
+      .transform-form-art { height:280px; }
+    }
 
     @keyframes detail-tab-in {
       from { opacity: 0; transform: translateY(5px); }
@@ -14321,6 +14399,181 @@
           <div class="card-ability-panel-head"><h3>ความสามารถเฉพาะการ์ด</h3><span>${abilities.length} ความสามารถ</span></div>
           <div class="card-ability-list">${items}</div>
         </div>`;
+    }
+
+    function getCardTransformForms(card) {
+      const forms = [];
+      getCardAbilities(card).forEach((ability, abilityIndex) => {
+        abilityArray(ability && ability.effects).forEach((effect, effectIndex) => {
+          if (!effect || typeof effect !== "object") return;
+          if (normalizeAbilityEffectType(effect.type) !== CARD_ABILITY_EFFECT_TYPES.TRANSFORM) return;
+          const transformId = String(effect.transformId || effect.formId || `${card && card.id || "card"}-form-${abilityIndex + 1}-${effectIndex + 1}`).trim();
+          forms.push({
+            key: `${abilityIndex}:${effectIndex}:${transformId}`,
+            transformId,
+            transformName: String(effect.transformName || effect.formName || `${card && card.name || "การ์ด"} — ร่างแปลง`).trim(),
+            image: resolveAsset(effect.image || effect.transformImage || effect.formImage || "", "card") || getCardImage(card),
+            durationTurns: Math.max(0, Math.floor(Number(effect.durationTurns ?? effect.turns ?? 0) || 0)),
+            bonuses: effect.bonuses && typeof effect.bonuses === "object"
+              ? { ...effect.bonuses }
+              : effect.transformBonuses && typeof effect.transformBonuses === "object" ? { ...effect.transformBonuses } : {},
+            transformedElements: normalizeAbilityElements(effect.transformedElements || effect.formElements),
+            normalAttackTargetCount: Math.max(0, Math.min(5, Math.floor(Number(effect.normalAttackTargetCount ?? effect.attackTargetCount) || 0))),
+            transformedAbilities: abilityArray(effect.transformedAbilities || effect.formAbilities || effect.transformAbilities)
+              .filter(item => item && typeof item === "object").map(item => ({ ...item })),
+            parentAbility: ability,
+            effect
+          });
+        });
+      });
+      return forms;
+    }
+
+    function getTransformDetailBonusMap(form = {}) {
+      const effect = form && form.effect && typeof form.effect === "object" ? form.effect : {};
+      const source = form && form.bonuses && typeof form.bonuses === "object" ? form.bonuses : {};
+      const number = (...names) => {
+        for (const name of names) {
+          const value = source[name] ?? effect[name];
+          if (value !== undefined && value !== null && value !== "" && Number.isFinite(Number(value))) return Number(value);
+        }
+        return 0;
+      };
+      return {
+        powerRate:number("powerRate","attackRate","atkRate"), powerFlat:number("powerFlat","attackFlat","atkFlat"),
+        hpRate:number("hpRate"), hpFlat:number("hpFlat"),
+        defenseRate:number("defenseRate","defRate"), defenseFlat:number("defenseFlat","defFlat"),
+        speedRate:number("speedRate","spdRate"), speedFlat:number("speedFlat","spdFlat"),
+        attackHits:number("attackHits","extraHits"), criticalRate:number("criticalRate"),
+        dodgeRate:number("dodgeRate"), blockRate:number("blockRate")
+      };
+    }
+
+    function transformSignedValueHTML(value, formatter = formatNumber) {
+      const number = Number(value) || 0;
+      const className = number < 0 ? "negative" : number === 0 ? "zero" : "";
+      const text = `${number > 0 ? "+" : ""}${formatter(number)}`;
+      return `<em class="transform-stat-bonus ${className}">${escapeHTML(text)}</em>`;
+    }
+
+    function transformRateValueHTML(value) {
+      const number = Number(value) || 0;
+      const className = number < 0 ? "negative" : number === 0 ? "zero" : "";
+      return `<em class="transform-stat-bonus ${className}">${escapeHTML(signedPercent(number))}</em>`;
+    }
+
+    function transformedAbilityListHTML(card, form) {
+      const abilities = abilityArray(form && form.transformedAbilities);
+      const formName = String(form && form.transformName || "ร่างแปลง");
+      if (!abilities.length) {
+        return `
+          <div class="card-ability-panel">
+            <div class="card-ability-panel-head"><h3>สกิลเฉพาะร่าง</h3><span>0 ความสามารถ</span></div>
+            <div class="card-ability-item inactive">
+              <div class="card-ability-title-row"><strong>ยังไม่ได้กำหนดสกิลเฉพาะร่าง</strong><span class="card-ability-status">FORM</span></div>
+              <p class="card-ability-description">ร่างนี้ยังได้รับเฉพาะโบนัสสแตตและการเปลี่ยนภาพ โดยไม่มี transformedAbilities เพิ่มเติม</p>
+            </div>
+          </div>`;
+      }
+      const items = abilities.map(ability => {
+        const effects = abilityArray(ability && ability.effects).filter(effect => effect && typeof effect === "object");
+        const effectHTML = effects.length
+          ? effects.map(effect => `<span class="card-ability-effect ${Number(effect.value || 0) < 0 ? "negative" : ""}">${escapeHTML(abilityEffectText(effect))}</span>`).join("")
+          : `<span class="card-ability-effect">ยังไม่มี effect</span>`;
+        const effectConditions = effects
+          .filter(effect => effect.condition && Object.keys(effect.condition).length)
+          .map(effect => `${abilityEffectText(effect)}: ${abilityConditionText(effect.condition)}`);
+        const conditionText = [
+          `ทำงานเฉพาะขณะอยู่ใน ${formName}`,
+          abilityConditionText(ability && ability.condition || {}),
+          ...effectConditions
+        ].filter(Boolean).join(" • ");
+        const modes = getAbilityModes(ability);
+        return `
+          <div class="card-ability-item active">
+            <div class="card-ability-title-row">
+              <strong>${escapeHTML(ability && ability.name || "ความสามารถเฉพาะร่าง")}</strong>
+              <span class="card-ability-status transform-only-status">เฉพาะร่าง</span>
+            </div>
+            <p class="card-ability-description">${escapeHTML(ability && ability.description || "ทำงานเฉพาะเมื่อแปลงร่างแล้ว")}</p>
+            ${skillTagPillsHTML(getAbilitySkillTags(ability), 6, { clickable: true, className: "card-ability-tags" })}
+            <div class="card-ability-effects">${effectHTML}</div>
+            <p class="card-ability-condition">เงื่อนไข: ${escapeHTML(conditionText)} • ทำงานเฉพาะ: ${escapeHTML(modes.map(abilityModeLabel).join(" / "))}</p>
+          </div>`;
+      }).join("");
+      return `
+        <div class="card-ability-panel">
+          <div class="card-ability-panel-head"><h3>สกิลเฉพาะร่าง ${escapeHTML(formName)}</h3><span>${abilities.length} ความสามารถ</span></div>
+          <div class="card-ability-list">${items}</div>
+        </div>`;
+    }
+
+    function transformFormsDetailHTML(card, forms = getCardTransformForms(card)) {
+      if (!forms.length) return `<div class="empty-state">การ์ดใบนี้ยังไม่มีเอฟเฟกต์แปลงร่าง</div>`;
+      const basePower = getCardPower(card);
+      const baseHp = getCardHp(card);
+      const baseDefense = getCardDefense(card);
+      const baseSpeed = getCardSpeed(card);
+      const baseTargets = Math.max(1, Math.min(5, Math.floor(Number(card && (card.normalAttackTargetCount ?? card.attackTargetCount)) || 1)));
+      const baseHits = Math.max(1, Math.floor(Number(card && (card.attackHits ?? card.normalAttackHits)) || 1));
+      const baseCritical = Number(card && card.criticalRate) || 0;
+      const baseDodge = Number(card && card.dodgeRate) || 0;
+      const baseBlock = Number(card && card.blockRate) || 0;
+      const baseElements = getCardElements(card);
+
+      return `<div class="transform-form-list">${forms.map((form, index) => {
+        const bonus = getTransformDetailBonusMap(form);
+        const powerBonus = basePower * bonus.powerRate + bonus.powerFlat;
+        const hpBonus = baseHp * bonus.hpRate + bonus.hpFlat;
+        const defenseBonus = baseDefense * bonus.defenseRate + bonus.defenseFlat;
+        const transformedSpeed = Math.max(1, Math.round(baseSpeed + baseSpeed * bonus.speedRate + bonus.speedFlat));
+        const speedBonus = transformedSpeed - baseSpeed;
+        const targetBonus = form.normalAttackTargetCount > 0 ? form.normalAttackTargetCount - baseTargets : 0;
+        const transformedElements = form.transformedElements.length ? form.transformedElements : baseElements;
+        const parentCondition = abilityConditionText(form.parentAbility && form.parentAbility.condition || {});
+        const effectCondition = form.effect && form.effect.condition && Object.keys(form.effect.condition).length
+          ? abilityConditionText(form.effect.condition) : "";
+        const triggerText = [parentCondition, effectCondition].filter(Boolean).join(" • ");
+        const parentDescription = String(form.parentAbility && form.parentAbility.description || "เมื่อผ่านเงื่อนไข จะเปลี่ยนเข้าสู่ร่างนี้");
+        return `
+          <article class="transform-form-card">
+            <div class="transform-form-head">
+              <div class="transform-form-art">${form.image ? `<img src="${escapeHTML(form.image)}" alt="${escapeHTML(form.transformName)}" onerror="this.remove()">` : ""}</div>
+              <div class="transform-form-copy">
+                <span class="pill">ร่างแปลง #${index + 1}</span>
+                <h3>${escapeHTML(form.transformName)}</h3>
+                <p>${escapeHTML(parentDescription)}</p>
+                <div class="transform-form-badges">
+                  <span class="transform-form-badge duration">${form.durationTurns > 0 ? `${form.durationTurns} เทิร์น` : "ถาวรจนจบการต่อสู้"}</span>
+                  <span class="transform-form-badge id">FORM ID: ${escapeHTML(form.transformId)}</span>
+                  <span class="transform-form-badge">สกิลเฉพาะร่าง ${form.transformedAbilities.length}</span>
+                </div>
+                <p class="transform-form-trigger">เงื่อนไขแปลงร่าง: ${escapeHTML(triggerText || "ทำงานตามเงื่อนไขของสกิลแปลงร่าง")}</p>
+              </div>
+            </div>
+            <div class="transform-form-body">
+              <div class="transform-stat-grid">
+                <div class="transform-stat"><span>Attack / ATK</span><strong>${formatNumber(basePower)} ${transformSignedValueHTML(powerBonus)}</strong></div>
+                <div class="transform-stat"><span>Health / HP</span><strong>${formatNumber(baseHp)} ${transformSignedValueHTML(hpBonus)}</strong></div>
+                <div class="transform-stat"><span>Defense / DEF</span><strong>${formatNumber(baseDefense)} ${transformSignedValueHTML(defenseBonus)}</strong></div>
+                <div class="transform-stat"><span>Speed / SPD</span><strong>${formatNumber(baseSpeed)} ${transformSignedValueHTML(speedBonus)}</strong></div>
+                <div class="transform-stat"><span>เป้าหมายโจมตีปกติ</span><strong>${formatNumber(baseTargets)} ${transformSignedValueHTML(targetBonus)}</strong></div>
+                <div class="transform-stat"><span>จำนวนฮิตโจมตี</span><strong>${formatNumber(baseHits)} ${transformSignedValueHTML(bonus.attackHits)}</strong></div>
+                <div class="transform-stat"><span>Critical Rate</span><strong>${formatRatePercent(baseCritical * 100)}% ${transformRateValueHTML(bonus.criticalRate)}</strong></div>
+                <div class="transform-stat"><span>Dodge Rate</span><strong>${formatRatePercent(baseDodge * 100)}% ${transformRateValueHTML(bonus.dodgeRate)}</strong></div>
+                <div class="transform-stat"><span>Block Rate</span><strong>${formatRatePercent(baseBlock * 100)}% ${transformRateValueHTML(bonus.blockRate)}</strong></div>
+              </div>
+              <div class="transform-form-elements">
+                <span>Element</span>
+                <strong>
+                  <span class="card-element-list">${elementChipsHTML(baseElements, "element-chip")}</span>
+                  ${form.transformedElements.length ? `<span class="transform-element-arrow">→</span><span class="card-element-list">${elementChipsHTML(transformedElements, "element-chip")}</span>` : `<span class="transform-element-arrow">คงเดิม</span>`}
+                </strong>
+              </div>
+              <div class="transform-ability-block">${transformedAbilityListHTML(card, form)}</div>
+            </div>
+          </article>`;
+      }).join("")}</div>`;
     }
 
     function rollCriticalHit(criticalRate = 0) {
@@ -25681,7 +25934,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               </div>
             </section>
 
-            <section class="detail-tab-panel ${!statsActive ? "active" : ""}" role="tabpanel">
+            <section class="detail-tab-panel ${abilityActive ? "active" : ""}" role="tabpanel">
               <div class="ability-tab-intro">
                 <strong>ความสามารถของบอส</strong>
                 <span>อ่านสกิล เงื่อนไข ฮิต และจำนวนเป้าหมายก่อนเริ่มตีบอสได้จากตรงนี้</span>
@@ -27504,7 +27757,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         ? `<button class="btn btn-primary" data-action="use-selector" data-card-id="${escapeHTML(card.id)}">ใช้ใบเลือก ${escapeHTML(card.rarity)} <span class="cost">มี ${formatNumber(selectorCount)} ใบ</span></button>`
         : "";
       const abilityCount = getCardAbilities(card).length;
-      const statsActive = cardDetailActiveTab !== "ability";
+      const transformForms = getCardTransformForms(card);
+      const transformFormCount = transformForms.length;
+      const activeDetailTab = cardDetailActiveTab === "ability" ? "ability" : cardDetailActiveTab === "transform" && transformFormCount ? "transform" : "stats";
+      const statsActive = activeDetailTab === "stats";
+      const abilityActive = activeDetailTab === "ability";
+      const transformActive = activeDetailTab === "transform";
       const membershipHTML = owned
         ? `<div class="detail-membership-row">${inTeam ? `<span class="team-membership-badge showcase">ทีมโชว์ #${state.team.indexOf(String(card.id)) + 1}</span>` : ""}${inTowerTeam ? `<span class="team-membership-badge tower">ไต่หอ #${getTowerTeamIds().indexOf(String(card.id)) + 1}</span>` : ""}${inArenaTeam ? `<span class="team-membership-badge arena">ARENA #${state.arena.team.indexOf(String(card.id)) + 1}</span>` : ""}${!inTeam && !inTowerTeam && !inArenaTeam ? `<span class="pill">ยังไม่ได้จัดลงทีม</span>` : ""}</div>`
         : "";
@@ -27527,13 +27785,16 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               ${isAwaken ? `<div class="awaken-transform-note">💜 ร่างปลุกพลังของ Card ID ${escapeHTML(getAwakenSourceId(card))} • หาไม่ได้จากกาชา ตั๋ว Selector จดหมาย หรือรางวัล • เลเวลตัน 350 / อเวกตัน 20</div>` : ""}
             </div>
 
-            <div class="detail-tabbar" role="tablist" aria-label="หมวดรายละเอียดการ์ด">
+            <div class="detail-tabbar ${transformFormCount ? "has-transform" : ""}" role="tablist" aria-label="หมวดรายละเอียดการ์ด">
               <button type="button" class="detail-tab ${statsActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="stats" role="tab" aria-selected="${statsActive}">
                 <span>📊</span><strong>สแตตและพัฒนา</strong><small>เลเวล ATK HP DEF เงินเดือน อเวก</small>
               </button>
-              <button type="button" class="detail-tab ${!statsActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="ability" role="tab" aria-selected="${!statsActive}">
+              <button type="button" class="detail-tab ${abilityActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="ability" role="tab" aria-selected="${abilityActive}">
                 <span>✨</span><strong>ความสามารถ</strong><small>${abilityCount ? `${abilityCount} ความสามารถ` : "ยังไม่ได้กำหนด"}</small>
               </button>
+              ${transformFormCount ? `<button type="button" class="detail-tab ${transformActive ? "active" : ""}" data-action="switch-card-detail-tab" data-detail-tab="transform" role="tab" aria-selected="${transformActive}">
+                <span>🌀</span><strong>รายละเอียดร่างแปลง</strong><small>${transformFormCount} ร่าง • สแตตและสกิลเฉพาะร่าง</small>
+              </button>` : ""}
             </div>
 
             <section class="detail-tab-panel ${statsActive ? "active" : ""}" role="tabpanel">
@@ -27580,6 +27841,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               </div>
               ${cardAbilitiesHTML(card)}
             </section>
+
+            ${transformFormCount ? `<section class="detail-tab-panel ${transformActive ? "active" : ""}" role="tabpanel">
+              <div class="ability-tab-intro">
+                <strong>รายละเอียดร่างแปลง</strong>
+                <span>แสดงสแตตเดิมของการ์ดก่อน แล้วตามด้วยโบนัสของร่างแปลงเป็นตัวเลขสีเขียว พร้อมอ่านสกิลที่เปิดใช้เฉพาะตอนแปลงร่างได้ครบ</span>
+              </div>
+              ${transformFormsDetailHTML(card, transformForms)}
+            </section>` : ""}
           </div>
         </div>
       `;
@@ -28563,7 +28832,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "open-team-card-detail") openTeamCardDetail(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0, cardId);
       if (action === "change-team-card") changeTeamCardFromDetail(target.dataset.teamMode, Number(target.dataset.slotIndex) || 0);
       if (action === "switch-card-detail-tab") {
-        cardDetailActiveTab = target.dataset.detailTab === "ability" ? "ability" : "stats";
+        const requestedDetailTab = String(target.dataset.detailTab || "stats");
+        cardDetailActiveTab = ["stats", "ability", "transform"].includes(requestedDetailTab) ? requestedDetailTab : "stats";
         if (modalBossId) renderWorldBossDetail(modalBossId);
         else if (modalCardId) renderCardDetail(modalCardId);
       }
