@@ -30,7 +30,7 @@ ACC_REGISTER_CARD({
     accent: "#8a0000",
     accent2: "#350303",
     introMs: 2200,
-    maxVideoMs: 60000,
+    maxVideoMs: 14000,
     revealMs: 1900,
     objectFit: "cover",
     objectPosition: "center center",
@@ -75,27 +75,25 @@ ACC_REGISTER_CARD({
         targetSelection: "all"
       },
       {
-  type: "nextAttackPowerRate",
-  value: 15,
-  targetSide: "self",
-  targetSelection: "all",
-  condition: {
-    afterReviveNextAttack: true,
-    maxActivations: 1
-  }
-},
-{
-  type: "applyStatus",
-  targetSide: "enemy",
-  targetSelection: "hitTargets",
-  status: "stun",
-  successRate: 1,
-  targetCount: 1,
-  durationTurns: 10,
-  condition: {
-    afterReviveNextAttack: true,
-    maxActivations: 1
-  }
+        type: "nextAttackPowerRate",
+        value: 15,
+        targetSide: "self",
+        condition: {
+          onDeath: true
+        },
+        targetSelection: "all"
+      },
+      {
+        type: "applyStatus",
+        targetSide: "enemy",
+        targetSelection: "hitTargets",
+        status: "stun",
+        successRate: 1,
+        targetCount: 1,
+        durationTurns: 10,
+        condition: {
+          afterReviveNextAttack: true
+        }
       }
     ],
     attackTargetCount: 1
@@ -157,6 +155,85 @@ ACC_REGISTER_CARD({
     condition: {
       afterOwnAttacks: 4
     }
+  },
+  {
+  name: "ซูซาโนะโอะ",
+  description: "เมื่อโจมตีครบ 8 ครั้ง จะแปลงร่างเป็นซูซาโนะโอะนาน 5 เทิร์น",
+  activeIn: [
+    "team",
+    "tower",
+    "arena",
+    "worldBoss"
+  ],
+  condition: {
+    afterOwnAttacks: 7,
+    repeat: true
+  },
+  effects: [
+    {
+      type: "transform",
+      targetSide: "self",
+      targetSelection: "self",
+
+      transformId: "susanoo",
+      transformName: "อุจิวะ อิทาจิ — ซูซาโนะโอะ",
+      image: "card/4010/4010tf.png",
+
+      durationTurns: 5,
+
+      bonuses: {
+        powerRate: 1,
+        hpRate: 0.5,
+        defenseRate: 1,
+        dodgeRate: 0.3,
+        criticalRate: 0.5
+      },
+
+      transformedElements: [
+        "ความมืด",
+        "ไฟ",
+        "มิติ"
+      ],
+
+      normalAttackTargetCount: 3,
+
+      transformedAbilities: [
+        {
+          name: "เนตรกระจกเงาหมื่นบุปผา",
+          description: "ขณะอยู่ในร่างซูซาโนะโอะ ลดความเสียหายที่ได้รับ 50%",
+          activeIn: [
+            "team",
+            "tower",
+            "arena",
+            "worldBoss"
+          ],
+          condition: {
+            sourceTransformed: true,
+            sourceTransformId: "susanoo"
+          },
+          effects: [
+            {
+              type: "damageTakenRate",
+              value: -0.5,
+              targetSide: "self",
+              targetSelection: "all"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  activeCutscene: {
+    enabled: true,
+    kicker: "SUSANOO",
+    quote: "นี่คือการป้องกันที่สมบูรณ์แบบ",
+    subtitle: "พลังแห่งเนตรกระจกเงาหมื่นบุปผา",
+    video: "card/4010/4010op.mp4",
+    maxVideoMs: 60000,
+    muted: false,
+    volume: 0.9
   }
+}
 ]
 });
