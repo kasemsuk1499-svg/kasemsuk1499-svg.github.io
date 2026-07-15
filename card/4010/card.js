@@ -30,7 +30,7 @@ ACC_REGISTER_CARD({
     accent: "#8a0000",
     accent2: "#350303",
     introMs: 2200,
-    maxVideoMs: 14000,
+    maxVideoMs: 60000,
     revealMs: 1900,
     objectFit: "cover",
     objectPosition: "center center",
