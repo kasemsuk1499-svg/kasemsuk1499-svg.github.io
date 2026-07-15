@@ -75,25 +75,27 @@ ACC_REGISTER_CARD({
         targetSelection: "all"
       },
       {
-        type: "nextAttackPowerRate",
-        value: 15,
-        targetSide: "self",
-        condition: {
-          onDeath: true
-        },
-        targetSelection: "all"
-      },
-      {
-        type: "applyStatus",
-        targetSide: "enemy",
-        targetSelection: "hitTargets",
-        status: "stun",
-        successRate: 1,
-        targetCount: 1,
-        durationTurns: 10,
-        condition: {
-          afterReviveNextAttack: true
-        }
+  type: "nextAttackPowerRate",
+  value: 15,
+  targetSide: "self",
+  targetSelection: "all",
+  condition: {
+    afterReviveNextAttack: true,
+    maxActivations: 1
+  }
+},
+{
+  type: "applyStatus",
+  targetSide: "enemy",
+  targetSelection: "hitTargets",
+  status: "stun",
+  successRate: 1,
+  targetCount: 1,
+  durationTurns: 10,
+  condition: {
+    afterReviveNextAttack: true,
+    maxActivations: 1
+  }
       }
     ],
     attackTargetCount: 1
