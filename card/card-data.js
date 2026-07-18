@@ -4693,28 +4693,61 @@ window.ACC_CARD_DATA = [
   },
   {
     "id": 14,
-    "name": "Saber Alter",
-    "rarity": "SSR",
+    "name": "เซเบอร์ อัลเทอร์",
+    "rarity": "SC",
     "element": "ความมืด",
-    "power": 27000,
-        "hp": 135000,
-        "defense": 10800,
-    "incomePerSec": 800,
-    "upgradeDustBase": 220,
-    "upgradeDustGrowth": 1.052,
-    "awakenMax": 7,
-    "icon": "",
-    "image": "14.png",
-    "ability": {
-      "name": "จงลิ้มรสดาบฉันซ้ะ...",
-      "description": "หากจัดทีมความมืดครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +25%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "ความมืด":5}, "leaderOnly": true},
-      "effects": [
-        { "type": "teamHpRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.25 }
-      ]
+     "balanceSchemaVersion": 4,
+  "power": 27000,
+  "hp": 135000,
+  "defense": 10800,
+  "speed": 103,
+  "incomePerSec": 275,
+  "normalAttackTargetCount": 4,
+  "targetSelection": "default",
+  "upgradeDustBase": 1723,
+  "upgradeDustGrowth": 1.016,
+  "awakenMax": 20,
+  "icon": "",
+  "image": "14.png",
+    "ability": [
+        {
+          "type": "nextAttackPowerRate",
+          "value": 2,
+          "targetSide": "self",
+          "targetSelection": "all"
+        },
+        {
+          "type": "applyStatus",
+          "targetSide": "enemy",
+          "targetSelection": "hitTargets",
+          "status": "burn",
+          "successRate": 0.2,
+          "targetCount": 4,
+          "durationTurns": 2,
+          "damageRate": 0.2
         }
+      ],
+       "scCutscene": {
+    "enabled": true,
+    "kicker": "THE BLACKENED KING",
+    "quote": "ราชาอัศวินผู้ถูกความมืดกัดกิน ก้าวออกมาพร้อมดาบแห่งการทำลายล้าง",
+    "subtitle": "THE KING OF KNIGHTS, CORRUPTED BY DARKNESS",
+    "video": "14op.mp4",
+    "revealKicker": "SERVANT • SABER",
+    "revealTitle": "SABER ALTER",
+    "revealText": "แสงแห่งดาบศักดิ์สิทธิ์ได้แปรเปลี่ยนเป็นเปลวเพลิงสีดำ",
+    "accent": "#fa0000",
+    "accent2": "#000000",
+    "introMs": 2200,
+    "maxVideoMs": 60000,
+    "revealMs": 1900,
+    "objectFit": "cover",
+    "objectPosition": "center center",
+    "muted": false,
+    "volume": 0.9,
+    "showCardAfterVideo": true
+  },
+
   },
   {
     "id": 15,
@@ -4739,7 +4772,7 @@ window.ACC_CARD_DATA = [
         { "type": "teamPowerRate", "value": 0.2 },
         { "type": "teamIncomeRate", "value": 0.25 }
       ]
-        }
+        }  
   },
   {
     "id": 16,
@@ -5038,21 +5071,92 @@ window.ACC_CARD_DATA = [
     "awakenMax": 9,
     "icon": "",
     "image": "27.png",
-    "ability": {
-      "name": "ไปซ้ะให้พ้น...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุไฟได้รับ ATK/HP +40%,และเจาะโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "ไฟ":2}, "leaderOnly": true},
-      "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["ไฟ"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["ไฟ"] },
-        { "type": "attackHits", "value": 1 }
-      ]
+    "ability": [{
+      "name": "ฉันคืออันดับหนึ่ง",
+      "description": "หากการ์ดใบนี้หมดสภาพจะคืนชีพตัวเองด้วย HP 80% และได้แจก ATK+40% ให้ตัวเองและเพื่อนร่วมทีมที่เป็นธาตุไฟ",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {},
+     "effects": [
+        {
+          "type": "teamPowerRate",
+          "value": 0.4,
+          "targetSide": "ally",
+          "targetElements": [
+            "ไฟ"
+          ],
+          "targetSelection": "all"
+        },
+        {
+          "type": "revive",
+          "value": 0.8,
+          "targetSide": "self",
+          "targetSelection": "all"
         }
+      ],
+      "condition": {
+        "onDeath": true
+      }
+        },
+            {
+      "name": "EVA-02",
+      "description": "เมื่อโจมตีครบ 10 ครั้ง การโจมตีครั้งถัดไปจะโจมตีศัตรู 5 เป้าหมาย ทำดาเมจ 200% และ จะแปลงร่างเป็น อาซูกะ-EVA-02",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena",
+        "worldBoss"
+      ],
+      "effects": [
+        {
+          "type": "nextAttackPowerRate",
+          "value": 2,
+          "targetSide": "self",
+          "targetSelection": "all"
+        },
+        {
+          "type": "transform",
+          "targetSide": "self",
+          "targetSelection": "self",
+          "transformId": "27tf",
+          "transformName": "อาซูกะ-EVA-02",
+          "image": "27tf.png",
+          "transformedAbilities": [
+            {
+              "name": "EVA-02 Full Assault",
+              "description": "ทุกๆการโจมตีจะกลายเป็น 5 เป้าหมาย",
+              "activeIn": [
+                "team",
+                "tower",
+                "arena",
+                "worldBoss"
+              ],
+              "effects": [
+                {
+                  "type": "nextAttackPowerRate",
+                  "value": 0,
+                  "targetSide": "self",
+                  "targetSelection": "all"
+                }
+              ],
+              "attackTargetCount": 5,
+              "activeCutscene": {
+                "enabled": false
+              }
+            }
+          ]
+        }
+      ],
+      "attackTargetCount": 5,
+      "condition": {
+        "afterOwnAttacks": 10,
+        "repeat": false
+      }
+    }
+  ]
   },
   {
     "id": 28,
-    "name": "Stark",
+    "name": "สตาร์ค",
     "rarity": "SR",
     "element": "เหล็ก",
     "power": 9000,
@@ -5065,14 +5169,24 @@ window.ACC_CARD_DATA = [
     "icon": "",
     "image": "28.png",
     "ability": {
-      "name": "นักรบ...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุเหล็กได้รับ ATK/HP +40%,และโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "เหล็ก":2}, "leaderOnly": true},
-      "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["เหล็ก"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["เหล็ก"] },
-        { "type": "shieldHits", "value": 1 }
+      "name": "กระโดดสับบ...",
+      "description": "ทุกๆการโจมตีครั้งที่ 2 จะโจมตีใส่เป้าหมาย 1 เป้าหมายด้วยดาเมจ +5000% เจาะเกาะ 75% (ทำงานเฉพาะบอสแหละหอคอย)",
+      "activeIn": [ "tower", "worldBoss"],
+      "condition": {"afterOwnAttacks": 1,
+        "repeat": true},
+      "effects":  [
+        {
+          "type": "nextAttackPowerRate",
+          "value": 50,
+          "targetSide": "self",
+          "targetSelection": "all"
+        },
+        {
+          "type": "defensePenetrationRate",
+          "value": 0.75,
+          "targetSide": "enemy",
+          "targetSelection": "hitTargets"
+        }
       ]
         }
   }
