@@ -1501,6 +1501,35 @@
       padding: 3px 6px;
     }
 
+    /* เพิ่มโดยอลิซ: ย้ายธาตุไปไว้บนรูปการ์ด มุมขวาล่าง และแสดงเป็นอิโมจิอย่างเดียว */
+    .card-art .card-element-overlay {
+      position: absolute;
+      z-index: 4;
+      right: 9px;
+      bottom: 9px;
+      max-width: calc(100% - 18px);
+      justify-content: flex-end;
+      gap: 5px;
+      pointer-events: none;
+    }
+
+    .card-element-emoji {
+      --element-color: #94a3b8;
+      width: 30px;
+      height: 30px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--element-color) 44%, rgba(255,255,255,.16));
+      border-radius: 999px;
+      color: #fff;
+      font-size: .92rem;
+      line-height: 1;
+      background: color-mix(in srgb, var(--element-color) 26%, rgba(5,8,18,.84));
+      box-shadow: 0 6px 14px rgba(0,0,0,.26), 0 0 12px color-mix(in srgb, var(--element-color) 20%, transparent);
+      backdrop-filter: blur(8px);
+      text-shadow: 0 1px 1px rgba(0,0,0,.38);
+    }
+
     .card-upgrade-mini {
       margin-top: 9px;
       display: grid;
@@ -11648,6 +11677,13 @@
 
     function elementChipsHTML(elements, className = "element-chip") {
       return normalizeElements(elements).map(element => elementChipHTML(element, "", 0, className)).join("");
+    }
+
+    function elementEmojiBadgeHTML(elements, className = "card-element-emoji") {
+      return normalizeElements(elements).map(element => {
+        const safeElement = normalizeElementName(element);
+        return `<span class="${escapeHTML(className)}" style="${elementStyleVars(safeElement)}" title="${escapeHTML(safeElement)}" aria-label="${escapeHTML(safeElement)}">${escapeHTML(getElementEmoji(safeElement))}</span>`;
+      }).join("");
     }
 
     function makeMatchupResult(attacker, defender) {
@@ -23936,6 +23972,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(card.name)}" loading="lazy" onerror="this.remove()">` : ""}
             <span class="rarity-badge">${escapeHTML(rarity.label)}</span>
             <span class="card-id-badge">ID ${escapeHTML(card.id)}</span>
+            <span class="card-element-list card-element-overlay">${elementEmojiBadgeHTML(elements)}</span>
             ${awakenBadge}
             ${resultLabel}
           </div>
@@ -23944,7 +23981,6 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               <h3 class="card-name">${escapeHTML(card.name)}</h3>
               <div class="card-meta">
                 <span>Lv.${status.owned ? status.level : 1}</span>
-                <span class="card-element-list">${elementChipsHTML(elements, "card-element")}</span>
                 <span class="stars">${"★".repeat(Math.min(rarity.stars, 8))}${rarity.stars > 8 ? "+" : ""}</span>
               </div>
               ${cardCollectionMiniStatusHTML(card)}
