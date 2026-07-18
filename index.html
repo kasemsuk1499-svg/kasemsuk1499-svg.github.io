@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-15-transform-detail-v132">
-  <title>Anime Card Collection · Runtime v132 · Transform Form Details</title>
+  <meta name="gacha-app-build" content="2026-07-18-remove-n-r-v133">
+  <title>Anime Card Collection · Runtime v133 · SR Minimum Rarity</title>
   <style>
     :root {
       color-scheme: dark;
@@ -531,7 +531,7 @@
 
     /*
       เพิ่มโดยอลิซ: แถบปุ่มแยกระดับการ์ดในหน้าคลัง
-      - ใช้คู่กับ select#rarityFilter เดิม เพื่อให้ผู้เล่นกดแยก N/R/SR/... ได้ทันที
+      - ใช้คู่กับ select#rarityFilter เดิม เพื่อให้ผู้เล่นกดแยก SR/SSR/UR/... ได้ทันที
       - ถ้าต้องการเพิ่มระดับใหม่ในอนาคต แก้เพิ่มที่ const RARITIES แล้วปุ่มจะสร้างตามอัตโนมัติ
     */
     .rarity-filter-row {
@@ -772,9 +772,6 @@
       background: var(--rarity-fx, var(--rarity-gradient, none));
       mix-blend-mode: screen;
     }
-
-    .rarity-n { --fx-opacity: .07; --rarity-fx: radial-gradient(circle at 25% 18%, rgba(203,213,225,.72), transparent 38%); }
-    .rarity-r { --fx-opacity: .12; --rarity-fx: linear-gradient(135deg, transparent 20%, rgba(96,165,250,.75), transparent 76%); }
     .rarity-sr { --fx-opacity: .17; --rarity-fx: linear-gradient(115deg, transparent 16%, rgba(167,139,250,.82), transparent 48%); }
     .rarity-ssr { --fx-opacity: .22; --rarity-fx: linear-gradient(115deg, transparent 12%, rgba(255,209,102,.95), transparent 46%); }
     .rarity-ur { --fx-opacity: .24; --rarity-fx: radial-gradient(circle at 78% 18%, rgba(244,114,182,.9), transparent 34%); }
@@ -9472,10 +9469,14 @@
       GOD: { label: "GOD",       color: "#f8fafc", colors: ["#020617", "#ffffff", "#d4af37", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #020617 0%, #ffffff 18%, #d4af37 42%, #111827 68%, #facc15 100%)", glow: "#fff7c2", textColor: "#111827", borderColor: "#facc15", order: 9, stars: 14, dust: 250000, basePower: 31500, baseHp: 157500, baseDefense: 12600, baseSpeed: 108, baseIncome: 350, maxLevel: 350, upgradeDustBase: 1800, upgradeDustGrowth: 1.0175, powerPerLevel: .0285, incomePerLevel: .0195, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.042, incomeBonus: 0.026 }
     });
 
+    // v133: ระดับต่ำสุดของระบบคือ SR — ไม่โหลด ไม่สุ่ม และไม่แสดงการ์ด N/R อีกต่อไป
+    const REMOVED_RARITIES = Object.freeze(["N", "R"]);
+    const REMOVED_RARITY_SET = new Set(REMOVED_RARITIES);
+    const REMOVED_CARD_IDS = new Set();
+
     // เพิ่มโดยอลิซ v5: ปรับเบสทุกระดับให้ใกล้กัน และย้ายการ์ดเก่าเข้าสเกลใหม่โดยรักษาความต่างรายใบไว้ไม่เกิน ±10%
     const CARD_BALANCE_SCHEMA_VERSION = 3;
     const LEGACY_RARITY_BASES = Object.freeze({
-      N:{power:1000,hp:5000,defense:400,income:35}, R:{power:3000,hp:15000,defense:1200,income:100},
       SR:{power:9000,hp:45000,defense:3600,income:280}, SSR:{power:27000,hp:135000,defense:10800,income:800},
       UR:{power:81000,hp:405000,defense:32400,income:2300}, LR:{power:243000,hp:1215000,defense:97200,income:6500},
       SC:{power:729000,hp:3645000,defense:291600,income:18000}, EX:{power:2187000,hp:10935000,defense:874800,income:50000}, AWAKEN:{power:2274480,hp:11372400,defense:909792,income:51750},
@@ -9490,7 +9491,7 @@
       if (Number(card && card.balanceSchemaVersion) >= CARD_BALANCE_SCHEMA_VERSION) {
         return Number.isFinite(raw) && raw > 0 ? raw : targetBase;
       }
-      const code = String(card && card.rarity || rarityKey || "N").toUpperCase();
+      const code = String(card && card.rarity || rarityKey || "SR").toUpperCase();
       const legacyBase = Number(LEGACY_RARITY_BASES[code] && LEGACY_RARITY_BASES[code][statKey]) || targetBase || 1;
       const ratio = Number.isFinite(raw) && raw > 0 ? Math.max(.90, Math.min(1.10, raw / Math.max(1, legacyBase))) : 1;
       return targetBase * ratio;
@@ -9524,7 +9525,7 @@
 
     // เพิ่มโดยอลิซ v76: เรทแพ็คสุ่มในกระเป๋าใช้ระบบ "น้ำหนัก" แล้ว normalize ใหม่ทุกครั้ง
     // ตั้งให้ EX / SC / GOD หายากขึ้นมาก เพื่อไม่ให้การเปิดรวดเดียวจำนวนมากดรอปถี่เกินไป
-    const ITEM_PACK_RATES = Object.freeze({ N: 58, R: 29, SR: 10, SSR: 2.65, UR: .30, LR: .048, EX: .0015, SC: .0005, GOD: .00005 });
+    const ITEM_PACK_RATES = Object.freeze({ SR: 10, SSR: 2.65, UR: .30, LR: .048, EX: .0015, SC: .0005, GOD: .00005 });
     // เพดานเรทสุดท้ายหลังรวมโบนัสทีม/สกิลกาชา หน่วยเป็นเปอร์เซ็นต์จริงหลัง normalize
     // เช่น GOD: .0001 = ไม่เกิน 0.0001% ต่อการเปิด 1 ใบ แม้มีสกิลเพิ่มเรทหลายใบ
     const GACHA_EFFECTIVE_RATE_CAPS = Object.freeze({ EX: .01, SC: .002, GOD: .0001 });
@@ -10144,6 +10145,10 @@
         const rawId = rawCard.id;
         if (rawId === undefined || rawId === null || rawId === "") return;
         const rarityKey = String(rawCard.rarity || "").toUpperCase();
+        if (REMOVED_RARITY_SET.has(rarityKey)) {
+          REMOVED_CARD_IDS.add(String(normalizeId(rawId)));
+          return;
+        }
         if (rarityKey === "AWAKEN" || String(rawId).toUpperCase().startsWith("AK-")) return;
         const card = { ...rawCard, id: normalizeId(rawId) };
         byId.set(String(card.id), card);
@@ -10156,8 +10161,9 @@
         const rawSource = rawCard.awakenSourceId ?? rawCard.originalCardId ?? (awakenIdSyntax ? String(rawCard.id).slice(3) : "");
         if (rarityKey !== "AWAKEN" && !awakenIdSyntax) return;
         const sourceId = String(rawSource || "").trim();
-        if (!sourceId) return;
+        if (!sourceId || REMOVED_CARD_IDS.has(sourceId)) return;
         const source = byId.get(sourceId) || null;
+        if (!source) return;
         const awakenId = `AK-${sourceId}`;
         const merged = {
           ...(source || {}),
@@ -10413,9 +10419,9 @@
         team.push(id);
       };
 
-      // เลือกทีมเริ่มต้นให้ครบ 5 ช่องจากการ์ดระดับต้นที่มีจริงในไฟล์นี้
+      // เลือกทีมเริ่มต้นให้ครบ 5 ช่องจากระดับต่ำสุดที่ยังใช้งานได้ (เริ่มที่ SR)
       const starterPool = CARDS
-        .filter(card => RARITIES[card.rarity] && RARITIES[card.rarity].order <= RARITIES.R.order)
+        .filter(card => RARITIES[card.rarity] && !isAwakenCard(card) && card.transformOnly !== true)
         .sort((a, b) => (getRarity(a).order - getRarity(b).order) || Number(a.id) - Number(b.id));
       ["ไฟ", "น้ำ", "ลม", "ดิน", "แสง", "มิติ", "ไร้ธาตุ"].forEach(element => {
         const card = starterPool.find(item => getCardElements(item).includes(element) && !team.includes(String(item.id)));
@@ -11203,6 +11209,10 @@
       next.firstLoginRewards.lastClaimDate = String(next.firstLoginRewards.lastClaimDate || "");
       next.firstLoginRewards.completed = next.firstLoginRewards.claimedDays >= FIRST_LOGIN_REWARDS.length;
       next.owned = next.owned && typeof next.owned === "object" ? next.owned : {};
+      // v133: ล้างการ์ด N/R ออกจากเซฟเก่า โดยไม่แตะการ์ดระดับอื่น
+      Object.keys(next.owned).forEach(id => {
+        if (REMOVED_CARD_IDS.has(String(id))) delete next.owned[id];
+      });
       // เพิ่มโดยอลิซ: ย้ายสต็อกการ์ดซ้ำเก่าของใบที่อเวกเต็มเป็นโบนัส Dust อัตโนมัติ
       // การ์ดซ้ำเหล่านี้เคยได้รับ Dust ปกติตอนเปิดแล้ว จึงเติมเฉพาะโบนัสอีก 1 เท่าต่อใบ
       let convertedMaxAwakenCopies = 0;
@@ -11400,7 +11410,8 @@
     }
 
     function getRarity(card) {
-      return RARITIES[card && card.rarity] || RARITIES.N;
+      const key = String(card && card.rarity || "").toUpperCase();
+      return RARITIES[key] || RARITIES.SR;
     }
 
 
@@ -11530,7 +11541,8 @@
     function rarityDisplayName(rarityKey = "") {
       const key = String(rarityKey || "").toUpperCase();
       const rarity = RARITIES[key];
-      if (!rarity) return key || "N";
+      if (REMOVED_RARITY_SET.has(key)) return RARITIES.SR.label;
+      if (!rarity) return key || "SR";
       return rarity.label === key ? key : `${rarity.label} (${key})`;
     }
 
@@ -11745,7 +11757,7 @@
 
     function getRarityTheme(rarity) {
       // เพิ่มโดยอลิซ: รวมค่าธีมสีของแรร์ให้เรียกใช้ได้ทุกจุดในเกม
-      const info = rarity || RARITIES.N;
+      const info = rarity || RARITIES.SR;
       const colors = Array.isArray(info.colors) && info.colors.length ? info.colors : [info.color || "#94a3b8", "#0f172a"];
       const main = colors[0] || info.color || "#94a3b8";
       const accent = colors[1] || main;
@@ -13925,11 +13937,12 @@
       const rarityKeys = new Set([...Object.keys(baseRates), ...Object.keys(gachaSummary.rarityRateBonuses || {})]);
 
       rarityKeys.forEach(rarity => {
-        if (String(rarity).toUpperCase() === "AWAKEN") return;
+        const rarityKey = String(rarity || "").toUpperCase();
+        if (!RARITIES[rarityKey] || rarityKey === "AWAKEN" || REMOVED_RARITY_SET.has(rarityKey)) return;
         const base = Math.max(0, Number(baseRates[rarity]) || 0);
-        const bonus = normalizeGachaWeightBonus(gachaSummary.rarityRateBonuses[rarity] || 0);
+        const bonus = normalizeGachaWeightBonus(gachaSummary.rarityRateBonuses[rarity] || gachaSummary.rarityRateBonuses[rarityKey] || 0);
         const delta = Math.abs(bonus) <= 1 ? base * bonus : bonus;
-        weights[rarity] = Math.max(0, base + delta);
+        weights[rarityKey] = Math.max(0, base + delta);
       });
 
       const cappedWeights = applyGachaRateCaps(weights, getGachaRateCaps(banner));
@@ -14079,7 +14092,7 @@
           targetElements: normalAttackTargetFilterValues((item && item.targetElements) ?? card.targetElements),
           targetRarities: normalAttackTargetFilterValues((item && item.targetRarities) ?? card.targetRarities),
           targetMatch: String((item && item.targetMatch) ?? card.targetMatch ?? "any") === "all" ? "all" : "any",
-          rarity: String(card.rarity || item && item.rarity || "N"),
+          rarity: String(card.rarity || item && item.rarity || "SR"),
           elements: getCardElements(card),
           level: Math.max(1, Math.floor(Number(item && item.level || getOwned(id) && getOwned(id).level || 1))),
           awaken: Math.max(0, Math.floor(Number(item && item.awaken || item && item.duplicateRank || getOwned(id) && getOwned(id).duplicateRank || 0))),
@@ -14102,7 +14115,7 @@
         return {
           id,
           name: String(item && typeof item === "object" && item.name || card.name || `ID ${id}`),
-          rarity: String(card.rarity || item && item.rarity || "N"),
+          rarity: String(card.rarity || item && item.rarity || "SR"),
           elements: getCardElements(card),
           power: Math.max(0, getBattleItemStat(item, abilitySummary, "power", snapshotMode)),
           hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
@@ -14114,7 +14127,7 @@
           snapshot: {
             id,
             name: String(item && typeof item === "object" && item.name || card.name || `ID ${id}`),
-            rarity: String(card.rarity || item && item.rarity || "N"),
+            rarity: String(card.rarity || item && item.rarity || "SR"),
             elements: getCardElements(card),
             power: Math.max(0, getBattleItemStat(item, abilitySummary, "power", snapshotMode)),
             hp: Math.max(1, getBattleItemStat(item, abilitySummary, "hp", snapshotMode)),
@@ -14745,7 +14758,7 @@
           sourceCardId: String(item.sourceCardId || ""),
           sourceCardName: String(item.sourceCardName || "Unknown Character"),
           sourceCardImage: String(item.sourceCardImage || ""),
-          sourceCardRarity: String(item.sourceCardRarity || "N"),
+          sourceCardRarity: String(item.sourceCardRarity || "SR"),
           sourceCardElements: normalizeAbilityElements(item.sourceCardElements).length ? normalizeAbilityElements(item.sourceCardElements) : ["ไร้ธาตุ"],
           cutscene: item.cutscene && typeof item.cutscene === "object" ? { ...item.cutscene } : {},
           onBattleStart: runtimeTriggerMode(item) === "battleStart",
@@ -14891,7 +14904,7 @@
             power: Math.max(0, Number(member.power) || 0),
             hp: Math.max(1, Number(member.hp) || 1),
             defense: Math.max(0, Number(member.defense) || 0),
-            rarity: String(member.rarity || "N"),
+            rarity: String(member.rarity || "SR"),
             elements: normalizeAbilityElements(member.elements || member.element),
             level: Math.max(1, Math.floor(Number(member.level) || 1)),
             awaken: Math.max(0, Math.floor(Number(member.awaken) || 0)),
@@ -16419,7 +16432,7 @@
           return {
             id: cardIdString(item.id || `${side}-${index}`),
             name: String(item.name || `Unit ${index + 1}`),
-            rarity: String(item.rarity || "N"),
+            rarity: String(item.rarity || "SR"),
             elements: normalizeAbilityElements(item.elements || item.element),
             row,
             slot: slotNumber,
@@ -16819,7 +16832,7 @@
         return {
           id: runtimeId,
           name: isSummon ? String(identityCard.name || `Summon ${baseId}`) : `${actor.name} · ร่างแยก ${spawnIndex + 1}`,
-          rarity: String(identityCard.rarity || actor.rarity || "N"),
+          rarity: String(identityCard.rarity || actor.rarity || "SR"),
           elements: getCardElements(identityCard),
           row, slot, basePower, power, maxHp, currentHp:maxHp, baseDefense, defense, baseSpeed, speed:baseSpeed,
           normalAttackTargetCount, targetSelection, targetCardIds, targetElements, targetRarities, targetMatch, speedStacks:{}, attackHits, shieldHits:0, initialShieldHits:0,
@@ -18841,7 +18854,7 @@
       const abilityCustom = ability && (ability.activeCutscene || ability.activeSkillCutscene);
       const custom = abilityCustom && typeof abilityCustom === "object" ? abilityCustom : {};
       const merged = { ...cardDefaults, ...custom };
-      const rarity = card ? getRarity(card) : RARITIES.N;
+      const rarity = card ? getRarity(card) : RARITIES.SR;
       const title = String(merged.title || ability && ability.name || "ACTIVE SKILL");
       return {
         enabled: merged.enabled !== false,
@@ -19217,7 +19230,7 @@
       if (!stack) return null;
       const baseId = runtimeBaseCardId(state.cardId || state.id);
       const bossCard = typeof getWorldBossByAnyId === "function" ? worldBossAsBattleCard(getWorldBossByAnyId(baseId)) : null;
-      const card = CARD_BY_ID.get(baseId) || bossCard || { id:baseId, name:state.name || baseId, rarity:"N" };
+      const card = CARD_BY_ID.get(baseId) || bossCard || { id:baseId, name:state.name || baseId, rarity:"SR" };
       const holder = document.createElement("div");
       holder.innerHTML = battleModelHTML(card, stack.querySelectorAll(".battle-unit").length, side === "enemy", Math.max(1, stack.querySelectorAll(".battle-unit").length + 1), state.row || "front", state.slot || stack.querySelectorAll(".battle-unit").length + 1);
       node = holder.firstElementChild;
@@ -20052,7 +20065,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             sourceCardId: cardIdString(record.sourceCard && record.sourceCard.id),
             sourceCardName: String(record.sourceCard && record.sourceCard.name || "Unknown Character"),
             sourceCardImage: record.sourceCard ? getCardImage(record.sourceCard) : "",
-            sourceCardRarity: String(record.sourceCard && record.sourceCard.rarity || "N"),
+            sourceCardRarity: String(record.sourceCard && record.sourceCard.rarity || "SR"),
             sourceCardElements: record.sourceCard ? getCardElements(record.sourceCard) : ["ไร้ธาตุ"],
             cutscene: record.trigger.onOwnAttack
               ? { ...getActiveSkillCutsceneConfig(record.ability, record.sourceCard), enabled: false }
@@ -21573,7 +21586,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
         function arenaSnapshotModelHTML(item, index = 0, enemy = true, rowIndex = index, rowTotal = 5, slotNumber = null, forcedRow = "") {
       const card = CARD_BY_ID.get(cardIdString(item && item.id));
-      const rarity = card ? getRarity(card) : (RARITIES[item && item.rarity] || RARITIES.N);
+      const rarity = card ? getRarity(card) : (RARITIES[item && item.rarity] || RARITIES.SR);
       const image = card ? getCardImage(card) : "";
       const name = item && item.name || (card && card.name) || "Unknown";
       const count = Math.max(1, Number(rowTotal) || 1);
@@ -22719,14 +22732,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const guaranteed = guarantee.enabled !== false && Number(guarantee.every) > 0 && pity >= Number(guarantee.every);
         let rarity = guaranteed
           ? weightedKey(guarantee.rarityRates || {}, Object.keys(guarantee.rarityRates || {})[0] || "UR")
-          : weightedKey(effectiveRates.weights, "N");
+          : weightedKey(effectiveRates.weights, "SR");
 
         if (times === 10 && index === 9) {
           const hasSRPlus = results.some(result => getRarity(result.card).order >= RARITIES.SR.order);
           if (!hasSRPlus && !guaranteed) {
             const betterRates = {};
             Object.entries(effectiveRates.weights).forEach(([key, value]) => {
-              if ((RARITIES[key] || RARITIES.N).order >= RARITIES.SR.order) betterRates[key] = value;
+              if ((RARITIES[key] || RARITIES.SR).order >= RARITIES.SR.order) betterRates[key] = value;
             });
             rarity = weightedKey(betterRates, "SR");
           }
@@ -22761,7 +22774,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     // ถ้าตู้ไหนยังไม่ได้ตั้งค่า จะคืนค่า disabled เพื่อไม่ให้เกมพังตอน render หน้าแรก
     function getBannerGuarantee(banner = getActiveBanner()) {
       const guarantee = banner && banner.guarantee && typeof banner.guarantee === "object" ? banner.guarantee : {};
-      const rarityRates = guarantee.rarityRates && typeof guarantee.rarityRates === "object" ? guarantee.rarityRates : {};
+      const rawRarityRates = guarantee.rarityRates && typeof guarantee.rarityRates === "object" ? guarantee.rarityRates : {};
+      const rarityRates = Object.fromEntries(Object.entries(rawRarityRates)
+        .map(([rarity, weight]) => [String(rarity || "").toUpperCase(), Math.max(0, Number(weight) || 0)])
+        .filter(([rarity, weight]) => RARITIES[rarity] && rarity !== "AWAKEN" && !REMOVED_RARITY_SET.has(rarity) && weight > 0));
       const every = Math.max(0, Math.floor(Number(guarantee.every) || 0));
       return {
         enabled: guarantee.enabled !== false && every > 0 && Object.keys(rarityRates).length > 0,
@@ -22807,8 +22823,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function summarizePullStats(stats) {
       const highRarityText = Object.entries(stats.rarityCounts || {})
-        .filter(([rarity]) => (RARITIES[rarity] || RARITIES.N).order >= RARITIES.SR.order)
-        .sort((a, b) => ((RARITIES[b[0]] || RARITIES.N).order) - ((RARITIES[a[0]] || RARITIES.N).order))
+        .filter(([rarity]) => (RARITIES[rarity] || RARITIES.SR).order >= RARITIES.SR.order)
+        .sort((a, b) => ((RARITIES[b[0]] || RARITIES.SR).order) - ((RARITIES[a[0]] || RARITIES.SR).order))
         .map(([rarity, amount]) => `${rarityDisplayName(rarity)}×${amount}`)
         .join(" • ");
       const parts = [`เปิด ${formatNumber(stats.total)} ใบสำเร็จ`, `ใหม่ ${formatNumber(stats.newCount)} ใบ`];
@@ -22876,14 +22892,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       for (let index = 0; index < count; index += 1) {
         let rarity = forcedRarity && RARITIES[forcedRarity]
           ? forcedRarity
-          : weightedKey(effectiveRates.weights, "N");
+          : weightedKey(effectiveRates.weights, "SR");
 
         if (!forcedRarity && count === 10 && index === 9) {
           const hasSRPlus = results.some(result => getRarity(result.card).order >= RARITIES.SR.order);
           if (!hasSRPlus) {
             const betterRates = {};
             Object.entries(effectiveRates.weights).forEach(([key, value]) => {
-              if ((RARITIES[key] || RARITIES.N).order >= RARITIES.SR.order) betterRates[key] = value;
+              if ((RARITIES[key] || RARITIES.SR).order >= RARITIES.SR.order) betterRates[key] = value;
             });
             rarity = weightedKey(betterRates, "SR");
           }
@@ -22964,7 +22980,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!meta || meta.kind !== "pack") return [];
       const results = [];
       for (let index = 0; index < count; index += 1) {
-        const rarity = meta.rarity || weightedKey(ITEM_PACK_RATES, "N");
+        const rarity = meta.rarity || weightedKey(ITEM_PACK_RATES, "SR");
         const pool = CARDS.filter(card => card.rarity === rarity);
         const card = pool[Math.floor(Math.random() * pool.length)] || CARDS[0];
         const added = addCardToCollection(card, true);
@@ -24082,7 +24098,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
       return {
         rows: [...rowsByCardId.values()].sort((a, b) => {
-          const rarityDiff = ((RARITIES[b.card.rarity] || RARITIES.N).order) - ((RARITIES[a.card.rarity] || RARITIES.N).order);
+          const rarityDiff = ((RARITIES[b.card.rarity] || RARITIES.SR).order) - ((RARITIES[a.card.rarity] || RARITIES.SR).order);
           return rarityDiff || b.normalRate - a.normalRate || String(a.card.name || "").localeCompare(String(b.card.name || ""), "th");
         }),
         effective,
@@ -24099,8 +24115,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const rarityFilter = document.getElementById("gachaRateRarityFilter");
       const query = String(searchInput && searchInput.value || "").trim().toLocaleLowerCase("th");
       const previousRarity = rarityFilter ? rarityFilter.value : "";
-      const presentRarities = [...new Set(result.rows.map(row => String(row.card.rarity || "N")))]
-        .sort((a, b) => ((RARITIES[b] || RARITIES.N).order) - ((RARITIES[a] || RARITIES.N).order));
+      const presentRarities = [...new Set(result.rows.map(row => String(row.card.rarity || "SR")))]
+        .sort((a, b) => ((RARITIES[b] || RARITIES.SR).order) - ((RARITIES[a] || RARITIES.SR).order));
 
       if (rarityFilter) {
         rarityFilter.innerHTML = `<option value="">ทุกระดับ</option>${presentRarities.map(rarity => `<option value="${escapeHTML(rarity)}">${escapeHTML(rarityDisplayName(rarity))}</option>`).join("")}`;
@@ -24126,15 +24142,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (summary) {
         summary.innerHTML = Object.entries(result.effective.percentages)
           .filter(([, rate]) => Number(rate) > 0)
-          .sort((a, b) => ((RARITIES[b[0]] || RARITIES.N).order) - ((RARITIES[a[0]] || RARITIES.N).order))
-          .map(([rarity, rate]) => `<span class="gacha-rate-rarity-chip" style="--rate-rarity-color:${escapeHTML((RARITIES[rarity] || RARITIES.N).color || "#5ce8ff")}">${escapeHTML(rarityDisplayName(rarity))} ${formatDetailedRatePercent(rate)}%</span>`)
+          .sort((a, b) => ((RARITIES[b[0]] || RARITIES.SR).order) - ((RARITIES[a[0]] || RARITIES.SR).order))
+          .map(([rarity, rate]) => `<span class="gacha-rate-rarity-chip" style="--rate-rarity-color:${escapeHTML((RARITIES[rarity] || RARITIES.SR).color || "#5ce8ff")}">${escapeHTML(rarityDisplayName(rarity))} ${formatDetailedRatePercent(rate)}%</span>`)
           .join("");
       }
 
       if (list) {
         list.innerHTML = filteredRows.length ? filteredRows.map(row => {
           const card = row.card;
-          const rarity = RARITIES[card.rarity] || RARITIES.N;
+          const rarity = RARITIES[card.rarity] || RARITIES.SR;
           const image = getCardImage(card);
           const rateUp = Number((banner.rateUpCards || {})[card.id]) || 1;
           const guaranteeCardWeight = Number(result.guarantee.cardRates && result.guarantee.cardRates[card.id]) || 0;
@@ -24146,7 +24162,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
               <strong>${escapeHTML(card.name || `Card ${card.id}`)}</strong>
               <small><span>ID ${escapeHTML(card.id)}</span>${rateUp > 1 ? `<span class="gacha-rate-up-tag">RATE UP ×${formatDetailedRatePercent(rateUp)}</span>` : ""}${guaranteeCardWeight > 0 ? `<span class="gacha-guarantee-up-tag">การันตี Weight ${formatDetailedRatePercent(guaranteeCardWeight)}</span>` : ""}</small>
             </div>
-            <span class="gacha-rate-badge" style="--rate-rarity-color:${escapeHTML(rarity.color || "#5ce8ff")}">${escapeHTML(rarity.label || card.rarity || "N")}</span>
+            <span class="gacha-rate-badge" style="--rate-rarity-color:${escapeHTML(rarity.color || "#5ce8ff")}">${escapeHTML(rarity.label || card.rarity || "SR")}</span>
             <strong class="gacha-rate-number">${normalRateText}</strong>
             <strong class="gacha-rate-number guarantee ${result.guarantee.enabled && row.guaranteeRate > 0 ? "" : "disabled"}">${guaranteeRateText}</strong>
           </div>`;
@@ -25877,7 +25893,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const media = video && isVideo(video)
         ? `<video src="${escapeHTML(video)}" poster="${escapeHTML(image)}" autoplay muted loop playsinline></video>`
         : image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(boss.name || "World Boss")}" onerror="this.remove()">` : "";
-      const rarity = RARITIES.EX || RARITIES.SC || RARITIES.N;
+      const rarity = RARITIES.EX || RARITIES.SC || RARITIES.SR;
       const statsActive = cardDetailActiveTab !== "ability";
       const targetCount = getWorldBossAttackTargetCount(boss);
       const abilityCount = getWorldBossAbilities(boss).length;
@@ -26539,7 +26555,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return {
         id: cardIdString(source.id),
         name: String(source.name || "Unknown"),
-        rarity: String(source.rarity || "N"),
+        rarity: String(source.rarity || "SR"),
         image: String(source.image ? resolveAsset(source.image, "card") : source.imageURL || source.photoURL || ""),
         elements: source.elements || (source.element ? getCardElements(source) : []),
         power: Math.max(0, Number(source.power || 0)),
