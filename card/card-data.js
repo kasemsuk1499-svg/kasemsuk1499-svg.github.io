@@ -4709,25 +4709,38 @@ window.ACC_CARD_DATA = [
   "awakenMax": 20,
   "icon": "",
   "image": "14.png",
-    "ability": [
-        {
-          "type": "nextAttackPowerRate",
-          "value": 2,
-          "targetSide": "self",
-          "targetSelection": "all"
-        },
-        {
-          "type": "applyStatus",
-          "targetSide": "enemy",
-          "targetSelection": "hitTargets",
-          "status": "burn",
-          "successRate": 0.2,
-          "targetCount": 4,
-          "durationTurns": 2,
-          "damageRate": 0.2
-        }
-      ],
-       "scCutscene": {
+   "ability": {
+    "name": "Excalibur Morgan",
+    "description": "ทุกครั้งที่โจมตี จะโจมตีศัตรู 4 เป้าหมายด้วยดาเมจ 200% และมีโอกาส 20% ที่จะทำให้เป้าหมายติดไฟไหม้เป็นเวลา 2 เทิร์น",
+    "activeIn": [
+      "team",
+      "tower",
+      "arena"
+    ],
+    "condition": {
+      "onOwnAttack": true,
+      "repeat": true
+    },
+    "effects": [
+      {
+        "type": "nextAttackPowerRate",
+        "value": 2,
+        "targetSide": "self",
+        "targetSelection": "self"
+      },
+      {
+        "type": "applyStatus",
+        "targetSide": "enemy",
+        "targetSelection": "hitTargets",
+        "targetCount": 4,
+        "status": "burn",
+        "successRate": 0.2,
+        "durationTurns": 2,
+        "damageRate": 0.2
+      }
+    ]
+  },
+    "scCutscene": {
     "enabled": true,
     "kicker": "THE BLACKENED KING",
     "quote": "ราชาอัศวินผู้ถูกความมืดกัดกิน ก้าวออกมาพร้อมดาบแห่งการทำลายล้าง",
@@ -4746,8 +4759,7 @@ window.ACC_CARD_DATA = [
     "muted": false,
     "volume": 0.9,
     "showCardAfterVideo": true
-  },
-
+  }
   },
   {
     "id": 15,
@@ -5059,16 +5071,20 @@ window.ACC_CARD_DATA = [
   },
   {
     "id": 27,
-    "name": "Asuka",
-    "rarity": "SR",
+    "name": "อาซูกะ",
+    "rarity": "SC",
     "element": "ไฟ",
-    "power": 9000,
-        "hp": 45000,
-        "defense": 3600,
-    "incomePerSec": 280,
-    "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.04,
-    "awakenMax": 9,
+    "balanceSchemaVersion": 4,
+  "power": 27000,
+  "hp": 135000,
+  "defense": 10800,
+  "speed": 103,
+  "incomePerSec": 275,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1723,
+  "upgradeDustGrowth": 1.016,
+  "awakenMax": 20,
     "icon": "",
     "image": "27.png",
     "ability": [{
