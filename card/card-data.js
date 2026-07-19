@@ -4726,7 +4726,8 @@ window.ACC_CARD_DATA = [
         "type": "nextAttackPowerRate",
         "value": 2,
         "targetSide": "self",
-        "targetSelection": "self"
+        "targetSelection": "self",
+        "attackTargetCount": 4
       },
       {
         "type": "applyStatus",
