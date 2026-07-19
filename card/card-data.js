@@ -5,7 +5,7 @@
 */
 window.ACC_CARD_DATA = [
 {
-  "id": 2010,
+  "id": 2010, 
   "name": "ไอริส",
   "rarity": "SC",
   "element": "แสง",
