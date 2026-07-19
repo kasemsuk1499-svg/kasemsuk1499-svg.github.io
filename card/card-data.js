@@ -4727,7 +4727,7 @@ window.ACC_CARD_DATA = [
         "value": 2,
         "targetSide": "self",
         "targetSelection": "self",
-        "attackTargetCount": 4
+        "targetCount": 4
       },
       {
         "type": "applyStatus",
