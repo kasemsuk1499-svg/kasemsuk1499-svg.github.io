@@ -5,7 +5,7 @@
 */
 window.ACC_CARD_DATA = [
 {
-  "id": 2010, 
+  "id": 2010,
   "name": "ไอริส",
   "rarity": "SC",
   "element": "แสง",
@@ -4722,13 +4722,13 @@ window.ACC_CARD_DATA = [
       "repeat": true
     },
     "effects": [
-      {
-        "type": "nextAttackPowerRate",
-        "value": 2,
-        "targetSide": "self",
-        "targetSelection": "self",
-        "targetCount": 4
-      },
+{
+  "type": "skillAttack",
+  "targetSide": "enemy",
+  "targetSelection": "default",
+  "targetCount": 4,
+  "damageRate": 2
+},
       {
         "type": "applyStatus",
         "targetSide": "enemy",
