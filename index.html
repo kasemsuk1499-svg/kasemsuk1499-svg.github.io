@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-18-remove-n-r-v133">
-  <title>Anime Card Collection · Runtime v133 · SR Minimum Rarity</title>
+  <meta name="gacha-app-build" content="2026-07-20-skill-attack-v134">
+  <title>Anime Card Collection · Runtime v134 · Skill Attack</title>
   <style>
     :root {
       color-scheme: dark;
@@ -9827,6 +9827,7 @@
        - nullifyCardAbilities ใช้ targetSide: "ally"/"self"/"enemy" และ targetCardIds เพื่อทำให้ความสามารถของการ์ดเป้าหมายไร้ผล
        - ignoreAbilityConditions เลือกเป้าหมายด้วย targetCardIds / targetElements / targetRarities และ targetMatch: "any"/"all" ได้
        - condition: { "afterOwnAttacks": 2, "repeat": true } = เอฟเฟกต์ทำงานในการโจมตีครั้งที่ 3, 6, 9... และรีเซ็ตวนลูป
+       - skillAttack เปลี่ยนเฉพาะการโจมตีที่สกิลทำงาน: damageRate 2 = ดาเมจรวม 200%, targetCount 4 = ตีสูงสุด 4 เป้าหมาย โดยไม่แก้ normalAttackTargetCount
        - nextAttackPowerRate/nextAttackPowerFlat เพิ่ม ATK เฉพาะการโจมตีที่ Active แล้วกลับเป็นค่าปกติทันที
        - nextAttackCriticalRate เพิ่ม/ลดเรทคริติคอลเฉพาะการโจมตีที่ Active ทำงาน โดยไม่เปลี่ยน criticalRate ถาวร
        - healHpRate/healHpFlat ฟื้น HP ปัจจุบันหลังโจมตีที่ Active โดยไม่เพิ่ม HP สูงสุด
@@ -9959,6 +9960,7 @@
       NULLIFY_CARD_ABILITIES: "nullifyCardAbilities",
       IGNORE_ABILITY_CONDITIONS: "ignoreAbilityConditions",
       ACTIVATE_DOMAIN: "activateDomain",
+      SKILL_ATTACK: "skillAttack",
       NEXT_ATTACK_POWER_RATE: "nextAttackPowerRate",
       NEXT_ATTACK_POWER_FLAT: "nextAttackPowerFlat",
       NEXT_ATTACK_CRITICAL_RATE: "nextAttackCriticalRate",
@@ -12225,6 +12227,9 @@
         hpRate: CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE,
         ignoreAbilityCondition: CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS,
         activateField: CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN,
+        skillDamage: CARD_ABILITY_EFFECT_TYPES.SKILL_ATTACK,
+        skillAttackDamage: CARD_ABILITY_EFFECT_TYPES.SKILL_ATTACK,
+        activeAttack: CARD_ABILITY_EFFECT_TYPES.SKILL_ATTACK,
         provoke: CARD_ABILITY_EFFECT_TYPES.TAUNT,
         aggro: CARD_ABILITY_EFFECT_TYPES.TAUNT,
         soulCapture: CARD_ABILITY_EFFECT_TYPES.CAPTURE_REVIVE,
@@ -13457,6 +13462,7 @@
             // เอฟเฟกต์ต่อสู้ขั้นสูงที่ไม่ได้ใส่ Trigger จะใช้ค่าเริ่มต้นที่สมเหตุผล:
             // Counter = เมื่อถูกโจมตี, ที่เหลือ = ทุกการโจมตีของเจ้าของสกิล
             if (!effectTrigger && [
+              CARD_ABILITY_EFFECT_TYPES.SKILL_ATTACK,
               CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_TARGET_COUNT,
               CARD_ABILITY_EFFECT_TYPES.FOLLOW_UP_ATTACK,
               CARD_ABILITY_EFFECT_TYPES.COUNTER_ATTACK,
@@ -14264,6 +14270,7 @@
         abnormalStatusResistance: `ต้านสถานะผิดปกติ ${targetText} ${signedPercent(normalizeStatusResistanceRate(effect && (effect.successRate ?? effect.resistRate ?? effect.rate ?? effect.value ?? 100), 1))} • ไม่ถูกลดค่า${Math.max(0, Math.floor(Number(effect && (effect.durationTurns ?? effect.turns)) || 0)) ? ` • ${Math.max(0, Math.floor(Number(effect && (effect.durationTurns ?? effect.turns)) || 0))} เทิร์น` : ""}${Math.max(0, Math.floor(Number(effect && (effect.durationHits ?? effect.durationAttacks ?? effect.attacksRemaining ?? effect.hitsRemaining)) || 0)) ? ` • ${Math.max(0, Math.floor(Number(effect && (effect.durationHits ?? effect.durationAttacks ?? effect.attacksRemaining ?? effect.hitsRemaining)) || 0))} ครั้งที่โดนตี` : ""}`,
         nullifyCardAbilities: `ยกเลิกความสามารถ ${targetText}`,
         ignoreAbilityConditions: `ยกเลิกเงื่อนไขสกิล ${targetText}`,
+        skillAttack: `โจมตีด้วยสกิล ${Math.max(1, Math.min(5, Math.floor(Number(effect && (effect.targetCount ?? effect.attackTargetCount)) || 1)))} เป้าหมาย • ดาเมจ ${formatNumber(Math.max(0, Number(effect && (effect.damageRate ?? effect.powerRate ?? effect.attackPowerRate ?? effect.value ?? 1)) || 0) * 100)}%`,
         nextAttackPowerRate: afterReviveNextAttack
           ? `การโจมตีแรกหลังคืนชีพ ATK ${signedPercent(Math.max(0, value))} • ครั้งเดียว`
           : `โจมตีครั้งที่สกิลทำงาน ATK ${signedPercent(Math.max(0, value))}`,
@@ -17867,6 +17874,8 @@
         return {
           fired, details, names: fired.map(trigger => trigger.name),
           attackTargetCount: Math.max(0, Math.min(5, fired.reduce((max, trigger) => Math.max(max, Math.floor(Number(trigger.attackTargetCount) || 0), ...abilityArray(trigger.multiElementAttacks).map(rule=>Math.floor(Number(rule.targetCount)||0)), ...abilityArray(trigger.followUpAttacks).map(rule=>Math.floor(Number(rule.targetCount)||0))), 0))),
+          skillAttackPowerRate: fired.reduce((max, trigger) => Math.max(max, Number(trigger.skillAttackPowerRate) || 0), 0),
+          skillAttackTargetSelection: String((fired.find(trigger => Number(trigger.skillAttackPowerRate) > 0) || {}).skillAttackTargetSelection || "default"),
           reviveRules: fired.flatMap(trigger => abilityArray(trigger.reviveRules).map(rule => ({ ...rule }))),
           spawnRules: fired.flatMap(trigger => abilityArray(trigger.spawnRules).map(rule => ({ ...rule }))),
           transformRules: fired.flatMap(trigger => abilityArray(trigger.transformRules).map(rule => ({ ...rule }))),
@@ -18490,7 +18499,11 @@
           const actorPurified = hasPurificationStatus(actor);
           const explicitAttackTargetCount = Math.max(0, Math.min(5, Math.floor(Number(activation.attackTargetCount) || 0)));
           const requestedAttackTargets = explicitAttackTargetCount > 0 ? explicitAttackTargetCount : actor.normalAttackTargetCount;
-          const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex, explicitAttackTargetCount > 0 ? null : actor);
+          const skillAttackSelection = normalizeNormalAttackTargetSelection(activation.skillAttackTargetSelection || "default");
+          const attackTargetActor = explicitAttackTargetCount > 0
+            ? (skillAttackSelection !== "default" ? { ...actor, targetSelection: skillAttackSelection } : null)
+            : actor;
+          const attackTargets = pickTargets(team, defenderTeam, requestedAttackTargets, turnIndex, attackTargetActor);
           defenderTeam.currentHitTargetIds = attackTargets.map(member => String(member.id));
           target = attackTargets[0] || target;
           const transformEvents = applyTransformRules(activation.transformRules, team, defenderTeam, actor, target, turnIndex);
@@ -18543,7 +18556,8 @@
           const followUpPowerBonus = activeFollowUpRules.reduce((sum,rule)=>sum + actor.power * Math.max(0,Number(rule.powerRate)||0),0);
           const activeAttackBonus = actorPurified && Number(activation.attackBonus) > 0 ? 0 : Number(activation.attackBonus || 0);
           const activeAttackStackGain = actorPurified && Number(activation.attackStackGain) > 0 ? 0 : Number(activation.attackStackGain || 0);
-          const activeAttack = Math.max(1, actor.power + activeAttackBonus + activeAttackStackGain + followUpPowerBonus);
+          const skillAttackPowerRate = Number(activation.skillAttackPowerRate) > 0 ? Number(activation.skillAttackPowerRate) : 1;
+          const activeAttack = Math.max(1, actor.power * skillAttackPowerRate + activeAttackBonus + activeAttackStackGain + followUpPowerBonus);
           const attackMissedByBlind = rollBattleBlindMiss(actor);
 
           const alliedShieldBefore = teamShield(team);
@@ -20145,6 +20159,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             removeAllEnemyShield: false,
             sourceAbilityRuntimeKey: String(record.abilityRuntimeKey || ""),
             attackTargetCount: (!record.trigger.onOwnAttack || record.effect?.affectNormalAttack === true || record.effect?.affectsNormalAttack === true) ? Math.max(0, Math.min(5, Math.floor(Number(record.ability && (record.ability.attackTargetCount ?? record.ability.targetCount)) || 0))) : 0,
+            skillAttackPowerRate: 0,
+            skillAttackTargetSelection: "default",
             abilityTransfers: [],
             attackBonus: 0,
             healHp: 0,
@@ -20249,6 +20265,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           return;
         }
         switch (effectType) {
+          case CARD_ABILITY_EFFECT_TYPES.SKILL_ATTACK: {
+            const rawSkillAttackRate = Number(effect.damageRate ?? effect.powerRate ?? effect.attackPowerRate ?? effect.value ?? 1);
+            const skillAttackRate = Number.isFinite(rawSkillAttackRate) ? Math.max(0, rawSkillAttackRate) : 1;
+            const skillAttackTargetCount = Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount ?? effect.attackTargetCount ?? effect.targets ?? 1) || 1)));
+            group.skillAttackPowerRate = Math.max(Number(group.skillAttackPowerRate) || 0, skillAttackRate);
+            group.attackTargetCount = Math.max(Number(group.attackTargetCount) || 0, skillAttackTargetCount);
+            group.skillAttackTargetSelection = String(effect.targetSelection || effect.attackTargetSelection || "default");
+            break;
+          }
           case CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE:
           case CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_RATE:
           case CARD_ABILITY_EFFECT_TYPES.SELF_POWER_RATE:
@@ -20568,6 +20593,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return [...grouped.values()].map(item => ({
         ...item,
         attackBonus: Math.max(-teamPower * .90, Math.min(attackCap, Number(item.attackBonus || 0))),
+        skillAttackPowerRate: Math.max(0, Number(item.skillAttackPowerRate) || 0),
+        skillAttackTargetSelection: String(item.skillAttackTargetSelection || "default"),
         healHp: Math.max(0, Math.min(healCap, Number(item.healHp || 0))),
         extraHits: Math.round(Number(item.extraHits) || 0),
         enemyNextAttackHits: Math.round(Number(item.enemyNextAttackHits) || 0),
@@ -24420,6 +24447,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       cardPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk เฉพาะการ์ด",
       rarityPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk ระดับการ์ด",
       elementPowerRate: "atk attack power พลังโจมตี โจมตี บัฟ atk ธาตุ",
+      skillAttack: "สกิลโจมตี skill attack damage aoe หลายเป้าหมาย ดาเมจเฉพาะตอนสกิลทำงาน",
       nextAttackPowerRate: "atk attack power พลังโจมตี โจมตีครั้งถัดไป แอคทีฟสกิล",
       nextAttackPowerFlat: "atk attack power พลังโจมตี โจมตีครั้งถัดไป ค่าคงที่ แอคทีฟสกิล",
       nextAttackCriticalRate: "คริติคอล critical crit 100% การโจมตีครั้งถัดไป ชั่วคราว แอคทีฟสกิล guaranteed",
