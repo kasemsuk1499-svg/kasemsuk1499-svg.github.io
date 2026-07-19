@@ -4702,7 +4702,7 @@ window.ACC_CARD_DATA = [
   "defense": 10800,
   "speed": 103,
   "incomePerSec": 275,
-  "normalAttackTargetCount": 4,
+  "normalAttackTargetCount": 1,
   "targetSelection": "default",
   "upgradeDustBase": 1723,
   "upgradeDustGrowth": 1.016,
