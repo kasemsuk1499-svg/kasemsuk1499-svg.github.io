@@ -4994,9 +4994,9 @@ window.ACC_CARD_DATA = [
   },
   {
     "id": 24,
-    "name": "Zero Two",
+    "name": "กลาเซียร์ลาส อัลบิส",
     "rarity": "SR",
-    "element": "ความมืด",
+    "element": "น้ำแข็ง",
     "power": 9000,
         "hp": 45000,
         "defense": 3600,
@@ -5007,21 +5007,27 @@ window.ACC_CARD_DATA = [
     "icon": "",
     "image": "24.png",
     "ability": {
-      "name": "มีอะไรน่าสนใจ...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุมืดได้รับ ATK/HP +40%,และโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "ความมืด":2}, "leaderOnly": true},
+      "name": "Pxonix Revival",
+      "description": "เมื่อการ์ดใบนี้หมดสภาพ จะคืนชีพด้วย HP 100%",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
       "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["ความมืด"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["ความมืด"] },
-        { "type": "shieldHits", "value": 1 }
-      ]
+        {
+          "type": "revive",
+          "value": 1,
+          "targetSide": "self",
+          "targetSelection": "all"
         }
+      ],
+      "condition": {
+        "onDeath": true,
+        "afterDeaths": 1
+      }
+     }
   },
   {
     "id": 25,
-    "name": "Vegeta",
-    "rarity": "SR",
+    "name": "ฮากะคุเระ",
+    "rarity": "SSR",
     "element": "แสง",
     "power": 9000,
         "hp": 45000,
@@ -5033,44 +5039,102 @@ window.ACC_CARD_DATA = [
     "icon": "",
     "image": "25.png",
     "ability": {
-      "name": "แกมันกระจอก...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุแสงได้รับ ATK/HP +40%,และเจาะโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "แสง":2}, "leaderOnly": true},
-      "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["แสง"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["แสง"] },
-        { "type": "attackHits", "value": 1 }
+      "name": "หักเหลำแสง",
+      "description": "เมื่อเริ่มต่อสู้จะมอบบัพกันสถานะไฟไหม้และตาบอดให้เพื่อนร่วมทีมและตนเองเป็นเวลา 2 เทิร์น และทุกครั้งที่โจมตีจะได้รับเพิ่มอีก 2 เทิร์น",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {onOwnAttack: true, repeat: true},
+      effects: [
+        {
+          type: "abnormalStatusResistance",
+          targetSide: "ally",
+          durationTurns: 2,
+          targetSelection: "all",
+          scope: "field",
+          resistStatuses: [
+            "burn",
+            "blind"
+          ],
+          statuses: [
+            "burn",
+            "blind"
+          ]
+        }
       ]
         }
   },
   {
     "id": 26,
-    "name": "Itadori Yuji",
-    "rarity": "SR",
-    "element": "ลม",
-    "power": 9000,
-        "hp": 45000,
-        "defense": 3600,
-    "incomePerSec": 280,
-    "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.04,
-    "awakenMax": 9,
+    "name": "คลอเด็ต",
+    "rarity": "SSR",
+    "element": "ดิน",
+ "balanceSchemaVersion": 4,
+  "power": 18000,
+  "hp": 90000,
+  "defense": 7200,
+  "speed": 96,
+  "incomePerSec": 155,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1530,
+  "upgradeDustGrowth": 1.013,
+  "awakenMax": 20,
     "icon": "",
     "image": "26.png",
-    "ability": {
-      "name": "เฮเทคเคน!!!",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุลมได้รับ ATK/HP +40%,และเจาะโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "ลม":2}, "leaderOnly": true},
-      "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["ลม"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["ลม"] },
-        { "type": "attackHits", "value": 1 }
-      ]
-        }
+"ability": {
+  "name": "พรสวรรค์แห่งคทา",
+  "description": "เมื่อเริ่มการต่อสู้ จะได้รับโล่ 5 ฮิต และมอบบัพป้องกันสถานะสตั้นให้เพื่อนร่วมทีมทั้งหมดเป็นเวลา 2 เทิร์น ทุกครั้งที่โจมตี จะมอบบัพป้องกันสถานะสตั้นให้ทีมทั้งหมดเป็นเวลา 2 เทิร์น",
+  "activeIn": ["team", "tower", "arena", "worldBoss"],
+  "condition": {},
+  "effects": [
+    {
+      "type": "shieldHits",
+      "value": 5,
+      "targetSide": "self",
+      "targetSelection": "self",
+      "condition": {
+        "onBattleStart": true
+      }
+    },
+    {
+      "type": "abnormalStatusResistance",
+      "targetSide": "ally",
+      "targetSelection": "all",
+      "durationTurns": 2,
+      "scope": "field",
+      "resistStatuses": [
+        "stun"
+      ],
+      "statuses": [
+        "stun"
+      ],
+      "resistBeneficial": true,
+      "condition": {
+        "onBattleStart": true
+      }
+    },
+    {
+      "type": "abnormalStatusResistance",
+      "targetSide": "ally",
+      "targetSelection": "all",
+      "durationTurns": 2,
+      "scope": "field",
+      "resistStatuses": [
+        "stun"
+      ],
+      "statuses": [
+        "stun"
+      ],
+      "resistBeneficial": true,
+      "condition": {
+        "onOwnAttack": true,
+        "repeat": true
+      }
+     }
+   ]
   },
+},
   {
+
     "id": 27,
     "name": "อาซูกะ",
     "rarity": "SC",
