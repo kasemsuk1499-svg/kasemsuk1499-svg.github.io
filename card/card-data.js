@@ -5029,7 +5029,8 @@ window.ACC_CARD_DATA = [
     "name": "ฮากะคุเระ",
     "rarity": "SSR",
     "element": "แสง",
-  "power": 18000,
+  "balanceSchemaVersion": 4, 
+    "power": 18000,
   "hp": 90000,
   "defense": 7200,
   "speed": 96,
@@ -5045,19 +5046,19 @@ window.ACC_CARD_DATA = [
       "name": "หักเหลำแสง",
       "description": "เมื่อเริ่มต่อสู้จะมอบบัพกันสถานะไฟไหม้และตาบอดให้เพื่อนร่วมทีมและตนเองเป็นเวลา 2 เทิร์น และทุกครั้งที่โจมตีจะได้รับเพิ่มอีก 2 เทิร์น",
       "activeIn": ["team", "tower", "arena", "worldBoss"],
-      "condition": {onOwnAttack: true, repeat: true},
-      effects: [
+      "condition": {"onOwnAttack": true, "repeat": true},
+      "effects": [
         {
-          type: "abnormalStatusResistance",
-          targetSide: "ally",
-          durationTurns: 2,
-          targetSelection: "all",
-          scope: "field",
-          resistStatuses: [
+          "type": "abnormalStatusResistance",
+          "targetSide": "ally",
+          "durationTurns": 2,
+          "targetSelection": "all",
+          "scope": "field",
+          "resistStatuses": [
             "burn",
             "blind"
           ],
-          statuses: [
+          "statuses": [
             "burn",
             "blind"
           ]
