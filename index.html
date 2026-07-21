@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-21-owned-gacha-cutscene-toggle-v144">
-  <title>Anime Card Collection · Runtime v144 · First-Pull Cutscene Lock</title>
+  <meta name="gacha-app-build" content="2026-07-21-multihit-repeat-v145">
+  <title>Anime Card Collection · Runtime v145 · Per-Hit Skill Repeat</title>
   <style>
     :root {
       color-scheme: dark;
@@ -18269,7 +18269,7 @@
       function onBattleStatusHit(targetTeam, attackerTeam, target, hitCount, actor) {
         const events = [];
         if (!target || hitCount <= 0) return events;
-        events.push(...consumeStatusResistanceHits(target, targetTeam, hitCount));
+        // v145: การลดจำนวนฮิตของบัพต้านสถานะย้ายไปทำหลังทอยสถานะของแต่ละฮิตใน applyAttackStatusRules
         activeStatusEffects(target,"freeze").forEach(effect => {
           const sourceMember = [...abilityArray(player.members), ...abilityArray(enemy.members)].find(member => String(member && member.id || "") === String(effect.sourceCardId || ""));
           const sourcePower = Math.max(0, Number(sourceMember && sourceMember.power) || Number(effect.sourcePower) || 0);
@@ -18298,7 +18298,11 @@
       }
       function applyAttackStatusRules(rules, ownerTeam, defenderTeam, actor, attackResults, turnIndex) {
         const events = [];
-        abilityArray(rules).forEach((rule, ruleIndex) => {
+        const results = abilityArray(attackResults);
+        // v145: เอฟเฟกต์สถานะที่ผูกกับการโจมตีหลายฮิตต้องทอยแยกต่อฮิต
+        // เช่น สตั้น 20% จำนวน 5 ฮิต = ทอย 20% จำนวน 5 ครั้ง ไม่ใช่รวมเป็น 100%
+        const maxPlannedHits = Math.max(1, ...results.map(item => Math.max(0, Math.floor(Number(item && (item.plannedHits ?? item.hits ?? item.statusAttemptHits)) || 0))));
+        const preparedRules = abilityArray(rules).map((rule, ruleIndex) => {
           const count = Math.max(1, Math.min(5, Math.floor(Number(rule && rule.targetCount) || 1)));
           const side = String(rule && rule.side || "enemy");
           const selection = normalizeAbilitySelectionMode(rule && (rule.targetSelection || rule.selection), "random");
@@ -18306,16 +18310,13 @@
           let candidates = [];
 
           if (selection === "hitTargets") {
-            const resultIds = new Set(abilityArray(attackResults).filter(item => !item.ko).map(item => String(item.targetCardId)));
+            const resultIds = new Set(results.filter(item => !item.ko).map(item => String(item.targetCardId)));
             const targetTeam = side === "enemy" ? defenderTeam : ownerTeam;
             candidates = targetTeam.members.filter(member => resultIds.has(String(member.id)) && memberMatchesRuntimeRule(member, rule));
           } else if (side === "enemy") {
-            // v78: สถานะผิดปกติแบบ random/specific/all เลือกจากฝ่ายศัตรูตามตัวกรองโดยตรง
             candidates = resolveRuntimeTargets({ ...rule, side:"enemy", selection:"all" }, ownerTeam, defenderTeam, actor, null);
-
-            // ข้อมูลเก่าที่หาเป้าจากตัวกรองไม่ได้ จะ fallback ไปหาเป้าหมายของการโจมตีครั้งนี้
             if (!candidates.length) {
-              const resultIds = new Set(abilityArray(attackResults).filter(item => !item.ko).map(item => String(item.targetCardId)));
+              const resultIds = new Set(results.filter(item => !item.ko).map(item => String(item.targetCardId)));
               candidates = defenderTeam.members.filter(member => resultIds.has(String(member.id)) && memberMatchesRuntimeRule(member, rule));
             }
           } else {
@@ -18323,29 +18324,59 @@
           }
 
           candidates = selectAbilityItems(candidates, selection === "hitTargets" ? "all" : selection, count, seed, "targets");
-          candidates.forEach(member => {
-            if (!Array.isArray(member.statusResistanceRules)) member.statusResistanceRules = [];
-            events.push(...compactStatusResistanceRules(member, side === "enemy" ? defenderTeam : ownerTeam, "before-status"));
-            const resistance = shouldAbilityEffectBeResisted(
-              member.statusResistanceRules,
-              { ...rule, type:CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS },
-              `${options.statusResolutionSeed || "runtime-status"}`,
-              `${rule._runtimeEffectKey || "status"}:${turnIndex}:${ruleIndex}:${member.id}`
-            );
-            const statusType = normalizeBattleStatusName(rule.status);
-            const statusLabel = BATTLE_STATUS_LABELS[statusType] || rule.status;
-            if (resistance.resisted) {
-              events.push({ status:"resisted", statusType, statusLabel, targetCardId:member.id, targetName:member.name, rate:resistance.rate });
-              return;
-            }
-            if (Math.random() > Math.max(0, Math.min(1, Number(rule.successRate) || 0))) {
-              events.push({ status:"failed", statusType, statusLabel, targetCardId:member.id, targetName:member.name, successRate:rule.successRate });
-              return;
-            }
-            const event = applyBattleStatus(member, rule, actor, ownerTeam, defenderTeam, "attack");
-            if (event) events.push(event);
-          });
+          return { rule, ruleIndex, side, selection, candidates };
         });
+
+        for (let hitIndex = 1; hitIndex <= maxPlannedHits; hitIndex += 1) {
+          preparedRules.forEach(({ rule, ruleIndex, side, candidates }) => {
+            candidates.forEach(member => {
+              if (!Array.isArray(member.statusResistanceRules)) member.statusResistanceRules = [];
+              const attackResult = results.find(item => String(item && item.targetCardId) === String(member.id));
+              const detail = attackResult ? abilityArray(attackResult.hitDetails)[hitIndex - 1] : null;
+              const legacyAttemptHits = attackResult
+                ? Math.max(0, Math.floor(Number(attackResult.statusAttemptHits ?? attackResult.landedHits ?? attackResult.unblockedHits) || 0))
+                : maxPlannedHits;
+              // เป้าหมายที่ถูกโจมตีจริงจะทอยเฉพาะฮิตที่ผ่านโล่และไม่หลบ
+              const shouldAttempt = attackResult
+                ? (detail ? !detail.shieldBlocked && !detail.dodged : hitIndex <= legacyAttemptHits)
+                : hitIndex <= maxPlannedHits;
+              if (!shouldAttempt || member.ko || member.currentHp <= 0) return;
+
+              events.push(...compactStatusResistanceRules(member, side === "enemy" ? defenderTeam : ownerTeam, "before-status"));
+              const resistance = shouldAbilityEffectBeResisted(
+                member.statusResistanceRules,
+                { ...rule, type:CARD_ABILITY_EFFECT_TYPES.APPLY_STATUS },
+                `${options.statusResolutionSeed || "runtime-status"}`,
+                `${rule._runtimeEffectKey || "status"}:${turnIndex}:${ruleIndex}:${member.id}:hit:${hitIndex}`
+              );
+              const statusType = normalizeBattleStatusName(rule.status);
+              const statusLabel = BATTLE_STATUS_LABELS[statusType] || rule.status;
+              const hitCount = attackResult
+                ? Math.max(0, abilityArray(attackResult.hitDetails).filter(item => item && !item.shieldBlocked && !item.dodged).length || legacyAttemptHits)
+                : maxPlannedHits;
+              if (resistance.resisted) {
+                events.push({ status:"resisted", statusType, statusLabel, targetCardId:member.id, targetName:member.name, rate:resistance.rate, hitIndex, hitCount });
+                return;
+              }
+              if (Math.random() > Math.max(0, Math.min(1, Number(rule.successRate) || 0))) {
+                events.push({ status:"failed", statusType, statusLabel, targetCardId:member.id, targetName:member.name, successRate:rule.successRate, hitIndex, hitCount });
+                return;
+              }
+              const event = applyBattleStatus(member, rule, actor, ownerTeam, defenderTeam, "attack");
+              if (event) events.push({ ...event, hitIndex, hitCount });
+            });
+          });
+
+          // ต้านสถานะแบบกำหนดจำนวนฮิต: ป้องกันเอฟเฟกต์ของฮิตนี้ก่อน แล้วค่อยลดจำนวนคงเหลือ 1
+          results.forEach(item => {
+            const detail = abilityArray(item && item.hitDetails)[hitIndex - 1];
+            const legacyReceivedHits = Math.max(0, Math.floor(Number(item && (item.receivedHits ?? ((item.blockedHits || 0) + (item.unblockedHits || 0)))) || 0));
+            const receivedThisHit = detail ? !detail.dodged : hitIndex <= legacyReceivedHits;
+            if (!receivedThisHit) return;
+            const member = defenderTeam.members.find(targetMember => String(targetMember.id) === String(item.targetCardId));
+            if (member) events.push(...consumeStatusResistanceHits(member, defenderTeam, 1));
+          });
+        }
         return events;
       }
       function applyStatusResistanceEffects(effects, ownerTeam, defenderTeam, actor, currentTarget, reason = "skill") {
@@ -19044,6 +19075,130 @@
         return { player: player.members.map(snap), enemy: enemy.members.map(snap) };
       }
 
+      // v145: แก้การโจมตีหลายฮิตให้เป็นการทำซ้ำแบบต่อฮิตจริง
+      // แต่ละฮิตมีพลังของตัวเอง ใช้โล่ 1 ฮิต ทอยหลบ/บล็อกแยก และส่งจำนวนฮิตที่ลงเป้าหมายให้เอฟเฟกต์สถานะ
+      function resolveRepeatedAttackAgainstTarget({ actor, target, defenderTeam, activation, attackingSide, round, attackPackets, criticalMultiplier, defensePenetrationRate }) {
+        const packets = abilityArray(attackPackets).length
+          ? abilityArray(attackPackets).map((packet, index) => ({
+              power: Math.max(1, Number(packet && packet.power) || 1),
+              kind: String(packet && packet.kind || "main"),
+              packetIndex: index + 1
+            }))
+          : [{ power: Math.max(1, Number(actor && actor.power) || 1), kind:"main", packetIndex:1 }];
+        const plannedHits = packets.length;
+        const hitDetails = [];
+        const variance = varianceOf(attackingSide);
+        const elementMultiplier = Math.max(0, 1 + advancedElementModifier(actor, target, activation));
+        const penetration = Math.max(0, Math.min(1, Number(defensePenetrationRate) || 0));
+        let damage = 0;
+        let blockedHits = 0;
+        let unblockedHits = 0;
+        let landedHits = 0;
+        let receivedHits = 0;
+        let dodgedHits = 0;
+        let blindMissHits = 0;
+        let defenseBlockedHits = 0;
+        let blockedDamageReduced = 0;
+        let hitLifeConsumed = 0;
+        let hitLifeExpired = false;
+
+        for (let index = 0; index < packets.length; index += 1) {
+          if (!target || target.ko || target.currentHp <= 0) break;
+          const packet = packets[index];
+          const hitIndex = index + 1;
+
+          if (target.shieldHits > 0) {
+            target.shieldHits -= 1;
+            target.shieldConsumed += 1;
+            blockedHits += 1;
+            receivedHits += 1;
+            const survival = applyReviveSurvivalAfterHit(target, 1);
+            hitLifeConsumed += survival.hitLifeConsumed;
+            hitLifeExpired = hitLifeExpired || survival.expired;
+            hitDetails.push({ hitIndex, kind:packet.kind, power:packet.power, shieldBlocked:true, dodged:false, blocked:false, damage:0, remaining:Math.max(0,target.currentHp), ko:Boolean(target.ko) });
+            if (survival.expired) break;
+            continue;
+          }
+
+          unblockedHits += 1;
+          const blindMiss = rollBattleBlindMiss(actor);
+          const dodged = blindMiss || Math.random() < Math.max(0, Number(target.dodgeRate) || 0);
+          if (blindMiss) blindMissHits += 1;
+          if (dodged) {
+            dodgedHits += 1;
+            target.dodges += 1;
+            defenderTeam.totalDodges += 1;
+            hitDetails.push({ hitIndex, kind:packet.kind, power:packet.power, shieldBlocked:false, blindMiss, dodged:true, blocked:false, damage:0, remaining:Math.max(0,target.currentHp), ko:Boolean(target.ko) });
+            continue;
+          }
+
+          landedHits += 1;
+          receivedHits += 1;
+          const attackBeforeDefense = packet.power * variance * Math.max(1, Number(criticalMultiplier) || 1) * elementMultiplier;
+          const defenseApplied = target.defense * (1 - penetration) * Number(CONFIG.combatDefenseWeight || 1);
+          const minimum = packet.power * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05));
+          let hitDamageBeforeBlock = Math.max(minimum, attackBeforeDefense - defenseApplied);
+          const blocked = Math.random() < Math.max(0, Number(target.blockRate) || 0);
+          let hitDamage = blocked ? hitDamageBeforeBlock * Number(CONFIG.combatBlockDamageMultiplier || .5) : hitDamageBeforeBlock;
+          if (blocked) {
+            defenseBlockedHits += 1;
+            target.blocks += 1;
+            defenderTeam.totalBlocks += 1;
+            blockedDamageReduced += Math.max(0, hitDamageBeforeBlock - hitDamage);
+          }
+          if (target.guardTurns > 0) hitDamage *= .5;
+          hitDamage *= Math.max(0, 1 + Number(target.damageTakenRate || 0));
+          // Fatigue ยังเป็นขั้นต่ำหนึ่งครั้งต่อการโจมตี ไม่คูณซ้ำทุกฮิต
+          const fatigueStart = Math.max(1, Number(CONFIG.combatFatigueStartRound || 18));
+          if (landedHits === 1 && round >= fatigueStart) {
+            const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxHpRate || .10), .01 + Math.max(0, round-fatigueStart)*.003);
+            hitDamage = Math.max(hitDamage, target.maxHp * fatigueRate);
+          }
+          hitDamage = Math.max(1, isUndyingSide(defenderTeam.side) ? hitDamage : Math.min(target.currentHp, hitDamage));
+          target.currentHp = Math.max(0, target.currentHp - hitDamage);
+          damage += hitDamage;
+
+          const keptAliveByUndying = keepUndyingMemberAlive(target, defenderTeam);
+          const survival = keptAliveByUndying ? { expired:false, hitLifeConsumed:0 } : applyReviveSurvivalAfterHit(target, 1);
+          hitLifeConsumed += survival.hitLifeConsumed;
+          hitLifeExpired = hitLifeExpired || survival.expired;
+          if (!survival.expired) {
+            if (target.currentHp <= 0 && target.reviveTurnsRemaining > 0) target.currentHp = 1;
+            target.ko = keptAliveByUndying ? false : target.currentHp <= 0;
+            if (target.ko) target.deathReason = "damage";
+          }
+          hitDetails.push({ hitIndex, kind:packet.kind, power:packet.power, shieldBlocked:false, blindMiss:false, dodged:false, blocked, damage:hitDamage, damageBeforeBlock:hitDamageBeforeBlock, remaining:Math.max(0,target.currentHp), ko:Boolean(target.ko) });
+          if (target.ko || survival.expired) break;
+        }
+
+        defenderTeam.totalBlockedDamage += blockedDamageReduced;
+        return {
+          targetCardId: target.id,
+          targetName: target.name,
+          targetRow: target.row,
+          damage,
+          plannedHits,
+          actualHits: hitDetails.length,
+          blockedHits,
+          unblockedHits,
+          landedHits,
+          receivedHits,
+          statusAttemptHits: landedHits,
+          dodgedHits,
+          blindMissHits,
+          defenseBlockedHits,
+          blockedDamageReduced,
+          dodged: unblockedHits > 0 && landedHits === 0,
+          partiallyDodged: dodgedHits > 0 && landedHits > 0,
+          blocked: defenseBlockedHits > 0,
+          remaining: Math.max(0, target.currentHp),
+          ko: Boolean(target.ko),
+          hitLifeConsumed,
+          hitLifeExpired,
+          hitDetails
+        };
+      }
+
       function guardDecision(team, actor) {
         if (team.commandStrategy !== "guard") return false;
         return actor.currentHp / Math.max(1, actor.maxHp) <= .45;
@@ -19322,10 +19477,13 @@
           const baseHits = applyCombatAttackHitModifier(actor.attackHits, pendingHitChange);
           const rawActiveHitRuleChange = abilityArray(activation.hitTargetRules).length ? targetedCurrentHitChange : activation.extraHits;
           const activeHitRuleChange = actorPurified && Number(rawActiveHitRuleChange) > 0 ? 0 : Number(rawActiveHitRuleChange || 0);
+          const mainHits = applyCombatAttackHitModifier(baseHits, activeHitRuleChange);
           const activeFollowUpRules = actorPurified ? [] : abilityArray(activation.followUpAttacks);
-          const followUpHits = activeFollowUpRules.filter(rule=>Math.random()<=Math.max(0,Math.min(1,Number(rule.successRate)||0))).reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hits)||1)),0);
-          const multiElementHits = abilityArray(activation.multiElementAttacks).reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hitsPerElement)||1))*Math.max(1,abilityArray(rule.attackElements).length),0);
-          const hits = applyCombatAttackHitModifier(baseHits, activeHitRuleChange + followUpHits + multiElementHits);
+          const triggeredFollowUpRules = activeFollowUpRules.filter(rule=>Math.random()<=Math.max(0,Math.min(1,Number(rule.successRate)||0)));
+          const followUpHits = triggeredFollowUpRules.reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hits)||1)),0);
+          const activeMultiElementRules = abilityArray(activation.multiElementAttacks);
+          const multiElementHits = activeMultiElementRules.reduce((sum,rule)=>sum+Math.max(1,Math.floor(Number(rule.hitsPerElement)||1))*Math.max(1,abilityArray(rule.attackElements).length),0);
+          const hits = Math.max(1, mainHits + followUpHits + multiElementHits);
           const pendingCritChange = Number(actor.pendingCriticalRateChange || 0);
           const activeNextCritChange = actorPurified && Number(activation.nextAttackCriticalRate) > 0 ? 0 : Number(activation.nextAttackCriticalRate || 0);
           const nextCrit = pendingCritChange + activeNextCritChange;
@@ -19335,12 +19493,16 @@
           const effectiveCriticalDamageRate = actorPurified && Number(activation.criticalDamageRate) > 0 ? 0 : Number(activation.criticalDamageRate || 0);
           const effectiveDefensePenetrationRate = actorPurified && Number(activation.defensePenetrationRate) > 0 ? 0 : Number(activation.defensePenetrationRate || 0);
           const critMultiplier = critical ? Math.max(1, criticalDamageOf(entry.side) * Math.max(0, 1 + effectiveCriticalDamageRate)) : 1;
-          const followUpPowerBonus = activeFollowUpRules.reduce((sum,rule)=>sum + actor.power * Math.max(0,Number(rule.powerRate)||0),0);
           const activeAttackBonus = actorPurified && Number(activation.attackBonus) > 0 ? 0 : Number(activation.attackBonus || 0);
           const activeAttackStackGain = actorPurified && Number(activation.attackStackGain) > 0 ? 0 : Number(activation.attackStackGain || 0);
           const skillAttackPowerRate = Number(activation.skillAttackPowerRate) > 0 ? Number(activation.skillAttackPowerRate) : 1;
-          const activeAttack = Math.max(1, actor.power * skillAttackPowerRate + activeAttackBonus + activeAttackStackGain + followUpPowerBonus);
-          const attackMissedByBlind = rollBattleBlindMiss(actor);
+          // พลังนี้คือพลัง "ต่อหนึ่งฮิต" เช่น 30% × 5 ฮิต = 30% ถูกคำนวณห้าครั้ง
+          const activeAttack = Math.max(1, actor.power * skillAttackPowerRate + activeAttackBonus + activeAttackStackGain);
+          const attackPackets = [
+            ...Array.from({ length: mainHits }, () => ({ power:activeAttack, kind:"main" })),
+            ...triggeredFollowUpRules.flatMap(rule => Array.from({ length:Math.max(1,Math.floor(Number(rule.hits)||1)) }, () => ({ power:Math.max(1,actor.power*Math.max(0,Number(rule.powerRate)||1)), kind:"followUp" }))),
+            ...activeMultiElementRules.flatMap(rule => Array.from({ length:Math.max(1,Math.floor(Number(rule.hitsPerElement)||1))*Math.max(1,abilityArray(rule.attackElements).length) }, () => ({ power:activeAttack, kind:"multiElement" })))
+          ];
 
           const alliedShieldBefore = teamShield(team);
           const enemyShieldBefore = teamShield(defenderTeam);
@@ -19374,110 +19536,32 @@
             }
           }
 
-          const blockedHits = Math.min(target.shieldHits, hits);
-          target.shieldHits -= blockedHits;
-          target.shieldConsumed += blockedHits;
-          const unblockedHits = Math.max(0, hits - blockedHits);
-          const hitRate = hits > 0 ? unblockedHits / hits : 0;
-          let dodged = false, blocked = false;
-          let damage = 0;
-          if (unblockedHits > 0) {
-            dodged = attackMissedByBlind || Math.random() < Math.max(0, target.dodgeRate);
-            if (!dodged) {
-              const elementMultiplier = Math.max(0, 1 + advancedElementModifier(actor, target, activation));
-              const attackAfterShield = activeAttack * hitRate * varianceOf(entry.side) * critMultiplier * elementMultiplier;
-              const defenseApplied = target.defense * (1 - Math.max(0,Math.min(1,effectiveDefensePenetrationRate))) * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, hitRate);
-              const minimum = activeAttack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)) * hitRate;
-              damage = Math.max(minimum, attackAfterShield - defenseApplied);
-              blocked = Math.random() < Math.max(0, target.blockRate);
-              if (blocked) damage *= Number(CONFIG.combatBlockDamageMultiplier || .5);
-              if (target.guardTurns > 0) damage *= .5;
-              damage *= Math.max(0, 1 + Number(target.damageTakenRate || 0));
-              const fatigueStart = Math.max(1, Number(CONFIG.combatFatigueStartRound || 18));
-              if (round >= fatigueStart) {
-                const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxHpRate || .10), .01 + Math.max(0, round-fatigueStart)*.003);
-                damage = Math.max(damage, target.maxHp * fatigueRate);
-              }
-              damage = Math.max(1, isUndyingSide(defenderTeam.side) ? damage : Math.min(target.currentHp, damage));
-            }
-          }
-          if (dodged) { target.dodges += 1; defenderTeam.totalDodges += 1; }
-          if (blocked) { target.blocks += 1; defenderTeam.totalBlocks += 1; defenderTeam.totalBlockedDamage += damage; }
-          target.currentHp = Math.max(0, target.currentHp - damage);
-          const keptAliveByUndying = keepUndyingMemberAlive(target, defenderTeam);
-          // ชีวิตแบบนับฮิต: ฮิตที่โล่รับยังถือว่าโดนโจมตี แต่ฮิตที่หลบสำเร็จไม่นับ
-          const receivedHitsForReviveLife = blockedHits + (dodged ? 0 : unblockedHits);
-          const reviveSurvival = keptAliveByUndying ? { expired:false, hitLifeConsumed:0 } : applyReviveSurvivalAfterHit(target, receivedHitsForReviveLife);
-          if (!reviveSurvival.expired) {
-            if (target.currentHp <= 0 && target.reviveTurnsRemaining > 0) target.currentHp = 1;
-            target.ko = keptAliveByUndying ? false : target.currentHp <= 0;
-            if (target.ko) target.deathReason = "damage";
-          }
-          const targetResults = [{
-            targetCardId: target.id, targetName: target.name, targetRow: target.row,
-            damage, blockedHits, unblockedHits, dodged, blocked,
-            remaining: Math.max(0, target.currentHp), ko: Boolean(target.ko),
-            hitLifeConsumed: reviveSurvival.hitLifeConsumed, hitLifeExpired: reviveSurvival.expired
-          }];
+          const primaryResult = resolveRepeatedAttackAgainstTarget({
+            actor, target, defenderTeam, activation, attackingSide:entry.side, round,
+            attackPackets, criticalMultiplier:critMultiplier, defensePenetrationRate:effectiveDefensePenetrationRate
+          });
+          const damage = primaryResult.damage;
+          const blockedHits = primaryResult.blockedHits;
+          const unblockedHits = primaryResult.unblockedHits;
+          const targetResults = [primaryResult];
           let totalDamage = damage;
           let totalBlockedHits = blockedHits;
           let totalUnblockedHits = unblockedHits;
-          let totalHitLifeConsumed = reviveSurvival.hitLifeConsumed;
-          let anyHitLifeExpired = reviveSurvival.expired;
+          let totalHitLifeConsumed = primaryResult.hitLifeConsumed;
+          let anyHitLifeExpired = primaryResult.hitLifeExpired;
 
           for (const extraTarget of attackTargets.slice(1)) {
-            const extraBlockedHits = Math.min(extraTarget.shieldHits, hits);
-            extraTarget.shieldHits -= extraBlockedHits;
-            extraTarget.shieldConsumed += extraBlockedHits;
-            const extraUnblockedHits = Math.max(0, hits - extraBlockedHits);
-            const extraHitRate = hits > 0 ? extraUnblockedHits / hits : 0;
-            let extraDodged = false;
-            let extraBlocked = false;
-            let extraDamage = 0;
-            if (extraUnblockedHits > 0) {
-              extraDodged = attackMissedByBlind || Math.random() < Math.max(0, extraTarget.dodgeRate);
-              if (!extraDodged) {
-                const extraElementMultiplier = Math.max(0, 1 + advancedElementModifier(actor, extraTarget, activation));
-                const extraAttackAfterShield = activeAttack * extraHitRate * varianceOf(entry.side) * critMultiplier * extraElementMultiplier;
-                const extraDefenseApplied = extraTarget.defense * (1 - Math.max(0,Math.min(1,effectiveDefensePenetrationRate))) * Number(CONFIG.combatDefenseWeight || 1) * Math.max(.35, extraHitRate);
-                const extraMinimum = activeAttack * Math.max(0, Number(CONFIG.combatMinimumDamageRate || .05)) * extraHitRate;
-                extraDamage = Math.max(extraMinimum, extraAttackAfterShield - extraDefenseApplied);
-                extraBlocked = Math.random() < Math.max(0, extraTarget.blockRate);
-                if (extraBlocked) extraDamage *= Number(CONFIG.combatBlockDamageMultiplier || .5);
-                if (extraTarget.guardTurns > 0) extraDamage *= .5;
-                extraDamage *= Math.max(0, 1 + Number(extraTarget.damageTakenRate || 0));
-                const fatigueStart = Math.max(1, Number(CONFIG.combatFatigueStartRound || 18));
-                if (round >= fatigueStart) {
-                  const fatigueRate = Math.min(Number(CONFIG.combatFatigueMaxHpRate || .10), .01 + Math.max(0, round-fatigueStart)*.003);
-                  extraDamage = Math.max(extraDamage, extraTarget.maxHp * fatigueRate);
-                }
-                extraDamage = Math.max(1, isUndyingSide(defenderTeam.side) ? extraDamage : Math.min(extraTarget.currentHp, extraDamage));
-              }
-            }
-            if (extraDodged) { extraTarget.dodges += 1; defenderTeam.totalDodges += 1; }
-            if (extraBlocked) { extraTarget.blocks += 1; defenderTeam.totalBlocks += 1; defenderTeam.totalBlockedDamage += extraDamage; }
-            extraTarget.currentHp = Math.max(0, extraTarget.currentHp - extraDamage);
-            const extraKeptAliveByUndying = keepUndyingMemberAlive(extraTarget, defenderTeam);
-            const extraReceivedHits = extraBlockedHits + (extraDodged ? 0 : extraUnblockedHits);
-            const extraReviveSurvival = extraKeptAliveByUndying ? { expired:false, hitLifeConsumed:0 } : applyReviveSurvivalAfterHit(extraTarget, extraReceivedHits);
-            if (!extraReviveSurvival.expired) {
-              if (extraTarget.currentHp <= 0 && extraTarget.reviveTurnsRemaining > 0) extraTarget.currentHp = 1;
-              extraTarget.ko = extraKeptAliveByUndying ? false : extraTarget.currentHp <= 0;
-              if (extraTarget.ko) extraTarget.deathReason = "damage";
-            }
-            if (extraTarget.guardTurns > 0) extraTarget.guardTurns -= 1;
-            targetResults.push({
-              targetCardId: extraTarget.id, targetName: extraTarget.name, targetRow: extraTarget.row,
-              damage: extraDamage, blockedHits: extraBlockedHits, unblockedHits: extraUnblockedHits,
-              dodged: extraDodged, blocked: extraBlocked, remaining: Math.max(0, extraTarget.currentHp),
-              ko: Boolean(extraTarget.ko), hitLifeConsumed: extraReviveSurvival.hitLifeConsumed,
-              hitLifeExpired: extraReviveSurvival.expired
+            const extraResult = resolveRepeatedAttackAgainstTarget({
+              actor, target:extraTarget, defenderTeam, activation, attackingSide:entry.side, round,
+              attackPackets, criticalMultiplier:critMultiplier, defensePenetrationRate:effectiveDefensePenetrationRate
             });
-            totalDamage += extraDamage;
-            totalBlockedHits += extraBlockedHits;
-            totalUnblockedHits += extraUnblockedHits;
-            totalHitLifeConsumed += extraReviveSurvival.hitLifeConsumed;
-            anyHitLifeExpired = anyHitLifeExpired || extraReviveSurvival.expired;
+            if (extraTarget.guardTurns > 0) extraTarget.guardTurns -= 1;
+            targetResults.push(extraResult);
+            totalDamage += extraResult.damage;
+            totalBlockedHits += extraResult.blockedHits;
+            totalUnblockedHits += extraResult.unblockedHits;
+            totalHitLifeConsumed += extraResult.hitLifeConsumed;
+            anyHitLifeExpired = anyHitLifeExpired || extraResult.hitLifeExpired;
           }
 
           if (target.guardTurns > 0) target.guardTurns -= 1;
@@ -19491,7 +19575,7 @@
           const statusHitEvents = [];
           targetResults.forEach(item => {
             const member = defenderTeam.members.find(targetMember => String(targetMember.id) === String(item.targetCardId));
-            if (member) statusHitEvents.push(...onBattleStatusHit(defenderTeam, team, member, Math.max(0, Number(item.blockedHits || 0) + Number(item.unblockedHits || 0)), actor));
+            if (member) statusHitEvents.push(...onBattleStatusHit(defenderTeam, team, member, Math.max(0, Number(item.receivedHits ?? (Number(item.blockedHits || 0) + Number(item.unblockedHits || 0)))), actor));
           });
           const statusApplyEvents = applyAttackStatusRules(activation.statusApplyRules, team, defenderTeam, actor, targetResults, turnIndex);
           const burnTickEvents = tickBattleBurnOnAttack();
@@ -19582,13 +19666,13 @@
             enemyNextAttackHits:abilityArray(activation.hitTargetRules).length ? 0 : activation.enemyNextAttackHits, blockedHits:totalBlockedHits, unblockedHits:totalUnblockedHits, damage:totalDamage, critical,
             criticalRate:effectiveCrit, baseCriticalRate:actor.criticalRate, nextAttackCriticalRateChange:nextCrit,
             enemyNextAttackCriticalRate:activation.enemyNextAttackCriticalRate, criticalMultiplier:critMultiplier,
-            defenderDefense:target.defense, dodgedMembers:targetResults.filter(item=>item.dodged).map(item=>({id:item.targetCardId,name:item.targetName,hpShare:1})),
-            blockedMembers:targetResults.filter(item=>item.blocked).map(item=>({id:item.targetCardId,name:item.targetName,finalDamage:item.damage})), dodgedHpRate:targetResults.some(item=>item.dodged)?1:0,
-            blockDamageReduced:0, damageBeforeBlock:totalDamage, damageAfterBlock:totalDamage,
+            defenderDefense:target.defense, dodgedMembers:targetResults.filter(item=>Number(item.dodgedHits || 0)>0).map(item=>({id:item.targetCardId,name:item.targetName,hpShare:1,dodgedHits:item.dodgedHits,landedHits:item.landedHits})),
+            blockedMembers:targetResults.filter(item=>Number(item.defenseBlockedHits || 0)>0).map(item=>({id:item.targetCardId,name:item.targetName,finalDamage:item.damage,blockedHits:item.defenseBlockedHits})), dodgedHpRate:targetResults.some(item=>Number(item.dodgedHits || 0)>0)?1:0,
+            blockDamageReduced:targetResults.reduce((sum,item)=>sum+Math.max(0,Number(item.blockedDamageReduced)||0),0), damageBeforeBlock:totalDamage+targetResults.reduce((sum,item)=>sum+Math.max(0,Number(item.blockedDamageReduced)||0),0), damageAfterBlock:totalDamage,
             triggerActivated:activation.fired.length>0, triggeredSkills:activation.names, triggeredDetails:activation.details,
             suppressedAbilities:[], domainEvents:[], nullifyEvents:[], statusResistanceEvents:resistanceActivationEvents, transferEvents:[], stackEvents:[], statusEvents,
             cleanseEvents:statusActionResult.cleanseEvents, purgeEvents:statusActionResult.purgeEvents, turnAccelerationEvents:statusActionResult.turnAccelerationEvents,
-            blindMiss:attackMissedByBlind,
+            blindMiss:targetResults.some(item => Number(item.blindMissHits || 0) > 0),
             attackBonus:activeAttackBonus, attackStackGain:activeAttackStackGain, maxHpGain,
             requestedHealHp:requestedHeal, healingMultiplier:getBattleHealingMultiplier(actor), healHp:heal, healEvents,
             shieldChange:selfShieldChange, enemyShieldChange, shieldGain:Math.max(0,selfShieldChange), shieldLoss:Math.max(0,-selfShieldChange),
@@ -19599,7 +19683,7 @@
             playerRemaining:teamHp(player), enemyRemaining:teamHp(enemy), playerShieldRemaining:teamShield(player), enemyShieldRemaining:teamShield(enemy),
             actorRemaining:actor.currentHp, targetRemaining:target.currentHp, targetKo:target.ko,
             reviveEvents, spawnEvents, transformEvents, transformRevertEvents, captureEvents, captureReleaseEvents, speedEvents, tauntEvents, counterEvents,
-            followUpEvents: activeFollowUpRules.map(rule=>({powerRate:rule.powerRate,hits:rule.hits,targetCount:rule.targetCount})),
+            followUpEvents: triggeredFollowUpRules.map(rule=>({powerRate:rule.powerRate,hits:rule.hits,targetCount:rule.targetCount})),
             multiElementEvents: abilityArray(activation.multiElementAttacks).map(rule=>({attackElements:rule.attackElements,hitsPerElement:rule.hitsPerElement,targetCount:rule.targetCount})),
             adaptiveElement: activation.adaptiveElement, defensePenetrationRate:effectiveDefensePenetrationRate, criticalDamageRate:effectiveCriticalDamageRate,
             hitLifeConsumed:totalHitLifeConsumed,
