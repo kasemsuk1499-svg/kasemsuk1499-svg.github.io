@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-21-idle-arena-fit-v141">
-  <title>Anime Card Collection · Runtime v141 · Idle Arena Fit</title>
+  <meta name="gacha-app-build" content="2026-07-21-idle-attack-line-v142">
+  <title>Anime Card Collection · Runtime v142 · Idle Attack Line Fix</title>
   <style>
     :root {
       color-scheme: dark;
@@ -8646,6 +8646,16 @@
     }
   </style>
 
+
+  <style id="v142-idle-attack-line-fix">
+    /* v142: เส้นโจมตีถูกสร้างไว้ที่ body จึงต้องไม่ถูก contain/overflow ของสนาม IDLE ตัดทิ้ง */
+    body:has(#idleView:not(.hidden)) > .battle-attack-path {
+      display:block !important;
+      visibility:visible !important;
+      opacity:1;
+      z-index:10020 !important;
+    }
+  </style>
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
@@ -20667,6 +20677,7 @@
 
 async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180, hooks = {}) {
       const quietMode = Boolean(hooks && hooks.quiet);
+      const hideActionRibbon = Boolean(hooks && hooks.hideActionRibbon);
       const hiddenFastMode = () => Boolean(hooks && hooks.runWhenHidden && document.hidden);
       updateTurnBattleDisplay(display, combat);
       const playerLabel = labels.player || "ทีมของคุณ";
@@ -20687,7 +20698,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       for (let turnIndex = 0; turnIndex < combat.turns.length; turnIndex += 1) {
         const turn = combat.turns[turnIndex];
         renderBattleTurnOrder(stage, combat, turnIndex, labels);
-        if (!quietMode) updateBattleActionRibbon(stage, turn, labels);
+        if (!quietMode && !hideActionRibbon) updateBattleActionRibbon(stage, turn, labels);
         const sideLabel = turn.side === "player" ? playerLabel : enemyLabel;
         const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
         const attackerLabel = turn.actorName ? `${turn.actorName} (${sideLabel})` : sideLabel;
@@ -28346,7 +28357,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             playerPower:document.getElementById("idlePlayerPower"), enemyPower:document.getElementById("idleEnemyPower"),
             playerMeter:document.getElementById("idlePlayerMeter"), enemyMeter:document.getElementById("idleEnemyMeter")
           }, { player:"ทีม IDLE ของคุณ", enemy:currentIdleOpponent.username }, phaseDuration, {
-            quiet:true,
+            // v142: ซ่อนเฉพาะ Action Ribbon ด้วย CSS แต่เปิดเอฟเฟกต์สนามแบบ ARENA ครบ
+            // ทำให้เส้นโจมตี ตัวเลขลอย Toast สกิล และ Event Feed ทำงานใน IDLE ตามปกติ
+            quiet:false,
+            hideActionRibbon:true,
             runWhenHidden:true
           });
           if (!document.hidden) stage.classList.add(won ? "battle-win" : "battle-lose");
