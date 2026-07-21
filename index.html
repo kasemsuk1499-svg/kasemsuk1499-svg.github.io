@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-21-idle-toast-ribbon-v140">
-  <title>Anime Card Collection · Runtime v140 · Idle Effects Restored</title>
+  <meta name="gacha-app-build" content="2026-07-21-idle-arena-fit-v141">
+  <title>Anime Card Collection · Runtime v141 · Idle Arena Fit</title>
   <style>
     :root {
       color-scheme: dark;
@@ -8254,6 +8254,395 @@
       #idleView .battle-actions{grid-template-columns:1fr 1fr}
       #idleView .battle-actions .btn:first-child{grid-column:1 / -1}
       .idle-status-grid{grid-template-columns:1fr 1fr}.gm-idle-card-grid{grid-template-columns:1fr}
+    }
+  </style>
+
+
+
+  <style id="v141-idle-arena-fit">
+    /* v141 · IDLE ใช้สนามสัดส่วนเดียวกับ ARENA และล็อกแถบควบคุมไว้ด้านล่าง */
+    #idleView .battle-layout {
+      grid-template-columns: minmax(0, 1fr) !important;
+      min-height: 0 !important;
+      gap: 12px !important;
+    }
+
+    #idleView .battle-arena {
+      position: relative;
+      width: 100%;
+      height: min(780px, max(620px, calc(100svh - 170px)));
+      min-height: 620px !important;
+      padding: clamp(34px, 4.2vh, 48px) clamp(12px, 1.8vw, 22px) clamp(104px, 12vh, 126px) !important;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 18px;
+      overflow: hidden !important;
+      contain: layout paint;
+    }
+
+    #idleView .battle-arena::before {
+      content: "";
+      position: absolute;
+      inset: 46px 12px 102px;
+      z-index: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, transparent 0 47%, rgba(255,255,255,.075) 50%, transparent 53%),
+        radial-gradient(ellipse at 50% 50%, rgba(255,255,255,.075), transparent 46%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    }
+
+    #idleView .battle-arena::after {
+      top: 47%;
+      opacity: .055;
+      font-size: clamp(4.8rem, 15vw, 10rem);
+    }
+
+    #idleView .battle-sides {
+      position: relative;
+      z-index: 2;
+      flex: 1 1 auto;
+      height: 100%;
+      min-height: 0 !important;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+      grid-template-rows: minmax(0, 1fr) !important;
+      gap: clamp(18px, 2.4vw, 42px) !important;
+      align-items: stretch !important;
+      padding: 2px 0 !important;
+    }
+
+    #idleView .fighter {
+      position: relative;
+      min-width: 0;
+      min-height: 0 !important;
+      height: 100%;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) !important;
+      align-content: stretch;
+      overflow: visible !important;
+    }
+    #idleView .fighter.player { grid-column: 1; grid-row: 1; text-align: left; }
+    #idleView .fighter.enemy { grid-column: 2; grid-row: 1; text-align: right; }
+    #idleView .fighter-label { display: none; }
+
+    #idleView .fighter h3,
+    #idleView .fighter-power {
+      position: absolute;
+      z-index: 10;
+      margin: 0;
+      max-width: min(23vw, 320px);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      background: rgba(4,7,16,.76);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #idleView .fighter h3 {
+      top: 2px !important;
+      bottom: auto !important;
+      padding: 6px 10px !important;
+      font-size: clamp(.7rem, .95vw, .88rem) !important;
+    }
+    #idleView .fighter.player h3 { left: 4px; right: auto; }
+    #idleView .fighter.enemy h3 { right: 4px; left: auto; }
+    #idleView .fighter-power {
+      top: auto !important;
+      bottom: 2px !important;
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 9px !important;
+      font-size: clamp(.66rem, .9vw, .82rem) !important;
+      line-height: 1.1;
+    }
+    #idleView .fighter.player .fighter-power { left: 4px; right: auto; justify-content: flex-start; }
+    #idleView .fighter.enemy .fighter-power { right: 4px; left: auto; justify-content: flex-end; }
+    #idleView .fighter-power .combat-total-top { display: none; }
+    #idleView .fighter-power .combat-def { font-size: .78em; }
+    #idleView .power-breakdown,
+    #idleView .power-meter { display: none; }
+
+    #idleView .battle-model-stack {
+      min-width: 0;
+      min-height: 100% !important;
+      height: 100%;
+      margin: 0;
+      contain: layout;
+      overflow: visible !important;
+      transform: translateZ(0);
+    }
+
+    #idleView .battle-model-stack.arena-side-grid {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(42px, 1fr)) !important;
+      grid-template-rows: repeat(5, minmax(54px, 1fr)) !important;
+      justify-items: center !important;
+      align-items: center !important;
+      align-content: center !important;
+      width: min(100%, 520px);
+      max-width: 520px;
+      margin-inline: auto !important;
+      padding: clamp(24px, 3vh, 34px) clamp(8px, 1vw, 14px) !important;
+      gap: 0 !important;
+      row-gap: 0 !important;
+      column-gap: clamp(7px, .8vw, 13px) !important;
+    }
+    #idleView .battle-model-stack.arena-side-grid > .battle-row-line { display: contents !important; }
+    #idleView .battle-model-stack.arena-side-grid .battle-row-line > .battle-model-card,
+    #idleView .battle-model-stack.arena-side-grid .battle-row-line > .battle-source-formation {
+      align-self: center;
+      justify-self: center;
+    }
+    #idleView .battle-model-stack.arena-side-grid .battle-model-card {
+      width: clamp(62px, 7vw, 100px) !important;
+      aspect-ratio: 4 / 5;
+      height: auto !important;
+      margin: 0 !important;
+      transform: translateY(0) rotate(var(--model-tilt, 0deg)) scale(1) !important;
+      transform-origin: center bottom;
+      z-index: 5;
+    }
+    #idleView .battle-model-stack.arena-side-grid .battle-position-front,
+    #idleView .battle-model-stack.arena-side-grid .battle-position-back {
+      --row-offset: 0px !important;
+      --row-scale: 1 !important;
+    }
+
+    #idleView .battle-model-stack.arena-side-grid::before,
+    #idleView .battle-model-stack.arena-side-grid::after {
+      content: "";
+      grid-row: 1 / 6;
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(245,158,11,.05), rgba(245,158,11,.015));
+      box-shadow: inset 0 0 0 1px rgba(245,158,11,.07);
+      z-index: 0;
+    }
+    #idleView .fighter.player .battle-model-stack.arena-side-grid::before { grid-column: 2; }
+    #idleView .fighter.player .battle-model-stack.arena-side-grid::after { grid-column: 4; }
+    #idleView .fighter.enemy .battle-model-stack.arena-side-grid::before { grid-column: 1; }
+    #idleView .fighter.enemy .battle-model-stack.arena-side-grid::after { grid-column: 3; }
+
+    #idleView .battle-model-stack.arena-side-grid .battle-source-formation {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: max-content;
+      overflow: visible;
+      isolation: isolate;
+    }
+    #idleView .battle-model-stack.arena-side-grid .battle-source-formation > .battle-model-card {
+      position: relative;
+      z-index: 8;
+    }
+    #idleView .battle-model-stack.arena-side-grid .battle-source-clone-lane {
+      position: absolute !important;
+      z-index: 4;
+      top: 50% !important;
+      right: auto !important;
+      bottom: auto !important;
+      width: clamp(42px, 4.6vw, 62px) !important;
+      min-width: clamp(42px, 4.6vw, 62px) !important;
+      max-width: clamp(42px, 4.6vw, 62px) !important;
+      min-height: clamp(136px, 18vh, 208px) !important;
+      display: grid !important;
+      grid-template-columns: 1fr;
+      grid-auto-rows: minmax(20px, auto);
+      align-content: center;
+      justify-items: center;
+      gap: 5px;
+      pointer-events: none;
+      transform: translateY(-50%) !important;
+    }
+    #idleView .fighter.player .battle-model-stack.arena-side-grid .battle-source-clone-lane {
+      left: calc(100% + clamp(10px, 1vw, 14px)) !important;
+    }
+    #idleView .fighter.enemy .battle-model-stack.arena-side-grid .battle-source-clone-lane {
+      left: auto !important;
+      right: calc(100% + clamp(10px, 1vw, 14px)) !important;
+    }
+    #idleView .battle-model-stack.arena-side-grid .battle-source-clone-lane .battle-model-card {
+      width: clamp(24px, 2.5vw, 34px) !important;
+      margin: 0 !important;
+      border-radius: 10px;
+      pointer-events: auto;
+      transform: none !important;
+    }
+    #idleView .battle-model-stack.arena-side-grid .battle-source-formation[data-reserve-clone-lane="true"] .battle-source-clone-lane:empty {
+      min-height: clamp(136px, 18vh, 208px) !important;
+      height: clamp(136px, 18vh, 208px) !important;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(245,158,11,.14), rgba(245,158,11,.07));
+      box-shadow: inset 0 0 0 1px rgba(245,158,11,.22);
+    }
+
+    /* ล็อกแถบควบคุมด้านล่าง: ปุ่มเริ่ม/หยุด/สรุปจะไม่สลับตำแหน่งเมื่อข้อความเปลี่ยน */
+    #idleView .battle-actions {
+      position: absolute !important;
+      z-index: 30;
+      left: clamp(10px, 2vw, 22px);
+      right: clamp(10px, 2vw, 22px);
+      bottom: clamp(10px, 2vh, 18px);
+      min-height: 82px !important;
+      display: grid !important;
+      grid-template-columns: minmax(170px, 1fr) minmax(190px, 1fr) minmax(170px, 1fr) minmax(270px, 1.45fr) !important;
+      grid-template-rows: minmax(42px, auto) auto;
+      gap: 7px 9px;
+      align-items: center;
+      align-content: center !important;
+      margin: 0;
+      padding: 9px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 18px;
+      background: rgba(4,7,16,.82);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 14px 44px rgba(0,0,0,.38);
+    }
+    #idleView #idleStartButton { grid-column: 1; grid-row: 1; }
+    #idleView #idleStopButton { grid-column: 2; grid-row: 1; }
+    #idleView #idleSummaryButton { grid-column: 3; grid-row: 1; }
+    #idleView .battle-playback-controls {
+      grid-column: 4 !important;
+      grid-row: 1;
+      min-width: 0;
+      min-height: 36px;
+      margin: 0;
+      justify-content: flex-end;
+      flex-wrap: nowrap;
+    }
+    #idleView .battle-result {
+      grid-column: 1 / -1 !important;
+      grid-row: 2;
+      min-height: 30px;
+      max-height: 38px;
+      margin: 0;
+      padding: 7px 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #idleView .battle-actions > .btn {
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #idleView #idleStopButton {
+      position: relative;
+      z-index: 2;
+      border-color: rgba(251,113,133,.46);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 18px rgba(190,24,93,.14);
+    }
+
+    #idleView .battle-sidebar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+    #idleView .battle-sidebar .battle-card { min-width: 0; }
+
+    #idleView .battle-turn-order {
+      width: min(52vw, 560px) !important;
+      max-width: min(52vw, 560px) !important;
+      min-height: 34px !important;
+      max-height: 34px !important;
+      padding: 4px 8px !important;
+      gap: 5px !important;
+    }
+    #idleView .battle-turn-chip {
+      max-width: 82px;
+      min-height: 28px;
+      padding: 4px 6px;
+      flex: 0 0 auto;
+    }
+    #idleView .battle-turn-chip img { width: 22px; height: 22px; }
+    #idleView .battle-turn-chip b { font-size: .63rem !important; }
+    #idleView .battle-turn-chip small { font-size: .52rem !important; }
+
+    @media (max-width: 1180px) {
+      #idleView .battle-actions {
+        grid-template-columns: repeat(3, minmax(150px, 1fr)) !important;
+        grid-template-rows: auto auto auto;
+      }
+      #idleView .battle-playback-controls {
+        grid-column: 1 / -1 !important;
+        grid-row: 2;
+        justify-content: center;
+      }
+      #idleView .battle-result { grid-row: 3; }
+      #idleView .battle-sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      #idleView .battle-arena {
+        height: auto;
+        min-height: 820px !important;
+        padding-top: 42px !important;
+        padding-bottom: 154px !important;
+      }
+      #idleView .battle-sides {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) !important;
+        gap: 12px !important;
+      }
+      #idleView .fighter.player { grid-column: 1; grid-row: 2; }
+      #idleView .fighter.enemy { grid-column: 1; grid-row: 1; }
+      #idleView .battle-model-stack.arena-side-grid {
+        width: min(100%, 430px);
+        grid-template-columns: repeat(4, minmax(38px, 1fr)) !important;
+        padding-block: 20px !important;
+      }
+      #idleView .fighter h3,
+      #idleView .fighter-power { max-width: 46vw; }
+      #idleView .battle-turn-order {
+        width: min(76vw, 460px) !important;
+        max-width: min(76vw, 460px) !important;
+      }
+    }
+
+    @media (max-width: 760px) {
+      #idleView .battle-arena {
+        min-height: 790px !important;
+        padding: 42px 8px 206px !important;
+      }
+      #idleView .battle-actions {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: auto auto auto auto;
+        gap: 6px;
+      }
+      #idleView #idleStartButton { grid-column: 1; grid-row: 1; }
+      #idleView #idleStopButton { grid-column: 2; grid-row: 1; }
+      #idleView #idleSummaryButton { grid-column: 1 / -1; grid-row: 2; }
+      #idleView .battle-playback-controls {
+        grid-column: 1 / -1 !important;
+        grid-row: 3;
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+      #idleView .battle-result { grid-row: 4; }
+      #idleView .battle-sidebar { grid-template-columns: 1fr; }
+      #idleView .battle-turn-order {
+        width: calc(100% - 16px) !important;
+        max-width: calc(100% - 16px) !important;
+      }
+      #idleView .fighter h3,
+      #idleView .fighter-power { max-width: 48%; }
+      #idleView .fighter-power .combat-def { display: none; }
     }
   </style>
 
@@ -27797,18 +28186,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function idlePlaceGridItems(stack, side = "player") {
       if (!stack) return;
-      stack.classList.add("v72-rowed", "idle-side-grid");
-      const frontColumn = side === "player" ? 2 : 1;
-      const backColumn = side === "player" ? 1 : 2;
-      ["front","back"].forEach(row => {
-        const line = stack.querySelector(`:scope > .battle-row-line.${row}`);
-        if (!line) return;
-        const children = Array.from(line.children).filter(node => node.classList && (node.classList.contains("battle-model-card") || node.classList.contains("battle-source-formation")));
-        children.forEach((node, index) => {
-          node.style.gridColumn = String(row === "front" ? frontColumn : backColumn);
-          node.style.gridRow = String(Math.min(5, index + 1));
-        });
-      });
+      // v141: ใช้โครงจัดตำแหน่งเดียวกับ ARENA เพื่อให้ขนาดและตำแหน่งตัวละครคงที่ทุกระลอก
+      stack.classList.remove("idle-side-grid");
+      stack.classList.add("v72-rowed", "arena-side-grid");
+      layoutArenaSideGrid(stack, side);
     }
 
     function renderIdleTeam() {
