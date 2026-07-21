@@ -16,7 +16,7 @@
 window.ACC_CARD_VERSION = "2026-07-07-split-card-data-v2";
 window.ACC_CARD_ROOT = "card";
 window.ACC_CARD_MANIFEST = [
-  888, 889, 890, 10000, 3001, "AK-3001", 3002, 4010,
+  888, 889, 890, 10000, 3001, "AK-3001", 3002, "AK-3002", 4010,
 
 
   // เพิ่มการ์ดใหม่ตรงนี้ เช่น:
