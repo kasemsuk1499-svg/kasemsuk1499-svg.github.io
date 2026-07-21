@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-21-rarity-visual-v135">
-  <title>Anime Card Collection · Runtime v135 · Rarity Visual</title>
+  <meta name="gacha-app-build" content="2026-07-21-rarity-visual-v136">
+  <title>Anime Card Collection · Runtime v136 · Rarity Visual</title>
   <style>
     :root {
       color-scheme: dark;
@@ -784,7 +784,7 @@
     .rarity-ex { --fx-opacity: .32; --rarity-fx: conic-gradient(from 180deg, #22d3ee, #a78bfa, #f472b6, #facc15, #22d3ee); }
     .rarity-awaken { --fx-opacity: .38; --rarity-fx: conic-gradient(from 190deg, #12051f, #7c3aed 18%, #d8b4fe 36%, #8b5cf6 52%, #f0abfc 70%, #5b21b6 86%, #12051f); }
     .rarity-awaken::after { content:""; position:absolute; inset:-35%; z-index:1; pointer-events:none; opacity:.32; background:radial-gradient(circle, rgba(240,171,252,.72), transparent 36%); animation:awaken-magic-pulse 2.2s ease-in-out infinite; }
-    /* v135: GOD ใช้โอเวอร์เลย์เส้นแสงแบบ SC และพัลส์เรืองแสงคล้าย AWAKEN */
+    /* v136: GOD ใช้โอเวอร์เลย์เส้นแสงแบบ SC และพัลส์เรืองแสงแบบไม่หมุน */
     .rarity-god {
       --fx-opacity: .43;
       --rarity-fx:
@@ -814,13 +814,12 @@
           transparent 27deg 40deg);
       mix-blend-mode: screen;
       filter: drop-shadow(0 0 14px rgba(255,248,196,.52));
-      animation: god-divine-line-pulse 4.8s linear infinite;
+      animation: god-divine-line-pulse 3.6s ease-in-out infinite;
     }
     @keyframes awaken-magic-pulse { 0%,100%{transform:scale(.72) rotate(0deg);opacity:.18} 50%{transform:scale(1.08) rotate(18deg);opacity:.48} }
     @keyframes god-divine-line-pulse {
-      0% { transform: scale(.72) rotate(0deg); opacity: .16; }
-      50% { transform: scale(1.06) rotate(180deg); opacity: .46; }
-      100% { transform: scale(.72) rotate(360deg); opacity: .16; }
+      0%, 100% { transform: scale(.82); opacity: .16; }
+      50% { transform: scale(1.04); opacity: .42; }
     }
 
     .reveal-panel .rarity-sr::before,
