@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-20-skill-attack-v134">
-  <title>Anime Card Collection · Runtime v134 · Skill Attack</title>
+  <meta name="gacha-app-build" content="2026-07-21-rarity-visual-v135">
+  <title>Anime Card Collection · Runtime v135 · Rarity Visual</title>
   <style>
     :root {
       color-scheme: dark;
@@ -772,9 +772,10 @@
       background: var(--rarity-fx, var(--rarity-gradient, none));
       mix-blend-mode: screen;
     }
-    .rarity-sr { --fx-opacity: .17; --rarity-fx: linear-gradient(115deg, transparent 16%, rgba(167,139,250,.82), transparent 48%); }
-    .rarity-ssr { --fx-opacity: .22; --rarity-fx: linear-gradient(115deg, transparent 12%, rgba(255,209,102,.95), transparent 46%); }
-    .rarity-ur { --fx-opacity: .24; --rarity-fx: radial-gradient(circle at 78% 18%, rgba(244,114,182,.9), transparent 34%); }
+    /* v135: โทนระดับใหม่ — SR เขียว / SSR น้ำเงิน / UR ม่วง */
+    .rarity-sr { --fx-opacity: .19; --rarity-fx: linear-gradient(115deg, transparent 10%, rgba(187,247,208,.92) 20%, transparent 38%, rgba(34,197,94,.40) 55%, transparent 72%); }
+    .rarity-ssr { --fx-opacity: .23; --rarity-fx: linear-gradient(115deg, transparent 8%, rgba(191,219,254,.95) 19%, transparent 37%, rgba(37,99,235,.48) 55%, transparent 73%); }
+    .rarity-ur { --fx-opacity: .27; --rarity-fx: linear-gradient(115deg, transparent 7%, rgba(243,232,255,.96) 18%, transparent 35%, rgba(147,51,234,.56) 53%, transparent 72%); }
     .rarity-lr { --fx-opacity: .25; --rarity-fx: linear-gradient(135deg, rgba(34,211,238,.68), transparent 34%, rgba(139,92,246,.72)); }
     .rarity-jjkb { --fx-opacity: .22; --rarity-fx: linear-gradient(155deg, transparent 25%, rgba(59,130,246,.9), transparent 62%); }
     .rarity-jjkc { --fx-opacity: .24; --rarity-fx: radial-gradient(circle at 25% 20%, rgba(239,68,68,.86), transparent 42%); }
@@ -783,8 +784,44 @@
     .rarity-ex { --fx-opacity: .32; --rarity-fx: conic-gradient(from 180deg, #22d3ee, #a78bfa, #f472b6, #facc15, #22d3ee); }
     .rarity-awaken { --fx-opacity: .38; --rarity-fx: conic-gradient(from 190deg, #12051f, #7c3aed 18%, #d8b4fe 36%, #8b5cf6 52%, #f0abfc 70%, #5b21b6 86%, #12051f); }
     .rarity-awaken::after { content:""; position:absolute; inset:-35%; z-index:1; pointer-events:none; opacity:.32; background:radial-gradient(circle, rgba(240,171,252,.72), transparent 36%); animation:awaken-magic-pulse 2.2s ease-in-out infinite; }
-    .rarity-god { --fx-opacity: .36; --rarity-fx: conic-gradient(from 210deg, #020617, #ffffff 18%, #d4af37 35%, #0f172a 52%, #fff8dc 70%, #facc15 86%, #020617); }
+    /* v135: GOD ใช้โอเวอร์เลย์เส้นแสงแบบ SC และพัลส์เรืองแสงคล้าย AWAKEN */
+    .rarity-god {
+      --fx-opacity: .43;
+      --rarity-fx:
+        linear-gradient(115deg,
+          transparent 6%, rgba(255,255,255,.98) 14%, transparent 22%,
+          transparent 37%, rgba(250,204,21,.92) 46%, transparent 55%,
+          transparent 68%, rgba(255,248,220,.90) 77%, transparent 86%),
+        repeating-linear-gradient(155deg,
+          transparent 0 36px,
+          rgba(255,255,255,.20) 37px 39px,
+          transparent 40px 76px);
+    }
+    .game-card.rarity-god::after {
+      content: "";
+      position: absolute;
+      inset: -44%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: .30;
+      background:
+        radial-gradient(circle, rgba(255,249,196,.56) 0 7%, rgba(255,244,163,.20) 24%, transparent 43%),
+        repeating-conic-gradient(from 0deg,
+          transparent 0deg 10deg,
+          rgba(255,255,255,.34) 11deg 12deg,
+          transparent 13deg 24deg,
+          rgba(250,204,21,.24) 25deg 26deg,
+          transparent 27deg 40deg);
+      mix-blend-mode: screen;
+      filter: drop-shadow(0 0 14px rgba(255,248,196,.52));
+      animation: god-divine-line-pulse 4.8s linear infinite;
+    }
     @keyframes awaken-magic-pulse { 0%,100%{transform:scale(.72) rotate(0deg);opacity:.18} 50%{transform:scale(1.08) rotate(18deg);opacity:.48} }
+    @keyframes god-divine-line-pulse {
+      0% { transform: scale(.72) rotate(0deg); opacity: .16; }
+      50% { transform: scale(1.06) rotate(180deg); opacity: .46; }
+      100% { transform: scale(.72) rotate(360deg); opacity: .16; }
+    }
 
     .reveal-panel .rarity-sr::before,
     .reveal-panel .rarity-ssr::before,
@@ -9472,9 +9509,9 @@
     /* ===================== [SECTION 02 RARITY-COLORS] ===================== */
     const RARITIES = Object.freeze({
       // สมดุลใหม่: ATK : HP : DEF ≈ 1 : 5 : 0.40 เพื่อให้การ์ดระดับเดียวกันสู้กันประมาณ 8–9 เทิร์นก่อนคิดสกิล/โล่
-      SR:  { label: "C",        color: "#a78bfa", colors: ["#a78bfa", "#7c3aed", "#111827"], gradient: "linear-gradient(135deg, #c4b5fd, #7c3aed 58%, #111827)", glow: "#a78bfa", textColor: "#10051f", order: 2, stars: 5,  dust: 70,     basePower: 16000,    baseHp: 80000,    baseDefense: 6400, baseSpeed: 94,   baseIncome: 125,   maxLevel: 140, upgradeDustBase: 1130,   upgradeDustGrowth: 1.0120, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 20,  awakenCopies: [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6], powerBonus: 0.025, incomeBonus: 0.0155 },
-      SSR: { label: "B",       color: "#fbbf24", colors: ["#fde68a", "#f59e0b", "#7c2d12"], gradient: "linear-gradient(135deg, #fde68a, #f59e0b 52%, #7c2d12)", glow: "#fbbf24", textColor: "#211500", order: 3, stars: 6,  dust: 280,    basePower: 18000,   baseHp: 90000,   baseDefense: 7200, baseSpeed: 96,  baseIncome: 155,   maxLevel: 160, upgradeDustBase: 1530,   upgradeDustGrowth: 1.013, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 20,  awakenCopies: [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5], powerBonus: 0.0275, incomeBonus: 0.017 },
-      UR:  { label: "A",        color: "#fb7185", colors: ["#fb7185", "#dc2626", "#111827"], gradient: "linear-gradient(135deg, #fb7185, #dc2626 55%, #111827)", glow: "#fb7185", textColor: "#21060a", order: 4, stars: 7,  dust: 1500,   basePower: 21000,   baseHp: 105000,   baseDefense: 8400, baseSpeed: 98,  baseIncome: 190,  maxLevel: 180, upgradeDustBase: 1901,   upgradeDustGrowth: 1.014, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 20,  awakenCopies: [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4], powerBonus: 0.03, incomeBonus: 0.019 },
+      SR:  { label: "C",        color: "#4ade80", colors: ["#86efac", "#22c55e", "#052e16"], gradient: "linear-gradient(135deg, #bbf7d0 0%, #22c55e 52%, #052e16 100%)", glow: "#4ade80", textColor: "#052015", order: 2, stars: 5,  dust: 70,     basePower: 16000,    baseHp: 80000,    baseDefense: 6400, baseSpeed: 94,   baseIncome: 125,   maxLevel: 140, upgradeDustBase: 1130,   upgradeDustGrowth: 1.0120, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 20,  awakenCopies: [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6], powerBonus: 0.025, incomeBonus: 0.0155 },
+      SSR: { label: "B",       color: "#60a5fa", colors: ["#93c5fd", "#2563eb", "#172554"], gradient: "linear-gradient(135deg, #bfdbfe 0%, #2563eb 54%, #172554 100%)", glow: "#60a5fa", textColor: "#06152f", order: 3, stars: 6,  dust: 280,    basePower: 18000,   baseHp: 90000,   baseDefense: 7200, baseSpeed: 96,  baseIncome: 155,   maxLevel: 160, upgradeDustBase: 1530,   upgradeDustGrowth: 1.013, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 20,  awakenCopies: [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5], powerBonus: 0.0275, incomeBonus: 0.017 },
+      UR:  { label: "A",        color: "#c084fc", colors: ["#e9d5ff", "#9333ea", "#2e1065"], gradient: "linear-gradient(135deg, #f3e8ff 0%, #9333ea 54%, #2e1065 100%)", glow: "#c084fc", textColor: "#210638", order: 4, stars: 7,  dust: 1500,   basePower: 21000,   baseHp: 105000,   baseDefense: 8400, baseSpeed: 98,  baseIncome: 190,  maxLevel: 180, upgradeDustBase: 1901,   upgradeDustGrowth: 1.014, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 20,  awakenCopies: [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4], powerBonus: 0.03, incomeBonus: 0.019 },
       LR:  { label: "S",     color: "#FFD700",
   colors: ["#7A4800", "#D99A16", "#FFF2A8", "#FFD700", "#A86400"],
   gradient: "linear-gradient(135deg, #6B3F00 0%, #D99A16 22%, #FFF7C2 43%, #FFD700 58%, #B8750D 78%, #FFE98A 100%)",
