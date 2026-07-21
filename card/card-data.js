@@ -4974,7 +4974,7 @@ window.ACC_CARD_DATA = [
         {
           "type": "nextAttackHits",
           "value": 2,
-          "targetSide": "enemy",
+          "targetSide": "self",
           "targetSelection": "hitTargets"
         }
       ]
