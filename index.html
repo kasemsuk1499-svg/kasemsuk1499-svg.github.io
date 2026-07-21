@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-21-idle-auto-v137">
-  <title>Anime Card Collection · Runtime v137 · Idle Auto Battle</title>
+  <meta name="gacha-app-build" content="2026-07-21-idle-toast-ribbon-v140">
+  <title>Anime Card Collection · Runtime v140 · Idle Effects Restored</title>
   <style>
     :root {
       color-scheme: dark;
@@ -8196,9 +8196,59 @@
     .gm-idle-team-row strong { display:block; color:#e0f2fe; }
     .gm-idle-team-row span { display:block; margin-top:3px; color:var(--muted); font-size:.67rem; line-height:1.45; }
     @media(max-width:1100px){#idleView .battle-layout{grid-template-columns:1fr}.gm-idle-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    /* v140: ล็อกพื้นที่สนาม IDLE ให้คงที่ ซ่อนเฉพาะแถบแจ้งเตือนด้านบน แต่คง Toast สกิล เส้นโจมตี และตัวเลขลอยไว้ */
+    #idleView .battle-arena { contain:layout paint; overflow:hidden; }
+    #idleView .battle-sides { min-height:520px; }
+    #idleView .fighter { min-height:520px; overflow:hidden; }
+    #idleView .battle-model-stack {
+      contain:layout paint;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+    }
+    #idleView .battle-model-card,
+    #idleView .battle-source-formation { backface-visibility:hidden; }
+    #idleView .battle-turn-order {
+      min-height:48px;
+      max-height:48px;
+      flex:0 0 48px;
+      white-space:nowrap;
+      transform:translateX(-50%) translateZ(0);
+    }
+    #idleView .battle-turn-chip { flex:0 0 auto; }
+    /* ซ่อนเฉพาะแถบ Action Ribbon ที่บังสนาม; Toast สกิลและ Event Feed ยังแสดงตามปกติ */
+    #idleView .battle-action-ribbon { display:none!important; }
+    #idleView .battle-skill-toast { display:grid!important; }
+    #idleView .battle-actions { min-height:104px; align-content:end; }
+    #idleView .battle-playback-controls { min-height:36px; }
+    .idle-background-state {
+      margin-top:9px;
+      min-height:36px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(125,211,252,.20);
+      border-radius:12px;
+      padding:8px 10px;
+      color:#dbeafe;
+      background:rgba(14,116,144,.08);
+      font-size:.69rem;
+      font-weight:900;
+      line-height:1.45;
+    }
+    .idle-background-state.hidden-run {
+      color:#fde68a;
+      border-color:rgba(251,191,36,.30);
+      background:rgba(146,64,14,.12);
+    }
+    .battle-playback-controls [data-skill-cutscene-toggle].off {
+      color:#fecdd3;
+      border-color:rgba(251,113,133,.34);
+      background:rgba(190,24,93,.16);
+    }
     @media(max-width:760px){
       #idleView .battle-arena{min-height:640px;padding:15px 12px 150px}
       #idleView .battle-sides{grid-template-columns:1fr;gap:14px;min-height:auto}
+      #idleView .fighter{min-height:300px}
       #idleView .fighter.enemy{grid-row:1}#idleView .fighter.player{grid-row:2}
       #idleView .battle-model-stack{min-height:220px}
       #idleView .battle-actions{grid-template-columns:1fr 1fr}
@@ -8549,7 +8599,7 @@
                 <div class="battle-stat-row"><span>ชั้นสูงสุด</span><strong id="battleStageText">1</strong></div>
                 <div class="battle-stat-row"><span>ชนะ / แพ้</span><strong id="battleRecordText">0 / 0</strong></div>
               </div>
-              <div class="battle-card">
+              <div class="battle-card idle-hit-report-card">
                 <h3>รายงานฮิตไฟต์ล่าสุด</h3>
                 <div class="hit-report" id="battleHitReport"><p class="hit-report-empty">หลังจบการต่อสู้ ระบบจะแสดงจำนวนครั้งโจมตี ฮิตรวม ฮิตผ่านโล่ ฮิตที่ถูกบล็อก และโบนัสฮิตจาก ACTIVE Skill</p></div>
               </div>
@@ -8796,6 +8846,7 @@
                 <h3>สเกลศัตรู</h3>
                 <div class="idle-scale-box" id="idleScaleText">ระลอก 1–10 พลัง ×1.0 • ทุก 10 ระลอกเพิ่มอีก ×0.1</div>
                 <div style="margin-top:8px" id="idleBossText"><span class="idle-boss-chip">👑 ระลอก 10 ใช้ทีม GM</span></div>
+                <div class="idle-background-state" id="idleBackgroundState">🟢 พร้อมทำงานต่อเนื่อง แม้สลับไปแท็บอื่น</div>
               </div>
               <div class="battle-card">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -10619,6 +10670,13 @@
     let idleBossTeams = [];
     let gmIdleBossDraftTeams = [];
     let idleBossTeamsLoadedAt = 0;
+    // v138: โหมดเบื้องหลังใช้เวลาจริงชดเชยรอบที่เบราว์เซอร์พัก Timer
+    const IDLE_BACKGROUND_FIGHT_MS = 2500;
+    const IDLE_BACKGROUND_MAX_CATCHUP = 1440;
+    let idleHiddenSince = 0;
+    let idleHiddenRunsProcessed = 0;
+    let idleCatchUpRuns = 0;
+    let idleBackgroundWake = null;
     let activeRevealResults = [];
     let activeRevealIndex = 0;
     let returnToReveal = false;
@@ -19281,6 +19339,7 @@
     }
 
     function playActiveSkillCutscene(detail, turn, labels = {}, side = "player") {
+      if (!activeSkillCutscenesEnabled || document.hidden) return Promise.resolve();
       const config = detail && detail.cutscene && typeof detail.cutscene === "object"
         ? detail.cutscene
         : getActiveSkillCutsceneConfig({ name: detail && detail.name }, detail && detail.sourceCardId ? CARD_BY_ID.get(String(detail.sourceCardId)) : null);
@@ -19460,8 +19519,39 @@
     }
 
     
+    const BATTLE_VIEW_PREFERENCES = {
+      get(key) {
+        try { return window.localStorage.getItem(`anime_card_battle_${key}`); }
+        catch (error) { return null; }
+      },
+      set(key, value) {
+        try { window.localStorage.setItem(`anime_card_battle_${key}`, String(value)); }
+        catch (error) {}
+      }
+    };
     let battlePlaybackSpeed = 1;
     let battleSkipAnimations = false;
+    let activeSkillCutscenesEnabled = BATTLE_VIEW_PREFERENCES.get("skillCutscene") !== "0";
+
+    function syncSkillCutsceneButtons() {
+      document.querySelectorAll("[data-skill-cutscene-toggle]").forEach(button => {
+        button.textContent = `คัทซีนสกิล: ${activeSkillCutscenesEnabled ? "เปิด" : "ปิด"}`;
+        button.classList.toggle("active", activeSkillCutscenesEnabled);
+        button.classList.toggle("off", !activeSkillCutscenesEnabled);
+        button.setAttribute("aria-pressed", activeSkillCutscenesEnabled ? "true" : "false");
+      });
+    }
+
+    function ensureSkillCutsceneButtons() {
+      document.querySelectorAll(".battle-playback-controls").forEach(control => {
+        if (control.querySelector("[data-skill-cutscene-toggle]")) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.skillCutsceneToggle = "true";
+        control.appendChild(button);
+      });
+      syncSkillCutsceneButtons();
+    }
 
     document.addEventListener("click", event => {
       const speedButton = event.target.closest("[data-battle-speed]");
@@ -19474,8 +19564,18 @@
       if (skipButton) {
         battleSkipAnimations = true;
         showToast("ข้ามแอนิเมชันของไฟต์นี้แล้ว");
+        return;
+      }
+      const cutsceneButton = event.target.closest("[data-skill-cutscene-toggle]");
+      if (cutsceneButton) {
+        activeSkillCutscenesEnabled = !activeSkillCutscenesEnabled;
+        BATTLE_VIEW_PREFERENCES.set("skillCutscene", activeSkillCutscenesEnabled ? "1" : "0");
+        if (!activeSkillCutscenesEnabled) finishActiveSkillCutscene();
+        syncSkillCutsceneButtons();
+        showToast(activeSkillCutscenesEnabled ? "เปิดคัทซีน ACTIVE Skill แล้ว" : "ปิดคัทซีน ACTIVE Skill แล้ว");
       }
     });
+    ensureSkillCutsceneButtons();
 
     function battleUnitNode(stage, side, cardId) {
       if (!stage || cardId === undefined || cardId === null) return null;
@@ -20003,8 +20103,8 @@
       return paths;
     }
 
-    async function animateIndividualBattleAction(stage, turn, duration) {
-      if (!stage || battleSkipAnimations || !turn || turn.command === "suddenBreak") return;
+    async function animateIndividualBattleAction(stage, turn, duration, quietMode = false) {
+      if (!stage || battleSkipAnimations || (idleAutoRunning && document.hidden) || !turn || turn.command === "suddenBreak") return;
       const actorNode = battleUnitNode(stage, turn.side, turn.actorCardId);
       const targetSide = turn.side === "player" ? "enemy" : "player";
       const resultList = abilityArray(turn.targetResults).length
@@ -20033,7 +20133,7 @@
       // v111: ร่างแยกโจมตีอยู่กับที่ และถ้าตัวละคร/เป้าหมายอยู่นอก viewport จะไม่สร้างการ์ดวิ่งแบบ fixed
       // ป้องกันการ์ดดีดออกนอกจอและป้องกันหน้าเว็บสั่นจากพิกัดที่เปลี่ยนระหว่างจัดแถวร่างแยก
       if (isRuntimeClone || !actorOnScreen || !targetOnScreen) {
-        drawBattleAttackPaths(actorNode, targetEntries, turn.side, duration);
+        if (!quietMode) drawBattleAttackPaths(actorNode, targetEntries, turn.side, duration);
         actorNode.animate?.([
           { opacity: 1, filter: "brightness(1)" },
           { opacity: .72, filter: "brightness(1.55) drop-shadow(0 0 18px rgba(92,232,255,.75))" },
@@ -20042,8 +20142,10 @@
         await wait(Math.max(70, Math.floor(duration * .42)));
         targetEntries.forEach(({node, result}) => {
           node.classList.add("is-hit");
-          const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
-          floatBattleText(node, text);
+          if (!quietMode) {
+            const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
+            floatBattleText(node, text);
+          }
         });
         await wait(Math.max(80, Math.floor(duration * .38)));
         targetEntries.forEach(({node}) => node.classList.remove("is-hit", "is-target", "is-multi-target"));
@@ -20065,7 +20167,7 @@
       actorNode.style.opacity = ".28";
       const dx = (t.left + t.width/2) - (a.left + a.width/2);
       const dy = (t.top + t.height/2) - (a.top + a.height/2);
-      drawBattleAttackPaths(actorNode, targetEntries, turn.side, duration);
+      if (!quietMode) drawBattleAttackPaths(actorNode, targetEntries, turn.side, duration);
       const travel = Math.max(140, Math.floor(duration * .72));
       if (clone.animate) {
         await clone.animate([{transform:"translate(0,0) scale(1)"},{transform:`translate(${dx*.88}px,${dy*.88}px) scale(1.08)`}],{duration:travel,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"}).finished.catch(()=>{});
@@ -20075,8 +20177,10 @@
       }
       targetEntries.forEach(({node, result}) => {
         node.classList.add("is-hit");
-        const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
-        floatBattleText(node, text);
+        if (!quietMode) {
+          const text = result.dodged ? "DODGE" : Number(result.damage) > 0 ? `-${formatNumber(result.damage)}` : "BLOCK";
+          floatBattleText(node, text);
+        }
       });
       await wait(Math.max(60, Math.floor(duration*.28)));
       targetEntries.forEach(({node}) => node.classList.remove("is-hit"));
@@ -20173,23 +20277,28 @@
     }
 
 async function playTurnBasedCombat(stage, result, combat, display, labels = {}, phaseDuration = 180, hooks = {}) {
+      const quietMode = Boolean(hooks && hooks.quiet);
+      const hiddenFastMode = () => Boolean(hooks && hooks.runWhenHidden && document.hidden);
       updateTurnBattleDisplay(display, combat);
       const playerLabel = labels.player || "ทีมของคุณ";
       const enemyLabel = labels.enemy || "ศัตรู";
       const starterLabel = combat.playerFirst ? playerLabel : enemyLabel;
       syncBattleBoard(stage, { player: combat.playerInitialMembers || [], enemy: combat.enemyInitialMembers || [] });
-      const cinematicHud = ensureBattleCinematicHud(stage);
+      const cinematicHud = quietMode ? null : ensureBattleCinematicHud(stage);
       if (cinematicHud && cinematicHud.feed) cinematicHud.feed.innerHTML = "";
+      if (quietMode && stage) stage.querySelectorAll(".battle-cinematic-hud,.battle-skill-toast").forEach(node => node.remove());
       renderBattleTurnOrder(stage, combat, 0, labels);
-      abilityArray(combat.initialTransferEvents).slice(0, 8).forEach(event => showTransferBattleEvent(stage, event, { actorCardId: event.sourceCardId, actorName: event.sourceName }));
-      result.textContent = `${starterLabel} ได้เริ่มโจมตีก่อน • ตัวละครที่หมดสภาพจะหยุดโจมตีและไม่ตกเป็นเป้าหมาย`;
-      beautifyBattleResult(result);
-      await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
+      if (!quietMode) abilityArray(combat.initialTransferEvents).slice(0, 8).forEach(event => showTransferBattleEvent(stage, event, { actorCardId: event.sourceCardId, actorName: event.sourceName }));
+      if (!quietMode && result) {
+        result.textContent = `${starterLabel} ได้เริ่มโจมตีก่อน • ตัวละครที่หมดสภาพจะหยุดโจมตีและไม่ตกเป็นเป้าหมาย`;
+        beautifyBattleResult(result);
+      }
+      if (!hiddenFastMode()) await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
 
       for (let turnIndex = 0; turnIndex < combat.turns.length; turnIndex += 1) {
         const turn = combat.turns[turnIndex];
         renderBattleTurnOrder(stage, combat, turnIndex, labels);
-        updateBattleActionRibbon(stage, turn, labels);
+        if (!quietMode) updateBattleActionRibbon(stage, turn, labels);
         const sideLabel = turn.side === "player" ? playerLabel : enemyLabel;
         const defenderSideLabel = turn.side === "player" ? enemyLabel : playerLabel;
         const attackerLabel = turn.actorName ? `${turn.actorName} (${sideLabel})` : sideLabel;
@@ -20216,23 +20325,25 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           ? ` • ⚡ ${turn.triggeredSkills.join(" + ")}${turn.attackBonus ? ` • ATK ชั่วคราว ${turn.attackBonus >= 0 ? "+" : ""}${formatNumber(turn.attackBonus)}` : ""}${turn.activeHitChange ? ` • ฮิตตนเอง ${turn.activeHitChange >= 0 ? "+" : ""}${formatNumber(turn.activeHitChange)}` : ""}${turn.healHp ? ` • ฟื้น HP ${formatNumber(turn.healHp)}` : ""}${turn.shieldChange ? ` • โล่ตนเอง ${turn.shieldChange >= 0 ? "+" : ""}${formatNumber(turn.shieldChange)}` : ""}`
           : "";
         const criticalText = turn.critical ? ` • 💥 CRITICAL x${Number(turn.criticalMultiplier || 1).toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}` : "";
-        if (turn.command === "statusSkip") {
-          result.textContent = `รอบ ${turn.round} • ${attackerLabel} ถูก ${abilityArray(turn.statusEvents)[0]?.statusLabel || "สถานะผิดปกติ"} จึงข้ามเทิร์น${statusText} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
-        } else result.textContent = turn.command === "guard"
-          ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
-          : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${spawnText}${cloneLimitText}${transformText}${transformEndText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
-        beautifyBattleResult(result);
+        if (!quietMode && result) {
+          if (turn.command === "statusSkip") {
+            result.textContent = `รอบ ${turn.round} • ${attackerLabel} ถูก ${abilityArray(turn.statusEvents)[0]?.statusLabel || "สถานะผิดปกติ"} จึงข้ามเทิร์น${statusText} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+          } else result.textContent = turn.command === "guard"
+            ? `รอบ ${turn.round} • ${attackerLabel} ตั้งรับ • ได้โล่ +${formatNumber(turn.shieldGain || 0)} • SPD ${formatNumber(turn.actorSpeed || 0)}${turn.timedReviveExpired ? " • หมดเวลาคืนชีพและตาย" : ""}`
+            : `รอบ ${turn.round} • ${attackerLabel} วิ่งเข้าโจมตี ${defenderLabel} • ${targetHitText}${turn.blindMiss ? " • 👁 ตาบอด: โจมตีพลาด" : ""}${criticalText}${blockText}${activeText}${reviveText}${spawnText}${cloneLimitText}${transformText}${transformEndText}${captureText}${captureReleaseText}${speedText}${lifeText}${statusText} • ดาเมจรวม ${formatNumber(turn.damage)}${Number(turn.targetCount || 1) === 1 ? ` เหลือ ${formatNumber(turn.targetRemaining ?? remaining)}` : ""} • SPD ${formatNumber(turn.actorSpeed || 0)}`;
+          beautifyBattleResult(result);
+        }
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
-            showTriggeredAbilityEvent(stage, detail, turn, { attacker: attackerLabel, defender: defenderLabel });
-            if (!battleSkipAnimations) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
+            if (!quietMode) showTriggeredAbilityEvent(stage, detail, turn, { attacker: attackerLabel, defender: defenderLabel });
+            if (!battleSkipAnimations && activeSkillCutscenesEnabled && !hiddenFastMode()) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
           }
         }
         applyBattleTransformEvents(stage, turn, turn.transformEvents, false);
         const baseSpeed = turn.round > 6 ? Math.max(55, Math.floor(phaseDuration * .55)) : phaseDuration;
         const speed = battleSkipAnimations ? 5 : Math.max(35, Math.floor(baseSpeed / battlePlaybackSpeed));
-        await animateIndividualBattleAction(stage, turn, speed * 2.25);
-        animateBattleEvents(stage, turn);
+        await animateIndividualBattleAction(stage, turn, speed * 2.25, quietMode || hiddenFastMode());
+        if (!quietMode && !hiddenFastMode()) animateBattleEvents(stage, turn);
         applyBattleTransformEvents(stage, turn, turn.transformRevertEvents, true);
         syncBattleBoard(stage, turn.memberStates);
         updateTurnBattleDisplay(display, combat, turn);
@@ -20244,8 +20355,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             console.warn("Battle turn hook skipped:", hookError);
           }
         }
-        if (turn.suddenBreak) { result.textContent = `${result.dataset.rawBattleText || result.textContent} • Sudden Break!`; beautifyBattleResult(result); }
-        if (!battleSkipAnimations) await wait(Math.max(35, Math.floor(speed * .38)));
+        if (!quietMode && result && turn.suddenBreak) { result.textContent = `${result.dataset.rawBattleText || result.textContent} • Sudden Break!`; beautifyBattleResult(result); }
+        if (!battleSkipAnimations && !hiddenFastMode()) await wait(Math.max(35, Math.floor(speed * .38)));
       }
       renderBattleTurnOrder(stage, combat, combat.turns.length, labels);
     }
@@ -22396,7 +22507,66 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
         function wait(ms) {
-      return new Promise(resolve => window.setTimeout(resolve, ms));
+      if (idleAutoRunning && document.hidden) return Promise.resolve();
+      return new Promise(resolve => {
+        let settled = false;
+        let timer = 0;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          if (timer) window.clearTimeout(timer);
+          document.removeEventListener("visibilitychange", onVisibility);
+          resolve();
+        };
+        const onVisibility = () => {
+          if (idleAutoRunning && document.hidden) finish();
+        };
+        document.addEventListener("visibilitychange", onVisibility);
+        timer = window.setTimeout(finish, Math.max(0, Number(ms) || 0));
+      });
+    }
+
+    function idleBackgroundDelay(ms = IDLE_BACKGROUND_FIGHT_MS) {
+      return new Promise(resolve => {
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          if (idleBackgroundWake === finish) idleBackgroundWake = null;
+          resolve();
+        };
+        const timer = window.setTimeout(finish, Math.max(250, Number(ms) || IDLE_BACKGROUND_FIGHT_MS));
+        idleBackgroundWake = () => {
+          window.clearTimeout(timer);
+          finish();
+        };
+      });
+    }
+
+    function wakeIdleBackgroundLoop() {
+      const wake = idleBackgroundWake;
+      idleBackgroundWake = null;
+      if (typeof wake === "function") wake();
+    }
+
+    function finishIdleVisualAnimationsForBackground() {
+      finishActiveSkillCutscene();
+      const stage = document.getElementById("idleBattleStage");
+      const animations = typeof document.getAnimations === "function"
+        ? document.getAnimations()
+        : stage && typeof stage.getAnimations === "function"
+          ? stage.getAnimations({ subtree:true })
+          : [];
+      animations.forEach(animation => {
+        const target = animation && animation.effect && animation.effect.target;
+        const belongsToIdle = !target
+          || (stage && (target === stage || stage.contains(target)))
+          || (target && target.closest && target.closest(".battle-moving-clone,.battle-attack-path"));
+        if (!belongsToIdle) return;
+        try { animation.finish(); }
+        catch (error) { try { animation.cancel(); } catch (innerError) {} }
+      });
+      document.querySelectorAll(".battle-moving-clone,.battle-attack-path").forEach(node => node.remove());
     }
 
     async function runBattle() {
@@ -27593,6 +27763,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const rewards = normalizeIdlePendingRewards(state.idle.pendingRewards || []);
       idleAutoRunning = false;
       idleStopRequested = false;
+      idleHiddenSince = 0;
+      idleHiddenRunsProcessed = 0;
+      idleCatchUpRuns = 0;
+      wakeIdleBackgroundLoop();
       state.idle.running = false;
       if (!rewards.length) {
         state.idle.currentWave = Math.max(1, state.idle.maxClearedWave + 1);
@@ -27641,6 +27815,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const grid = document.getElementById("idleTeamGrid");
       const panel = document.getElementById("idleElementPanel");
       if (!grid || !panel || !state.idle) return;
+      const teamRuntimeSignature = state.idle.team.map(id => {
+        const owned = getOwned(String(id || ""));
+        return `${id || ""}:${owned ? owned.level : 0}:${owned ? owned.duplicateRank : 0}`;
+      }).join("|");
+      const renderSignature = `${teamRuntimeSignature}::${state.idle.leaderId || ""}::${state.idle.formationFront}::${state.idle.commandStrategy}::${state.idle.targetStrategy}`;
+      const stats = getIdleBattleStats(null);
+      const powerText = document.getElementById("idleTeamPowerText");
+      if (powerText) powerText.textContent = `ATK ${formatNumber(stats.effectiveAttack)} • HP ${formatNumber(stats.effectiveHp)} • DEF ${formatNumber(stats.effectiveDefense)} • พลังรวม ${formatNumber(stats.totalCombatPower)}`;
+      if (grid.dataset.idleTeamSignature === renderSignature && panel.dataset.idleTeamSignature === renderSignature) return;
       const slots = [];
       for (let index = 0; index < CONFIG.idleTeamSlots; index += 1) {
         slots.push(teamSlotHTML(CARD_BY_ID.get(String(state.idle.team[index] || "")), index, "idle"));
@@ -27654,9 +27837,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         ? abilitySummary.activeAbilities.map(entry => `<div class="combo-card"><strong>✨ ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong><span>${entry.activeEffects.map(effect => escapeHTML(abilityEffectText(effect))).join(" • ")}</span></div>`).join("")
         : `<div class="combo-card"><strong>ยังไม่มีสกิล ARENA ทำงาน</strong><span>โหมด IDLE ใช้สกิลที่ activeIn มี arena</span></div>`;
       panel.innerHTML = `<div><h3>สถานะทีม IDLE</h3><p>ธาตุหลัก ${escapeHTML(elementLabel(summary.dominantElement))} • สมาชิก ${state.idle.team.filter(Boolean).length}/${CONFIG.idleTeamSlots} • คอมโบ ATK +${Math.round(summary.powerRate * 100)}%</p><div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div></div><div><h3>สกิลที่ทำงาน</h3><div class="combo-list">${activeAbilityHTML}</div></div>`;
-      const stats = getIdleBattleStats(null);
-      const powerText = document.getElementById("idleTeamPowerText");
-      if (powerText) powerText.textContent = `ATK ${formatNumber(stats.effectiveAttack)} • HP ${formatNumber(stats.effectiveHp)} • DEF ${formatNumber(stats.effectiveDefense)} • พลังรวม ${formatNumber(stats.totalCombatPower)}`;
+      grid.dataset.idleTeamSignature = renderSignature;
+      panel.dataset.idleTeamSignature = renderSignature;
     }
 
     function renderIdle(forceModels = false) {
@@ -27667,20 +27849,28 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const playerModels = document.getElementById("idlePlayerModels");
       const enemyModels = document.getElementById("idleEnemyModels");
       if (!playerModels || !enemyModels) return;
-      if (forceModels || !idleAnimating || !playerModels.children.length || !enemyModels.children.length) {
+      const playerSignature = `${state.idle.team.map(String).join("|")}::${state.idle.formationFront}`;
+      const enemySignature = `${currentIdleOpponent.uid || currentIdleOpponent.username || "idle"}::${currentIdleOpponent.wave}::${currentIdleOpponent.formationFront}`;
+      const rebuildPlayer = forceModels || !playerModels.children.length || playerModels.dataset.idleSignature !== playerSignature;
+      const rebuildEnemy = forceModels || !enemyModels.children.length || enemyModels.dataset.idleSignature !== enemySignature;
+      if (rebuildPlayer) {
         const playerFront = normalizeFormationFront(state.idle.formationFront, CONFIG.idleTeamSlots);
         const playerRecords = state.idle.team.map((id,index) => ({ card:CARD_BY_ID.get(String(id)), slot:index+1 })).filter(item => item.card);
         playerModels.innerHTML = playerRecords.length
           ? battleRowedModelRowsHTML(playerRecords.map(item => ({ ...item, row:item.slot <= playerFront ? "front" : "back", model:true })), false, (item,rowIndex,rowTotal,row) => battleModelHTML(item.card,rowIndex,false,rowTotal,row,item.slot))
           : `<div class="arena-secret-model">+</div>`;
+        playerModels.dataset.idleSignature = playerSignature;
+        reserveBattleCloneFormations(playerModels,"player");
+        idlePlaceGridItems(playerModels,"player");
+      }
+      if (rebuildEnemy) {
         const enemyFront = normalizeFormationFront(currentIdleOpponent.formationFront, CONFIG.idleTeamSlots);
         const enemyRecords = stats.enemyTeam.map((item,index) => ({ item, slot:index+1, row:index < enemyFront ? "front" : "back", model:true }));
         enemyModels.innerHTML = enemyRecords.length
           ? battleRowedModelRowsHTML(enemyRecords, true, (record,rowIndex,rowTotal,row) => arenaSnapshotModelHTML(record.item,rowIndex,true,rowIndex,rowTotal,record.slot,row))
           : `<div class="arena-secret-model">?</div>`;
-        reserveBattleCloneFormations(playerModels,"player");
+        enemyModels.dataset.idleSignature = enemySignature;
         reserveBattleCloneFormations(enemyModels,"enemy");
-        idlePlaceGridItems(playerModels,"player");
         idlePlaceGridItems(enemyModels,"enemy");
       }
       const maxHp = Math.max(1, stats.effectiveHp, stats.enemyEffectiveHp || 0);
@@ -27714,11 +27904,24 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         result.textContent = text;
         result.className = `battle-result ${idleAutoRunning ? (idleFarmMode ? "farming" : "running") : last && last.tone || ""}`;
       }
-      renderCombatHitReport("idleHitReport", lastIdleCombat, { player:"ทีม IDLE ของคุณ", enemy:currentIdleOpponent.username });
+      document.body.classList.toggle("idle-quiet-combat", activeTab === "idle");
+      const backgroundState = document.getElementById("idleBackgroundState");
+      if (backgroundState) {
+        const catchingUp = idleCatchUpRuns > 0;
+        backgroundState.classList.toggle("hidden-run", document.hidden || catchingUp);
+        backgroundState.textContent = document.hidden && idleAutoRunning
+          ? "🟡 กำลังคำนวณต่อสู้เบื้องหลัง และจะชดเชยเวลาที่เบราว์เซอร์พัก Timer"
+          : catchingUp
+            ? `⏩ กำลังชดเชยการต่อสู้เบื้องหลังอีก ${formatNumber(idleCatchUpRuns)} ไฟต์`
+            : idleAutoRunning
+              ? "🟢 AUTO ทำงานอยู่ • สลับแท็บได้ ระบบยังนับเวลาต่อเนื่อง"
+              : "🟢 พร้อมทำงานต่อเนื่อง แม้สลับไปแท็บอื่น";
+      }
       renderIdleTeam();
     }
 
-    async function runIdleWave(wave = 1) {
+    async function runIdleWave(wave = 1, options = {}) {
+      const headless = Boolean(options.headless || document.hidden);
       const safeWave = Math.max(1, Math.floor(Number(wave) || 1));
       currentIdleOpponent = makeIdleOpponent(safeWave);
       state.idle.currentWave = safeWave;
@@ -27727,8 +27930,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const result = document.getElementById("idleBattleResult");
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const phaseDuration = reducedMotion ? 15 : 180;
-      idleAnimating = true;
-      renderIdle(true);
+      idleAnimating = !headless;
+      if (!headless) renderIdle(true);
       const combat = buildIndividualTurnBasedCombat({
         playerAttack:stats.effectiveAttack, playerHp:stats.effectiveHp, playerDefense:stats.effectiveDefense,
         playerAttackHits:stats.attackHits, playerShieldHits:stats.shieldHits,
@@ -27757,11 +27960,16 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       combat.initialTransferEvents = abilityArray(stats.abilitySummary && stats.abilitySummary.transferResults).concat(abilityArray(stats.enemyAbilitySummary && stats.enemyAbilitySummary.transferResults));
       const won = combat.winner === "player";
       try {
-        await playTurnBasedCombat(stage, result, combat, {
-          playerPower:document.getElementById("idlePlayerPower"), enemyPower:document.getElementById("idleEnemyPower"),
-          playerMeter:document.getElementById("idlePlayerMeter"), enemyMeter:document.getElementById("idleEnemyMeter")
-        }, { player:"ทีม IDLE ของคุณ", enemy:currentIdleOpponent.username }, phaseDuration);
-        stage.classList.add(won ? "battle-win" : "battle-lose");
+        if (!headless) {
+          await playTurnBasedCombat(stage, result, combat, {
+            playerPower:document.getElementById("idlePlayerPower"), enemyPower:document.getElementById("idleEnemyPower"),
+            playerMeter:document.getElementById("idlePlayerMeter"), enemyMeter:document.getElementById("idleEnemyMeter")
+          }, { player:"ทีม IDLE ของคุณ", enemy:currentIdleOpponent.username }, phaseDuration, {
+            quiet:true,
+            runWhenHidden:true
+          });
+          if (!document.hidden) stage.classList.add(won ? "battle-win" : "battle-lose");
+        }
         lastIdleCombat = combat;
         state.idle.totalRuns += 1;
         state.idle.pendingRuns = Math.max(0, Math.floor(Number(state.idle.pendingRuns) || 0)) + 1;
@@ -27783,13 +27991,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           playerCards:battleSummaryOwnedTeam(state.idle.team), enemyCards:stats.enemyTeam.map(battleSummaryCardSnapshot)
         });
         saveState();
-        renderIdle();
-        await wait(reducedMotion ? 10 : 180);
+        if (!headless && !document.hidden) {
+          renderIdle();
+          await wait(reducedMotion ? 10 : 180);
+        }
         return won;
       } finally {
-        stage.classList.remove("player-strike","enemy-strike","battle-win","battle-lose");
+        if (stage) stage.classList.remove("player-strike","enemy-strike","battle-win","battle-lose");
         idleAnimating = false;
-        renderIdle();
+        if (!headless && !document.hidden) renderIdle();
       }
     }
 
@@ -27800,6 +28010,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       idleAutoRunning = true;
       idleStopRequested = false;
       idleFarmMode = false;
+      idleHiddenSince = document.hidden ? Date.now() : 0;
+      idleHiddenRunsProcessed = 0;
+      idleCatchUpRuns = 0;
       battlePlaybackSpeed = Math.max(1, battlePlaybackSpeed || 3);
       if (!state.idle.sessionId) state.idle.sessionId = `idle-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
       if (!state.idle.pendingStartedAt) state.idle.pendingStartedAt = Date.now();
@@ -27810,15 +28023,28 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderIdle(true);
       try {
         while (idleAutoRunning && !idleStopRequested) {
-          const won = await runIdleWave(idleRuntimeWave);
+          const catchingUp = !document.hidden && idleCatchUpRuns > 0;
+          const headless = document.hidden || catchingUp;
+          const won = await runIdleWave(idleRuntimeWave, { headless });
+          if (document.hidden) idleHiddenRunsProcessed += 1;
+          if (catchingUp) idleCatchUpRuns = Math.max(0, idleCatchUpRuns - 1);
           if (idleStopRequested || !idleAutoRunning) break;
           if (!idleFarmMode && won) idleRuntimeWave += 1;
           else if (!won) { idleFarmMode = true; idleRuntimeWave = Math.max(1, state.idle.maxClearedWave); }
           // หลังแพ้จะฟาร์มชั้นล่าสุดซ้ำ แม้ชนะแล้วก็ไม่ไต่ต่อจนกว่าจะหยุดและเริ่มใหม่
           state.idle.currentWave = idleRuntimeWave;
           currentIdleOpponent = null;
-          renderIdle();
-          await wait(battleSkipAnimations ? 30 : 240);
+          if (document.hidden) {
+            await idleBackgroundDelay(IDLE_BACKGROUND_FIGHT_MS);
+          } else if (idleCatchUpRuns > 0) {
+            if (idleCatchUpRuns % 8 === 0) {
+              renderIdle();
+              await new Promise(resolve => window.setTimeout(resolve, 0));
+            }
+          } else {
+            renderIdle();
+            await wait(battleSkipAnimations ? 30 : 240);
+          }
         }
       } catch (error) {
         console.error("Idle auto loop failed:", error);
@@ -27826,6 +28052,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         showToast("โหมด IDLE หยุดจากข้อผิดพลาด กรุณาลองใหม่");
       } finally {
         idleAutoRunning = false;
+        wakeIdleBackgroundLoop();
+        if (!idleStopRequested) {
+          idleHiddenSince = 0;
+          idleHiddenRunsProcessed = 0;
+          idleCatchUpRuns = 0;
+        }
         state.idle.running = false;
         if (idleStopRequested) finalizeIdleSessionRewards();
         else { saveState(true); renderIdle(); }
@@ -27836,6 +28068,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!idleAutoRunning && !idleAnimating) return finalizeIdleSessionRewards();
       idleStopRequested = true;
       idleAutoRunning = false;
+      wakeIdleBackgroundLoop();
       renderIdle();
       showToast("รับคำสั่งหยุดแล้ว จะส่งรางวัลหลังไฟต์ปัจจุบันจบ");
     }
@@ -30151,10 +30384,26 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     document.addEventListener("visibilitychange", () => {
       handleBGMVisibilityChange();
       if (!document.hidden) {
+        if (idleAutoRunning && idleHiddenSince) {
+          const elapsed = Math.max(0, Date.now() - idleHiddenSince);
+          const expectedRuns = Math.floor(elapsed / IDLE_BACKGROUND_FIGHT_MS);
+          const missingRuns = Math.max(0, expectedRuns - idleHiddenRunsProcessed);
+          idleCatchUpRuns = Math.min(IDLE_BACKGROUND_MAX_CATCHUP, idleCatchUpRuns + missingRuns);
+          idleHiddenSince = 0;
+          idleHiddenRunsProcessed = 0;
+          wakeIdleBackgroundLoop();
+        }
         renderResources();
+        if (activeTab === "idle") renderIdle();
         const notice = document.getElementById("updateNoticeModal");
         if (notice && !notice.classList.contains("hidden") && activeNoticeTab === "news") showUpdatePromo(activePromoIndex);
       } else {
+        if (idleAutoRunning) {
+          idleHiddenSince = Date.now();
+          idleHiddenRunsProcessed = 0;
+          finishIdleVisualAnimationsForBackground();
+          wakeIdleBackgroundLoop();
+        }
         pauseUpdatePromo();
         updateIncome();
         persistLocalState();
@@ -30163,6 +30412,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     });
 
     try {
+      ensureSkillCutsceneButtons();
       renderAll();
       renderTabs();
       renderLoginGate(true);
@@ -30177,6 +30427,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         ensureArenaWeekCurrent();
         if (activeTab === "battle") renderBattle();
         if (activeTab === "arena") renderArena();
+        if (activeTab === "idle" && !document.hidden && idleCatchUpRuns === 0) renderIdle();
       }, 1000);
       setInterval(persistLocalState, 15000);
       setInterval(scheduleCloudSave, 60000);
