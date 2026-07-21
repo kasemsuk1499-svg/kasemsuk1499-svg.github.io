@@ -13,7 +13,7 @@ ACC_REGISTER_CARD({
   defense: 20000,
   speed: 109,
   incomePerSec: 330,
-  normalAttackTargetCount: 5,
+  normalAttackTargetCount: 3,
   targetSelection: "default",
   upgradeDustBase: 1450,
   upgradeDustGrowth: 1.0175,
@@ -65,7 +65,7 @@ ACC_REGISTER_CARD({
       }
     },
     {
-      name: "วิสเวทมนต์แห่งความกล้า",
+      name: "วิสเซอร์อบิส",
       description: "หากจัดทีมร่วมกับใครก็ตามที่มีสกิล 'พรสวรรค์แห่งคทา' ก็อปปี้สกิลนั้นของตัวผู้ใช้งานทันที และ ตนเองจะได้รับ ATK/HP/DEF + 20% ต่อเพื่อนร่มทีมที่มีสกิลนั้น",
       activeIn: [
         "team",
@@ -89,7 +89,8 @@ ACC_REGISTER_CARD({
             3007,
             3008,
             3009,
-            3010
+            3010,
+            26
           ],
           targetSelection: "all"
         },
@@ -107,7 +108,8 @@ ACC_REGISTER_CARD({
             3007,
             3008,
             3009,
-            3010
+            3010,
+            26
           ],
           targetSelection: "all"
         },
@@ -125,7 +127,8 @@ ACC_REGISTER_CARD({
             3007,
             3008,
             3009,
-            3010
+            3010,
+            26
           ],
           targetSelection: "all"
         },
@@ -144,7 +147,7 @@ ACC_REGISTER_CARD({
     },
 {
   name: "ความหวัง",
-  description: "เมื่อหมดสภาพจากการต่อสู้ จะคืนชีพตัวเองด้วย HP 1% และเป็นอมตะ 5 เทิร์น พร้อมมอบโล่ 10 ฮิตให้พวกพ้องทั้งหมด",
+  description: "เมื่อหมดสภาพจากการต่อสู้ จะคืนชีพตัวเองด้วย HP 1% และเป็นอมตะ 10 เทิร์น พร้อมมอบโล่ 10 ฮิตให้พวกพ้องทั้งหมด",
   activeIn: [
     "team",
     "tower",
@@ -163,7 +166,7 @@ ACC_REGISTER_CARD({
       type: "reviveTimedUndying",
       value: 0.01,
       targetSide: "self",
-      durationTurns: 5,
+      durationTurns: 10,
       maxTriggers: 1
     },
     {
@@ -192,6 +195,6 @@ ACC_REGISTER_CARD({
     "volume": 0.5,
     "showCardAfterVideo": true,
     "revealKicker": "HOPE OF WISTORIA",
-    "revealTitle": "EX · Wil Serfors"
+    "revealTitle": "Wil Serfors"
   }
 });
