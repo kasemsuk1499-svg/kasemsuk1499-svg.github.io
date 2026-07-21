@@ -4,7 +4,7 @@ ACC_REGISTER_CARD({
   rarity: "EX",
   element: "ไร้ธาตุ",
   balanceSchemaVersion: 4,
-  power: 50000,
+  power: 32000,
   hp: 200000,
   defense: 15000,
   speed: 107,
