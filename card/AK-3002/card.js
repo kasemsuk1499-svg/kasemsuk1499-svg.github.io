@@ -356,7 +356,7 @@ ACC_REGISTER_CARD({
         accent: "#0ed8b6",
         accent2: "#22d3ee",
         durationMs: 800,
-        maxVideoMs: 30000,
+        maxVideoMs: 60000,
         objectFit: "cover",
         objectPosition: "center center",
         muted: false,
