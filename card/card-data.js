@@ -4863,132 +4863,201 @@ window.ACC_CARD_DATA = [
         }
   },
   {
-    "id": 19,
-    "name": "Aria",
+    "id": 33,
+    "name": "โคบี้",
     "rarity": "SR",
-    "element": "น้ำแข็ง",
-    "power": 9000,
-        "hp": 45000,
-        "defense": 3600,
-    "incomePerSec": 280,
-    "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.04,
-    "awakenMax": 9,
+    "element": "น้ำ",
+  "balanceSchemaVersion": 4,
+  "power": 16000,
+  "hp": 80000,
+  "defense": 6400,
+  "speed": 94,
+  "incomePerSec": 125,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1130,
+  "upgradeDustGrowth": 1.012,
+  "awakenMax": 20,
     "icon": "",
-    "image": "19.png",
+    "image": "33.png",
     "ability": {
-      "name": "โนๆฉันไม่ได้ชอบนายสักหน่อย...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุน้ำแข็งได้รับ ATK/HP +40%,และโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "น้ำแข็ง":2}, "leaderOnly": true},
+      "name": "ว่าที่พลเรือเอกโคบี้",
+      "description": "เมื่อเริ่มต่อสู้จะเพิ่มอัตราการป้องกันของทีมทั้งหมดขึ้น 50% และลดอัตราการป้องกันของศัตรูทั้งหมดลง 15% และลดโล่ของศัตรูทั้งหมดลง 5 ครั้ง",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {"onBattleStart": true},
       "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["น้ำแข็ง"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["น้ำแข็ง"] },
-        { "type": "shieldHits", "value": 1 }
+        {
+          "type": "teamDefenseRate",
+          "value": 0.5,
+          "targetSelection": "all"
+        },
+        {
+          "type": "enemyDefenseRate",
+          "value": -0.15,
+          "targetSelection": "all"
+        },
+        {
+          "type": "shieldHits",
+          "value": -5,
+          "targetSide": "enemy",
+          "targetSelection": "all"
+        }
       ]
         }
   },
   {
     "id": 20,
-    "name": "Inosuke",
+    "name": "อิโนะสึเกะ",
     "rarity": "SR",
     "element": "พืช",
-    "power": 9000,
-        "hp": 45000,
-        "defense": 3600,
-    "incomePerSec": 280,
-    "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.04,
-    "awakenMax": 9,
+  "balanceSchemaVersion": 4,
+  "power": 16000,
+  "hp": 80000,
+  "defense": 6400,
+  "speed": 94,
+  "incomePerSec": 125,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1130,
+  "upgradeDustGrowth": 1.012,
+  "awakenMax": 20,
     "icon": "",
     "image": "20.png",
     "ability": {
-      "name": "ลูกน้องของข้าตามข้ามา...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุพืชได้รับ ATK/HP +40%,และได้เจาะโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "พืช":2}, "leaderOnly": true},
+      "name": "ปราณสัตว์ป่า",
+      "description": "เมื่อเริ่มต่อสู้จะลดอัตราหลบหลีกของศัตรูทั้งหมดลง 40%",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {"onBattleStart": true
+      },
       "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["พืช"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["พืช"] },
-        { "type": "attackHits", "value": 1 }
+        {
+          "type": "dodgeRate",
+          "value": -0.4,
+          "targetSide": "enemy",
+          "targetSelection": "all"
+        }
       ]
         }
   },
   {
     "id": 21,
-    "name": "Uraraka",
+    "name": "ทาชิงิ",
     "rarity": "SR",
     "element": "สายฟ้า",
-    "power": 9000,
-        "hp": 45000,
-        "defense": 3600,
-    "incomePerSec": 280,
-    "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.04,
-    "awakenMax": 9,
+  "balanceSchemaVersion": 4,
+  "power": 16000,
+  "hp": 80000,
+  "defense": 6400,
+  "speed": 94,
+  "incomePerSec": 125,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1130,
+  "upgradeDustGrowth": 1.012,
+  "awakenMax": 20,
     "icon": "",
     "image": "21.png",
     "ability": {
-      "name": "ไม่มีอะไรต้องกังวล...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุสายฟ้าได้รับ ATK/HP +40%,และได้เจาะโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "สายฟ้า":2}, "leaderOnly": true},
+      "name": "ดาบตัดอากาศ",
+      "description": "ทุกการโจมตี 4 ครั้ง จะโจมตีศัตรู 3 เป้าหมายด้วยดาเมจ 200% จำนวน 3 ฮิต",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {"afterOwnAttacks": 3, "repeat": true
+      },
       "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["สายฟ้า"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["สายฟ้า"] },
-        { "type": "attackHits", "value": 1 }
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "default",
+          "targetCount": 3,
+          "damageRate": 2
+        },
+        {
+          "type": "nextAttackHits",
+          "value": 2,
+          "targetSide": "enemy",
+          "targetSelection": "hitTargets"
+        }
       ]
         }
   },
   {
     "id": 22,
-    "name": "Sakura",
+    "name": "ซากุระ",
     "rarity": "SR",
     "element": "ดิน",
-    "power": 9000,
-        "hp": 45000,
-        "defense": 3600,
-    "incomePerSec": 280,
-    "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.04,
-    "awakenMax": 9,
+  "balanceSchemaVersion": 4,
+  "power": 16000,
+  "hp": 80000,
+  "defense": 6400,
+  "speed": 94,
+  "incomePerSec": 125,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1130,
+  "upgradeDustGrowth": 1.012,
+  "awakenMax": 20,
     "icon": "",
     "image": "22.png",
     "ability": {
-      "name": "หรือจะมีเรื่อง...",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุดินได้รับ ATK/HP +40%,และโล่+1",
+      "name": "ทลายธรณี",
+      "description": "ทุกๆการโจมตี 5 ครั้ง จะโจมตีด้วยดาเมจ 60% 3 เป้าหมาย และมีโอกาส 25% ที่เป้าหมายจะติดสถานะ สตั้น เป็นเวลา 2 เทิร์น",
       "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "ดิน":2}, "leaderOnly": true},
+      "condition": {"afterOwnAttacks": 4, "repeat": true},
       "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["ดิน"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["ดิน"] },
-        { "type": "shieldHits", "value": 1 }
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "random",
+          "targetCount": 3,
+          "damageRate": 0.6
+        },
+        {
+          "type": "applyStatus",
+          "targetSide": "enemy",
+          "targetSelection": "hitTargets",
+          "status": "stun",
+          "successRate": 0.25,
+          "targetCount": 3,
+          "durationTurns": 2
+        }
       ]
         }
   },
   {
     "id": 23,
-    "name": "Miku",
+    "name": "ฮัตสึนะ มิกุ",
     "rarity": "SR",
     "element": "น้ำ",
-    "power": 9000,
-        "hp": 45000,
-        "defense": 3600,
-    "incomePerSec": 280,
-    "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.04,
-    "awakenMax": 9,
+  "balanceSchemaVersion": 4,
+  "power": 16000,
+  "hp": 80000,
+  "defense": 6400,
+  "speed": 94,
+  "incomePerSec": 125,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1130,
+  "upgradeDustGrowth": 1.012,
+  "awakenMax": 20,
     "icon": "",
     "image": "23.png",
     "ability": {
-      "name": "เสียงเพลงของฉัน..จะดังกังวาล",
-      "description": "หากการ์ดนี้อเวกตัน ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมที่เป็นธาตุน้ำได้รับ ATK/HP +40%,และโล่+1",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"sourceMinAwaken": 9, "minElementCount": { "น้ำ":2}, "leaderOnly": true},
+      "name": "ท่วงทำนองของมิกุ",
+      "description": "ทุกการโจมตี3ครั้ง จะมอบการฟื้นฟู HP 20% และล้างสถานะอันตรายให้เพื่อนร่วมทีมและตนเอง",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {"afterOwnAttacks": 2, "repeat": true},
       "effects": [
-        { "type": "elementPowerRate", "value": 0.4, "targetElements": ["น้ำ"] },
-        { "type": "elementHpRate", "value": 0.4, "targetElements": ["น้ำ"] },
-        { "type": "shieldHits", "value": 1 }
+        {
+          "type": "healHpRate",
+          "value": 0.2,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        },
+        {
+          "type": "cleanseStatuses",
+          "targetSide": "ally",
+          "targetSelection": "all"
+        }
       ]
         }
   },
@@ -4997,13 +5066,17 @@ window.ACC_CARD_DATA = [
     "name": "กลาเซียร์ลาส อัลบิส",
     "rarity": "SR",
     "element": "น้ำแข็ง",
-    "power": 9000,
-        "hp": 45000,
-        "defense": 3600,
-    "incomePerSec": 280,
-    "upgradeDustBase": 70,
-    "upgradeDustGrowth": 1.04,
-    "awakenMax": 9,
+  "balanceSchemaVersion": 4,
+  "power": 16000,
+  "hp": 80000,
+  "defense": 6400,
+  "speed": 94,
+  "incomePerSec": 125,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1130,
+  "upgradeDustGrowth": 1.012,
+  "awakenMax": 20,
     "icon": "",
     "image": "24.png",
     "ability": {
