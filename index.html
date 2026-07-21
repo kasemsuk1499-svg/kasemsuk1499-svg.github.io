@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-21-idle-attack-line-v142">
-  <title>Anime Card Collection · Runtime v142 · Idle Attack Line Fix</title>
+  <meta name="gacha-app-build" content="2026-07-21-no-battle-skip-v143">
+  <title>Anime Card Collection · Runtime v143 · No Battle Animation Skip</title>
   <style>
     :root {
       color-scheme: dark;
@@ -8968,7 +8968,7 @@
               <div class="battle-actions">
                 <button class="btn btn-primary" id="battleButton" data-action="battle">เริ่มต่อสู้</button>
                 <button class="btn" id="battleSummaryButton" data-action="open-battle-summary" data-summary-mode="tower" disabled>📊 สรุปฉบับเต็ม</button>
-                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1" class="active">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3">x3</button><button type="button" data-battle-skip="true">ข้ามแอนิเมชัน</button></div>
+                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1" class="active">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3">x3</button></div>
                 <div class="battle-result" id="battleResult">จัดทีมให้พร้อมแล้วท้าทายหอคอย</div>
               </div>
             </div>
@@ -9075,7 +9075,7 @@
                 </div>
                 <div class="battle-actions">
                   <button class="btn" id="worldBossBattleSummaryButton2" data-action="open-battle-summary" data-summary-mode="worldBoss" disabled>📊 สรุปไฟต์บอส</button>
-                  <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้บอส"><button type="button" data-battle-speed="1" class="active">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3">x3</button><button type="button" data-battle-skip="true">ข้ามแอนิเมชัน</button></div>
+                  <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้บอส"><button type="button" data-battle-speed="1" class="active">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3">x3</button></div>
                   <div class="battle-result" id="worldBossBattleArenaResult">กดเริ่มตีบอสโลกเพื่อเปิดสนามต่อสู้แบบ ARENA</div>
                 </div>
               </div>
@@ -9140,7 +9140,7 @@
               <div class="battle-actions">
                 <button class="btn btn-primary" id="arenaBattleButton" data-action="arena-battle">ใช้ดาบ 1 เล่มและสุ่มคู่ต่อสู้</button>
                 <button class="btn" id="arenaSummaryButton" data-action="open-battle-summary" data-summary-mode="arena" disabled>📊 สรุปฉบับเต็ม</button>
-                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1" class="active">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3">x3</button><button type="button" data-battle-skip="true">ข้ามแอนิเมชัน</button></div>
+                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1" class="active">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3">x3</button></div>
                 <div class="battle-result" id="arenaBattleResult">ชนะ +25 แต้ม • แพ้ -10 แต้ม</div>
               </div>
             </div>
@@ -9227,7 +9227,7 @@
                 <button class="btn btn-primary" id="idleStartButton" data-action="idle-start">▶ เริ่มต่อสู้ออโต้</button>
                 <button class="btn btn-danger" id="idleStopButton" data-action="idle-stop">■ หยุดและส่งรางวัล</button>
                 <button class="btn" id="idleSummaryButton" data-action="open-battle-summary" data-summary-mode="idle" disabled>📊 สรุปไฟต์ล่าสุด</button>
-                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3" class="active">x3</button><button type="button" data-battle-skip="true">ข้ามแอนิเมชัน</button></div>
+                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3" class="active">x3</button></div>
                 <div class="battle-result" id="idleBattleResult">พร้อมเริ่มท้าทายระลอกถัดไป</div>
               </div>
             </div>
@@ -19929,7 +19929,6 @@
       }
     };
     let battlePlaybackSpeed = 1;
-    let battleSkipAnimations = false;
     let activeSkillCutscenesEnabled = BATTLE_VIEW_PREFERENCES.get("skillCutscene") !== "0";
 
     function syncSkillCutsceneButtons() {
@@ -19957,12 +19956,6 @@
       if (speedButton) {
         battlePlaybackSpeed = Math.max(1, Math.min(3, Number(speedButton.dataset.battleSpeed) || 1));
         document.querySelectorAll("[data-battle-speed]").forEach(button => button.classList.toggle("active", Number(button.dataset.battleSpeed) === battlePlaybackSpeed));
-        return;
-      }
-      const skipButton = event.target.closest("[data-battle-skip]");
-      if (skipButton) {
-        battleSkipAnimations = true;
-        showToast("ข้ามแอนิเมชันของไฟต์นี้แล้ว");
         return;
       }
       const cutsceneButton = event.target.closest("[data-skill-cutscene-toggle]");
@@ -20503,7 +20496,7 @@
     }
 
     async function animateIndividualBattleAction(stage, turn, duration, quietMode = false) {
-      if (!stage || battleSkipAnimations || (idleAutoRunning && document.hidden) || !turn || turn.command === "suddenBreak") return;
+      if (!stage || (idleAutoRunning && document.hidden) || !turn || turn.command === "suddenBreak") return;
       const actorNode = battleUnitNode(stage, turn.side, turn.actorCardId);
       const targetSide = turn.side === "player" ? "enemy" : "player";
       const resultList = abilityArray(turn.targetResults).length
@@ -20693,7 +20686,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         result.textContent = `${starterLabel} ได้เริ่มโจมตีก่อน • ตัวละครที่หมดสภาพจะหยุดโจมตีและไม่ตกเป็นเป้าหมาย`;
         beautifyBattleResult(result);
       }
-      if (!hiddenFastMode()) await wait(battleSkipAnimations ? 10 : Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
+      if (!hiddenFastMode()) await wait(Math.min(240, Math.max(20, phaseDuration / battlePlaybackSpeed)));
 
       for (let turnIndex = 0; turnIndex < combat.turns.length; turnIndex += 1) {
         const turn = combat.turns[turnIndex];
@@ -20736,12 +20729,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         if (turn.triggerActivated) {
           for (const detail of abilityArray(turn.triggeredDetails)) {
             if (!quietMode) showTriggeredAbilityEvent(stage, detail, turn, { attacker: attackerLabel, defender: defenderLabel });
-            if (!battleSkipAnimations && activeSkillCutscenesEnabled && !hiddenFastMode()) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
+            if (activeSkillCutscenesEnabled && !hiddenFastMode()) await playActiveSkillCutscene(detail, turn, { attacker: attackerLabel, defender: defenderLabel }, turn.side);
           }
         }
         applyBattleTransformEvents(stage, turn, turn.transformEvents, false);
         const baseSpeed = turn.round > 6 ? Math.max(55, Math.floor(phaseDuration * .55)) : phaseDuration;
-        const speed = battleSkipAnimations ? 5 : Math.max(35, Math.floor(baseSpeed / battlePlaybackSpeed));
+        const speed = Math.max(35, Math.floor(baseSpeed / battlePlaybackSpeed));
         await animateIndividualBattleAction(stage, turn, speed * 2.25, quietMode || hiddenFastMode());
         if (!quietMode && !hiddenFastMode()) animateBattleEvents(stage, turn);
         applyBattleTransformEvents(stage, turn, turn.transformRevertEvents, true);
@@ -20756,7 +20749,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           }
         }
         if (!quietMode && result && turn.suddenBreak) { result.textContent = `${result.dataset.rawBattleText || result.textContent} • Sudden Break!`; beautifyBattleResult(result); }
-        if (!battleSkipAnimations && !hiddenFastMode()) await wait(Math.max(35, Math.floor(speed * .38)));
+        if (!hiddenFastMode()) await wait(Math.max(35, Math.floor(speed * .38)));
       }
       renderBattleTurnOrder(stage, combat, combat.turns.length, labels);
     }
@@ -22541,7 +22534,6 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const phaseDuration = reducedMotion ? 20 : 220;
       arenaAnimating = true;
-      battleSkipAnimations = false;
       state.battle.energy -= 1;
       renderArena(true);
 
@@ -22980,7 +22972,6 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const phaseDuration = reducedMotion ? 20 : 220;
       battleAnimating = true;
-      battleSkipAnimations = false;
       state.battle.energy -= 1;
       const combat = buildIndividualTurnBasedCombat({
         playerAttack: stats.effectiveAttack,
@@ -27387,7 +27378,6 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const phaseDuration = reducedMotion ? 20 : 220;
       worldBossAnimating = true;
-      battleSkipAnimations = false;
       if (stage) {
         stage.classList.remove("hidden", "player-strike", "enemy-strike", "battle-win", "battle-lose");
         renderWorldBossBattleModels(stats);
@@ -28438,7 +28428,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             }
           } else {
             renderIdle();
-            await wait(battleSkipAnimations ? 30 : 240);
+            await wait(240);
           }
         }
       } catch (error) {
