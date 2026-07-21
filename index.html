@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-21-rarity-visual-v136">
-  <title>Anime Card Collection · Runtime v136 · Rarity Visual</title>
+  <meta name="gacha-app-build" content="2026-07-21-idle-auto-v137">
+  <title>Anime Card Collection · Runtime v137 · Idle Auto Battle</title>
   <style>
     :root {
       color-scheme: dark;
@@ -8123,6 +8123,90 @@
     }
   </style>
 
+
+  <style id="v137-idle-auto-mode">
+    /* v137: โหมด IDLE AUTO BATTLE */
+    #idleView { --idle-accent:#7dd3fc; --idle-accent2:#c084fc; }
+    #idleView .section-title { align-items:flex-start; }
+    #idleView .battle-layout { grid-template-columns:minmax(0,1.55fr) minmax(280px,.45fr); min-height:720px; }
+    #idleView .battle-arena {
+      min-height:700px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      isolation:isolate;
+      border-color:rgba(125,211,252,.28);
+      background:
+        radial-gradient(circle at 50% 10%,rgba(192,132,252,.18),transparent 35%),
+        radial-gradient(circle at 50% 92%,rgba(125,211,252,.16),transparent 36%),
+        linear-gradient(180deg,rgba(17,24,39,.96),rgba(15,23,42,.98));
+      box-shadow:inset 0 0 70px rgba(125,211,252,.05),0 22px 70px rgba(15,23,42,.28);
+    }
+    #idleView .battle-arena::after { content:"IDLE"; color:rgba(224,242,254,.08); }
+    #idleView .battle-sides { flex:1; min-height:500px; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:stretch; }
+    #idleView .fighter { display:grid; grid-template-rows:auto 1fr auto auto auto auto; min-height:0; }
+    #idleView .battle-model-stack { min-height:clamp(250px,42vh,490px); align-items:center; padding-inline:clamp(8px,2vw,28px)!important; }
+    #idleView .battle-model-stack.idle-side-grid {
+      display:grid!important;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      grid-template-rows:repeat(5,minmax(0,1fr));
+      gap:8px 10px;
+      align-items:center;
+      justify-items:center;
+      overflow:visible;
+    }
+    #idleView .battle-model-stack.idle-side-grid > .battle-row-line { display:contents!important; }
+    #idleView .battle-model-stack.idle-side-grid .battle-model-card,
+    #idleView .battle-model-stack.idle-side-grid .battle-source-formation {
+      width:clamp(72px,8.2vw,122px);
+      margin:0!important;
+      transform:none!important;
+      align-self:center;
+      justify-self:center;
+    }
+    #idleView .fighter.player .battle-model-stack.idle-side-grid .battle-position-front { grid-column:2; }
+    #idleView .fighter.player .battle-model-stack.idle-side-grid .battle-position-back { grid-column:1; }
+    #idleView .fighter.enemy .battle-model-stack.idle-side-grid .battle-position-front { grid-column:1; }
+    #idleView .fighter.enemy .battle-model-stack.idle-side-grid .battle-position-back { grid-column:2; }
+    #idleView .battle-actions { display:grid; grid-template-columns:minmax(160px,1fr) minmax(140px,.8fr) minmax(140px,.8fr); gap:9px; align-items:stretch; }
+    #idleView .battle-actions .battle-playback-controls,
+    #idleView .battle-actions .battle-result { grid-column:1 / -1; }
+    #idleView .battle-result.running { color:#bae6fd; border-color:rgba(125,211,252,.35); background:rgba(14,116,144,.14); }
+    #idleView .battle-result.farming { color:#fde68a; border-color:rgba(251,191,36,.38); background:rgba(146,64,14,.14); }
+    #idleView .battle-result.win { color:#bbf7d0; }
+    #idleView .battle-result.lose { color:#fecdd3; }
+    .idle-team-zone { margin-top:18px; padding:18px; border:1px solid rgba(125,211,252,.20); border-radius:22px; background:linear-gradient(145deg,rgba(14,116,144,.08),rgba(76,29,149,.08)); }
+    .idle-status-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .idle-status-card { padding:11px 12px; border:1px solid rgba(255,255,255,.09); border-radius:14px; background:rgba(3,7,18,.34); }
+    .idle-status-card span { display:block; color:var(--muted); font-size:.67rem; font-weight:800; }
+    .idle-status-card strong { display:block; margin-top:3px; color:#e0f2fe; font-size:1.02rem; }
+    .idle-scale-box { padding:12px; border:1px solid rgba(192,132,252,.22); border-radius:14px; background:linear-gradient(135deg,rgba(76,29,149,.15),rgba(14,116,144,.08)); color:#dbeafe; font-size:.73rem; line-height:1.55; }
+    .idle-reward-panel { display:grid; gap:8px; max-height:320px; overflow:auto; padding:3px; }
+    .idle-reward-panel.hidden { display:none!important; }
+    .idle-reward-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 10px; border:1px solid rgba(255,255,255,.09); border-radius:12px; background:rgba(3,7,18,.40); }
+    .idle-reward-row span { color:#dbeafe; font-size:.72rem; }
+    .idle-reward-row strong { color:var(--gold); white-space:nowrap; }
+    .idle-boss-chip { display:inline-flex; align-items:center; gap:5px; border:1px solid rgba(251,191,36,.34); border-radius:999px; padding:5px 8px; color:#fde68a; background:rgba(146,64,14,.16); font-size:.65rem; font-weight:1000; }
+    .team-membership-badge.idle { color:#071019; background:linear-gradient(135deg,#7dd3fc,#c084fc); }
+    .team-picker-actions .assign-idle { color:#071019; border-color:transparent; background:linear-gradient(135deg,#7dd3fc,#c084fc); }
+    .gm-idle-team-editor { display:grid; gap:10px; }
+    .gm-idle-card-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
+    .gm-idle-team-list { display:grid; gap:8px; margin-top:10px; }
+    .gm-idle-team-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px; border:1px solid rgba(125,211,252,.18); border-radius:14px; background:rgba(3,7,18,.34); }
+    .gm-idle-team-row strong { display:block; color:#e0f2fe; }
+    .gm-idle-team-row span { display:block; margin-top:3px; color:var(--muted); font-size:.67rem; line-height:1.45; }
+    @media(max-width:1100px){#idleView .battle-layout{grid-template-columns:1fr}.gm-idle-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:760px){
+      #idleView .battle-arena{min-height:640px;padding:15px 12px 150px}
+      #idleView .battle-sides{grid-template-columns:1fr;gap:14px;min-height:auto}
+      #idleView .fighter.enemy{grid-row:1}#idleView .fighter.player{grid-row:2}
+      #idleView .battle-model-stack{min-height:220px}
+      #idleView .battle-actions{grid-template-columns:1fr 1fr}
+      #idleView .battle-actions .btn:first-child{grid-column:1 / -1}
+      .idle-status-grid{grid-template-columns:1fr 1fr}.gm-idle-card-grid{grid-template-columns:1fr}
+    }
+  </style>
+
 </head>
 <body class="auth-locked">
   <div class="boot-error hidden" id="bootError">
@@ -8319,6 +8403,7 @@
             <button class="tab" data-tab="battle">ไต่หอ</button>
             <button class="tab" data-tab="worldBoss">บอสโลก</button>
             <button class="tab" data-tab="arena">ARENA</button>
+            <button class="tab" data-tab="idle">IDLE AUTO</button>
             <button class="tab" data-tab="friends">เพื่อน</button>
           </div>
           <div class="tools hidden" id="collectionTools">
@@ -8658,6 +8743,94 @@
           </div>
         </section>
 
+
+        <section id="idleView" class="hidden">
+          <div class="section-title">
+            <div>
+              <h2>IDLE AUTO BATTLE</h2>
+              <p>กดเริ่มแล้วระบบจะสู้ต่อเนื่อง บันทึกระลอกสูงสุด และเมื่อแพ้จะย้อนกลับไปฟาร์มระลอกที่ชนะล่าสุดจนกว่าจะกดหยุด</p>
+            </div>
+            <button class="btn" data-action="idle-refresh-boss-teams">รีเฟรชทีม GM</button>
+          </div>
+          <div class="battle-layout">
+            <div class="battle-arena" id="idleBattleStage">
+              <div class="battle-impact" aria-hidden="true"></div>
+              <div class="battle-turn-order" id="idleTurnOrder" aria-label="ลำดับเทิร์น"></div>
+              <div class="battle-sides">
+                <div class="fighter player">
+                  <div class="fighter-label">Your Idle Team</div>
+                  <div class="battle-model-stack" id="idlePlayerModels"></div>
+                  <h3>ทีม IDLE</h3>
+                  <div class="fighter-power" id="idlePlayerPower">0</div>
+                  <div class="power-breakdown" id="idlePlayerDetail">จัดทีมแยกสำหรับโหมดไอเดิล</div>
+                  <div class="power-meter"><i id="idlePlayerMeter"></i></div>
+                </div>
+                <div class="fighter enemy">
+                  <div class="fighter-label">Wave Opponent</div>
+                  <div class="battle-model-stack" id="idleEnemyModels"></div>
+                  <h3 id="idleEnemyName">คู่ต่อสู้ระลอกถัดไป</h3>
+                  <div class="fighter-power" id="idleEnemyPower">?</div>
+                  <div class="power-breakdown" id="idleEnemyDetail">ศัตรูอ้างอิงการ์ดต้นแบบ Lv.1 / Awaken +1</div>
+                  <div class="power-meter"><i id="idleEnemyMeter"></i></div>
+                </div>
+              </div>
+              <div class="battle-actions">
+                <button class="btn btn-primary" id="idleStartButton" data-action="idle-start">▶ เริ่มต่อสู้ออโต้</button>
+                <button class="btn btn-danger" id="idleStopButton" data-action="idle-stop">■ หยุดและส่งรางวัล</button>
+                <button class="btn" id="idleSummaryButton" data-action="open-battle-summary" data-summary-mode="idle" disabled>📊 สรุปไฟต์ล่าสุด</button>
+                <div class="battle-playback-controls" aria-label="ความเร็วการต่อสู้"><button type="button" data-battle-speed="1">x1</button><button type="button" data-battle-speed="2">x2</button><button type="button" data-battle-speed="3" class="active">x3</button><button type="button" data-battle-skip="true">ข้ามแอนิเมชัน</button></div>
+                <div class="battle-result" id="idleBattleResult">พร้อมเริ่มท้าทายระลอกถัดไป</div>
+              </div>
+            </div>
+            <aside class="battle-sidebar">
+              <div class="battle-card">
+                <h3>สถิติ IDLE</h3>
+                <div class="idle-status-grid">
+                  <div class="idle-status-card"><span>ระลอกสูงสุด</span><strong id="idleMaxWaveText">0</strong></div>
+                  <div class="idle-status-card"><span>ระลอกปัจจุบัน</span><strong id="idleCurrentWaveText">1</strong></div>
+                  <div class="idle-status-card"><span>ชนะ / แพ้</span><strong id="idleRecordText">0 / 0</strong></div>
+                  <div class="idle-status-card"><span>จำนวนไฟต์</span><strong id="idleRunCountText">0</strong></div>
+                </div>
+              </div>
+              <div class="battle-card">
+                <h3>สเกลศัตรู</h3>
+                <div class="idle-scale-box" id="idleScaleText">ระลอก 1–10 พลัง ×1.0 • ทุก 10 ระลอกเพิ่มอีก ×0.1</div>
+                <div style="margin-top:8px" id="idleBossText"><span class="idle-boss-chip">👑 ระลอก 10 ใช้ทีม GM</span></div>
+              </div>
+              <div class="battle-card">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <h3 style="margin:0">รางวัลสะสมที่ยังไม่ส่ง</h3>
+                  <button class="btn" data-action="idle-toggle-rewards" style="min-height:32px;padding:5px 8px">ดู / ซ่อน</button>
+                </div>
+                <p>รางวัลจะยังไม่เข้ากระเป๋า จนกว่าจะกด “หยุดและส่งรางวัล” และยอดค้างจะถูกเก็บไว้แม้รีโหลดหน้า</p>
+                <div class="idle-reward-panel" id="idlePendingRewardPanel"></div>
+              </div>
+              <div class="battle-card">
+                <h3>รายงานฮิตไฟต์ล่าสุด</h3>
+                <div class="hit-report" id="idleHitReport"><p class="hit-report-empty">เริ่มต่อสู้เพื่อดูฮิต สกิล และผลการต่อสู้</p></div>
+              </div>
+            </aside>
+          </div>
+
+          <div class="idle-team-zone">
+            <div class="section-title">
+              <div><h2>ทีม IDLE แยก</h2><p>ไม่กระทบทีมโชว์ ทีมไต่หอ หรือทีม ARENA และใช้ระบบสกิลของโหมด ARENA ในการต่อสู้</p></div>
+              <strong id="idleTeamPowerText">ATK 0 • HP 0 • DEF 0 • พลังรวม 0</strong>
+            </div>
+            <div class="team-preset-panel" id="idlePresetPanel"></div>
+            <div class="turn-tactics-panel" id="idleTacticsPanel">
+              <div class="turn-tactics-grid">
+                <div class="turn-tactics-field"><label for="idleFormationSelect">แผนการรบ หน้า / หลัง</label><select class="field" id="idleFormationSelect"><option value="4">หน้า 4 DEF +10% • หลัง 1 ATK +45%</option><option value="3">หน้า 3 DEF +20% • หลัง 2 ATK +30%</option><option value="2">หน้า 2 DEF +30% • หลัง 3 ATK +20%</option><option value="1">หน้า 1 DEF +45% • หลัง 4 ATK +10%</option></select></div>
+                <div class="turn-tactics-field"><label for="idleCommandSelect">คำสั่ง AI ฝ่ายเรา</label><select class="field" id="idleCommandSelect"><option value="balanced">สมดุล • ใช้สกิลเมื่อพร้อม</option><option value="skill">เน้นสกิล • รีบใช้ Active</option><option value="attack">โจมตีปกติ • เก็บ Active</option><option value="guard">ตั้งรับ • ป้องกันเมื่อ HP ต่ำ</option></select></div>
+                <div class="turn-tactics-field"><label for="idleTargetSelect">วิธีเลือกเป้าหมาย</label><select class="field" id="idleTargetSelect"><option value="lowHp">แนวหน้าที่ HP ต่ำสุด</option><option value="highAtk">แนวหน้าที่ ATK สูงสุด</option><option value="random">สุ่มจากแนวหน้าที่ยังอยู่</option></select></div>
+              </div>
+              <div class="turn-tactics-note" id="idleFormationNote">IDLE: กำลังอ่านแผนการรบ…</div>
+            </div>
+            <div class="team-grid" id="idleTeamGrid"></div>
+            <div class="element-panel" id="idleElementPanel"></div>
+          </div>
+        </section>
+
         <section id="friendsView" class="hidden">
           <div class="section-title">
             <div><h2>Friends Hub</h2><p>เพิ่มเพื่อน เลือก Support ดูพลังทีม และประลองกันแบบไม่เสีย Energy</p></div>
@@ -8706,6 +8879,7 @@
     <button data-tab="battle">ไต่หอ</button>
     <button data-tab="worldBoss">บอสโลก</button>
     <button data-tab="arena">อารีน่า</button>
+    <button data-tab="idle">ไอเดิล</button>
     <button data-tab="friends">เพื่อน</button>
   </nav>
 
@@ -9016,6 +9190,31 @@
           </div>
           <div class="gm-status-box" id="gmMailStatus">พร้อมสร้างจดหมายใหม่ • ต้องระบุเหตุผล/โอกาสก่อนส่งทุกครั้ง</div>
         </section>
+
+        <section class="gm-card wide">
+          <h3>👑 ทีมบอส IDLE ทุกระลอกที่ 10</h3>
+          <p>จัดทีมต้นแบบได้หลายชุด ระบบผู้เล่นจะสุ่มหนึ่งทีมมาใช้ในระลอก 10, 20, 30... โดยการ์ดศัตรูถูกยึดที่ Lv.1 / Awaken +1 แล้วคูณสเกลของช่วงระลอก</p>
+          <div class="gm-idle-team-editor">
+            <div class="gm-fields two">
+              <label class="gm-field-label">ชื่อทีม<input class="field" id="gmIdleBossTeamName" type="text" maxlength="60" placeholder="เช่น หน่วยพิทักษ์มิติ"></label>
+              <label class="gm-field-label">แนวหน้า<select class="field" id="gmIdleBossFormation"><option value="1">หน้า 1 / หลัง 4</option><option value="2" selected>หน้า 2 / หลัง 3</option><option value="3">หน้า 3 / หลัง 2</option><option value="4">หน้า 4 / หลัง 1</option></select></label>
+            </div>
+            <div class="gm-idle-card-grid">
+              <label class="gm-field-label">ช่อง 1<select class="field" id="gmIdleBossCard1"></select></label>
+              <label class="gm-field-label">ช่อง 2<select class="field" id="gmIdleBossCard2"></select></label>
+              <label class="gm-field-label">ช่อง 3<select class="field" id="gmIdleBossCard3"></select></label>
+              <label class="gm-field-label">ช่อง 4<select class="field" id="gmIdleBossCard4"></select></label>
+              <label class="gm-field-label">ช่อง 5<select class="field" id="gmIdleBossCard5"></select></label>
+            </div>
+            <div class="gm-actions">
+              <button class="btn" data-action="gm-add-idle-boss-team">＋ เพิ่มทีมเข้ารายการ</button>
+              <button class="btn btn-primary" data-action="gm-publish-idle-boss-teams">☁️ เผยแพร่ทีมให้เซิร์ฟเวอร์</button>
+              <button class="btn" data-action="gm-refresh-idle-boss-teams">รีเฟรชจากเซิร์ฟเวอร์</button>
+            </div>
+            <div class="gm-idle-team-list" id="gmIdleBossTeamList"></div>
+            <div class="gm-status-box" id="gmIdleBossStatus">ยังไม่ได้โหลดทีมบอส IDLE</div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -9269,6 +9468,8 @@
       // เพิ่มโดยอลิซ: ทีมไต่หอแยกจากทีมโชว์ และหอคอย/ARENA ใช้ดาบร่วมกัน
       towerTeamSlots: 5,
       arenaTeamSlots: 5,
+      // v137: ทีม IDLE แยกจากทุกโหมด
+      idleTeamSlots: 5,
       // เพิ่มโดยอลิซ: แยก HP ออกจาก DEF อย่างสมบูรณ์
       // ค่า defense เดิมของข้อมูลการ์ดถูกย้ายเป็น hp แล้ว; defense ใหม่คือเกราะที่ใช้หัก ATK
       hpBaseRatio: 0.64,
@@ -9508,14 +9709,14 @@
     /* ===================== [SECTION 02 RARITY-COLORS] ===================== */
     const RARITIES = Object.freeze({
       // สมดุลใหม่: ATK : HP : DEF ≈ 1 : 5 : 0.40 เพื่อให้การ์ดระดับเดียวกันสู้กันประมาณ 8–9 เทิร์นก่อนคิดสกิล/โล่
-      SR:  { label: "C",        color: "#4ade80", colors: ["#86efac", "#22c55e", "#052e16"], gradient: "linear-gradient(135deg, #bbf7d0 0%, #22c55e 52%, #052e16 100%)", glow: "#4ade80", textColor: "#052015", order: 2, stars: 5,  dust: 70,     basePower: 16000,    baseHp: 80000,    baseDefense: 6400, baseSpeed: 94,   baseIncome: 125,   maxLevel: 140, upgradeDustBase: 1130,   upgradeDustGrowth: 1.0120, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 20,  awakenCopies: [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6], powerBonus: 0.025, incomeBonus: 0.0155 },
-      SSR: { label: "B",       color: "#60a5fa", colors: ["#93c5fd", "#2563eb", "#172554"], gradient: "linear-gradient(135deg, #bfdbfe 0%, #2563eb 54%, #172554 100%)", glow: "#60a5fa", textColor: "#06152f", order: 3, stars: 6,  dust: 280,    basePower: 18000,   baseHp: 90000,   baseDefense: 7200, baseSpeed: 96,  baseIncome: 155,   maxLevel: 160, upgradeDustBase: 1530,   upgradeDustGrowth: 1.013, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 20,  awakenCopies: [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5], powerBonus: 0.0275, incomeBonus: 0.017 },
-      UR:  { label: "A",        color: "#c084fc", colors: ["#e9d5ff", "#9333ea", "#2e1065"], gradient: "linear-gradient(135deg, #f3e8ff 0%, #9333ea 54%, #2e1065 100%)", glow: "#c084fc", textColor: "#210638", order: 4, stars: 7,  dust: 1500,   basePower: 21000,   baseHp: 105000,   baseDefense: 8400, baseSpeed: 98,  baseIncome: 190,  maxLevel: 180, upgradeDustBase: 1901,   upgradeDustGrowth: 1.014, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 20,  awakenCopies: [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4], powerBonus: 0.03, incomeBonus: 0.019 },
+      SR:  { label: "C",        color: "#4ade80", colors: ["#86efac", "#22c55e", "#052e16"], gradient: "linear-gradient(135deg, #bbf7d0 0%, #22c55e 52%, #052e16 100%)", glow: "#4ade80", textColor: "#052015", order: 2, stars: 1,  dust: 70,     basePower: 16000,    baseHp: 80000,    baseDefense: 6400, baseSpeed: 94,   baseIncome: 125,   maxLevel: 300, upgradeDustBase: 1130,   upgradeDustGrowth: 1.0120, powerPerLevel: .0175, incomePerLevel: .009,  awakenMax: 20,  awakenCopies: [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6], powerBonus: 0.025, incomeBonus: 0.0155 },
+      SSR: { label: "B",       color: "#60a5fa", colors: ["#93c5fd", "#2563eb", "#172554"], gradient: "linear-gradient(135deg, #bfdbfe 0%, #2563eb 54%, #172554 100%)", glow: "#60a5fa", textColor: "#06152f", order: 3, stars: 2,  dust: 280,    basePower: 18000,   baseHp: 90000,   baseDefense: 7200, baseSpeed: 96,  baseIncome: 155,   maxLevel: 300, upgradeDustBase: 1530,   upgradeDustGrowth: 1.013, powerPerLevel: .019, incomePerLevel: .0095, awakenMax: 20,  awakenCopies: [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5], powerBonus: 0.0275, incomeBonus: 0.017 },
+      UR:  { label: "A",        color: "#c084fc", colors: ["#e9d5ff", "#9333ea", "#2e1065"], gradient: "linear-gradient(135deg, #f3e8ff 0%, #9333ea 54%, #2e1065 100%)", glow: "#c084fc", textColor: "#210638", order: 4, stars: 3,  dust: 1500,   basePower: 21000,   baseHp: 105000,   baseDefense: 8400, baseSpeed: 98,  baseIncome: 190,  maxLevel: 300, upgradeDustBase: 1901,   upgradeDustGrowth: 1.014, powerPerLevel: .021, incomePerLevel: .0105, awakenMax: 20,  awakenCopies: [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4], powerBonus: 0.03, incomeBonus: 0.019 },
       LR:  { label: "S",     color: "#FFD700",
   colors: ["#7A4800", "#D99A16", "#FFF2A8", "#FFD700", "#A86400"],
   gradient: "linear-gradient(135deg, #6B3F00 0%, #D99A16 22%, #FFF7C2 43%, #FFD700 58%, #B8750D 78%, #FFE98A 100%)",
   glow: "#FFD966",
-  textColor: "#2B1700", order: 5, stars: 8,  dust: 9000,   basePower: 24000,  baseHp: 120000,  baseDefense: 9600, baseSpeed: 100,  baseIncome: 230,  maxLevel: 220, upgradeDustBase: 1795,   upgradeDustGrowth: 1.015, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 20,  awakenCopies: [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], powerBonus: 0.0325, incomeBonus: 0.021 },
+  textColor: "#2B1700", order: 5, stars: 4,  dust: 9000,   basePower: 24000,  baseHp: 120000,  baseDefense: 9600, baseSpeed: 100,  baseIncome: 230,  maxLevel: 300, upgradeDustBase: 1795,   upgradeDustGrowth: 1.015, powerPerLevel: .024, incomePerLevel: .0115, awakenMax: 20,  awakenCopies: [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], powerBonus: 0.0325, incomeBonus: 0.021 },
       SC:  { label: "SS",   color: "#f5d9ff",
   colors: [
     "#ff77d9",
@@ -9528,10 +9729,10 @@
   ],
   gradient: "linear-gradient(135deg, #ff77d9 0%, #9c8cff 16%, #65e8ff 32%, #75ffbf 48%, #fff18a 64%, #ff9f76 80%, #ffffff 92%, #ff77d9 100%)",
   glow: "#f4caff",
-  textColor: "#170b25", order: 6, stars: 10, dust: 50000,  basePower: 27000,  baseHp: 135000,  baseDefense: 10800, baseSpeed: 103, baseIncome: 275, maxLevel: 250, upgradeDustBase: 1723,   upgradeDustGrowth: 1.016, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 20,  awakenCopies: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], powerBonus: 0.035, incomeBonus: 0.023 },
-      EX:  { label: "SSS",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 12, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 1107,   upgradeDustGrowth: 1.017, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 },
-      AWAKEN: { label: "AWAKEN", color: "#c084fc", colors: ["#12051f", "#5b21b6", "#8b5cf6", "#d8b4fe", "#f0abfc", "#4c1d95"], gradient: "linear-gradient(135deg, #12051f 0%, #5b21b6 22%, #8b5cf6 44%, #d8b4fe 63%, #f0abfc 79%, #4c1d95 100%)", glow: "#d8b4fe", textColor: "#fff7ff", borderColor: "#e9d5ff", order: 8, stars: 13, dust: 180000, basePower: 31200, baseHp: 156000, baseDefense: 12480, baseSpeed: 107, baseIncome: 345, maxLevel: 350, upgradeDustBase: 1450, upgradeDustGrowth: 1.0175, powerPerLevel: .033, incomePerLevel: .022, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.041, incomeBonus: 0.0255, transformOnly: true, moneyAwaken: false },
-      GOD: { label: "GOD",       color: "#f8fafc", colors: ["#020617", "#ffffff", "#d4af37", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #020617 0%, #ffffff 18%, #d4af37 42%, #111827 68%, #facc15 100%)", glow: "#fff7c2", textColor: "#111827", borderColor: "#facc15", order: 9, stars: 14, dust: 250000, basePower: 31500, baseHp: 157500, baseDefense: 12600, baseSpeed: 108, baseIncome: 350, maxLevel: 350, upgradeDustBase: 1800, upgradeDustGrowth: 1.0175, powerPerLevel: .0285, incomePerLevel: .0195, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.042, incomeBonus: 0.026 }
+  textColor: "#170b25", order: 6, stars: 5, dust: 50000,  basePower: 27000,  baseHp: 135000,  baseDefense: 10800, baseSpeed: 103, baseIncome: 275, maxLevel: 300, upgradeDustBase: 1723,   upgradeDustGrowth: 1.016, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 20,  awakenCopies: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], powerBonus: 0.035, incomeBonus: 0.023 },
+      EX:  { label: "SSS",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 6, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 1107,   upgradeDustGrowth: 1.017, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 },
+      AWAKEN: { label: "AWAKEN", color: "#c084fc", colors: ["#12051f", "#5b21b6", "#8b5cf6", "#d8b4fe", "#f0abfc", "#4c1d95"], gradient: "linear-gradient(135deg, #12051f 0%, #5b21b6 22%, #8b5cf6 44%, #d8b4fe 63%, #f0abfc 79%, #4c1d95 100%)", glow: "#d8b4fe", textColor: "#fff7ff", borderColor: "#e9d5ff", order: 8, stars: 7, dust: 180000, basePower: 31200, baseHp: 156000, baseDefense: 12480, baseSpeed: 107, baseIncome: 345, maxLevel: 350, upgradeDustBase: 1450, upgradeDustGrowth: 1.0175, powerPerLevel: .033, incomePerLevel: .022, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.041, incomeBonus: 0.0255, transformOnly: true, moneyAwaken: false },
+      GOD: { label: "GOD",       color: "#f8fafc", colors: ["#020617", "#ffffff", "#d4af37", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #020617 0%, #ffffff 18%, #d4af37 42%, #111827 68%, #facc15 100%)", glow: "#fff7c2", textColor: "#111827", borderColor: "#facc15", order: 9, stars: 8, dust: 250000, basePower: 31500, baseHp: 157500, baseDefense: 12600, baseSpeed: 108, baseIncome: 350, maxLevel: 350, upgradeDustBase: 1800, upgradeDustGrowth: 1.0175, powerPerLevel: .0285, incomePerLevel: .0195, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.042, incomeBonus: 0.026 }
     });
 
     // v133: ระดับต่ำสุดของระบบคือ SR — ไม่โหลด ไม่สุ่ม และไม่แสดงการ์ด N/R อีกต่อไป
@@ -10346,6 +10547,7 @@
       team: { image: KONOSUBA_UI_ASSETS.teamSetup, accent: "#65e8b1", accent2: "#f5d56a", opacity: ".11" },
       battle: { image: KONOSUBA_UI_ASSETS.questPanel, accent: "#55d6ff", accent2: "#a78bfa", opacity: ".10" },
       arena: { image: KONOSUBA_UI_ASSETS.eventBanner, accent: "#fb7185", accent2: "#f5b84b", opacity: ".11" },
+      idle: { image: KONOSUBA_UI_ASSETS.questPanel, accent: "#7dd3fc", accent2: "#c084fc", opacity: ".11" },
       friends: { image: KONOSUBA_UI_ASSETS.shopPanel, accent: "#f5d56a", accent2: "#f472b6", opacity: ".09" }
     });
 
@@ -10404,6 +10606,19 @@
     let currentArenaOpponent = null;
     let arenaOpponentPool = [];
     let arenaLeaderboardEntries = [];
+    // v137: Runtime ของโหมด IDLE AUTO
+    let idleAutoRunning = false;
+    let idleStopRequested = false;
+    let idleAnimating = false;
+    let idleRuntimeWave = 1;
+    let idleFarmMode = false;
+    let idleRewardPanelOpen = true;
+    let currentIdleOpponent = null;
+    let lastIdleCombat = null;
+    let lastIdleSummary = null;
+    let idleBossTeams = [];
+    let gmIdleBossDraftTeams = [];
+    let idleBossTeamsLoadedAt = 0;
     let activeRevealResults = [];
     let activeRevealIndex = 0;
     let returnToReveal = false;
@@ -10604,12 +10819,37 @@
           commandStrategy: "balanced",
           targetStrategy: "lowHp"
         },
+
+        idle: {
+          team: starter.team.slice(0, CONFIG.idleTeamSlots),
+          leaderId: String(starter.team[0] || ""),
+          formationFront: 2,
+          commandStrategy: "balanced",
+          targetStrategy: "lowHp",
+          maxClearedWave: 0,
+          currentWave: 1,
+          wins: 0,
+          losses: 0,
+          totalRuns: 0,
+          pendingRewards: [],
+          pendingStartedAt: 0,
+          pendingRuns: 0,
+          sessionId: "",
+          lastResult: null,
+          running: false
+        },
         migratedFromOldSave: false
       };
     }
 
+    function normalizeTeamMode(mode = "showcase") {
+      const key = String(mode || "showcase");
+      return ["showcase", "tower", "arena", "idle"].includes(key) ? key : "showcase";
+    }
+
     function getTeamSlotLimit(mode = "showcase") {
-      return mode === "arena" ? CONFIG.arenaTeamSlots : mode === "tower" ? CONFIG.towerTeamSlots : CONFIG.teamSlots;
+      const safeMode = normalizeTeamMode(mode);
+      return safeMode === "arena" ? CONFIG.arenaTeamSlots : safeMode === "tower" ? CONFIG.towerTeamSlots : safeMode === "idle" ? CONFIG.idleTeamSlots : CONFIG.teamSlots;
     }
 
     function trimTrailingTeamSlots(team = []) {
@@ -10643,16 +10883,22 @@
     }
 
     function getTeamLeaderId(mode = "showcase", teamOverride = null) {
-      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
-      const team = Array.isArray(teamOverride) ? teamOverride : safeMode === "arena" ? state?.arena?.team : safeMode === "tower" ? state?.battle?.team : state?.team;
-      const candidate = safeMode === "arena" ? state?.arena?.leaderId : safeMode === "tower" ? state?.battle?.leaderId : state?.teamLeaderId;
+      const safeMode = normalizeTeamMode(mode);
+      const team = Array.isArray(teamOverride) ? teamOverride
+        : safeMode === "arena" ? state?.arena?.team
+          : safeMode === "tower" ? state?.battle?.team
+            : safeMode === "idle" ? state?.idle?.team : state?.team;
+      const candidate = safeMode === "arena" ? state?.arena?.leaderId
+        : safeMode === "tower" ? state?.battle?.leaderId
+          : safeMode === "idle" ? state?.idle?.leaderId : state?.teamLeaderId;
       return normalizeTeamLeaderId(candidate, team || []);
     }
 
     function setStoredTeamLeaderId(mode, leaderId) {
-      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const safeMode = normalizeTeamMode(mode);
       if (safeMode === "arena") state.arena.leaderId = String(leaderId || "");
       else if (safeMode === "tower") state.battle.leaderId = String(leaderId || "");
+      else if (safeMode === "idle") state.idle.leaderId = String(leaderId || "");
       else state.teamLeaderId = String(leaderId || "");
     }
 
@@ -11399,6 +11645,28 @@
       next.arena.formationFront = normalizeFormationFront(next.arena.formationFront, CONFIG.arenaTeamSlots);
       next.arena.commandStrategy = ["balanced","skill","attack","guard"].includes(String(next.arena.commandStrategy)) ? String(next.arena.commandStrategy) : "balanced";
       next.arena.targetStrategy = ["lowHp","highAtk","random"].includes(String(next.arena.targetStrategy)) ? String(next.arena.targetStrategy) : "lowHp";
+
+
+      next.idle = Object.assign(defaultState().idle, next.idle || {});
+      next.idle.team = Array.isArray(next.idle.team)
+        ? normalizeTeamSlotArray(next.idle.team, CONFIG.idleTeamSlots, next.owned)
+        : normalizeTeamSlotArray(next.team, CONFIG.idleTeamSlots, next.owned);
+      next.idle.leaderId = normalizeTeamLeaderId(next.idle.leaderId, next.idle.team);
+      next.idle.formationFront = normalizeFormationFront(next.idle.formationFront, CONFIG.idleTeamSlots);
+      next.idle.commandStrategy = ["balanced","skill","attack","guard"].includes(String(next.idle.commandStrategy)) ? String(next.idle.commandStrategy) : "balanced";
+      next.idle.targetStrategy = ["lowHp","highAtk","random"].includes(String(next.idle.targetStrategy)) ? String(next.idle.targetStrategy) : "lowHp";
+      next.idle.maxClearedWave = Math.max(0, Math.floor(Number(next.idle.maxClearedWave) || 0));
+      next.idle.currentWave = Math.max(1, Math.floor(Number(next.idle.currentWave) || next.idle.maxClearedWave + 1));
+      next.idle.wins = Math.max(0, Math.floor(Number(next.idle.wins) || 0));
+      next.idle.losses = Math.max(0, Math.floor(Number(next.idle.losses) || 0));
+      next.idle.totalRuns = Math.max(0, Math.floor(Number(next.idle.totalRuns) || 0));
+      next.idle.pendingRewards = normalizeIdlePendingRewards(next.idle.pendingRewards || []);
+      next.idle.pendingStartedAt = Math.max(0, Number(next.idle.pendingStartedAt) || 0);
+      next.idle.pendingRuns = Math.max(0, Math.floor(Number(next.idle.pendingRuns) || 0));
+      next.idle.sessionId = String(next.idle.sessionId || "").slice(0, 100);
+      next.idle.lastResult = next.idle.lastResult && typeof next.idle.lastResult === "object" ? next.idle.lastResult : null;
+      // หลังรีโหลดจะไม่เริ่มต่อสู้อัตโนมัติเอง แต่รางวัลค้างยังอยู่ให้กดส่งหรือเริ่มต่อได้
+      next.idle.running = false;
 
       // เพิ่มโดยอลิซ v53: รีเซ็ตภารกิจตามวันที่จริงและนับล็อกอินเป็นภารกิจแรกอัตโนมัติ
       const todayKey = getLocalDateKey();
@@ -19312,7 +19580,7 @@
         return null;
       }
       if (node) return node;
-      const stack = stage.querySelector(side === "player" ? "#battlePlayerModels, #arenaPlayerModels, #worldBossPlayerModels" : "#battleEnemyModels, #arenaEnemyModels, #worldBossEnemyModels");
+      const stack = stage.querySelector(side === "player" ? "#battlePlayerModels, #arenaPlayerModels, #worldBossPlayerModels, #idlePlayerModels" : "#battleEnemyModels, #arenaEnemyModels, #worldBossEnemyModels, #idleEnemyModels");
       if (!stack) return null;
       const baseId = runtimeBaseCardId(state.cardId || state.id);
       const bossCard = typeof getWorldBossByAnyId === "function" ? worldBossAsBattleCard(getWorldBossByAnyId(baseId)) : null;
@@ -19486,9 +19754,11 @@
         });
         stage.querySelectorAll(`.battle-source-formation.${side}`).forEach(cleanupBattleSourceFormation);
       });
-      if (stage.id === "arenaView" || stage.querySelector("#arenaPlayerModels, #arenaEnemyModels")) {
-        layoutArenaSideGrid(stage.querySelector("#arenaPlayerModels"), "player");
-        layoutArenaSideGrid(stage.querySelector("#arenaEnemyModels"), "enemy");
+      if (stage.id === "arenaView" || stage.querySelector("#arenaPlayerModels, #arenaEnemyModels, #idlePlayerModels, #idleEnemyModels")) {
+        const playerStack = stage.querySelector("#arenaPlayerModels, #idlePlayerModels");
+        const enemyStack = stage.querySelector("#arenaEnemyModels, #idleEnemyModels");
+        if (playerStack && playerStack.id.startsWith("arena")) layoutArenaSideGrid(playerStack, "player");
+        if (enemyStack && enemyStack.id.startsWith("arena")) layoutArenaSideGrid(enemyStack, "enemy");
       }
     }
 
@@ -21970,6 +22240,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         arenaAttackHits: getArenaCombatTraits().attackHits,
         arenaShieldHits: getArenaCombatTraits().shieldHits,
         arenaTeam: (state.arena && Array.isArray(state.arena.team) ? state.arena.team : []).map(id => makeArenaCardSnapshot(id)).filter(Boolean),
+        idleMaxWave: Math.max(0, Number(state.idle && state.idle.maxClearedWave || 0)),
         team: state.team.map(id => {
           const card = CARD_BY_ID.get(String(id));
           return card ? {
@@ -23741,6 +24012,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (activeTab === "team") renderTeam();
       if (activeTab === "battle") renderBattle();
       if (activeTab === "arena") renderArena();
+      if (activeTab === "idle") renderIdle();
       if (!document.getElementById("teamPickerModal").classList.contains("hidden")) renderTeamPicker();
       if (modalCardId === String(card.id) && !document.getElementById("cardModal").classList.contains("hidden")) {
         refreshCardDetailProgress(card.id);
@@ -24999,16 +25271,21 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function getTeamArrayByMode(mode) {
-      if (mode === "tower") return getTowerTeamIds();
-      if (mode === "arena") {
+      const safeMode = normalizeTeamMode(mode);
+      if (safeMode === "tower") return getTowerTeamIds();
+      if (safeMode === "arena") {
         if (!state.arena || !Array.isArray(state.arena.team)) state.arena = Object.assign(defaultState().arena, state.arena || {});
         return state.arena.team;
+      }
+      if (safeMode === "idle") {
+        if (!state.idle || !Array.isArray(state.idle.team)) state.idle = Object.assign(defaultState().idle, state.idle || {});
+        return state.idle.team;
       }
       return state.team;
     }
 
     function openTeamCardDetail(mode = "showcase", slotIndex = 0, cardId = "") {
-      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const safeMode = normalizeTeamMode(mode);
       const index = Math.max(0, Math.floor(Number(slotIndex) || 0));
       const id = String(cardId || getTeamArrayByMode(safeMode)[index] || "");
       if (!id || !CARD_BY_ID.has(id)) return openTeamPicker(safeMode, index);
@@ -25017,7 +25294,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function changeTeamCardFromDetail(mode = "showcase", slotIndex = 0) {
-      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const safeMode = normalizeTeamMode(mode);
       const index = Math.max(0, Math.floor(Number(slotIndex) || 0));
       document.getElementById("cardModal").classList.add("hidden");
       modalCardId = "";
@@ -25026,9 +25303,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function openTeamPicker(mode = "showcase", slotIndex = 0) {
-      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const safeMode = normalizeTeamMode(mode);
       const team = getTeamArrayByMode(safeMode);
-      const limit = safeMode === "arena" ? CONFIG.arenaTeamSlots : safeMode === "tower" ? CONFIG.towerTeamSlots : CONFIG.teamSlots;
+      const limit = getTeamSlotLimit(safeMode);
       const requestedIndex = Math.max(0, Math.floor(Number(slotIndex) || 0));
       teamPickerContext = {
         mode: safeMode,
@@ -25037,7 +25314,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       };
       const title = document.getElementById("teamPickerTitle");
       const subtitle = document.getElementById("teamPickerSubtitle");
-      const modeLabel = teamPickerContext.mode === "arena" ? "ทีม ARENA" : teamPickerContext.mode === "tower" ? "ทีมไต่หอ" : "ทีมโชว์";
+      const modeLabel = teamPresetModeLabel(teamPickerContext.mode);
       if (title) title.textContent = `${modeLabel} • ช่อง ${teamPickerContext.slotIndex + 1}`;
       if (subtitle) subtitle.textContent = "เลือกลงช่องนี้ได้โดยตรง ช่องก่อนหน้าไม่จำเป็นต้องเต็ม และสามารถลากสลับตำแหน่งภายหลังได้";
       renderTeamPicker();
@@ -25055,14 +25332,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const showcaseIndex = state.team.indexOf(id);
       const towerIndex = getTowerTeamIds().indexOf(id);
       const arenaTeam = state.arena && Array.isArray(state.arena.team) ? state.arena.team : [];
+      const idleTeam = state.idle && Array.isArray(state.idle.team) ? state.idle.team : [];
       const arenaIndex = arenaTeam.indexOf(id);
+      const idleIndex = idleTeam.indexOf(id);
       return {
-        showcaseIndex,
-        towerIndex,
-        arenaIndex,
+        showcaseIndex, towerIndex, arenaIndex, idleIndex,
         inShowcase: showcaseIndex >= 0,
         inTower: towerIndex >= 0,
-        inArena: arenaIndex >= 0
+        inArena: arenaIndex >= 0,
+        inIdle: idleIndex >= 0
       };
     }
 
@@ -25071,16 +25349,17 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const membership = getCardTeamMembership(id);
       const selected = id === String(currentId || "");
       const inCurrentTeam = getTeamArrayByMode(teamPickerContext.mode).includes(id);
-      const membershipCount = [membership.inShowcase, membership.inTower, membership.inArena].filter(Boolean).length;
+      const membershipCount = [membership.inShowcase, membership.inTower, membership.inArena, membership.inIdle].filter(Boolean).length;
       const membershipClass = membershipCount >= 3
         ? "in-all"
         : membershipCount >= 2
           ? "in-multiple"
-          : membership.inShowcase ? "in-showcase" : membership.inTower ? "in-tower" : membership.inArena ? "in-arena" : "";
+          : membership.inShowcase ? "in-showcase" : membership.inTower ? "in-tower" : membership.inArena ? "in-arena" : membership.inIdle ? "in-idle" : "";
       const badges = [
         membership.inShowcase ? `<span class="team-membership-badge showcase">ทีมโชว์ #${membership.showcaseIndex + 1}</span>` : "",
         membership.inTower ? `<span class="team-membership-badge tower">ไต่หอ #${membership.towerIndex + 1}</span>` : "",
         membership.inArena ? `<span class="team-membership-badge arena">ARENA #${membership.arenaIndex + 1}</span>` : "",
+        membership.inIdle ? `<span class="team-membership-badge idle">IDLE #${membership.idleIndex + 1}</span>` : "",
         selected ? `<span class="team-membership-badge current">ช่องที่กำลังแก้</span>` : ""
       ].filter(Boolean).join("");
       const selectLabel = selected
@@ -25088,10 +25367,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         : inCurrentTeam
           ? `สลับมาช่อง ${teamPickerContext.slotIndex + 1}`
           : `เลือกลงช่อง ${teamPickerContext.slotIndex + 1}`;
-      const resultLabel = selected ? "ช่องนี้" : membershipCount > 1 ? `${membershipCount} ทีม` : membership.inShowcase ? "ทีมโชว์" : membership.inTower ? "ไต่หอ" : membership.inArena ? "ARENA" : `เลือก #${teamPickerContext.slotIndex + 1}`;
+      const resultLabel = selected ? "ช่องนี้" : membershipCount > 1 ? `${membershipCount} ทีม` : membership.inShowcase ? "ทีมโชว์" : membership.inTower ? "ไต่หอ" : membership.inArena ? "ARENA" : membership.inIdle ? "IDLE" : `เลือก #${teamPickerContext.slotIndex + 1}`;
       const assignClass = selected
         ? "assign-current"
-        : teamPickerContext.mode === "arena" ? "assign-arena" : teamPickerContext.mode === "tower" ? "assign-tower" : "assign-showcase";
+        : teamPickerContext.mode === "arena" ? "assign-arena" : teamPickerContext.mode === "tower" ? "assign-tower" : teamPickerContext.mode === "idle" ? "assign-idle" : "assign-showcase";
       return `
         <div class="team-picker-entry ${membershipClass} ${selected ? "current-slot" : ""}">
           ${cardHTML(card, {
@@ -25152,6 +25431,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function resetModeBattleCache(mode) {
       if (mode === "arena") { currentArenaOpponent = null; arenaResult = null; lastArenaCombat = null; lastArenaSummary = null; }
+      if (mode === "idle") { currentIdleOpponent = null; lastIdleCombat = null; lastIdleSummary = null; }
       if (mode === "tower") { battleResult = null; lastBattleCombat = null; lastBattleSummary = null; }
       if (mode === "worldBoss") { lastWorldBossCombat = null; lastWorldBossSummary = null; }
     }
@@ -25187,7 +25467,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function clearTeamSlot(mode = "showcase", slotIndex = 0) {
-      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const safeMode = normalizeTeamMode(mode);
       const team = getTeamArrayByMode(safeMode);
       const index = Math.max(0, Math.floor(Number(slotIndex) || 0));
       if (!team[index]) return;
@@ -25203,7 +25483,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function setTeamLeader(mode = "showcase", cardId = "") {
-      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const safeMode = normalizeTeamMode(mode);
       const team = getTeamArrayByMode(safeMode);
       const id = String(cardId || "");
       if (!id || !team.includes(id)) return showToast("Leader ต้องเป็นสมาชิกในทีมนี้");
@@ -25215,7 +25495,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function swapTeamSlots(mode = "showcase", fromIndex = 0, toIndex = 0) {
-      const safeMode = mode === "arena" ? "arena" : mode === "tower" ? "tower" : "showcase";
+      const safeMode = normalizeTeamMode(mode);
       const limit = getTeamSlotLimit(safeMode);
       const from = Math.max(0, Math.min(limit - 1, Math.floor(Number(fromIndex) || 0)));
       const to = Math.max(0, Math.min(limit - 1, Math.floor(Number(toIndex) || 0)));
@@ -25292,7 +25572,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return Array.from({ length: CONFIG.teamPresetLimit }, (_, index) => {
         const item = source[index];
         if (!item || typeof item !== "object") return null;
-        const cards = normalizeTeamSlotArray(item.cards || item.team, Math.max(CONFIG.teamSlots, CONFIG.towerTeamSlots, CONFIG.arenaTeamSlots), ownedMap);
+        const cards = normalizeTeamSlotArray(item.cards || item.team, Math.max(CONFIG.teamSlots, CONFIG.towerTeamSlots, CONFIG.arenaTeamSlots, CONFIG.idleTeamSlots), ownedMap);
         if (!cards.some(Boolean)) return null;
         return {
           name: String(item.name || `พรีเซ็ต ${index + 1}`).trim().slice(0, 28) || `พรีเซ็ต ${index + 1}`,
@@ -25305,11 +25585,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function teamPresetModeLabel(mode = "showcase") {
-      return mode === "tower" ? "ทีมไต่หอ" : mode === "arena" ? "ทีม ARENA" : "ทีมโชว์";
+      return mode === "tower" ? "ทีมไต่หอ" : mode === "arena" ? "ทีม ARENA" : mode === "idle" ? "ทีม IDLE" : "ทีมโชว์";
     }
 
     function getTeamPresetContainerId(mode = "showcase") {
-      return mode === "tower" ? "towerPresetPanel" : mode === "arena" ? "arenaPresetPanel" : "teamPresetPanel";
+      return mode === "tower" ? "towerPresetPanel" : mode === "arena" ? "arenaPresetPanel" : mode === "idle" ? "idlePresetPanel" : "teamPresetPanel";
     }
 
     function teamPresetMemberHTML(cardId) {
@@ -25361,6 +25641,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderTeamPresets("showcase");
       renderTeamPresets("tower");
       renderTeamPresets("arena");
+      renderTeamPresets("idle");
     }
 
     function saveTeamPreset(index, mode = "showcase") {
@@ -25385,7 +25666,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const safeIndex = Math.max(0, Math.min(CONFIG.teamPresetLimit - 1, Math.floor(Number(index) || 0)));
       const preset = Array.isArray(state.teamPresets) ? state.teamPresets[safeIndex] : null;
       if (!preset) return showToast("พรีเซ็ตช่องนี้ยังว่าง");
-      const limit = mode === "tower" ? CONFIG.towerTeamSlots : mode === "arena" ? CONFIG.arenaTeamSlots : CONFIG.teamSlots;
+      const limit = getTeamSlotLimit(mode);
       const cards = normalizeTeamSlotArray(preset.cards, limit, state.owned);
       if (!cards.some(Boolean)) return showToast("การ์ดในพรีเซ็ตนี้ไม่อยู่ในคลังแล้ว");
       updateIncome();
@@ -25439,10 +25720,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
 
     function renderTurnTactics(mode) {
-      const isArena = mode === "arena";
-      const data = isArena ? state.arena : state.battle;
-      const team = isArena ? state.arena.team : getTowerTeamIds();
-      const prefix = isArena ? "arena" : "tower";
+      const safeMode = normalizeTeamMode(mode);
+      const data = safeMode === "arena" ? state.arena : safeMode === "idle" ? state.idle : state.battle;
+      const team = safeMode === "arena" ? state.arena.team : safeMode === "idle" ? state.idle.team : getTowerTeamIds();
+      const prefix = safeMode === "arena" ? "arena" : safeMode === "idle" ? "idle" : "tower";
       const formation = document.getElementById(`${prefix}FormationSelect`);
       const command = document.getElementById(`${prefix}CommandSelect`);
       const target = document.getElementById(`${prefix}TargetSelect`);
@@ -25450,7 +25731,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (formation) formation.value = String(normalizeFormationFront(data.formationFront, 5));
       if (command) command.value = String(data.commandStrategy || "balanced");
       if (target) target.value = String(data.targetStrategy || "lowHp");
-      if (note) note.innerHTML = `<b>${escapeHTML(formationDescription(data.formationFront, 5))}</b><br>ช่อง 1–${normalizeFormationFront(data.formationFront,5)} เป็นแนวหน้า • ลากการ์ดเพื่อเปลี่ยนช่องได้อิสระ • Leader ปัจจุบัน: ${escapeHTML(CARD_BY_ID.get(getTeamLeaderId(mode, team))?.name || "ยังไม่กำหนด")}`;
+      if (note) note.innerHTML = `<b>${escapeHTML(formationDescription(data.formationFront, 5))}</b><br>ช่อง 1–${normalizeFormationFront(data.formationFront,5)} เป็นแนวหน้า • ลากการ์ดเพื่อเปลี่ยนช่องได้อิสระ • Leader ปัจจุบัน: ${escapeHTML(CARD_BY_ID.get(getTeamLeaderId(safeMode, team))?.name || "ยังไม่กำหนด")}`;
       const grid = document.getElementById(`${prefix}TeamGrid`);
       if (grid) [...grid.children].forEach((slot,index) => {
         const row = index < normalizeFormationFront(data.formationFront,5) ? "front" : "back";
@@ -26761,7 +27042,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         return `<div class="battle-turn-row ${turn.side === "enemy" ? "enemy" : ""} ${turn.triggerActivated ? "active" : ""}"><span class="battle-turn-cell turn">#${battleColorTextHTML(index + 1)} / R${battleColorTextHTML(turn.round)}</span><strong>${escapeHTML(attacker)} → ${escapeHTML(targetName)}</strong><span class="battle-turn-cell hit">${turn.command === "guard" ? "ตั้งรับ" : `${battleColorTextHTML(formatNumber(turn.hits))} ฮิต`}</span><span class="battle-turn-cell block">${battleColorTextHTML(formatNumber(turn.blockedHits))} บล็อก</span><span class="battle-turn-cell damage">${battleColorTextHTML(formatNumber(turn.damage))}</span><span class="battle-turn-cell heal">+${battleColorTextHTML(formatNumber(turn.healHp || 0))}</span><span class="battle-turn-cell shield">${battleColorTextHTML(shieldText)}</span><span class="battle-turn-cell hp">${battleColorTextHTML(formatNumber(turn.playerRemaining))}</span><span class="battle-turn-cell hp">${battleColorTextHTML(formatNumber(turn.enemyRemaining))}</span><span class="battle-turn-skill">${escapeHTML(skills)}</span></div>`;
       }).join("");
       target.innerHTML = `
-        <div class="battle-summary-head"><p class="eyebrow">${summary.mode === "arena" ? "Arena Battle Report" : summary.mode === "worldBoss" ? "World Boss Report" : "Tower Battle Report"}</p><h2>${escapeHTML(summary.title)}</h2><p>${escapeHTML(summary.playerLabel)} ปะทะ ${escapeHTML(summary.enemyLabel)}</p></div>
+        <div class="battle-summary-head"><p class="eyebrow">${summary.mode === "arena" ? "Arena Battle Report" : summary.mode === "idle" ? "Idle Auto Report" : summary.mode === "worldBoss" ? "World Boss Report" : "Tower Battle Report"}</p><h2>${escapeHTML(summary.title)}</h2><p>${escapeHTML(summary.playerLabel)} ปะทะ ${escapeHTML(summary.enemyLabel)}</p></div>
         <div class="battle-summary-body">
           <div class="battle-summary-result ${summary.tone}"><strong>${escapeHTML(summary.outcomeText || (combat.winner === "player" ? "ชัยชนะ" : "พ่ายแพ้"))}</strong><span>${escapeHTML(summary.rewardText || "สรุปข้อมูลจากการต่อสู้ล่าสุด")}</span></div>
           <div class="battle-summary-metrics">${metrics.map(([label, value]) => `<div class="battle-summary-metric"><span>${escapeHTML(label)}</span><strong title="${escapeHTML(value)}">${battleColorTextHTML(value)}</strong></div>`).join("")}</div>
@@ -26773,7 +27054,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
     }
 
     function openBattleSummary(mode = "tower") {
-      const summary = mode === "arena" ? lastArenaSummary : mode === "worldBoss" ? lastWorldBossSummary : lastBattleSummary;
+      const summary = mode === "arena" ? lastArenaSummary : mode === "idle" ? lastIdleSummary : mode === "worldBoss" ? lastWorldBossSummary : lastBattleSummary;
       if (!summary) return showToast("ยังไม่มีสรุปการต่อสู้ของโหมดนี้");
       renderBattleSummary(summary);
       document.getElementById("battleSummaryModal").classList.remove("hidden");
@@ -27021,6 +27302,614 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderArenaTeam();
     }
 
+
+    /* ======================= [SECTION 07C IDLE-AUTO] ======================= */
+    function normalizeIdlePendingRewards(source = []) {
+      const rows = Array.isArray(source) ? source : [];
+      const merged = new Map();
+      rows.map(normalizeRewardPayload).filter(Boolean).forEach(reward => {
+        const key = reward.type === "item" ? `item:${reward.itemId}` : String(reward.type);
+        const current = merged.get(key) || { ...reward, amount: 0 };
+        current.amount += Math.max(0, Number(reward.amount) || 0);
+        merged.set(key, current);
+      });
+      return [...merged.values()].filter(item => item.amount > 0).slice(0, 30);
+    }
+
+    function idleWaveMultiplier(wave = 1) {
+      return 1 + Math.floor((Math.max(1, Math.floor(Number(wave) || 1)) - 1) / 10) * .10;
+    }
+
+    function idleWaveRangeText(wave = 1) {
+      const safeWave = Math.max(1, Math.floor(Number(wave) || 1));
+      const start = Math.floor((safeWave - 1) / 10) * 10 + 1;
+      return `${start}–${start + 9}`;
+    }
+
+    function idleCardStatAt(card, stat = "power", level = 1, awaken = 1) {
+      if (!card) return 0;
+      const rarity = getRarity(card);
+      const safeLevel = Math.max(1, Math.floor(Number(level) || 1));
+      const safeAwaken = Math.max(0, Math.floor(Number(awaken) || 0));
+      if (stat === "hp") {
+        const fallbackBase = Number(rarity.baseHp !== undefined ? rarity.baseHp : Number(rarity.basePower || 0) * Number(CONFIG.hpBaseRatio || .64));
+        const base = Math.max(1, getBalancedCardBase(card, "hp", card.rarity) || fallbackBase);
+        const p = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
+        const levelRate = Number(rarity.hpPerLevel !== undefined ? rarity.hpPerLevel : p * Number(CONFIG.hpLevelGrowthScale || .88));
+        const awakenRate = Number(rarity.hpBonus !== undefined ? rarity.hpBonus : Number(rarity.powerBonus || 0) * Number(CONFIG.hpAwakenGrowthScale || .85));
+        return Math.max(1, base * (1 + (safeLevel - 1) * levelRate) * (1 + safeAwaken * awakenRate));
+      }
+      if (stat === "defense") {
+        const fallbackBase = Number(rarity.baseDefense !== undefined ? rarity.baseDefense : Number(rarity.basePower || 0) * Number(CONFIG.defenseBaseRatio || .32));
+        const base = Math.max(0, getBalancedCardBase(card, "defense", card.rarity) || fallbackBase);
+        const p = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
+        const levelRate = Number(rarity.defensePerLevel !== undefined ? rarity.defensePerLevel : p * Number(CONFIG.defenseLevelGrowthScale || .74));
+        const awakenRate = Number(rarity.defenseBonus !== undefined ? rarity.defenseBonus : Number(rarity.powerBonus || 0) * Number(CONFIG.defenseAwakenGrowthScale || .70));
+        return Math.max(0, base * (1 + (safeLevel - 1) * levelRate) * (1 + safeAwaken * awakenRate));
+      }
+      const base = getBalancedCardBase(card, "power", card.rarity);
+      const levelRate = Number(rarity.powerPerLevel !== undefined ? rarity.powerPerLevel : CONFIG.powerGrowth);
+      return Math.max(1, base * (1 + (safeLevel - 1) * levelRate) * (1 + safeAwaken * Number(rarity.powerBonus || 0)));
+    }
+
+    function idleEligibleCards() {
+      return CARDS.filter(card => card && RARITIES[card.rarity] && card.transformOnly !== true && !isAwakenCard(card));
+    }
+
+    function buildFallbackIdleBossTeams() {
+      const pool = idleEligibleCards().sort((a, b) => getRarity(b).order - getRarity(a).order || Number(a.id) - Number(b.id));
+      if (!pool.length) return [];
+      return Array.from({ length: Math.min(6, Math.max(1, Math.ceil(pool.length / 5))) }, (_, teamIndex) => ({
+        id: `fallback-${teamIndex + 1}`,
+        name: `ทีม GM สำรอง ${teamIndex + 1}`,
+        cardIds: Array.from({ length: Math.min(5, pool.length) }, (_, slot) => String(pool[(teamIndex * 5 + slot) % pool.length].id)),
+        formationFront: 1 + (teamIndex % 4),
+        source: "fallback"
+      }));
+    }
+
+    function normalizeIdleBossTeam(raw, index = 0) {
+      if (!raw || typeof raw !== "object") return null;
+      const cardIds = [...new Set(abilityArray(raw.cardIds || raw.cards || raw.team).map(cardIdString).filter(id => CARD_BY_ID.has(id)))].slice(0, CONFIG.idleTeamSlots);
+      if (!cardIds.length) return null;
+      return {
+        id: String(raw.id || `idle-boss-${index + 1}`).slice(0, 80),
+        name: String(raw.name || `ทีมบอส IDLE ${index + 1}`).slice(0, 60),
+        cardIds,
+        formationFront: normalizeFormationFront(raw.formationFront, CONFIG.idleTeamSlots),
+        source: String(raw.source || "gm").slice(0, 24),
+        gmUid: String(raw.gmUid || raw.publisherUid || "").slice(0, 80),
+        updatedAt: Math.max(0, Number(raw.updatedAt) || 0)
+      };
+    }
+
+    async function refreshIdleBossTeams(showNotice = false) {
+      let loaded = [];
+      if (cloudReady && cloudModules && cloudDb && activeCloudUid) {
+        try {
+          const snapshot = await cloudModules.get(cloudModules.ref(cloudDb, "idleBossTeams"));
+          if (snapshot.exists()) {
+            const value = snapshot.val() || {};
+            loaded = (Array.isArray(value) ? value : Object.values(value)).map(normalizeIdleBossTeam).filter(Boolean);
+          }
+        } catch (error) {
+          console.warn("Idle boss root load skipped:", error);
+        }
+        if (!loaded.length) {
+          try {
+            const profiles = await cloudModules.get(cloudModules.ref(cloudDb, "publicProfiles"));
+            const rows = profiles.exists() ? Object.values(profiles.val() || {}) : [];
+            loaded = rows.flatMap(profile => {
+              const source = profile && profile.idleBossTeams;
+              return (Array.isArray(source) ? source : Object.values(source || {})).map(normalizeIdleBossTeam).filter(Boolean);
+            });
+          } catch (error) {
+            console.warn("Idle boss public-profile fallback skipped:", error);
+          }
+        }
+      }
+      idleBossTeams = loaded.length ? loaded : buildFallbackIdleBossTeams();
+      idleBossTeamsLoadedAt = Date.now();
+      if (!gmIdleBossDraftTeams.length && gmAccess && gmAccess.isGM) gmIdleBossDraftTeams = idleBossTeams.filter(team => team.source !== "fallback").map(team => ({ ...team, cardIds:[...team.cardIds] }));
+      renderIdle();
+      if (gmAccess && gmAccess.isGM) renderGMIdleBossEditor();
+      if (showNotice) showToast(loaded.length ? `โหลดทีม GM ${loaded.length} ชุดแล้ว` : "ยังไม่มีทีม GM บนเซิร์ฟเวอร์ ใช้ทีมสำรองในเกมก่อน");
+      return idleBossTeams;
+    }
+
+    function pickIdleRandomCards(wave = 1) {
+      const safeWave = Math.max(1, Math.floor(Number(wave) || 1));
+      const maxOrder = Math.min(Math.max(...Object.values(RARITIES).map(info => Number(info.order) || 0)), 2 + Math.floor(safeWave / 20));
+      let pool = idleEligibleCards().filter(card => Number(getRarity(card).order || 0) <= Math.max(3, maxOrder));
+      if (pool.length < CONFIG.idleTeamSlots) pool = idleEligibleCards();
+      return [...pool].sort(() => Math.random() - .5).slice(0, CONFIG.idleTeamSlots);
+    }
+
+    function makeIdleOpponent(wave = 1) {
+      const safeWave = Math.max(1, Math.floor(Number(wave) || 1));
+      const multiplier = idleWaveMultiplier(safeWave);
+      const isBoss = safeWave % 10 === 0;
+      let sourceTeam = null;
+      if (isBoss) {
+        const teams = idleBossTeams.length ? idleBossTeams : buildFallbackIdleBossTeams();
+        sourceTeam = teams[Math.floor(Math.random() * Math.max(1, teams.length))] || null;
+      }
+      const cards = sourceTeam
+        ? sourceTeam.cardIds.map(id => CARD_BY_ID.get(String(id))).filter(Boolean).slice(0, CONFIG.idleTeamSlots)
+        : pickIdleRandomCards(safeWave);
+      const formationFront = normalizeFormationFront(sourceTeam && sourceTeam.formationFront || 2, CONFIG.idleTeamSlots);
+      const snapshots = cards.map((card, index) => {
+        const variance = isBoss ? 1 : .96 + Math.random() * .08;
+        return {
+          id: String(card.id), name: card.name, rarity: card.rarity,
+          power: Math.max(1, Math.floor(idleCardStatAt(card, "power", 1, 1) * multiplier * variance)),
+          hp: Math.max(1, Math.floor(idleCardStatAt(card, "hp", 1, 1) * multiplier * variance)),
+          defense: Math.max(0, Math.floor(idleCardStatAt(card, "defense", 1, 1) * multiplier * variance)),
+          speed: getCardSpeed(card), elements: getCardElements(card), level: 1, awaken: 1,
+          slot: index + 1, row: index < formationFront ? "front" : "back"
+        };
+      });
+      const attack = snapshots.reduce((sum, item) => sum + item.power, 0);
+      const hp = snapshots.reduce((sum, item) => sum + item.hp, 0);
+      const defense = snapshots.reduce((sum, item) => sum + item.defense, 0);
+      return {
+        uid: `IDLE-${safeWave}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
+        type: isBoss ? "idle-boss" : "idle-ai",
+        username: isBoss ? `👑 ${sourceTeam?.name || "ทีม GM"} • ระลอก ${safeWave}` : `Idle AI • ระลอก ${safeWave}`,
+        wave: safeWave, multiplier, isBoss, formationFront,
+        arenaPower: attack, arenaHp: hp, arenaDefense: defense,
+        arenaCombatPower: calculateCombatPower(attack, hp, defense, 1, 0),
+        arenaAttackHits: 1, arenaShieldHits: 0, arenaTeam: snapshots, points: safeWave
+      };
+    }
+
+    function getIdleBattleStats(opponent = currentIdleOpponent) {
+      const teamIds = state.idle && Array.isArray(state.idle.team) ? state.idle.team : [];
+      const summary = getTeamElementSummary(teamIds);
+      const enemy = opponent || null;
+      const enemyTeam = enemy && Array.isArray(enemy.arenaTeam) ? enemy.arenaTeam : [];
+      const enemyTeamIds = enemyTeam.map(item => cardIdString(item && item.id)).filter(id => CARD_BY_ID.has(id));
+      const paired = enemyTeamIds.length
+        ? getPairedAbilitySummaries(teamIds, enemyTeamIds, "arena", {}, { progressByCardId: snapshotProgressByCardId(enemyTeam) })
+        : { ally: getTeamAbilitySummary(teamIds, "arena"), enemy: getTeamAbilitySummary([], "arena") };
+      const abilitySummary = paired.ally;
+      const enemyAbilitySummary = paired.enemy;
+      const rawPower = getRawTeamPower(teamIds, "arena", abilitySummary) + abilitySummary.teamPowerFlat;
+      const rawHp = getRawTeamHp(teamIds, "arena", abilitySummary) + abilitySummary.teamHpFlat;
+      const rawDefense = getRawTeamDefense(teamIds, "arena", abilitySummary) + abilitySummary.teamDefenseFlat;
+      const teamPower = Math.max(0, rawPower * (1 + summary.powerRate + abilitySummary.teamPowerRate));
+      const teamHp = Math.max(1, rawHp * (1 + abilitySummary.teamHpRate));
+      const teamDefense = Math.max(0, rawDefense * (1 + abilitySummary.teamDefenseRate));
+      const attackHits = getCombatAttackHits(abilitySummary, enemyAbilitySummary.enemyAttackHits);
+      const shieldHits = getCombatShieldHits(abilitySummary, enemyAbilitySummary.enemyShieldHits);
+      const healingRate = getCombatHealingRate(abilitySummary, enemyAbilitySummary.enemyHealingRate);
+      const shieldRecoveryRate = getCombatShieldRecoveryRate(abilitySummary, enemyAbilitySummary.enemyShieldRecoveryRate);
+      const enemyElement = getSnapshotDominantElement(enemyTeam);
+      const enemyElementSummary = enemyTeamIds.length ? getTeamElementSummary(enemyTeamIds) : { powerRate: 0 };
+      const matchup = enemy ? getElementMatchup(summary.dominantElement, enemyElement) : makeMatchupResult(summary.dominantElement, "ไร้ธาตุ");
+      const effectiveAttack = enemy ? Math.max(0, teamPower * (1 + matchup.modifier) * (1 + enemyAbilitySummary.enemyPowerRate)) : teamPower;
+      const effectiveHp = Math.max(1, teamHp * (1 + enemyAbilitySummary.enemyHpRate));
+      const effectiveDefense = Math.max(0, teamDefense * (1 + enemyAbilitySummary.enemyDefenseRate));
+      const snapshotRawPower = enemyTeam.reduce((sum, item) => sum + getSnapshotAdjustedStat(item, enemyAbilitySummary, "power"), 0);
+      const snapshotRawHp = enemyTeam.reduce((sum, item) => sum + getSnapshotAdjustedStat(item, enemyAbilitySummary, "hp"), 0);
+      const snapshotRawDefense = enemyTeam.reduce((sum, item) => sum + getSnapshotAdjustedStat(item, enemyAbilitySummary, "defense"), 0);
+      const enemyRawPower = snapshotRawPower + enemyAbilitySummary.teamPowerFlat;
+      const enemyRawHp = snapshotRawHp + enemyAbilitySummary.teamHpFlat;
+      const enemyRawDefense = snapshotRawDefense + enemyAbilitySummary.teamDefenseFlat;
+      const enemyBasePower = enemy ? Math.max(1, enemyRawPower * (1 + enemyElementSummary.powerRate + enemyAbilitySummary.teamPowerRate)) : 0;
+      const enemyBaseHp = enemy ? Math.max(1, enemyRawHp * (1 + enemyAbilitySummary.teamHpRate)) : 0;
+      const enemyBaseDefense = enemy ? Math.max(0, enemyRawDefense * (1 + enemyAbilitySummary.teamDefenseRate)) : 0;
+      const enemyAttack = enemy ? Math.max(1, enemyBasePower * (1 - matchup.modifier * .70) * (1 + abilitySummary.enemyPowerRate)) : 0;
+      const enemyEffectiveHp = enemy ? Math.max(1, enemyBaseHp * (1 + abilitySummary.enemyHpRate)) : 0;
+      const enemyEffectiveDefense = enemy ? Math.max(0, enemyBaseDefense * (1 + abilitySummary.enemyDefenseRate)) : 0;
+      const enemyAttackHits = enemy ? applyCombatAttackHitModifier(getCombatAttackHits(enemyAbilitySummary), abilitySummary.enemyAttackHits) : 1;
+      const enemyShieldHits = enemy ? applyCombatShieldHitModifier(getCombatShieldHits(enemyAbilitySummary), abilitySummary.enemyShieldHits) : 0;
+      const enemyHealingRate = getCombatHealingRate(enemyAbilitySummary, abilitySummary.enemyHealingRate);
+      const enemyShieldRecoveryRate = getCombatShieldRecoveryRate(enemyAbilitySummary, abilitySummary.enemyShieldRecoveryRate);
+      const criticalRate = getTeamCriticalRate(teamIds, abilitySummary, false);
+      const enemyCriticalRate = enemy ? getTeamCriticalRate(enemyTeam, enemyAbilitySummary, true) : clampCriticalRate(CONFIG.combatBaseCriticalRate);
+      const playerMembers = buildBattleDefenseMembers(teamIds, abilitySummary, false);
+      const enemyMembers = buildBattleDefenseMembers(enemyTeam, enemyAbilitySummary, true);
+      if (enemy && !enemyMembers.length) enemyMembers.push({ id:"idle-ai", name:enemy.username, hp:enemyEffectiveHp, blockRate:0, dodgeRate:0, damageTakenRate:0 });
+      const playerPreview = enemy ? resolveCombatExchange(effectiveAttack, enemyEffectiveDefense, attackHits, enemyShieldHits, 1) : null;
+      const enemyPreview = enemy ? resolveCombatExchange(enemyAttack, effectiveDefense, enemyAttackHits, shieldHits, 1) : null;
+      const totalCombatPower = calculateCombatPower(effectiveAttack, effectiveHp, effectiveDefense, attackHits, shieldHits);
+      const enemyCombatPower = enemy ? calculateCombatPower(enemyAttack, enemyEffectiveHp, enemyEffectiveDefense, enemyAttackHits, enemyShieldHits) : 0;
+      return {
+        summary, abilitySummary, enemyAbilitySummary,
+        rawPower, rawHp, rawDefense, teamPower, teamHp, teamDefense,
+        effectivePower:effectiveAttack, effectiveAttack, effectiveHp, effectiveDefense, totalCombatPower,
+        attackHits, shieldHits, healingRate, shieldRecoveryRate, enemy, enemyTeam, enemyElement,
+        enemyBasePower, enemyBaseHp, enemyBaseDefense,
+        enemyEffectivePower:enemyAttack, enemyAttack, enemyEffectiveHp, enemyEffectiveDefense, enemyCombatPower,
+        enemyAttackHits, enemyShieldHits, enemyHealingRate, enemyShieldRecoveryRate,
+        criticalRate, enemyCriticalRate, playerMembers, enemyMembers,
+        playerActiveTriggers:buildTeamBattleTriggerConfigs(teamIds, abilitySummary, false),
+        enemyActiveTriggers:buildTeamBattleTriggerConfigs(enemyTeam, enemyAbilitySummary, true),
+        playerAbilityRoster:buildBattleAbilityRoster(teamIds, abilitySummary, false),
+        enemyAbilityRoster:buildBattleAbilityRoster(enemyTeam, enemyAbilitySummary, true),
+        playerPreview, enemyPreview, matchup
+      };
+    }
+
+    function rollIdleRewardOnce(wave = 1, bossBonus = false) {
+      const safeWave = Math.max(1, Math.floor(Number(wave) || 1));
+      const tier = Math.floor((safeWave - 1) / 10);
+      const roll = Math.random();
+      if (roll < .42) {
+        const amount = Math.max(1, Math.floor((1200000 + safeWave * 180000) * (1 + tier * .18) * (bossBonus ? 1.8 : 1)));
+        return { type:"gems", amount };
+      }
+      if (roll < .72) {
+        const amount = Math.max(1, Math.floor((30000 + safeWave * 6500) * (1 + tier * .16) * (bossBonus ? 1.7 : 1)));
+        return { type:"dust", amount };
+      }
+      if (roll < .90) {
+        const amount = Math.max(1, 1 + Math.floor(safeWave / 25) + (bossBonus ? 1 : 0));
+        return { type:"crystals", amount };
+      }
+      let itemId = "pack:normal";
+      if (safeWave >= 160 && Math.random() < .12) itemId = "pack:guarantee:LR";
+      else if (safeWave >= 90 && Math.random() < .28) itemId = "pack:guarantee:UR";
+      else if (safeWave >= 40 && Math.random() < .48) itemId = "pack:guarantee:SSR";
+      else if (safeWave >= 15) itemId = "pack:guarantee:SR";
+      return { type:"item", itemId, amount:bossBonus ? 2 : 1 };
+    }
+
+    function rollIdleWaveRewards(wave = 1, isBoss = false) {
+      const rewards = [rollIdleRewardOnce(wave, isBoss)];
+      if (isBoss) rewards.push(rollIdleRewardOnce(wave, true));
+      return normalizeIdlePendingRewards(rewards);
+    }
+
+    function addIdlePendingRewards(rewards = []) {
+      state.idle.pendingRewards = normalizeIdlePendingRewards([...(state.idle.pendingRewards || []), ...rewards]);
+      if (!state.idle.pendingStartedAt) state.idle.pendingStartedAt = Date.now();
+      if (!state.idle.sessionId) state.idle.sessionId = `idle-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
+    }
+
+    function idlePendingRewardTotal() {
+      return abilityArray(state.idle && state.idle.pendingRewards).reduce((sum, reward) => sum + Math.max(0, Number(reward.amount) || 0), 0);
+    }
+
+    function idlePendingRewardMeta(reward = {}) {
+      if (reward.type === "gems") return { icon:"💎", name:"Gems" };
+      if (reward.type === "crystals" || reward.type === "cristal") return { icon:"🔮", name:"Cristal" };
+      if (reward.type === "dust") return { icon:"✨", name:"Dust" };
+      const meta = getItemMeta(reward.itemId);
+      return { icon:meta && meta.icon || "🎁", name:meta && meta.name || "ไอเทม" };
+    }
+
+    function idlePendingRewardsHTML() {
+      const rewards = normalizeIdlePendingRewards(state.idle && state.idle.pendingRewards || []);
+      if (!rewards.length) return `<div class="empty-state" style="min-height:90px">ยังไม่มีรางวัลสะสม</div>`;
+      return rewards.map(reward => {
+        const meta = idlePendingRewardMeta(reward);
+        return `<div class="idle-reward-row"><span>${escapeHTML(`${meta.icon} ${meta.name}`)}</span><strong>x${formatNumber(reward.amount)}</strong></div>`;
+      }).join("");
+    }
+
+    function finalizeIdleSessionRewards() {
+      const rewards = normalizeIdlePendingRewards(state.idle.pendingRewards || []);
+      idleAutoRunning = false;
+      idleStopRequested = false;
+      state.idle.running = false;
+      if (!rewards.length) {
+        state.idle.currentWave = Math.max(1, state.idle.maxClearedWave + 1);
+        saveState(true);
+        renderIdle();
+        return showToast("หยุดโหมด IDLE แล้ว แต่ยังไม่มีรางวัลสะสม");
+      }
+      const sessionId = state.idle.sessionId || `idle-${Date.now()}`;
+      const mail = createSystemMail({
+        uniqueKey:`idle-session-${sessionId}`,
+        title:`รางวัล IDLE AUTO • สูงสุดระลอก ${state.idle.maxClearedWave}`,
+        message:`รางวัลจากการต่อสู้อัตโนมัติรอบนี้ ${Math.max(0, Number(state.idle.pendingRuns) || 0)} ไฟต์ ถูกพักไว้จนคุณกดหยุดแล้วจึงส่งเข้ากล่องจดหมาย`,
+        occasion:"หยุดฟาร์มโหมด IDLE AUTO",
+        source:"idle",
+        rewards
+      });
+      state.idle.pendingRewards = [];
+      state.idle.pendingStartedAt = 0;
+      state.idle.pendingRuns = 0;
+      state.idle.sessionId = "";
+      state.idle.currentWave = Math.max(1, state.idle.maxClearedWave + 1);
+      currentIdleOpponent = makeIdleOpponent(state.idle.currentWave);
+      saveState(true);
+      renderAll();
+      if (mail) showToast("หยุดฟาร์มแล้ว ส่งรางวัลสะสมเข้ากล่องจดหมายเรียบร้อย ✨");
+      else showToast("หยุดฟาร์มแล้ว แต่จดหมายรอบนี้ถูกสร้างไว้ก่อนหน้าแล้ว");
+    }
+
+    function idlePlaceGridItems(stack, side = "player") {
+      if (!stack) return;
+      stack.classList.add("v72-rowed", "idle-side-grid");
+      const frontColumn = side === "player" ? 2 : 1;
+      const backColumn = side === "player" ? 1 : 2;
+      ["front","back"].forEach(row => {
+        const line = stack.querySelector(`:scope > .battle-row-line.${row}`);
+        if (!line) return;
+        const children = Array.from(line.children).filter(node => node.classList && (node.classList.contains("battle-model-card") || node.classList.contains("battle-source-formation")));
+        children.forEach((node, index) => {
+          node.style.gridColumn = String(row === "front" ? frontColumn : backColumn);
+          node.style.gridRow = String(Math.min(5, index + 1));
+        });
+      });
+    }
+
+    function renderIdleTeam() {
+      const grid = document.getElementById("idleTeamGrid");
+      const panel = document.getElementById("idleElementPanel");
+      if (!grid || !panel || !state.idle) return;
+      const slots = [];
+      for (let index = 0; index < CONFIG.idleTeamSlots; index += 1) {
+        slots.push(teamSlotHTML(CARD_BY_ID.get(String(state.idle.team[index] || "")), index, "idle"));
+      }
+      grid.innerHTML = slots.join("");
+      renderTeamPresets("idle");
+      renderTurnTactics("idle");
+      const summary = getTeamElementSummary(state.idle.team);
+      const abilitySummary = getTeamAbilitySummary(state.idle.team, "arena");
+      const activeAbilityHTML = abilitySummary.activeAbilities.length
+        ? abilitySummary.activeAbilities.map(entry => `<div class="combo-card"><strong>✨ ${escapeHTML(entry.sourceCard.name)} — ${escapeHTML(entry.ability.name || "ความสามารถพิเศษ")}</strong><span>${entry.activeEffects.map(effect => escapeHTML(abilityEffectText(effect))).join(" • ")}</span></div>`).join("")
+        : `<div class="combo-card"><strong>ยังไม่มีสกิล ARENA ทำงาน</strong><span>โหมด IDLE ใช้สกิลที่ activeIn มี arena</span></div>`;
+      panel.innerHTML = `<div><h3>สถานะทีม IDLE</h3><p>ธาตุหลัก ${escapeHTML(elementLabel(summary.dominantElement))} • สมาชิก ${state.idle.team.filter(Boolean).length}/${CONFIG.idleTeamSlots} • คอมโบ ATK +${Math.round(summary.powerRate * 100)}%</p><div class="element-chip-row">${summary.uniqueElements.length ? summary.uniqueElements.map(element => elementChipHTML(element, "", summary.counts[element] || 0)).join("") : `<span class="pill">ยังไม่มีการ์ด</span>`}</div></div><div><h3>สกิลที่ทำงาน</h3><div class="combo-list">${activeAbilityHTML}</div></div>`;
+      const stats = getIdleBattleStats(null);
+      const powerText = document.getElementById("idleTeamPowerText");
+      if (powerText) powerText.textContent = `ATK ${formatNumber(stats.effectiveAttack)} • HP ${formatNumber(stats.effectiveHp)} • DEF ${formatNumber(stats.effectiveDefense)} • พลังรวม ${formatNumber(stats.totalCombatPower)}`;
+    }
+
+    function renderIdle(forceModels = false) {
+      if (!document.getElementById("idleView") || !state.idle) return;
+      const previewWave = Math.max(1, Math.floor(Number(state.idle.currentWave) || state.idle.maxClearedWave + 1));
+      if (!currentIdleOpponent || Number(currentIdleOpponent.wave) !== previewWave) currentIdleOpponent = makeIdleOpponent(previewWave);
+      const stats = getIdleBattleStats(currentIdleOpponent);
+      const playerModels = document.getElementById("idlePlayerModels");
+      const enemyModels = document.getElementById("idleEnemyModels");
+      if (!playerModels || !enemyModels) return;
+      if (forceModels || !idleAnimating || !playerModels.children.length || !enemyModels.children.length) {
+        const playerFront = normalizeFormationFront(state.idle.formationFront, CONFIG.idleTeamSlots);
+        const playerRecords = state.idle.team.map((id,index) => ({ card:CARD_BY_ID.get(String(id)), slot:index+1 })).filter(item => item.card);
+        playerModels.innerHTML = playerRecords.length
+          ? battleRowedModelRowsHTML(playerRecords.map(item => ({ ...item, row:item.slot <= playerFront ? "front" : "back", model:true })), false, (item,rowIndex,rowTotal,row) => battleModelHTML(item.card,rowIndex,false,rowTotal,row,item.slot))
+          : `<div class="arena-secret-model">+</div>`;
+        const enemyFront = normalizeFormationFront(currentIdleOpponent.formationFront, CONFIG.idleTeamSlots);
+        const enemyRecords = stats.enemyTeam.map((item,index) => ({ item, slot:index+1, row:index < enemyFront ? "front" : "back", model:true }));
+        enemyModels.innerHTML = enemyRecords.length
+          ? battleRowedModelRowsHTML(enemyRecords, true, (record,rowIndex,rowTotal,row) => arenaSnapshotModelHTML(record.item,rowIndex,true,rowIndex,rowTotal,record.slot,row))
+          : `<div class="arena-secret-model">?</div>`;
+        reserveBattleCloneFormations(playerModels,"player");
+        reserveBattleCloneFormations(enemyModels,"enemy");
+        idlePlaceGridItems(playerModels,"player");
+        idlePlaceGridItems(enemyModels,"enemy");
+      }
+      const maxHp = Math.max(1, stats.effectiveHp, stats.enemyEffectiveHp || 0);
+      document.getElementById("idlePlayerPower").innerHTML = `<span class="combat-total-top">✨ พลังรวม ${formatNumber(stats.totalCombatPower)}</span><span class="combat-atk">⚔️ ${formatNumber(stats.effectiveAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.effectiveHp)} • 🛡️ DEF ${formatNumber(stats.effectiveDefense)}</span>`;
+      document.getElementById("idlePlayerDetail").innerHTML = `คอมโบ ATK +${Math.round(stats.summary.powerRate * 100)}% • CRIT ${signedPercent(stats.criticalRate)} • ${stats.attackHits} ฮิต • โล่ ${stats.shieldHits} ฮิต`;
+      document.getElementById("idleEnemyName").textContent = currentIdleOpponent.username;
+      document.getElementById("idleEnemyPower").innerHTML = `<span class="combat-total-top">✨ พลังรวม ${formatNumber(stats.enemyCombatPower)}</span><span class="combat-atk">⚔️ ${formatNumber(stats.enemyAttack)}</span><span class="combat-def">❤️ ${formatNumber(stats.enemyEffectiveHp)} • 🛡️ DEF ${formatNumber(stats.enemyEffectiveDefense)}</span>`;
+      document.getElementById("idleEnemyDetail").innerHTML = `ต้นแบบ Lv.1 / Awaken +1 • สเกล ×${currentIdleOpponent.multiplier.toFixed(1)} • ธาตุหลัก ${escapeHTML(elementLabel(stats.enemyElement))} • ${currentIdleOpponent.isBoss ? "ทีม GM ระลอกบอส" : "ทีมสุ่มแบบ ARENA"}`;
+      document.getElementById("idlePlayerMeter").style.width = `${Math.max(3, stats.effectiveHp / maxHp * 100)}%`;
+      document.getElementById("idleEnemyMeter").style.width = `${Math.max(3, stats.enemyEffectiveHp / maxHp * 100)}%`;
+      document.getElementById("idleMaxWaveText").textContent = formatNumber(state.idle.maxClearedWave);
+      document.getElementById("idleCurrentWaveText").textContent = formatNumber(previewWave);
+      document.getElementById("idleRecordText").textContent = `${formatNumber(state.idle.wins)} / ${formatNumber(state.idle.losses)}`;
+      document.getElementById("idleRunCountText").textContent = formatNumber(state.idle.totalRuns);
+      document.getElementById("idleScaleText").textContent = `ช่วง ${idleWaveRangeText(previewWave)} ใช้พลัง ×${idleWaveMultiplier(previewWave).toFixed(1)} • ช่วงถัดไปเพิ่มอีก ×0.1`;
+      document.getElementById("idleBossText").innerHTML = `<span class="idle-boss-chip">${currentIdleOpponent.isBoss ? "👑 ระลอกนี้เป็นทีม GM" : `👑 ทีม GM ถัดไปที่ระลอก ${Math.ceil(previewWave / 10) * 10}`}</span>`;
+      const rewardPanel = document.getElementById("idlePendingRewardPanel");
+      if (rewardPanel) { rewardPanel.innerHTML = idlePendingRewardsHTML(); rewardPanel.classList.toggle("hidden", !idleRewardPanelOpen); }
+      const startButton = document.getElementById("idleStartButton");
+      const stopButton = document.getElementById("idleStopButton");
+      if (startButton) { startButton.disabled = idleAutoRunning || idleAnimating || !state.idle.team.some(Boolean); startButton.textContent = idleAutoRunning ? "กำลังต่อสู้อัตโนมัติ…" : "▶ เริ่มต่อสู้ออโต้"; }
+      if (stopButton) { stopButton.disabled = (!idleAutoRunning && !idleAnimating && !state.idle.pendingRewards.length); stopButton.textContent = idleStopRequested ? "กำลังหยุดหลังจบไฟต์…" : "■ หยุดและส่งรางวัล"; }
+      const summaryButton = document.getElementById("idleSummaryButton");
+      if (summaryButton) summaryButton.disabled = !lastIdleSummary;
+      const result = document.getElementById("idleBattleResult");
+      if (result && !idleAnimating) {
+        const last = state.idle.lastResult;
+        const text = idleAutoRunning
+          ? (idleFarmMode ? `โหมดฟาร์มระลอก ${previewWave} • รางวัลค้าง ${formatNumber(idlePendingRewardTotal())}` : `กำลังไต่ระลอก ${previewWave} • รางวัลค้าง ${formatNumber(idlePendingRewardTotal())}`)
+          : last && last.text ? last.text : `พร้อมท้าทายระลอก ${previewWave}`;
+        result.textContent = text;
+        result.className = `battle-result ${idleAutoRunning ? (idleFarmMode ? "farming" : "running") : last && last.tone || ""}`;
+      }
+      renderCombatHitReport("idleHitReport", lastIdleCombat, { player:"ทีม IDLE ของคุณ", enemy:currentIdleOpponent.username });
+      renderIdleTeam();
+    }
+
+    async function runIdleWave(wave = 1) {
+      const safeWave = Math.max(1, Math.floor(Number(wave) || 1));
+      currentIdleOpponent = makeIdleOpponent(safeWave);
+      state.idle.currentWave = safeWave;
+      const stats = getIdleBattleStats(currentIdleOpponent);
+      const stage = document.getElementById("idleBattleStage");
+      const result = document.getElementById("idleBattleResult");
+      const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const phaseDuration = reducedMotion ? 15 : 180;
+      idleAnimating = true;
+      renderIdle(true);
+      const combat = buildIndividualTurnBasedCombat({
+        playerAttack:stats.effectiveAttack, playerHp:stats.effectiveHp, playerDefense:stats.effectiveDefense,
+        playerAttackHits:stats.attackHits, playerShieldHits:stats.shieldHits,
+        playerHealingRate:stats.healingRate, playerShieldRecoveryRate:stats.shieldRecoveryRate,
+        enemyAttack:stats.enemyAttack, enemyHp:stats.enemyEffectiveHp, enemyDefense:stats.enemyEffectiveDefense,
+        enemyAttackHits:stats.enemyAttackHits, enemyShieldHits:stats.enemyShieldHits,
+        enemyHealingRate:stats.enemyHealingRate, enemyShieldRecoveryRate:stats.enemyShieldRecoveryRate,
+        playerCriticalRate:stats.criticalRate, enemyCriticalRate:stats.enemyCriticalRate,
+        playerMembers:stats.playerMembers, enemyMembers:stats.enemyMembers,
+        playerCriticalDamageMultiplier:CONFIG.combatCriticalDamageMultiplier,
+        enemyCriticalDamageMultiplier:CONFIG.combatCriticalDamageMultiplier,
+        mode:"arena",
+        playerActiveTriggers:stats.playerActiveTriggers, enemyActiveTriggers:stats.enemyActiveTriggers,
+        playerAbilityRoster:stats.playerAbilityRoster, enemyAbilityRoster:stats.enemyAbilityRoster,
+        playerCaptureRules:buildTeamCaptureReviveConfigs(stats.abilitySummary),
+        enemyCaptureRules:buildTeamCaptureReviveConfigs(stats.enemyAbilitySummary),
+        statusResolutionSeed:makeAbilityResolutionSeed("idle", state.idle.team, stats.enemyTeam.map(item => item.id), String(safeWave)),
+        playerFormationFront:state.idle.formationFront, playerFormationSize:CONFIG.idleTeamSlots,
+        enemyFormationFront:currentIdleOpponent.formationFront, enemyFormationSize:CONFIG.idleTeamSlots,
+        playerCommandStrategy:state.idle.commandStrategy, playerTargetStrategy:state.idle.targetStrategy,
+        enemyCommandStrategy:"balanced", enemyTargetStrategy:"highAtk",
+        playerVariance:() => .91 + Math.random() * .18, enemyVariance:() => .91 + Math.random() * .18
+      });
+      combat.playerCombatPower = stats.totalCombatPower;
+      combat.enemyCombatPower = stats.enemyCombatPower;
+      combat.initialTransferEvents = abilityArray(stats.abilitySummary && stats.abilitySummary.transferResults).concat(abilityArray(stats.enemyAbilitySummary && stats.enemyAbilitySummary.transferResults));
+      const won = combat.winner === "player";
+      try {
+        await playTurnBasedCombat(stage, result, combat, {
+          playerPower:document.getElementById("idlePlayerPower"), enemyPower:document.getElementById("idleEnemyPower"),
+          playerMeter:document.getElementById("idlePlayerMeter"), enemyMeter:document.getElementById("idleEnemyMeter")
+        }, { player:"ทีม IDLE ของคุณ", enemy:currentIdleOpponent.username }, phaseDuration);
+        stage.classList.add(won ? "battle-win" : "battle-lose");
+        lastIdleCombat = combat;
+        state.idle.totalRuns += 1;
+        state.idle.pendingRuns = Math.max(0, Math.floor(Number(state.idle.pendingRuns) || 0)) + 1;
+        if (won) {
+          state.idle.wins += 1;
+          if (safeWave > state.idle.maxClearedWave) state.idle.maxClearedWave = safeWave;
+          const rewards = rollIdleWaveRewards(safeWave, currentIdleOpponent.isBoss);
+          addIdlePendingRewards(rewards);
+          state.idle.lastResult = { tone:"win", text:`ชนะระลอก ${safeWave} • ได้ ${rewards.map(rewardPayloadLabel).join(" + ")}` };
+        } else {
+          state.idle.losses += 1;
+          state.idle.lastResult = { tone:"lose", text:`แพ้ระลอก ${safeWave} • จะย้อนกลับไปฟาร์มระลอก ${Math.max(1, state.idle.maxClearedWave)}` };
+        }
+        lastIdleSummary = makeCombatSummary({
+          mode:"idle", title:`IDLE AUTO • ระลอก ${safeWave}`, opponent:currentIdleOpponent.username, combat,
+          outcomeText:won ? `ชนะระลอก ${safeWave}` : `แพ้ระลอก ${safeWave}`,
+          rewardText:state.idle.lastResult.text,
+          playerLabel:"ทีม IDLE ของคุณ", enemyLabel:currentIdleOpponent.username,
+          playerCards:battleSummaryOwnedTeam(state.idle.team), enemyCards:stats.enemyTeam.map(battleSummaryCardSnapshot)
+        });
+        saveState();
+        renderIdle();
+        await wait(reducedMotion ? 10 : 180);
+        return won;
+      } finally {
+        stage.classList.remove("player-strike","enemy-strike","battle-win","battle-lose");
+        idleAnimating = false;
+        renderIdle();
+      }
+    }
+
+    async function startIdleAuto() {
+      if (idleAutoRunning || idleAnimating) return;
+      if (!state.idle.team.some(Boolean)) return showToast("ต้องจัดทีม IDLE ก่อนเริ่ม");
+      if (!idleBossTeams.length) await refreshIdleBossTeams(false);
+      idleAutoRunning = true;
+      idleStopRequested = false;
+      idleFarmMode = false;
+      battlePlaybackSpeed = Math.max(1, battlePlaybackSpeed || 3);
+      if (!state.idle.sessionId) state.idle.sessionId = `idle-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
+      if (!state.idle.pendingStartedAt) state.idle.pendingStartedAt = Date.now();
+      idleRuntimeWave = Math.max(1, state.idle.maxClearedWave + 1);
+      state.idle.currentWave = idleRuntimeWave;
+      state.idle.running = true;
+      saveState(true);
+      renderIdle(true);
+      try {
+        while (idleAutoRunning && !idleStopRequested) {
+          const won = await runIdleWave(idleRuntimeWave);
+          if (idleStopRequested || !idleAutoRunning) break;
+          if (!idleFarmMode && won) idleRuntimeWave += 1;
+          else if (!won) { idleFarmMode = true; idleRuntimeWave = Math.max(1, state.idle.maxClearedWave); }
+          // หลังแพ้จะฟาร์มชั้นล่าสุดซ้ำ แม้ชนะแล้วก็ไม่ไต่ต่อจนกว่าจะหยุดและเริ่มใหม่
+          state.idle.currentWave = idleRuntimeWave;
+          currentIdleOpponent = null;
+          renderIdle();
+          await wait(battleSkipAnimations ? 30 : 240);
+        }
+      } catch (error) {
+        console.error("Idle auto loop failed:", error);
+        state.idle.lastResult = { tone:"lose", text:`โหมด IDLE หยุดเพราะเกิดข้อผิดพลาด: ${String(error && error.message || error)}` };
+        showToast("โหมด IDLE หยุดจากข้อผิดพลาด กรุณาลองใหม่");
+      } finally {
+        idleAutoRunning = false;
+        state.idle.running = false;
+        if (idleStopRequested) finalizeIdleSessionRewards();
+        else { saveState(true); renderIdle(); }
+      }
+    }
+
+    function stopIdleAuto() {
+      if (!idleAutoRunning && !idleAnimating) return finalizeIdleSessionRewards();
+      idleStopRequested = true;
+      idleAutoRunning = false;
+      renderIdle();
+      showToast("รับคำสั่งหยุดแล้ว จะส่งรางวัลหลังไฟต์ปัจจุบันจบ");
+    }
+
+    function toggleIdleRewardPanel() {
+      idleRewardPanelOpen = !idleRewardPanelOpen;
+      renderIdle();
+    }
+
+    function renderGMIdleBossEditor() {
+      if (!gmAccess || !gmAccess.isGM) return;
+      const options = `<option value="">— ว่าง —</option>${gmCardOptionsHTML("")}`;
+      for (let index = 1; index <= 5; index += 1) {
+        const select = document.getElementById(`gmIdleBossCard${index}`);
+        if (select && !select.options.length) select.innerHTML = options;
+      }
+      const list = document.getElementById("gmIdleBossTeamList");
+      if (list) list.innerHTML = gmIdleBossDraftTeams.length
+        ? gmIdleBossDraftTeams.map((team,index) => `<div class="gm-idle-team-row"><div><strong>${escapeHTML(team.name)}</strong><span>${team.cardIds.map(id => escapeHTML(CARD_BY_ID.get(id)?.name || id)).join(" • ")}<br>หน้า ${team.formationFront} / หลัง ${Math.max(0,5-team.formationFront)}</span></div><button class="btn btn-danger" data-action="gm-remove-idle-boss-team" data-index="${index}">ลบ</button></div>`).join("")
+        : `<div class="gm-status-box">ยังไม่มีทีมในรายการ กรอกช่องด้านบนแล้วกดเพิ่มทีม</div>`;
+      const status = document.getElementById("gmIdleBossStatus");
+      if (status) status.textContent = `รายการร่าง ${gmIdleBossDraftTeams.length} ทีม • ทีมที่เกมโหลดใช้งาน ${idleBossTeams.length} ทีม`;
+    }
+
+    function gmAddIdleBossTeam() {
+      if (!gmAccess || !gmAccess.isGM) return showToast("ไม่มีสิทธิ์ GM");
+      const cardIds = [...new Set(Array.from({length:5},(_,index) => cardIdString(document.getElementById(`gmIdleBossCard${index+1}`)?.value)).filter(id => CARD_BY_ID.has(id)))];
+      if (!cardIds.length) return showToast("เลือกการ์ดอย่างน้อย 1 ใบสำหรับทีมบอส IDLE");
+      if (gmIdleBossDraftTeams.length >= 30) return showToast("เพิ่มทีมบอสได้สูงสุด 30 ทีม");
+      const name = String(document.getElementById("gmIdleBossTeamName")?.value || `ทีมบอส IDLE ${gmIdleBossDraftTeams.length+1}`).trim().slice(0,60) || `ทีมบอส IDLE ${gmIdleBossDraftTeams.length+1}`;
+      const formationFront = normalizeFormationFront(document.getElementById("gmIdleBossFormation")?.value, 5);
+      gmIdleBossDraftTeams.push({ id:`gm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`, name, cardIds, formationFront, source:"gm", gmUid:activeCloudUid, updatedAt:Date.now() });
+      const nameInput = document.getElementById("gmIdleBossTeamName"); if (nameInput) nameInput.value = "";
+      renderGMIdleBossEditor();
+      showToast(`เพิ่ม “${name}” เข้ารายการแล้ว`);
+    }
+
+    async function gmPublishIdleBossTeams() {
+      if (gmPanelBusy || !gmAccess || !gmAccess.isGM) return;
+      if (!cloudReady || !activeCloudUid || !cloudModules || !cloudDb) return showToast("Firebase ยังไม่พร้อม");
+      if (!gmIdleBossDraftTeams.length) return showToast("ต้องเพิ่มทีมอย่างน้อย 1 ทีมก่อนเผยแพร่");
+      gmPanelBusy = true;
+      const status = document.getElementById("gmIdleBossStatus");
+      try {
+        const now = Date.now();
+        const payload = Object.fromEntries(gmIdleBossDraftTeams.map((team,index) => {
+          const clean = normalizeIdleBossTeam({ ...team, source:"gm", gmUid:activeCloudUid, updatedAt:now }, index);
+          return [clean.id, clean];
+        }).filter(([,team]) => team));
+        let rootOk = false, profileOk = false;
+        try { await cloudModules.set(cloudModules.ref(cloudDb,"idleBossTeams"), payload); rootOk = true; } catch (error) { console.warn("idleBossTeams root publish skipped:", error); }
+        try {
+          const updates = {};
+          updates[`publicProfiles/${activeCloudUid}/idleBossTeams`] = payload;
+          updates[`publicProfiles/${activeCloudUid}/idleBossTeamsPublisherRole`] = "gm";
+          updates[`publicProfiles/${activeCloudUid}/idleBossTeamsUpdatedAt`] = now;
+          await cloudModules.update(cloudModules.ref(cloudDb), updates);
+          profileOk = true;
+        } catch (error) { console.warn("idleBossTeams profile fallback publish skipped:", error); }
+        if (!rootOk && !profileOk) throw new Error("idle-boss-publish-denied");
+        await writeGMAudit("gm-publish-idle-boss-teams", { teamCount:Object.keys(payload).length, rootOk, profileOk });
+        idleBossTeams = Object.values(payload);
+        idleBossTeamsLoadedAt = now;
+        if (status) status.textContent = `เผยแพร่ ${idleBossTeams.length} ทีมสำเร็จ • ช่องทาง ${rootOk ? "Root" : ""}${rootOk && profileOk ? " + " : ""}${profileOk ? "Public Profile" : ""}`;
+        currentIdleOpponent = null;
+        renderIdle();
+        showToast("เผยแพร่ทีมบอส IDLE ให้เซิร์ฟเวอร์แล้ว");
+      } catch (error) {
+        const message = String(error && error.message) === "idle-boss-publish-denied" ? "Firebase Rules ยังไม่อนุญาต idleBossTeams และ publicProfiles fallback" : firebaseErrorMessage(error,"เผยแพร่ทีมบอส IDLE");
+        if (status) status.textContent = message;
+        showToast(message);
+      } finally { gmPanelBusy = false; }
+    }
+
         function renderFriends() {
       const loggedIn = Boolean(cloudReady && activeCloudUid);
       document.getElementById("friendsLoginRequired").classList.toggle("hidden", loggedIn);
@@ -27217,6 +28106,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       document.getElementById("battleView").classList.toggle("hidden", activeTab !== "battle");
       document.getElementById("worldBossView").classList.toggle("hidden", activeTab !== "worldBoss");
       document.getElementById("arenaView").classList.toggle("hidden", activeTab !== "arena");
+      document.getElementById("idleView").classList.toggle("hidden", activeTab !== "idle");
       document.getElementById("friendsView").classList.toggle("hidden", activeTab !== "friends");
       document.getElementById("collectionTools").classList.toggle("hidden", activeTab !== "collection");
       document.getElementById("workspace").scrollIntoView({ block: "start", behavior: "smooth" });
@@ -27634,6 +28524,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderGMSelectedCard(false);
       renderGMRewardEditor();
       renderGMDraftRewards();
+      renderGMIdleBossEditor();
     }
 
     function openGMPanel() {
@@ -27800,6 +28691,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       renderBattle();
       renderWorldBoss();
       renderArena();
+      renderIdle();
       renderFriends();
       renderAccount();
       renderUtilityDock();
@@ -28847,6 +29739,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     function resetSave() {
       if (!window.confirm("เริ่มเกมใหม่และลบเซฟในเบราว์เซอร์นี้ใช่ไหม?")) return;
+      idleAutoRunning = false;
+      idleStopRequested = false;
       state = defaultState();
       saveState(true);
       closeModal();
@@ -28878,6 +29772,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         renderTabs();
         if (activeTab === "friends") refreshFriends();
         if (activeTab === "arena") refreshArenaData();
+        if (activeTab === "idle") { refreshIdleBossTeams(false); renderIdle(); }
         if (activeTab === "worldBoss") renderWorldBoss();
         return;
       }
@@ -28920,6 +29815,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "gm-remove-reward") { gmDraftRewards.splice(Math.max(0, Number(target.dataset.index) || 0), 1); renderGMDraftRewards(); }
       if (action === "gm-clear-rewards") { gmDraftRewards = []; renderGMDraftRewards(); }
       if (action === "gm-send-mail") gmSendEventMail();
+      if (action === "gm-add-idle-boss-team") gmAddIdleBossTeam();
+      if (action === "gm-remove-idle-boss-team") { gmIdleBossDraftTeams.splice(Math.max(0, Number(target.dataset.index) || 0), 1); renderGMIdleBossEditor(); }
+      if (action === "gm-publish-idle-boss-teams") gmPublishIdleBossTeams();
+      if (action === "gm-refresh-idle-boss-teams") refreshIdleBossTeams(true);
       if (action === "use-item-pack") useInventoryPack(target.dataset.itemId, Number(target.dataset.times) || 1);
       if (action === "open-item-selector") openItemSelector(target.dataset.itemId);
       if (action === "close-item-selector") closeItemSelector();
@@ -28999,6 +29898,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (action === "toggle-tower-team") toggleTowerTeam(cardId);
       if (action === "toggle-arena-team") toggleArenaTeam(cardId);
       if (action === "arena-battle") runArenaBattle();
+      if (action === "idle-start") startIdleAuto();
+      if (action === "idle-stop") stopIdleAuto();
+      if (action === "idle-toggle-rewards") toggleIdleRewardPanel();
+      if (action === "idle-refresh-boss-teams") refreshIdleBossTeams(true);
       if (action === "world-boss-battle") runWorldBossBattle();
       if (action === "refresh-world-boss") { normalizeWorldBossStateForToday(false); renderWorldBoss(); showToast("รีเฟรชข้อมูลบอสวันนี้แล้ว"); }
       if (action === "refresh-arena") refreshArenaData(true);
@@ -29140,14 +30043,15 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       }
       const map = {
         towerFormationSelect:["battle","formationFront"], towerCommandSelect:["battle","commandStrategy"], towerTargetSelect:["battle","targetStrategy"],
-        arenaFormationSelect:["arena","formationFront"], arenaCommandSelect:["arena","commandStrategy"], arenaTargetSelect:["arena","targetStrategy"]
+        arenaFormationSelect:["arena","formationFront"], arenaCommandSelect:["arena","commandStrategy"], arenaTargetSelect:["arena","targetStrategy"],
+        idleFormationSelect:["idle","formationFront"], idleCommandSelect:["idle","commandStrategy"], idleTargetSelect:["idle","targetStrategy"]
       };
       if (!map[id]) return;
       const [scope, field] = map[id];
       state[scope][field] = field === "formationFront" ? normalizeFormationFront(event.target.value, 5) : String(event.target.value || "");
       saveState(true);
-      if (scope === "battle") renderBattle(); else renderArena();
-      showToast(`บันทึกแผนการรบ ${scope === "battle" ? "ไต่หอ" : "ARENA"} แล้ว`);
+      if (scope === "battle") renderBattle(); else if (scope === "idle") { currentIdleOpponent = null; renderIdle(); } else renderArena();
+      showToast(`บันทึกแผนการรบ ${scope === "battle" ? "ไต่หอ" : scope === "idle" ? "IDLE" : "ARENA"} แล้ว`);
     });
 
     document.addEventListener("dragstart", event => {
