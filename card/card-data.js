@@ -4668,27 +4668,58 @@ window.ACC_CARD_DATA = [
   },
   {
     "id": 36,
-    "name": "Yuki Suou",
+    "name": "ลีฟา",
     "rarity": "SSR",
-    "element": "ไฟ",
-    "power": 27800,
-        "hp": 139000,
-        "defense": 11100,
-    "incomePerSec": 824,
-    "upgradeDustBase": 220,
-    "upgradeDustGrowth": 1.052,
-    "awakenMax": 7,
+    "element": "ลม",
+  "balanceSchemaVersion": 4,
+  "power": 18000,
+  "hp": 90000,
+  "defense": 7200,
+  "speed": 96,
+  "incomePerSec": 155,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1530,
+  "upgradeDustGrowth": 1.013,
+  "awakenMax": 20,
     "icon": "",
     "image": "36.png",
     "ability": {
-      "name": "พี่ชายมายบราเทอร์...",
-      "description": "หากจัดทีมไฟครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "ไฟ":5}, "leaderOnly": true},
+      "name": "Shield magic",
+      "description": "เมื่อเริ่มต่อสู้จะฟื้นฟูโล่ให้เพื่อนร่วมทีม 1 ครั้ง และทุกครั้งที่โจมตีจะเพิ่มความต้านทานต่อสถานะผิดปกติ 'เลือดไหล' ให้เพื่อนร่วมทีมเป็นเวลา 2 เทิร์น",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.20 }
-      ]
+        {
+          "type": "restoreShieldHits",
+          "value": 1,
+          "targetSide": "ally",
+          "condition": {
+            "afterOwnAttacks": 1,
+            "repeat": true
+          },
+          "targetSelection": "all"
+        },
+        {
+          "type": "abnormalStatusResistance",
+          "targetSide": "ally",
+          "condition": {
+            "onOwnAttack": true
+          },
+          "durationTurns": 2,
+          "targetSelection": "all",
+          "scope": "target",
+          "resistStatuses": [
+            "bleed"
+          ],
+          "statuses": [
+            "bleed"
+          ]
+        }
+      ],
+      "condition": {
+        "onBattleStart": true
+      }
         }
   },
   {
@@ -4764,102 +4795,222 @@ window.ACC_CARD_DATA = [
   },
   {
     "id": 15,
-    "name": "Yuki Asuna",
-    "rarity": "SSR",
+    "name": "ยูกิ อาสึนะ",
+    "rarity": "LR",
     "element": "แสง",
-    "power": 27000,
-        "hp": 135000,
-        "defense": 10800,
-    "incomePerSec": 800,
-    "upgradeDustBase": 220,
-    "upgradeDustGrowth": 1.052,
-    "awakenMax": 7,
+  "balanceSchemaVersion": 4,
+  "power": 24000,
+  "hp": 120000,
+  "defense": 9600,
+  "speed": 100,
+  "incomePerSec": 230,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1795,
+  "upgradeDustGrowth": 1.015,
+  "awakenMax": 20,
     "icon": "",
     "image": "15.png",
-    "ability": {
-      "name": "ประกายแสงแห่งหวัง...",
-      "description": "หากจัดทีมแสงครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +25%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "แสง":5}, "leaderOnly": true},
+    "ability": [{
+      "name": "ประกายแสงแห่งไอแครค",
+      "description": "เมื่อเริ่มต่อสู้จะเพิ่มพลังโจมตีของทีมทั้งหมดขึ้น 40% และเพิ่มอัตราคริติคอลของทีมทั้งหมดขึ้น 20%",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {"onBattleStart": true},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.25 }
-      ]
-        }  
+        {
+          "type": "teamPowerRate",
+          "value": 0.4,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        },
+        {
+          "type": "criticalRate",
+          "value": 0.2,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        }
+      ],
+      "condition": {
+        "onBattleStart": true
+      }
+    },
+    {
+      "name": "Linear",
+      "description": "เมื่อโจมตีครบ 4 ครั้ง การโจมตีครั้งถัดไปจะโจมตีศัตรู 4 เป้าหมายด้วยดาเมจ 250% และเร่งเทิร์นของเอฟเฟกต์ทั้งหมดของฝ่ายตรงข้ามขึ้น 2 เทิร์น",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena",
+        "worldBoss"
+      ],
+      "effects": [
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "default",
+          "targetCount": 4,
+          "damageRate": 2.5
+        },
+        {
+          "type": "accelerateTurnEffects",
+          "value": 2,
+          "targetSelection": "all",
+          "successRate": 1,
+          "turns": 2,
+          "targetSide": "enemy"
+        }
+      ],
+      "condition": {
+        "afterOwnAttacks": 4, "repeat": true
+      }
+  } 
+]
   },
   {
     "id": 16,
-    "name": "Sinobu",
+    "name": "ริน",
     "rarity": "SSR",
-    "element": "น้ำ",
-    "power": 27000,
-        "hp": 135000,
-        "defense": 10800,
-    "incomePerSec": 800,
-    "upgradeDustBase": 220,
-    "upgradeDustGrowth": 1.052,
-    "awakenMax": 7,
+    "element": "เหล็ก",
+  "balanceSchemaVersion": 4,
+  "power": 18000,
+  "hp": 90000,
+  "defense": 7200,
+  "speed": 96,
+  "incomePerSec": 155,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1530,
+  "upgradeDustGrowth": 1.013,
+  "awakenMax": 20,
     "icon": "",
     "image": "16.png",
     "ability": {
-      "name": "ลิ้มรสพิษของฉันไหม...",
-      "description": "หากจัดทีมน้ำครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "น้ำ":5}, "leaderOnly": true},
+      "name": "สายฟ้าฝ่าเปรี้ยง...",
+      "description": "เมื่อโจมตีครบ 5 ครั้ง การโจมตีครั้งถัดไปจะโจมตีศัตรู 1 เป้าหมายด้วยดาเมจ 500% และมีโอกาส 30% ที่จะทำให้เป้าหมายติดสถานะช็อตเป็นเวลา 3 เทิร์น",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {"afterOwnAttacks": 5, "repeat": true},
       "effects": [
-        { "type": "teamHpRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.2 }
-      ]
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "default",
+          "targetCount": 1,
+          "damageRate": 5
+        },
+        {
+          "type": "applyStatus",
+          "targetSide": "enemy",
+          "targetSelection": "all",
+          "status": "shock",
+          "successRate": 0.3,
+          "targetCount": 1,
+          "durationTurns": 3,
+          "chainAfterHits": 2,
+          "chainCount": 1
+        }
+      ],
+      "condition": {
+        "afterOwnAttacks": 5,
+        "repeat": true
+      }
         }
   },
   {
     "id": 17,
-    "name": "Nami",
+    "name": "อารูเอะ",
     "rarity": "SSR",
     "element": "ลม",
-    "power": 27000,
-        "hp": 135000,
-        "defense": 10800,
-    "incomePerSec": 800,
-    "upgradeDustBase": 220,
-    "upgradeDustGrowth": 1.052,
-    "awakenMax": 7,
+  "balanceSchemaVersion": 4,
+  "power": 18000,
+  "hp": 90000,
+  "defense": 7200,
+  "speed": 96,
+  "incomePerSec": 155,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1530,
+  "upgradeDustGrowth": 1.013,
+  "awakenMax": 20,
     "icon": "",
     "image": "17.png",
     "ability": {
-      "name": "เงินอยู่ในอากาศ...",
-      "description": "หากจัดทีมลมครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "ลม":5}, "leaderOnly": true},
+      "name": "นามของข้า คือ อารูเอะ...",
+      "description": "เมื่อเริ่มต่อสู้จะเพิ่มอัตราคริติคอลของทีมทั้งหมดขึ้น 40% และเพิ่มดาเมจคริติคอลของทีมทั้งหมดขึ้น 50% ทุกครั้งที่ตีคริติคอล",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {"onBattleStart": true},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.2 }
-      ]
+        {
+          "type": "criticalRate",
+          "value": 0.4,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        },
+        {
+          "type": "criticalDamageRate",
+          "value": 0.5,
+          "targetSide": "ally",
+          "condition": {
+            "repeat": true,
+            "onCritical": true
+          },
+          "targetSelection": "all"
+        }
+      ],
+      "condition": {
+        "onBattleStart": true
+      }
         }
   },
   {
     "id": 18,
-    "name": "Waguri Kaoruko",
+    "name": "ฮัตสึนะ มิกุ(ชุดนักเรียน)",
     "rarity": "SSR",
-    "element": "ดิน",
-    "power": 27000,
-        "hp": 135000,
-        "defense": 10800,
-    "incomePerSec": 800,
-    "upgradeDustBase": 220,
-    "upgradeDustGrowth": 1.052,
-    "awakenMax": 7,
+    "element": "ไฟ",
+  "balanceSchemaVersion": 4,
+  "power": 18000,
+  "hp": 90000,
+  "defense": 7200,
+  "speed": 96,
+  "incomePerSec": 155,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1530,
+  "upgradeDustGrowth": 1.013,
+  "awakenMax": 20,
     "icon": "",
     "image": "18.png",
     "ability": {
-      "name": "เค้กชิ้นนี้ซื้อที่ไหนคะ...",
-      "description": "หากจัดทีมดินครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": { "minElementCount": { "ดิน":5}, "leaderOnly": true},
+      "name": "ไม่อยากไปโรงเรียนเลย...",
+      "description": "เมื่อตีครบ 4 ครั้ง การโจมตีครั้งถัดไปจะโจมตีศัตรู 1 เป้าหมายด้วยดาเมจ 3000% แถวหน้าก่อน และเพิ่มอัตราคริติคอลของตัวเองขึ้น 10% (สูงสุด 5 ครั้ง) และเจาะเกราะของศัตรูที่ถูกโจมตี 50% ",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
+      "condition": {"afterOwnAttacks": 4, "repeat": true},
       "effects": [
-        { "type": "teamHpRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.2 }
-      ]
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "front",
+          "targetCount": 1,
+          "damageRate": 30
+        },
+        {
+          "type": "criticalRateStack",
+          "value": 0.1,
+          "targetSide": "self",
+          "maxStacks": 5,
+          "stackKey": "sharedStack",
+          "targetSelection": "all"
+        },
+        {
+          "type": "defensePenetrationRate",
+          "value": 0.5,
+          "targetSide": "enemy",
+          "targetSelection": "hitTargets"
+        }
+      ],
+      "condition": {
+        "afterOwnAttacks": 4,
+        "repeat": true
+      }
         }
   },
   {
