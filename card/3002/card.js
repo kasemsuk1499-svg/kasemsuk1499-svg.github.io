@@ -9,7 +9,7 @@ ACC_REGISTER_CARD({
   defense: 10000,
   speed: 107,
   incomePerSec: 330,
-  normalAttackTargetCount: 3,
+  normalAttackTargetCount: 2,
   targetSelection: "default",
   upgradeDustBase: 1107,
   upgradeDustGrowth: 1.017,
@@ -63,13 +63,13 @@ ACC_REGISTER_CARD({
           targetSelection: "hitTargets",
           status: "freeze",
           successRate: 0.3,
-          targetCount: 3
+          targetCount: 2
         }
       ]
     },
     {
       name: "เอลวัน: อาร์ส ไวส์",
-      description: "ทุกๆการโจมตี 3 ครั้ง เอลฟาเรียจะสร้างร่างโคลนน้ำแข็งตัวเอง 1 ร่าง สูงสุด 5 ร่าง และตัวเองได้รับโล่ 1",
+      description: "ทุกๆการโจมตี 4 ครั้ง เอลฟาเรียจะสร้างร่างโคลนน้ำแข็งตัวเอง 1 ร่าง สูงสุด 5 ร่าง และตัวเองได้รับโล่ 1",
       activeIn: [
         "team",
         "tower",
@@ -104,7 +104,7 @@ ACC_REGISTER_CARD({
         }
       ],
       condition: {
-        afterOwnAttacks: 2
+        afterOwnAttacks: 3
       },
       activeCutscene: {
         enabled: true,
@@ -124,7 +124,7 @@ ACC_REGISTER_CARD({
     },
 {
   name: "สเตลลาส นาเทีย",
-  description: "ทุกการโจมตีครั้งที่ 5 จะโจมตีด้วยหอกน้ำแข็ง ดาเมจ 3500% เจาะเกราะ 80% และแช่แข็ง 100% 1 เป้าหมาย",
+  description: "ทุกการโจมตีครั้งที่ 5 จะโจมตีด้วยหอกน้ำแข็ง ดาเมจ 3200% เจาะเกราะ 60% และแช่แข็ง 100% 1 เป้าหมาย",
   activeIn: [
     "team",
     "tower",
@@ -134,13 +134,13 @@ ACC_REGISTER_CARD({
   effects: [
     {
       type: "nextAttackPowerRate",
-      value: 35,
+      value: 32,
       effectOperation: "increase",
       targetSide: "self"
     },
     {
       type: "defensePenetrationRate",
-      value: 0.8,
+      value: 0.6,
       effectOperation: "increase",
       targetSide: "enemy",
       targetSelection: "hitTargets"
