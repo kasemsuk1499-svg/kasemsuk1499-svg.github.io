@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-22-idle-clone-scale-v146">
-  <title>Anime Card Collection · Runtime v146 · Larger Idle Clones</title>
+  <meta name="gacha-app-build" content="2026-07-22-focus-silence-targeting-v147">
+  <title>Anime Card Collection · Runtime v147 · Focus, Silence & Ally Revive</title>
   <style>
     :root {
       color-scheme: dark;
@@ -10696,6 +10696,7 @@
       BLOCK_RATE: "blockRate",
       DAMAGE_TAKEN_RATE: "damageTakenRate",
       DODGE_RATE: "dodgeRate",
+      FOCUS_RATE: "focusRate",
       RARITY_POWER_RATE: "rarityPowerRate",
       RARITY_HP_RATE: "rarityHpRate",
       RARITY_DEFENSE_RATE: "rarityDefenseRate",
@@ -12791,6 +12792,7 @@
       if (nested.onCritical === true || String(nested.triggerOn || "").toLowerCase() === "critical") return result("critical", nested.afterCriticalHits || 1, { onCritical:true });
       if (nested.onAllyActiveSkill === true || String(nested.triggerOn || "").toLowerCase() === "allyactiveskill") return result("allyActiveSkill", nested.afterActiveSkills || 1, { onAllyActiveSkill:true });
       if (nested.onKill === true || String(nested.triggerOn || "").toLowerCase() === "kill") return result("kill", nested.afterKills || 1, { onKill:true });
+      if (nested.onAllyDeath === true || String(nested.triggerOn || "").toLowerCase() === "allydeath") return result("allyDeath", nested.afterAllyDeaths || 1, { onAllyDeath:true });
       if (nested.onDeath === true || nested.onDead === true || String(nested.triggerOn || "").toLowerCase() === "death" || String(nested.triggerOn || "").toLowerCase() === "dead") return result("death", nested.afterDeaths || nested.afterDeathCount || 1, { onDeath:true, repeat:false });
       if (common.sourceHpBelowRate !== null || common.sourceHpAboveRate !== null || String(nested.triggerOn || "").toLowerCase() === "hpthreshold") return result("hpThreshold", 1);
       const onOwnAttack = nested.onOwnAttack === true || nested.triggerOnOwnAttack === true || String(nested.triggerOn || "").trim().toLowerCase() === "ownattack";
@@ -12816,7 +12818,7 @@
       delete result.domainActive;
       delete result.requiredDomainId;
       delete result.afterDomainAttacks;
-      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","sourceRevived","afterRevive","afterRevived","afterDeathRevive","afterReviveNextAttack","onFirstAttackAfterRevive","firstAttackAfterRevive","sourceReviveActive","whileRevived","reviveActive","sourceReviveMode","requiredReviveMode","reviveModeRequired","sourceTransformed","whileTransformed","transformActive","sourceTransformId","requiredTransformId","transformIdRequired","maxActivations","maxTriggers"].forEach(key => delete result[key]);
+      ["onBattleStart","onDamaged","afterDamagedHits","onCritical","afterCriticalHits","onAllyActiveSkill","afterActiveSkills","onKill","afterKills","onAllyDeath","afterAllyDeaths","onDeath","onDead","afterDeaths","afterDeathCount","sourceHpBelowRate","sourceHpAboveRate","targetHpBelowRate","targetHpAboveRate","sourceRevived","afterRevive","afterRevived","afterDeathRevive","afterReviveNextAttack","onFirstAttackAfterRevive","firstAttackAfterRevive","sourceReviveActive","whileRevived","reviveActive","sourceReviveMode","requiredReviveMode","reviveModeRequired","sourceTransformed","whileTransformed","transformActive","sourceTransformId","requiredTransformId","transformIdRequired","maxActivations","maxTriggers"].forEach(key => delete result[key]);
       return result;
     }
 
@@ -13011,6 +13013,10 @@
         statusImmunity: CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE,
         abnormalStatusImmunity: CARD_ABILITY_EFFECT_TYPES.ABNORMAL_STATUS_RESISTANCE,
         powerRate: CARD_ABILITY_EFFECT_TYPES.CARD_POWER_RATE,
+        focus: CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE,
+        accuracyRate: CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE,
+        hitRate: CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE,
+        precisionRate: CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE,
         hpRate: CARD_ABILITY_EFFECT_TYPES.CARD_HP_RATE,
         ignoreAbilityCondition: CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS,
         activateField: CARD_ABILITY_EFFECT_TYPES.ACTIVATE_DOMAIN,
@@ -13177,6 +13183,11 @@
       if (["hittargets", "hit-targets", "hit_targets", "attackedtargets", "attacktargets", "เป้าหมายที่โดนโจมตี", "ผู้ที่โดนโจมตี"].includes(mode)) return "hitTargets";
       if (["all", "everyone", "ทุกคน", "ทั้งหมด"].includes(mode)) return "all";
       if (["specific", "selected", "เจาะจง", "กำหนด"].includes(mode)) return "specific";
+      if (["lowhp", "lowesthp", "hplowest", "เลือดต่ำสุด"].includes(mode)) return "lowHp";
+      if (["highatk", "highestatk", "atkhighest", "พลังโจมตีสูงสุด"].includes(mode)) return "highAtk";
+      if (["front", "frontline", "แนวหน้า"].includes(mode)) return "front";
+      if (["back", "backline", "แนวหลัง"].includes(mode)) return "back";
+      if (["default", "current", "self", "firstko", "first-ko"].includes(mode)) return mode === "first-ko" ? "firstKo" : mode;
       return "random";
     }
 
@@ -13210,7 +13221,11 @@
       const normalizedMode = normalizeAbilitySelectionMode(mode, "random");
       if (normalizedMode === "all" || normalizedMode === "hitTargets") return list;
       const safeCount = Math.max(1, Math.min(list.length || 1, Math.floor(Number(count) || 1)));
-      if (normalizedMode === "specific") return list.slice(0, safeCount);
+      if (normalizedMode === "lowHp") return [...list].sort((a,b)=>(Number(a.currentHp ?? a.hp ?? getCardHp(a))||0)-(Number(b.currentHp ?? b.hp ?? getCardHp(b))||0)).slice(0,safeCount);
+      if (normalizedMode === "highAtk") return [...list].sort((a,b)=>(Number(b.power ?? getCardPower(b))||0)-(Number(a.power ?? getCardPower(a))||0)).slice(0,safeCount);
+      if (normalizedMode === "front") return list.slice(0,safeCount);
+      if (normalizedMode === "back") return [...list].reverse().slice(0,safeCount);
+      if (["specific","default","current","self","firstKo"].includes(normalizedMode)) return list.slice(0, safeCount);
       return deterministicAbilityShuffle(list, seed, key).slice(0, safeCount);
     }
 
@@ -13242,7 +13257,7 @@
       if ([CARD_ABILITY_EFFECT_TYPES.COPY_ABILITIES, CARD_ABILITY_EFFECT_TYPES.STEAL_ABILITIES].includes(type)) return "transfer";
       if ([CARD_ABILITY_EFFECT_TYPES.NULLIFY_CARD_ABILITIES, CARD_ABILITY_EFFECT_TYPES.IGNORE_ABILITY_CONDITIONS].includes(type)) return "abilityControl";
       if ([CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_CYCLE, CARD_ABILITY_EFFECT_TYPES.ACTIVE_SKILL_COST_PERMANENT].includes(type)) return "cost";
-      if ([CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.LUCK_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE, CARD_ABILITY_EFFECT_TYPES.DODGE_RATE].includes(type) && value < 0) return "hitReduction";
+      if ([CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.LUCK_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE, CARD_ABILITY_EFFECT_TYPES.DODGE_RATE, CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE].includes(type) && value < 0) return "hitReduction";
       if ([CARD_ABILITY_EFFECT_TYPES.HEALING_RATE, CARD_ABILITY_EFFECT_TYPES.HEAL_HP_RATE, CARD_ABILITY_EFFECT_TYPES.HEAL_HP_FLAT].includes(type) && value < 0) return "healingReduction";
       if ([CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS, CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS, CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE].includes(type) && value < 0) return "shieldReduction";
       if ([
@@ -13287,7 +13302,7 @@
         CARD_ABILITY_EFFECT_TYPES.TEAM_POWER_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_HP_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_DEFENSE_FLAT, CARD_ABILITY_EFFECT_TYPES.TEAM_INCOME_FLAT,
         CARD_ABILITY_EFFECT_TYPES.ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_HITS, CARD_ABILITY_EFFECT_TYPES.SHIELD_HITS, CARD_ABILITY_EFFECT_TYPES.RESTORE_SHIELD_HITS,
         CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE, CARD_ABILITY_EFFECT_TYPES.LUCK_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_CRITICAL_RATE,
-        CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE, CARD_ABILITY_EFFECT_TYPES.DODGE_RATE,
+        CARD_ABILITY_EFFECT_TYPES.BLOCK_RATE, CARD_ABILITY_EFFECT_TYPES.DODGE_RATE, CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE,
         CARD_ABILITY_EFFECT_TYPES.HEALING_RATE, CARD_ABILITY_EFFECT_TYPES.SHIELD_RECOVERY_RATE,
         CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_RATE, CARD_ABILITY_EFFECT_TYPES.NEXT_ATTACK_POWER_FLAT
       ].includes(type)) return value < 0;
@@ -13418,7 +13433,7 @@
     function resolveAbilityTargetCardIdsWithResistance(effect, sourceCard, targetContext, resistanceByCardId, seed, key, resistedEffects = []) {
       let ids = resolveAbilityTargetCardIds(effect, sourceCard, targetContext);
       const mode = normalizeAbilitySelectionMode(effect && effect.targetSelection, "all");
-      if (["random","specific"].includes(mode)) {
+      if (!["all","hitTargets"].includes(mode)) {
         const cards = ids.map(id => targetContext.cards.find(card => String(card.id) === String(id))).filter(Boolean);
         const defaultCount = mode === "specific" && !Object.prototype.hasOwnProperty.call(effect || {}, "targetCount") ? cards.length : 1;
         ids = selectAbilityItems(cards, mode, effect && effect.targetCount || defaultCount, seed, `${key}:selection`).map(card => String(card.id));
@@ -14085,6 +14100,8 @@
         enemyDamageTakenRateSelectors: [],
         cardDodgeRates: {},
         enemyDodgeRateSelectors: [],
+        cardFocusRates: {},
+        enemyFocusRateSelectors: [],
         gachaRarityRates: {},
         teamPowerFlat: 0,
         teamHpFlat: 0,
@@ -14153,6 +14170,7 @@
       mergeExternalAbilityRateMap(summary.cardBlockRates, options.externalCardBlockRates, context);
       mergeExternalAbilityRateMap(summary.cardDamageTakenRates, options.externalCardDamageTakenRates, context);
       mergeExternalAbilityRateMap(summary.cardDodgeRates, options.externalCardDodgeRates, context);
+      mergeExternalAbilityRateMap(summary.cardFocusRates, options.externalCardFocusRates, context);
       mergeExternalAbilityRateMap(summary.cardIncomeRates, options.externalCardIncomeRates, context);
       mergeExternalAbilityRateMap(summary.triggerCostChanges, options.externalTriggerCostChanges, context);
       mergeExternalAbilityRateMap(summary.permanentTriggerCostChanges, options.externalPermanentTriggerCostChanges, context);
@@ -14357,6 +14375,12 @@
                 else addAbilityMapRate(summary.cardDodgeRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
                 break;
               }
+              case CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE: {
+                const side = normalizeAbilityTargetSide(effect.targetSide);
+                if (side === "enemy") summary.enemyFocusRateSelectors.push({ sourceCard, ability, effect: record });
+                else addAbilityMapRate(summary.cardFocusRates, resolveLocalTargets(record, sourceCard, record._runtimeEffectKey), value);
+                break;
+              }
               case CARD_ABILITY_EFFECT_TYPES.GACHA_RARITY_RATE:
                 addAbilityMapRate(summary.gachaRarityRates, normalizeAbilityRarities(effect.targetRarities || effect.rarities), value);
                 break;
@@ -14526,6 +14550,9 @@
       Object.keys(summary.cardDodgeRates).forEach(id => {
         summary.cardDodgeRates[id] = Math.max(-1, Number(summary.cardDodgeRates[id]) || 0);
       });
+      Object.keys(summary.cardFocusRates).forEach(id => {
+        summary.cardFocusRates[id] = Math.max(-1, Number(summary.cardFocusRates[id]) || 0);
+      });
       Object.keys(summary.cardDamageTakenRates).forEach(id => {
         summary.cardDamageTakenRates[id] = Math.max(Number(CONFIG.combatMinDamageTakenRate || -1), Number(summary.cardDamageTakenRates[id]) || 0);
       });
@@ -14644,6 +14671,7 @@
         externalCardBlockRates: resolveEnemyRateMap(enemyLocal.enemyBlockRateSelectors, allyContext, allyCrossOptions),
         externalCardDamageTakenRates: resolveEnemyRateMap(enemyLocal.enemyDamageTakenRateSelectors, allyContext, allyCrossOptions),
         externalCardDodgeRates: resolveEnemyRateMap(enemyLocal.enemyDodgeRateSelectors, allyContext, allyCrossOptions),
+        externalCardFocusRates: resolveEnemyRateMap(enemyLocal.enemyFocusRateSelectors, allyContext, allyCrossOptions),
         externalCardIncomeRates: resolveEnemyRateMap(enemyLocal.enemyCardIncomeSelectors, allyContext, allyCrossOptions),
         externalTriggerCostChanges: resolveEnemyRateMap(enemyLocal.enemyTriggerCostSelectors, allyContext, allyCrossOptions),
         externalPermanentTriggerCostChanges: resolveEnemyRateMap(enemyLocal.enemyPermanentTriggerCostSelectors, allyContext, allyCrossOptions),
@@ -14663,6 +14691,7 @@
         externalCardBlockRates: resolveEnemyRateMap(allyLocal.enemyBlockRateSelectors, enemyContext, enemyCrossOptions),
         externalCardDamageTakenRates: resolveEnemyRateMap(allyLocal.enemyDamageTakenRateSelectors, enemyContext, enemyCrossOptions),
         externalCardDodgeRates: resolveEnemyRateMap(allyLocal.enemyDodgeRateSelectors, enemyContext, enemyCrossOptions),
+        externalCardFocusRates: resolveEnemyRateMap(allyLocal.enemyFocusRateSelectors, enemyContext, enemyCrossOptions),
         externalCardIncomeRates: resolveEnemyRateMap(allyLocal.enemyCardIncomeSelectors, enemyContext, enemyCrossOptions),
         externalTriggerCostChanges: resolveEnemyRateMap(allyLocal.enemyTriggerCostSelectors, enemyContext, enemyCrossOptions),
         externalPermanentTriggerCostChanges: resolveEnemyRateMap(allyLocal.enemyPermanentTriggerCostSelectors, enemyContext, enemyCrossOptions),
@@ -14862,7 +14891,8 @@
       return {
         cardBlockRates: resolveEnemyRateMap(sourceSummary.enemyBlockRateSelectors, context),
         cardDamageTakenRates: resolveEnemyRateMap(sourceSummary.enemyDamageTakenRateSelectors, context),
-        cardDodgeRates: resolveEnemyRateMap(sourceSummary.enemyDodgeRateSelectors, context)
+        cardDodgeRates: resolveEnemyRateMap(sourceSummary.enemyDodgeRateSelectors, context),
+        cardFocusRates: resolveEnemyRateMap(sourceSummary.enemyFocusRateSelectors, context)
       };
     }
 
@@ -14871,6 +14901,10 @@
     }
 
     function clampDodgeRate(value) {
+      return Math.max(0, Number(value) || 0);
+    }
+
+    function clampFocusRate(value) {
       return Math.max(0, Number(value) || 0);
     }
 
@@ -14884,6 +14918,10 @@
 
     function getAbilityAdjustedCardDodgeRate(card, abilitySummary = {}) {
       return card ? clampDodgeRate(abilitySummary.cardDodgeRates && abilitySummary.cardDodgeRates[String(card.id)]) : 0;
+    }
+
+    function getAbilityAdjustedCardFocusRate(card, abilitySummary = {}) {
+      return card ? clampFocusRate(abilitySummary.cardFocusRates && abilitySummary.cardFocusRates[String(card.id)]) : 0;
     }
 
     function getAbilityAdjustedCardDamageTakenRate(card, abilitySummary = {}) {
@@ -14927,6 +14965,7 @@
           awaken: Math.max(0, Math.floor(Number(item && item.awaken || item && item.duplicateRank || getOwned(id) && getOwned(id).duplicateRank || 0))),
           blockRate: getAbilityAdjustedCardBlockRate(card, abilitySummary),
           dodgeRate: getAbilityAdjustedCardDodgeRate(card, abilitySummary),
+          focusRate: getAbilityAdjustedCardFocusRate(card, abilitySummary),
           damageTakenRate: getAbilityAdjustedCardDamageTakenRate(card, abilitySummary),
           statusResistanceRules: abilityArray(abilitySummary.statusResistanceByCardId && abilitySummary.statusResistanceByCardId[String(id)]).map(rule => ({ ...rule })),
           slot: Math.max(1, Math.floor(Number(item && item.slot) || sourceIndex + 1))
@@ -15068,6 +15107,7 @@
         blockRate: `อัตราบล็อก ${targetText} ${signedPercent(value)} (บล็อกแล้วดาเมจส่วนตัวลด 50%)`,
         damageTakenRate: `ดาเมจที่ได้รับขั้นสุดท้าย ${targetText} ${signedPercent(value)}`,
         dodgeRate: `อัตราหลบหลีก ${targetText} ${signedPercent(value)}`,
+        focusRate: `โฟกัสขณะโจมตี ${targetText} ${signedPercent(value)} • หักล้างหลบหลีกและตาบอด`,
         healHpRate: `เมื่อสกิลทำงาน ฟื้น HP ${signedPercent(Math.max(0, value))}`,
         healHpFlat: `เมื่อสกิลทำงาน ฟื้น HP ${formatNumber(value)}`,
         healingRate: `อัตราฟื้น HP ${targetSideText} ${signedPercent(value)}`,
@@ -15281,7 +15321,7 @@
         defenseRate:number("defenseRate","defRate"), defenseFlat:number("defenseFlat","defFlat"),
         speedRate:number("speedRate","spdRate"), speedFlat:number("speedFlat","spdFlat"),
         attackHits:number("attackHits","extraHits"), criticalRate:number("criticalRate"),
-        dodgeRate:number("dodgeRate"), blockRate:number("blockRate")
+        dodgeRate:number("dodgeRate"), focusRate:number("focusRate","accuracyRate","hitRate"), blockRate:number("blockRate")
       };
     }
 
@@ -15530,7 +15570,7 @@
       if (unblockedHits > 0) {
         members.forEach(member => {
           const hpShare = Math.max(0, Number(member.hp) || 0) / totalMemberHp;
-          const dodgeRate = clampDodgeRate(member.dodgeRate);
+          const dodgeRate = Math.max(0, clampDodgeRate(member.dodgeRate) - clampFocusRate(defenseOptions && defenseOptions.focusRate));
           const blockRate = clampBlockRate(member.blockRate);
           const damageTakenRate = clampDamageTakenRate(member.damageTakenRate);
           const dodged = rollDefensiveEffects && dodgeRate > 0 && Math.random() < dodgeRate;
@@ -15576,6 +15616,7 @@
       function runtimeTriggerMode(item = {}) {
         const raw = String(item.triggerOn || "").trim().toLowerCase();
         if (item.onBattleStart || raw === "battlestart" || raw === "battle_start" || raw === "start") return "battleStart";
+        if (item.onAllyDeath || raw === "allydeath" || raw === "ally_death") return "allyDeath";
         if (item.onDeath || item.onDead || raw === "death" || raw === "dead") return "death";
         if (item.onOwnAttack || raw === "ownattack") return "ownAttack";
         return "nextAttack";
@@ -15593,6 +15634,7 @@
           cutscene: item.cutscene && typeof item.cutscene === "object" ? { ...item.cutscene } : {},
           onBattleStart: runtimeTriggerMode(item) === "battleStart",
           onDeath: runtimeTriggerMode(item) === "death",
+          onAllyDeath: runtimeTriggerMode(item) === "allyDeath",
           onOwnAttack: runtimeTriggerMode(item) === "ownAttack",
           activateImmediately: Boolean(item.activateImmediately),
           triggerOn: runtimeTriggerMode(item),
@@ -15648,6 +15690,8 @@
           enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule })),
           dodgeRateChanges: item.dodgeRateChanges && typeof item.dodgeRateChanges === "object" ? { ...item.dodgeRateChanges } : {},
           enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule })),
+          focusRateChanges: item.focusRateChanges && typeof item.focusRateChanges === "object" ? { ...item.focusRateChanges } : {},
+          enemyFocusRateRules: abilityArray(item.enemyFocusRateRules).map(rule => ({ ...rule })),
           abilityTransfers: abilityArray(item.abilityTransfers).map(record => ({ ...record, effect: record && record.effect ? { ...record.effect } : {} })),
           copiedInstanceId: String(item.copiedInstanceId || ""),
           sourceAbilityRuntimeKey: String(item.sourceAbilityRuntimeKey || ""),
@@ -15662,9 +15706,12 @@
           requiresActivationKey: String(item.requiresActivationKey || ""),
           unlocked: !String(item.requiresActivationKey || "") && !String(item.requiredDomainId || ""),
           charge: 0,
-          armed: runtimeTriggerMode(item) !== "nextAttack",
+          eventEvery: Math.max(1, Math.floor(Number(item.eventEvery) || 1)),
+          eventCharge: 0,
+          armed: ["battleStart", "ownAttack"].includes(runtimeTriggerMode(item)),
           completed: false,
-          activations: 0
+          activations: 0,
+          maxActivations: Math.max(0, Math.floor(Number(item.maxActivations || item.maxTriggers) || 0))
         })).map(trigger => {
           const cap = Math.max(1, Math.floor(Number(CONFIG.combatMaxTriggerChargeAttacks || 99)));
           trigger.permanentCostChange = Math.max(-(cap - 1), Math.min(cap - 1, trigger.permanentCostChange));
@@ -15683,12 +15730,20 @@
             trigger.cycleCostChange = 0;
             trigger.charge = 0;
             trigger.armed = true;
-          } else {
+          } else if (trigger.triggerOn === "nextAttack") {
             trigger.afterOwnAttacks = Math.max(1, Math.min(cap, trigger.baseAfterOwnAttacks + trigger.permanentCostChange + trigger.cycleCostChange));
             if (trigger.activateImmediately) {
               trigger.charge = trigger.afterOwnAttacks;
               trigger.armed = true;
             }
+          } else {
+            trigger.baseAfterOwnAttacks = 0;
+            trigger.afterOwnAttacks = 0;
+            trigger.permanentCostChange = 0;
+            trigger.cycleCostChange = 0;
+            trigger.charge = 0;
+            trigger.eventCharge = trigger.activateImmediately ? trigger.eventEvery : 0;
+            trigger.armed = Boolean(trigger.activateImmediately);
           }
           return trigger;
         });
@@ -15703,6 +15758,10 @@
         const healingRate = clampRate(options[`${prefix}HealingRate`]);
         const shieldRecoveryRate = clampRate(options[`${prefix}ShieldRecoveryRate`]);
         const criticalRate = clampCriticalRate(options[`${prefix}CriticalRate`] ?? CONFIG.combatBaseCriticalRate);
+        const focusMembers = abilityArray(options[`${prefix}Members`]).filter(Boolean);
+        const focusPower = focusMembers.reduce((sum, member) => sum + Math.max(1, Number(member.power) || 1), 0);
+        const weightedFocus = focusPower > 0 ? focusMembers.reduce((sum, member) => sum + Math.max(1, Number(member.power) || 1) * clampFocusRate(member.focusRate), 0) / focusPower : 0;
+        const focusRate = clampFocusRate(options[`${prefix}FocusRate`] ?? weightedFocus);
         const criticalDamageMultiplier = Math.max(1, Number(options[`${prefix}CriticalDamageMultiplier`] || CONFIG.combatCriticalDamageMultiplier || 1.5));
         return {
           initialAttack,
@@ -15721,6 +15780,8 @@
           initialShieldRecoveryRate: shieldRecoveryRate,
           criticalRate,
           initialCriticalRate: criticalRate,
+          focusRate,
+          initialFocusRate: focusRate,
           initialIncomeRate: 0,
           incomeRate: 0,
           initialIncomeFlat: 0,
@@ -15740,6 +15801,7 @@
             awaken: Math.max(0, Math.floor(Number(member.awaken) || 0)),
             blockRate: clampBlockRate(member.blockRate),
             dodgeRate: clampDodgeRate(member.dodgeRate),
+            focusRate: clampFocusRate(member.focusRate),
             damageTakenRate: clampDamageTakenRate(member.damageTakenRate),
             statusResistanceRules: abilityArray(member.statusResistanceRules).map(rule => ({ ...rule }))
           })),
@@ -16606,6 +16668,8 @@
             enemyDamageTakenRateRules: abilityArray(trigger.enemyDamageTakenRateRules).map(rule => ({ ...rule })),
             dodgeRateChanges: { ...trigger.dodgeRateChanges },
             enemyDodgeRateRules: abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule })),
+            focusRateChanges: { ...trigger.focusRateChanges },
+            enemyFocusRateRules: abilityArray(trigger.enemyFocusRateRules).map(rule => ({ ...rule })),
             abilityTransfers: abilityArray(trigger.abilityTransfers).map(record => ({ ...record, transferDepth: trigger.transferDepth })),
             domainActivations: abilityArray(trigger.domainActivations).map(rule => ({ ...rule })),
             nullifyRules: abilityArray(trigger.nullifyRules).map(rule => ({ ...rule })),
@@ -16654,6 +16718,8 @@
           enemyDamageTakenRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDamageTakenRateRules).map(rule => ({ ...rule }))),
           dodgeRateChanges: fired.reduce((map, trigger) => { Object.entries(trigger.dodgeRateChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
           enemyDodgeRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyDodgeRateRules).map(rule => ({ ...rule }))),
+          focusRateChanges: fired.reduce((map, trigger) => { Object.entries(trigger.focusRateChanges || {}).forEach(([id, change]) => addAbilityMapRate(map, [id], change)); return map; }, {}),
+          enemyFocusRateRules: fired.flatMap(trigger => abilityArray(trigger.enemyFocusRateRules).map(rule => ({ ...rule }))),
           abilityTransfers: fired.flatMap(trigger => abilityArray(trigger.abilityTransfers).map(record => ({ ...record, transferDepth: trigger.transferDepth }))),
           domainActivations: fired.flatMap(trigger => abilityArray(trigger.domainActivations).map(rule => ({ ...rule, sourceCardId: trigger.sourceCardId, sourceAbilityName: trigger.name, passiveEffects: abilityArray(trigger.domainPassiveEffects).map(effect => ({ ...effect })) }))),
           nullifyRules: fired.flatMap(trigger => abilityArray(trigger.nullifyRules).map(rule => ({ ...rule, _sourceCardId: trigger.sourceCardId, _sourceAbilityName: trigger.name, _runtimeEffectKey: `${trigger.key}:nullify` }))),
@@ -16971,6 +17037,8 @@
         applyMemberRateChanges(defender, "damageTakenRate", {}, activation.enemyDamageTakenRateRules, clampDamageTakenRate);
         applyMemberRateChanges(attacker, "dodgeRate", activation.dodgeRateChanges, [], clampDodgeRate);
         applyMemberRateChanges(defender, "dodgeRate", {}, activation.enemyDodgeRateRules, clampDodgeRate);
+        applyMemberRateChanges(attacker, "focusRate", activation.focusRateChanges, [], clampFocusRate);
+        applyMemberRateChanges(defender, "focusRate", {}, activation.enemyFocusRateRules, clampFocusRate);
 
         const pendingHitChange = clampPendingHits(attacker.pendingAttackHits);
         attacker.pendingAttackHits = 0;
@@ -16986,7 +17054,7 @@
         const effectiveCriticalRate = clampCriticalRate(attacker.criticalRate + nextAttackCriticalRateChange);
         const critical = rollCriticalHit(effectiveCriticalRate);
         const criticalMultiplier = critical ? attacker.criticalDamageMultiplier : 1;
-        const exchange = resolveCombatExchange(activeAttack, defender.defense, activeHits, defender.shieldHits, variance * criticalMultiplier, { members: defender.members, rollDefensiveEffects: true });
+        const exchange = resolveCombatExchange(activeAttack, defender.defense, activeHits, defender.shieldHits, variance * criticalMultiplier, { members: defender.members, rollDefensiveEffects: true, focusRate: attacker.focusRate });
         if (critical) attacker.totalCriticalHits += 1;
         defender.totalBlocks += exchange.blockedMembers.length;
         defender.totalDodges += exchange.dodgedMembers.length;
@@ -17206,8 +17274,8 @@
       const criticalRateOf = side => clampCriticalRate(options[`${side}CriticalRate`] ?? CONFIG.combatBaseCriticalRate);
 
       function normalizeTrigger(item = {}, index = 0) {
-        const allowedModes = new Set(["battleStart","ownAttack","nextAttack","damaged","critical","allyActiveSkill","kill","death","hpThreshold"]);
-        const requested = String(item.triggerOn || (item.onBattleStart ? "battleStart" : (item.onDeath || item.onDead) ? "death" : item.onOwnAttack ? "ownAttack" : "nextAttack"));
+        const allowedModes = new Set(["battleStart","ownAttack","nextAttack","damaged","critical","allyActiveSkill","kill","allyDeath","death","hpThreshold"]);
+        const requested = String(item.triggerOn || (item.onBattleStart ? "battleStart" : item.onAllyDeath ? "allyDeath" : (item.onDeath || item.onDead) ? "death" : item.onOwnAttack ? "ownAttack" : "nextAttack"));
         const mode = allowedModes.has(requested) ? requested : "nextAttack";
         const baseCost = mode === "nextAttack" ? Math.max(1, Math.floor(Number(item.baseAfterOwnAttacks ?? item.afterOwnAttacks) || 1)) : 0;
         const permanent = Math.round(Number(item.permanentCostChange) || 0);
@@ -17291,6 +17359,7 @@
             pendingCriticalRateChange: 0,
             blockRate: Math.max(0, Number(item.blockRate) || 0),
             dodgeRate: Math.max(0, Number(item.dodgeRate) || 0),
+            focusRate: Math.max(0, Number(item.focusRate) || 0),
             damageTakenRate: Number(item.damageTakenRate) || 0,
             guardTurns: 0,
             timedEffects: [],
@@ -17342,6 +17411,7 @@
           member.initialCriticalRate = Number(member.criticalRate) || 0;
           member.initialBlockRate = Number(member.blockRate) || 0;
           member.initialDodgeRate = Number(member.dodgeRate) || 0;
+          member.initialFocusRate = Number(member.focusRate) || 0;
           member.initialDamageTakenRate = Number(member.damageTakenRate) || 0;
           const identityCard = runtimeIdentityCard(member);
           member.baseName = member.name;
@@ -17487,7 +17557,7 @@
           powerRate:number("powerRate","attackRate","atkRate"), powerFlat:number("powerFlat","attackFlat","atkFlat"),
           hpRate:number("hpRate"), hpFlat:number("hpFlat"), defenseRate:number("defenseRate","defRate"), defenseFlat:number("defenseFlat","defFlat"),
           speedRate:number("speedRate","spdRate"), speedFlat:number("speedFlat","spdFlat"), attackHits:number("attackHits","extraHits"),
-          criticalRate:number("criticalRate"), dodgeRate:number("dodgeRate"), blockRate:number("blockRate"),
+          criticalRate:number("criticalRate"), dodgeRate:number("dodgeRate"), focusRate:number("focusRate","accuracyRate","hitRate"), blockRate:number("blockRate"),
           damageTakenRate:number("damageTakenRate"), healingRate:number("healingRate"), shieldRecoveryRate:number("shieldRecoveryRate")
         };
       }
@@ -17547,7 +17617,7 @@
         const token = String(member.transformToken || "");
         const deltas = member.transformDeltas && typeof member.transformDeltas === "object" ? member.transformDeltas : {};
         clearTransformedAbilities(team, member, token);
-        ["power","maxHp","defense","speed","attackHits","criticalRate","dodgeRate","blockRate","damageTakenRate","healingRate","shieldRecoveryRate"].forEach(field => {
+        ["power","maxHp","defense","speed","attackHits","criticalRate","dodgeRate","focusRate","blockRate","damageTakenRate","healingRate","shieldRecoveryRate"].forEach(field => {
           if (Number.isFinite(Number(deltas[field]))) member[field] = Number(member[field] || 0) - Number(deltas[field] || 0);
         });
         member.power = Math.max(1, Number(member.power) || 1);
@@ -17558,6 +17628,7 @@
         member.attackHits = Math.max(1, Math.round(Number(member.attackHits) || 1));
         member.criticalRate = Math.max(0, Number(member.criticalRate) || 0);
         member.dodgeRate = Math.max(0, Number(member.dodgeRate) || 0);
+        member.focusRate = Math.max(0, Number(member.focusRate) || 0);
         member.blockRate = Math.max(0, Number(member.blockRate) || 0);
         member.name = String(member.baseName || member.name);
         member.currentImage = String(member.baseImage || "");
@@ -17586,7 +17657,7 @@
               defense:Number(member.defense || 0) * bonuses.defenseRate + bonuses.defenseFlat,
               speed:Number(member.speed || 0) * bonuses.speedRate + bonuses.speedFlat,
               attackHits:bonuses.attackHits,
-              criticalRate:bonuses.criticalRate, dodgeRate:bonuses.dodgeRate, blockRate:bonuses.blockRate,
+              criticalRate:bonuses.criticalRate, dodgeRate:bonuses.dodgeRate, focusRate:bonuses.focusRate, blockRate:bonuses.blockRate,
               damageTakenRate:bonuses.damageTakenRate, healingRate:bonuses.healingRate, shieldRecoveryRate:bonuses.shieldRecoveryRate,
               elements:[...member.elements], normalAttackTargetCount:member.normalAttackTargetCount
             };
@@ -17598,6 +17669,7 @@
             member.attackHits = Math.max(1, Math.round(Number(member.attackHits) + delta.attackHits));
             member.criticalRate = Math.max(0, Number(member.criticalRate) + delta.criticalRate);
             member.dodgeRate = Math.max(0, Number(member.dodgeRate) + delta.dodgeRate);
+            member.focusRate = Math.max(0, Number(member.focusRate) + delta.focusRate);
             member.blockRate = Math.max(0, Number(member.blockRate) + delta.blockRate);
             member.damageTakenRate = Number(member.damageTakenRate) + delta.damageTakenRate;
             member.healingRate = Number(member.healingRate) + delta.healingRate;
@@ -17688,6 +17760,8 @@
           initialCriticalRate:isSummon ? criticalRateOf(team.side) : actor.criticalRate,
           initialBlockRate:isSummon ? Math.max(0, Number(identityCard.blockRate) || 0) : actor.blockRate,
           initialDodgeRate:isSummon ? Math.max(0, Number(identityCard.dodgeRate) || 0) : actor.dodgeRate,
+          focusRate:isSummon ? Math.max(0, Number(identityCard.focusRate) || 0) : actor.focusRate,
+          initialFocusRate:isSummon ? Math.max(0, Number(identityCard.focusRate) || 0) : actor.focusRate,
           initialDamageTakenRate:isSummon ? Number(identityCard.damageTakenRate) || 0 : actor.damageTakenRate,
           baseName:isSummon ? String(identityCard.name || `Summon ${baseId}`) : `${actor.name} · ร่างแยก ${spawnIndex + 1}`,
           baseImage:getCardImage(identityCard), currentImage:getCardImage(identityCard),
@@ -17934,7 +18008,7 @@
         const value = Number(delta) || 0;
         if (!value) return false;
         if (field === "damageTakenRate") return value < 0;
-        return ["power","attack","maxHp","defense","speed","attackHits","shieldHits","criticalRate","blockRate","dodgeRate","healingRate","shieldRecoveryRate"].includes(String(field)) && value > 0;
+        return ["power","attack","maxHp","defense","speed","attackHits","shieldHits","criticalRate","blockRate","dodgeRate","focusRate","healingRate","shieldRecoveryRate"].includes(String(field)) && value > 0;
       }
       function revertTimedEffectNow(member, effect) {
         if (!member || !effect) return;
@@ -17958,6 +18032,7 @@
         lowerToBaseline("criticalRate", "initialCriticalRate", -1);
         lowerToBaseline("blockRate", "initialBlockRate", -1);
         lowerToBaseline("dodgeRate", "initialDodgeRate", -1);
+        lowerToBaseline("focusRate", "initialFocusRate", -1);
         lowerToBaseline("healingRate", "initialHealingRate", -1);
         lowerToBaseline("shieldRecoveryRate", "initialShieldRecoveryRate", -1);
         const baseDamageTaken = Number(member.initialDamageTakenRate);
@@ -18225,7 +18300,8 @@
         const expired = tickStatusDurations(actor, "control-skip");
         return { prevented:true, statusType:blocker.status, statusLabel:blocker.label, expired };
       }
-      function rollBattleBlindMiss(actor) { const missRate = activeStatusEffects(actor,"blind").reduce((sum,item)=>sum+(Number(item.missRate)||0),0); return Math.random() < Math.max(0,Math.min(1,missRate)); }
+      function getBattleFocusRate(actor) { return Math.max(0, Number(actor && actor.focusRate) || 0); }
+      function rollBattleBlindMiss(actor) { const missRate = activeStatusEffects(actor,"blind").reduce((sum,item)=>sum+(Number(item.missRate)||0),0); const effectiveMissRate = Math.max(0, missRate - getBattleFocusRate(actor)); return Math.random() < Math.min(1,effectiveMissRate); }
       function tickBattleDoomAfterAttack(actor) {
         const events = [];
         activeStatusEffects(actor,"death").forEach(effect => { effect.attacksRemaining = Math.max(0,Number(effect.attacksRemaining||0)-1); events.push({ status:"tick", statusType:"death", statusLabel:effect.label, targetCardId:actor.id, targetName:actor.name, attacksRemaining:effect.attacksRemaining }); if (effect.attacksRemaining <= 0 && actor.currentHp > 0) { actor.currentHp = 0; actor.ko = true; actor.deathReason = "death-status"; effect.expired = true; events.push({ status:"applied", statusType:"death", statusLabel:effect.label, targetCardId:actor.id, targetName:actor.name, instantDeath:true }); } });
@@ -18548,26 +18624,36 @@
         let candidates = (includeKo
           ? targetTeam.members.filter(member => member.ko || member.currentHp <= 0)
           : alive(targetTeam)).filter(member => memberMatchesRuntimeRule(member, rule || {}));
-        if (side !== "enemy" && rule && rule.excludeSelf) candidates = candidates.filter(member => member.id !== actor.id);
-        if (side === "self") return candidates.some(member => member.id === actor.id) && actor.currentHp > 0 && !actor.ko ? [actor] : [];
-        const hasFilter = abilityArray(rule && rule.ids).length || abilityArray(rule && rule.elements).length || abilityArray(rule && rule.rarities).length;
-        const selectionRaw = String(rule && rule.selection || (includeKo ? "firstKo" : side === "enemy" ? "current" : "self")).trim();
-        const selection = normalizeAbilitySelectionMode(selectionRaw, selectionRaw || "random") === "hitTargets" ? "hitTargets" : selectionRaw.toLowerCase();
-        if (selection === "hitTargets") {
-          const hitOrder = abilityArray(targetTeam && targetTeam.currentHitTargetIds).map(String);
-          if (!hitOrder.length) return [];
-          const byId = new Map(candidates.map(member => [String(member.id), member]));
-          return hitOrder.map(id => byId.get(id)).filter(Boolean);
-        }
-        if (!hasFilter && !includeKo) {
-          if (side === "enemy" && selection !== "all" && selection !== "random") return currentTarget && currentTarget.currentHp > 0 && !currentTarget.ko ? [currentTarget] : [];
-          if (side !== "enemy" && selection !== "all" && selection !== "random") return actor.currentHp > 0 && !actor.ko ? [actor] : [];
+        if (side === "teammates" || (side !== "enemy" && rule && rule.excludeSelf)) candidates = candidates.filter(member => String(member.id) !== String(actor.id));
+        if (side === "self") {
+          const validSelf = includeKo ? (actor.ko || actor.currentHp <= 0) : (actor.currentHp > 0 && !actor.ko);
+          return validSelf && memberMatchesRuntimeRule(actor, rule || {}) ? [actor] : [];
         }
         if (!candidates.length) return [];
+        const requestedCount = Math.max(1, Math.min(5, Math.floor(Number(rule && rule.targetCount) || 1), candidates.length));
+        const selectionRaw = String(rule && rule.selection || (includeKo ? "firstKo" : side === "enemy" ? "current" : "self")).trim();
+        const normalizedSelection = normalizeAbilitySelectionMode(selectionRaw, selectionRaw || "random");
+        const selection = normalizedSelection === "hitTargets" ? "hitTargets" : String(normalizedSelection || selectionRaw).toLowerCase();
+        if (selection === "hitTargets") {
+          const hitOrder = abilityArray(targetTeam && targetTeam.currentHitTargetIds).map(String);
+          const byId = new Map(candidates.map(member => [String(member.id), member]));
+          return hitOrder.map(id => byId.get(id)).filter(Boolean).slice(0, requestedCount);
+        }
         if (selection === "all") return candidates;
-        if (selection === "random") return [candidates[Math.floor(Math.random() * candidates.length)]];
-        if (selection === "lowesthp" || selection === "lowhp") return [[...candidates].sort((a,b)=>a.currentHp-b.currentHp)[0]];
-        return [candidates[0]];
+        if (selection === "random") {
+          const pool = [...candidates];
+          const picked = [];
+          while (pool.length && picked.length < requestedCount) picked.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+          return picked;
+        }
+        if (["lowesthp","lowhp"].includes(selection)) return [...candidates].sort((a,b)=>(a.currentHp/Math.max(1,a.maxHp))-(b.currentHp/Math.max(1,b.maxHp)) || a.currentHp-b.currentHp).slice(0, requestedCount);
+        if (["highestatk","highatk"].includes(selection)) return [...candidates].sort((a,b)=>(Number(b.power)||0)-(Number(a.power)||0)).slice(0, requestedCount);
+        if (selection === "front") return [...candidates].sort((a,b)=>String(a.row)==="front"&&String(b.row)!=="front"?-1:String(b.row)==="front"&&String(a.row)!=="front"?1:(Number(a.slot)||0)-(Number(b.slot)||0)).slice(0, requestedCount);
+        if (selection === "back") return [...candidates].sort((a,b)=>String(a.row)==="back"&&String(b.row)!=="back"?-1:String(b.row)==="back"&&String(a.row)!=="back"?1:(Number(b.slot)||0)-(Number(a.slot)||0)).slice(0, requestedCount);
+        if (selection === "specific" || includeKo) return candidates.slice(0, requestedCount);
+        if (side === "enemy" && currentTarget && candidates.includes(currentTarget)) return [currentTarget, ...candidates.filter(member => member !== currentTarget)].slice(0, requestedCount);
+        if (side !== "enemy" && candidates.includes(actor)) return [actor, ...candidates.filter(member => member !== actor)].slice(0, requestedCount);
+        return candidates.slice(0, requestedCount);
       }
 
       function runtimeTriggerConditionMet(trigger, source, target) {
@@ -18602,8 +18688,10 @@
           if (trigger.completed || trigger.triggerOn !== eventName) return;
           const owner = team.members.find(member => member.id === trigger.sourceCardId);
           const isDeathEvent = String(eventName || "") === "death" || String(trigger.triggerOn || "") === "death";
+          const isAllyDeathEvent = String(eventName || "") === "allyDeath" || String(trigger.triggerOn || "") === "allyDeath";
           if (!owner) return;
           if (!isDeathEvent && (owner.currentHp <= 0 || owner.ko)) return;
+          if (isAllyDeathEvent && sourceMember && String(owner.id) === String(sourceMember.id)) return;
           if (!allSources && sourceMember && trigger.sourceCardId && trigger.sourceCardId !== sourceMember.id) return;
           if (!runtimeTriggerConditionMet(trigger, owner, targetMember)) return;
           trigger.eventCharge += Math.max(1, Math.floor(Number(amount) || 1));
@@ -18671,9 +18759,10 @@
         return true;
       }
 
-      function makeActivation(team, actor, target) {
+      function makeActivation(team, actor, target, triggerOnFilter = "") {
         const skillLocked = activeStatusEffects(actor).some(effect => ["skill-cancel", "skill-stolen", "silence", "seal"].includes(effect.status));
-        const available = skillLocked ? [] : triggersForActor(team, actor, target, true);
+        const allAvailable = skillLocked ? [] : triggersForActor(team, actor, target, true);
+        const available = triggerOnFilter ? allAvailable.filter(trigger => trigger.triggerOn === triggerOnFilter) : allAvailable;
         const always = available.filter(trigger => trigger.triggerOn === "ownAttack" || trigger.triggerOn === "battleStart" || !["nextAttack"].includes(trigger.triggerOn));
         const active = shouldUseActive(team, actor, available) ? available.filter(trigger => trigger.triggerOn === "nextAttack") : [];
         const fired = [...always, ...active].filter((trigger, index, list) => list.indexOf(trigger) === index);
@@ -18713,6 +18802,9 @@
           blockRateChanges: fired.reduce((map,t)=>Object.assign(map,t.blockRateChanges||{}),{}),
           damageTakenRateChanges: fired.reduce((map,t)=>Object.assign(map,t.damageTakenRateChanges||{}),{}),
           dodgeRateChanges: fired.reduce((map,t)=>Object.assign(map,t.dodgeRateChanges||{}),{}),
+          enemyDodgeRateRules: fired.flatMap(t=>abilityArray(t.enemyDodgeRateRules).map(rule=>({...rule}))),
+          focusRateChanges: fired.reduce((map,t)=>Object.assign(map,t.focusRateChanges||{}),{}),
+          enemyFocusRateRules: fired.flatMap(t=>abilityArray(t.enemyFocusRateRules).map(rule=>({...rule}))),
           triggerCostChanges: fired.reduce((map,t)=>{Object.entries(t.triggerCostChanges||{}).forEach(([id,v])=>map[id]=(map[id]||0)+Number(v||0));return map;},{}),
           permanentTriggerCostChanges: fired.reduce((map,t)=>{Object.entries(t.permanentTriggerCostChanges||{}).forEach(([id,v])=>map[id]=(map[id]||0)+Number(v||0));return map;},{}),
           followUpAttacks: fired.flatMap(t=>abilityArray(t.followUpAttacks).map(rule=>({...rule,sourceTriggerKey:t.key}))),
@@ -18775,6 +18867,17 @@
           if (!member || !delta) return;
           if (hasPurificationStatus(member) && isBeneficialTimedDelta(field, delta)) return;
           member[field] = Number(member[field] || 0) + delta;
+        });
+      }
+
+      function applyRuntimeRateRules(rules, ownerTeam, defenderTeam, actor, currentTarget, field) {
+        abilityArray(rules).forEach(rule => {
+          resolveRuntimeTargets({ ...rule, side:"enemy", selection:rule.selection || rule.targetSelection || "random", targetCount:rule.targetCount || 1 }, ownerTeam, defenderTeam, actor, currentTarget).forEach(member => {
+            const delta = Number(rule.value || 0);
+            if (!delta) return;
+            if (hasPurificationStatus(member) && isBeneficialTimedDelta(field, delta)) return;
+            member[field] = Number(member[field] || 0) + delta;
+          });
         });
       }
 
@@ -19127,7 +19230,8 @@
 
           unblockedHits += 1;
           const blindMiss = rollBattleBlindMiss(actor);
-          const dodged = blindMiss || Math.random() < Math.max(0, Number(target.dodgeRate) || 0);
+          const effectiveDodgeRate = Math.max(0, (Number(target.dodgeRate) || 0) - getBattleFocusRate(actor));
+          const dodged = blindMiss || Math.random() < Math.min(1, effectiveDodgeRate);
           if (blindMiss) blindMissHits += 1;
           if (dodged) {
             dodgedHits += 1;
@@ -19235,6 +19339,11 @@
         applyRateMaps(ownerTeam, activation.blockRateChanges, "blockRate");
         applyRateMaps(ownerTeam, activation.damageTakenRateChanges, "damageTakenRate");
         applyRateMaps(ownerTeam, activation.dodgeRateChanges, "dodgeRate");
+        applyRateMaps(ownerTeam, activation.focusRateChanges, "focusRate");
+        applyRuntimeRateRules(activation.enemyBlockRateRules, ownerTeam, defenderTeam, actor, currentTarget, "blockRate");
+        applyRuntimeRateRules(activation.enemyDamageTakenRateRules, ownerTeam, defenderTeam, actor, currentTarget, "damageTakenRate");
+        applyRuntimeRateRules(activation.enemyDodgeRateRules, ownerTeam, defenderTeam, actor, currentTarget, "dodgeRate");
+        applyRuntimeRateRules(activation.enemyFocusRateRules, ownerTeam, defenderTeam, actor, currentTarget, "focusRate");
 
         const resistanceActivationEvents = applyStatusResistanceEffects(activation.statusResistanceEffects, ownerTeam, defenderTeam, actor, currentTarget, reason);
         const speedEvents = applySpeedRules(activation.speedTargetRules, ownerTeam, defenderTeam, actor, currentTarget);
@@ -19452,6 +19561,11 @@
           applyRateMaps(team, activation.blockRateChanges, "blockRate");
           applyRateMaps(team, activation.damageTakenRateChanges, "damageTakenRate");
           applyRateMaps(team, activation.dodgeRateChanges, "dodgeRate");
+          applyRateMaps(team, activation.focusRateChanges, "focusRate");
+          applyRuntimeRateRules(activation.enemyBlockRateRules, team, defenderTeam, actor, target, "blockRate");
+          applyRuntimeRateRules(activation.enemyDamageTakenRateRules, team, defenderTeam, actor, target, "damageTakenRate");
+          applyRuntimeRateRules(activation.enemyDodgeRateRules, team, defenderTeam, actor, target, "dodgeRate");
+          applyRuntimeRateRules(activation.enemyFocusRateRules, team, defenderTeam, actor, target, "focusRate");
           activation.fired.forEach(trigger => {
             applyTimedRate(actor, "criticalRate", Number(trigger.criticalRateChange)||0, trigger);
             applyTimedRate(actor, "healingRate", Number(trigger.healingRateChange)||0, trigger);
@@ -19603,13 +19717,22 @@
           const deathTriggerTurns = [];
           killedMembers.forEach(deadMember => {
             chargeRuntimeEvent(defenderTeam, "death", deadMember, actor, 1, false);
-            const deathActivation = makeActivation(defenderTeam, deadMember, actor);
+            const deathActivation = makeActivation(defenderTeam, deadMember, actor, "death");
             if (deathActivation.fired.length) {
               const deathTurn = applySupportActivationEffects(defenderTeam, team, deadMember, actor, deathActivation, turnIndex, "death");
               deathTurn.round = round;
               deathTurn.memberStates = battleMemberStates();
               deathTriggerTurns.push(deathTurn);
             }
+            chargeRuntimeEvent(defenderTeam, "allyDeath", deadMember, actor, 1, true);
+            alive(defenderTeam).filter(owner => String(owner.id) !== String(deadMember.id)).forEach(owner => {
+              const allyDeathActivation = makeActivation(defenderTeam, owner, deadMember, "allyDeath");
+              if (!allyDeathActivation.fired.length) return;
+              const allyDeathTurn = applySupportActivationEffects(defenderTeam, team, owner, deadMember, allyDeathActivation, turnIndex, "allyDeath");
+              allyDeathTurn.round = round;
+              allyDeathTurn.memberStates = battleMemberStates();
+              deathTriggerTurns.push(allyDeathTurn);
+            });
           });
           const counterEvents = executeCounterAttacks(defenderTeam, team, damagedMembers, actor, entry.side);
           const captureEvents = applyCaptureReviveRules(team, defenderTeam, actor, killedMembers, turnIndex);
@@ -20992,18 +21115,31 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const filter = getAbilityTargetFilter(effect);
         const hasFilters = filter.ids.length || filter.elements.length || filter.rarities.length;
         const side = normalizeAbilityTargetSide(effect.targetSide);
-        const targetItems = selected.length
+        const sourceRuntimeId = cardIdString(record.sourceCard && record.sourceCard.id);
+        const targetSelectionRaw = String(effect.targetSelection || "").trim();
+        const targetSelection = targetSelectionRaw ? normalizeAbilitySelectionMode(targetSelectionRaw, "random") : "";
+        const targetCandidates = selected.length
           ? selected
           : (!hasFilters && side === "ally"
-            ? items.filter(item => !(effect.excludeSelf && getBattleItemId(item) === cardIdString(record.sourceCard && record.sourceCard.id)))
+            ? items.filter(item => !(effect.excludeSelf && getBattleItemId(item) === sourceRuntimeId))
             : []);
+        const buildSelection = targetSelection || (side === "self" ? "self" : "all");
+        const buildTargetCount = buildSelection === "specific" && !Object.prototype.hasOwnProperty.call(effect || {}, "targetCount")
+          ? targetCandidates.length
+          : Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount) || 1)));
+        const targetItems = ["all", "hitTargets"].includes(buildSelection)
+          ? targetCandidates
+          : selectAbilityItems(
+              targetCandidates,
+              buildSelection,
+              buildTargetCount,
+              `${record.key || record.triggerKey || "trigger"}|${items.map(getBattleItemId).join(",")}`,
+              `${record.key || "effect"}:ally-targets`
+            );
         const targetPower = targetItems.reduce((sum, item) => sum + getBattleItemStat(item, summary, "power", snapshotMode), 0);
         const targetHp = targetItems.reduce((sum, item) => sum + getBattleItemStat(item, summary, "hp", snapshotMode), 0);
         const value = Number(effect.value || 0);
         const effectType = normalizeAbilityEffectType(effect.type);
-        const sourceRuntimeId = cardIdString(record.sourceCard && record.sourceCard.id);
-        const targetSelectionRaw = String(effect.targetSelection || "").trim();
-        const targetSelection = targetSelectionRaw ? normalizeAbilitySelectionMode(targetSelectionRaw, "random") : "";
         // สำหรับฮิต/โล่/ฮีลในระบบรายตัว: ถ้าไม่ระบุเป้าหมาย จะถือว่าเป็นเจ้าของสกิล
         const runtimeTargetRule = {
           side,
@@ -21018,6 +21154,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           rarities: side === "enemy" ? normalizeAbilityRarities(filter.rarities) : [],
           match: normalizeAbilityTargetMatch(filter.match),
           selection: targetSelection || (side === "enemy" ? "current" : "self"),
+          targetCount: Math.max(1, Math.min(5, Math.floor(Number(effect.targetCount) || 1))),
           excludeSelf: Boolean(effect.excludeSelf),
           sourceCardId: sourceRuntimeId,
           effectType,
@@ -21122,6 +21259,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
             enemyDamageTakenRateRules: [],
             dodgeRateChanges: {},
             enemyDodgeRateRules: [],
+            focusRateChanges: {},
+            enemyFocusRateRules: [],
             followUpAttacks: [], counterAttacks: [], adaptiveElement: null, multiElementAttacks: [],
             criticalDamageRate: 0, defensePenetrationRate: 0
           });
@@ -21339,6 +21478,10 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           case CARD_ABILITY_EFFECT_TYPES.DODGE_RATE:
             if (side === "enemy") group.enemyDodgeRateRules.push({ ...getAbilityTargetFilter(effect), value, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
             else targetItems.forEach(item => addAbilityMapRate(group.dodgeRateChanges, [getBattleItemId(item)], value));
+            break;
+          case CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE:
+            if (side === "enemy") group.enemyFocusRateRules.push({ ...getAbilityTargetFilter(effect), value, effectType: normalizeAbilityEffectType(effect.type), resistanceKey: record.key });
+            else targetItems.forEach(item => addAbilityMapRate(group.focusRateChanges, [getBattleItemId(item)], value));
             break;
           case CARD_ABILITY_EFFECT_TYPES.CRITICAL_RATE:
           case CARD_ABILITY_EFFECT_TYPES.LUCK_RATE:
@@ -21568,6 +21711,8 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         enemyDamageTakenRateRules: abilityArray(item.enemyDamageTakenRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DAMAGE_TAKEN_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: clampDamageTakenRate(rule && rule.value) })).filter(rule => rule.value),
         dodgeRateChanges: Object.fromEntries(Object.entries(item.dodgeRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Number(change) || 0)]).filter(([, change]) => change)),
         enemyDodgeRateRules: abilityArray(item.enemyDodgeRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.DODGE_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Number(rule && rule.value) || 0) })).filter(rule => rule.value),
+        focusRateChanges: Object.fromEntries(Object.entries(item.focusRateChanges || {}).map(([id, change]) => [String(id), Math.max(-1, Number(change) || 0)]).filter(([, change]) => change)),
+        enemyFocusRateRules: abilityArray(item.enemyFocusRateRules).map(rule => ({ ...rule, effectType: normalizeAbilityEffectType(rule && rule.effectType || CARD_ABILITY_EFFECT_TYPES.FOCUS_RATE), resistanceKey: String(rule && rule.resistanceKey || ""), value: Math.max(-1, Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         healTargetRules: abilityArray(item.healTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities) })),
         hitTargetRules: abilityArray(item.hitTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
         shieldTargetRules: abilityArray(item.shieldTargetRules).map(rule => ({ ...rule, ids: normalizeAbilityCardIds(rule && rule.ids), elements: normalizeAbilityElements(rule && rule.elements), rarities: normalizeAbilityRarities(rule && rule.rarities), value: Math.round(Number(rule && rule.value) || 0) })).filter(rule => rule.value),
@@ -21609,7 +21754,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         statusResistanceEffects: abilityArray(item.statusResistanceEffects).map(effect => ({ ...effect })),
         removeAllEnemyShield: Boolean(item.removeAllEnemyShield),
         requiredDomainId: String(item.requiredDomainId || "")
-      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.spawnRules).length || abilityArray(item.transformRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.statusApplyRules).length || abilityArray(item.cleanseStatusRules).length || abilityArray(item.purgeBuffRules).length || abilityArray(item.turnAccelerationRules).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
+      })).filter(item => abilityArray(item.abilityTransfers).length || abilityArray(item.healTargetRules).length || abilityArray(item.hitTargetRules).length || abilityArray(item.shieldTargetRules).length || abilityArray(item.reviveRules).length || abilityArray(item.spawnRules).length || abilityArray(item.transformRules).length || abilityArray(item.speedTargetRules).length || abilityArray(item.tauntRules).length || abilityArray(item.captureReviveRules).length || item.attackBonus || item.healHp || item.extraHits || item.enemyNextAttackHits || item.restoreShieldHits || item.enemyShieldHitsChange || item.healingRateChange || item.enemyHealingRateChange || item.shieldRecoveryRateChange || item.enemyShieldRecoveryRateChange || item.criticalRateChange || item.enemyCriticalRateChange || item.nextAttackCriticalRate || item.enemyNextAttackCriticalRate || item.maxHpGain || item.attackStackGain || abilityArray(item.stackEffects).length || Object.keys(item.triggerCostChanges || {}).length || abilityArray(item.enemyTriggerCostRules).length || Object.keys(item.permanentTriggerCostChanges || {}).length || abilityArray(item.enemyPermanentTriggerCostRules).length || Object.keys(item.blockRateChanges || {}).length || abilityArray(item.enemyBlockRateRules).length || Object.keys(item.damageTakenRateChanges || {}).length || abilityArray(item.enemyDamageTakenRateRules).length || Object.keys(item.dodgeRateChanges || {}).length || abilityArray(item.enemyDodgeRateRules).length || Object.keys(item.focusRateChanges || {}).length || abilityArray(item.enemyFocusRateRules).length || abilityArray(item.domainActivations).length || abilityArray(item.nullifyRules).length || abilityArray(item.statusResistanceEffects).length || abilityArray(item.statusApplyRules).length || abilityArray(item.cleanseStatusRules).length || abilityArray(item.purgeBuffRules).length || abilityArray(item.turnAccelerationRules).length || abilityArray(item.followUpAttacks).length || abilityArray(item.counterAttacks).length || item.adaptiveElement || abilityArray(item.multiElementAttacks).length || item.criticalDamageRate || item.defensePenetrationRate || item.removeAllEnemyShield);
     }
 
 
@@ -25472,6 +25617,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       blockRate: "บล็อก block ลดดาเมจ 50 เปอร์เซ็นต์",
       damageTakenRate: "ลดเพิ่มความเสียหาย ดาเมจรับ ขั้นสุดท้าย damage taken",
       dodgeRate: "หลบหลีก dodge miss เข้าเป้า ลดอัตราหลบ",
+      focusRate: "โฟกัส focus accuracy hit แม่นยำ ล็อกเป้า หักหลบ ลดตาบอด ตีเข้า",
       activeSkillCost: "คอส cost ลดคอส เพิ่มคอส active skill ทีมเรา ฝ่ายตรงข้าม เจาะจง",
       healHpRate: "ฮีล hp heal ฟื้นฟูเลือด พลังชีวิต เปอร์เซ็นต์",
       healHpFlat: "ฮีล hp heal ฟื้นฟูเลือด พลังชีวิต ค่าคงที่",
