@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-22-focus-silence-targeting-v147">
-  <title>Anime Card Collection · Runtime v147 · Focus, Silence & Ally Revive</title>
+  <meta name="gacha-app-build" content="2026-07-22-revive-trigger-targeting-v148">
+  <title>Anime Card Collection · Runtime v148 · Revive Trigger & Target Count</title>
   <style>
     :root {
       color-scheme: dark;
@@ -14196,7 +14196,13 @@
             const ownEffectTrigger = normalizeBattleTriggerRule(effect.condition || {});
             const persistentAfterActivation = Boolean(effect.persistentAfterActivation && abilityTrigger);
             let effectTrigger = persistentAfterActivation ? ownEffectTrigger : (ownEffectTrigger || abilityTrigger);
-            if (sourceTriggersImmediately && effectTrigger && !effectTrigger.onOwnAttack) effectTrigger = { ...effectTrigger, activateImmediately: true };
+            // v148: onBattleStart ของความสามารถหลักห้ามทำให้ Event Trigger อย่าง allyDeath/death/damaged ถูกใช้ก่อนเกิดเหตุการณ์จริง
+            // อนุญาต activateImmediately เฉพาะสกิลเริ่มการต่อสู้และสกิลนับคอสเท่านั้น
+            if (sourceTriggersImmediately && effectTrigger
+              && ["battleStart", "nextAttack"].includes(String(effectTrigger.triggerOn || ""))
+              && !effectTrigger.onOwnAttack) {
+              effectTrigger = { ...effectTrigger, activateImmediately: true };
+            }
             const parentActivationKey = abilityTrigger ? `${runtimeKey}:${JSON.stringify(abilityTrigger)}` : "";
             const conditionActive = baseConditionActive
               && (sourceIgnoresConditions || isAbilityConditionMet(getStaticAbilityCondition(effect.condition || {}), context, sourceCard));
