@@ -4543,127 +4543,326 @@ window.ACC_CARD_DATA = [
   },
   {
     "id": 46,
-    "name": "Kaoruko Waguri(YukiSuit)",
+    "name": "คาโอรุโกะ วากุริ",
     "rarity": "UR",
-    "element": "น้ำแข็ง",
-    "power": 80400,
-        "hp": 402000,
-        "defense": 32200,
-    "incomePerSec": 2280,
-    "upgradeDustBase": 750,
-    "upgradeDustGrowth": 1.064,
-    "awakenMax": 5,
+    "element": "แสง",
+  "balanceSchemaVersion": 4,
+  "power": 21000,
+  "hp": 105000,
+  "defense": 8400,
+  "speed": 98,
+  "incomePerSec": 190,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1901,
+  "upgradeDustGrowth": 1.014,
+  "awakenMax": 20,
     "icon": "",
     "image": "46.png",
-    "ability": {
-      "name": "ไม่มีที่ไหนจะดีไปกว่าการได้เจอเธอทุกวัน...",
-      "description": "หากจัดทีมร่วมกับการ์ด 'Yuki Suou(WaguriSuit)' ;การ์ดที่ชื่อ 'Yuki Suou(WaguriSuit)'ได้รับการยกเลิกเงื่อนไข และ ทีมได้รับรายได้+10%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"requiredCardIds": [37]},
+    "ability": [
+    {
+      "name": "ขนมหวานๆ",
+      "description": "เมื่อตีครบ 4 ครั้ง การโจมตีครั้งต่อไปจะโจมตีศัตรูแบบสุ่ม 3 ตัวด้วยดาเมจ 100% และลบสถานะทั้งหมดของเพื่อนร่วมทีมและลบบัฟของศัตรูที่ถูกโจมตี",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena",
+        "worldBoss"
+      ],
       "effects": [
-        { "type": "teamIncomeRate", "value": 0.1 },
-        { "type": "ignoreAbilityConditions", "targetSide": "ally", "targetCardIds": [37],"targetMatch": "all" }
-      ]
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "random",
+          "targetCount": 3,
+          "damageRate": 1
+        },
+        {
+          "type": "cleanseStatuses",
+          "targetSide": "ally",
+          "targetSelection": "all"
+        },
+        {
+          "type": "purgeBuffs",
+          "targetSide": "enemy",
+          "targetSelection": "hitTargets",
+          "successRate": 1
         }
+      ],
+      "attackTargetCount": 3,
+      "condition": {
+        "afterOwnAttacks": 4,
+        "repeat": true
+      }
+    },
+    {
+      "name": "จงฟื้นคืนชีพ",
+      "description": "เมื่อร่วมทีมที่ตายไปแล้ว คนที่ตายไปจะฟื้นคืนชีพขึ้นมา 35% ของพลังชีวิตสูงสุด",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena",
+        "worldBoss"
+      ],
+      "effects": [
+        {
+          "type": "revive",
+          "value": 0.35,
+          "targetSide": "teammates",
+          "targetSelection": "all"
+        }
+      ],
+      "condition": {
+        "targetHpBelowRate": 0
+      }
+    }
+  ]
   },
   {
     "id": 37,
-    "name": "Yuki Suou(WaguriSuit)",
+    "name": "สุโอ ยูกิ",
     "rarity": "UR",
-    "element": "น้ำแข็ง",
-    "power": 80400,
-        "hp": 402000,
-        "defense": 32200,
-    "incomePerSec": 2280,
-    "upgradeDustBase": 750,
-    "upgradeDustGrowth": 1.064,
-    "awakenMax": 5,
+    "element": "มืด",
+  "balanceSchemaVersion": 4,
+  "power": 21000,
+  "hp": 105000,
+  "defense": 8400,
+  "speed": 98,
+  "incomePerSec": 190,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1901,
+  "upgradeDustGrowth": 1.014,
+  "awakenMax": 20,
     "icon": "",
     "image": "37.png",
-    "ability": {
-      "name": "คัพCที่ขยำได้ดีกว่าคัพDที่ขยำไม่ได้เป็นไหนๆ...",
-      "description": "หากจัดทีมน้ำแข็งครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "น้ำแข็ง":5}, "leaderOnly": true},
+    "ability": [
+    {
+      "name": "น้องสาวตระกูลสุโอ",
+      "description": "เมื่่อเริ่มต่อสู้จะลดดาเมจที่เพื่อนร่วมทีมได้รับลง 30% และลดพลังชีวิตของศัตรูลง 10%",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena",
+        "worldBoss"
+      ],
       "effects": [
-        { "type": "teamHpRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.20 }
-      ]
+        {
+          "type": "damageTakenRate",
+          "value": -0.3,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        },
+        {
+          "type": "enemyHpRate",
+          "value": -0.1,
+          "targetSide": "enemy",
+          "targetSelection": "all"
         }
+      ],
+      "condition": {
+        "onBattleStart": true
+      }
+    },
+    {
+      "name": "ผู้บัญชาการ",
+      "description": "เมื่อโจมตีครบ 4 ครั้ง การโจมตีครั้งต่อไปจะโจมตีศัตรูที่พลังชีวิตต่ำที่สุดด้วยดาเมจ 1000% และขโมยความสามารถของศัตรูคนนั้นมา 1 ความสามารถ",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena",
+        "worldBoss"
+      ],
+      "effects": [
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "back",
+          "targetCount": 1,
+          "damageRate": 10
+        },
+        {
+          "type": "stealAbilities",
+          "targetSide": "enemy",
+          "targetSelection": "hitTargets",
+          "successRate": 1,
+          "abilitySelection": "random",
+          "abilityCount": 1,
+          "recipientSide": "self"
+        }
+      ],
+      "condition": {
+        "afterOwnAttacks": 4,
+        "repeat": true
+      }
+    }
+  ]
   },
   {
     "id": 11,
-    "name": "Goku",
+    "name": "ฮัตสึนะ มิกุ(ชุดงานแข่งรถ)",
     "rarity": "UR",
-    "element": "พืช",
-    "power": 80400,
-        "hp": 402000,
-        "defense": 32200,
-    "incomePerSec": 2280,
-    "upgradeDustBase": 750,
-    "upgradeDustGrowth": 1.064,
-    "awakenMax": 5,
+    "element": "เหล็ก",
+  "balanceSchemaVersion": 4,
+  "power": 21000,
+  "hp": 105000,
+  "defense": 8400,
+  "speed": 98,
+  "incomePerSec": 190,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1901,
+  "upgradeDustGrowth": 1.014,
+  "awakenMax": 20,
     "icon": "",
     "image": "11.png",
-    "ability": {
-      "name": "S2...",
-      "description": "หากจัดทีมพืชครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "พืช":5}, "leaderOnly": true},
+    "ability": [
+    {
+      "name": "'งานแข่งได้เริ่มแล้ว!'",
+      "description": "เมื่อเริ่มต่อสู้จะเพิ่มความเร็วให้ตนเองและเพื่อนร่วมทีม 2 และทุกครั้งที่โจมตีติดคริติคอล จะลดคอสสกิลแอคทีฟของเพื่อนร่วมทีมลง 1 ครั้ง",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena",
+        "worldBoss"
+      ],
       "effects": [
-        { "type": "teamPowerRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.20 }
-      ]
+        {
+          "type": "speedFlat",
+          "value": 2,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        },
+        {
+          "type": "activeSkillCostCycle",
+          "value": -1,
+          "targetSide": "teammates",
+          "condition": {
+            "onCritical": true,
+            "repeat": true
+          },
+          "targetSelection": "all"
         }
+      ]
+    },
+    {
+      "name": "หน่วยมิกุเรซคิว",
+      "description": "หากจัดทีมที่มีการ์ดชื่อ 'ฮัตสึนะ มิกุ' อยู่ด้วย จะเพิ่มอัตราคริติคอลให้ตัวเองและเพื่อนร่วมทีม 20%",
+      "activeIn": [
+        "team",
+        "tower",
+        "arena",
+        "worldBoss"
+      ],
+      "effects": [
+        {
+          "type": "criticalRate",
+          "value": 0.2,
+          "targetSide": "ally",
+          "targetSelection": "all"
+        }
+      ],
+      "condition": {
+        "anyCardNames": [
+          "ฮัตสึนะ มิกุ"
+        ]
+      }
+    }
+  ]
   },
   {
     "id": 12,
-    "name": "Zenitsu",
+    "name": "เซนอิทสึ",
     "rarity": "UR",
     "element": "สายฟ้า",
-    "power": 80400,
-        "hp": 402000,
-        "defense": 32200,
-    "incomePerSec": 2280,
-    "upgradeDustBase": 750,
-    "upgradeDustGrowth": 1.064,
-    "awakenMax": 5,
+  "balanceSchemaVersion": 4,
+  "power": 21000,
+  "hp": 105000,
+  "defense": 8400,
+  "speed": 98,
+  "incomePerSec": 190,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1901,
+  "upgradeDustGrowth": 1.014,
+  "awakenMax": 20,
     "icon": "",
     "image": "12.png",
     "ability": {
       "name": "ปราณสายฟ้ากระบวนท่าที่ 1...",
-      "description": "หากจัดทีมสายฟ้าครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ ATK+20% ,รายได้รวม +20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "สายฟ้า":5}, "leaderOnly": true},
+      "description": "เมื่่อโจมตีครบ 4 ครั้ง การโจมตีครั้งต่อไปจะโจมตีศัตรูที่พลังชีวิตต่ำที่สุดด้วยดาเมจ 5000% และหากสังหารศัตรูได้ จะลดคอสสกิลแอคทีฟของตนเองลง 3 ครั้ง",
+      "activeIn": ["tower", "worldBoss", "arena"],
+      "condition": {"afterOwnAttacks": 4, "repeat": true},
       "effects": [
-        { "type": "teamPowerRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.20 }
-      ]
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "lowHp",
+          "targetCount": 1,
+          "damageRate": 50
+        },
+        {
+          "type": "activeSkillCostCycle",
+          "value": -3,
+          "targetSide": "self",
+          "condition": {
+            "onKill": true,
+            "repeat": true
+          },
+          "targetSelection": "all"
+        }
+      ],
+      "condition": {
+        "afterOwnAttacks": 4,
+        "repeat": true
+      }
         }
   },
   {
     "id": 13,
-    "name": "Roroa Zoro",
+    "name": "วิคนัล ลินเดอร์",
     "rarity": "UR",
-    "element": "เหล็ก",
-    "power": 80400,
-        "hp": 402000,
-        "defense": 32200,
-    "incomePerSec": 2280,
-    "upgradeDustBase": 750,
-    "upgradeDustGrowth": 1.064,
-    "awakenMax": 5,
+    "element": "พืช",
+  "balanceSchemaVersion": 4,
+  "power": 21000,
+  "hp": 105000,
+  "defense": 8400,
+  "speed": 98,
+  "incomePerSec": 190,
+  "normalAttackTargetCount": 1,
+  "targetSelection": "default",
+  "upgradeDustBase": 1901,
+  "upgradeDustGrowth": 1.014,
+  "awakenMax": 20,
     "icon": "",
     "image": "13.png",
     "ability": {
       "name": "ตรีสหกโลกธาตุรวมเป็น1...",
-      "description": "หากจัดทีมเหล็กครบ5ใบ,เมื่อการ์ดนี้อยู่ในทีมแล้วตนเองเป็นหลีดเดอร์ (จัดทีมช่อง 1),ทุกคนในทีมได้รับ HP+20% ,รายได้รวม +20%",
-      "activeIn": ["team", "tower", "arena"],
-      "condition": {"minElementCount": { "เหล็ก":5}, "leaderOnly": true},
+      "description": "เมื่่อโจมตีครบ 4 ครั้ง การโจมตีครั้งต่อไปจะโจมตีศัตรู 3 เป้าหมายที่พลังโจมตีเยอะที่สุดก่อนด้วยดาเมจ 150% และมีโอกาส 40% ที่จะทำให้เป้าหมายติดตาบอดเป็นเวลา 3 เทิร์น",
+      "activeIn": ["team", "tower", "arena", "worldBoss"],
       "effects": [
-        { "type": "teamHpRate", "value": 0.2 },
-        { "type": "teamIncomeRate", "value": 0.20 }
-      ]
+        {
+          "type": "skillAttack",
+          "targetSide": "enemy",
+          "targetSelection": "highAtk",
+          "targetCount": 3,
+          "damageRate": 1.5
+        },
+        {
+          "type": "applyStatus",
+          "targetSide": "enemy",
+          "targetSelection": "hitTargets",
+          "status": "blind",
+          "successRate": 0.4,
+          "targetCount": 3,
+          "durationTurns": 3,
+          "missRate": 0.8
+        }
+      ],
+      "condition": {
+        "afterOwnAttacks": 4,
+        "repeat": true
+      }
         }
   },
   {
