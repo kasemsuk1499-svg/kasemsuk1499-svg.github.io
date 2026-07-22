@@ -4609,11 +4609,15 @@ window.ACC_CARD_DATA = [
           "type": "revive",
           "value": 0.35,
           "targetSide": "teammates",
+          "condition": {
+            "onAllyDeath": true,
+            "maxActivations": 5
+          },
           "targetSelection": "all"
         }
       ],
       "condition": {
-        "targetHpBelowRate": 0
+        "onBattleStart": true
       }
     }
   ]
