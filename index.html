@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="gacha-app-build" content="2026-07-22-revive-trigger-targeting-v148">
-  <title>Anime Card Collection · Runtime v148 · Revive Trigger & Target Count</title>
+  <meta name="gacha-app-build" content="2026-07-23-god-awaken-idle-offline-v149">
+  <title>Anime Card Collection · Runtime v149 · GOD Awaken Rule & Offline IDLE</title>
   <style>
     :root {
       color-scheme: dark;
@@ -9912,7 +9912,7 @@
       // แก้โดยอลิซ v51: ผู้เล่นยืนยันอัตราแลก Dust โดยคำนึงถึงรายได้ของ EX ที่สูงกว่า SC
       // ใช้ 100 Gems แลก 1 Dust: เงินเดือน 1,000M Gems แลกได้ 10M Dust พออัป EX จาก Lv.1 ถึงเลเวลตัน 1 ใบ
       dustGemCost: 100,
-      // ใช้ Gems อเวกการ์ดปกติ +1 ขั้นทันที (ระดับ AWAKEN ห้ามใช้ระบบนี้)
+      // ใช้ Gems อเวกการ์ดปกติ +1 ขั้นทันที (ระดับที่กำหนด moneyAwaken:false เช่น AWAKEN/GOD ห้ามใช้ระบบนี้)
       awakenGemCost: 1000000000,
       // v100: ค่าเปลี่ยนร่างจากร่างต้นที่เลเวลตันและอเวกตันเป็นระดับ AWAKEN
       awakenTransformGemCost: 50000000000,
@@ -10201,7 +10201,7 @@
   textColor: "#170b25", order: 6, stars: 5, dust: 50000,  basePower: 27000,  baseHp: 135000,  baseDefense: 10800, baseSpeed: 103, baseIncome: 275, maxLevel: 300, upgradeDustBase: 1723,   upgradeDustGrowth: 1.016, powerPerLevel: .028, incomePerLevel: .0125, awakenMax: 20,  awakenCopies: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], powerBonus: 0.035, incomeBonus: 0.023 },
       EX:  { label: "SSS",        color: "#d946ef", colors: ["#111827", "#2e1065", "#7c3aed", "#22d3ee", "#c084fc"], gradient: "linear-gradient(135deg, #111827, #2e1065 28%, #7c3aed 56%, #22d3ee 82%, #c084fc)", glow: "#e879f9", textColor: "#f8fafc", borderColor: "#facc15", order: 7, stars: 6, dust: 100000, basePower: 30000, baseHp: 150000, baseDefense: 12000, baseSpeed: 106, baseIncome: 330, maxLevel: 300, upgradeDustBase: 1107,   upgradeDustGrowth: 1.017, powerPerLevel: .032, incomePerLevel: .0215, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.04, incomeBonus: 0.025 },
       AWAKEN: { label: "AWAKEN", color: "#c084fc", colors: ["#12051f", "#5b21b6", "#8b5cf6", "#d8b4fe", "#f0abfc", "#4c1d95"], gradient: "linear-gradient(135deg, #12051f 0%, #5b21b6 22%, #8b5cf6 44%, #d8b4fe 63%, #f0abfc 79%, #4c1d95 100%)", glow: "#d8b4fe", textColor: "#fff7ff", borderColor: "#e9d5ff", order: 8, stars: 7, dust: 180000, basePower: 31200, baseHp: 156000, baseDefense: 12480, baseSpeed: 107, baseIncome: 345, maxLevel: 350, upgradeDustBase: 1450, upgradeDustGrowth: 1.0175, powerPerLevel: .033, incomePerLevel: .022, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.041, incomeBonus: 0.0255, transformOnly: true, moneyAwaken: false },
-      GOD: { label: "GOD",       color: "#f8fafc", colors: ["#020617", "#ffffff", "#d4af37", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #020617 0%, #ffffff 18%, #d4af37 42%, #111827 68%, #facc15 100%)", glow: "#fff7c2", textColor: "#111827", borderColor: "#facc15", order: 9, stars: 8, dust: 250000, basePower: 31500, baseHp: 157500, baseDefense: 12600, baseSpeed: 108, baseIncome: 350, maxLevel: 350, upgradeDustBase: 1800, upgradeDustGrowth: 1.0175, powerPerLevel: .0285, incomePerLevel: .0195, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.042, incomeBonus: 0.026 }
+      GOD: { label: "GOD",       color: "#f8fafc", colors: ["#020617", "#ffffff", "#d4af37", "#111827", "#facc15"], gradient: "linear-gradient(135deg, #020617 0%, #ffffff 18%, #d4af37 42%, #111827 68%, #facc15 100%)", glow: "#fff7c2", textColor: "#111827", borderColor: "#facc15", order: 9, stars: 8, dust: 250000, basePower: 31500, baseHp: 157500, baseDefense: 12600, baseSpeed: 108, baseIncome: 350, maxLevel: 350, upgradeDustBase: 1800, upgradeDustGrowth: 1.0175, powerPerLevel: .0285, incomePerLevel: .0195, awakenMax: 20, awakenCopies: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], powerBonus: 0.042, incomeBonus: 0.026, moneyAwaken: false }
     });
 
     // v133: ระดับต่ำสุดของระบบคือ SR — ไม่โหลด ไม่สุ่ม และไม่แสดงการ์ด N/R อีกต่อไป
@@ -11089,13 +11089,18 @@
     let idleBossTeams = [];
     let gmIdleBossDraftTeams = [];
     let idleBossTeamsLoadedAt = 0;
-    // v138: โหมดเบื้องหลังใช้เวลาจริงชดเชยรอบที่เบราว์เซอร์พัก Timer
+    // v149: โหมด IDLE ใช้เวลาจริงทั้งตอนซ่อนแท็บและตอนปิดเกม
+    // เมื่อกลับเข้าเกมจะคำนวณจำนวนไฟต์ที่ขาดจาก timestamp แล้วเล่นแบบ headless เพื่อชดเชยทั้งหมด
     const IDLE_BACKGROUND_FIGHT_MS = 2500;
-    const IDLE_BACKGROUND_MAX_CATCHUP = 1440;
+    const IDLE_BACKGROUND_MAX_CATCHUP = Number.MAX_SAFE_INTEGER;
+    const IDLE_OFFLINE_SAVE_EVERY = 25;
     let idleHiddenSince = 0;
     let idleHiddenRunsProcessed = 0;
     let idleCatchUpRuns = 0;
     let idleBackgroundWake = null;
+    let idleResumeScheduled = false;
+    let idleResumeInProgress = false;
+    let idleOfflineCatchUpInitialRuns = 0;
     let activeRevealResults = [];
     let activeRevealIndex = 0;
     let returnToReveal = false;
@@ -11318,6 +11323,13 @@
           pendingRuns: 0,
           sessionId: "",
           lastResult: null,
+          // v149: เก็บตำแหน่งลูปและเวลาไว้ เพื่อกลับมาคำนวณต่อหลังปิดเกม
+          runtimeWave: 1,
+          farmMode: false,
+          lastCalculatedAt: 0,
+          lastOfflineRuns: 0,
+          lastOfflineDurationMs: 0,
+          lastOfflineAt: 0,
           running: false
         },
         migratedFromOldSave: false
@@ -12149,8 +12161,19 @@
       next.idle.pendingRuns = Math.max(0, Math.floor(Number(next.idle.pendingRuns) || 0));
       next.idle.sessionId = String(next.idle.sessionId || "").slice(0, 100);
       next.idle.lastResult = next.idle.lastResult && typeof next.idle.lastResult === "object" ? next.idle.lastResult : null;
-      // หลังรีโหลดจะไม่เริ่มต่อสู้อัตโนมัติเอง แต่รางวัลค้างยังอยู่ให้กดส่งหรือเริ่มต่อได้
-      next.idle.running = false;
+      next.idle.runtimeWave = Math.max(1, Math.floor(Number(next.idle.runtimeWave) || Number(next.idle.currentWave) || next.idle.maxClearedWave + 1));
+      next.idle.farmMode = Boolean(next.idle.farmMode);
+      next.idle.lastCalculatedAt = Math.max(0, Number(next.idle.lastCalculatedAt) || 0);
+      next.idle.lastOfflineRuns = Math.max(0, Math.floor(Number(next.idle.lastOfflineRuns) || 0));
+      next.idle.lastOfflineDurationMs = Math.max(0, Number(next.idle.lastOfflineDurationMs) || 0);
+      next.idle.lastOfflineAt = Math.max(0, Number(next.idle.lastOfflineAt) || 0);
+      // v149: ถ้าเซฟระบุว่ากำลังฟาร์ม ให้คงสถานะไว้และโหลดเวลาที่ปิดเกมกลับมาคำนวณต่อ
+      next.idle.running = Boolean(next.idle.running);
+      if (next.idle.running && !next.idle.lastCalculatedAt) next.idle.lastCalculatedAt = next.idle.pendingStartedAt || Date.now();
+      if (!next.idle.running) {
+        next.idle.runtimeWave = Math.max(1, next.idle.maxClearedWave + 1);
+        next.idle.farmMode = false;
+      }
 
       // เพิ่มโดยอลิซ v53: รีเซ็ตภารกิจตามวันที่จริงและนับล็อกอินเป็นภารกิจแรกอัตโนมัติ
       const todayKey = getLocalDateKey();
@@ -23222,6 +23245,66 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       document.querySelectorAll(".battle-moving-clone,.battle-attack-path").forEach(node => node.remove());
     }
 
+    function formatIdleOfflineDuration(ms = 0) {
+      const totalSeconds = Math.max(0, Math.floor((Number(ms) || 0) / 1000));
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const parts = [];
+      if (days) parts.push(`${days} วัน`);
+      if (hours) parts.push(`${hours} ชม.`);
+      if (minutes) parts.push(`${minutes} นาที`);
+      if (!parts.length || seconds) parts.push(`${seconds} วินาที`);
+      return parts.slice(0, 3).join(" ");
+    }
+
+    function getIdleOfflineRunCount(now = Date.now()) {
+      if (!state.idle || !state.idle.running) return 0;
+      const lastAt = Math.max(0, Number(state.idle.lastCalculatedAt) || Number(state.idle.pendingStartedAt) || 0);
+      if (!lastAt || now <= lastAt) return 0;
+      return Math.max(0, Math.floor((now - lastAt) / IDLE_BACKGROUND_FIGHT_MS));
+    }
+
+    function scheduleIdleResumeAfterStateLoad() {
+      if (!state.idle || !state.idle.running || idleAutoRunning || idleResumeScheduled || idleResumeInProgress || idleStopRequested) return;
+      idleResumeScheduled = true;
+      window.setTimeout(() => {
+        idleResumeScheduled = false;
+        resumeIdleAutoAfterLoad();
+      }, 0);
+    }
+
+    function resumeIdleAutoAfterLoad() {
+      if (!state.idle || !state.idle.running || idleAutoRunning || idleResumeInProgress || idleStopRequested) return;
+      idleResumeInProgress = true;
+      const now = Date.now();
+      const offlineRuns = getIdleOfflineRunCount(now);
+      const lastAt = Math.max(0, Number(state.idle.lastCalculatedAt) || Number(state.idle.pendingStartedAt) || now);
+      const offlineDurationMs = Math.max(0, now - lastAt);
+      idleCatchUpRuns = Math.min(IDLE_BACKGROUND_MAX_CATCHUP, Math.max(0, idleCatchUpRuns + offlineRuns));
+      idleOfflineCatchUpInitialRuns = offlineRuns;
+      state.idle.lastOfflineRuns = offlineRuns;
+      state.idle.lastOfflineDurationMs = offlineDurationMs;
+      state.idle.lastOfflineAt = now;
+      if (offlineRuns > 0) {
+        state.idle.lastResult = {
+          tone:"running",
+          text:`โหลดเวลาออฟไลน์ ${formatIdleOfflineDuration(offlineDurationMs)} • รอคำนวณชดเชย ${formatNumber(offlineRuns)} ไฟต์`
+        };
+        showToast(`โหลด IDLE ออฟไลน์ ${formatNumber(offlineRuns)} ไฟต์แล้ว กำลังคำนวณต่อ ✨`);
+      }
+      renderIdle();
+      startIdleAuto({ resume:true })
+        .catch(error => {
+          console.error("Idle offline resume failed:", error);
+          state.idle.running = false;
+          saveState(true);
+          renderIdle();
+        })
+        .finally(() => { idleResumeInProgress = false; });
+    }
+
     async function runBattle() {
       const stats = getBattleStats();
       if (battleAnimating) return;
@@ -24907,8 +24990,20 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       return Math.max(1, usedAfter - usedBefore);
     }
 
+    function canCardAwakenWithGems(card) {
+      if (!card || isAwakenCard(card)) return false;
+      return getRarity(card).moneyAwaken !== false;
+    }
+
+    function getMoneyAwakenBlockedReason(card) {
+      const rarityKey = String(card && card.rarity || "").toUpperCase();
+      if (isAwakenCard(card)) return "ระดับ AWAKEN ไม่สามารถใช้เงินอเวกได้ ต้องใช้ร่างต้นที่เลเวลตันและอเวกตันเท่านั้น";
+      if (rarityKey === "GOD") return "ระดับ GOD ห้ามใช้เงินอเวก ต้องใช้การ์ดซ้ำในการปลุกพลังเท่านั้น";
+      return `ระดับ ${rarityKey || "นี้"} ไม่รองรับการใช้เงินอเวก`;
+    }
+
     function getAwakenGemCost(card) {
-      if (isAwakenCard(card)) return 0;
+      if (!canCardAwakenWithGems(card)) return 0;
       return Math.max(1, Math.floor(Number(CONFIG.awakenGemCost) || 1000000000));
     }
 
@@ -24952,7 +25047,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const card = CARD_BY_ID.get(String(cardId));
       const owned = card && getOwned(card.id);
       if (!card || !owned) return;
-      if (isAwakenCard(card)) return showToast("ระดับ AWAKEN ไม่สามารถใช้เงินอเวกได้ ต้องใช้ร่างต้นที่เลเวลตันและอเวกตันเท่านั้น");
+      if (!canCardAwakenWithGems(card)) return showToast(getMoneyAwakenBlockedReason(card));
       const maxRank = getCardAwakenMax(card);
       if (owned.duplicateRank >= maxRank) return showToast("ปลุกพลังเต็มแล้ว");
       const cost = getAwakenGemCost(card);
@@ -25078,11 +25173,14 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           </div>`;
       }
       const levelNote = status.level >= status.maxLevel ? "เลเวลเต็มแล้ว" : `เลเวลถัดไปใช้ ${formatNumber(status.upgradeCost)} Dust`;
+      const moneyAwakenAllowed = canCardAwakenWithGems(card);
       const awakenNote = status.rank >= status.maxRank
         ? (awaken ? "AWAKEN เต็ม +20" : `ปลุกพลังเต็มแล้ว • การ์ดซ้ำใหม่แปลงเป็น Dust x${formatNumber(CONFIG.maxAwakenDuplicateDustMultiplier)}`)
         : awaken
           ? `ขั้นถัดไปต้องใช้ ${source ? source.name : "ร่างต้น"} ที่เลเวลตันและอเวกตัน 1 ใบ • ห้ามใช้เงินอเวก`
-          : `ขั้นถัดไปใช้ซ้ำ ${formatNumber(status.awakenCost)} ใบ • มีซ้ำ ${formatNumber(status.availableDuplicates)} ใบ • หรือใช้เงิน ${formatNumber(status.awakenGemCost)} Gems เพื่ออเวก +1`;
+          : moneyAwakenAllowed
+            ? `ขั้นถัดไปใช้ซ้ำ ${formatNumber(status.awakenCost)} ใบ • มีซ้ำ ${formatNumber(status.availableDuplicates)} ใบ • หรือใช้เงิน ${formatNumber(status.awakenGemCost)} Gems เพื่ออเวก +1`
+            : `ขั้นถัดไปใช้ซ้ำ ${formatNumber(status.awakenCost)} ใบ • มีซ้ำ ${formatNumber(status.availableDuplicates)} ใบ • ระดับ ${escapeHTML(String(card.rarity || ""))} ห้ามใช้เงินอเวก`;
       const supportActive = String(state.profile.supportCardId || "") === String(card.id);
       return `
         <div class="upgrade-status-panel">
@@ -28425,7 +28523,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       idleHiddenRunsProcessed = 0;
       idleCatchUpRuns = 0;
       wakeIdleBackgroundLoop();
+      idleOfflineCatchUpInitialRuns = 0;
       state.idle.running = false;
+      state.idle.farmMode = false;
+      state.idle.lastCalculatedAt = 0;
+      state.idle.runtimeWave = Math.max(1, state.idle.maxClearedWave + 1);
       if (!rewards.length) {
         state.idle.currentWave = Math.max(1, state.idle.maxClearedWave + 1);
         saveState(true);
@@ -28446,6 +28548,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       state.idle.pendingRuns = 0;
       state.idle.sessionId = "";
       state.idle.currentWave = Math.max(1, state.idle.maxClearedWave + 1);
+      state.idle.runtimeWave = state.idle.currentWave;
+      state.idle.farmMode = false;
+      state.idle.lastCalculatedAt = 0;
       currentIdleOpponent = makeIdleOpponent(state.idle.currentWave);
       saveState(true);
       renderAll();
@@ -28560,18 +28665,19 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
         const catchingUp = idleCatchUpRuns > 0;
         backgroundState.classList.toggle("hidden-run", document.hidden || catchingUp);
         backgroundState.textContent = document.hidden && idleAutoRunning
-          ? "🟡 กำลังคำนวณต่อสู้เบื้องหลัง และจะชดเชยเวลาที่เบราว์เซอร์พัก Timer"
+          ? "🟡 กำลังคำนวณต่อสู้เบื้องหลัง • หากปิดเกม เวลาที่หายไปจะถูกโหลดกลับมาคำนวณต่อ"
           : catchingUp
-            ? `⏩ กำลังชดเชยการต่อสู้เบื้องหลังอีก ${formatNumber(idleCatchUpRuns)} ไฟต์`
+            ? `⏩ กำลังโหลด IDLE ออฟไลน์อีก ${formatNumber(idleCatchUpRuns)} ไฟต์ • ปิดเกมระหว่างนี้ได้และจะต่อจากจุดเดิม`
             : idleAutoRunning
-              ? "🟢 AUTO ทำงานอยู่ • สลับแท็บได้ ระบบยังนับเวลาต่อเนื่อง"
-              : "🟢 พร้อมทำงานต่อเนื่อง แม้สลับไปแท็บอื่น";
+              ? "🟢 AUTO ทำงานอยู่ • สลับแท็บหรือปิดเกมได้ ระบบจะคำนวณเวลาที่หายไปเมื่อกลับมา"
+              : "🟢 กดเริ่มต่อสู้ออโต้แล้วสามารถสลับแท็บหรือปิดเกมได้";
       }
       renderIdleTeam();
     }
 
     async function runIdleWave(wave = 1, options = {}) {
       const headless = Boolean(options.headless || document.hidden);
+      const deferSave = Boolean(options.deferSave);
       const safeWave = Math.max(1, Math.floor(Number(wave) || 1));
       currentIdleOpponent = makeIdleOpponent(safeWave);
       state.idle.currentWave = safeWave;
@@ -28643,7 +28749,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           playerLabel:"ทีม IDLE ของคุณ", enemyLabel:currentIdleOpponent.username,
           playerCards:battleSummaryOwnedTeam(state.idle.team), enemyCards:stats.enemyTeam.map(battleSummaryCardSnapshot)
         });
-        saveState();
+        if (!deferSave) saveState();
         if (!headless && !document.hidden) {
           renderIdle();
           await wait(reducedMotion ? 10 : 180);
@@ -28656,44 +28762,74 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       }
     }
 
-    async function startIdleAuto() {
+    async function startIdleAuto(options = {}) {
+      const resumeExisting = Boolean(options.resume || (state.idle && state.idle.running));
       if (idleAutoRunning || idleAnimating) return;
-      if (!state.idle.team.some(Boolean)) return showToast("ต้องจัดทีม IDLE ก่อนเริ่ม");
+      if (!state.idle.team.some(Boolean)) {
+        state.idle.running = false;
+        saveState(true);
+        return showToast("ต้องจัดทีม IDLE ก่อนเริ่ม");
+      }
       if (!idleBossTeams.length) await refreshIdleBossTeams(false);
       idleAutoRunning = true;
       idleStopRequested = false;
-      idleFarmMode = false;
+      idleFarmMode = resumeExisting ? Boolean(state.idle.farmMode) : false;
       idleHiddenSince = document.hidden ? Date.now() : 0;
       idleHiddenRunsProcessed = 0;
-      idleCatchUpRuns = 0;
+      if (!resumeExisting) {
+        idleCatchUpRuns = 0;
+        idleOfflineCatchUpInitialRuns = 0;
+      }
       battlePlaybackSpeed = Math.max(1, battlePlaybackSpeed || 3);
       if (!state.idle.sessionId) state.idle.sessionId = `idle-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
       if (!state.idle.pendingStartedAt) state.idle.pendingStartedAt = Date.now();
-      idleRuntimeWave = Math.max(1, state.idle.maxClearedWave + 1);
+      idleRuntimeWave = resumeExisting
+        ? Math.max(1, Math.floor(Number(state.idle.runtimeWave) || Number(state.idle.currentWave) || state.idle.maxClearedWave + 1))
+        : Math.max(1, state.idle.maxClearedWave + 1);
       state.idle.currentWave = idleRuntimeWave;
+      state.idle.runtimeWave = idleRuntimeWave;
+      state.idle.farmMode = idleFarmMode;
       state.idle.running = true;
+      if (!state.idle.lastCalculatedAt) state.idle.lastCalculatedAt = Date.now();
       saveState(true);
+      if (cloudReady && activeCloudUid) writeCloudSave({ idleAutoRunning:true, idleAutoStartedAt:state.idle.pendingStartedAt }).catch(() => {});
       renderIdle(true);
       try {
         while (idleAutoRunning && !idleStopRequested) {
-          const catchingUp = !document.hidden && idleCatchUpRuns > 0;
+          const catchingUp = idleCatchUpRuns > 0;
           const headless = document.hidden || catchingUp;
-          const won = await runIdleWave(idleRuntimeWave, { headless });
-          if (document.hidden) idleHiddenRunsProcessed += 1;
-          if (catchingUp) idleCatchUpRuns = Math.max(0, idleCatchUpRuns - 1);
+          const won = await runIdleWave(idleRuntimeWave, { headless, deferSave:catchingUp });
+          if (document.hidden && !catchingUp) idleHiddenRunsProcessed += 1;
+          if (catchingUp) {
+            idleCatchUpRuns = Math.max(0, idleCatchUpRuns - 1);
+            state.idle.lastCalculatedAt = Math.max(0, Number(state.idle.lastCalculatedAt) || Date.now()) + IDLE_BACKGROUND_FIGHT_MS;
+          } else {
+            state.idle.lastCalculatedAt = Date.now();
+          }
           if (idleStopRequested || !idleAutoRunning) break;
           if (!idleFarmMode && won) idleRuntimeWave += 1;
           else if (!won) { idleFarmMode = true; idleRuntimeWave = Math.max(1, state.idle.maxClearedWave); }
           // หลังแพ้จะฟาร์มชั้นล่าสุดซ้ำ แม้ชนะแล้วก็ไม่ไต่ต่อจนกว่าจะหยุดและเริ่มใหม่
           state.idle.currentWave = idleRuntimeWave;
+          state.idle.runtimeWave = idleRuntimeWave;
+          state.idle.farmMode = idleFarmMode;
           currentIdleOpponent = null;
-          if (document.hidden) {
-            await idleBackgroundDelay(IDLE_BACKGROUND_FIGHT_MS);
-          } else if (idleCatchUpRuns > 0) {
-            if (idleCatchUpRuns % 8 === 0) {
-              renderIdle();
+
+          if (catchingUp) {
+            const checkpoint = idleCatchUpRuns === 0 || idleCatchUpRuns % IDLE_OFFLINE_SAVE_EVERY === 0;
+            if (checkpoint) {
+              saveState(true);
+              if (!document.hidden) renderIdle();
               await new Promise(resolve => window.setTimeout(resolve, 0));
             }
+            if (idleCatchUpRuns === 0 && idleOfflineCatchUpInitialRuns > 0) {
+              const loadedRuns = idleOfflineCatchUpInitialRuns;
+              idleOfflineCatchUpInitialRuns = 0;
+              state.idle.lastResult = { tone:"win", text:`คำนวณ IDLE ออฟไลน์ครบ ${formatNumber(loadedRuns)} ไฟต์แล้ว • AUTO ยังทำงานต่อ` };
+              showToast(`คำนวณ IDLE ออฟไลน์ครบ ${formatNumber(loadedRuns)} ไฟต์แล้ว ✨`);
+            }
+          } else if (document.hidden) {
+            await idleBackgroundDelay(IDLE_BACKGROUND_FIGHT_MS);
           } else {
             renderIdle();
             await wait(240);
@@ -28710,8 +28846,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           idleHiddenSince = 0;
           idleHiddenRunsProcessed = 0;
           idleCatchUpRuns = 0;
+          idleOfflineCatchUpInitialRuns = 0;
         }
         state.idle.running = false;
+        state.idle.runtimeWave = Math.max(1, Number(idleRuntimeWave) || state.idle.maxClearedWave + 1);
+        state.idle.farmMode = Boolean(idleFarmMode);
         if (idleStopRequested) finalizeIdleSessionRewards();
         else { saveState(true); renderIdle(); }
       }
@@ -28721,6 +28860,9 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!idleAutoRunning && !idleAnimating) return finalizeIdleSessionRewards();
       idleStopRequested = true;
       idleAutoRunning = false;
+      state.idle.running = false;
+      state.idle.lastCalculatedAt = 0;
+      saveState(true);
       wakeIdleBackgroundLoop();
       renderIdle();
       showToast("รับคำสั่งหยุดแล้ว จะส่งรางวัลหลังไฟต์ปัจจุบันจบ");
@@ -29588,6 +29730,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!document.getElementById("teamPickerModal").classList.contains("hidden")) renderTeamPicker();
       if (!document.getElementById("profileModal").classList.contains("hidden")) renderProfileDetail(activeProfileUid && activeProfileUid !== "local" && activeProfileUid !== activeCloudUid ? friendProfiles.find(item => String(item.uid) === activeProfileUid) : null);
       if (modalCardId && !document.getElementById("cardModal").classList.contains("hidden")) renderCardDetail(modalCardId);
+      scheduleIdleResumeAfterStateLoad();
     }
 
     /* ====================== [SECTION 08 CARD-DETAIL-UI] ====================== */
@@ -29627,7 +29770,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const awakenCostText = rank >= maxRank ? "เต็มแล้ว" : isAwaken
         ? `${awakenMaterialReady ? "วัตถุดิบพร้อม" : `ต้องใช้ ${awakenSourceCard ? awakenSourceCard.name : "ร่างต้น"} เลเวลตัน/อเวกตัน`}`
         : `ใช้ซ้ำ ${awakenCost} ใบ / มี ${availableDuplicates}`;
-      const awakenGemButtonHTML = isAwaken ? "" : `<button id="cardAwakenGemButton" class="btn btn-awaken-gems" data-action="awaken-gems" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>ใช้เงินอเวก +1 <span id="cardAwakenGemCost" class="cost">${rank >= maxRank ? "เต็มแล้ว" : `${formatNumber(getAwakenGemCost(card))} Gems`}</span></button>`;
+      const awakenGemButtonHTML = canCardAwakenWithGems(card) ? `<button id="cardAwakenGemButton" class="btn btn-awaken-gems" data-action="awaken-gems" data-card-id="${escapeHTML(card.id)}" ${rank >= maxRank ? "disabled" : ""}>ใช้เงินอเวก +1 <span id="cardAwakenGemCost" class="cost">${rank >= maxRank ? "เต็มแล้ว" : `${formatNumber(getAwakenGemCost(card))} Gems`}</span></button>` : "";
       const transformationButtonHTML = transformStatus ? `<button class="btn btn-awaken-transform" data-action="transform-awaken" data-card-id="${escapeHTML((isAwaken ? card : awakenTargetCard).id)}" ${transformStatus.eligible ? "" : "disabled"}>💜 เปลี่ยนร่างเป็น AWAKEN <span class="cost">${transformStatus.eligible ? `${formatNumber(transformStatus.cost)} Gems • ร่างต้นจะหายจากคลัง` : escapeHTML(transformStatus.reason)}</span></button>` : "";
       const inTeam = state.team.includes(String(card.id));
       const inTowerTeam = getTowerTeamIds().includes(String(card.id));
@@ -29772,11 +29915,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       const awakenSource = isAwakenCard(card) ? getAwakenSourceCard(card) : null;
       const awakenMaterialReady = Boolean(awakenSource && isCardProgressMaxed(awakenSource));
       if (awakenButton) awakenButton.disabled = status.rank >= status.maxRank || (isAwakenCard(card) && !awakenMaterialReady);
-      if (awakenGemButton) awakenGemButton.disabled = status.rank >= status.maxRank || isAwakenCard(card);
+      if (awakenGemButton) awakenGemButton.disabled = status.rank >= status.maxRank || !canCardAwakenWithGems(card);
       setText("cardUpgradeOneCost", status.level >= status.maxLevel ? "เลเวลเต็ม" : `${formatNumber(status.upgradeCost)} Dust`);
       setText("cardUpgradeAllCost", status.level >= status.maxLevel ? "เลเวลเต็ม" : `${formatNumber(getUpgradeCostToMax(card))} Dust`);
       setText("cardAwakenCost", status.rank >= status.maxRank ? "เต็มแล้ว" : isAwakenCard(card) ? (awakenMaterialReady ? "วัตถุดิบร่างต้นพร้อม" : `ต้องใช้ ${awakenSource ? awakenSource.name : "ร่างต้น"} เลเวลตัน/อเวกตัน`) : `ใช้ซ้ำ ${status.awakenCost} ใบ / มี ${status.availableDuplicates}`);
-      setText("cardAwakenGemCost", isAwakenCard(card) ? "AWAKEN ห้ามใช้เงินอเวก" : status.rank >= status.maxRank ? "เต็มแล้ว" : `${formatNumber(status.awakenGemCost)} Gems`);
+      setText("cardAwakenGemCost", !canCardAwakenWithGems(card) ? getMoneyAwakenBlockedReason(card) : status.rank >= status.maxRank ? "เต็มแล้ว" : `${formatNumber(status.awakenGemCost)} Gems`);
     }
 
     function openCardModal(cardId, options = {}) {
@@ -30659,6 +30802,11 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
       if (!window.confirm("เริ่มเกมใหม่และลบเซฟในเบราว์เซอร์นี้ใช่ไหม?")) return;
       idleAutoRunning = false;
       idleStopRequested = false;
+      idleResumeScheduled = false;
+      idleResumeInProgress = false;
+      idleCatchUpRuns = 0;
+      idleOfflineCatchUpInitialRuns = 0;
+      wakeIdleBackgroundLoop();
       state = defaultState();
       saveState(true);
       closeModal();
@@ -31070,6 +31218,12 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
 
     window.addEventListener("beforeunload", () => {
       stopLiveEventMailListeners();
+      if (idleAutoRunning && state.idle) {
+        state.idle.running = true;
+        state.idle.runtimeWave = Math.max(1, Number(idleRuntimeWave) || Number(state.idle.currentWave) || state.idle.maxClearedWave + 1);
+        state.idle.farmMode = Boolean(idleFarmMode);
+        if (!state.idle.lastCalculatedAt) state.idle.lastCalculatedAt = Date.now();
+      }
       updateIncome();
       persistLocalState();
       if (cloudReady && activeCloudUid) writeCloudSave().catch(() => {});
@@ -31082,7 +31236,7 @@ async function playTurnBasedCombat(stage, result, combat, display, labels = {}, 
           const elapsed = Math.max(0, Date.now() - idleHiddenSince);
           const expectedRuns = Math.floor(elapsed / IDLE_BACKGROUND_FIGHT_MS);
           const missingRuns = Math.max(0, expectedRuns - idleHiddenRunsProcessed);
-          idleCatchUpRuns = Math.min(IDLE_BACKGROUND_MAX_CATCHUP, idleCatchUpRuns + missingRuns);
+          idleCatchUpRuns = Math.min(IDLE_BACKGROUND_MAX_CATCHUP, Math.max(0, idleCatchUpRuns + missingRuns));
           idleHiddenSince = 0;
           idleHiddenRunsProcessed = 0;
           wakeIdleBackgroundLoop();
