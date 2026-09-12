@@ -7,16 +7,16 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <meta name="theme-color" content="#0a0f17" />
-<title>ACC City v0.5.0 — Loading</title>
+<title>ACC City v0.5.1 — Loading</title>
 <style>
 html,body{margin:0;min-height:100%;background:#080c12;color:#edf5ff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}body{display:grid;place-items:center;padding:24px}.box{text-align:center}.logo{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:grid;place-items:center;font-size:28px;font-weight:900;background:linear-gradient(145deg,#6ea8ff,#a67bff)}.muted{color:#8ea0b8;font-size:13px}.build{margin-top:8px;font-size:10px;color:#5f7794}
 </style>
 </head>
 <body>
-<div class="box"><div class="logo">A</div><h2>ACC City</h2><div id="status" class="muted">กำลังเข้าสู่เมือง…</div><div class="build">Loading v0.5.0</div></div>
+<div class="box"><div class="logo">A</div><h2>ACC City</h2><div id="status" class="muted">กำลังเข้าสู่เมือง…</div><div class="build">Loading v0.5.1</div></div>
 <script>
 (async()=>{try{
- const BUILD='20260912-1645';
+ const BUILD='20260912-1705';
  const files=['payload-01.txt','payload-02.txt','payload-03.txt','payload-04.txt','payload-05.txt'];
  const parts=await Promise.all(files.map(async f=>{const r=await fetch(f+'?v='+BUILD,{cache:'no-store'});if(!r.ok)throw new Error('โหลด '+f+' ไม่สำเร็จ');return (await r.text()).trim()}));
  const b64=parts.join('');
@@ -27,7 +27,7 @@ html,body{margin:0;min-height:100%;background:#080c12;color:#edf5ff;font-family:
  html=html.replace("function rememberSession(){try{if(state.uid)localStorage.setItem('accCitySession',state.uid)}catch(e){}}","function rememberSession(){try{if(state.uid){localStorage.setItem('accCitySession',state.uid);localStorage.setItem('accCityExplicitLogout','0')}}catch(e){}}");
  html=html.replace("function clearSession(){try{localStorage.removeItem('accCitySession')}catch(e){}}","function clearSession(){try{localStorage.removeItem('accCitySession');localStorage.setItem('accCityExplicitLogout','1')}catch(e){}}");
  html=html.replace(/function autoLoginLatest\(\)\{[\s\S]*?\}\s*autoLoginLatest\(\);/,"function autoLoginLatest(){try{let uid=localStorage.getItem('accCitySession');const explicitLogout=localStorage.getItem('accCityExplicitLogout')==='1';if(!uid&&!explicitLogout){try{const old=JSON.parse(localStorage.getItem('accCityV02')||'null');if(old&&old.uid){uid=old.uid;localStorage.setItem('accCitySession',uid)}}catch(e){}}if(!uid){renderServices();return}if(loadSaved(uid)){state.isGod=state.uid===GOD_UID||state.isGod;enterCity();return}localStorage.removeItem('accCitySession')}catch(e){try{localStorage.removeItem('accCitySession')}catch(_){}}renderServices()}\nautoLoginLatest();");
- html=html.replace('</body>','<script src="admin-patch.js?v='+BUILD+'"></'+'script><script src="v03-loader.js?v='+BUILD+'"></'+'script><script src="v04-community.js?v='+BUILD+'"></'+'script><script src="v05-loader.js?v='+BUILD+'"></'+'script></body>');
+ html=html.replace('</body>','<script src="admin-patch.js?v='+BUILD+'"></'+'script><script src="v03-loader.js?v='+BUILD+'"></'+'script><script src="v04-community.js?v='+BUILD+'"></'+'script><script src="v05-loader.js?v='+BUILD+'"></'+'script><script src="v051-bank-accounts.js?v='+BUILD+'"></'+'script></body>');
  document.open();document.write(html);document.close();
 }catch(err){console.error(err);document.getElementById('status').textContent='เปิด ACC City ไม่สำเร็จ กรุณารีเฟรชหน้าอีกครั้ง';}
 })();
