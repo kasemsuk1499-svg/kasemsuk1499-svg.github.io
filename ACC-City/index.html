@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="theme-color" content="#111827" />
+<title>ACC City — Community Simulation</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="login" class="login">
+  <section class="login-hero">
+    <div class="brandmark">A</div>
+    <h1>ACC City</h1>
+    <p>เมืองคอมมูนิตี้จำลองที่ทุกคนมีตัวตน มีอาชีพ ฐานะ ชื่อเสียง และเศรษฐกิจที่หมุนเวียนร่วมกันแบบเรียลไทม์</p>
+    <div class="feature-row">
+      <span class="pill">💬 Real-time Community</span><span class="pill">🎭 Roleplay</span><span class="pill">💸 Economy</span><span class="pill">🏭 Production</span><span class="pill">👑 Social Class</span><span class="pill">🎰 Casino</span>
+    </div>
+  </section>
+  <section class="login-side">
+    <div class="login-card">
+      <div class="row"><div><h2>เข้าสู่ ACC City</h2><div class="muted small">สร้างตัวตนของคุณในเมือง</div></div><span class="pill"><span class="dot"></span>ระบบออนไลน์</span></div>
+      <div class="tabs"><button id="guestTab" class="active" type="button">Guest</button><button id="normalTab" type="button">บัญชีปกติ</button></div>
+      <div id="guestForm">
+        <div class="field"><label>ชื่อในเมือง</label><input id="guestName" class="input" maxlength="24" placeholder="เช่น Miyako" value="Miyako" /></div>
+        <button id="guestStart" class="primary" style="width:100%" type="button">เข้าเมืองแบบ Guest</button>
+        <div class="divider">หรือกลับเข้าสู่ Guest เดิม</div>
+        <div class="field"><label>UID / Transfer Code</label><input id="transferInput" class="input" placeholder="ACC-GUEST-XXXX-XXXX" /></div>
+        <button id="transferBtn" class="ghost" style="width:100%" type="button">เข้าสู่บัญชีเดิม</button>
+        <p class="tiny muted" style="line-height:1.5">เวอร์ชันต้นแบบจะสร้าง UID และ Transfer Code ให้ทันที ระบบจริงจะเก็บบัญชีไว้บนฐานข้อมูลและใช้รหัสนี้ย้ายเครื่องได้</p>
+      </div>
+      <div id="normalForm" class="hidden">
+        <div class="field"><label>ชื่อผู้ใช้ / อีเมล</label><input class="input" placeholder="name@example.com" /></div>
+        <div class="field"><label>รหัสผ่าน</label><input class="input" type="password" placeholder="••••••••" /></div>
+        <button id="normalLogin" class="primary" style="width:100%" type="button">เข้าสู่ระบบ</button>
+        <p class="tiny muted">ใน v0.1 หน้านี้เป็น UI เตรียมไว้สำหรับระบบ Auth จริง</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="rolePicker" class="hidden">
+  <div class="role-modal">
+    <div class="row"><div><h2 style="margin:0">เลือก Starter Role</h2><div class="muted small" style="margin-top:4px">โรลจะสะสมได้ในภายหลัง และเลือก Active Role เพื่อกำหนดสีชื่อ</div></div><span class="pill">เลือก 1 โรลเริ่มต้น</span></div>
+    <div id="roleGrid" class="role-grid"></div>
+    <div class="row" style="margin-top:16px"><div class="small muted">ทุกคนได้รับสถานะ <b style="color:#dce8f8">พลเมือง</b> อัตโนมัติ</div><button id="confirmRole" class="primary" type="button">ยืนยันโรล</button></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="desktop">
+    <aside class="rail">
+      <div class="server active">AC</div><div class="sep"></div><div class="server">🏙️</div><div class="server">💹</div><div class="server">🎰</div>
+    </aside>
+    <aside class="sidebar">
+      <div class="sidebar-head">ACC City <span class="muted" style="margin-left:auto">⌄</span></div>
+      <div class="server-sub">
+        <button class="channel nav-view active" data-view="chat"><span>●</span><span>เมือง / แชท</span></button>
+        <button class="channel nav-view" data-view="economy"><span>฿</span><span>กระเป๋าเงิน</span></button>
+        <button class="channel nav-view" data-view="work"><span>▣</span><span>งาน & การผลิต</span></button>
+        <button class="channel nav-view" data-view="market"><span>◆</span><span>ตลาดกลาง</span></button>
+        <button class="channel nav-view" data-view="casino"><span>♠</span><span>คาสิโน</span></button>
+        <h4>ห้องแชท</h4>
+        <button class="channel chat-channel active" data-channel="ทั่วไป"><span>#</span><span>ทั่วไป</span></button>
+        <button class="channel chat-channel" data-channel="ตลาด"><span>#</span><span>ตลาด</span></button>
+        <button class="channel chat-channel" data-channel="หางาน"><span>#</span><span>หางาน</span></button>
+        <button class="channel chat-channel" data-channel="โรลเพลย์"><span>#</span><span>โรลเพลย์</span></button>
+        <button class="channel chat-channel" data-channel="ข่าวเมือง"><span>#</span><span>ข่าวเมือง</span></button>
+        <h4>สถานที่ RP</h4>
+        <button class="channel"><span>⌂</span><span>ACC Plaza</span></button><button class="channel"><span>☕</span><span>Moonlight Cafe</span></button><button class="channel"><span>🏭</span><span>Industrial Zone</span></button>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="main-head"><div class="main-title"><span id="desktopViewIcon">#</span><span id="desktopViewTitle">ทั่วไป</span><span class="pill"><span class="dot"></span><span id="onlineCount">128 ออนไลน์</span></span></div><div class="main-actions"><select id="currency" class="currency-select"><option value="THB">ไทย · THB</option><option value="JPY">日本 · JPY</option><option value="USD">USA · USD</option><option value="KRW">한국 · KRW</option></select><button class="iconbtn">🔔</button></div></header>
+      <div class="content">
+        <div class="hero-strip">
+          <div class="stat featured"><div class="label">สถานะทางสังคม</div><div class="value">ผู้ประกอบอาชีพ</div><div class="class-badge">👑 Class II · Reputation <span id="repHero">4.82</span> ★</div></div>
+          <div class="stat"><div class="label">Wallet</div><div class="value money" data-thb="12450">฿12,450</div></div>
+          <div class="stat"><div class="label">Bank</div><div class="value money" data-thb="38000">฿38,000</div></div>
+          <div class="stat"><div class="label">Active Role</div><div class="value" id="activeRoleTop">🛒 พ่อค้า</div></div>
+        </div>
+        <section id="view-chat" class="view active">
+          <div class="system-note">📣 <b>เมืองกำลังออนไลน์:</b> การซื้อขาย งาน ผลิตสินค้า และสถานะผู้เล่นจะอัปเดตแบบเรียลไทม์เมื่อเชื่อม Supabase</div>
+          <div id="chatList" class="chat-list" style="margin-top:10px"></div>
+        </section>
+        <section id="view-economy" class="view">
+          <div class="panel-grid">
+            <div class="card"><div class="row"><div><div class="muted small">ยอดรวมสินทรัพย์</div><div class="bigmoney money" data-thb="50450">฿50,450</div></div><span style="font-size:36px">💳</span></div><div class="tagline"><span class="pill">Wallet <b class="money" data-thb="12450">฿12,450</b></span><span class="pill">Bank <b class="money" data-thb="38000">฿38,000</b></span></div></div>
+            <div class="card"><h3>เงินหมุนเวียนวันนี้</h3><p>ธุรกรรมในเมืองที่เกิดขึ้นวันนี้</p><div class="bigmoney money" data-thb="2846200" style="margin-top:12px">฿2,846,200</div><div class="small pos">▲ 8.4% จากเมื่อวาน</div></div>
+          </div>
+          <div class="card" style="margin-top:12px"><div class="row"><h3>ประวัติธุรกรรม</h3><span class="pill">Ledger พร้อมตรวจสอบ</span></div><div class="tx"><div class="tx-icon">☕</div><div><b>Moonlight Cafe</b><div class="tiny muted">ซื้ออาหาร · 12:03</div></div><b class="neg money" data-thb="120">-฿120</b></div><div class="tx"><div class="tx-icon">💼</div><div><b>ค่าจ้างงาน</b><div class="tiny muted">งานส่งสินค้า · 11:24</div></div><b class="pos money" data-thb="540">+฿540</b></div><div class="tx"><div class="tx-icon">🛒</div><div><b>Marketplace</b><div class="tiny muted">ขายวัตถุดิบ · 10:55</div></div><b class="pos money" data-thb="860">+฿860</b></div></div>
+        </section>
+        <section id="view-work" class="view">
+          <div class="panel-grid">
+            <div class="card"><div class="row"><div><h3>กะงานปัจจุบัน</h3><p>สถานะอัปเดตตามเวลาจริง</p></div><span class="pill"><span class="dot"></span>กำลังทำงาน</span></div><div class="work-job"><div class="job-top"><div><div class="job-name">📦 จัดส่งวัตถุดิบ</div><div class="tiny muted">ACC Logistics · Contract #2048</div></div><b class="money" data-thb="540">฿540</b></div><div class="tagline"><span class="pill">เหลือ <b id="workTimer">00:21:42</b></span><span class="pill">Reputation +2</span></div></div></div>
+            <div class="card"><h3>สายการผลิต</h3><p>วัตถุดิบและสินค้าหมุนเวียนระหว่างผู้เล่น</p><div class="production-line"><div class="node">🌾<br><b>วัตถุดิบ</b><div class="tiny muted">เกษตรกร</div></div><div class="arrow">→</div><div class="node">🏭<br><b>แปรรูป</b><div class="tiny muted">ผู้ผลิต</div></div><div class="arrow">→</div><div class="node">🛒<br><b>ขาย</b><div class="tiny muted">พ่อค้า</div></div></div></div>
+          </div>
+          <div class="card" style="margin-top:12px"><div class="row"><div><h3>งานเปิดรับ</h3><p>งานจากระบบและผู้เล่น</p></div><span class="pill">14 งานใหม่</span></div><div class="work-job"><div class="job-top"><div><div class="job-name">🏭 ผู้ช่วยสายการผลิต</div><div class="tiny muted">Nova Foods · 35 นาที</div></div><button type="button">รับงาน</button></div><div class="tagline"><span class="pill money" data-thb="420">฿420</span><span class="pill">Class I+</span></div></div><div class="work-job"><div class="job-top"><div><div class="job-name">☕ พนักงานบริการ</div><div class="tiny muted">Moonlight Cafe · 20 นาที</div></div><button type="button">รับงาน</button></div><div class="tagline"><span class="pill money" data-thb="260">฿260</span><span class="pill">Reputation 20+</span></div></div></div>
+        </section>
+        <section id="view-market" class="view"><div class="row" style="margin-bottom:12px"><div><h2 style="margin:0">ตลาดกลาง</h2><div class="small muted">ราคาสินค้าและสต็อกจะเปลี่ยนพร้อมกันสำหรับทุกคน</div></div><button class="primary">+ ลงขายสินค้า</button></div><div class="market-grid"><div class="product"><div class="pic">🥬</div><b>ผักสดล็อต A</b><div class="small muted">โดย GreenField Farm · ★4.9</div><div class="price money" data-thb="340">฿340</div><button style="width:100%">ซื้อ</button></div><div class="product"><div class="pic">📦</div><b>กล่องบรรจุสินค้า ×20</b><div class="small muted">โดย Kira Workshop · ★4.6</div><div class="price money" data-thb="780">฿780</div><button style="width:100%">ซื้อ</button></div><div class="product"><div class="pic">☕</div><b>เมล็ดกาแฟ Premium</b><div class="small muted">โดย Blue Hill · ★4.8</div><div class="price money" data-thb="1250">฿1,250</div><button style="width:100%">ซื้อ</button></div></div></section>
+        <section id="view-casino" class="view"><div class="card casino"><div style="text-align:center"><span class="pill">🎰 ACC Grand Casino · เงินในเกมเท่านั้น</span><h2>Lucky Slots</h2><p class="muted">เดิมพันครั้งละ <span class="money" data-thb="100">฿100</span> · ใช้เป็น Money Sink ของระบบ Economy</p></div><div class="slots"><div id="slot1" class="slot">🍒</div><div id="slot2" class="slot">⭐</div><div id="slot3" class="slot">7️⃣</div></div><div id="casinoResult" class="casino-result">ยอดทดลอง: <b id="casinoBalance">฿12,450</b></div><div class="casino-actions"><button id="spinBtn" class="primary" type="button">หมุน · ฿100</button><button class="ghost" type="button">ดูอัตราจ่าย</button></div></div></section>
+      </div>
+      <div id="desktopCompose" class="chat-compose"><div class="compose-inner"><button class="iconbtn" type="button">＋</button><input id="chatInput" maxlength="300" placeholder="ส่งข้อความใน #ทั่วไป"/><button id="sendChat" class="primary" type="button">ส่ง</button></div></div>
+    </main>
+    <aside class="rightbar">
+      <div class="profile-card"><div class="profile-cover"></div><div class="profile-inner"><div class="profile-avatar">M</div><div id="profileName" class="profile-name">Miyako</div><div class="tiny muted">UID: <span id="uidText">ACC-GUEST-...</span></div><div class="profile-tags"><span class="pill">👑 ผู้ประกอบอาชีพ</span><span class="pill">⭐ 4.82</span><span class="pill">🏷️ Verified Trader</span></div><div class="small muted">ชื่อเสียง</div><div class="row"><b>82 / 100</b><span class="tiny">ดีมาก</span></div><div class="progress" style="margin-top:7px"><span></span></div><div class="profile-stats" style="margin-top:12px"><div class="mini"><span class="tiny muted">โรลสะสม</span><b id="roleCount">2</b></div><div class="mini"><span class="tiny muted">อันดับเมือง</span><b>#128</b></div></div></div></div>
+      <div class="section-title">โรลของคุณ</div><div id="roleChips"></div>
+      <div class="section-title">ออนไลน์ — 128</div><div class="online-user"><div class="ava">A</div><div><b style="color:#b78cff">Alice</b><small>ชนชั้นธุรกิจ · ★4.93</small></div><span class="online-status"></span></div><div class="online-user"><div class="ava">R</div><div><b style="color:#58d68d">Rin</b><small>เกษตรกร · ★4.72</small></div><span class="online-status"></span></div><div class="online-user"><div class="ava">K</div><div><b style="color:#62d6e8">Kansai</b><small>ฟรีแลนซ์ · ★4.51</small></div><span class="online-status"></span></div>
+    </aside>
+  </div>
+
+  <div class="mobile">
+    <header class="m-head"><div class="m-brand"><div class="m-logo">A</div><div>ACC City<div class="tiny muted">128 ออนไลน์</div></div></div><select id="mCurrency" class="currency-select"><option value="THB">THB</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option></select></header>
+    <div class="m-content">
+      <div class="m-profile"><div class="m-avatar">M</div><div style="min-width:0"><div id="mProfileName" class="m-name">Miyako</div><div class="tiny muted">👑 ผู้ประกอบอาชีพ · ⭐ 4.82</div><div id="mRoleLine" class="tiny" style="color:var(--role);margin-top:3px">🛒 พ่อค้า</div></div><button class="ghost" style="margin-left:auto;padding:7px 9px" type="button">โปรไฟล์</button></div>
+      <div class="m-stats"><div class="m-stat"><small>Wallet</small><b class="money" data-thb="12450">฿12,450</b></div><div class="m-stat"><small>Bank</small><b class="money" data-thb="38000">฿38,000</b></div></div>
+      <section id="mview-chat" class="m-view active"><div class="m-menu-row"><button class="m-channel active"># ทั่วไป</button><button class="m-channel"># ตลาด</button><button class="m-channel"># หางาน</button><button class="m-channel"># RP</button></div><div id="mChatList" style="margin-top:8px"></div><div class="m-compose"><input id="mChatInput" maxlength="300" placeholder="ส่งข้อความใน #ทั่วไป"/><button id="mSendChat" class="primary" type="button">ส่ง</button></div></section>
+      <section id="mview-city" class="m-view"><div class="m-menu-card"><b>🏙️ เมืองของคุณ</b><p class="small muted">Class II · Reputation 82/100</p></div><div class="m-menu-card"><div class="row"><b>Active Role</b><span id="mActiveRole">🛒 พ่อค้า</span></div></div><div id="mRoleList"></div></section>
+      <section id="mview-work" class="m-view"><div class="m-menu-card"><div class="row"><div><b>📦 จัดส่งวัตถุดิบ</b><div class="tiny muted">กำลังทำงาน</div></div><span class="pill"><span class="dot"></span><b id="mWorkTimer">00:21:42</b></span></div><div style="margin-top:10px" class="money" data-thb="540">ค่าจ้าง ฿540</div></div><div class="m-menu-card"><b>🏭 การผลิต</b><p class="small muted">วัตถุดิบ → แปรรูป → ขนส่ง → ร้านค้า</p></div></section>
+      <section id="mview-market" class="m-view"><div class="m-menu-card"><div class="row"><b>🥬 ผักสดล็อต A</b><b class="money" data-thb="340">฿340</b></div><div class="tiny muted">GreenField Farm · ★4.9</div></div><div class="m-menu-card"><div class="row"><b>📦 กล่องบรรจุ ×20</b><b class="money" data-thb="780">฿780</b></div><div class="tiny muted">Kira Workshop · ★4.6</div></div><div class="m-menu-card"><div class="row"><b>☕ เมล็ดกาแฟ</b><b class="money" data-thb="1250">฿1,250</b></div><div class="tiny muted">Blue Hill · ★4.8</div></div></section>
+      <section id="mview-more" class="m-view"><div class="m-menu-card"><b>🎰 คาสิโน</b><p class="small muted">Lucky Slots, Roulette และเกมเสี่ยงโชคด้วยเงินในเกม</p><button class="nav-casino primary" style="margin-top:8px">เปิดคาสิโน</button></div><div class="m-menu-card"><b>💳 การเงิน</b><p class="small muted">Wallet, Bank, Transaction Ledger และการโอนเงิน</p></div><div class="m-menu-card"><b>🏷️ แท็ก & ชื่อเสียง</b><p class="small muted">แสดงฐานะ โรล และความน่าเชื่อถือให้ทุกคนเห็น</p></div></section>
+      <section id="mview-casino" class="m-view"><div class="m-menu-card casino"><div style="text-align:center"><h2>🎰 Lucky Slots</h2><div class="tiny muted">เดิมพัน ฿100 ต่อรอบ</div></div><div class="slots"><div id="mslot1" class="slot">🍒</div><div id="mslot2" class="slot">⭐</div><div id="mslot3" class="slot">7️⃣</div></div><div id="mCasinoResult" class="casino-result">ยอดทดลอง: ฿12,450</div><button id="mSpinBtn" class="primary" style="width:100%">หมุน · ฿100</button></div></section>
+    </div>
+    <nav class="bottom-nav"><button class="mnav active" data-mview="chat"><span>💬</span>แชท</button><button class="mnav" data-mview="city"><span>🏙️</span>เมือง</button><button class="mnav" data-mview="work"><span>💼</span>งาน</button><button class="mnav" data-mview="market"><span>🛒</span>ตลาด</button><button class="mnav" data-mview="more"><span>•••</span>เพิ่มเติม</button></nav>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
