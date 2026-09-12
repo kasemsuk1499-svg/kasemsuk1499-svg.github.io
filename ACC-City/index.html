@@ -23,7 +23,7 @@ html,body{margin:0;min-height:100%;background:#080c12;color:#edf5ff;font-family:
  html=html.replace("function rememberSession(){try{if(state.uid)localStorage.setItem('accCitySession',state.uid)}catch(e){}}","function rememberSession(){try{if(state.uid){localStorage.setItem('accCitySession',state.uid);localStorage.setItem('accCityExplicitLogout','0')}}catch(e){}}");
  html=html.replace("function clearSession(){try{localStorage.removeItem('accCitySession')}catch(e){}}","function clearSession(){try{localStorage.removeItem('accCitySession');localStorage.setItem('accCityExplicitLogout','1')}catch(e){}}");
  html=html.replace(/function autoLoginLatest\(\)\{[\s\S]*?\}\s*autoLoginLatest\(\);/,"function autoLoginLatest(){try{let uid=localStorage.getItem('accCitySession');const explicitLogout=localStorage.getItem('accCityExplicitLogout')==='1';if(!uid&&!explicitLogout){try{const old=JSON.parse(localStorage.getItem('accCityV02')||'null');if(old&&old.uid){uid=old.uid;localStorage.setItem('accCitySession',uid)}}catch(e){}}if(!uid){renderServices();return}if(loadSaved(uid)){state.isGod=state.uid===GOD_UID||state.isGod;enterCity();return}localStorage.removeItem('accCitySession')}catch(e){try{localStorage.removeItem('accCitySession')}catch(_){}}renderServices()}\nautoLoginLatest();");
- html=html.replace('</body>','<script src="admin-patch.js?v=20260912-1421"></'+'script></body>');
+ html=html.replace('</body>','<script src="admin-patch.js?v=20260912-1421"></'+'script><script src="v03-loader.js?v=20260912-1537"></'+'script></body>');
  document.open();document.write(html);document.close();
 }catch(err){console.error(err);document.getElementById('status').textContent='เปิด ACC City ไม่สำเร็จ กรุณารีเฟรชหน้าอีกครั้ง';}
 })();
