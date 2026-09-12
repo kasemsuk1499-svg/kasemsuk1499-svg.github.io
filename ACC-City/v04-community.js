@@ -98,7 +98,7 @@
     return map;
   }
   function writePresence() {
-    if (!window.state || !state.uid || q('#app')?.classList.contains('hidden')) return;
+    if (typeof state === 'undefined' || !state.uid || q('#app')?.classList.contains('hidden')) return;
     const map = readPresence();
     map[tabId] = { uid: state.uid, name: state.name || 'Guest', role: roleLabel(), rep: Number(state.rep || 0), ts: Date.now(), where: q('#viewTitle')?.textContent || 'เมือง' };
     try { localStorage.setItem(PRESENCE_KEY, JSON.stringify(map)); } catch {}
@@ -128,7 +128,7 @@
   }
 
   function ensureActivity() {
-    if (!window.state) return null;
+    if (typeof state === 'undefined') return null;
     const g = gameTime();
     if (!state.activityV4 || state.activityV4.daySerial !== g.daySerial) {
       state.activityV4 = {daySerial:g.daySerial,jobs:0,bank:0,sports:0,social:0,claims:{},bonus:false};
@@ -153,7 +153,7 @@
     ];
   }
   function milestoneDefs() {
-    if (!window.state) return [];
+    if (typeof state === 'undefined') return [];
     const assets = Number(state.wallet||0)+Number(state.bank||0);
     return [
       {id:'rep100',icon:'⭐',name:'ชื่อเสียง 100',value:Number(state.rep||0),target:100,reward:800},
@@ -182,7 +182,7 @@
     return `<div class="goal-row"><div class="goal-icon">${x.icon}</div><div><div class="goal-name">${x.name}</div><div class="goal-sub">${x.sub||`${Math.min(x.value,x.target).toLocaleString('th-TH')} / ${x.target.toLocaleString('th-TH')}`}</div><div class="goal-progress"><span style="width:${pct}%"></span></div></div>${claimed?'<span class="goal-done">✓ รับแล้ว</span>':done?`<button class="goal-claim primary" data-v4-claim="${type}:${x.id}">รับ ฿${x.reward.toLocaleString('th-TH')}</button>`:`<span class="tiny muted">${pct}%</span>`}</div>`;
   }
   function renderGoals() {
-    if (!ensureUi() || !window.state || !state.uid) return;
+    if (!ensureUi() || typeof state === 'undefined' || !state.uid) return;
     const a=ensureActivity(); const daily=goalDefs(); const milestones=milestoneDefs(); const gt=gameTime();
     const dailyClaimed=daily.filter(x=>a.claims[x.id]).length; const milestoneDone=milestones.filter(x=>state.milestoneClaimsV4[x.id]).length;
     const nextSportsDay=Math.ceil((gt.daySerial+1)/6)*6; const sportsMs=EPOCH+nextSportsDay*REAL_HOUR;
@@ -216,7 +216,7 @@
   function start() {
     addCss(); ensureUi(); installTracking(); ensureActivity(); writePresence(); renderGoals();
     setInterval(()=>{writePresence();renderGoals()},5000);
-    setInterval(()=>{if(window.state?.uid){ensureUi();renderOnline();renderGoals()}},1000);
+    setInterval(()=>{if(typeof state !== 'undefined' && state.uid){ensureUi();renderOnline();renderGoals()}},1000);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();
