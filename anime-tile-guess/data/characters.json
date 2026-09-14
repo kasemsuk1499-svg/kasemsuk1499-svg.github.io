@@ -1,0 +1,92 @@
+[
+  {
+    "id": "demo-001",
+    "name": "Example Character 1",
+    "aliases": ["demo1", "character 1"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 1", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-002",
+    "name": "Example Character 2",
+    "aliases": ["demo2", "character 2"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 2", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-003",
+    "name": "Example Character 3",
+    "aliases": ["demo3", "character 3"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 3", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-004",
+    "name": "Example Character 4",
+    "aliases": ["demo4", "character 4"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 4", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-005",
+    "name": "Example Character 5",
+    "aliases": ["demo5", "character 5"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 5", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-006",
+    "name": "Example Character 6",
+    "aliases": ["demo6", "character 6"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 6", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-007",
+    "name": "Example Character 7",
+    "aliases": ["demo7", "character 7"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 7", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-008",
+    "name": "Example Character 8",
+    "aliases": ["demo8", "character 8"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 8", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-009",
+    "name": "Example Character 9",
+    "aliases": ["demo9", "character 9"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 9", "นี่เป็นข้อมูลทดลอง"]
+  },
+  {
+    "id": "demo-010",
+    "name": "Example Character 10",
+    "aliases": ["demo10", "character 10"],
+    "anime": "Demo",
+    "categories": ["Demo"],
+    "images": [],
+    "hints": ["คำใบ้ตัวอย่างหมายเลข 10", "นี่เป็นข้อมูลทดลอง"]
+  }
+]
