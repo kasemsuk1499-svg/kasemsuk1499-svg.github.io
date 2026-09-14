@@ -1,92 +1,1347 @@
 [
   {
-    "id": "demo-001",
-    "name": "Example Character 1",
-    "aliases": ["demo1", "character 1"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 1", "นี่เป็นข้อมูลทดลอง"]
+    "id": "rem",
+    "name": "Rem",
+    "aliases": [
+      "rem",
+      "เรม",
+      "rem re zero"
+    ],
+    "anime": "Re:Zero − Starting Life in Another World",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Re:Zero"
+    ],
+    "images": [
+      "images/rem1.jfif",
+      "images/rem2.jfif",
+      "images/rem3.jfif",
+      "images/rem4.jfif"
+    ],
+    "hints": [
+      "สาวใช้ผมสีฟ้าที่โด่งดังมาก",
+      "ใช้อาวุธลูกตุ้มโซ่",
+      "เป็นหนึ่งในตัวละครยอดนิยมที่สุดจาก Re:Zero"
+    ]
   },
   {
-    "id": "demo-002",
-    "name": "Example Character 2",
-    "aliases": ["demo2", "character 2"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 2", "นี่เป็นข้อมูลทดลอง"]
+    "id": "emilia",
+    "name": "Emilia",
+    "aliases": [
+      "emilia",
+      "เอมิเลีย",
+      "emilia re zero"
+    ],
+    "anime": "Re:Zero − Starting Life in Another World",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Re:Zero"
+    ],
+    "images": [
+      "images/emilia1.jfif",
+      "images/emilia2.jfif",
+      "images/emilia3.jfif",
+      "images/emilia4.jfif"
+    ],
+    "hints": [
+      "ฮาล์ฟเอลฟ์ผมสีเงิน",
+      "ใช้เวทน้ำแข็งและมีภูตคู่ใจ",
+      "เป็นผู้สมัครชิงบัลลังก์"
+    ]
   },
   {
-    "id": "demo-003",
-    "name": "Example Character 3",
-    "aliases": ["demo3", "character 3"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 3", "นี่เป็นข้อมูลทดลอง"]
+    "id": "asuka-langley",
+    "name": "Asuka Langley",
+    "aliases": [
+      "asuka",
+      "asuka langley",
+      "อาสึกะ",
+      "อาสึกะ แลงลีย์"
+    ],
+    "anime": "Neon Genesis Evangelion",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Popular"
+    ],
+    "images": [
+      "images/Asuka1.jfif",
+      "images/Asuka2.jfif",
+      "images/Asuka3.jfif",
+      "images/Asuka4.jfif"
+    ],
+    "hints": [
+      "นักบิน EVA ผมสีส้มแดง",
+      "บุคลิกมั่นใจและอารมณ์ร้อน",
+      "หนึ่งในตัวละครหญิงระดับตำนานของวงการอนิเมะ"
+    ]
   },
   {
-    "id": "demo-004",
-    "name": "Example Character 4",
-    "aliases": ["demo4", "character 4"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 4", "นี่เป็นข้อมูลทดลอง"]
+    "id": "rei-ayanami",
+    "name": "Rei Ayanami",
+    "aliases": [
+      "rei",
+      "rei ayanami",
+      "เรย์",
+      "เรย์ อายานามิ"
+    ],
+    "anime": "Neon Genesis Evangelion",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Popular"
+    ],
+    "images": [
+      "images/rei1.jfif",
+      "images/rei2.jfif",
+      "images/rei3.jfif",
+      "images/rei4.jfif"
+    ],
+    "hints": [
+      "นักบิน EVA ผมสีฟ้า",
+      "นิ่ง เงียบ และลึกลับ",
+      "ตัวละครหญิงไอคอนิกจาก Evangelion"
+    ]
   },
   {
-    "id": "demo-005",
-    "name": "Example Character 5",
-    "aliases": ["demo5", "character 5"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 5", "นี่เป็นข้อมูลทดลอง"]
+    "id": "mikasa-ackerman",
+    "name": "Mikasa Ackerman",
+    "aliases": [
+      "mikasa",
+      "mikasa ackerman",
+      "มิคาสะ",
+      "มิคาสะ แอคเคอร์แมน"
+    ],
+    "anime": "Attack on Titan",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Mikasa1.jfif",
+      "images/Mikasa2.jfif",
+      "images/Mikasa3.jfif",
+      "images/Mikasa4.jfif"
+    ],
+    "hints": [
+      "ทหารหญิงฝีมือระดับสูง",
+      "มักสวมผ้าพันคอสีแดง",
+      "ผูกพันกับเอเรนอย่างมาก"
+    ]
   },
   {
-    "id": "demo-006",
-    "name": "Example Character 6",
-    "aliases": ["demo6", "character 6"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 6", "นี่เป็นข้อมูลทดลอง"]
+    "id": "zero-two",
+    "name": "Zero Two",
+    "aliases": [
+      "zero two",
+      "02",
+      "002",
+      "ซีโร่ทู",
+      "zero2"
+    ],
+    "anime": "DARLING in the FRANXX",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Sci-Fi"
+    ],
+    "images": [
+      "images/ZeroTwo1.jfif",
+      "images/ZeroTwo2.jfif",
+      "images/ZeroTwo3.jfif",
+      "images/ZeroTwo4.jfif"
+    ],
+    "hints": [
+      "สาวผมชมพูมีเขา",
+      "รหัสประจำตัว 002",
+      "มักเรียกคนรักว่า Darling"
+    ]
   },
   {
-    "id": "demo-007",
-    "name": "Example Character 7",
-    "aliases": ["demo7", "character 7"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 7", "นี่เป็นข้อมูลทดลอง"]
+    "id": "mai-sakurajima",
+    "name": "Mai Sakurajima",
+    "aliases": [
+      "mai",
+      "mai sakurajima",
+      "ไม",
+      "ไม ซากุราจิมะ",
+      "bunny girl senpai"
+    ],
+    "anime": "Rascal Does Not Dream of Bunny Girl Senpai",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Romance"
+    ],
+    "images": [
+      "images/Mai1.jfif",
+      "images/Mai2.jfif",
+      "images/Mai3.jfif",
+      "images/Mai4.jfif"
+    ],
+    "hints": [
+      "นักแสดงสาวรุ่นพี่",
+      "เคยปรากฏตัวในชุดบันนี่เกิร์ล",
+      "เป็นนางเอกหลักของเรื่องเกี่ยวกับ Adolescence Syndrome"
+    ]
   },
   {
-    "id": "demo-008",
-    "name": "Example Character 8",
-    "aliases": ["demo8", "character 8"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 8", "นี่เป็นข้อมูลทดลอง"]
+    "id": "marin-kitagawa",
+    "name": "Marin Kitagawa",
+    "aliases": [
+      "marin",
+      "marin kitagawa",
+      "มาริน",
+      "มาริน คิตากาวะ"
+    ],
+    "anime": "My Dress-Up Darling",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Romance"
+    ],
+    "images": [
+      "images/Marin1.jfif",
+      "images/Marin2.jfif",
+      "images/Marin3.jfif",
+      "images/Marin4.jfif"
+    ],
+    "hints": [
+      "สาวแกลผู้รักการคอสเพลย์",
+      "สดใสและเข้ากับคนง่าย",
+      "ให้นักทำตุ๊กตาฮินะช่วยทำชุดคอสเพลย์"
+    ]
   },
   {
-    "id": "demo-009",
-    "name": "Example Character 9",
-    "aliases": ["demo9", "character 9"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 9", "นี่เป็นข้อมูลทดลอง"]
+    "id": "yor-forger",
+    "name": "Yor Forger",
+    "aliases": [
+      "yor",
+      "yor forger",
+      "ยอร์",
+      "ยอร์ ฟอร์เจอร์",
+      "thorn princess"
+    ],
+    "anime": "SPY×FAMILY",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Yor1.jfif",
+      "images/Yor2.jfif",
+      "images/Yor3.jfif",
+      "images/Yor4.jfif"
+    ],
+    "hints": [
+      "ภรรยาของครอบครัวปลอม ๆ",
+      "ทำงานลับในฐานะนักฆ่า",
+      "ฉายา Thorn Princess"
+    ]
   },
   {
-    "id": "demo-010",
-    "name": "Example Character 10",
-    "aliases": ["demo10", "character 10"],
-    "anime": "Demo",
-    "categories": ["Demo"],
-    "images": [],
-    "hints": ["คำใบ้ตัวอย่างหมายเลข 10", "นี่เป็นข้อมูลทดลอง"]
+    "id": "anya-forger",
+    "name": "Anya Forger",
+    "aliases": [
+      "anya",
+      "anya forger",
+      "อาเนีย",
+      "อาเนีย ฟอร์เจอร์"
+    ],
+    "anime": "SPY×FAMILY",
+    "categories": [
+      "Beloved",
+      "Popular",
+      "Comedy"
+    ],
+    "images": [
+      "images/Anya1.jfif",
+      "images/Anya2.jfif",
+      "images/Anya3.jfif",
+      "images/Anya4.jfif"
+    ],
+    "hints": [
+      "เด็กหญิงผมชมพู",
+      "อ่านใจคนอื่นได้",
+      "ชอบถั่วลิสงและทำหน้ามีมชื่อดัง"
+    ]
+  },
+  {
+    "id": "frieren",
+    "name": "Frieren",
+    "aliases": [
+      "frieren",
+      "ฟรีเรน",
+      "frieren beyond journey's end"
+    ],
+    "anime": "Frieren: Beyond Journey's End",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Fantasy"
+    ],
+    "images": [
+      "images/Frieren1.jfif",
+      "images/Frieren2.jfif",
+      "images/Frieren3.jfif",
+      "images/Frieren4.jfif"
+    ],
+    "hints": [
+      "เอลฟ์จอมเวทอายุยืน",
+      "เคยร่วมปาร์ตี้ผู้กล้า",
+      "ออกเดินทางเพื่อเข้าใจหัวใจมนุษย์มากขึ้น"
+    ]
+  },
+  {
+    "id": "fern",
+    "name": "Fern",
+    "aliases": [
+      "fern",
+      "เฟิร์น",
+      "เฟิร์น ฟรีเรน"
+    ],
+    "anime": "Frieren: Beyond Journey's End",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Fantasy"
+    ],
+    "images": [
+      "images/Fern1.jfif",
+      "images/Fern2.jfif",
+      "images/Fern3.jfif",
+      "images/Fern4.jfif"
+    ],
+    "hints": [
+      "จอมเวทสาวผมม่วง",
+      "เป็นศิษย์ของฟรีเรน",
+      "นิ่ง สุขุม แต่มีมุมขี้งอน"
+    ]
+  },
+  {
+    "id": "violet-evergarden",
+    "name": "Violet Evergarden",
+    "aliases": [
+      "violet",
+      "violet evergarden",
+      "ไวโอเล็ต",
+      "ไวโอเล็ต เอเวอร์การ์เดน"
+    ],
+    "anime": "Violet Evergarden",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Drama"
+    ],
+    "images": [
+      "images/Violet1.jfif",
+      "images/Violet2.jfif",
+      "images/Violet3.jfif",
+      "images/Violet4.jfif"
+    ],
+    "hints": [
+      "อดีตทหารหญิงแขนกล",
+      "ทำงานเป็น Auto Memory Doll",
+      "พยายามเรียนรู้ความหมายของคำว่ารัก"
+    ]
+  },
+  {
+    "id": "saber",
+    "name": "Saber",
+    "aliases": [
+      "saber",
+      "artoria",
+      "artoria pendragon",
+      "เซเบอร์",
+      "อาเธอเรีย"
+    ],
+    "anime": "Fate/stay night",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Popular"
+    ],
+    "images": [
+      "images/Saber1.jfif",
+      "images/Saber2.jfif",
+      "images/Saber3.jfif",
+      "images/Saber4.jfif"
+    ],
+    "hints": [
+      "Servant คลาส Saber",
+      "ถือดาบศักดิ์สิทธิ์",
+      "มีตัวตนเกี่ยวข้องกับกษัตริย์อาเธอร์"
+    ]
+  },
+  {
+    "id": "rin-tohsaka",
+    "name": "Rin Tohsaka",
+    "aliases": [
+      "rin",
+      "rin tohsaka",
+      "ริน",
+      "ริน โทซากะ",
+      "tohsaka"
+    ],
+    "anime": "Fate/stay night",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Magic"
+    ],
+    "images": [
+      "images/Rin1.jfif",
+      "images/Rin2.jfif",
+      "images/Rin3.jfif",
+      "images/Rin4.jfif"
+    ],
+    "hints": [
+      "จอมเวทสาวผมดำมัดทวินเทล",
+      "ถนัดเวทอัญมณี",
+      "เป็นหนึ่งใน Master ของสงครามจอกศักดิ์สิทธิ์"
+    ]
+  },
+  {
+    "id": "megumin",
+    "name": "Megumin",
+    "aliases": [
+      "megumin",
+      "เมกุมิน",
+      "explosion girl"
+    ],
+    "anime": "KONOSUBA",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Comedy"
+    ],
+    "images": [
+      "images/Megumin1.jfif",
+      "images/Megumin2.jfif",
+      "images/Megumin3.jfif",
+      "images/Megumin4.jfif"
+    ],
+    "hints": [
+      "จอมเวทเผ่า Crimson Demon",
+      "คลั่งไคล้เวท Explosion",
+      "ใช้เวทใหญ่ได้ทีเดียวแล้วหมดแรง"
+    ]
+  },
+  {
+    "id": "aqua-konosuba",
+    "name": "Aqua",
+    "aliases": [
+      "aqua",
+      "aqua konosuba",
+      "อควา",
+      "อควา โคโนสุบะ"
+    ],
+    "anime": "KONOSUBA",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Comedy"
+    ],
+    "images": [
+      "images/Aqua1.jfif",
+      "images/Aqua2.jfif",
+      "images/Aqua3.jfif",
+      "images/Aqua4.jfif"
+    ],
+    "hints": [
+      "เทพธิดาผมสีฟ้า",
+      "มีพลังศักดิ์สิทธิ์สูงมาก",
+      "ขึ้นชื่อเรื่องความป่วนและโชคที่ต่ำ"
+    ]
+  },
+  {
+    "id": "darkness",
+    "name": "Darkness",
+    "aliases": [
+      "darkness",
+      "lalatina",
+      "ลาลาทิน่า",
+      "ดาร์กเนส"
+    ],
+    "anime": "KONOSUBA",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Comedy"
+    ],
+    "images": [
+      "images/Darkness1.jfif",
+      "images/Darkness2.jfif",
+      "images/Darkness3.jfif",
+      "images/Darkness4.jfif"
+    ],
+    "hints": [
+      "ครูเซเดอร์สาวผมทอง",
+      "พลังป้องกันสูงมาก",
+      "ชื่อจริงของเธอคือ Lalatina"
+    ]
+  },
+  {
+    "id": "chizuru-mizuhara",
+    "name": "Chizuru Mizuhara",
+    "aliases": [
+      "chizuru",
+      "chizuru mizuhara",
+      "จิซึรุ",
+      "มิสึฮาระ"
+    ],
+    "anime": "Rent-A-Girlfriend",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Romance"
+    ],
+    "images": [
+      "images/Chizuru1.jfif",
+      "images/Chizuru2.jfif",
+      "images/Chizuru3.jfif",
+      "images/Chizuru4.jfif"
+    ],
+    "hints": [
+      "สาวสวยที่ทำงานเป็นแฟนเช่า",
+      "มีเป้าหมายด้านการแสดง",
+      "ชื่อ Mizuhara เป็นชื่อที่ใช้ในการทำงาน"
+    ]
+  },
+  {
+    "id": "nezuko-kamado",
+    "name": "Nezuko Kamado",
+    "aliases": [
+      "nezuko",
+      "nezuko kamado",
+      "เนซึโกะ",
+      "เนซึโกะ คามาโดะ"
+    ],
+    "anime": "Demon Slayer: Kimetsu no Yaiba",
+    "categories": [
+      "Beloved",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Nezuko1.jfif",
+      "images/Nezuko2.jfif",
+      "images/Nezuko3.jfif",
+      "images/Nezuko4.jfif"
+    ],
+    "hints": [
+      "น้องสาวของทันจิโร่",
+      "กลายเป็นอสูรแต่ยังปกป้องมนุษย์",
+      "มีปล้องไม้ไผ่ที่เป็นภาพจำ"
+    ]
+  },
+  {
+    "id": "shinobu-kocho",
+    "name": "Shinobu Kocho",
+    "aliases": [
+      "shinobu",
+      "shinobu kocho",
+      "ชิโนบุ",
+      "ชิโนบุ โคโจ"
+    ],
+    "anime": "Demon Slayer: Kimetsu no Yaiba",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Shinobu1.jfif",
+      "images/Shinobu2.jfif",
+      "images/Shinobu3.jfif",
+      "images/Shinobu4.jfif"
+    ],
+    "hints": [
+      "เสาหลักแมลง",
+      "ใช้พิษในการต่อสู้กับอสูร",
+      "มีลวดลายผีเสื้อเป็นเอกลักษณ์"
+    ]
+  },
+  {
+    "id": "mitsuri-kanroji",
+    "name": "Mitsuri Kanroji",
+    "aliases": [
+      "mitsuri",
+      "mitsuri kanroji",
+      "มิตสึริ",
+      "มิตสึริ คันโรจิ"
+    ],
+    "anime": "Demon Slayer: Kimetsu no Yaiba",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Mitsuri1.jfif",
+      "images/Mitsuri2.jfif",
+      "images/Mitsuri3.jfif",
+      "images/Mitsuri4.jfif"
+    ],
+    "hints": [
+      "เสาหลักความรัก",
+      "ผมสีชมพูสลับเขียว",
+      "มีพละกำลังมากกว่าคนทั่วไปอย่างมหาศาล"
+    ]
+  },
+  {
+    "id": "power",
+    "name": "Power",
+    "aliases": [
+      "power",
+      "พาวเวอร์",
+      "power chainsaw man"
+    ],
+    "anime": "Chainsaw Man",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Action"
+    ],
+    "images": [
+      "images/Power1.jfif",
+      "images/Power2.jfif",
+      "images/Power3.jfif",
+      "images/Power4.jfif"
+    ],
+    "hints": [
+      "Blood Fiend จอมป่วน",
+      "มีเขาและผมสีบลอนด์",
+      "นิสัยชอบโอ้อวดและรักแมวของตัวเอง"
+    ]
+  },
+  {
+    "id": "makima",
+    "name": "Makima",
+    "aliases": [
+      "makima",
+      "มากิมะ",
+      "makima chainsaw man"
+    ],
+    "anime": "Chainsaw Man",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Makima1.jfif",
+      "images/Makima2.jfif",
+      "images/Makima3.jfif",
+      "images/Makima4.jfif"
+    ],
+    "hints": [
+      "หญิงสาวผมแดงและดวงตาวงแหวน",
+      "เป็นผู้บังคับบัญชาในหน่วยนักล่าปีศาจ",
+      "มีบุคลิกสงบนิ่งและน่าเกรงขาม"
+    ]
+  },
+  {
+    "id": "kobeni-higashiyama",
+    "name": "Kobeni Higashiyama",
+    "aliases": [
+      "kobeni",
+      "kobeni higashiyama",
+      "โคเบนิ",
+      "โคเบนิ ฮิงาชิยามะ"
+    ],
+    "anime": "Chainsaw Man",
+    "categories": [
+      "Beloved",
+      "Popular",
+      "Comedy"
+    ],
+    "images": [
+      "images/Kobeni1.jfif",
+      "images/Kobeni2.jfif",
+      "images/Kobeni3.jfif",
+      "images/Kobeni4.jfif"
+    ],
+    "hints": [
+      "นักล่าปีศาจสาวขี้กลัว",
+      "มักตกอยู่ในสถานการณ์วุ่นวาย",
+      "มีฉากกับรถที่แฟน ๆ จำกันได้ดี"
+    ]
+  },
+  {
+    "id": "nami",
+    "name": "Nami",
+    "aliases": [
+      "nami",
+      "นามิ",
+      "nami one piece"
+    ],
+    "anime": "One Piece",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Popular"
+    ],
+    "images": [
+      "images/Nami1.jfif",
+      "images/Nami2.jfif",
+      "images/Nami3.jfif",
+      "images/Nami4.jfif"
+    ],
+    "hints": [
+      "ต้นหนของกลุ่มหมวกฟาง",
+      "เก่งเรื่องแผนที่และสภาพอากาศ",
+      "ชอบเงินและส้ม"
+    ]
+  },
+  {
+    "id": "nico-robin",
+    "name": "Nico Robin",
+    "aliases": [
+      "nico robin",
+      "robin",
+      "นิโค โรบิน",
+      "โรบิน"
+    ],
+    "anime": "One Piece",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Popular"
+    ],
+    "images": [
+      "images/Robin1.jfif",
+      "images/Robin2.jfif",
+      "images/Robin3.jfif",
+      "images/Robin4.jfif"
+    ],
+    "hints": [
+      "นักโบราณคดีของกลุ่มหมวกฟาง",
+      "อ่านโพเนกลีฟได้",
+      "ใช้พลังที่ทำให้ส่วนของร่างกายงอกออกมาได้"
+    ]
+  },
+  {
+    "id": "boa-hancock",
+    "name": "Boa Hancock",
+    "aliases": [
+      "boa hancock",
+      "hancock",
+      "โบอา แฮนค็อก",
+      "แฮนค็อก"
+    ],
+    "anime": "One Piece",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Hancock1.jfif",
+      "images/Hancock2.jfif",
+      "images/Hancock3.jfif",
+      "images/Hancock4.jfif"
+    ],
+    "hints": [
+      "จักรพรรดินีโจรสลัด",
+      "ปกครองเกาะอเมซอนลิลลี่",
+      "หลงรักลูฟี่อย่างมาก"
+    ]
+  },
+  {
+    "id": "hinata-hyuga",
+    "name": "Hinata Hyuga",
+    "aliases": [
+      "hinata",
+      "hinata hyuga",
+      "ฮินาตะ",
+      "ฮินาตะ ฮิวงะ"
+    ],
+    "anime": "Naruto",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Beloved"
+    ],
+    "images": [
+      "images/Hinata1.jfif",
+      "images/Hinata2.jfif",
+      "images/Hinata3.jfif",
+      "images/Hinata4.jfif"
+    ],
+    "hints": [
+      "คุโนะอิจิจากตระกูลฮิวงะ",
+      "ใช้เนตรสีขาว Byakugan",
+      "ชื่นชมนารูโตะมาตั้งแต่เด็ก"
+    ]
+  },
+  {
+    "id": "tsunade",
+    "name": "Tsunade",
+    "aliases": [
+      "tsunade",
+      "ซึนาเดะ",
+      "fifth hokage"
+    ],
+    "anime": "Naruto",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Popular"
+    ],
+    "images": [
+      "images/Tsunade1.jfif",
+      "images/Tsunade2.jfif",
+      "images/Tsunade3.jfif",
+      "images/Tsunade4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในสามนินจาในตำนาน",
+      "เก่งวิชาแพทย์และพละกำลัง",
+      "เคยดำรงตำแหน่งโฮคาเงะรุ่นที่ 5"
+    ]
+  },
+  {
+    "id": "bulma",
+    "name": "Bulma",
+    "aliases": [
+      "bulma",
+      "บูลม่า",
+      "bulma dragon ball"
+    ],
+    "anime": "Dragon Ball",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Beloved"
+    ],
+    "images": [
+      "images/Bulma1.jfif",
+      "images/Bulma2.jfif",
+      "images/Bulma3.jfif",
+      "images/Bulma4.jfif"
+    ],
+    "hints": [
+      "นักประดิษฐ์อัจฉริยะ",
+      "เป็นหนึ่งในตัวละครแรก ๆ ที่ร่วมเดินทางกับโกคู",
+      "เกี่ยวข้องกับ Capsule Corporation"
+    ]
+  },
+  {
+    "id": "android-18",
+    "name": "Android 18",
+    "aliases": [
+      "android 18",
+      "18",
+      "หมายเลข 18",
+      "แอนดรอยด์ 18"
+    ],
+    "anime": "Dragon Ball",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Popular"
+    ],
+    "images": [
+      "images/Android181.jfif",
+      "images/Android182.jfif",
+      "images/Android183.jfif",
+      "images/Android184.jfif"
+    ],
+    "hints": [
+      "มนุษย์ดัดแปลงผมบลอนด์",
+      "เคยเป็นศัตรูก่อนจะกลายเป็นพวกเดียวกัน",
+      "เป็นภรรยาของคุริริน"
+    ]
+  },
+  {
+    "id": "asuna-yuuki",
+    "name": "Asuna Yuuki",
+    "aliases": [
+      "asuna",
+      "asuna yuuki",
+      "อาสึนะ",
+      "อาสึนะ ยูกิ"
+    ],
+    "anime": "Sword Art Online",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Fantasy"
+    ],
+    "images": [
+      "images/Asuna1.jfif",
+      "images/Asuna2.jfif",
+      "images/Asuna3.jfif",
+      "images/Asuna4.jfif"
+    ],
+    "hints": [
+      "นักดาบหญิงความเร็วสูง",
+      "เป็นหนึ่งในผู้เล่นระดับแนวหน้าของ SAO",
+      "มีความสัมพันธ์ใกล้ชิดกับคิริโตะ"
+    ]
+  },
+  {
+    "id": "kurisu-makise",
+    "name": "Kurisu Makise",
+    "aliases": [
+      "kurisu",
+      "kurisu makise",
+      "คุริสุ",
+      "มากิเสะ คุริสุ",
+      "christina"
+    ],
+    "anime": "Steins;Gate",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Sci-Fi"
+    ],
+    "images": [
+      "images/Kurisu1.jfif",
+      "images/Kurisu2.jfif",
+      "images/Kurisu3.jfif",
+      "images/Kurisu4.jfif"
+    ],
+    "hints": [
+      "นักวิจัยสาวอัจฉริยะ",
+      "ถูกเรียกเล่น ๆ ว่า Christina",
+      "เกี่ยวข้องกับการทดลองเรื่องเวลา"
+    ]
+  },
+  {
+    "id": "holo",
+    "name": "Holo",
+    "aliases": [
+      "holo",
+      "horo",
+      "โฮโล",
+      "โฮโร"
+    ],
+    "anime": "Spice and Wolf",
+    "categories": [
+      "Waifu",
+      "Classic",
+      "Beloved"
+    ],
+    "images": [
+      "images/Holo1.jfif",
+      "images/Holo2.jfif",
+      "images/Holo3.jfif",
+      "images/Holo4.jfif"
+    ],
+    "hints": [
+      "เทพหมาป่าหญิง",
+      "มีหูและหางหมาป่า",
+      "ร่วมเดินทางกับพ่อค้าหนุ่ม"
+    ]
+  },
+  {
+    "id": "tohru",
+    "name": "Tohru",
+    "aliases": [
+      "tohru",
+      "tohru dragon maid",
+      "โทรุ",
+      "โทโอรุ"
+    ],
+    "anime": "Miss Kobayashi's Dragon Maid",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Comedy"
+    ],
+    "images": [
+      "images/Tohru1.jfif",
+      "images/Tohru2.jfif",
+      "images/Tohru3.jfif",
+      "images/Tohru4.jfif"
+    ],
+    "hints": [
+      "มังกรที่กลายร่างเป็นสาวใช้",
+      "มีเขาและหางมังกร",
+      "รักโคบายาชิมาก"
+    ]
+  },
+  {
+    "id": "kanna-kamui",
+    "name": "Kanna Kamui",
+    "aliases": [
+      "kanna",
+      "kanna kamui",
+      "คันนะ",
+      "คันนะ คามุย"
+    ],
+    "anime": "Miss Kobayashi's Dragon Maid",
+    "categories": [
+      "Beloved",
+      "Popular",
+      "Comedy"
+    ],
+    "images": [
+      "images/Kanna1.jfif",
+      "images/Kanna2.jfif",
+      "images/Kanna3.jfif",
+      "images/Kanna4.jfif"
+    ],
+    "hints": [
+      "มังกรเด็กตัวเล็ก",
+      "ผมสีขาวอมม่วง",
+      "ชอบกินและมีท่าทางน่ารักจนกลายเป็นมีมมากมาย"
+    ]
+  },
+  {
+    "id": "riza-hawkeye",
+    "name": "Riza Hawkeye",
+    "aliases": [
+      "riza",
+      "riza hawkeye",
+      "ริซ่า",
+      "ริซ่า ฮอว์คอาย"
+    ],
+    "anime": "Fullmetal Alchemist: Brotherhood",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Action"
+    ],
+    "images": [
+      "images/Riza1.jfif",
+      "images/Riza2.jfif",
+      "images/Riza3.jfif",
+      "images/Riza4.jfif"
+    ],
+    "hints": [
+      "ทหารหญิงผู้แม่นปืน",
+      "ทำงานใกล้ชิดกับรอย มัสแตง",
+      "บุคลิกสุขุมและไว้ใจได้"
+    ]
+  },
+  {
+    "id": "winry-rockbell",
+    "name": "Winry Rockbell",
+    "aliases": [
+      "winry",
+      "winry rockbell",
+      "วินรี่",
+      "วินรี่ ร็อคเบลล์"
+    ],
+    "anime": "Fullmetal Alchemist: Brotherhood",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Adventure"
+    ],
+    "images": [
+      "images/Winry1.jfif",
+      "images/Winry2.jfif",
+      "images/Winry3.jfif",
+      "images/Winry4.jfif"
+    ],
+    "hints": [
+      "ช่าง Auto-Mail ฝีมือดี",
+      "เป็นเพื่อนวัยเด็กของสองพี่น้องเอลริค",
+      "มักซ่อมแขนกลให้เอ็ดเวิร์ด"
+    ]
+  },
+  {
+    "id": "miku-nakano",
+    "name": "Miku Nakano",
+    "aliases": [
+      "miku nakano",
+      "miku",
+      "มิคุ",
+      "มิคุ นากาโนะ"
+    ],
+    "anime": "The Quintessential Quintuplets",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Romance"
+    ],
+    "images": [
+      "images/Miku1.jfif",
+      "images/Miku2.jfif",
+      "images/Miku3.jfif",
+      "images/Miku4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในห้าแฝดนากาโนะ",
+      "ชอบประวัติศาสตร์ยุคเซ็นโกคุ",
+      "มักสวมหูฟังคล้องคอ"
+    ]
+  },
+  {
+    "id": "nino-nakano",
+    "name": "Nino Nakano",
+    "aliases": [
+      "nino nakano",
+      "nino",
+      "นิโนะ",
+      "นิโนะ นากาโนะ"
+    ],
+    "anime": "The Quintessential Quintuplets",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Romance"
+    ],
+    "images": [
+      "images/Nino1.jfif",
+      "images/Nino2.jfif",
+      "images/Nino3.jfif",
+      "images/Nino4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในห้าแฝดนากาโนะ",
+      "บุคลิกตรงไปตรงมาและรักพี่น้องมาก",
+      "ภาพจำช่วงแรกคือผมยาวและริบบิ้นรูปผีเสื้อ"
+    ]
+  },
+  {
+    "id": "esdeath",
+    "name": "Esdeath",
+    "aliases": [
+      "esdeath",
+      "เอสเดธ",
+      "esdeath akame ga kill"
+    ],
+    "anime": "Akame ga Kill!",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Esdeath1.jfif",
+      "images/Esdeath2.jfif",
+      "images/Esdeath3.jfif",
+      "images/Esdeath4.jfif"
+    ],
+    "hints": [
+      "แม่ทัพหญิงผู้ใช้พลังน้ำแข็ง",
+      "แข็งแกร่งและโหดเหี้ยมมาก",
+      "มีความรู้สึกพิเศษต่อทัตสึมิ"
+    ]
+  },
+  {
+    "id": "akame",
+    "name": "Akame",
+    "aliases": [
+      "akame",
+      "อาคาเมะ",
+      "akame ga kill"
+    ],
+    "anime": "Akame ga Kill!",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Akame1.jfif",
+      "images/Akame2.jfif",
+      "images/Akame3.jfif",
+      "images/Akame4.jfif"
+    ],
+    "hints": [
+      "นักดาบหญิงผมดำ",
+      "สมาชิก Night Raid",
+      "ใช้ดาบต้องคำสาป Murasame"
+    ]
+  },
+  {
+    "id": "ryuko-matoi",
+    "name": "Ryuko Matoi",
+    "aliases": [
+      "ryuko",
+      "ryuko matoi",
+      "ริวโกะ",
+      "ริวโกะ มาโตอิ"
+    ],
+    "anime": "Kill la Kill",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Action"
+    ],
+    "images": [
+      "images/Ryuko1.jfif",
+      "images/Ryuko2.jfif",
+      "images/Ryuko3.jfif",
+      "images/Ryuko4.jfif"
+    ],
+    "hints": [
+      "เด็กสาวผมดำมีช่อแดง",
+      "ใช้อาวุธกรรไกรขนาดใหญ่",
+      "สวม Kamui ที่ชื่อ Senketsu"
+    ]
+  },
+  {
+    "id": "madoka-kaname",
+    "name": "Madoka Kaname",
+    "aliases": [
+      "madoka",
+      "madoka kaname",
+      "มาโดกะ",
+      "มาโดกะ คานาเมะ"
+    ],
+    "anime": "Puella Magi Madoka Magica",
+    "categories": [
+      "Beloved",
+      "Classic",
+      "Magic"
+    ],
+    "images": [
+      "images/Madoka1.jfif",
+      "images/Madoka2.jfif",
+      "images/Madoka3.jfif",
+      "images/Madoka4.jfif"
+    ],
+    "hints": [
+      "เด็กสาวผมชมพู",
+      "ถูกชวนให้ทำสัญญาเป็นสาวน้อยเวทมนตร์",
+      "เป็นหัวใจสำคัญของเรื่องราวที่เกี่ยวกับชะตากรรมและความหวัง"
+    ]
+  },
+  {
+    "id": "homura-akemi",
+    "name": "Homura Akemi",
+    "aliases": [
+      "homura",
+      "homura akemi",
+      "โฮมุระ",
+      "โฮมุระ อาเคมิ"
+    ],
+    "anime": "Puella Magi Madoka Magica",
+    "categories": [
+      "Waifu",
+      "Beloved",
+      "Magic"
+    ],
+    "images": [
+      "images/Homura1.jfif",
+      "images/Homura2.jfif",
+      "images/Homura3.jfif",
+      "images/Homura4.jfif"
+    ],
+    "hints": [
+      "สาวน้อยเวทมนตร์ผมดำ",
+      "เกี่ยวข้องกับพลังด้านเวลา",
+      "พยายามปกป้องมาโดกะซ้ำแล้วซ้ำเล่า"
+    ]
+  },
+  {
+    "id": "satsuki-kiryuin",
+    "name": "Satsuki Kiryuin",
+    "aliases": [
+      "satsuki",
+      "satsuki kiryuin",
+      "ซัทสึกิ",
+      "ซัทสึกิ คิริวอิน"
+    ],
+    "anime": "Kill la Kill",
+    "categories": [
+      "Waifu",
+      "Popular",
+      "Action"
+    ],
+    "images": [
+      "images/Satsuki1.jfif",
+      "images/Satsuki2.jfif",
+      "images/Satsuki3.jfif",
+      "images/Satsuki4.jfif"
+    ],
+    "hints": [
+      "ประธานสภานักเรียนผู้สง่างาม",
+      "ใช้ดาบและมีพลังผู้นำสูง",
+      "เป็นตัวละครสำคัญที่ยืนตรงข้ามริวโกะในช่วงต้น"
+    ]
+  },
+  {
+    "id": "luffy",
+    "name": "Monkey D. Luffy",
+    "aliases": [
+      "luffy",
+      "monkey d luffy",
+      "ลูฟี่",
+      "มังกี้ ดี ลูฟี่"
+    ],
+    "anime": "One Piece",
+    "categories": [
+      "Beloved",
+      "Popular",
+      "Male"
+    ],
+    "images": [
+      "images/Luffy1.jfif",
+      "images/Luffy2.jfif",
+      "images/Luffy3.jfif",
+      "images/Luffy4.jfif"
+    ],
+    "hints": [
+      "โจรสลัดหมวกฟาง",
+      "มีเป้าหมายจะเป็นราชาโจรสลัด",
+      "ร่างกายยืดหยุ่นจากพลังผลปีศาจ"
+    ]
+  },
+  {
+    "id": "gojo-satoru",
+    "name": "Satoru Gojo",
+    "aliases": [
+      "gojo",
+      "satoru gojo",
+      "โกโจ",
+      "โกโจ ซาโตรุ"
+    ],
+    "anime": "Jujutsu Kaisen",
+    "categories": [
+      "Beloved",
+      "Popular",
+      "Male"
+    ],
+    "images": [
+      "images/Gojo1.jfif",
+      "images/Gojo2.jfif",
+      "images/Gojo3.jfif",
+      "images/Gojo4.jfif"
+    ],
+    "hints": [
+      "อาจารย์ไสยเวทผมขาว",
+      "มักปิดตาด้วยผ้าหรือแว่น",
+      "ขึ้นชื่อว่าเป็นผู้ใช้คุณไสยที่แข็งแกร่งที่สุด"
+    ]
+  },
+  {
+    "id": "levi-ackerman",
+    "name": "Levi Ackerman",
+    "aliases": [
+      "levi",
+      "levi ackerman",
+      "ลีไว",
+      "รีไว",
+      "ลีไว แอคเคอร์แมน"
+    ],
+    "anime": "Attack on Titan",
+    "categories": [
+      "Beloved",
+      "Popular",
+      "Male"
+    ],
+    "images": [
+      "images/Levi1.jfif",
+      "images/Levi2.jfif",
+      "images/Levi3.jfif",
+      "images/Levi4.jfif"
+    ],
+    "hints": [
+      "หัวหน้าหน่วยรบฝีมือฉกาจ",
+      "ถูกเรียกว่าเป็นมนุษย์ที่แข็งแกร่งที่สุด",
+      "รักความสะอาดมาก"
+    ]
   }
 ]
