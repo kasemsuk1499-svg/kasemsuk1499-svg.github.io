@@ -2,6 +2,7 @@
 // Existing string artwork paths still work. Optional per-character or per-art focus is supported.
 (function () {
   const DEFAULT_FOCUS = [50, 28];
+  const boardEl = document.getElementById("board");
 
   function clamp(value, fallback) {
     const n = Number(value);
@@ -60,20 +61,20 @@
     };
   }
 
-  // Override the game's artwork picker while keeping the existing database format compatible.
-  window.pickArtwork = function pickArtworkWithFaceFocus(character) {
-    const artworks = typeof window.getArtworks === "function"
-      ? window.getArtworks(character)
+  // Reassign the global picker used by script.js.
+  pickArtwork = function pickArtworkWithFaceFocus(character) {
+    const artworks = typeof getArtworks === "function"
+      ? getArtworks(character)
       : [
           ...(Array.isArray(character?.images) ? character.images : []),
           character?.image
         ].filter(Boolean);
 
     if (!artworks.length) {
-      if (window.board) {
-        board.style.backgroundPosition = "50% 28%";
-        board.style.backgroundSize = "cover";
-        board.style.backgroundRepeat = "no-repeat";
+      if (boardEl) {
+        boardEl.style.backgroundPosition = "50% 28%";
+        boardEl.style.backgroundSize = "cover";
+        boardEl.style.backgroundRepeat = "no-repeat";
       }
       return null;
     }
@@ -82,10 +83,10 @@
     const parsed = parseArtwork(chosen, character);
     if (!parsed) return null;
 
-    if (window.board) {
-      board.style.backgroundPosition = parsed.position;
-      board.style.backgroundSize = parsed.fit;
-      board.style.backgroundRepeat = "no-repeat";
+    if (boardEl) {
+      boardEl.style.backgroundPosition = parsed.position;
+      boardEl.style.backgroundSize = parsed.fit;
+      boardEl.style.backgroundRepeat = "no-repeat";
     }
 
     return parsed.src;
