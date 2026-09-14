@@ -39,14 +39,14 @@
           <label for="modeSelect">ความยาก</label>
           <select id="modeSelect">
             <option value="easy">Easy — เปิดได้เรื่อย ๆ</option>
-            <option value="hard">Hard — เปิดได้สูงสุด 5 แผ่น</option>
+            <option value="hard">Hard — จำกัดตามขนาดกระดาน</option>
           </select>
         </div>
       </div>
 
       <div class="rule-card" id="ruleCard">
         <b>Easy</b>
-        <span>เปิดได้จนกว่าจะตอบได้ แต่ยิ่งเปิดเยอะ คะแนนข้อนั้นยิ่งลด</span>
+        <span>จำนวนช่องคำนวณจากสัดส่วนภาพ เปิดได้จนกว่าจะตอบได้ แต่ยิ่งเปิดเยอะ คะแนนยิ่งลด</span>
       </div>
 
       <button id="startBtn" class="primary big">START GAME</button>
@@ -62,7 +62,7 @@
                 <span class="pill" id="currentCategory">ทั้งหมด</span>
                 <span class="pill mode-pill" id="currentMode">EASY</span>
               </div>
-              <p id="tileStatus">เปิดแล้ว 0 แผ่น</p>
+              <p id="tileStatus">กำลังคำนวณกระดาน...</p>
             </div>
             <button id="resetBtn" class="ghost">เริ่มใหม่</button>
           </div>
@@ -109,6 +109,7 @@
             <div><span>ตอบผิด</span><b>-1 ❤️</b></div>
             <div><span>เปิดเพิ่ม</span><b>-10 คะแนน/แผ่น</b></div>
             <div><span>ตอบถูกด้วย 1 แผ่น</span><b>+50 Bonus</b></div>
+            <div><span>Hard</span><b>เปิดได้ ~30% ของกระดาน</b></div>
             <div><span>ใช้คำใบ้</span><b>-20 คะแนน</b></div>
           </div>
         </aside>
@@ -134,6 +135,6 @@
   </main>
 
   <script src="script.js"></script>
-  <script src="face-focus.js"></script>
+  <script src="dynamic-tiles.js"></script>
 </body>
 </html>
