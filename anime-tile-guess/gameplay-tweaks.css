@@ -1,0 +1,26 @@
+.tile.locked {
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+
+.answer-actions {
+  grid-template-columns: 1fr auto auto;
+}
+
+.skip-btn {
+  min-width: 112px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.skip-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+@media (max-width: 560px) {
+  .answer-actions {
+    grid-template-columns: 1fr;
+  }
+}
