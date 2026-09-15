@@ -1,5 +1,5 @@
 // Adaptive board sizing and tile calculation based on the real artwork ratio.
-// This intentionally does NOT use face focus. The whole board follows the image aspect ratio.
+// Missing/broken artwork files are skipped automatically before a question is shown.
 (function () {
   const TARGET_TILE_COUNT = 16;
   const MIN_TILE_COUNT = 15;
@@ -14,13 +14,25 @@
   let adaptiveHardLimit = 5;
   let loadToken = 0;
 
+  // Cache checks for the current browser session so broken paths are not retried every round.
+  const artworkCheckCache = new Map();
+
   function artworkSource(artwork) {
     if (typeof artwork === "string") return artwork;
     if (!artwork || typeof artwork !== "object") return null;
     return artwork.src || artwork.image || artwork.url || null;
   }
 
-  function chooseArtwork(character) {
+  function shuffled(list) {
+    const arr = [...list];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function getArtworkList(character) {
     const list = typeof getArtworks === "function"
       ? getArtworks(character)
       : [
@@ -28,20 +40,50 @@
           character?.image
         ].filter(Boolean);
 
-    if (!list.length) return null;
-    return list[Math.floor(Math.random() * list.length)];
+    return shuffled(list);
   }
 
-  function readImageSize(src) {
+  function checkImage(src) {
+    if (artworkCheckCache.has(src)) {
+      return Promise.resolve(artworkCheckCache.get(src));
+    }
+
     return new Promise(resolve => {
       const img = new Image();
-      img.onload = () => resolve({
-        width: img.naturalWidth || 1,
-        height: img.naturalHeight || 1
-      });
-      img.onerror = () => resolve({ width: 1, height: 1 });
+
+      img.onload = () => {
+        const width = img.naturalWidth || 0;
+        const height = img.naturalHeight || 0;
+        const result = width > 0 && height > 0
+          ? { ok: true, src, width, height }
+          : { ok: false, src };
+
+        artworkCheckCache.set(src, result);
+        resolve(result);
+      };
+
+      img.onerror = () => {
+        const result = { ok: false, src };
+        artworkCheckCache.set(src, result);
+        resolve(result);
+      };
+
       img.src = src;
     });
+  }
+
+  async function findUsableArtwork(character) {
+    const artworks = getArtworkList(character);
+
+    for (const artwork of artworks) {
+      const src = artworkSource(artwork);
+      if (!src) continue;
+
+      const checked = await checkImage(src);
+      if (checked.ok) return checked;
+    }
+
+    return null;
   }
 
   function calculateGrid(width, height) {
@@ -53,7 +95,6 @@
         const total = cols * rows;
         if (total < MIN_TILE_COUNT || total > MAX_TILE_COUNT) continue;
 
-        // A tile is nicest when it is close to square in the original image space.
         const tileAspect = ratio * rows / cols;
         const shapePenalty = Math.abs(Math.log(tileAspect)) * 2;
         const countPenalty = Math.abs(total - TARGET_TILE_COUNT) / TARGET_TILE_COUNT * 0.25;
@@ -69,7 +110,6 @@
   }
 
   function calculateHardLimit(total) {
-    // Hard mode reveals about 30% of the board, scaled to the board size.
     return Math.max(3, Math.ceil(total * HARD_REVEAL_RATIO));
   }
 
@@ -90,8 +130,6 @@
     board.style.backgroundRepeat = "no-repeat";
     board.style.marginInline = "auto";
 
-    // Keep very tall images from making the page excessively tall on desktop.
-    // Because width is derived from the same ratio, the image is still not cropped.
     const viewportWidthCap = Math.max(34, Math.min(100, Math.round(74 * ratio)));
     board.style.maxWidth = `min(100%, ${viewportWidthCap}vh)`;
   }
@@ -135,7 +173,7 @@
     const current = quiz[questionIndex];
 
     questionNoEl.textContent = `${questionIndex + 1} / 10`;
-    messageEl.textContent = "กำลังคำนวณกระดานจากภาพ...";
+    messageEl.textContent = "กำลังตรวจรูปและคำนวณกระดาน...";
     questionScoreEl.textContent = questionScore;
     scoreDetailEl.textContent = `ตอบถูกจากแผ่นแรก +${ONE_TILE_BONUS} Bonus`;
     hintBtn.disabled = hintsLeft <= 0;
@@ -144,23 +182,24 @@
     board.style.backgroundPosition = "center center";
     board.style.backgroundRepeat = "no-repeat";
 
-    const artwork = chooseArtwork(current);
-    const src = artworkSource(artwork);
+    const usable = await findUsableArtwork(current);
+    if (token !== loadToken) return;
 
-    if (src) {
-      const size = await readImageSize(src);
-      if (token !== loadToken) return;
-
-      configureBoard(size.width, size.height);
-      board.style.backgroundImage = `url(${JSON.stringify(src)})`;
+    if (usable) {
+      configureBoard(usable.width, usable.height);
+      board.style.backgroundImage = `url(${JSON.stringify(usable.src)})`;
     } else {
+      // No valid image exists for this character: use a safe placeholder instead of breaking the round.
       configureBoard(1, 1);
       board.style.backgroundImage = "radial-gradient(circle at 50% 50%, #4b436f 0 18%, transparent 19%), linear-gradient(145deg, #2a3044, #111520)";
     }
 
     buildTiles();
     updateTileStatus();
-    messageEl.textContent = "เปิดอย่างน้อย 1 แผ่นก่อนตอบ ✨";
+    messageEl.textContent = usable
+      ? "เปิดอย่างน้อย 1 แผ่นก่อนตอบ ✨"
+      : "⚠️ ตัวละครนี้ยังไม่มีรูปที่โหลดได้ — ใช้ภาพสำรองชั่วคราว";
+
     setTimeout(() => guessInput.focus(), 50);
   };
 
@@ -195,6 +234,5 @@
       : `กระดาน ${gridText} • เปิดแล้ว ${opened.size} แผ่น`;
   };
 
-  // Replace the old fixed-five wording immediately after this extension loads.
   updateRuleCard();
 })();
