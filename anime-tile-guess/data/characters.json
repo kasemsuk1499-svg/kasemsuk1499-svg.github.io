@@ -1343,5 +1343,1332 @@
       "ถูกเรียกว่าเป็นมนุษย์ที่แข็งแกร่งที่สุด",
       "รักความสะอาดมาก"
     ]
+  },
+  {
+    "id": "tsunayoshi-sawada",
+    "name": "Tsunayoshi Sawada",
+    "aliases": [
+      "tsuna",
+      "tsunayoshi sawada",
+      "ซึนะ",
+      "ซาวาดะ สึนะโยชิ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Vongola",
+      "Popular"
+    ],
+    "images": [
+      "images/Tsuna1.jfif",
+      "images/Tsuna2.jfif",
+      "images/Tsuna3.jfif",
+      "images/Tsuna4.jfif"
+    ],
+    "hints": [
+      "บอสวองโกเล่รุ่นที่ 10",
+      "มีไฟดับเครื่องชนธาตุนภา",
+      "มักถูกเรียกสั้น ๆ ว่า ซึนะ"
+    ]
+  },
+  {
+    "id": "reborn",
+    "name": "Reborn",
+    "aliases": [
+      "reborn",
+      "รีบอร์น"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Arcobaleno",
+      "Popular"
+    ],
+    "images": [
+      "images/Reborn1.jfif",
+      "images/Reborn2.jfif",
+      "images/Reborn3.jfif",
+      "images/Reborn4.jfif"
+    ],
+    "hints": [
+      "นักฆ่าที่แข็งแกร่งมากในร่างทารก",
+      "เป็นครูสอนพิเศษของซึนะ",
+      "อาร์โกบาเลโน่แห่งอรุณ"
+    ]
+  },
+  {
+    "id": "hayato-gokudera",
+    "name": "Hayato Gokudera",
+    "aliases": [
+      "gokudera",
+      "hayato gokudera",
+      "โกคุเดระ",
+      "โกคุเดระ ฮายาโตะ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Vongola",
+      "Popular"
+    ],
+    "images": [
+      "images/Gokudera1.jfif",
+      "images/Gokudera2.jfif",
+      "images/Gokudera3.jfif",
+      "images/Gokudera4.jfif"
+    ],
+    "hints": [
+      "ผู้พิทักษ์วายุของวองโกเล่รุ่นที่ 10",
+      "เชี่ยวชาญการใช้ระเบิด",
+      "เคารพซึนะในฐานะรุ่นที่ 10 อย่างมาก"
+    ]
+  },
+  {
+    "id": "takeshi-yamamoto",
+    "name": "Takeshi Yamamoto",
+    "aliases": [
+      "yamamoto",
+      "takeshi yamamoto",
+      "ยามาโมโตะ",
+      "ยามาโมโตะ ทาเคชิ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Vongola",
+      "Popular"
+    ],
+    "images": [
+      "images/Yamamoto1.jfif",
+      "images/Yamamoto2.jfif",
+      "images/Yamamoto3.jfif",
+      "images/Yamamoto4.jfif"
+    ],
+    "hints": [
+      "ผู้พิทักษ์พิรุณ",
+      "เป็นนักกีฬาเบสบอล",
+      "ใช้วิชาดาบชิงุเระโซเอ็น"
+    ]
+  },
+  {
+    "id": "kyoya-hibari",
+    "name": "Kyoya Hibari",
+    "aliases": [
+      "hibari",
+      "kyoya hibari",
+      "ฮิบาริ",
+      "ฮิบาริ เคียวยะ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Vongola",
+      "Popular"
+    ],
+    "images": [
+      "images/Hibari1.jfif",
+      "images/Hibari2.jfif",
+      "images/Hibari3.jfif",
+      "images/Hibari4.jfif"
+    ],
+    "hints": [
+      "ผู้พิทักษ์เมฆา",
+      "หัวหน้ากรรมการคุมกฎของโรงเรียนนามิโมริ",
+      "ไม่ชอบการสุมหัวและชอบพูดว่าจะขย้ำ"
+    ]
+  },
+  {
+    "id": "ryohei-sasagawa",
+    "name": "Ryohei Sasagawa",
+    "aliases": [
+      "ryohei",
+      "ryohei sasagawa",
+      "เรียวเฮ",
+      "ซาซางาวะ เรียวเฮ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Vongola"
+    ],
+    "images": [
+      "images/Ryohei1.jfif",
+      "images/Ryohei2.jfif",
+      "images/Ryohei3.jfif",
+      "images/Ryohei4.jfif"
+    ],
+    "hints": [
+      "ผู้พิทักษ์อรุณ",
+      "เป็นนักมวยของโรงเรียนนามิโมริ",
+      "ชอบพูดถึงคำว่าสุดขั้ว"
+    ]
+  },
+  {
+    "id": "lambo",
+    "name": "Lambo",
+    "aliases": [
+      "lambo",
+      "แรมโบ้",
+      "ลัมโบ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Vongola"
+    ],
+    "images": [
+      "images/Lambo1.jfif",
+      "images/Lambo2.jfif",
+      "images/Lambo3.jfif",
+      "images/Lambo4.jfif"
+    ],
+    "hints": [
+      "ผู้พิทักษ์อัสนี",
+      "เป็นเด็กจากโบวีโนแฟมิลี่",
+      "ใช้บาซูก้าทศวรรษเปลี่ยนตัวกับตนเองในอนาคต"
+    ]
+  },
+  {
+    "id": "mukuro-rokudo",
+    "name": "Mukuro Rokudo",
+    "aliases": [
+      "mukuro",
+      "mukuro rokudo",
+      "มุคุโร่",
+      "โรคุโด มุคุโร่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Vongola",
+      "Popular"
+    ],
+    "images": [
+      "images/Mukuro1.jfif",
+      "images/Mukuro2.jfif",
+      "images/Mukuro3.jfif",
+      "images/Mukuro4.jfif"
+    ],
+    "hints": [
+      "ผู้ใช้ภาพมายาระดับสูง",
+      "ดวงตาข้างหนึ่งมีสัญลักษณ์ตัวเลข",
+      "เกี่ยวข้องกับผู้พิทักษ์สายหมอกของวองโกเล่"
+    ]
+  },
+  {
+    "id": "chrome-dokuro",
+    "name": "Chrome Dokuro",
+    "aliases": [
+      "chrome",
+      "chrome dokuro",
+      "โคลม",
+      "โคลม โดคุโร"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Vongola",
+      "Popular"
+    ],
+    "images": [
+      "images/Chrome1.jfif",
+      "images/Chrome2.jfif",
+      "images/Chrome3.jfif",
+      "images/Chrome4.jfif"
+    ],
+    "hints": [
+      "ผู้พิทักษ์สายหมอกอีกคนของวองโกเล่",
+      "ใช้สามง่ามและภาพมายา",
+      "มีความผูกพันกับมุคุโร่"
+    ]
+  },
+  {
+    "id": "dino",
+    "name": "Dino",
+    "aliases": [
+      "dino",
+      "dino cavallone",
+      "ดีโน่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Cavallone",
+      "Popular"
+    ],
+    "images": [
+      "images/Dino1.jfif",
+      "images/Dino2.jfif",
+      "images/Dino3.jfif",
+      "images/Dino4.jfif"
+    ],
+    "hints": [
+      "บอสคาบัคโรเน่แฟมิลี่รุ่นที่ 10",
+      "เป็นศิษย์ของรีบอร์น",
+      "ใช้แส้ในการต่อสู้"
+    ]
+  },
+  {
+    "id": "xanxus",
+    "name": "Xanxus",
+    "aliases": [
+      "xanxus",
+      "ซันซัส"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Varia",
+      "Popular"
+    ],
+    "images": [
+      "images/Xanxus1.jfif",
+      "images/Xanxus2.jfif",
+      "images/Xanxus3.jfif",
+      "images/Xanxus4.jfif"
+    ],
+    "hints": [
+      "หัวหน้าหน่วยวาเรีย",
+      "ใช้ไฟโทสะและปืนคู่",
+      "เคยต่อสู้ชิงตำแหน่งบอสวองโกเล่รุ่นที่ 10"
+    ]
+  },
+  {
+    "id": "superbi-squalo",
+    "name": "Superbi Squalo",
+    "aliases": [
+      "squalo",
+      "superbi squalo",
+      "สควอโล่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Varia",
+      "Popular"
+    ],
+    "images": [
+      "images/Squalo1.jfif",
+      "images/Squalo2.jfif",
+      "images/Squalo3.jfif",
+      "images/Squalo4.jfif"
+    ],
+    "hints": [
+      "นักดาบแห่งวาเรีย",
+      "ผู้พิทักษ์พิรุณฝั่งวาเรีย",
+      "มักตะโกนเสียงดังเป็นเอกลักษณ์"
+    ]
+  },
+  {
+    "id": "belphegor",
+    "name": "Belphegor",
+    "aliases": [
+      "bel",
+      "belphegor",
+      "เบล",
+      "เบลเฟกอล"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Varia",
+      "Popular"
+    ],
+    "images": [
+      "images/Belphegor1.jfif",
+      "images/Belphegor2.jfif",
+      "images/Belphegor3.jfif",
+      "images/Belphegor4.jfif"
+    ],
+    "hints": [
+      "เจ้าชายนักเชือดแห่งวาเรีย",
+      "ใช้มีดและเส้นลวด",
+      "หัวเราะแบบชิชิชิ"
+    ]
+  },
+  {
+    "id": "mammon",
+    "name": "Mammon",
+    "aliases": [
+      "mammon",
+      "viper",
+      "มาม่อน",
+      "ไวเปอร์"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Arcobaleno",
+      "Varia",
+      "Popular"
+    ],
+    "images": [
+      "images/Mammon1.jfif",
+      "images/Mammon2.jfif",
+      "images/Mammon3.jfif",
+      "images/Mammon4.jfif"
+    ],
+    "hints": [
+      "อาร์โกบาเลโน่แห่งสายหมอก",
+      "สมาชิกวาเรีย",
+      "ชอบเงินและมีพลังภาพมายาสูงมาก"
+    ]
+  },
+  {
+    "id": "levi-a-than",
+    "name": "Levi A Than",
+    "aliases": [
+      "levi",
+      "levi a than",
+      "เลวี่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Varia"
+    ],
+    "images": [
+      "images/Levi1.jfif",
+      "images/Levi2.jfif",
+      "images/Levi3.jfif",
+      "images/Levi4.jfif"
+    ],
+    "hints": [
+      "สมาชิกวาเรียผู้ใช้ธาตุอัสนี",
+      "ภักดีต่อซันซัสมาก",
+      "ใช้อาวุธที่เกี่ยวข้องกับสายฟ้า"
+    ]
+  },
+  {
+    "id": "lussuria",
+    "name": "Lussuria",
+    "aliases": [
+      "lussuria",
+      "ลุสซูเรีย"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Varia"
+    ],
+    "images": [
+      "images/Lussuria1.jfif",
+      "images/Lussuria2.jfif",
+      "images/Lussuria3.jfif",
+      "images/Lussuria4.jfif"
+    ],
+    "hints": [
+      "ผู้พิทักษ์อรุณของวาเรีย",
+      "เชี่ยวชาญการต่อสู้ด้วยเข่า",
+      "มีบุคลิกโดดเด่นและชอบดูแลพวกพ้อง"
+    ]
+  },
+  {
+    "id": "fran",
+    "name": "Fran",
+    "aliases": [
+      "fran",
+      "ฟราน"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Varia",
+      "Popular"
+    ],
+    "images": [
+      "images/Fran1.jfif",
+      "images/Fran2.jfif",
+      "images/Fran3.jfif",
+      "images/Fran4.jfif"
+    ],
+    "hints": [
+      "ผู้ใช้ภาพมายารุ่นใหม่ของวาเรีย",
+      "มักสวมหมวกกบ",
+      "ชอบพูดจาแซวคนอื่นหน้าตาย"
+    ]
+  },
+  {
+    "id": "byakuran",
+    "name": "Byakuran",
+    "aliases": [
+      "byakuran",
+      "เบียคุรัน"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Millefiore",
+      "Popular"
+    ],
+    "images": [
+      "images/Byakuran1.jfif",
+      "images/Byakuran2.jfif",
+      "images/Byakuran3.jfif",
+      "images/Byakuran4.jfif"
+    ],
+    "hints": [
+      "ผู้นำมิลฟีโอเล่แฟมิลี่",
+      "มีพลังเกี่ยวข้องกับโลกคู่ขนาน",
+      "ชอบมาร์ชเมลโลว์"
+    ]
+  },
+  {
+    "id": "shoichi-irie",
+    "name": "Shoichi Irie",
+    "aliases": [
+      "shoichi",
+      "shoichi irie",
+      "โชอิจิ",
+      "อิริเอะ โชอิจิ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Millefiore",
+      "Future Arc"
+    ],
+    "images": [
+      "images/Shoichi1.jfif",
+      "images/Shoichi2.jfif",
+      "images/Shoichi3.jfif",
+      "images/Shoichi4.jfif"
+    ],
+    "hints": [
+      "มีบทบาทสำคัญในโลกอนาคต",
+      "เป็นนักวิทยาศาสตร์และนักวางแผน",
+      "เกี่ยวข้องกับระบบกล่องและฐานเมโลเน่"
+    ]
+  },
+  {
+    "id": "spanner",
+    "name": "Spanner",
+    "aliases": [
+      "spanner",
+      "สปาน่า"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Millefiore",
+      "Future Arc"
+    ],
+    "images": [
+      "images/Spanner1.jfif",
+      "images/Spanner2.jfif",
+      "images/Spanner3.jfif",
+      "images/Spanner4.jfif"
+    ],
+    "hints": [
+      "วิศวกรที่เชี่ยวชาญเทคโนโลยี",
+      "สนใจ X-Burner ของซึนะ",
+      "ชอบอมลูกอมรูปประแจ"
+    ]
+  },
+  {
+    "id": "uni",
+    "name": "Uni",
+    "aliases": [
+      "uni",
+      "yuni",
+      "ยูนิ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Arcobaleno",
+      "Millefiore",
+      "Popular"
+    ],
+    "images": [
+      "images/Uni1.jfif",
+      "images/Uni2.jfif",
+      "images/Uni3.jfif",
+      "images/Uni4.jfif"
+    ],
+    "hints": [
+      "มีสายสัมพันธ์กับอาร์โกบาเลโน่",
+      "เป็นหัวหน้าของแบล็กสเปลล์",
+      "มีพลังพิเศษเกี่ยวข้องกับนภา"
+    ]
+  },
+  {
+    "id": "gamma",
+    "name": "Gamma",
+    "aliases": [
+      "gamma",
+      "แกมม่า"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Millefiore",
+      "Future Arc"
+    ],
+    "images": [
+      "images/Gamma1.jfif",
+      "images/Gamma2.jfif",
+      "images/Gamma3.jfif",
+      "images/Gamma4.jfif"
+    ],
+    "hints": [
+      "สมาชิกแบล็กสเปลล์",
+      "ใช้ไฟธาตุอัสนี",
+      "ภักดีต่อยูนิมาก"
+    ]
+  },
+  {
+    "id": "genkishi",
+    "name": "Genkishi",
+    "aliases": [
+      "genkishi",
+      "phantom knight",
+      "เก็นคิชิ",
+      "อัศวินมายา"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Millefiore"
+    ],
+    "images": [
+      "images/Genkishi1.jfif",
+      "images/Genkishi2.jfif",
+      "images/Genkishi3.jfif",
+      "images/Genkishi4.jfif"
+    ],
+    "hints": [
+      "นักดาบฝีมือสูงของมิลฟีโอเล่",
+      "มีฉายาอัศวินมายา",
+      "ใช้ภาพมายาร่วมกับการต่อสู้ด้วยดาบ"
+    ]
+  },
+  {
+    "id": "bluebell",
+    "name": "Bluebell",
+    "aliases": [
+      "bluebell",
+      "บลูเบล"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Real Six Funeral Wreaths"
+    ],
+    "images": [
+      "images/Bluebell1.jfif",
+      "images/Bluebell2.jfif",
+      "images/Bluebell3.jfif",
+      "images/Bluebell4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในหกบุปผาอาลัยที่แท้จริง",
+      "ใช้พลังธาตุพิรุณ",
+      "สามารถเปลี่ยนร่างเพื่อการต่อสู้ได้"
+    ]
+  },
+  {
+    "id": "kikyo",
+    "name": "Kikyo",
+    "aliases": [
+      "kikyo",
+      "คิเคียว"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Real Six Funeral Wreaths"
+    ],
+    "images": [
+      "images/Kikyo1.jfif",
+      "images/Kikyo2.jfif",
+      "images/Kikyo3.jfif",
+      "images/Kikyo4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในหกบุปผาอาลัยที่แท้จริง",
+      "มีภาพลักษณ์สุขุมและผมยาว",
+      "ใช้พลังธาตุเมฆา"
+    ]
+  },
+  {
+    "id": "zakuro",
+    "name": "Zakuro",
+    "aliases": [
+      "zakuro",
+      "ซาคุโร่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Real Six Funeral Wreaths"
+    ],
+    "images": [
+      "images/Zakuro1.jfif",
+      "images/Zakuro2.jfif",
+      "images/Zakuro3.jfif",
+      "images/Zakuro4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในหกบุปผาอาลัยที่แท้จริง",
+      "นิสัยร้อนแรงและชอบการต่อสู้",
+      "ใช้พลังธาตุวายุ"
+    ]
+  },
+  {
+    "id": "daisy",
+    "name": "Daisy",
+    "aliases": [
+      "daisy",
+      "เดซี่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Real Six Funeral Wreaths"
+    ],
+    "images": [
+      "images/Daisy1.jfif",
+      "images/Daisy2.jfif",
+      "images/Daisy3.jfif",
+      "images/Daisy4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในหกบุปผาอาลัยที่แท้จริง",
+      "มีความสามารถฟื้นฟูร่างกายสูงมาก",
+      "ใช้พลังธาตุอรุณ"
+    ]
+  },
+  {
+    "id": "torikabuto",
+    "name": "Torikabuto",
+    "aliases": [
+      "torikabuto",
+      "โทริคาบูโตะ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Real Six Funeral Wreaths"
+    ],
+    "images": [
+      "images/Torikabuto1.jfif",
+      "images/Torikabuto2.jfif",
+      "images/Torikabuto3.jfif",
+      "images/Torikabuto4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในหกบุปผาอาลัยที่แท้จริง",
+      "เชี่ยวชาญภาพมายา",
+      "ใช้พลังธาตุสายหมอก"
+    ]
+  },
+  {
+    "id": "ghost",
+    "name": "Ghost",
+    "aliases": [
+      "ghost",
+      "โกสต์"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Millefiore",
+      "Real Six Funeral Wreaths"
+    ],
+    "images": [
+      "images/Ghost1.jfif",
+      "images/Ghost2.jfif",
+      "images/Ghost3.jfif",
+      "images/Ghost4.jfif"
+    ],
+    "hints": [
+      "หนึ่งในหกบุปผาอาลัยที่แท้จริง",
+      "มีลักษณะคล้ายเบียคุรัน",
+      "สามารถดูดซับไฟดับเครื่องชนได้"
+    ]
+  },
+  {
+    "id": "enma-kozato",
+    "name": "Enma Kozato",
+    "aliases": [
+      "enma",
+      "enma kozato",
+      "เอ็นมะ",
+      "โคซาโตะ เอ็นมะ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Shimon",
+      "Popular"
+    ],
+    "images": [
+      "images/Enma1.jfif",
+      "images/Enma2.jfif",
+      "images/Enma3.jfif",
+      "images/Enma4.jfif"
+    ],
+    "hints": [
+      "บอสชิม่อนแฟมิลี่",
+      "มีบุคลิกขี้อายและดูไม่โดดเด่นในตอนแรก",
+      "มีพลังเกี่ยวข้องกับแรงโน้มถ่วง"
+    ]
+  },
+  {
+    "id": "adelheid-suzuki",
+    "name": "Adelheid Suzuki",
+    "aliases": [
+      "adelheid",
+      "adelheid suzuki",
+      "อเดลไฮด์"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Shimon",
+      "Popular"
+    ],
+    "images": [
+      "images/Adelheid1.jfif",
+      "images/Adelheid2.jfif",
+      "images/Adelheid3.jfif",
+      "images/Adelheid4.jfif"
+    ],
+    "hints": [
+      "สมาชิกชิม่อนแฟมิลี่",
+      "เป็นรองประธานนักเรียน",
+      "ใช้พลังน้ำแข็งในการต่อสู้"
+    ]
+  },
+  {
+    "id": "julie-kato",
+    "name": "Julie Kato",
+    "aliases": [
+      "julie",
+      "julie kato",
+      "จูลี่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Shimon"
+    ],
+    "images": [
+      "images/Julie1.jfif",
+      "images/Julie2.jfif",
+      "images/Julie3.jfif",
+      "images/Julie4.jfif"
+    ],
+    "hints": [
+      "สมาชิกชิม่อนแฟมิลี่",
+      "มีบทบาทเด่นในอาร์คชิม่อน",
+      "เกี่ยวข้องกับพลังภาพมายา"
+    ]
+  },
+  {
+    "id": "shitt-p",
+    "name": "Shitt P.",
+    "aliases": [
+      "shitt p",
+      "shitt-p",
+      "ชิตต์ พี"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Shimon"
+    ],
+    "images": [
+      "images/ShittP1.jfif",
+      "images/ShittP2.jfif",
+      "images/ShittP3.jfif",
+      "images/ShittP4.jfif"
+    ],
+    "hints": [
+      "สมาชิกชิม่อนแฟมิลี่",
+      "มีรูปลักษณ์และบุคลิกแปลกตา",
+      "เป็นคู่ต่อสู้ของโกคุเดระในอาร์คชิม่อน"
+    ]
+  },
+  {
+    "id": "rauhji-ooyama",
+    "name": "Rauji Ooyama",
+    "aliases": [
+      "rauhji",
+      "rauhji ooyama",
+      "ราวจิ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Shimon"
+    ],
+    "images": [
+      "images/Rauji1.jfif",
+      "images/Rauji2.jfif",
+      "images/Rauji3.jfif",
+      "images/Rauji4.jfif"
+    ],
+    "hints": [
+      "สมาชิกชิม่อนแฟมิลี่",
+      "มีร่างกายใหญ่และแข็งแรง",
+      "เป็นคู่ต่อสู้ของลัมโบ้ในอาร์คชิม่อน"
+    ]
+  },
+  {
+    "id": "kaoru-mizuno",
+    "name": "Kaoru Mizuno",
+    "aliases": [
+      "kaoru mizuno",
+      "kaoru",
+      "คาโอรุ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Shimon"
+    ],
+    "images": [
+      "images/Kaoru1.jfif",
+      "images/Kaoru2.jfif",
+      "images/Kaoru3.jfif",
+      "images/Kaoru4.jfif"
+    ],
+    "hints": [
+      "สมาชิกชิม่อนแฟมิลี่",
+      "ชื่นชอบกีฬาเบสบอล",
+      "มีความเกี่ยวข้องกับยามาโมโตะในอาร์คชิม่อน"
+    ]
+  },
+  {
+    "id": "koyo-aoba",
+    "name": "Koyo Aoba",
+    "aliases": [
+      "koyo",
+      "koyo aoba",
+      "โคโย"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Shimon"
+    ],
+    "images": [
+      "images/Koyo1.jfif",
+      "images/Koyo2.jfif",
+      "images/Koyo3.jfif",
+      "images/Koyo4.jfif"
+    ],
+    "hints": [
+      "สมาชิกชิม่อนแฟมิลี่",
+      "เป็นคู่ต่อสู้ของเรียวเฮ",
+      "มีรูปแบบการต่อสู้ทางกายภาพที่แข็งแกร่ง"
+    ]
+  },
+  {
+    "id": "basil",
+    "name": "Basil",
+    "aliases": [
+      "basil",
+      "บาจิล",
+      "บาซิล"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "CEDEF",
+      "Popular"
+    ],
+    "images": [
+      "images/Basil1.jfif",
+      "images/Basil2.jfif",
+      "images/Basil3.jfif",
+      "images/Basil4.jfif"
+    ],
+    "hints": [
+      "เด็กหนุ่มที่เกี่ยวข้องกับ CEDEF",
+      "ใช้ไฟดับเครื่องชนธาตุพิรุณ",
+      "มักใช้ภาษาสุภาพและเรียกซึนะว่าท่าน"
+    ]
+  },
+  {
+    "id": "fuuta",
+    "name": "Fuuta de la Stella",
+    "aliases": [
+      "fuuta",
+      "futa",
+      "ฟูตะ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Vongola Related"
+    ],
+    "images": [
+      "images/Fuuta1.jfif",
+      "images/Fuuta2.jfif",
+      "images/Fuuta3.jfif",
+      "images/Fuuta4.jfif"
+    ],
+    "hints": [
+      "เด็กชายผู้จัดอันดับสิ่งต่าง ๆ ได้",
+      "เคยถูกตามล่าเพราะความสามารถของตน",
+      "สนิทกับซึนะและพวกพ้อง"
+    ]
+  },
+  {
+    "id": "i-pin",
+    "name": "I-Pin",
+    "aliases": [
+      "i-pin",
+      "อี้ผิง",
+      "อี้ผิน"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Vongola Related"
+    ],
+    "images": [
+      "images/IPin1.jfif",
+      "images/IPin2.jfif",
+      "images/IPin3.jfif",
+      "images/IPin4.jfif"
+    ],
+    "hints": [
+      "เด็กนักฆ่าจากจีน",
+      "ใช้วิชากังฟู",
+      "เมื่อเขินมากอาจกระตุ้นระเบิดพินซึ"
+    ]
+  },
+  {
+    "id": "bianchi",
+    "name": "Bianchi",
+    "aliases": [
+      "bianchi",
+      "เบียงกี้"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Vongola Related"
+    ],
+    "images": [
+      "images/Bianchi1.jfif",
+      "images/Bianchi2.jfif",
+      "images/Bianchi3.jfif",
+      "images/Bianchi4.jfif"
+    ],
+    "hints": [
+      "พี่สาวต่างแม่ของโกคุเดระ",
+      "มีฉายา Poison Cooking",
+      "มีความรู้สึกพิเศษต่อรีบอร์น"
+    ]
+  },
+  {
+    "id": "haru-miura",
+    "name": "Haru Miura",
+    "aliases": [
+      "haru",
+      "haru miura",
+      "ฮารุ",
+      "มิอุระ ฮารุ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Daily Life",
+      "Popular"
+    ],
+    "images": [
+      "images/Haru1.jfif",
+      "images/Haru2.jfif",
+      "images/Haru3.jfif",
+      "images/Haru4.jfif"
+    ],
+    "hints": [
+      "เพื่อนสาวของซึนะ",
+      "มีนิสัยร่าเริงและชอบพูดคำติดปาก",
+      "หลงใหลซึนะอย่างเปิดเผย"
+    ]
+  },
+  {
+    "id": "kyoko-sasagawa",
+    "name": "Kyoko Sasagawa",
+    "aliases": [
+      "kyoko",
+      "kyoko sasagawa",
+      "เคียวโกะ",
+      "ซาซางาวะ เคียวโกะ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Daily Life",
+      "Popular"
+    ],
+    "images": [
+      "images/Kyoko1.jfif",
+      "images/Kyoko2.jfif",
+      "images/Kyoko3.jfif",
+      "images/Kyoko4.jfif"
+    ],
+    "hints": [
+      "น้องสาวของเรียวเฮ",
+      "เป็นคนที่ซึนะชอบ",
+      "มีบุคลิกอ่อนโยนและเป็นมิตร"
+    ]
+  },
+  {
+    "id": "nana-sawada",
+    "name": "Nana Sawada",
+    "aliases": [
+      "nana",
+      "nana sawada",
+      "นานะ",
+      "ซาวาดะ นานะ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Sawada Family"
+    ],
+    "images": [
+      "images/Nana1.jfif",
+      "images/Nana2.jfif",
+      "images/Nana3.jfif",
+      "images/Nana4.jfif"
+    ],
+    "hints": [
+      "แม่ของซึนะ",
+      "ดูแลบ้านซาวาดะที่มักมีแขกแปลก ๆ เต็มบ้าน",
+      "มีบุคลิกใจดีและมองโลกในแง่ดี"
+    ]
+  },
+  {
+    "id": "iemitsu-sawada",
+    "name": "Iemitsu Sawada",
+    "aliases": [
+      "iemitsu",
+      "iemitsu sawada",
+      "อิเอมิตสึ"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "CEDEF",
+      "Sawada Family"
+    ],
+    "images": [
+      "images/Iemitsu1.jfif",
+      "images/Iemitsu2.jfif",
+      "images/Iemitsu3.jfif",
+      "images/Iemitsu4.jfif"
+    ],
+    "hints": [
+      "พ่อของซึนะ",
+      "เป็นหัวหน้าหน่วย CEDEF",
+      "มีความเกี่ยวข้องโดยตรงกับวองโกเล่"
+    ]
+  },
+  {
+    "id": "colonnello",
+    "name": "Colonnello",
+    "aliases": [
+      "colonnello",
+      "โคโลเนโร่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Arcobaleno",
+      "Popular"
+    ],
+    "images": [
+      "images/Colonnello1.jfif",
+      "images/Colonnello2.jfif",
+      "images/Colonnello3.jfif",
+      "images/Colonnello4.jfif"
+    ],
+    "hints": [
+      "อาร์โกบาเลโน่แห่งพิรุณ",
+      "มีพื้นฐานด้านทหาร",
+      "เป็นหนึ่งในอาร์โกบาเลโน่ที่เด่นมาก"
+    ]
+  },
+  {
+    "id": "lal-mirch",
+    "name": "Lal Mirch",
+    "aliases": [
+      "lal mirch",
+      "lal",
+      "รัล มิลจิ",
+      "ลัล มิร์ช"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Arcobaleno",
+      "CEDEF",
+      "Popular"
+    ],
+    "images": [
+      "images/LalMirch1.jfif",
+      "images/LalMirch2.jfif",
+      "images/LalMirch3.jfif",
+      "images/LalMirch4.jfif"
+    ],
+    "hints": [
+      "มีความเกี่ยวข้องกับคำสาปอาร์โกบาเลโน่",
+      "เป็นสมาชิก CEDEF",
+      "มีความสัมพันธ์ลึกซึ้งกับโคโลเนโร่"
+    ]
+  },
+  {
+    "id": "fon",
+    "name": "Fon",
+    "aliases": [
+      "fon",
+      "ฟง"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Arcobaleno",
+      "Popular"
+    ],
+    "images": [
+      "images/Fon1.jfif",
+      "images/Fon2.jfif",
+      "images/Fon3.jfif",
+      "images/Fon4.jfif"
+    ],
+    "hints": [
+      "อาร์โกบาเลโน่แห่งวายุ",
+      "เป็นผู้ใช้ศิลปะการต่อสู้",
+      "มีหน้าตาคล้ายฮิบาริอย่างเห็นได้ชัด"
+    ]
+  },
+  {
+    "id": "verde",
+    "name": "Verde",
+    "aliases": [
+      "verde",
+      "เวลเด้",
+      "เวอร์เด"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Arcobaleno"
+    ],
+    "images": [
+      "images/Verde1.jfif",
+      "images/Verde2.jfif",
+      "images/Verde3.jfif",
+      "images/Verde4.jfif"
+    ],
+    "hints": [
+      "อาร์โกบาเลโน่แห่งอัสนี",
+      "เป็นนักวิทยาศาสตร์อัจฉริยะ",
+      "สนใจการทดลองและเทคโนโลยี"
+    ]
+  },
+  {
+    "id": "skull",
+    "name": "Skull",
+    "aliases": [
+      "skull",
+      "สกัล"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Male",
+      "Arcobaleno"
+    ],
+    "images": [
+      "images/Skull1.jfif",
+      "images/Skull2.jfif",
+      "images/Skull3.jfif",
+      "images/Skull4.jfif"
+    ],
+    "hints": [
+      "อาร์โกบาเลโน่แห่งเมฆา",
+      "มักถูกอาร์โกบาเลโน่คนอื่นแกล้ง",
+      "มีพื้นฐานเป็นสตันท์แมน"
+    ]
+  },
+  {
+    "id": "luce",
+    "name": "Luce",
+    "aliases": [
+      "luce",
+      "ลูเช่"
+    ],
+    "anime": "Katekyo Hitman REBORN!",
+    "categories": [
+      "REBORN!",
+      "Female",
+      "Arcobaleno"
+    ],
+    "images": [
+      "images/Luce1.jfif",
+      "images/Luce2.jfif",
+      "images/Luce3.jfif",
+      "images/Luce4.jfif"
+    ],
+    "hints": [
+      "อาร์โกบาเลโน่แห่งนภารุ่นก่อน",
+      "มีความเกี่ยวข้องทางสายเลือดกับยูนิ",
+      "เป็นบุคคลสำคัญของเหล่าอาร์โกบาเลโน่"
+    ]
   }
 ]
