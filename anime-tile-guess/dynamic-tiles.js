@@ -1,12 +1,9 @@
-// Adaptive board sizing and tile calculation based on the real artwork ratio.
-// Missing/broken artwork files are skipped automatically before a question is shown.
+// Adaptive board sizing based on the real artwork ratio.
+// Broken/missing artwork files are skipped automatically.
 (function () {
-  const TARGET_TILE_COUNT = 16;
-  const MIN_TILE_COUNT = 15;
-  const MAX_TILE_COUNT = 20;
-  const MIN_AXIS = 3;
-  const MAX_AXIS = 6;
-  const HARD_REVEAL_RATIO = 0.30;
+  const EASY_GRID = { target: 16, min: 15, max: 20, minAxis: 3, maxAxis: 6 };
+  const HARD_GRID = { target: 28, min: 24, max: 30, minAxis: 4, maxAxis: 7 };
+  const HARD_REVEAL_RATIO = 0.24;
 
   let adaptiveRows = 4;
   let adaptiveCols = 4;
@@ -14,7 +11,6 @@
   let adaptiveHardLimit = 5;
   let loadToken = 0;
 
-  // Cache checks for the current browser session so broken paths are not retried every round.
   const artworkCheckCache = new Map();
 
   function artworkSource(artwork) {
@@ -86,18 +82,23 @@
     return null;
   }
 
+  function currentGridConfig() {
+    return selectedMode === "hard" ? HARD_GRID : EASY_GRID;
+  }
+
   function calculateGrid(width, height) {
+    const cfg = currentGridConfig();
     const ratio = Math.max(0.2, Math.min(5, width / Math.max(1, height)));
     let best = null;
 
-    for (let cols = MIN_AXIS; cols <= MAX_AXIS; cols++) {
-      for (let rows = MIN_AXIS; rows <= MAX_AXIS; rows++) {
+    for (let cols = cfg.minAxis; cols <= cfg.maxAxis; cols++) {
+      for (let rows = cfg.minAxis; rows <= cfg.maxAxis; rows++) {
         const total = cols * rows;
-        if (total < MIN_TILE_COUNT || total > MAX_TILE_COUNT) continue;
+        if (total < cfg.min || total > cfg.max) continue;
 
         const tileAspect = ratio * rows / cols;
         const shapePenalty = Math.abs(Math.log(tileAspect)) * 2;
-        const countPenalty = Math.abs(total - TARGET_TILE_COUNT) / TARGET_TILE_COUNT * 0.25;
+        const countPenalty = Math.abs(total - cfg.target) / cfg.target * 0.25;
         const score = shapePenalty + countPenalty;
 
         if (!best || score < best.score) {
@@ -106,11 +107,13 @@
       }
     }
 
-    return best || { rows: 4, cols: 4, total: 16 };
+    return best || (selectedMode === "hard"
+      ? { rows: 5, cols: 5, total: 25 }
+      : { rows: 4, cols: 4, total: 16 });
   }
 
   function calculateHardLimit(total) {
-    return Math.max(3, Math.ceil(total * HARD_REVEAL_RATIO));
+    return Math.max(4, Math.ceil(total * HARD_REVEAL_RATIO));
   }
 
   function configureBoard(width, height) {
@@ -151,8 +154,8 @@
   updateRuleCard = function adaptiveRuleCard() {
     const hard = modeSelect.value === "hard";
     ruleCard.innerHTML = hard
-      ? `<b>Hard</b><span>จำนวนแผ่นที่เปิดได้จะคำนวณจากขนาดกระดานของแต่ละภาพ (ประมาณ ${Math.round(HARD_REVEAL_RATIO * 100)}% ของช่องทั้งหมด)</span>`
-      : `<b>Easy</b><span>จำนวนช่องจะคำนวณจากสัดส่วนภาพ และเปิดได้เรื่อย ๆ แต่ทุกแผ่นที่เปิดเพิ่มจะทำให้คะแนนข้อนั้นลดลง</span>`;
+      ? `<b>Hard</b><span>กระดานละเอียดขึ้นประมาณ 24–30 ช่อง และเปิดได้ราว ${Math.round(HARD_REVEAL_RATIO * 100)}% ของช่องทั้งหมด</span>`
+      : `<b>Easy</b><span>จำนวนช่องคำนวณจากสัดส่วนภาพประมาณ 15–20 ช่อง เปิดได้เรื่อย ๆ แต่เปิดเพิ่มแล้วคะแนนลด</span>`;
   };
 
   loadQuestion = async function adaptiveLoadQuestion() {
@@ -171,8 +174,12 @@
     hintText.textContent = "";
 
     const current = quiz[questionIndex];
+    if (!current) return;
 
-    questionNoEl.textContent = `${questionIndex + 1} / 10`;
+    questionNoEl.textContent = (typeof gameLengthMode !== "undefined" && gameLengthMode === "endless")
+      ? `${endlessQuestionNumber} / ∞`
+      : `${questionIndex + 1} / 10`;
+
     messageEl.textContent = "กำลังตรวจรูปและคำนวณกระดาน...";
     questionScoreEl.textContent = questionScore;
     scoreDetailEl.textContent = `ตอบถูกจากแผ่นแรก +${ONE_TILE_BONUS} Bonus`;
@@ -189,7 +196,6 @@
       configureBoard(usable.width, usable.height);
       board.style.backgroundImage = `url(${JSON.stringify(usable.src)})`;
     } else {
-      // No valid image exists for this character: use a safe placeholder instead of breaking the round.
       configureBoard(1, 1);
       board.style.backgroundImage = "radial-gradient(circle at 50% 50%, #4b436f 0 18%, transparent 19%), linear-gradient(145deg, #2a3044, #111520)";
     }
