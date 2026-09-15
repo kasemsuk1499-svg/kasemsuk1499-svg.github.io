@@ -3,6 +3,14 @@
   cursor: not-allowed;
 }
 
+.setup-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.board .tile {
+  font-size: clamp(10px, 1.35vw, 16px);
+}
+
 .answer-actions {
   grid-template-columns: 1fr auto auto;
 }
@@ -17,6 +25,12 @@
 .skip-btn:hover {
   color: var(--text);
   border-color: var(--muted);
+}
+
+@media (max-width: 700px) {
+  .setup-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
