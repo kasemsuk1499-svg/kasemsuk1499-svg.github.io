@@ -27,7 +27,7 @@
       <div class="start-copy">
         <span class="pill">QUIZ SETUP</span>
         <h2>เลือกรูปแบบเกม</h2>
-        <p>หนึ่งเกมมี 10 ตัวละคร, 5 ชีวิต และคำใบ้รวม 4 ครั้ง</p>
+        <p>หนึ่งเกมมี 10 ตัวละคร • 5 ชีวิต • คำใบ้รวม 4 ครั้ง</p>
       </div>
 
       <div class="setup-grid">
@@ -40,7 +40,15 @@
           <label for="modeSelect">ความยาก</label>
           <select id="modeSelect">
             <option value="easy">Easy — เปิดได้เรื่อย ๆ</option>
-            <option value="hard">Hard — จำกัดตามขนาดกระดาน</option>
+            <option value="hard">Hard — ป้ายเยอะและเปิดได้น้อย</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="lengthSelect">จำนวนข้อ</label>
+          <select id="lengthSelect">
+            <option value="ten">10 ข้อ</option>
+            <option value="endless">Endless — ไม่จำกัดข้อ</option>
           </select>
         </div>
       </div>
@@ -112,7 +120,8 @@
             <div><span>ไม่รู้ / ข้าม</span><b>-1 ❤️ และไปข้อถัดไป</b></div>
             <div><span>เปิดเพิ่ม</span><b>-10 คะแนน/แผ่น</b></div>
             <div><span>ตอบถูกด้วย 1 แผ่น</span><b>+50 Bonus</b></div>
-            <div><span>Hard</span><b>เปิดได้ ~30% ของกระดาน</b></div>
+            <div><span>Hard</span><b>24–30 ป้าย • เปิดได้ ~24%</b></div>
+            <div><span>Endless</span><b>เล่นจนชีวิตหมด</b></div>
             <div><span>ใช้คำใบ้</span><b>-20 คะแนน</b></div>
           </div>
         </aside>
@@ -139,6 +148,7 @@
 
   <script src="script.js"></script>
   <script src="dynamic-tiles.js"></script>
+  <script src="game-length.js"></script>
   <script src="round-flow.js"></script>
 </body>
 </html>
