@@ -6,6 +6,7 @@ var endlessCycle = 1;
 (function () {
   const lengthSelect = document.getElementById("lengthSelect");
   const startCopy = document.querySelector(".start-copy p");
+  const baseFinishGame = finishGame;
 
   function reshuffleEndless(previousId = null) {
     let next = shuffle(pool);
@@ -45,6 +46,22 @@ var endlessCycle = 1;
     loadQuestion();
   };
 
+  finishGame = function finishWithLengthMode(completed) {
+    if (gameLengthMode !== "endless") {
+      baseFinishGame(completed);
+      return;
+    }
+
+    gameScreen.classList.add("hidden");
+    endScreen.classList.remove("hidden");
+    hud.classList.add("hidden");
+
+    finalScoreEl.textContent = totalScore;
+    endBadge.textContent = "ENDLESS OVER";
+    endTitle.textContent = `จบที่ข้อ ${endlessQuestionNumber} 💀`;
+    endSummary.textContent = `ตอบถูก ${correct} ข้อ • คะแนน ${totalScore} • เล่นถึงรอบชุดที่ ${endlessCycle}`;
+  };
+
   function adaptiveStartGame() {
     selectedCategory = categorySelect.value;
     selectedMode = modeSelect.value;
@@ -62,7 +79,6 @@ var endlessCycle = 1;
       return;
     }
 
-    gameLengthMode = lengthSelect?.value || "ten";
     questionIndex = 0;
     endlessQuestionNumber = 1;
     endlessCycle = 1;
@@ -103,6 +119,9 @@ var endlessCycle = 1;
     event.stopImmediatePropagation();
     adaptiveStartGame();
   }, true);
+
+  // The core script registered its old rule renderer first; render the adaptive text again afterward.
+  modeSelect.addEventListener("change", () => updateRuleCard());
 
   if (lengthSelect) {
     lengthSelect.addEventListener("change", () => {
