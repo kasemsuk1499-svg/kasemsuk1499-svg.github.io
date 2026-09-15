@@ -2,6 +2,19 @@
 (function () {
   const skipBtn = document.getElementById("skipBtn");
 
+  function goNext() {
+    if (typeof window.advanceToNextQuestion === "function") {
+      window.advanceToNextQuestion();
+      return;
+    }
+
+    if (questionIndex >= 9) finishGame(true);
+    else {
+      questionIndex++;
+      loadQuestion();
+    }
+  }
+
   function advanceAfterMiss(label) {
     if (locked) return;
 
@@ -21,14 +34,7 @@
       return;
     }
 
-    setTimeout(() => {
-      if (questionIndex >= 9) {
-        finishGame(true);
-      } else {
-        questionIndex++;
-        loadQuestion();
-      }
-    }, 350);
+    setTimeout(goNext, 350);
   }
 
   function adaptiveSubmitAnswer() {
@@ -69,24 +75,15 @@
         ? `🎯 ถูกต้อง! ${current.name} — ${questionScore} + โบนัส ${bonus} = ${earned} คะแนน`
         : `✅ ถูกต้อง! ${current.name} — ได้ ${earned} คะแนน`;
 
-      setTimeout(() => {
-        if (questionIndex >= 9) {
-          finishGame(true);
-        } else {
-          questionIndex++;
-          loadQuestion();
-        }
-      }, 500);
+      setTimeout(goNext, 500);
       return;
     }
 
     advanceAfterMiss("❌ ตอบผิด!");
   }
 
-  // Reassign for Enter-key flow in script.js.
   submitAnswer = adaptiveSubmitAnswer;
 
-  // Intercept the original submit button listener registered by script.js.
   submitBtn.addEventListener("click", event => {
     event.preventDefault();
     event.stopImmediatePropagation();
