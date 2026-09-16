@@ -87,15 +87,15 @@
           </div>
 
           <div class="panel-title">
-            <h3>คำตอบของคุณ</h3>
-            <p>พิมพ์ชื่อใกล้เคียง แล้วเลือกจากรายการที่ระบบค้นหาให้</p>
+            <h3>ค้นหาคำตอบ</h3>
+            <p>จำชื่อไม่ได้ก็พิมพ์ชื่ออนิเมะ องค์กร กลุ่ม หรือแท็ก แล้วเลือกตัวละครจากรายการได้</p>
           </div>
 
           <div class="search-box">
             <input
               id="guessInput"
               type="text"
-              placeholder="เช่น naru, rim, gojo..."
+              placeholder="ชื่อ / อนิเมะ / องค์กร / แท็ก..."
               autocomplete="off"
               spellcheck="false"
             />
@@ -116,8 +116,9 @@
           <div id="message" class="message">เปิดอย่างน้อย 1 แผ่นก่อนตอบ ✨</div>
 
           <div class="help">
-            <div><span>ตอบผิด</span><b>-1 ❤️ และไปข้อถัดไป</b></div>
-            <div><span>ไม่รู้ / ข้าม</span><b>-1 ❤️ และไปข้อถัดไป</b></div>
+            <div><span>ค้นหา</span><b>ชื่อ • อนิเมะ • องค์กร • แท็ก</b></div>
+            <div><span>ตอบผิด</span><b>-1 ❤️ และเฉลยก่อนข้อถัดไป</b></div>
+            <div><span>ไม่รู้ / ข้าม</span><b>-1 ❤️ และเฉลยก่อนข้อถัดไป</b></div>
             <div><span>เปิดเพิ่ม</span><b>-10 คะแนน/แผ่น</b></div>
             <div><span>ตอบถูกด้วย 1 แผ่น</span><b>+50 Bonus</b></div>
             <div><span>Hard</span><b>24–30 ป้าย • เปิดได้ ~24%</b></div>
@@ -147,6 +148,7 @@
   </main>
 
   <script src="script.js"></script>
+  <script src="tag-search.js"></script>
   <script src="dynamic-tiles.js"></script>
   <script src="game-length.js"></script>
   <script src="round-flow.js"></script>
