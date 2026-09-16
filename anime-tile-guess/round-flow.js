@@ -1,6 +1,7 @@
-// Round-flow rules: wrong answer or skip costs one life and advances immediately.
+// Round-flow rules: wrong answer or skip costs one life, reveals the answer, then advances.
 (function () {
   const skipBtn = document.getElementById("skipBtn");
+  const RESULT_REVEAL_MS = 1800;
 
   function goNext() {
     if (typeof window.advanceToNextQuestion === "function") {
@@ -30,11 +31,11 @@
     messageEl.textContent = `${label} เฉลย: ${current.name} • เหลือ ${Math.max(0, lives)} ชีวิต`;
 
     if (lives <= 0) {
-      setTimeout(() => finishGame(false), 350);
+      setTimeout(() => finishGame(false), RESULT_REVEAL_MS);
       return;
     }
 
-    setTimeout(goNext, 350);
+    setTimeout(goNext, RESULT_REVEAL_MS);
   }
 
   function adaptiveSubmitAnswer() {
@@ -48,7 +49,7 @@
     const chosen = resolveTypedCharacter();
 
     if (!chosen) {
-      messageEl.textContent = "เลือกชื่อจาก dropdown ก่อนตอบนะ 👀";
+      messageEl.textContent = "เลือกตัวละครจากรายการค้นหาก่อนตอบนะ 👀";
       renderSuggestions(guessInput.value);
       return;
     }
@@ -75,7 +76,7 @@
         ? `🎯 ถูกต้อง! ${current.name} — ${questionScore} + โบนัส ${bonus} = ${earned} คะแนน`
         : `✅ ถูกต้อง! ${current.name} — ได้ ${earned} คะแนน`;
 
-      setTimeout(goNext, 500);
+      setTimeout(goNext, RESULT_REVEAL_MS);
       return;
     }
 
