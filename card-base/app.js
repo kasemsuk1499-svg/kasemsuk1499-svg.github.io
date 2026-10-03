@@ -72,7 +72,7 @@
     money:0, baseLevel:1, cards:[], placed:[],
     currentPack:null, rollingUntil:0, lastTick:Date.now(), uidCounter:1,
     autoTargets:[], autoRolling:false, fullAuto:false, targetFound:false,
-    storedPacks:[], packUidCounter:1, gradeAuto:null
+    storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{}
   });
 
   let state = load();
@@ -118,11 +118,52 @@
     return typeof value==="string"&&value.length>=8&&value.length<=80;
   }
 
+  function normalizeCardIndex(raw){
+    const out={};
+    if(!raw||typeof raw!=="object"||Array.isArray(raw))return out;
+    for(const [key,value] of Object.entries(raw)){
+      const charId=Number(key);
+      if(!Number.isInteger(charId)||charId<CARD_MIN_ID||charId>CARD_MAX_ID||!value||typeof value!=="object")continue;
+      const tiers=[...new Set((Array.isArray(value.tiers)?value.tiers:[]).map(Number).filter(i=>Number.isInteger(i)&&i>=0&&i<TIERS.length))].sort((a,b)=>a-b);
+      const bestGrade=Math.max(0,Math.min(GRADES.length-1,Number(value.bestGrade)||0));
+      out[charId]={
+        tiers,
+        bestGrade,
+        firstSeen:Number(value.firstSeen)||Date.now(),
+        lastSeen:Number(value.lastSeen)||Number(value.firstSeen)||Date.now()
+      };
+    }
+    return out;
+  }
+
+  function recordCardInIndex(card,seenAt=Date.now(),targetState=state){
+    if(!card||!Number.isInteger(Number(card.charId)))return;
+    const charId=Number(card.charId),tier=Math.max(0,Math.min(TIERS.length-1,Number(card.tier)||0));
+    const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
+    if(charId<CARD_MIN_ID||charId>CARD_MAX_ID)return;
+    if(!targetState.cardIndex||typeof targetState.cardIndex!=="object")targetState.cardIndex={};
+    const old=targetState.cardIndex[charId]||{tiers:[],bestGrade:0,firstSeen:seenAt,lastSeen:seenAt};
+    const tiers=[...new Set([...(Array.isArray(old.tiers)?old.tiers:[]),tier])].sort((a,b)=>a-b);
+    targetState.cardIndex[charId]={
+      tiers,
+      bestGrade:Math.max(Number(old.bestGrade)||0,grade),
+      firstSeen:Number(old.firstSeen)||seenAt,
+      lastSeen:Math.max(Number(old.lastSeen)||0,seenAt)
+    };
+  }
+
+  function syncCardIndex(targetState=state){
+    if(!targetState.cardIndex||typeof targetState.cardIndex!=="object")targetState.cardIndex={};
+    (Array.isArray(targetState.cards)?targetState.cards:[]).forEach(c=>recordCardInIndex(c,Number(c.obtainedAt)||Date.now(),targetState));
+  }
+
   function hydrateState(parsed){
     const s={...newState(),...(parsed||{})};
     s.cards=(Array.isArray(s.cards)?s.cards:[])
       .filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID)
       .map(c=>({...c,gid:validCardGid(c.gid)?c.gid:makeCardGid()}));
+    s.cardIndex=normalizeCardIndex(s.cardIndex);
+    syncCardIndex(s);
     s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
     s.storedPacks=(Array.isArray(s.storedPacks)?s.storedPacks:[]).filter(p=>p&&Number.isInteger(p.tier)&&p.tier>=0&&p.tier<10);
     const keepPackAuto=packAutoSessionActive();
@@ -1212,6 +1253,7 @@
     const charId=CARD_MIN_ID+Math.floor(Math.random()*(CARD_MAX_ID-CARD_MIN_ID+1));
     const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,level:1,locked:false,obtainedAt:Date.now()};
     state.cards.push(card);
+    recordCardInIndex(card,card.obtainedAt);
     return card;
   }
 
@@ -1257,6 +1299,66 @@
       });
       wrap.appendChild(el);
     });
+  }
+
+  function renderCardIndex(){
+    const wrap=$("#cardIndexGrid");if(!wrap)return;
+    syncCardIndex();
+    const query=($("#indexSearch")?.value||"").trim();
+    const filter=$("#indexFilter")?.value||"all";
+    const ownedByChar=new Map();
+    state.cards.forEach(c=>{
+      if(!ownedByChar.has(c.charId))ownedByChar.set(c.charId,[]);
+      ownedByChar.get(c.charId).push(c);
+    });
+
+    const discoveredIds=Object.keys(state.cardIndex).map(Number).filter(id=>id>=CARD_MIN_ID&&id<=CARD_MAX_ID);
+    const charFound=discoveredIds.length;
+    const variantFound=discoveredIds.reduce((sum,id)=>sum+(state.cardIndex[id]?.tiers?.length||0),0);
+    const totalChars=CARD_MAX_ID-CARD_MIN_ID+1,totalVariants=totalChars*TIERS.length;
+    $("#indexCharacterCount").textContent=charFound+"/"+totalChars;
+    $("#indexVariantCount").textContent=variantFound+"/"+totalVariants;
+    $("#indexCompletion").textContent=(charFound/totalChars*100).toFixed(charFound===totalChars?0:1)+"%";
+    $("#indexVariantCompletion").textContent=(variantFound/totalVariants*100).toFixed(1)+"%";
+    $("#indexProgressFill").style.width=(charFound/totalChars*100)+"%";
+    $("#indexVariantFill").style.width=(variantFound/totalVariants*100)+"%";
+
+    let ids=Array.from({length:totalChars},(_,i)=>CARD_MIN_ID+i);
+    if(query)ids=ids.filter(id=>String(id).includes(query)||padId(id).includes(query));
+    if(filter==="found")ids=ids.filter(id=>!!state.cardIndex[id]);
+    if(filter==="missing")ids=ids.filter(id=>!state.cardIndex[id]);
+    if(filter==="complete")ids=ids.filter(id=>(state.cardIndex[id]?.tiers?.length||0)===TIERS.length);
+    if(filter==="owned")ids=ids.filter(id=>(ownedByChar.get(id)||[]).length>0);
+
+    wrap.innerHTML=ids.map(id=>{
+      const entry=state.cardIndex[id],owned=ownedByChar.get(id)||[];
+      if(!entry){
+        return '<article class="index-card locked">'+
+          '<div class="index-lock-art"><span>?</span></div>'+
+          '<div class="index-card-body"><strong>'+padId(id)+'</strong><small>ยังไม่ค้นพบ</small>'+
+          '<div class="index-tier-strip">'+TIERS.map((t,i)=>'<i title="'+t.name+'" style="--tier:'+t.color+'"></i>').join("")+'</div></div>'+
+        '</article>';
+      }
+      const tiers=Array.isArray(entry.tiers)?entry.tiers:[];
+      const highestTier=tiers.length?Math.max(...tiers):0;
+      const bestGrade=GRADES[Math.max(0,Math.min(GRADES.length-1,entry.bestGrade||0))];
+      const t=TIERS[highestTier];
+      return '<article class="index-card found tier-shell tier-'+highestTier+'" style="--tier:'+t.color+'">'+
+        '<div class="index-art">'+
+          '<img src="'+imageFor(id)+'" alt="'+padId(id)+'">'+
+          '<div class="tier-ring"></div>'+
+          '<span class="index-best-grade '+gradeFxClass(entry.bestGrade||0)+'" style="--grade:'+bestGrade.color+'">'+bestGrade.name+'</span>'+
+          '<span class="index-owned">'+owned.length+' ใบ</span>'+
+        '</div>'+
+        '<div class="index-card-body">'+
+          '<div class="index-id-row"><strong>'+padId(id)+'</strong><span class="tier-label tier-'+highestTier+'" style="color:'+t.color+'">'+t.name+'</span></div>'+
+          '<small>Variants '+tiers.length+'/10 · Best Grade '+bestGrade.name+'</small>'+
+          '<div class="index-tier-strip">'+TIERS.map((tier,i)=>'<i class="'+(tiers.includes(i)?'on':'')+'" title="'+tier.name+'" style="--tier:'+tier.color+'"></i>').join("")+'</div>'+
+        '</div>'+
+      '</article>';
+    }).join("")||'<div class="empty-state index-empty">ไม่มีรายการตามตัวกรองนี้</div>';
+
+    wrap.querySelectorAll("img").forEach(img=>img.addEventListener("error",e=>e.currentTarget.style.display="none"));
   }
 
   function renderRebirth(){
@@ -1316,7 +1418,8 @@
   }
 
   function renderAll(){
-    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderRebirth();renderRankCatalog();renderOnlineShell();save();
+    syncCardIndex();
+    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();save();
   }
 
   function rollTargetsReady(){
@@ -1737,6 +1840,7 @@
       $$(".tab").forEach(x=>x.classList.remove("active"));$$(".panel").forEach(x=>x.classList.remove("active"));
       btn.classList.add("active");$("#panel-"+btn.dataset.tab).classList.add("active");
       if(btn.dataset.tab==="collection")renderCollection();
+      if(btn.dataset.tab==="index")renderCardIndex();
       if(btn.dataset.tab==="online")refreshOnline();
     }));
     $("#accountBtn").addEventListener("click",openAuth);
@@ -1796,7 +1900,9 @@
       updateGradeTargetChance();
     });
     $("#closeReveal").addEventListener("click",closeReveal);$("#closeStandModal").addEventListener("click",closeStand);$("[data-close-modal]").addEventListener("click",closeStand);
-    $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);$("#rebirthBtn").addEventListener("click",doRebirth);
+    $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);
+    $("#indexSearch").addEventListener("input",renderCardIndex);$("#indexFilter").addEventListener("change",renderCardIndex);
+    $("#rebirthBtn").addEventListener("click",doRebirth);
     $("#tierFilters").addEventListener("change",e=>{
       const input=e.target.closest("input[data-tier]");if(!input)return;
       const tier=Number(input.dataset.tier);
