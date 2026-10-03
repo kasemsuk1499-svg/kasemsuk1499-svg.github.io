@@ -555,9 +555,9 @@ body[data-rank-stage="5"]::before{opacity:.82;filter:saturate(1.65) brightness(1
   -webkit-text-fill-color:var(--rank);
   background:#0d0f15!important;
 }
-.rank-row.rank-band-3{border-color:color-mix(in srgb,var(--rank,#7f8cff) 30%,#242938)}
-.rank-row.rank-band-4{border-color:color-mix(in srgb,var(--rank,#ff79ee) 45%,#242938)}
-.rank-row.rank-band-5{border-color:color-mix(in srgb,var(--rank,#fff0a8) 58%,#242938);box-shadow:0 0 24px color-mix(in srgb,var(--rank,#fff0a8) 14%,transparent)}
+.rank-row.rank-stage-3{border-color:color-mix(in srgb,var(--rank,#7f8cff) 30%,#242938)}
+.rank-row.rank-stage-4{border-color:color-mix(in srgb,var(--rank,#ff79ee) 45%,#242938)}
+.rank-row.rank-stage-5{border-color:color-mix(in srgb,var(--rank,#fff0a8) 58%,#242938);box-shadow:0 0 24px color-mix(in srgb,var(--rank,#fff0a8) 14%,transparent)}
 
 /* Wealth progression */
 .wealth-value{font-variant-numeric:tabular-nums;letter-spacing:.015em}
@@ -739,4 +739,42 @@ body[data-rank-stage="5"] .primary.danger{
   .rank-fx,.wealth-value,.tier-fx,.tier-fx::before,.card-grade,.stand-grade,body::before,.primary.danger{
     animation:none!important
   }
+}
+
+.rank-row.rank-stage-2{
+  box-shadow:inset 0 0 20px color-mix(in srgb,var(--rank,#8d7cff) 6%,transparent)
+}
+.rank-row.rank-stage-3{
+  background:
+    radial-gradient(circle at 0 50%,color-mix(in srgb,var(--rank,#8d7cff) 12%,transparent),transparent 42%),
+    #0c0e14
+}
+.rank-row.rank-stage-4{
+  background:
+    radial-gradient(circle at 0 50%,color-mix(in srgb,var(--rank,#ff79ee) 16%,transparent),transparent 48%),
+    #0c0e14;
+  box-shadow:0 0 24px color-mix(in srgb,var(--rank,#ff79ee) 12%,transparent)
+}
+.rank-row.rank-stage-5{
+  background:
+    radial-gradient(circle at 0 50%,color-mix(in srgb,var(--rank,#fff0a8) 20%,transparent),transparent 52%),
+    linear-gradient(120deg,#0c0e14,#12131a);
+  box-shadow:0 0 32px color-mix(in srgb,var(--rank,#fff0a8) 18%,transparent)
+}
+.rank-row button{
+  color:var(--text)!important;
+  -webkit-text-fill-color:currentColor;
+}
+.rank-title-badge{
+  -webkit-text-fill-color:currentColor;
+}
+.rank-title-badge.rank-band-2,
+.rank-title-badge.rank-band-3,
+.rank-title-badge.rank-band-4,
+.rank-title-badge.rank-band-5{
+  color:var(--rank)!important;
+  -webkit-text-fill-color:var(--rank)!important;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--rank) 14%,#151925),#11141d)!important;
+  -webkit-background-clip:border-box!important;
+  background-clip:border-box!important;
 }
