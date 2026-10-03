@@ -748,11 +748,30 @@
     toast("อัปเดตรายชื่อเพื่อนแล้ว");await refreshOnline();
   }
 
+  function renderVisitorIdentity(name,level,title=null){
+    const lv=Math.max(1,Math.min(40,Number(level)||1));
+    const safeName=escapeHtml(name||"Player");
+    const nameEl=$("#socialBaseName"),metaEl=$("#socialBaseMeta");
+    nameEl.innerHTML=
+      '<span class="visit-player-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+safeName+'</span>'+
+      '<span class="visit-base-suffix">’s Base</span>';
+    if(title){
+      metaEl.innerHTML=
+        '<span class="visit-base-level">Base Lv.'+lv+'</span>'+
+        '<span class="rank-title-badge visit-rank-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(title)+'</span>';
+    }else{
+      metaEl.textContent="กำลังโหลด…";
+    }
+  }
+
   async function visitPlayerBase(userId){
     if(!gameToken||!supabaseClient)return;
     const profile=socialProfiles.get(userId);
-    $("#socialBaseName").textContent=(profile?profile.display_name:"Player")+"'s Base";
-    $("#socialBaseMeta").textContent="กำลังโหลด…";
+    renderVisitorIdentity(
+      profile?profile.display_name:"Player",
+      profile&&profile.base_level?profile.base_level:1,
+      profile&&profile.title?profile.title:null
+    );
     $("#socialBaseStands").innerHTML="";
     $("#socialBaseModal").classList.add("show");
     $("#socialBaseModal").setAttribute("aria-hidden","false");
@@ -763,9 +782,8 @@
       $("#socialBaseStands").innerHTML='<div class="social-empty">ยังไม่มีข้อมูลฐาน</div>';
       return;
     }
-    $("#socialBaseName").textContent=(data.display_name||"Player")+"'s Base";
-    $("#socialBaseMeta").textContent="Base Lv."+data.base_level+" · "+data.title;
-    const max=STANDS[data.base_level-1]||30;
+    renderVisitorIdentity(data.display_name||"Player",data.base_level,data.title||"Collector");
+    const max=STANDS[Math.min(39,Math.max(0,data.base_level-1))]||30;
     const bySlot=new Map((Array.isArray(data.stands)?data.stands:[]).map(x=>[x.slot,x]));
     const wrap=$("#socialBaseStands");
     let html="";
