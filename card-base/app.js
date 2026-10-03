@@ -9,6 +9,7 @@
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
   const CLOUD_TABLE = "card_base_saves";
   const GAME_SESSION_KEY = "card-base-username-session-v1";
+  const PACK_AUTO_SESSION_KEY = "card-base-pack-auto-session-v1";
   const GRADE_ROLL_MS = 450;
 
   const TIERS = [
@@ -82,16 +83,34 @@
   let socialProfiles = new Map();
   let authRequestBusy = false;
 
+  function packAutoSessionActive(){
+    try{return sessionStorage.getItem(PACK_AUTO_SESSION_KEY)==="1"}catch{return false}
+  }
+
+  function setPackAutoSession(active){
+    try{
+      if(active)sessionStorage.setItem(PACK_AUTO_SESSION_KEY,"1");
+      else sessionStorage.removeItem(PACK_AUTO_SESSION_KEY);
+    }catch{}
+  }
+
   function hydrateState(parsed){
     const s={...newState(),...(parsed||{})};
     s.cards=(Array.isArray(s.cards)?s.cards:[]).filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID);
     s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
     s.storedPacks=(Array.isArray(s.storedPacks)?s.storedPacks:[]).filter(p=>p&&Number.isInteger(p.tier)&&p.tier>=0&&p.tier<10);
-    s.autoRolling=false;
-    s.fullAuto=false;
-    s.targetFound=false;
+    const keepPackAuto=packAutoSessionActive();
+    s.autoRolling=keepPackAuto&&!!s.autoRolling;
+    s.fullAuto=keepPackAuto&&!!s.fullAuto;
+    if(s.autoRolling&&s.fullAuto)s.autoRolling=false;
+    if(!s.autoRolling&&!s.fullAuto){
+      s.targetFound=false;
+      s.rollingUntil=0;
+      if(keepPackAuto)setPackAutoSession(false);
+    }else if(!Number.isFinite(Number(s.rollingUntil))||Number(s.rollingUntil)<=0){
+      s.rollingUntil=Date.now()+ROLL_MS;
+    }
     s.gradeAuto=null;
-    s.rollingUntil=0;
     const valid=new Set(s.cards.map(c=>c.uid));
     const old=Array.isArray(s.placed)?s.placed:[];
     s.placed=old.map(uid=>valid.has(uid)?uid:null);
@@ -1016,6 +1035,7 @@
   function manualRoll(){
     if(state.autoRolling||state.fullAuto){
       state.autoRolling=false;state.fullAuto=false;
+      setPackAutoSession(false);
       clearTimeout(autoTimer);state.rollingUntil=0;
     }
     beginRoll();
@@ -1055,6 +1075,7 @@
           state.autoRolling=false;
           state.targetFound=true;
           state.rollingUntil=0;
+          setPackAutoSession(false);
           toast("เจอ "+TIERS[tier].name+" แล้ว! Auto หยุดให้แล้ว ✨",true);
           break;
         }
@@ -1087,15 +1108,16 @@
 
   function toggleAuto(){
     if(state.autoRolling){
-      state.autoRolling=false;state.rollingUntil=0;clearTimeout(autoTimer);
+      state.autoRolling=false;state.rollingUntil=0;setPackAutoSession(false);clearTimeout(autoTimer);
       toast("หยุด Auto Roll แล้ว");renderFilters();renderPack();updateRollProgress();save();return;
     }
     if(!rollTargetsReady())return;
     state.fullAuto=false;
     state.autoRolling=true;
     state.targetFound=false;
+    setPackAutoSession(true);
     if(state.currentPack&&state.autoTargets.includes(state.currentPack.tier)){
-      state.autoRolling=false;state.targetFound=true;
+      state.autoRolling=false;state.targetFound=true;setPackAutoSession(false);
       toast("ซองปัจจุบันตรงกับ Filter อยู่แล้ว ✨",true);
       renderAll();return;
     }
@@ -1106,13 +1128,14 @@
 
   function toggleFullAuto(){
     if(state.fullAuto){
-      state.fullAuto=false;state.rollingUntil=0;clearTimeout(autoTimer);
+      state.fullAuto=false;state.rollingUntil=0;setPackAutoSession(false);clearTimeout(autoTimer);
       toast("หยุด Full Auto แล้ว");renderFilters();renderPack();updateRollProgress();save();return;
     }
     if(!rollTargetsReady())return;
     state.autoRolling=false;
     state.fullAuto=true;
     state.targetFound=false;
+    setPackAutoSession(true);
     if(state.currentPack&&state.autoTargets.includes(state.currentPack.tier)){
       storePack(state.currentPack.tier);
       toast("เก็บซอง "+TIERS[state.currentPack.tier].name+" เข้าคลังแล้ว ✨",true);
@@ -1417,12 +1440,12 @@
       if(input.checked&&!state.autoTargets.includes(tier))state.autoTargets.push(tier);
       if(!input.checked)state.autoTargets=state.autoTargets.filter(x=>x!==tier);
       if(!state.autoTargets.length&&(state.autoRolling||state.fullAuto)){
-        state.autoRolling=false;state.fullAuto=false;state.rollingUntil=0;clearTimeout(autoTimer);
+        state.autoRolling=false;state.fullAuto=false;state.rollingUntil=0;setPackAutoSession(false);clearTimeout(autoTimer);
         toast("ไม่มี Tier เป้าหมาย · หยุด Auto แล้ว");
       }
       renderFilters();renderPack();updateRollProgress();save();
     });
-    $("#clearFilters").addEventListener("click",()=>{state.autoTargets=[];if(state.autoRolling||state.fullAuto){state.autoRolling=false;state.fullAuto=false;state.rollingUntil=0;clearTimeout(autoTimer)}renderFilters();renderPack();updateRollProgress();save()});
+    $("#clearFilters").addEventListener("click",()=>{state.autoTargets=[];if(state.autoRolling||state.fullAuto){state.autoRolling=false;state.fullAuto=false;state.rollingUntil=0;setPackAutoSession(false);clearTimeout(autoTimer)}renderFilters();renderPack();updateRollProgress();save()});
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
     document.addEventListener("keydown",e=>{
       if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling&&!state.fullAuto)manualRoll();
@@ -1436,7 +1459,13 @@
     const now=Date.now(),offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
     if(offlineSeconds>2&&state.placed.some(Boolean)){const gain=totalIncome()*offlineSeconds;state.money+=gain;toast("รับรายได้ออฟไลน์ "+fmt(gain))}
     state.lastTick=now;renderAll();updateRollProgress();
-    state.rollingUntil=0;
+    if((state.autoRolling||state.fullAuto)&&packAutoSessionActive()){
+      if(!state.rollingUntil)state.rollingUntil=Date.now()+ROLL_MS;
+      processRollEngine();
+    }else{
+      state.rollingUntil=0;
+      setPackAutoSession(false);
+    }
     setInterval(economyTick,1000);
     onlineHeartbeatTimer=setInterval(()=>{if(document.visibilityState==="visible"&&gameToken)heartbeatOnline()},45000);
     const catchUpActiveSystems=()=>{
@@ -1446,7 +1475,14 @@
       renderHeader();renderRebirth();
       if(gameToken){heartbeatOnline();flushCloudSave()}
     };
-    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")catchUpActiveSystems()});
+    document.addEventListener("visibilitychange",()=>{
+      if(document.visibilityState==="hidden"){
+        if(state.autoRolling||state.fullAuto)setPackAutoSession(true);
+        save();
+      }else{
+        catchUpActiveSystems();
+      }
+    });
     window.addEventListener("focus",catchUpActiveSystems);
     initCloud();
   }
