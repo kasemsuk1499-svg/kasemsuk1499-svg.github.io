@@ -592,7 +592,7 @@
     const lv=Number(profile.base_level)||1;
     const rankText=profile.server_rank?'<span class="player-rank-badge">#'+profile.server_rank+'</span>':'';
     const titleText=profile.title?'<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.title)+'</span>':'';
-    return '<div class="player-row rank-row rank-band-'+rankBand(lv)+'"><div class="player-main"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.display_name)+rankText+'</strong>'+
+    return '<div class="player-row rank-row rank-stage-'+rankBand(lv)+'"><div class="player-main"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.display_name)+rankText+'</strong>'+
       '<small>#'+escapeHtml(profile.player_code)+' · '+baseText+'</small>'+titleText+'</div>'+
       '<div class="player-actions">'+actions+'</div></div>';
   }
@@ -625,7 +625,7 @@
     }
     const lv=Number(profile.base_level)||1;
     const income=Number(profile.base_income)||0;
-    return '<div class="'+rowClass+' rank-row rank-band-'+rankBand(lv)+'">'+
+    return '<div class="'+rowClass+' rank-row rank-stage-'+rankBand(lv)+'">'+
       '<div class="leaderboard-rank">'+medal+'</div>'+
       '<div class="leaderboard-player"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.display_name)+'</strong>'+
         '<small><span>#'+escapeHtml(profile.player_code)+'</span><span>Base Lv.'+profile.base_level+'</span>'+(profile.online?'<span>● Online</span>':'')+'</small>'+
