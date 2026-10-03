@@ -14,7 +14,7 @@
         <div class="brand-mark">CB</div>
         <div>
           <div class="brand-title">CARD BASE</div>
-          <div class="brand-sub">Collector Tycoon · Prototype v0.1</div>
+          <div class="brand-sub">Collector Tycoon · Prototype v0.2</div>
         </div>
       </div>
       <div class="stats">
@@ -38,7 +38,7 @@
           <div>
             <div class="eyebrow">ฐานของคุณ</div>
             <h1 id="baseTitle">Rookie Collector</h1>
-            <p class="muted">การ์ดบนแท่นจะสร้างรายได้ทุกวินาที การอัปฐานจะเพิ่มแท่น ตัวคูณรายได้ และ Luck</p>
+            <p class="muted">กดแท่นว่างเพื่อเลือกการ์ดจากคลัง · กดแท่นที่มีการ์ดเพื่ออัป Level, สุ่ม Grade, เปลี่ยนหรือถอดการ์ด</p>
           </div>
           <div class="hero-badges">
             <span class="badge" id="standCount">10 แท่น</span>
@@ -53,21 +53,42 @@
           <div class="pack-stage">
             <div class="eyebrow">FREE PACK ROLL</div>
             <h2>สุ่มหาซองที่คุณต้องการ</h2>
-            <p class="muted">เห็นระดับซองก่อนเปิด แต่ไม่รู้ว่าจะได้ Character ID ไหน ถ้าสุ่มใหม่ ซองเดิมจะถูกทิ้ง</p>
+            <p class="muted">สุ่มฟรีโดยใช้เวลา เห็น Tier ของซองก่อนเปิด แต่ไม่รู้ Character ID ภายใน ถ้าสุ่มใหม่ ซองเดิมจะถูกทิ้ง</p>
+
             <button id="packCard" class="pack-card empty" type="button" aria-label="เปิดซอง">
               <span class="pack-glow"></span>
               <span class="pack-tier" id="packTier">NO PACK</span>
               <span class="pack-hint" id="packHint">กดสุ่มซองก่อน</span>
+              <span class="target-found" id="targetFound">TARGET FOUND</span>
             </button>
+
             <div class="roll-row">
               <button id="rollBtn" class="primary" type="button">สุ่มซอง</button>
+              <button id="autoBtn" class="secondary" type="button">เริ่ม Auto Roll</button>
               <div class="timer-wrap">
                 <div class="timer-bar"><i id="timerFill"></i></div>
                 <span id="timerText">พร้อมสุ่ม</span>
               </div>
             </div>
-            <div class="micro">คีย์ลัด: กด <kbd>1</kbd> เพื่อสุ่มซอง · คลิกซองเพื่อเปิด</div>
+
+            <div class="auto-box">
+              <div class="auto-head">
+                <div>
+                  <div class="eyebrow">AUTO STOP FILTER</div>
+                  <strong>หยุดอัตโนมัติเมื่อเจอ Tier ที่ติ๊กไว้</strong>
+                </div>
+                <div class="filter-actions">
+                  <button id="selectUnlocked" type="button">เลือกที่ปลดล็อก</button>
+                  <button id="clearFilters" type="button">ล้างทั้งหมด</button>
+                </div>
+              </div>
+              <div id="tierFilters" class="tier-filters"></div>
+              <div id="autoStatus" class="auto-status">Auto Roll ปิดอยู่</div>
+            </div>
+
+            <div class="micro">คีย์ลัด: กด <kbd>1</kbd> เพื่อสุ่ม 1 ครั้ง · คลิกซองเพื่อเปิด</div>
           </div>
+
           <aside class="luck-panel">
             <div class="eyebrow">LUCK PROFILE</div>
             <h3 id="luckTitle">Luck ×1.00</h3>
@@ -83,7 +104,7 @@
             <h2>คลังการ์ด</h2>
           </div>
           <div class="collection-tools">
-            <input id="searchId" inputmode="numeric" placeholder="ค้นหา Character ID">
+            <input id="searchId" inputmode="numeric" placeholder="ค้นหา Character ID 1–20">
             <select id="sortCards">
               <option value="power">เรียง: รายได้สูงสุด</option>
               <option value="tier">เรียง: Tier สูงสุด</option>
@@ -101,15 +122,16 @@
           <div class="rebirth-card">
             <div class="eyebrow">BASE PROGRESSION</div>
             <h2 id="rebirthHeadline">Lv.1 → Lv.2</h2>
-            <p class="muted">Rebirth คือการอัปเลเวลฐาน ระบบเดียวกัน ไม่ใช่ค่าแยก</p>
+            <p class="muted">Rebirth คือการอัปเลเวลฐานระบบเดียวกัน เมื่อผ่านเงื่อนไข เงินจะถูกรีเซ็ต แต่คลังและการ์ดทั้งหมดอยู่ครบ</p>
             <div class="req-list">
               <div><span>เงินที่ต้องใช้</span><strong id="rebirthMoney">0</strong></div>
-              <div><span>ต้องมี Character ID</span><strong id="rebirthCard">#0000</strong></div>
+              <div><span>ต้องมี Character ID</span><strong id="rebirthCard">#0001</strong></div>
               <div><span>การ์ดเงื่อนไข</span><strong id="rebirthOwned">ยังไม่มี</strong></div>
             </div>
             <button id="rebirthBtn" class="primary danger" type="button">Rebirth / อัปฐาน</button>
-            <p class="warning">เมื่ออัปสำเร็จ เงินจะกลับเป็น 0 แต่การ์ด Level Grade และคลังทั้งหมดไม่หาย</p>
+            <p class="warning">การ์ดเงื่อนไขแค่ต้องมีในคลัง ไม่ถูกใช้ทิ้ง</p>
           </div>
+
           <div class="next-card">
             <div class="eyebrow">หลังอัป</div>
             <div class="upgrade-preview">
@@ -129,6 +151,20 @@
         <div class="reveal-kicker">YOU GOT</div>
         <div id="revealVisual"></div>
         <button id="closeReveal" class="primary" type="button">เก็บเข้าคลัง</button>
+      </div>
+    </div>
+
+    <div id="standModal" class="modal" aria-hidden="true">
+      <button class="modal-backdrop" data-close-modal type="button" aria-label="ปิด"></button>
+      <div class="modal-card">
+        <div class="modal-top">
+          <div>
+            <div class="eyebrow">CARD STAND</div>
+            <h2 id="standModalTitle">แท่น</h2>
+          </div>
+          <button id="closeStandModal" class="icon-btn" type="button" aria-label="ปิด">✕</button>
+        </div>
+        <div id="standModalBody"></div>
       </div>
     </div>
 
