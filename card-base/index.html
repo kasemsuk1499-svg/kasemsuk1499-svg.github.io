@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261003-userauth1">
+  <link rel="stylesheet" href="./style.css?v=20261003-userauth2">
 </head>
 <body>
   <div class="app-shell">
@@ -311,11 +311,6 @@
             <button id="signupBtn" class="secondary" type="button">สร้างบัญชี</button>
           </div>
           <p id="authMessage" class="auth-message"></p>
-          <div id="recoveryCodeBox" class="recovery-code-box" hidden>
-            <span>Recovery Code — เก็บไว้ใช้กู้รหัสผ่าน</span>
-            <strong id="recoveryCodeValue"></strong>
-            <small>โค้ดนี้จะแสดงตอนสมัคร/กู้บัญชีเท่านั้น ถ้าหายและลืมรหัสผ่านจะกู้บัญชีไม่ได้</small>
-          </div>
           <details class="recover-panel">
             <summary>ลืมรหัสผ่าน / ใช้ Recovery Code</summary>
             <div class="auth-fields recover-fields">
@@ -324,6 +319,12 @@
             </div>
             <button id="recoverBtn" class="secondary" type="button">กู้บัญชีและเปลี่ยนรหัสผ่าน</button>
           </details>
+        </div>
+
+        <div id="recoveryCodeBox" class="recovery-code-box" hidden>
+          <span>Recovery Code — เก็บไว้ใช้กู้รหัสผ่าน</span>
+          <strong id="recoveryCodeValue"></strong>
+          <small>โค้ดนี้จะแสดงตอนสมัคร/กู้บัญชีเท่านั้น ถ้าหายและลืมรหัสผ่านจะกู้บัญชีไม่ได้</small>
         </div>
 
         <div id="authSignedIn" class="auth-signed-in" hidden>
@@ -339,6 +340,6 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261003-userauth1" defer></script>
+  <script src="./app.js?v=20261003-userauth2" defer></script>
 </body>
 </html>
