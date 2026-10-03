@@ -194,7 +194,8 @@
           '<div class="mini-card" style="'+tierStyle(c.tier)+'">'+
             '<img src="'+imageFor(c.charId)+'" alt="Card '+padId(c.charId)+'">'+
             '<div class="tier-ring"></div>'+
-            '<div class="mini-meta"><b>'+padId(c.charId)+' · '+t.name+'</b><span>Lv.'+c.level+' · '+g.name+' · '+fmt(cardIncome(c))+'/s</span></div>'+
+            '<div class="stand-grade grade-'+c.grade+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
+            '<div class="mini-meta"><b>'+padId(c.charId)+' · '+t.name+'</b><span>Lv.'+c.level+' · '+fmt(cardIncome(c))+'/s</span></div>'+
           '</div>';
         const img=slot.querySelector("img"); if(img) img.addEventListener("error",e=>e.currentTarget.style.display="none");
       }
