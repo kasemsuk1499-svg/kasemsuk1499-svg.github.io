@@ -490,12 +490,34 @@
     for(const need of unlockAt)if(lv>=need)count++;
     return Math.max(3,Math.min(10,count));
   }
+  function tierQualityProgress(level=state.baseLevel){
+    // Rebirth quality curve: almost no suppression in early game,
+    // then low tiers fade out gradually through mid/late game.
+    const lv=Math.max(1,Number(level)||1);
+    return Math.max(0,Math.min(1,(lv-10)/25));
+  }
+
+  function lowTierWeightMultiplier(tier,level=state.baseLevel){
+    const p=tierQualityProgress(level);
+    if(tier===0)return 1-(0.72*p); // Common: strongest suppression
+    if(tier===1)return 1-(0.50*p); // Uncommon
+    if(tier===2)return 1-(0.25*p); // Rare
+    if(tier===3)return 1-(0.08*p); // Epic: only a small fade
+    return 1;
+  }
+
   function tierOdds(level=state.baseLevel){
     const maxTier=maxTierForLevel(level);
     const luck=effectiveLuckValue(level);
-    // ลด power creep: Tier สูงยังมีโอกาสตั้งแต่ปลด แต่ต้องไต่ Luck หลาย Rebirth จึงเห็นผลชัด
-    const ratio=Math.min(0.39,0.23+0.075*Math.max(0,luck-1));
-    const weights=TIERS.map((_,i)=>i<maxTier?Math.pow(ratio,i):0);
+
+    // Slightly stronger Luck conversion + Rebirth-based low-tier suppression.
+    // This improves pack quality without making top-end tiers common.
+    const ratio=Math.min(0.405,0.235+0.08*Math.max(0,luck-1));
+    const weights=TIERS.map((_,i)=>
+      i<maxTier
+        ? Math.pow(ratio,i)*lowTierWeightMultiplier(i,level)
+        : 0
+    );
     const sum=weights.reduce((a,b)=>a+b,0);
     return weights.map(w=>sum?w/sum:0);
   }
@@ -1498,7 +1520,8 @@
 
   function renderOdds(){
     const odds=tierOdds();
-    $("#luckTitle").textContent="Luck ×"+effectiveLuckValue().toFixed(2)+" · Mutation ×"+mutationLuckMultiplier().toFixed(2)+" · ปลด Tier "+maxTierForLevel()+"/10";
+    const qualityPct=Math.round(tierQualityProgress()*100);
+    $("#luckTitle").textContent="Luck ×"+effectiveLuckValue().toFixed(2)+" · Mutation ×"+mutationLuckMultiplier().toFixed(2)+" · Pack Quality "+qualityPct+"% · ปลด Tier "+maxTierForLevel()+"/10";
     $("#odds").innerHTML=TIERS.map((t,i)=>
       '<div class="odd" style="--tier:'+t.color+';opacity:'+(odds[i]>0?1:.28)+'"><span>'+t.name+'</span><b>'+chanceText(odds[i])+'</b></div>'
     ).join("");
@@ -1741,9 +1764,11 @@
     $("#rebirthMoney").textContent=fmt(cost);
     $("#rebirthMoney").className=wealthClass(cost);
     $("#rebirthRule").textContent="ใช้เงินอย่างเดียว · ไม่มีเงื่อนไข Character ID / Card Level";
+    const currentLow=currentOdds.slice(0,3).reduce((a,b)=>a+b,0)*100;
+    const nextLow=nextOdds.slice(0,3).reduce((a,b)=>a+b,0)*100;
     $("#rebirthTierGain").textContent=newlyUnlocked
-      ?"ปลด "+TIERS[focusTier].name+" · "+(nextOdds[focusTier]*100).toFixed(nextOdds[focusTier]*100<0.1?3:2)+"%"
-      :TIERS[focusTier].name+" "+(currentOdds[focusTier]*100).toFixed(3)+"% → "+(nextOdds[focusTier]*100).toFixed(3)+"%";
+      ?"ปลด "+TIERS[focusTier].name+" · "+(nextOdds[focusTier]*100).toFixed(nextOdds[focusTier]*100<0.1?3:2)+"% · Low Tier "+currentLow.toFixed(1)+"% → "+nextLow.toFixed(1)+"%"
+      :"Low Tier "+currentLow.toFixed(1)+"% → "+nextLow.toFixed(1)+"% · "+TIERS[focusTier].name+" "+(currentOdds[focusTier]*100).toFixed(3)+"% → "+(nextOdds[focusTier]*100).toFixed(3)+"%";
     const pace=$("#rebirthPace");if(pace)pace.textContent="~"+formatDuration(rebirthTargetSeconds());
     $("#rebirthBtn").disabled=state.money<cost;
     $("#nextTitle").textContent=TITLES[next-1];
