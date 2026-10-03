@@ -841,21 +841,25 @@
     const rng=seededRandom(rotationId^0x51F15EED);
     const themes=idPackRanges();
     const themePool=[...themes];
-    const eligible=ROTATING_PACK_ARCHETYPES.filter(a=>state.baseLevel>=a.minLevel);
-    const archPool=[...eligible];
+    const archPool=[...ROTATING_PACK_ARCHETYPES];
     const offers=[];
+
+    // Always keep one entry-level premium offer; the other four rotate randomly.
+    const entry=archPool.find(a=>a.key==="rare-bloom")||archPool[0];
+    if(entry)archPool.splice(archPool.indexOf(entry),1);
+
     for(let slot=0;slot<ROTATING_SHOP_SLOTS;slot++){
       if(!themePool.length)themePool.push(...themes);
       const themeIndex=Math.floor(rng()*themePool.length);
       const theme=themePool.splice(themeIndex,1)[0]||themes[slot%themes.length];
 
       let archetype;
-      if(archPool.length){
+      if(slot===0&&entry){
+        archetype=entry;
+      }else{
         archetype=pickWeightedArchetype(archPool,rng);
         const idx=archPool.indexOf(archetype);
         if(idx>=0)archPool.splice(idx,1);
-      }else{
-        archetype=pickWeightedArchetype(eligible,rng);
       }
 
       const stock=archetype.stockMin+Math.floor(rng()*(archetype.stockMax-archetype.stockMin+1));
@@ -865,6 +869,7 @@
         themeIndex:theme.index,start:theme.start,end:theme.end,
         themeName:theme.name,image:theme.image,
         archetypeKey:archetype.key,name:archetype.name,label:archetype.label,
+        minLevel:archetype.minLevel,
         featuredTier:archetype.featuredTier,
         stock,priceSeconds:archetype.priceSeconds,
         outRate:archetype.outRate,
@@ -926,10 +931,11 @@
       const featured=TIERS[offer.featuredTier];
       const left=rotatingPackStockLeft(offer);
       const cost=rotatingPackCost(offer);
+      const locked=state.baseLevel<offer.minLevel;
       const cover=offer.image
         ? '<div class="rot-pack-cover"><img src="'+escapeHtml(offer.image)+'" alt="'+escapeHtml(offer.themeName)+'"></div>'
         : '<div class="rot-pack-cover rot-pack-fallback"><span>'+escapeHtml(offer.themeName)+'</span></div>';
-      return '<article class="rot-pack tier-'+offer.featuredTier+'" style="--pack-tier:'+featured.color+'">'+
+      return '<article class="rot-pack tier-'+offer.featuredTier+(locked?' locked':'')+'" style="--pack-tier:'+featured.color+'">'+
         '<div class="rot-pack-ribbon">'+escapeHtml(offer.label)+'</div>'+
         cover+
         '<div class="rot-pack-body">'+
@@ -939,8 +945,8 @@
           '<div class="rot-pack-rates">'+rateRowsHtml(offer)+'</div>'+
           '<div class="rot-pack-footer">'+
             '<div class="rot-stock"><span>STOCK</span><strong>'+left+'/'+offer.stock+'</strong></div>'+
-            '<button type="button" data-buy-rot-pack="'+offer.id+'" '+(left<=0?'disabled':'')+'>'+
-              (left<=0?'SOLD OUT':'ซื้อ & เปิด · '+fmt(cost))+
+            '<button type="button" data-buy-rot-pack="'+offer.id+'" '+(left<=0||locked?'disabled':'')+'>'+
+              (locked?'ปลดที่ Base Lv.'+offer.minLevel:left<=0?'SOLD OUT':'ซื้อ & เปิด · '+fmt(cost))+
             '</button>'+
           '</div>'+
         '</div>'+
@@ -972,6 +978,10 @@
     if(!offer){
       toast("ร้านรีสต็อกแล้ว · ลองเลือกแพ็กใหม่");
       renderRotatingPackShop();
+      return;
+    }
+    if(state.baseLevel<offer.minLevel){
+      toast(offer.name+" ปลดที่ Base Lv."+offer.minLevel);
       return;
     }
     const left=rotatingPackStockLeft(offer);
