@@ -300,7 +300,7 @@
     if(Number(result.trade_receipts)>0&&result.state){
       state=hydrateState(result.state);
       localStorage.setItem(SAVE_KEY,JSON.stringify(state));
-      renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
+      renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
       toast("Trade สำเร็จ · คลังการ์ดอัปเดตแล้ว ✨",true);
       setTimeout(()=>refreshTrades(true),0);
     }
@@ -337,7 +337,16 @@
     return 1+(0.045*x)+(0.0035*Math.pow(x,1.28));
   }
   function standLimit(level=state.baseLevel){return STANDS[Math.min(39,Math.max(0,level-1))]||50}
-  function charBaseIncome(id){return 80+((id*7919+113)%921)}
+  function charIncomeMultiplier(id){
+    const safe=Math.max(1,Number(id)||1);
+    return 1+((safe-1)*0.003);
+  }
+  function charBaseIncome(id){
+    return 500*charIncomeMultiplier(id);
+  }
+  function charIncomeBonusText(id){
+    return "+"+((charIncomeMultiplier(id)-1)*100).toFixed(1)+"%";
+  }
   function wealthLevel(value){
     if(!Number.isFinite(value)||value<=0)return 0;
     return Math.min(9,Math.max(0,Math.floor(Math.log10(value)/3)));
@@ -484,6 +493,64 @@
   function expectedTierMultiplier(level){
     const odds=tierOdds(level);
     return odds.reduce((sum,p,i)=>sum+p*TIERS[i].multi,0);
+  }
+
+  function idPackRanges(){
+    const ranges=[];
+    let index=0;
+    for(let start=CARD_MIN_ID;start<=CARD_MAX_ID;start+=10,index++){
+      ranges.push({index,start,end:Math.min(CARD_MAX_ID,start+9)});
+    }
+    return ranges;
+  }
+
+  function modeledBaseIncomeForShop(level=state.baseLevel){
+    const x=Math.max(0,level-1);
+    const avgCharacterIncome=545; // frozen economy model; keeps shop pricing independent from current stand manipulation
+    const assumedCardLevel=1+Math.round(x*4.2);
+    const expectedCardIncome=
+      avgCharacterIncome*
+      rebirthExpectedTierMultiplier(level)*
+      Math.pow(1.04,assumedCardLevel-1)*
+      baseIncomeMultiplier(level)*
+      economyScale(level);
+    return expectedCardIncome*standLimit(level);
+  }
+
+  function idPackCost(rangeIndex,level=state.baseLevel){
+    const seconds=12+(Math.max(0,Number(rangeIndex)||0)*10);
+    return roundUpNice(modeledBaseIncomeForShop(level)*seconds);
+  }
+
+  function renderIdPackShop(){
+    const wrap=$("#idPackShop");if(!wrap)return;
+    const ranges=idPackRanges();
+    wrap.innerHTML=ranges.map(r=>{
+      const cost=idPackCost(r.index);
+      const minBonus=charIncomeBonusText(r.start),maxBonus=charIncomeBonusText(r.end);
+      return '<article class="id-pack-card" style="--pack-index:'+r.index+'">'+
+        '<div class="id-pack-top"><span>ID PACK</span><strong>'+padId(r.start)+'–'+padId(r.end)+'</strong></div>'+
+        '<div class="id-pack-range"><b>'+r.start+'–'+r.end+'</b><small>Character Pool</small></div>'+
+        '<div class="id-pack-meta"><span>ID Income '+minBonus+' → '+maxBonus+'</span><span>Tier ใช้ Luck ปัจจุบัน</span></div>'+
+        '<button type="button" data-buy-id-pack="'+r.index+'">สุ่ม '+fmt(cost)+'</button>'+
+      '</article>';
+    }).join("");
+  }
+
+  function buyIdPack(rangeIndex){
+    const ranges=idPackRanges(),range=ranges.find(r=>r.index===rangeIndex);
+    if(!range)return;
+    const cost=idPackCost(range.index);
+    if(state.money<cost){
+      toast("เงินไม่พอ · ID Pack "+range.start+"–"+range.end+" ใช้ "+fmt(cost));
+      return;
+    }
+    state.money-=cost;
+    const tier=randomTier();
+    const card=createCardFromTier(tier,range.start,range.end);
+    toast("เปิด ID Pack "+range.start+"–"+range.end+" · ได้ "+padId(card.charId)+" "+TIERS[tier].name+" ✨",true);
+    showReveal(card);
+    renderAll();
   }
 
   function rebirthExpectedTierMultiplier(level){
@@ -1462,8 +1529,10 @@
     renderAll();
   }
 
-  function createCardFromTier(tier){
-    const charId=CARD_MIN_ID+Math.floor(Math.random()*(CARD_MAX_ID-CARD_MIN_ID+1));
+  function createCardFromTier(tier,minId=CARD_MIN_ID,maxId=CARD_MAX_ID){
+    const low=Math.max(CARD_MIN_ID,Math.min(CARD_MAX_ID,Math.floor(Number(minId)||CARD_MIN_ID)));
+    const high=Math.max(low,Math.min(CARD_MAX_ID,Math.floor(Number(maxId)||CARD_MAX_ID)));
+    const charId=low+Math.floor(Math.random()*(high-low+1));
     const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),level:1,locked:false,obtainedAt:Date.now()};
     state.cards.push(card);
     recordCardInIndex(card,card.obtainedAt);
@@ -1492,6 +1561,7 @@
         '</div>'+
         '<div class="card-body"><div class="card-stats">'+
           '<div><span>Level</span><b>'+c.level+'</b></div><div><span>รายได้</span><b class="tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</b></div>'+
+          '<div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div>'+
           '<div><span>อัป Lv.</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div>'+
           '<div><span>Mutation</span><b style="color:'+MUTATIONS[c.mutation||0].color+'">'+MUTATIONS[c.mutation||0].name+'</b></div><div><span>ได้จาก</span><b>'+(c.mutation?'First Open / Event':'รอ Mutation Event')+'</b></div>'+
         '</div>'+(tradeLocked?'<div class="trade-lock-banner">🔒 TRADE LOCK · รออีกฝ่ายตอบรับ</div>':'')+'<div class="card-actions">'+
@@ -1830,7 +1900,7 @@
     body.innerHTML=
       '<div class="stand-detail"><div class="stand-detail-art '+tierFxClass(c.tier)+mutationFxClass(c.mutation)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+mutationStyle(c.mutation)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div><div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div></div>'+
       '<div class="stand-detail-info"><div><div class="eyebrow">INCOME</div><div class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
-      '<div class="card-stats"><div><span>Level</span><b>'+c.level+'</b></div><div><span>Grade</span><b>'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>Mutation</span><b style="color:'+MUTATIONS[c.mutation||0].color+'">'+MUTATIONS[c.mutation||0].name+' · Income ×'+MUTATIONS[c.mutation||0].income.toFixed(2)+' · Luck ×'+MUTATIONS[c.mutation||0].luck.toFixed(2)+'</b></div><div><span>อัป Level</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Source</span><b>'+(c.mutation?'First Open / Event':'วางโชว์เพื่อรอ Event')+'</b></div></div>'+
+      '<div class="card-stats"><div><span>Level</span><b>'+c.level+'</b></div><div><span>Grade</span><b>'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b style="color:'+MUTATIONS[c.mutation||0].color+'">'+MUTATIONS[c.mutation||0].name+' · Income ×'+MUTATIONS[c.mutation||0].income.toFixed(2)+' · Luck ×'+MUTATIONS[c.mutation||0].luck.toFixed(2)+'</b></div><div><span>อัป Level</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Source</span><b>'+(c.mutation?'First Open / Event':'วางโชว์เพื่อรอ Event')+'</b></div></div>'+
       '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
     body.querySelector('[data-modal-a="level"]').addEventListener("click",()=>{levelUp(c.uid,true)});
@@ -2109,6 +2179,10 @@
     });
     $("#rollBtn").addEventListener("click",manualRoll);$("#autoBtn").addEventListener("click",toggleAuto);$("#fullAutoBtn").addEventListener("click",toggleFullAuto);$("#packCard").addEventListener("click",openPack);
     $("#storedPacks").addEventListener("click",e=>{const b=e.target.closest("[data-open-stored-tier]");if(b)openStoredPack(Number(b.dataset.openStoredTier))});
+    $("#idPackShop").addEventListener("click",e=>{
+      const b=e.target.closest("[data-buy-id-pack]");if(!b)return;
+      buyIdPack(Number(b.dataset.buyIdPack));
+    });
     $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
     $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
     $("#gradeTargetList").addEventListener("change",updateGradeTargetChance);
