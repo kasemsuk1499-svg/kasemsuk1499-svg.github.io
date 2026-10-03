@@ -39,6 +39,7 @@
   ];
 
   const GRADE_REROLL_COSTS = [1000,2000,3000,5500,10000,18000,32000,60000,110000,200000];
+  const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02];
 
   const TITLES = [
     "Rookie Collector","Card Scout","Pack Seeker","Card Hunter","Vault Keeper",
@@ -90,6 +91,10 @@
   let onlineHeartbeatTimer = 0;
   let onlineCache = {online:[],requests:[],friends:[],leaders:[],myRank:null,totalPlayers:0};
   let socialProfiles = new Map();
+  let tradeCache = {incoming:[],outgoing:[],recent:[]};
+  let tradeLockedGids = new Set();
+  let tradeModalState = {mode:null,targetId:null,tradeId:null,selectedGid:null};
+  let tradeBusy = false;
   let authRequestBusy = false;
 
   function packAutoSessionActive(){
@@ -103,9 +108,21 @@
     }catch{}
   }
 
+  function makeCardGid(){
+    if(globalThis.crypto&&typeof crypto.randomUUID==="function")return crypto.randomUUID();
+    const rnd=Math.random().toString(36).slice(2);
+    return "card-"+Date.now().toString(36)+"-"+rnd+"-"+Math.random().toString(36).slice(2);
+  }
+
+  function validCardGid(value){
+    return typeof value==="string"&&value.length>=8&&value.length<=80;
+  }
+
   function hydrateState(parsed){
     const s={...newState(),...(parsed||{})};
-    s.cards=(Array.isArray(s.cards)?s.cards:[]).filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID);
+    s.cards=(Array.isArray(s.cards)?s.cards:[])
+      .filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID)
+      .map(c=>({...c,gid:validCardGid(c.gid)?c.gid:makeCardGid()}));
     s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
     s.storedPacks=(Array.isArray(s.storedPacks)?s.storedPacks:[]).filter(p=>p&&Number.isInteger(p.tier)&&p.tier>=0&&p.tier<10);
     const keepPackAuto=packAutoSessionActive();
@@ -297,10 +314,13 @@
     for(let i=odds.length-1;i>=0;i--) if(odds[i]>0) return i;
     return 0;
   }
+  function gradeOdds(){
+    const sum=GRADE_WEIGHTS.reduce((a,b)=>a+b,0);
+    return GRADE_WEIGHTS.map(w=>w/sum);
+  }
   function randomGrade(){
-    const weights=[44,25,14,7,4,2.5,1.5,.8,.18,.02];
-    let r=Math.random()*weights.reduce((a,b)=>a+b,0);
-    for(let i=0;i<weights.length;i++){r-=weights[i];if(r<=0)return i}
+    let r=Math.random()*GRADE_WEIGHTS.reduce((a,b)=>a+b,0);
+    for(let i=0;i<GRADE_WEIGHTS.length;i++){r-=GRADE_WEIGHTS[i];if(r<=0)return i}
     return 0;
   }
   function expectedTierMultiplier(level){
@@ -943,7 +963,7 @@
 
   function createCardFromTier(tier){
     const charId=CARD_MIN_ID+Math.floor(Math.random()*(CARD_MAX_ID-CARD_MIN_ID+1));
-    const card={uid:state.uidCounter++,charId,tier,grade:0,level:1,locked:false,obtainedAt:Date.now()};
+    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,level:1,locked:false,obtainedAt:Date.now()};
     state.cards.push(card);
     return card;
   }
