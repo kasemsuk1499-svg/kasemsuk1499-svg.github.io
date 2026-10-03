@@ -256,7 +256,7 @@
     const level=Math.max(1,Number(card.level)||1);
     // Card Level ต้องเป็น long-term sink: เริ่มแพงขึ้น ~6x และโตเร็วกว่ารายได้ของการ์ด
     const seconds=40*Math.pow(1.05,level-1);
-    return roundUpNice(Math.min(1e300,income*seconds*economyScale()));
+    return roundUpNice(Math.min(1e300,income*seconds*baseIncomeMultiplier()*economyScale()));
   }
 
   function rerollCost(card){
