@@ -1281,3 +1281,86 @@ body::before{
   .index-summary-card:nth-child(3){grid-column:1/-1}
   .index-summary-note{grid-column:1/-1}
 }
+
+
+/* =========================================================
+   SERVER MUTATION EVENT
+   15 min waiting -> 5 min active -> repeat
+   ========================================================= */
+.mutation-event-bar{
+  position:relative;overflow:hidden;
+  display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:11px;
+  margin:10px 0 0;padding:10px 13px;
+  border:1px solid #303748;border-radius:14px;
+  background:linear-gradient(115deg,#0e1119,#111521);
+  transition:border-color .25s ease,box-shadow .25s ease,background .25s ease
+}
+.mutation-event-icon{
+  display:grid;place-items:center;width:38px;height:38px;border-radius:12px;
+  border:1px solid #394258;background:#111725;font-size:20px
+}
+.mutation-event-copy{position:relative;z-index:2;min-width:0}
+.mutation-event-title-row{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap
+}
+.mutation-event-title-row strong{
+  font-size:11px;letter-spacing:.08em
+}
+.mutation-event-state{
+  padding:3px 6px;border:1px solid #363e50;border-radius:999px;
+  color:#aeb8ca;font-size:7px;font-weight:900;letter-spacing:.05em
+}
+.mutation-event-meta{
+  display:flex;gap:9px;flex-wrap:wrap;margin-top:4px;color:var(--muted);font-size:8px
+}
+.mutation-event-wave{
+  position:absolute;inset:-80% -10%;pointer-events:none;opacity:0
+}
+.mutation-event-bar.waiting .mutation-event-icon{color:#b8c7df}
+.mutation-event-bar.offline{opacity:.72}
+
+.mutation-event-bar.active{
+  border-color:#77eaff;
+  background:
+    radial-gradient(circle at 8% 50%,rgba(83,231,255,.16),transparent 30%),
+    linear-gradient(115deg,#0b1720,#17112a 60%,#15110b);
+  box-shadow:0 0 28px rgba(80,225,255,.16),inset 0 0 22px rgba(151,107,255,.07)
+}
+.mutation-event-bar.active .mutation-event-icon{
+  color:#fff;border-color:#77eaff;
+  background:linear-gradient(135deg,#173b4b,#251b50);
+  box-shadow:0 0 20px rgba(94,231,255,.38);
+  animation:eventIconPulse 1.4s ease-in-out infinite
+}
+.mutation-event-bar.active .mutation-event-title-row strong{
+  background:linear-gradient(90deg,#fff,#73edff,#d68cff,#fff1a6,#fff);
+  background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:wealthPrism 2s linear infinite
+}
+.mutation-event-bar.active .mutation-event-state{
+  color:#93f7ff;border-color:#5bd9e9;background:rgba(53,202,221,.09)
+}
+.mutation-event-bar.active .mutation-event-wave{
+  opacity:.46;
+  background:
+    repeating-linear-gradient(118deg,transparent 0 36px,rgba(117,239,255,.14) 37px 39px,transparent 40px 68px);
+  animation:eventStormSweep 3.2s linear infinite
+}
+@keyframes eventIconPulse{
+  0%,100%{transform:scale(1);filter:brightness(1)}
+  50%{transform:scale(1.08);filter:brightness(1.35)}
+}
+@keyframes eventStormSweep{
+  from{transform:translateX(-16%)}
+  to{transform:translateX(16%)}
+}
+@media (max-width:700px){
+  .mutation-event-bar{margin:8px 7px 0;padding:9px 10px;gap:8px}
+  .mutation-event-icon{width:34px;height:34px}
+  .mutation-event-meta{gap:5px 8px;font-size:7px}
+}
+@media (prefers-reduced-motion:reduce){
+  .mutation-event-bar.active .mutation-event-icon,
+  .mutation-event-bar.active .mutation-event-title-row strong,
+  .mutation-event-bar.active .mutation-event-wave{animation:none!important}
+}
