@@ -1137,6 +1137,10 @@
 
   function openGradeAuto(uid){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    if(state.gradeAuto&&state.gradeAuto.uid!==uid){
+      toast("มี Auto Grade อีกใบกำลังทำงานอยู่ · หยุดใบนั้นก่อน");
+      return;
+    }
     gradeAutoSetupUid=uid;
     const g=GRADES[c.grade];
     $("#gradeAutoCardInfo").innerHTML='<strong>'+padId(c.charId)+' · '+TIERS[c.tier].name+'</strong>'+
@@ -1292,7 +1296,11 @@
       const tier=Number(input.dataset.tier);
       if(input.checked&&!state.autoTargets.includes(tier))state.autoTargets.push(tier);
       if(!input.checked)state.autoTargets=state.autoTargets.filter(x=>x!==tier);
-      renderFilters();save();
+      if(!state.autoTargets.length&&(state.autoRolling||state.fullAuto)){
+        state.autoRolling=false;state.fullAuto=false;state.rollingUntil=0;clearTimeout(autoTimer);
+        toast("ไม่มี Tier เป้าหมาย · หยุด Auto แล้ว");
+      }
+      renderFilters();renderPack();updateRollProgress();save();
     });
     $("#clearFilters").addEventListener("click",()=>{state.autoTargets=[];if(state.autoRolling||state.fullAuto){state.autoRolling=false;state.fullAuto=false;state.rollingUntil=0;clearTimeout(autoTimer)}renderFilters();renderPack();updateRollProgress();save()});
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
@@ -1311,15 +1319,15 @@
     state.rollingUntil=0;
     setInterval(economyTick,1000);
     onlineHeartbeatTimer=setInterval(()=>{if(document.visibilityState==="visible"&&authSession)heartbeatOnline()},45000);
-    document.addEventListener("visibilitychange",()=>{
-      if(document.visibilityState==="visible"){
-        accrueIncomeToNow();
-        if(state.rollingUntil)processRollEngine();
-        if(state.gradeAuto)processGradeAuto();
-        renderHeader();renderRebirth();
-        if(authSession){heartbeatOnline();flushCloudSave()}
-      }
-    });
+    const catchUpActiveSystems=()=>{
+      accrueIncomeToNow();
+      if(state.rollingUntil)processRollEngine();
+      if(state.gradeAuto)processGradeAuto();
+      renderHeader();renderRebirth();
+      if(authSession){heartbeatOnline();flushCloudSave()}
+    };
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")catchUpActiveSystems()});
+    window.addEventListener("focus",catchUpActiveSystems);
     initCloud();
   }
 
