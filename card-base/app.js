@@ -3,7 +3,7 @@
 
   const SAVE_KEY = "card-base-prototype-v01";
   const CARD_MIN_ID = 1;
-  const CARD_MAX_ID = 20;
+  const CARD_MAX_ID = 46;
   const ROLL_MS = 3500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
