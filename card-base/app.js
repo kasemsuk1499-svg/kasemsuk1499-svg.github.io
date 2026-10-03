@@ -12,6 +12,7 @@
   const PACK_AUTO_SESSION_KEY = "card-base-pack-auto-session-v1";
   const MUTATION_EVENT_SESSION_KEY = "card-base-mutation-event-session-v1";
   const GRADE_ROLL_MS = 450;
+  const ID_PACK_AUTO_MS = 1200;
 
   const TIERS = [
     {name:"Common",color:"#9aa1ad",multi:1},
@@ -123,6 +124,9 @@
   let autoTimer = 0;
   let gradeTimer = 0;
   let gradeAutoSetupUid = null;
+  let idPackAutoTimer = 0;
+  let idPackAutoIndex = null;
+  let idPackAutoCount = 0;
   let supabaseClient = null;
   let gameToken = localStorage.getItem(GAME_SESSION_KEY) || null;
   let gameAccount = null;
@@ -600,7 +604,12 @@
           '<div class="id-pack-name">'+escapeHtml(r.name)+'</div>'+
           '<div class="id-pack-range"><b>'+r.start+'–'+r.end+'</b><small>Character Pool</small></div>'+
           '<div class="id-pack-meta"><span>ID Income '+minBonus+' → '+maxBonus+'</span><span>Tier ใช้ Luck ปัจจุบัน</span></div>'+
-          '<button type="button" data-buy-id-pack="'+r.index+'">สุ่ม '+fmt(cost)+'</button>'+
+          '<div class="id-pack-actions">'+
+            '<button type="button" data-buy-id-pack="'+r.index+'">สุ่ม '+fmt(cost)+'</button>'+
+            '<button type="button" class="id-pack-auto-btn '+(idPackAutoIndex===r.index?'on':'')+'" data-auto-id-pack="'+r.index+'">'+
+              (idPackAutoIndex===r.index?'หยุด Auto · '+idPackAutoCount:'Auto')+
+            '</button>'+
+          '</div>'+
         '</div>'+
       '</article>';
     }).join("");
@@ -615,20 +624,102 @@
     });
   }
 
-  function buyIdPack(rangeIndex){
+  function buyIdPack(rangeIndex,{auto=false}={}){
     const ranges=idPackRanges(),range=ranges.find(r=>r.index===rangeIndex);
-    if(!range)return;
+    if(!range)return null;
     const cost=idPackCost(range);
     if(state.money<cost){
-      toast("เงินไม่พอ · "+range.name+" ใช้ "+fmt(cost));
-      return;
+      if(!auto)toast("เงินไม่พอ · "+range.name+" ใช้ "+fmt(cost));
+      return null;
     }
+
     state.money-=cost;
     const tier=randomTier();
     const card=createCardFromTier(tier,range.start,range.end);
-    toast("เปิด "+range.name+" · ได้ "+padId(card.charId)+" "+TIERS[tier].name+" ✨",true);
-    showReveal(card);
-    renderAll();
+
+    if(auto){
+      idPackAutoCount++;
+      const special=tier>=4||Number(card.mutation||0)>0;
+      toast(
+        "Auto "+range.name+" #"+idPackAutoCount+" · "+padId(card.charId)+" "+TIERS[tier].name+
+        (card.mutation?" · "+MUTATIONS[card.mutation].icon+" "+MUTATIONS[card.mutation].name:""),
+        special
+      );
+      renderHeader();
+      renderIdPackShop();
+      renderCollection();
+      renderCardIndex();
+      renderRebirth();
+      save();
+    }else{
+      toast("เปิด "+range.name+" · ได้ "+padId(card.charId)+" "+TIERS[tier].name+" ✨",true);
+      showReveal(card);
+      renderAll();
+    }
+    return card;
+  }
+
+  function stopIdPackAuto(message=""){
+    clearTimeout(idPackAutoTimer);
+    idPackAutoTimer=0;
+    const wasActive=idPackAutoIndex!==null;
+    idPackAutoIndex=null;
+    if(wasActive&&message)toast(message);
+    renderIdPackShop();
+  }
+
+  function processIdPackAuto(){
+    clearTimeout(idPackAutoTimer);
+    idPackAutoTimer=0;
+    if(idPackAutoIndex===null)return;
+
+    const index=idPackAutoIndex;
+    const range=idPackRanges().find(r=>r.index===index);
+    if(!range){
+      stopIdPackAuto("หยุด Auto · ไม่พบแพ็กนี้แล้ว");
+      return;
+    }
+
+    if(state.money<idPackCost(range)){
+      stopIdPackAuto("Auto "+range.name+" หยุดแล้ว · เงินไม่พอ 💸");
+      return;
+    }
+
+    const card=buyIdPack(index,{auto:true});
+    if(!card){
+      stopIdPackAuto("Auto "+range.name+" หยุดแล้ว");
+      return;
+    }
+
+    idPackAutoTimer=setTimeout(processIdPackAuto,ID_PACK_AUTO_MS);
+  }
+
+  function toggleIdPackAuto(rangeIndex){
+    if(idPackAutoIndex===rangeIndex){
+      stopIdPackAuto("หยุด Auto ID Pack แล้ว");
+      return;
+    }
+
+    clearTimeout(idPackAutoTimer);
+    idPackAutoTimer=0;
+    idPackAutoIndex=rangeIndex;
+    idPackAutoCount=0;
+    closeReveal();
+    const range=idPackRanges().find(r=>r.index===rangeIndex);
+    if(!range){
+      stopIdPackAuto();
+      return;
+    }
+    if(state.money<idPackCost(range)){
+      idPackAutoIndex=null;
+      toast("เงินไม่พอ · "+range.name+" ใช้ "+fmt(idPackCost(range)));
+      renderIdPackShop();
+      return;
+    }
+
+    toast("เปิด Auto · "+range.name+" 🔁");
+    renderIdPackShop();
+    processIdPackAuto();
   }
 
   function rebirthExpectedTierMultiplier(level){
@@ -2182,6 +2273,7 @@
 
   function doRebirth(){
     if(state.baseLevel>=40)return;
+    if(idPackAutoIndex!==null)stopIdPackAuto("Auto ID Pack หยุดเพราะ Rebirth");
     const cost=rebirthCost();
     if(state.money<cost){toast("เงินยังไม่พอสำหรับ Rebirth");return}
     const oldMax=maxTierForLevel(state.baseLevel);
@@ -2263,8 +2355,13 @@
     $("#rollBtn").addEventListener("click",manualRoll);$("#autoBtn").addEventListener("click",toggleAuto);$("#fullAutoBtn").addEventListener("click",toggleFullAuto);$("#packCard").addEventListener("click",openPack);
     $("#storedPacks").addEventListener("click",e=>{const b=e.target.closest("[data-open-stored-tier]");if(b)openStoredPack(Number(b.dataset.openStoredTier))});
     $("#idPackShop").addEventListener("click",e=>{
-      const b=e.target.closest("[data-buy-id-pack]");if(!b)return;
-      buyIdPack(Number(b.dataset.buyIdPack));
+      const auto=e.target.closest("[data-auto-id-pack]");
+      if(auto){
+        toggleIdPackAuto(Number(auto.dataset.autoIdPack));
+        return;
+      }
+      const buy=e.target.closest("[data-buy-id-pack]");
+      if(buy)buyIdPack(Number(buy.dataset.buyIdPack));
     });
     $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
     $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
