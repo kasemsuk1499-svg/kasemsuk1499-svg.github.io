@@ -223,3 +223,32 @@ button,input,select{font:inherit}button{color:inherit}
   .reveal-card-wrap{width:min(330px,90vw)}
   .toast{bottom:calc(88px + env(safe-area-inset-bottom));max-width:90vw;text-align:center}
 }
+
+/* Online V1 */
+.online-hero{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:18px 0}
+.online-gate{min-height:360px;display:grid;place-items:center;align-content:center;text-align:center;gap:8px;border:1px dashed var(--border);border-radius:22px;background:#0d0f15;padding:28px}
+.online-profile-card{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border:1px solid var(--border);border-radius:18px;background:#10131b;margin-bottom:12px}
+.online-name-row{display:flex;gap:8px;margin-top:8px}.online-name-row input{min-width:240px}
+.player-code{font-size:11px;color:var(--muted);margin-top:8px}.player-code strong{color:#d8dbea;letter-spacing:.08em}
+.online-self-stat{min-width:92px;text-align:center;padding:12px;border-radius:14px;background:#0b0d13}.online-self-stat span{display:block;color:var(--muted);font-size:10px}.online-self-stat strong{font-size:20px}
+.player-search{display:grid;grid-template-columns:1fr auto;gap:8px;margin:12px 0}.player-search input{width:100%}
+.online-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}.friends-box{grid-column:1/-1}
+.social-box{border:1px solid var(--border);background:#10131b;border-radius:18px;padding:14px;min-height:180px}
+.social-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.social-title>div{display:flex;align-items:center;gap:7px}.social-title small{color:var(--muted)}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px color-mix(in srgb,var(--ok) 60%,transparent)}
+.social-list{display:grid;gap:8px}.social-list.compact:empty{display:none}.social-empty{padding:18px;text-align:center;color:var(--muted);font-size:12px;border:1px dashed #252a39;border-radius:12px}
+.player-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border:1px solid #242938;border-radius:13px;background:#0c0e14}
+.player-main{min-width:0}.player-main strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player-main small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+.player-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.player-actions button{border:1px solid #343a4d;background:#171b27;border-radius:9px;padding:7px 9px;cursor:pointer;font-size:10px}.player-actions button.accept{color:var(--ok)}.player-actions button.remove{color:#ff9aab}
+.visitor-stands{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:14px}.visitor-stand{position:relative;min-height:210px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#0b0d13}.visitor-stand.empty{display:grid;place-items:center;color:#596074;border-style:dashed}.visitor-card{position:absolute;inset:0}.visitor-card img{width:100%;height:100%;object-fit:cover;display:block}.visitor-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.9))}
+.visitor-meta{position:absolute;z-index:4;left:8px;right:8px;bottom:8px}.visitor-meta b{display:block;font-size:11px}.visitor-meta span{font-size:9px;color:#d4d8e3}
+.social-base-card{width:min(1000px,96vw)}
+@media (max-width:700px){
+  .tabs{grid-template-columns:repeat(5,1fr)}
+  .online-hero{align-items:flex-start;margin:10px 0 12px}.online-hero .secondary{min-height:40px;padding:8px 11px}
+  .online-profile-card{align-items:flex-start;padding:12px}.online-name-row{display:grid;grid-template-columns:1fr}.online-name-row input{min-width:0;width:100%}
+  .online-columns{grid-template-columns:1fr}.friends-box{grid-column:auto}
+  .player-row{align-items:flex-start}.player-actions{max-width:46%;}.player-actions button{padding:7px}
+  .visitor-stands{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.visitor-stand{min-height:190px}
+  .social-base-card{max-height:94dvh}
+}
