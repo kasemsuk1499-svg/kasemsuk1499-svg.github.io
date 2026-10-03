@@ -120,7 +120,7 @@
     {
       key:"celestial-gate",name:"Celestial Gate",label:"PREMIUM",minLevel:21,weight:3,featuredTier:7,
       stockMin:1,stockMax:1,priceSeconds:230,outRate:.012,
-      rates:{6:32,7:55,8:12,9:1},
+      rates:{6:32,7:56,8:12},
       outPool:{9:100}
     },
     {
@@ -892,17 +892,29 @@
     return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
   }
 
+  function rotatingNormalRates(offer){
+    const unlocked=maxTierForLevel();
+    const filtered=Object.fromEntries(
+      Object.entries(offer.rates||{}).filter(([tier,w])=>Number(tier)<unlocked&&Number(w)>0)
+    );
+    if(Object.keys(filtered).length)return filtered;
+    return {[offer.featuredTier]:1};
+  }
+
   function rateRowsHtml(offer){
-    const rows=Object.entries(offer.rates)
+    const normalRates=rotatingNormalRates(offer);
+    const total=Object.values(normalRates).reduce((a,b)=>a+Number(b),0);
+    const rows=Object.entries(normalRates)
       .sort((a,b)=>Number(a[0])-Number(b[0]))
       .map(([tier,w])=>{
         const t=TIERS[Number(tier)];
-        const total=Object.values(offer.rates).reduce((a,b)=>a+Number(b),0);
         const pct=(1-offer.outRate)*(Number(w)/total)*100;
         return '<div class="rot-rate"><span style="--rate-color:'+t.color+'">'+t.name+'</span><b>'+pct.toFixed(pct<10?1:0)+'%</b></div>';
       }).join("");
+    const jackpotNames=Object.keys(offer.outPool).map(i=>TIERS[Number(i)]?.name).filter(Boolean).join(" / ");
     return rows+
-      '<div class="rot-rate out-rate"><span>OUT OF RATE</span><b>'+(offer.outRate*100).toFixed(offer.outRate*100<2?1:0)+'%</b></div>';
+      '<div class="rot-rate out-rate"><span>OUT OF RATE</span><b>'+(offer.outRate*100).toFixed(offer.outRate*100<2?1:0)+'%</b></div>'+
+      '<div class="rot-out-pool">JACKPOT → '+escapeHtml(jackpotNames)+'</div>';
   }
 
   function renderRotatingPackShop(){
@@ -977,7 +989,7 @@
     const outOfRate=Math.random()<offer.outRate;
     const tier=outOfRate
       ? weightedPickObject(offer.outPool)
-      : weightedPickObject(offer.rates);
+      : weightedPickObject(rotatingNormalRates(offer));
     const card=createCardFromTier(tier,offer.start,offer.end);
     state.rotatingShop.bought[offer.id]=rotatingPackBought(offer)+1;
 
