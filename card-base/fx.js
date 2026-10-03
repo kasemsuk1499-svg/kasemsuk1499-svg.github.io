@@ -34,6 +34,7 @@
   const particles = [];
   const images = {};
   const spawnState = new WeakMap();
+  const frameRects = new Map();
 
   function loadTextures(){
     Object.entries(TEX).forEach(([key,src])=>{
@@ -153,8 +154,7 @@
 
   function updateSpawns(dt){
     for(const t of targets){
-      if(!activeLayerAllows(t.el)) continue;
-      const r=visibleRect(t.el);
+      const r=frameRects.get(t.el);
       if(!r) continue;
       let s=spawnState.get(t.el);
       if(!s){s={acc:Math.random()};spawnState.set(t.el,s)}
@@ -188,8 +188,7 @@
       const p=particles[i];
       p.life-=dt*1000;
       if(p.life<=0 || !p.el.isConnected){particles.splice(i,1);continue}
-      if(!activeLayerAllows(p.el)){continue}
-      const r=visibleRect(p.el);
+      const r=frameRects.get(p.el);
       if(!r) continue;
 
       p.dx+=p.vx*dt;
@@ -224,10 +223,13 @@
 
     ctx.clearRect(0,0,vw,vh);
 
+    frameRects.clear();
     for(const t of targets){
       if(!activeLayerAllows(t.el)) continue;
       const r=visibleRect(t.el);
-      if(r) drawHalo(t,r,time);
+      if(!r) continue;
+      frameRects.set(t.el,r);
+      drawHalo(t,r,time);
     }
 
     updateSpawns(dt);
