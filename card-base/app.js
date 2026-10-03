@@ -38,7 +38,7 @@
     "Card Baron","Vault Lord","Collection Master","Grand Collector","Card Duke",
     "Legend Keeper","Collector King","Card Emperor","Legend Sovereign","Grand Sovereign"
   ];
-  const STANDS = [10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30];
+  const STANDS = [10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30];\n  const REBIRTH_CARD_LEVELS = [3,5,8,12,16,21,27,34,42,51,61,72,84,97,111,126,142,159,177];
 
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
@@ -87,7 +87,7 @@
     return v.toFixed(v>=100?0:v>=10?1:2)+units[i];
   }
 
-  function padId(id){return "#"+String(id).padStart(4,"0")}
+  function padId(id){return "#"+String(id).padStart(4,"0")}\n  function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
   function imageFor(id){return "../assets/cards/"+id+".png"}
   function baseIncomeMultiplier(level=state.baseLevel){return 1+(level-1)*0.25}
   function luckValue(level=state.baseLevel){return 1+(level-1)*0.145}
@@ -105,10 +105,14 @@
     state.placed=next;
   }
 
-  function cardIncome(card){
+  function cardIntrinsicIncome(card){
     const tier=TIERS[card.tier],grade=GRADES[card.grade];
-    const levelMulti=Math.pow(1.105,Math.max(0,card.level-1));
-    return charBaseIncome(card.charId)*tier.multi*grade.multi*levelMulti*baseIncomeMultiplier();
+    const levelMulti=Math.pow(1.04,Math.max(0,card.level-1));
+    return charBaseIncome(card.charId)*tier.multi*grade.multi*levelMulti;
+  }
+
+  function cardIncome(card){
+    return cardIntrinsicIncome(card)*baseIncomeMultiplier();
   }
 
   function totalIncome(){
@@ -120,13 +124,27 @@
   }
 
   function upgradeCost(card){
-    return Math.min(140*Math.sqrt(TIERS[card.tier].multi)*Math.pow(1.17,Math.max(0,card.level-1)),Number.MAX_SAFE_INTEGER);
+    const income=cardIntrinsicIncome(card);
+    const seconds=6+Math.min(24,card.level*0.12);
+    return roundUpNice(Math.min(income*seconds,Number.MAX_SAFE_INTEGER));
   }
+
   function rerollCost(card){
-    return Math.min(900*TIERS[card.tier].multi*Math.pow(1.08,card.grade),Number.MAX_SAFE_INTEGER);
+    const income=cardIntrinsicIncome(card);
+    const gradePressure=18*Math.pow(1.72,card.grade);
+    return roundUpNice(Math.min(income*gradePressure,Number.MAX_SAFE_INTEGER));
   }
+
   function sellValue(card){
-    return Math.floor(350*TIERS[card.tier].multi*GRADES[card.grade].multi*Math.pow(1.06,card.level-1));
+    const income=cardIntrinsicIncome(card);
+    return roundUpNice(income*(4+Math.min(20,card.level*0.14)));
+  }
+
+  function roundUpNice(value){
+    if(!Number.isFinite(value)||value<=0)return 0;
+    const power=Math.max(0,Math.floor(Math.log10(value))-2);
+    const step=Math.pow(10,power);
+    return Math.ceil(value/step)*step;
   }
   function maxTierForLevel(level=state.baseLevel){
     return Math.min(10,3+Math.floor((level-1)*7/19));
@@ -150,9 +168,42 @@
     for(let i=0;i<weights.length;i++){r-=weights[i];if(r<=0)return i}
     return 0;
   }
-  function rebirthCost(level=state.baseLevel){return Math.floor(12000*Math.pow(2.15,level-1))}
+  function expectedTierMultiplier(level){
+    const odds=tierOdds(level);
+    return odds.reduce((sum,p,i)=>sum+p*TIERS[i].multi,0);
+  }
+
+  function rebirthRequiredLevel(level=state.baseLevel){
+    return REBIRTH_CARD_LEVELS[Math.min(REBIRTH_CARD_LEVELS.length-1,Math.max(0,level-1))];
+  }
+
+  function rebirthTargetSeconds(level=state.baseLevel){
+    return 55+11*Math.max(0,level-1);
+  }
+
+  function rebirthCost(level=state.baseLevel){
+    const avgCharacterIncome=545;
+    const reqLevel=rebirthRequiredLevel(level);
+    const assumedLevel=Math.max(1,Math.round(reqLevel*0.35));
+    const expectedCardIncome=
+      avgCharacterIncome*
+      expectedTierMultiplier(level)*
+      Math.pow(1.04,assumedLevel-1)*
+      baseIncomeMultiplier(level);
+    const expectedBaseIncome=expectedCardIncome*standLimit(level);
+    return roundUpNice(expectedBaseIncome*rebirthTargetSeconds(level));
+  }
+
   function rebirthRequiredId(level=state.baseLevel){return ((level*7+3)%20)+1}
-  function hasCharacter(id){return state.cards.some(c=>c.charId===id)}
+
+  function bestRequiredCard(id){
+    return state.cards.filter(c=>c.charId===id).sort((a,b)=>b.level-a.level)[0]||null;
+  }
+
+  function hasRequiredCard(id,level){
+    const card=bestRequiredCard(id);
+    return !!card&&card.level>=level;
+  }
 
   function toast(msg,found=false){
     const el=$("#toast");
@@ -290,12 +341,16 @@
   function renderRebirth(){
     if(state.baseLevel>=20){
       $("#rebirthHeadline").textContent="Lv.20 · MAX";$("#rebirthMoney").textContent="—";$("#rebirthCard").textContent="—";
-      $("#rebirthOwned").textContent="ถึงระดับสูงสุดของ V1 แล้ว";$("#rebirthBtn").disabled=true;$("#nextTitle").textContent="MAX";
+      $("#rebirthOwned").textContent="ถึงระดับสูงสุดของ V1 แล้ว";const pace=$("#rebirthPace");if(pace)pace.textContent="—";$("#rebirthBtn").disabled=true;$("#nextTitle").textContent="MAX";
       $("#nextStands").textContent="30";$("#nextIncome").textContent="×"+baseIncomeMultiplier(20).toFixed(2);$("#nextLuck").textContent="×"+luckValue(20).toFixed(2);return;
     }
-    const next=state.baseLevel+1,need=rebirthRequiredId(),cost=rebirthCost(),has=hasCharacter(need);
-    $("#rebirthHeadline").textContent="Lv."+state.baseLevel+" → Lv."+next;$("#rebirthMoney").textContent=fmt(cost);$("#rebirthCard").textContent=padId(need);
-    $("#rebirthOwned").textContent=has?"มีแล้ว ✓":"ยังไม่มี";$("#rebirthOwned").style.color=has?"var(--ok)":"var(--danger)";
+    const next=state.baseLevel+1,need=rebirthRequiredId(),needLevel=rebirthRequiredLevel(),cost=rebirthCost();
+    const best=bestRequiredCard(need),has=hasRequiredCard(need,needLevel);
+    $("#rebirthHeadline").textContent="Lv."+state.baseLevel+" → Lv."+next;$("#rebirthMoney").textContent=fmt(cost);
+    $("#rebirthCard").textContent=padId(need)+" · Lv."+needLevel+"+";
+    $("#rebirthOwned").textContent=best?(has?"Lv."+best.level+" ✓":"ดีที่สุด Lv."+best.level+" / ต้อง Lv."+needLevel):"ยังไม่มีการ์ด ID นี้";
+    $("#rebirthOwned").style.color=has?"var(--ok)":"var(--danger)";
+    const pace=$("#rebirthPace");if(pace)pace.textContent="~"+formatDuration(rebirthTargetSeconds());
     $("#rebirthBtn").disabled=!(state.money>=cost&&has);$("#nextTitle").textContent=TITLES[next-1];$("#nextStands").textContent=standLimit(next);
     $("#nextIncome").textContent="×"+baseIncomeMultiplier(next).toFixed(2);$("#nextLuck").textContent="×"+luckValue(next).toFixed(2);
   }
@@ -434,8 +489,8 @@
 
   function doRebirth(){
     if(state.baseLevel>=20)return;
-    const cost=rebirthCost(),need=rebirthRequiredId();
-    if(state.money<cost||!hasCharacter(need)){toast("ยังไม่ครบเงื่อนไข");return}
+    const cost=rebirthCost(),need=rebirthRequiredId(),needLevel=rebirthRequiredLevel();
+    if(state.money<cost||!hasRequiredCard(need,needLevel)){toast("ยังไม่ครบเงื่อนไขเงิน + ID + Level");return}
     state.money=0;state.baseLevel++;normalizeSlots();toast("Rebirth สำเร็จ! ฐาน Lv."+state.baseLevel);renderAll();
   }
 
