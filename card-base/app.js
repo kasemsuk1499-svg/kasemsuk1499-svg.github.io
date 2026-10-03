@@ -279,8 +279,9 @@
   function clearGameSession(){
     gameToken=null;gameAccount=null;onlineProfile=null;cloudReady=false;cloudLoading=false;
     tradeCache={incoming:[],outgoing:[],recent:[]};tradeLockedGids=new Set();
+    mutationEventStatus=null;
     localStorage.removeItem(GAME_SESSION_KEY);
-    renderAuth();renderOnlineShell();updateSyncUi("local");
+    renderAuth();renderOnlineShell();renderMutationEvent();updateSyncUi("local");
   }
 
   async function flushCloudSave(){
@@ -611,6 +612,7 @@
   }
 
   async function activateGameSession(token,username,recoveryCode=null){
+    rotateMutationEventSession();
     gameToken=token;
     localStorage.setItem(GAME_SESSION_KEY,token);
     gameAccount={username};
@@ -622,7 +624,7 @@
       return false;
     }
     await loadCloudState();
-    await publishPublicBase();
+    await heartbeatOnline();
     if(recoveryCode)showRecoveryCode(recoveryCode);
     renderAuth();renderOnlineShell();
     return true;
@@ -640,7 +642,7 @@
       const me=await fetchMe();
       if(me){
         await loadCloudState();
-        await publishPublicBase();
+        await heartbeatOnline();
       }else{
         clearGameSession();
       }
@@ -753,9 +755,99 @@
     return me;
   }
 
+  function mutationEventSchedule(nowMs=Date.now()+mutationEventClockOffset){
+    const sec=Math.floor(nowMs/1000);
+    const cycleStart=Math.floor(sec/1200)*1200;
+    const pos=sec-cycleStart;
+    const active=pos>=900;
+    return {
+      active,
+      startMs:(cycleStart+900)*1000,
+      endMs:(cycleStart+1200)*1000,
+      nextStartMs:(active?cycleStart+2100:cycleStart+900)*1000
+    };
+  }
+
+  function eventCountdown(ms){
+    const total=Math.max(0,Math.ceil(ms/1000));
+    const m=Math.floor(total/60),s=total%60;
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+
+  function mutationEventEligibleCount(){
+    normalizeSlots();
+    return state.placed.reduce((count,uid)=>{
+      const c=uid?state.cards.find(x=>x.uid===uid):null;
+      return count+(c&&Number(c.mutation||0)===0?1:0);
+    },0);
+  }
+
+  function renderMutationEvent(){
+    const bar=$("#mutationEventBar");if(!bar)return;
+    const title=$("#mutationEventTitle"),stateEl=$("#mutationEventState");
+    const countdown=$("#mutationEventCountdown"),eligible=$("#mutationEventEligible");
+    const schedule=mutationEventSchedule();
+    const online=!!(gameToken&&gameAccount);
+    const eligibleCount=mutationEventEligibleCount();
+
+    eligible.textContent="Normal บนฐาน "+eligibleCount+" ใบ";
+
+    if(schedule.active){
+      bar.className="mutation-event-bar active";
+      title.textContent="⚡ MUTATION STORM";
+      stateEl.textContent=online?"EVENT ACTIVE · ออนไลน์อยู่":"EVENT ACTIVE · ล็อกอินเพื่อรับสิทธิ์";
+      countdown.textContent="เหลือ "+eventCountdown(schedule.endMs-(Date.now()+mutationEventClockOffset));
+    }else{
+      bar.className="mutation-event-bar "+(online?"waiting":"offline");
+      title.textContent="MUTATION EVENT";
+      stateEl.textContent=online?"ONLINE · รอ Event ถัดไป":"ต้องออนไลน์เพื่อร่วม Event";
+      countdown.textContent="เริ่มใน "+eventCountdown(schedule.nextStartMs-(Date.now()+mutationEventClockOffset));
+    }
+  }
+
+  async function tickMutationEvent(){
+    if(mutationEventBusy||!gameToken||!supabaseClient)return;
+    mutationEventBusy=true;
+    try{
+      const result=await rpc("cb_mutation_event_tick",{
+        p_token:gameToken,
+        p_client_session:mutationEventClientSession
+      });
+      if(!result.ok){
+        if(result.error==="invalid_session")clearGameSession();
+        return;
+      }
+
+      if(Number.isFinite(Number(result.server_now_ms))){
+        mutationEventClockOffset=Number(result.server_now_ms)-Date.now();
+      }
+      mutationEventStatus=result;
+
+      if(Number(result.hit_count)>0&&result.state){
+        state=hydrateState(result.state);
+        localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+        syncCardIndex();
+        const hits=Array.isArray(result.hits)?result.hits:[];
+        const names=hits.slice(0,3).map(hit=>{
+          const m=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(hit.mutation)||0))];
+          return padId(Number(hit.charId)||0)+" "+m.icon+" "+m.name;
+        });
+        toast("⚡ Mutation Event! "+result.hit_count+" ใบกลายพันธุ์"+(names.length?" · "+names.join(", "):""),true);
+        renderAll();
+        await publishPublicBase();
+      }else{
+        renderMutationEvent();
+      }
+    }finally{
+      mutationEventBusy=false;
+    }
+  }
+
   async function heartbeatOnline(){
     if(!gameToken||!supabaseClient)return;
-    await publishPublicBase();
+    if(cloudReady&&!cloudLoading)await flushCloudSave();
+    else await publishPublicBase();
+    await tickMutationEvent();
   }
 
   function renderOnlineShell(){
@@ -1544,7 +1636,7 @@
 
   function renderAll(){
     syncCardIndex();
-    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();save();
+    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();renderMutationEvent();save();
   }
 
   function rollTargetsReady(){
@@ -2061,13 +2153,14 @@
       setPackAutoSession(false);
     }
     setInterval(economyTick,1000);
-    onlineHeartbeatTimer=setInterval(()=>{if(document.visibilityState==="visible"&&gameToken)heartbeatOnline()},45000);
+    onlineHeartbeatTimer=setInterval(()=>{if(gameToken)heartbeatOnline()},30000);
+    mutationEventTimer=setInterval(renderMutationEvent,1000);
     const catchUpActiveSystems=()=>{
       accrueIncomeToNow();
       if(state.rollingUntil)processRollEngine();
       if(state.gradeAuto)processGradeAuto();
       renderHeader();renderRebirth();
-      if(gameToken){heartbeatOnline();flushCloudSave()}
+      if(gameToken)heartbeatOnline()
     };
     document.addEventListener("visibilitychange",()=>{
       if(document.visibilityState==="hidden"){
