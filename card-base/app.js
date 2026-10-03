@@ -54,7 +54,18 @@
     {name:"Prismatic",icon:"◇",color:"#ff83e8",income:1.38,luck:1.16,weight:.20},
     {name:"Celestial Surge",icon:"✦",color:"#fff0a5",income:1.55,luck:1.22,weight:.15}
   ];
-  const MUTATION_ROLL_SECONDS = 120;
+  const MUTATION_REROLL_COSTS = [
+    60000,      // Common
+    110000,     // Uncommon
+    180000,     // Rare
+    330000,     // Epic
+    600000,     // Legendary
+    1100000,    // Mythic
+    2000000,    // Divine
+    3600000,    // Celestial
+    6600000,    // Transcendent
+    12000000    // Eternal
+  ];
 
   const TITLES = [
     "Rookie Collector","Card Scout","Pack Seeker","Card Hunter","Vault Keeper",
@@ -402,7 +413,10 @@
     return (GRADE_REROLL_COSTS[card.tier]||GRADE_REROLL_COSTS[0])*economyScale();
   }
   function mutationRerollCost(card){
-    return roundUpNice(cardCoreIncome(card)*baseIncomeMultiplier()*economyScale()*MUTATION_ROLL_SECONDS);
+    // Mutation price is rarity-driven only: same Tier = same price.
+    // Card Level / Grade / Character ID must never make Mutation rerolls more expensive.
+    const tier=Math.max(0,Math.min(MUTATION_REROLL_COSTS.length-1,Number(card?.tier)||0));
+    return MUTATION_REROLL_COSTS[tier]*economyScale();
   }
 
   function sellValue(card){
