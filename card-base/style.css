@@ -778,3 +778,89 @@ body[data-rank-stage="5"] .primary.danger{
   -webkit-background-clip:border-box!important;
   background-clip:border-box!important;
 }
+
+
+/* =========================================================
+   PERFORMANCE FX V2 — single canvas renderer owns card FX
+   Keep typography/rank styling, retire per-card CSS animation.
+   ========================================================= */
+#cardFxCanvas{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  pointer-events:none;
+  z-index:105;
+  contain:strict;
+  transform:translateZ(0);
+}
+
+/* Canvas particles replace these GPU-heavy per-element effects. */
+.tier-fx,
+.tier-fx.tier-2,
+.tier-fx.tier-3,
+.tier-fx.tier-4,
+.tier-fx.tier-5,
+.tier-fx.tier-6,
+.tier-fx.tier-7,
+.tier-fx.tier-8,
+.tier-fx.tier-9{
+  animation:none!important;
+  filter:none!important;
+}
+.tier-fx::before,
+.tier-fx.tier-3::before,
+.tier-fx.tier-4::before,
+.tier-fx.tier-5::before,
+.tier-fx.tier-6::before,
+.tier-fx.tier-7::before,
+.tier-fx.tier-8::before,
+.tier-fx.tier-9::before{
+  display:none!important;
+  animation:none!important;
+}
+
+.card-grade,
+.stand-grade,
+.card-grade.grade-4,.stand-grade.grade-4,
+.card-grade.grade-5,.stand-grade.grade-5,
+.card-grade.grade-6,.stand-grade.grade-6,
+.card-grade.grade-7,.stand-grade.grade-7,
+.card-grade.grade-8,.stand-grade.grade-8,
+.card-grade.grade-9,.stand-grade.grade-9{
+  animation:none!important;
+  filter:none!important;
+}
+
+/* Keep rarity readable but avoid dozens of blurred shadows at once. */
+.card-item.tier-shell,
+.stand.tier-shell,
+.visitor-stand.tier-shell{
+  box-shadow:none!important;
+}
+.grade-shell-6,.grade-shell-7,.grade-shell-8,.grade-shell-9{
+  box-shadow:none!important;
+}
+.tier-fx.tier-8 .tier-ring,
+.tier-fx.tier-9 .tier-ring{
+  box-shadow:inset 0 0 14px color-mix(in srgb,var(--tier) 26%,transparent)!important;
+}
+body::before{
+  animation:none!important;
+}
+
+/* Reveal is only one card, so a static cinematic glow is cheap enough. */
+.reveal-visual.tier-4,.reveal-visual.tier-5{
+  box-shadow:0 0 44px color-mix(in srgb,var(--tier) 34%,transparent)!important
+}
+.reveal-visual.tier-6,.reveal-visual.tier-7{
+  box-shadow:0 0 54px color-mix(in srgb,var(--tier) 42%,transparent)!important
+}
+.reveal-visual.tier-8,.reveal-visual.tier-9{
+  box-shadow:0 0 66px color-mix(in srgb,var(--tier) 48%,transparent)!important
+}
+
+@media (max-width:700px){
+  #cardFxCanvas{z-index:105}
+  .tier-ring{box-shadow:inset 0 0 10px color-mix(in srgb,var(--tier) 20%,transparent)!important}
+}
