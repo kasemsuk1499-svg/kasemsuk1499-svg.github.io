@@ -647,10 +647,11 @@
       );
       renderHeader();
       renderIdPackShop();
-      renderCollection();
-      renderCardIndex();
+      if($("#panel-collection")?.classList.contains("active"))renderCollection();
+      if($("#panel-index")?.classList.contains("active"))renderCardIndex();
       renderRebirth();
-      save();
+      localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+      if(idPackAutoCount%5===0)scheduleCloudSave();
     }else{
       toast("เปิด "+range.name+" · ได้ "+padId(card.charId)+" "+TIERS[tier].name+" ✨",true);
       showReveal(card);
@@ -664,7 +665,10 @@
     idPackAutoTimer=0;
     const wasActive=idPackAutoIndex!==null;
     idPackAutoIndex=null;
-    if(wasActive&&message)toast(message);
+    if(wasActive){
+      save();
+      if(message)toast(message);
+    }
     renderIdPackShop();
   }
 
