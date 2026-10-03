@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261003-trade-grade-ranks1">
+  <link rel="stylesheet" href="./style.css?v=20261003-index1">
 </head>
 <body>
   <div class="app-shell">
@@ -36,6 +36,7 @@
       <button class="tab active" data-tab="base"><span class="tab-icon">⌂</span><span>ฐาน</span></button>
       <button class="tab" data-tab="pack"><span class="tab-icon">◇</span><span>สุ่มซอง</span></button>
       <button class="tab" data-tab="collection"><span class="tab-icon">▦</span><span>คลังการ์ด</span></button>
+      <button class="tab" data-tab="index"><span class="tab-icon">◫</span><span>Index</span></button>
       <button class="tab" data-tab="online"><span class="tab-icon">◎</span><span>ออนไลน์</span></button>
       <button class="tab" data-tab="rebirth"><span class="tab-icon">↟</span><span>Rebirth</span></button>
     </nav>
@@ -144,6 +145,61 @@
         </div>
         <div id="collection" class="collection"></div>
         <div id="emptyCollection" class="empty-state">ยังไม่มีการ์ด — ไปสุ่มซองใบแรกกัน ✨</div>
+      </section>
+
+      <section id="panel-index" class="panel">
+        <div class="index-hero">
+          <div>
+            <div class="eyebrow">COLLECTION INDEX</div>
+            <h2>สมุดสะสมการ์ด</h2>
+            <p class="muted">บันทึกการ์ดที่เคยค้นพบไว้ถาวร แม้ภายหลังจะขายหรือ Trade ออกไป</p>
+          </div>
+          <div class="index-tools">
+            <input id="indexSearch" inputmode="numeric" placeholder="ค้นหา Character ID">
+            <select id="indexFilter">
+              <option value="all">ทั้งหมด</option>
+              <option value="found">ค้นพบแล้ว</option>
+              <option value="missing">ยังไม่พบ</option>
+              <option value="owned">ถืออยู่ตอนนี้</option>
+              <option value="complete">Tier ครบ 10/10</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="index-summary">
+          <div class="index-summary-card">
+            <span>Character Collection</span>
+            <strong id="indexCharacterCount">0/46</strong>
+            <small id="indexCompletion">0%</small>
+            <div class="index-progress"><i id="indexProgressFill"></i></div>
+          </div>
+          <div class="index-summary-card">
+            <span>Tier Variants</span>
+            <strong id="indexVariantCount">0/460</strong>
+            <small id="indexVariantCompletion">0%</small>
+            <div class="index-progress variant"><i id="indexVariantFill"></i></div>
+          </div>
+          <div class="index-summary-note">
+            <strong>เป้าหมายสะสม</strong>
+            <span>Character 46 ตัว × Tier 10 ระดับ = 460 Variants</span>
+            <small>Grade สูงสุดของแต่ละ Character จะถูกบันทึกไว้ด้วย</small>
+          </div>
+        </div>
+
+        <div class="index-legend">
+          <span>Tier:</span>
+          <i style="--tier:#9aa1ad"></i><small>Common</small>
+          <i style="--tier:#62d58b"></i><small>Uncommon</small>
+          <i style="--tier:#58a9ff"></i><small>Rare</small>
+          <i style="--tier:#a579ff"></i><small>Epic</small>
+          <i style="--tier:#ffbd4a"></i><small>Legendary</small>
+          <i style="--tier:#ff638b"></i><small>Mythic</small>
+          <i style="--tier:#67f1e4"></i><small>Divine</small>
+          <i style="--tier:#7f8cff"></i><small>Celestial</small>
+          <i style="--tier:#ff79ee"></i><small>Transcendent</small>
+          <i style="--tier:#fff0a8"></i><small>Eternal</small>
+        </div>
+        <div id="cardIndexGrid" class="card-index-grid"></div>
       </section>
 
 
@@ -437,7 +493,7 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261003-trade-grade-ranks1" defer></script>
-  <script src="./fx.js?v=20261003-trade-grade-ranks1" defer></script>
+  <script src="./app.js?v=20261003-index1" defer></script>
+  <script src="./fx.js?v=20261003-index1" defer></script>
 </body>
 </html>
