@@ -73,6 +73,9 @@
   let onlineHeartbeatTimer = 0;
   let onlineCache = {online:[],friendships:[],profiles:new Map(),bases:new Map()};
   let socialProfiles = new Map();
+  let authRequestBusy = false;
+  let signupCooldownUntil = 0;
+  let signupCooldownTimer = 0;
 
   function hydrateState(parsed){
     const s={...newState(),...(parsed||{})};
@@ -364,25 +367,104 @@
     });
   }
 
+  function authErrorMessage(error,context="login"){
+    const code=error?.code||"";
+    const msg=String(error?.message||"").toLowerCase();
+    if(code==="over_email_send_rate_limit"||msg.includes("email rate limit")){
+      return "ระบบส่งอีเมลยืนยันถึงขีดจำกัดชั่วคราว กรุณารอสักพักก่อนลองใหม่ หากเคยสมัครแล้วให้เช็กอีเมลยืนยันเดิมและใช้ปุ่มเข้าสู่ระบบ ไม่ต้องกดสร้างบัญชีซ้ำ";
+    }
+    if(code==="email_not_confirmed"||msg.includes("email not confirmed")){
+      return "อีเมลนี้สมัครแล้ว แต่ยังไม่ได้ยืนยันค่ะ กรุณาเปิดอีเมลยืนยันที่ได้รับก่อน แล้วกลับมาเข้าสู่ระบบ";
+    }
+    if(msg.includes("invalid login credentials")){
+      return "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+    }
+    if(msg.includes("user already registered")||msg.includes("already registered")){
+      return "อีเมลนี้มีบัญชีแล้วค่ะ ใช้ปุ่มเข้าสู่ระบบได้เลย";
+    }
+    if(msg.includes("email address")&&msg.includes("invalid")){
+      return "อีเมลนี้ไม่ถูกต้องหรือผู้ให้บริการไม่ยอมรับ กรุณาตรวจสอบอีเมลอีกครั้ง";
+    }
+    if(msg.includes("password")&&msg.includes("weak")){
+      return "รหัสผ่านยังไม่แข็งแรงพอ กรุณาใช้รหัสผ่านที่ยาวและคาดเดายากขึ้น";
+    }
+    return context==="signup"
+      ?"สมัครบัญชีไม่สำเร็จชั่วคราว กรุณาลองใหม่อีกครั้ง"
+      :"เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูลแล้วลองใหม่";
+  }
+
+  function setAuthBusy(busy){
+    authRequestBusy=busy;
+    $("#loginBtn").disabled=busy;
+    $("#signupBtn").disabled=busy||Date.now()<signupCooldownUntil;
+  }
+
+  function startSignupCooldown(seconds=60){
+    signupCooldownUntil=Math.max(signupCooldownUntil,Date.now()+seconds*1000);
+    clearInterval(signupCooldownTimer);
+    const update=()=>{
+      const left=Math.max(0,Math.ceil((signupCooldownUntil-Date.now())/1000));
+      const btn=$("#signupBtn");
+      if(left>0){
+        btn.disabled=true;
+        btn.textContent="สร้างบัญชีอีกครั้งใน "+left+" วิ";
+      }else{
+        clearInterval(signupCooldownTimer);
+        btn.disabled=authRequestBusy;
+        btn.textContent="สร้างบัญชี";
+      }
+    };
+    update();
+    signupCooldownTimer=setInterval(update,1000);
+  }
+
   async function loginAccount(){
+    if(authRequestBusy)return;
     if(!supabaseClient){setAuthMessage("Cloud ยังไม่พร้อม ลองรีเฟรชหน้าเว็บ","error");return}
     const email=$("#authEmail").value.trim(),password=$("#authPassword").value;
     if(!email||!password){setAuthMessage("กรอกอีเมลและรหัสผ่านก่อนนะ","error");return}
+    setAuthBusy(true);
     setAuthMessage("กำลังเข้าสู่ระบบ…");
-    const {error}=await supabaseClient.auth.signInWithPassword({email,password});
-    if(error){setAuthMessage(error.message,"error");return}
-    setAuthMessage("เข้าสู่ระบบสำเร็จ","ok");
+    try{
+      const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+      if(error){setAuthMessage(authErrorMessage(error,"login"),"error");return}
+      setAuthMessage("เข้าสู่ระบบสำเร็จ ✓","ok");
+    }finally{
+      setAuthBusy(false);
+    }
   }
 
   async function signupAccount(){
+    if(authRequestBusy)return;
+    if(Date.now()<signupCooldownUntil){
+      const left=Math.ceil((signupCooldownUntil-Date.now())/1000);
+      setAuthMessage("กรุณารอ "+left+" วินาทีก่อนส่งคำขอสมัครอีกครั้ง","error");
+      return;
+    }
     if(!supabaseClient){setAuthMessage("Cloud ยังไม่พร้อม ลองรีเฟรชหน้าเว็บ","error");return}
     const email=$("#authEmail").value.trim(),password=$("#authPassword").value;
     if(!email||password.length<6){setAuthMessage("กรอกอีเมล และรหัสผ่านอย่างน้อย 6 ตัวอักษร","error");return}
-    setAuthMessage("กำลังสร้างบัญชี…");
-    const {data,error}=await supabaseClient.auth.signUp({email,password});
-    if(error){setAuthMessage(error.message,"error");return}
-    if(data.session)setAuthMessage("สร้างบัญชีและเข้าสู่ระบบแล้ว","ok");
-    else setAuthMessage("สร้างบัญชีแล้ว · เช็กอีเมลเพื่อยืนยัน จากนั้นกลับมาเข้าสู่ระบบ","ok");
+    setAuthBusy(true);
+    startSignupCooldown(60);
+    setAuthMessage("กำลังสร้างบัญชี… กรุณากดเพียงครั้งเดียว");
+    try{
+      const redirectTo=window.location.origin+window.location.pathname;
+      const {data,error}=await supabaseClient.auth.signUp({
+        email,password,
+        options:{emailRedirectTo:redirectTo}
+      });
+      if(error){
+        setAuthMessage(authErrorMessage(error,"signup"),"error");
+        return;
+      }
+      if(data.session){
+        setAuthMessage("สร้างบัญชีและเข้าสู่ระบบแล้ว ✓","ok");
+      }else{
+        setAuthMessage("ส่งอีเมลยืนยันแล้ว ✓ กรุณาเช็ก Inbox/Spam แล้วกดลิงก์ยืนยันก่อนเข้าสู่ระบบ อย่ากดสร้างบัญชีซ้ำ","ok");
+      }
+    }finally{
+      setAuthBusy(false);
+    }
   }
 
   async function logoutAccount(){
