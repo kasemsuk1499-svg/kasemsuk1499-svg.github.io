@@ -252,3 +252,50 @@ button,input,select{font:inherit}button{color:inherit}
   .visitor-stands{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.visitor-stand{min-height:190px}
   .social-base-card{max-height:94dvh}
 }
+
+/* Full Auto + Pack Storage + Auto Grade */
+.full-auto-btn.on{
+  border-color:#63e6ff;
+  color:#8df1ff;
+  box-shadow:0 0 22px rgba(99,230,255,.14);
+}
+.roll-row{grid-auto-flow:row}
+.pack-vault{
+  margin-top:14px;padding:16px;border:1px solid var(--border);
+  border-radius:16px;background:#0c0e14;text-align:left
+}
+.pack-vault-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.stored-packs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stored-pack-row{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px;border:1px solid var(--border);border-left:3px solid var(--tier);
+  border-radius:12px;background:#11141d
+}
+.stored-pack-main{min-width:0}
+.stored-pack-main strong{display:block;font-size:12px;color:var(--tier)}
+.stored-pack-main span{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+.stored-pack-row button{
+  border:1px solid #343a4d;background:#191d29;border-radius:9px;
+  padding:7px 9px;cursor:pointer;font-size:10px;white-space:nowrap
+}
+.grade-auto-card{width:min(460px,96vw)}
+.grade-auto-info{
+  margin:12px 0;padding:12px;border:1px solid var(--border);
+  border-radius:14px;background:#0c0e14
+}
+.grade-auto-info strong{display:block;font-size:15px}
+.grade-auto-info span{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.grade-target-field{display:grid;gap:7px;margin:12px 0}
+.grade-target-field>span{font-size:11px;color:var(--muted);font-weight:800}
+.grade-target-field select{width:100%;min-height:48px}
+.grade-auto-card>.primary,.grade-auto-card>.secondary{width:100%;margin-top:8px}
+.grade-running{
+  color:#8df1ff!important;border-color:#63e6ff!important;
+  box-shadow:0 0 18px rgba(99,230,255,.12)
+}
+@media (max-width:700px){
+  .roll-row{grid-template-columns:1fr 1fr}
+  .roll-row .full-auto-btn{grid-column:1/-1}
+  .stored-packs{grid-template-columns:1fr}
+  .pack-vault{padding:12px}
+}
