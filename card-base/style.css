@@ -299,3 +299,19 @@ button,input,select{font:inherit}button{color:inherit}
   .stored-packs{grid-template-columns:1fr}
   .pack-vault{padding:12px}
 }
+
+/* Username auth */
+.recovery-code-box{
+  margin-top:12px;padding:12px;border:1px solid #3a5f52;border-radius:14px;
+  background:#0d1714
+}
+.recovery-code-box span,.recovery-code-box small{display:block;color:var(--muted);font-size:10px;line-height:1.5}
+.recovery-code-box strong{
+  display:block;margin:8px 0;font-size:17px;letter-spacing:.08em;
+  color:#86f0bb;word-break:break-all
+}
+.recover-panel{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+.recover-panel summary{cursor:pointer;color:#c9cedd;font-size:12px}
+.recover-fields{margin-top:12px}
+.recover-panel>.secondary{width:100%}
+.auth-fields small{font-size:9px;color:var(--muted);font-weight:500}
