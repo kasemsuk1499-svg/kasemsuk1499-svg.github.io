@@ -7,7 +7,7 @@
   const ROLL_MS = 3500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
-  const CLOUD_TABLE = "player_progress";
+  const CLOUD_TABLE = "card_base_saves";
 
   const TIERS = [
     {name:"Common",color:"#9aa1ad",multi:1},
