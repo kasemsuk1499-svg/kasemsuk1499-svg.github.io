@@ -44,16 +44,25 @@
     "Rookie Collector","Card Scout","Pack Seeker","Card Hunter","Vault Keeper",
     "Elite Collector","Card Warden","Treasure Keeper","Renowned Collector","Hall Master",
     "Card Baron","Vault Lord","Collection Master","Grand Collector","Card Duke",
-    "Legend Keeper","Collector King","Card Emperor","Legend Sovereign","Grand Sovereign"
+    "Legend Keeper","Collector King","Card Emperor","Legend Sovereign","Grand Sovereign",
+    "Astral Collector","Relic Monarch","Star Vault Lord","Celestial Warden","Mythic Overlord",
+    "Divine Curator","Arcane Sovereign","Eternal Keeper","Cosmic Baron","Galaxy Emperor",
+    "Nebula Sovereign","Infinite Collector","Fate Archivist","Void Monarch","Omni Warden",
+    "Supreme Curator","Transcendent King","Eternal Emperor","Apex Sovereign","Absolute Collector"
   ];
   const TITLE_FX = [
     ["#aab2c0","#e8edf5"],["#6ee7a8","#c7ffe1"],["#58c7ff","#c9f2ff"],["#6688ff","#d2dbff"],
     ["#a979ff","#eadcff"],["#d66cff","#f5d7ff"],["#ff72bd","#ffd7ee"],["#ff8e68","#ffe0d5"],
     ["#ffc857","#fff1bd"],["#ff675f","#ffd29e"],["#54e0c1","#ffe287"],["#8b78ff","#ff9ee9"],
     ["#67d8ff","#ffe99b"],["#ff5578","#ffd7e0"],["#d26cff","#70efff"],["#83a8ff","#ffffff"],
-    ["#48f2ff","#a478ff"],["#ffd45a","#ff665f"],["#ff63e6","#55f5ff"],["#fff3a8","#ffffff"]
+    ["#48f2ff","#a478ff"],["#ffd45a","#ff665f"],["#ff63e6","#55f5ff"],["#fff3a8","#ffffff"],
+    ["#70f6ff","#9f7bff"],["#ff8cd9","#ffd56a"],["#75a7ff","#ecfbff"],["#73fff2","#fff0a5"],
+    ["#ff6dba","#a778ff"],["#fff17e","#70ecff"],["#bb7cff","#ff77cf"],["#ffffff","#69f7e6"],
+    ["#ffae66","#ff6fcb"],["#75d7ff","#ffe278"],["#9a86ff","#65f5ff"],["#e7fbff","#ff83ea"],
+    ["#ffd56f","#89f4ff"],["#8c79ff","#ff597c"],["#65fff0","#d18cff"],["#fff4a5","#ff8dd8"],
+    ["#81f5ff","#ffffff"],["#ffe06b","#ff6d6d"],["#ff6ff0","#6ffaff"],["#ffffff","#ffe47a"]
   ];
-  const STANDS = [10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30];
+  const STANDS = [10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50];
 
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
@@ -193,8 +202,11 @@
   function imageFor(id){return "../assets/cards/"+id+".png"}
   function baseIncomeMultiplier(level=state.baseLevel){return 1+(level-1)*0.25}
   function economyScale(level=state.baseLevel){return Math.pow(5,Math.max(0,level-1))}
-  function luckValue(level=state.baseLevel){return 1+(level-1)*0.145}
-  function standLimit(level=state.baseLevel){return STANDS[level-1]||30}
+  function luckValue(level=state.baseLevel){
+    const x=Math.max(0,level-1);
+    return 1+(0.045*x)+(0.0035*Math.pow(x,1.28));
+  }
+  function standLimit(level=state.baseLevel){return STANDS[Math.min(39,Math.max(0,level-1))]||50}
   function charBaseIncome(id){return 80+((id*7919+113)%921)}
   function wealthLevel(value){
     if(!Number.isFinite(value)||value<=0)return 0;
@@ -203,10 +215,10 @@
   function wealthClass(value){return "wealth-value wealth-"+wealthLevel(value)}
   function rankBand(level){return Math.min(5,Math.floor((Math.max(1,level)-1)/4))}
   function rankFxStyle(level){
-    const lv=Math.max(1,Math.min(20,Number(level)||1)),fx=TITLE_FX[lv-1];
-    return "--rank:"+fx[0]+";--rank2:"+fx[1]+";--rank-glow:"+(10+lv*1.6)+"px;--rank-speed:"+Math.max(2.4,6.4-lv*.18)+"s";
+    const lv=Math.max(1,Math.min(40,Number(level)||1)),fx=TITLE_FX[lv-1];
+    return "--rank:"+fx[0]+";--rank2:"+fx[1]+";--rank-glow:"+(10+lv*1.25)+"px;--rank-speed:"+Math.max(1.9,6.4-lv*.11)+"s";
   }
-  function rankFxClass(level){return "rank-fx rank-level-"+Math.max(1,Math.min(20,Number(level)||1))+" rank-band-"+rankBand(level)}
+  function rankFxClass(level){return "rank-fx rank-level-"+Math.max(1,Math.min(40,Number(level)||1))+" rank-band-"+rankBand(level)}
   function tierFxClass(tier){return "tier-fx tier-"+Math.max(0,Math.min(9,Number(tier)||0))}
   function gradeFxClass(grade){return "grade-fx grade-"+Math.max(0,Math.min(9,Number(grade)||0))}
 
@@ -241,8 +253,10 @@
 
   function upgradeCost(card){
     const income=cardIntrinsicIncome(card);
-    const seconds=6+Math.min(24,card.level*0.12);
-    return roundUpNice(income*seconds*economyScale());
+    const level=Math.max(1,Number(card.level)||1);
+    // Card Level ต้องเป็น long-term sink: เริ่มแพงขึ้น ~6x และโตเร็วกว่ารายได้ของการ์ด
+    const seconds=40*Math.pow(1.05,level-1);
+    return roundUpNice(Math.min(1e300,income*seconds*economyScale()));
   }
 
   function rerollCost(card){
@@ -261,13 +275,17 @@
     return Math.ceil(value/step)*step;
   }
   function maxTierForLevel(level=state.baseLevel){
-    return Math.min(10,Math.max(3,level+2));
+    const lv=Math.max(1,Number(level)||1);
+    const unlockAt=[1,1,1,3,6,10,15,21,28,36];
+    let count=0;
+    for(const need of unlockAt)if(lv>=need)count++;
+    return Math.max(3,Math.min(10,count));
   }
   function tierOdds(level=state.baseLevel){
     const maxTier=maxTierForLevel(level);
     const luck=luckValue(level);
-    // Rebirth ทุกครั้งเพิ่มโอกาส Tier สูงขึ้น ส่วน Lv.2–8 จะปลด Tier ใหม่ทีละขั้น
-    const ratio=Math.min(0.62,0.24+0.124*Math.max(0,luck-1));
+    // ลด power creep: Tier สูงยังมีโอกาสตั้งแต่ปลด แต่ต้องไต่ Luck หลาย Rebirth จึงเห็นผลชัด
+    const ratio=Math.min(0.39,0.23+0.075*Math.max(0,luck-1));
     const weights=TIERS.map((_,i)=>i<maxTier?Math.pow(ratio,i):0);
     const sum=weights.reduce((a,b)=>a+b,0);
     return weights.map(w=>sum?w/sum:0);
@@ -290,6 +308,17 @@
     return odds.reduce((sum,p,i)=>sum+p*TIERS[i].multi,0);
   }
 
+  function rebirthExpectedTierMultiplier(level){
+    // Freeze ราคา Rebirth ตาม balance ก่อนปรับ Luck/Tier รอบนี้
+    const lv=Math.max(1,Number(level)||1);
+    const legacyMax=Math.min(10,Math.max(3,lv+2));
+    const legacyLuck=1+(lv-1)*0.145;
+    const legacyRatio=Math.min(0.62,0.24+0.124*Math.max(0,legacyLuck-1));
+    const weights=TIERS.map((_,i)=>i<legacyMax?Math.pow(legacyRatio,i):0);
+    const sum=weights.reduce((a,b)=>a+b,0);
+    return weights.reduce((acc,w,i)=>acc+(sum?w/sum:0)*TIERS[i].multi,0);
+  }
+
   function rebirthTargetSeconds(level=state.baseLevel){
     // เงินเป็น gate หลัก: ต้นเกมยังเดินได้ แต่ปลายเกมต้องสะสมจริงและไม่ตันเร็ว
     const x=Math.max(0,level-1);
@@ -304,7 +333,7 @@
     const optimizationFactor=1+(0.10*x)+(0.018*x*x);
     const expectedCardIncome=
       avgCharacterIncome*
-      expectedTierMultiplier(level)*
+      rebirthExpectedTierMultiplier(level)*
       Math.pow(1.04,assumedCardLevel-1)*
       baseIncomeMultiplier(level);
     const expectedBaseIncome=expectedCardIncome*standLimit(level);
@@ -946,18 +975,18 @@
   }
 
   function renderRebirth(){
-    if(state.baseLevel>=20){
-      $("#rebirthHeadline").textContent="Lv.20 · MAX";
+    if(state.baseLevel>=40){
+      $("#rebirthHeadline").textContent="Lv.40 · MAX";
       $("#rebirthMoney").textContent="—";
       $("#rebirthRule").textContent="ถึงระดับสูงสุดของ V1 แล้ว";
       $("#rebirthTierGain").textContent="Eternal · โอกาสสูงสุดของ V1";
       const pace=$("#rebirthPace");if(pace)pace.textContent="—";
       $("#rebirthBtn").disabled=true;
       $("#nextTitle").textContent="MAX";
-      $("#nextStands").textContent="30";
-      $("#nextIncome").textContent="×"+baseIncomeMultiplier(20).toFixed(2);
-      $("#nextLuck").textContent="×"+luckValue(20).toFixed(2);
-      $("#nextTier").textContent=TIERS[maxTierForLevel(20)-1].name;
+      $("#nextStands").textContent="50";
+      $("#nextIncome").textContent="×"+baseIncomeMultiplier(40).toFixed(2);
+      $("#nextLuck").textContent="×"+luckValue(40).toFixed(2);
+      $("#nextTier").textContent=TIERS[maxTierForLevel(40)-1].name;
       return;
     }
     const next=state.baseLevel+1,cost=rebirthCost();
@@ -1359,7 +1388,7 @@
   }
 
   function doRebirth(){
-    if(state.baseLevel>=20)return;
+    if(state.baseLevel>=40)return;
     const cost=rebirthCost();
     if(state.money<cost){toast("เงินยังไม่พอสำหรับ Rebirth");return}
     const oldMax=maxTierForLevel(state.baseLevel);
