@@ -13,6 +13,8 @@
   const MUTATION_EVENT_SESSION_KEY = "card-base-mutation-event-session-v1";
   const GRADE_ROLL_MS = 450;
   const ID_PACK_AUTO_MS = 1200;
+  const ROTATING_SHOP_RESTOCK_MS = 10*60*1000;
+  const ROTATING_SHOP_SLOTS = 5;
 
   const TIERS = [
     {name:"Common",color:"#9aa1ad",multi:1},
@@ -84,6 +86,51 @@
     81: {name:"Frieren pack v1", image:"./assets/packs/90.png", priceSeconds:null}
   };
 
+  const ROTATING_PACK_ARCHETYPES = [
+    {
+      key:"rare-bloom",name:"Rare Bloom",label:"RATE UP",minLevel:1,weight:30,featuredTier:2,
+      stockMin:4,stockMax:7,priceSeconds:18,outRate:.020,
+      rates:{1:15,2:55,3:24,4:6},
+      outPool:{5:75,6:20,7:5}
+    },
+    {
+      key:"epic-mirage",name:"Epic Mirage",label:"RATE UP",minLevel:3,weight:26,featuredTier:3,
+      stockMin:3,stockMax:5,priceSeconds:30,outRate:.025,
+      rates:{2:18,3:56,4:20,5:6},
+      outPool:{6:72,7:23,8:5}
+    },
+    {
+      key:"legendary-crown",name:"Legendary Crown",label:"LIMITED",minLevel:6,weight:20,featuredTier:4,
+      stockMin:2,stockMax:4,priceSeconds:55,outRate:.020,
+      rates:{3:22,4:58,5:15,6:5},
+      outPool:{7:70,8:25,9:5}
+    },
+    {
+      key:"mythic-rift",name:"Mythic Rift",label:"LIMITED",minLevel:10,weight:13,featuredTier:5,
+      stockMin:2,stockMax:3,priceSeconds:90,outRate:.018,
+      rates:{4:24,5:56,6:16,7:4},
+      outPool:{8:82,9:18}
+    },
+    {
+      key:"divine-vault",name:"Divine Vault",label:"PREMIUM",minLevel:15,weight:7,featuredTier:6,
+      stockMin:1,stockMax:2,priceSeconds:150,outRate:.015,
+      rates:{5:28,6:55,7:14,8:3},
+      outPool:{9:100}
+    },
+    {
+      key:"celestial-gate",name:"Celestial Gate",label:"PREMIUM",minLevel:21,weight:3,featuredTier:7,
+      stockMin:1,stockMax:1,priceSeconds:230,outRate:.012,
+      rates:{6:32,7:55,8:12,9:1},
+      outPool:{9:100}
+    },
+    {
+      key:"jackpot-echo",name:"Jackpot Echo",label:"JACKPOT",minLevel:10,weight:1,featuredTier:5,
+      stockMin:1,stockMax:1,priceSeconds:320,outRate:.050,
+      rates:{4:35,5:35,6:20,7:10},
+      outPool:{8:70,9:30}
+    }
+  ];
+
   const TITLES = [
     "Rookie Collector","Card Scout","Pack Seeker","Card Hunter","Vault Keeper",
     "Elite Collector","Card Warden","Treasure Keeper","Renowned Collector","Hall Master",
@@ -115,7 +162,8 @@
     money:0, baseLevel:1, cards:[], placed:[],
     currentPack:null, rollingUntil:0, lastTick:Date.now(), uidCounter:1,
     autoTargets:[], autoRolling:false, fullAuto:false, targetFound:false,
-    storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{}
+    storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{},
+    rotatingShop:{rotationId:null,bought:{}}
   });
 
   let state = load();
@@ -136,6 +184,7 @@
   let onlineProfile = null;
   let onlineHeartbeatTimer = 0;
   let mutationEventTimer = 0;
+  let rotatingShopTimer = 0;
   let mutationEventBusy = false;
   let mutationEventClockOffset = 0;
   let mutationEventStatus = null;
@@ -250,6 +299,13 @@
         mutation:Number.isInteger(Number(c.mutation))&&Number(c.mutation)>=0&&Number(c.mutation)<MUTATIONS.length?Number(c.mutation):0
       }));
     s.cardIndex=normalizeCardIndex(s.cardIndex);
+    const rawRotating=s.rotatingShop&&typeof s.rotatingShop==="object"?s.rotatingShop:{};
+    s.rotatingShop={
+      rotationId:Number.isFinite(Number(rawRotating.rotationId))?Number(rawRotating.rotationId):null,
+      bought:rawRotating.bought&&typeof rawRotating.bought==="object"&&!Array.isArray(rawRotating.bought)
+        ? Object.fromEntries(Object.entries(rawRotating.bought).map(([k,v])=>[String(k),Math.max(0,Math.floor(Number(v)||0))]))
+        : {}
+    };
     syncCardIndex(s);
     s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
     s.storedPacks=(Array.isArray(s.storedPacks)?s.storedPacks:[]).filter(p=>p&&Number.isInteger(p.tier)&&p.tier>=0&&p.tier<10);
@@ -328,7 +384,7 @@
     if(Number(result.trade_receipts)>0&&result.state){
       state=hydrateState(result.state);
       localStorage.setItem(SAVE_KEY,JSON.stringify(state));
-      renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
+      renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderRotatingPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
       toast("Trade สำเร็จ · คลังการ์ดอัปเดตแล้ว ✨",true);
       setTimeout(()=>refreshTrades(true),0);
     }
@@ -724,6 +780,214 @@
     toast("เปิด Auto · "+range.name+" 🔁");
     renderIdPackShop();
     processIdPackAuto();
+  }
+
+  function rotatingShopRotationId(now=Date.now()){
+    return Math.floor(now/ROTATING_SHOP_RESTOCK_MS);
+  }
+
+  function rotatingShopRemaining(now=Date.now()){
+    const elapsed=now%ROTATING_SHOP_RESTOCK_MS;
+    return Math.max(0,ROTATING_SHOP_RESTOCK_MS-elapsed);
+  }
+
+  function seededRandom(seed){
+    let x=(Number(seed)||1)|0;
+    return ()=>{
+      x=(x+0x6D2B79F5)|0;
+      let t=x;
+      t=Math.imul(t^(t>>>15),t|1);
+      t^=t+Math.imul(t^(t>>>7),t|61);
+      return ((t^(t>>>14))>>>0)/4294967296;
+    };
+  }
+
+  function weightedPickObject(table,rng=Math.random){
+    const entries=Object.entries(table||{}).filter(([,w])=>Number(w)>0);
+    if(!entries.length)return 0;
+    const total=entries.reduce((s,[,w])=>s+Number(w),0);
+    let roll=rng()*total;
+    for(const [key,w] of entries){
+      roll-=Number(w);
+      if(roll<=0)return Number(key);
+    }
+    return Number(entries[entries.length-1][0]);
+  }
+
+  function pickWeightedArchetype(pool,rng){
+    const total=pool.reduce((s,a)=>s+a.weight,0);
+    let roll=rng()*total;
+    for(const a of pool){
+      roll-=a.weight;
+      if(roll<=0)return a;
+    }
+    return pool[pool.length-1];
+  }
+
+  function ensureRotatingShopState(){
+    const id=rotatingShopRotationId();
+    if(!state.rotatingShop||typeof state.rotatingShop!=="object")state.rotatingShop={rotationId:id,bought:{}};
+    if(Number(state.rotatingShop.rotationId)!==id){
+      state.rotatingShop={rotationId:id,bought:{}};
+      localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+      scheduleCloudSave();
+      return true;
+    }
+    if(!state.rotatingShop.bought||typeof state.rotatingShop.bought!=="object")state.rotatingShop.bought={};
+    return false;
+  }
+
+  function rotatingShopOffers(rotationId=rotatingShopRotationId()){
+    const rng=seededRandom(rotationId^0x51F15EED);
+    const themes=idPackRanges();
+    const themePool=[...themes];
+    const eligible=ROTATING_PACK_ARCHETYPES.filter(a=>state.baseLevel>=a.minLevel);
+    const archPool=[...eligible];
+    const offers=[];
+    for(let slot=0;slot<ROTATING_SHOP_SLOTS;slot++){
+      if(!themePool.length)themePool.push(...themes);
+      const themeIndex=Math.floor(rng()*themePool.length);
+      const theme=themePool.splice(themeIndex,1)[0]||themes[slot%themes.length];
+
+      let archetype;
+      if(archPool.length){
+        archetype=pickWeightedArchetype(archPool,rng);
+        const idx=archPool.indexOf(archetype);
+        if(idx>=0)archPool.splice(idx,1);
+      }else{
+        archetype=pickWeightedArchetype(eligible,rng);
+      }
+
+      const stock=archetype.stockMin+Math.floor(rng()*(archetype.stockMax-archetype.stockMin+1));
+      offers.push({
+        id:rotationId+"-"+slot,
+        slot,rotationId,
+        themeIndex:theme.index,start:theme.start,end:theme.end,
+        themeName:theme.name,image:theme.image,
+        archetypeKey:archetype.key,name:archetype.name,label:archetype.label,
+        featuredTier:archetype.featuredTier,
+        stock,priceSeconds:archetype.priceSeconds,
+        outRate:archetype.outRate,
+        rates:archetype.rates,outPool:archetype.outPool
+      });
+    }
+    return offers;
+  }
+
+  function rotatingPackCost(offer){
+    return roundUpNice(modeledBaseIncomeForShop()*offer.priceSeconds);
+  }
+
+  function rotatingPackBought(offer){
+    return Math.max(0,Math.floor(Number(state.rotatingShop?.bought?.[offer.id])||0));
+  }
+
+  function rotatingPackStockLeft(offer){
+    return Math.max(0,offer.stock-rotatingPackBought(offer));
+  }
+
+  function formatShopTimer(ms){
+    const total=Math.max(0,Math.ceil(ms/1000));
+    const m=Math.floor(total/60),s=total%60;
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+
+  function rateRowsHtml(offer){
+    const rows=Object.entries(offer.rates)
+      .sort((a,b)=>Number(a[0])-Number(b[0]))
+      .map(([tier,w])=>{
+        const t=TIERS[Number(tier)];
+        const total=Object.values(offer.rates).reduce((a,b)=>a+Number(b),0);
+        const pct=(1-offer.outRate)*(Number(w)/total)*100;
+        return '<div class="rot-rate"><span style="--rate-color:'+t.color+'">'+t.name+'</span><b>'+pct.toFixed(pct<10?1:0)+'%</b></div>';
+      }).join("");
+    return rows+
+      '<div class="rot-rate out-rate"><span>OUT OF RATE</span><b>'+(offer.outRate*100).toFixed(offer.outRate*100<2?1:0)+'%</b></div>';
+  }
+
+  function renderRotatingPackShop(){
+    const wrap=$("#rotatingPackGrid");
+    if(!wrap)return;
+    ensureRotatingShopState();
+    const offers=rotatingShopOffers();
+    wrap.innerHTML=offers.map(offer=>{
+      const featured=TIERS[offer.featuredTier];
+      const left=rotatingPackStockLeft(offer);
+      const cost=rotatingPackCost(offer);
+      const cover=offer.image
+        ? '<div class="rot-pack-cover"><img src="'+escapeHtml(offer.image)+'" alt="'+escapeHtml(offer.themeName)+'"></div>'
+        : '<div class="rot-pack-cover rot-pack-fallback"><span>'+escapeHtml(offer.themeName)+'</span></div>';
+      return '<article class="rot-pack tier-'+offer.featuredTier+'" style="--pack-tier:'+featured.color+'">'+
+        '<div class="rot-pack-ribbon">'+escapeHtml(offer.label)+'</div>'+
+        cover+
+        '<div class="rot-pack-body">'+
+          '<div class="rot-pack-kicker">'+escapeHtml(offer.themeName)+' · '+offer.start+'–'+offer.end+'</div>'+
+          '<div class="rot-pack-title">'+escapeHtml(offer.name)+'</div>'+
+          '<div class="rot-pack-feature"><span>FEATURED</span><strong style="color:'+featured.color+'">'+featured.name+'</strong></div>'+
+          '<div class="rot-pack-rates">'+rateRowsHtml(offer)+'</div>'+
+          '<div class="rot-pack-footer">'+
+            '<div class="rot-stock"><span>STOCK</span><strong>'+left+'/'+offer.stock+'</strong></div>'+
+            '<button type="button" data-buy-rot-pack="'+offer.id+'" '+(left<=0?'disabled':'')+'>'+
+              (left<=0?'SOLD OUT':'ซื้อ & เปิด · '+fmt(cost))+
+            '</button>'+
+          '</div>'+
+        '</div>'+
+      '</article>';
+    }).join("");
+    wrap.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{
+      const cover=img.closest(".rot-pack-cover");
+      if(cover){cover.classList.add("rot-pack-fallback");cover.innerHTML="<span>PREMIUM PACK</span>"}
+    },{once:true}));
+    renderRotatingShopClock();
+  }
+
+  function renderRotatingShopClock(){
+    const timer=$("#rotatingRestockTimer"),cycle=$("#rotatingShopCycle");
+    if(!timer)return;
+    const changed=ensureRotatingShopState();
+    if(changed){
+      renderRotatingPackShop();
+      return;
+    }
+    const id=rotatingShopRotationId();
+    timer.textContent=formatShopTimer(rotatingShopRemaining());
+    if(cycle)cycle.textContent="Rotation #"+String(id).slice(-6);
+  }
+
+  function buyRotatingPack(offerId){
+    ensureRotatingShopState();
+    const offer=rotatingShopOffers().find(o=>o.id===String(offerId));
+    if(!offer){
+      toast("ร้านรีสต็อกแล้ว · ลองเลือกแพ็กใหม่");
+      renderRotatingPackShop();
+      return;
+    }
+    const left=rotatingPackStockLeft(offer);
+    if(left<=0){
+      toast("แพ็กนี้ SOLD OUT แล้ว");
+      return;
+    }
+    const cost=rotatingPackCost(offer);
+    if(state.money<cost){
+      toast("เงินไม่พอ · "+offer.name+" ใช้ "+fmt(cost));
+      return;
+    }
+
+    state.money-=cost;
+    const outOfRate=Math.random()<offer.outRate;
+    const tier=outOfRate
+      ? weightedPickObject(offer.outPool)
+      : weightedPickObject(offer.rates);
+    const card=createCardFromTier(tier,offer.start,offer.end);
+    state.rotatingShop.bought[offer.id]=rotatingPackBought(offer)+1;
+
+    if(outOfRate){
+      toast("OUT OF RATE!! "+TIERS[tier].name+" · "+padId(card.charId)+" 🌌",true);
+    }else{
+      toast("เปิด "+offer.name+" · "+TIERS[tier].name+" "+padId(card.charId)+" ✨",tier>=offer.featuredTier);
+    }
+    showReveal(card);
+    renderAll();
   }
 
   function rebirthExpectedTierMultiplier(level){
@@ -2367,6 +2631,10 @@
       const buy=e.target.closest("[data-buy-id-pack]");
       if(buy)buyIdPack(Number(buy.dataset.buyIdPack));
     });
+    $("#rotatingPackGrid").addEventListener("click",e=>{
+      const buy=e.target.closest("[data-buy-rot-pack]");
+      if(buy)buyRotatingPack(buy.dataset.buyRotPack);
+    });
     $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
     $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
     $("#gradeTargetList").addEventListener("change",updateGradeTargetChance);
@@ -2419,6 +2687,7 @@
     setInterval(economyTick,1000);
     onlineHeartbeatTimer=setInterval(()=>{if(gameToken)heartbeatOnline()},30000);
     mutationEventTimer=setInterval(renderMutationEvent,1000);
+    rotatingShopTimer=setInterval(renderRotatingShopClock,1000);
     const catchUpActiveSystems=()=>{
       accrueIncomeToNow();
       if(state.rollingUntil)processRollEngine();
