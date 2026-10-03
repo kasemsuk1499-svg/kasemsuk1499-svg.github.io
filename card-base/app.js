@@ -67,11 +67,11 @@
   // priceSeconds: ไม่ใส่ = ใช้ราคามาตรฐานตามลำดับแพ็ก
   // =========================================================
   const ID_PACK_CUSTOM = {
-    1:  {name:"WUWA pack v1", image:"./assets/cards/10.png", priceSeconds:null},
-    11: {name:"ARISA pack v1", image:"./assets/cards/12.png", priceSeconds:null},
-    21: {name:"NARUTO pack v1", image:"./assets/cards/30.png", priceSeconds:null},
-    31: {name:"FATE pack v1", image:"./assets/cards/40.png", priceSeconds:null},
-    41: {name:"VG pack v1", image:"./assets/cards/50.png", priceSeconds:null}
+    1:  {name:"WUWA pack v1", image:"./assets/packs/8.png", priceSeconds:null},
+    11: {name:"ARISA pack v1", image:"./assets/cards/16.png", priceSeconds:null},
+    21: {name:"NARUTO pack v1", image:"./assets/cards/27.png", priceSeconds:null},
+    31: {name:"FATE pack v1", image:"./assets/cards/31.png", priceSeconds:null},
+    41: {name:"VG pack v1", image:"./assets/cards/41.png", priceSeconds:null}
   };
 
   const TITLES = [
