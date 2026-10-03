@@ -36,11 +36,16 @@
     {name:"SS",color:"#ff8d79",multi:2.55},
     {name:"SS+",color:"#ffd166",multi:3.10},
     {name:"SSS",color:"#82fff3",multi:3.80},
-    {name:"SSS★",color:"#fff2a9",multi:5.00}
+    {name:"SSS★",color:"#fff2a9",multi:5.00},
+    {name:"EX",color:"#8ff6ff",multi:6.50},
+    {name:"EX+",color:"#d798ff",multi:8.50},
+    {name:"EX★",color:"#ffffff",multi:12.00}
   ];
 
-  const GRADE_REROLL_COSTS = [1000,2000,3000,5500,10000,18000,32000,60000,110000,200000];
-  const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02];
+  // Grade reroll is a major money sink. Base Level scaling is applied on top.
+  const GRADE_REROLL_COSTS = [5000,10000,20000,40000,80000,160000,320000,640000,1280000,2560000];
+  // Ultra-end grades are chase outcomes. Luck intentionally does not affect Grade.
+  const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02,.01,.0025,.0005];
 
   const MUTATIONS = [
     {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:96.00},
@@ -379,7 +384,7 @@
   }
   function rankFxClass(level){return "rank-fx rank-level-"+Math.max(1,Math.min(40,Number(level)||1))+" rank-band-"+rankBand(level)}
   function tierFxClass(tier){return "tier-fx tier-"+Math.max(0,Math.min(9,Number(tier)||0))}
-  function gradeFxClass(grade){return "grade-fx grade-"+Math.max(0,Math.min(9,Number(grade)||0))}
+  function gradeFxClass(grade){return "grade-fx grade-"+Math.max(0,Math.min(GRADES.length-1,Number(grade)||0))}
   function mutationFxClass(mutation){
     const m=Math.max(0,Math.min(MUTATIONS.length-1,Number(mutation)||0));
     return m?" mutation-fx mutation-"+m:"";
@@ -1165,7 +1170,7 @@
   function tradeCardVisual(card,compact=false){
     if(!card)return '<div class="social-empty">ไม่มีข้อมูลการ์ด</div>';
     const tier=Math.max(0,Math.min(9,Number(card.tier)||0));
-    const grade=Math.max(0,Math.min(9,Number(card.grade)||0));
+    const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
     const mutation=Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0));
     const t=TIERS[tier],g=GRADES[grade],m=MUTATIONS[mutation];
     return '<div class="trade-card-visual tier-shell tier-'+tier+' grade-shell-'+grade+(compact?' compact':'')+'" style="--tier:'+t.color+'">'+
@@ -1484,6 +1489,8 @@
 
   function chanceText(prob){
     const p=Math.max(0,Number(prob)||0)*100;
+    if(p<0.001)return p.toFixed(5)+"%";
+    if(p<0.01)return p.toFixed(4)+"%";
     if(p<0.1)return p.toFixed(3)+"%";
     if(p<1)return p.toFixed(2)+"%";
     return p.toFixed(1)+"%";
