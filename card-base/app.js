@@ -61,7 +61,7 @@
       const raw = localStorage.getItem(SAVE_KEY);
       if(!raw) return newState();
       const parsed = JSON.parse(raw);
-      return {...newState(), ...parsed, lastTick: Date.now()};
+      return {...newState(), ...parsed};
     }catch{
       return newState();
     }
