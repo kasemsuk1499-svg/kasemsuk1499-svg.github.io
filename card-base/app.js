@@ -240,7 +240,7 @@
     if(Number(result.trade_receipts)>0&&result.state){
       state=hydrateState(result.state);
       localStorage.setItem(SAVE_KEY,JSON.stringify(state));
-      renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderRebirth();renderRankCatalog();renderOnlineShell();
+      renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
       toast("Trade สำเร็จ · คลังการ์ดอัปเดตแล้ว ✨",true);
       setTimeout(()=>refreshTrades(true),0);
     }
