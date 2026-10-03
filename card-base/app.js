@@ -63,6 +63,10 @@
   let cloudLoading = false;
   let cloudTimer = 0;
   let activeCloudUserId = null;
+  let onlineProfile = null;
+  let onlineHeartbeatTimer = 0;
+  let onlineCache = {online:[],friendships:[],profiles:new Map(),bases:new Map()};
+  let socialProfiles = new Map();
 
   function hydrateState(parsed){
     const s={...newState(),...(parsed||{})};
@@ -113,6 +117,7 @@
       return;
     }
     updateSyncUi("online");
+    publishPublicBase();
   }
 
   function save(){
@@ -326,9 +331,13 @@
     authSession=session||null;
     renderAuth();
     if(!authSession){
-      cloudReady=false;activeCloudUserId=null;return;
+      cloudReady=false;activeCloudUserId=null;onlineProfile=null;renderOnlineShell();return;
     }
     if(previous!==authSession.user.id||!cloudReady)await loadCloudState();
+    await ensureOnlineProfile();
+    await heartbeatOnline();
+    await publishPublicBase();
+    renderOnlineShell();
   }
 
   async function initCloud(){
@@ -371,10 +380,314 @@
   async function logoutAccount(){
     if(!supabaseClient)return;
     await flushCloudSave();
+    if(authSession){
+      const oldSeen=new Date(Date.now()-5*60*1000).toISOString();
+      await supabaseClient.from("card_base_profiles").update({last_seen:oldSeen,updated_at:new Date().toISOString()}).eq("user_id",authSession.user.id);
+    }
     const {error}=await supabaseClient.auth.signOut();
     if(error){setAuthMessage(error.message,"error");return}
     authSession=null;cloudReady=false;activeCloudUserId=null;
     renderAuth();closeAuth();toast("ออกจากระบบแล้ว · เล่น Local ต่อได้");
+  }
+
+
+  function escapeHtml(value){
+    return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  }
+
+  function publicStandSnapshot(){
+    normalizeSlots();
+    return state.placed.map((uid,slot)=>{
+      const c=uid?state.cards.find(x=>x.uid===uid):null;
+      if(!c)return null;
+      return {
+        slot,
+        charId:c.charId,
+        tier:c.tier,
+        grade:c.grade,
+        level:c.level,
+        income:Math.round(cardIncome(c))
+      };
+    }).filter(Boolean);
+  }
+
+  async function publishPublicBase(){
+    if(!authSession||!supabaseClient)return;
+    const payload={
+      user_id:authSession.user.id,
+      base_level:state.baseLevel,
+      title:TITLES[state.baseLevel-1]||"Collector",
+      stands:publicStandSnapshot(),
+      updated_at:new Date().toISOString()
+    };
+    const {error}=await supabaseClient.from("card_base_public_bases").upsert(payload,{onConflict:"user_id"});
+    if(error)console.error("Public base publish failed",error);
+  }
+
+  async function ensureOnlineProfile(){
+    if(!authSession||!supabaseClient)return null;
+    const uid=authSession.user.id;
+    let {data,error}=await supabaseClient.from("card_base_profiles")
+      .select("user_id,player_code,display_name,last_seen")
+      .eq("user_id",uid).maybeSingle();
+    if(error){console.error("Profile load failed",error);return null}
+    if(!data){
+      const created=await supabaseClient.from("card_base_profiles")
+        .insert({user_id:uid})
+        .select("user_id,player_code,display_name,last_seen").single();
+      if(created.error){console.error("Profile create failed",created.error);return null}
+      data=created.data;
+    }
+    if(data.display_name==="Player"){
+      const generated="Player-"+String(data.player_code||"0000").slice(0,4);
+      const renamed=await supabaseClient.from("card_base_profiles")
+        .update({display_name:generated,updated_at:new Date().toISOString()})
+        .eq("user_id",uid)
+        .select("user_id,player_code,display_name,last_seen").single();
+      if(!renamed.error)data=renamed.data;
+    }
+    onlineProfile=data;
+    socialProfiles.set(data.user_id,data);
+    renderOnlineShell();
+    return data;
+  }
+
+  async function heartbeatOnline(){
+    if(!authSession||!supabaseClient)return;
+    if(!onlineProfile)await ensureOnlineProfile();
+    if(!onlineProfile)return;
+    const now=new Date().toISOString();
+    const {error}=await supabaseClient.from("card_base_profiles")
+      .update({last_seen:now,updated_at:now})
+      .eq("user_id",authSession.user.id);
+    if(!error)onlineProfile.last_seen=now;
+  }
+
+  function renderOnlineShell(){
+    const gate=$("#onlineGate"),content=$("#onlineContent");
+    if(!gate||!content)return;
+    const signedIn=!!authSession;
+    gate.hidden=signedIn;
+    content.hidden=!signedIn;
+    if(!signedIn)return;
+    $("#onlineBaseLevel").textContent="Lv."+state.baseLevel;
+    if(onlineProfile){
+      $("#onlineDisplayName").value=onlineProfile.display_name||"";
+      $("#onlinePlayerCode").textContent="#"+(onlineProfile.player_code||"—");
+    }
+  }
+
+  function friendshipFor(userId){
+    return onlineCache.friendships.find(f=>f.requester_id===userId||f.addressee_id===userId)||null;
+  }
+
+  function socialRow(profile,options={}){
+    if(!profile)return '<div class="social-empty">ไม่พบข้อมูลผู้เล่น</div>';
+    socialProfiles.set(profile.user_id,profile);
+    const base=onlineCache.bases.get(profile.user_id);
+    const relation=friendshipFor(profile.user_id);
+    let actions='<button data-social-action="visit" data-user="'+profile.user_id+'">ดูฐาน</button>';
+    if(options.request){
+      actions+='<button class="accept" data-social-action="accept" data-friend="'+options.request.id+'">รับเพื่อน</button>'+
+               '<button class="remove" data-social-action="remove" data-friend="'+options.request.id+'">ปฏิเสธ</button>';
+    }else if(options.friend){
+      actions+='<button class="remove" data-social-action="remove" data-friend="'+options.friend.id+'">ลบเพื่อน</button>';
+    }else if(relation){
+      const text=relation.status==="accepted"?"เพื่อนแล้ว":(relation.requester_id===authSession.user.id?"ส่งคำขอแล้ว":"มีคำขอเข้า");
+      actions+='<button disabled>'+text+'</button>';
+    }else{
+      actions+='<button data-social-action="add" data-user="'+profile.user_id+'">+ เพื่อน</button>';
+    }
+    return '<div class="player-row"><div class="player-main"><strong>'+escapeHtml(profile.display_name)+'</strong>'+
+      '<small>#'+escapeHtml(profile.player_code)+' · '+(base?'Base Lv.'+base.base_level:'ยังไม่เผยแพร่ฐาน')+'</small></div>'+
+      '<div class="player-actions">'+actions+'</div></div>';
+  }
+
+  function renderOnlineLists(){
+    if(!authSession)return;
+    const onlineEl=$("#onlinePlayersList"),requestsEl=$("#friendRequestsList"),friendsEl=$("#friendsList");
+    if(!onlineEl||!requestsEl||!friendsEl)return;
+
+    onlineEl.innerHTML=onlineCache.online.length
+      ? onlineCache.online.map(p=>socialRow(p)).join("")
+      : '<div class="social-empty">ยังไม่มีผู้เล่นอื่นออนไลน์ในตอนนี้</div>';
+
+    const uid=authSession.user.id;
+    const requests=onlineCache.friendships.filter(f=>f.status==="pending"&&f.addressee_id===uid);
+    $("#requestCount").textContent=requests.length+" รายการ";
+    requestsEl.innerHTML=requests.length
+      ? requests.map(f=>socialRow(onlineCache.profiles.get(f.requester_id),{request:f})).join("")
+      : '<div class="social-empty">ไม่มีคำขอใหม่</div>';
+
+    const friends=onlineCache.friendships.filter(f=>f.status==="accepted");
+    $("#friendCount").textContent=friends.length+" คน";
+    friendsEl.innerHTML=friends.length
+      ? friends.map(f=>{
+          const other=f.requester_id===uid?f.addressee_id:f.requester_id;
+          return socialRow(onlineCache.profiles.get(other),{friend:f});
+        }).join("")
+      : '<div class="social-empty">ยังไม่มีเพื่อน — ลองค้นหาผู้เล่นด้านบน</div>';
+  }
+
+  async function refreshOnline(){
+    renderOnlineShell();
+    if(!authSession||!supabaseClient)return;
+    await ensureOnlineProfile();
+    await heartbeatOnline();
+    await publishPublicBase();
+
+    const uid=authSession.user.id;
+    const cutoff=new Date(Date.now()-120000).toISOString();
+
+    const [onlineRes,friendsRes]=await Promise.all([
+      supabaseClient.from("card_base_profiles")
+        .select("user_id,player_code,display_name,last_seen")
+        .gte("last_seen",cutoff).neq("user_id",uid)
+        .order("last_seen",{ascending:false}).limit(20),
+      supabaseClient.from("card_base_friendships")
+        .select("id,requester_id,addressee_id,status,created_at,updated_at")
+        .or("requester_id.eq."+uid+",addressee_id.eq."+uid)
+        .order("updated_at",{ascending:false})
+    ]);
+
+    if(onlineRes.error)console.error("Online players load failed",onlineRes.error);
+    if(friendsRes.error)console.error("Friends load failed",friendsRes.error);
+
+    const online=onlineRes.data||[];
+    const friendships=friendsRes.data||[];
+    const ids=new Set(online.map(p=>p.user_id));
+    friendships.forEach(fr=>ids.add(fr.requester_id===uid?fr.addressee_id:fr.requester_id));
+
+    let profiles=[];
+    let bases=[];
+    const idList=[...ids];
+    if(idList.length){
+      const [profileRes,baseRes]=await Promise.all([
+        supabaseClient.from("card_base_profiles")
+          .select("user_id,player_code,display_name,last_seen").in("user_id",idList),
+        supabaseClient.from("card_base_public_bases")
+          .select("user_id,base_level,title,updated_at").in("user_id",idList)
+      ]);
+      if(!profileRes.error)profiles=profileRes.data||[];
+      if(!baseRes.error)bases=baseRes.data||[];
+    }
+
+    const profileMap=new Map();
+    [...online,...profiles].forEach(p=>{profileMap.set(p.user_id,p);socialProfiles.set(p.user_id,p)});
+    onlineCache={
+      online,
+      friendships,
+      profiles:profileMap,
+      bases:new Map(bases.map(b=>[b.user_id,b]))
+    };
+    renderOnlineLists();
+  }
+
+  async function saveOnlineName(){
+    if(!authSession||!supabaseClient)return;
+    const name=$("#onlineDisplayName").value.trim();
+    if(name.length<2||name.length>20){toast("ชื่อผู้เล่นต้องยาว 2–20 ตัวอักษร");return}
+    const {data,error}=await supabaseClient.from("card_base_profiles")
+      .update({display_name:name,updated_at:new Date().toISOString()})
+      .eq("user_id",authSession.user.id)
+      .select("user_id,player_code,display_name,last_seen").single();
+    if(error){toast("บันทึกชื่อไม่สำเร็จ");console.error(error);return}
+    onlineProfile=data;socialProfiles.set(data.user_id,data);toast("เปลี่ยนชื่อเป็น "+name+" แล้ว");
+    await refreshOnline();
+  }
+
+  async function searchPlayers(){
+    if(!authSession||!supabaseClient)return;
+    const q=$("#playerSearchInput").value.trim();
+    const out=$("#playerSearchResults");
+    if(!q){out.innerHTML="";return}
+    const code=q.replace(/^#/,"").toUpperCase();
+    const [nameRes,codeRes]=await Promise.all([
+      supabaseClient.from("card_base_profiles")
+        .select("user_id,player_code,display_name,last_seen")
+        .ilike("display_name","%"+q+"%").neq("user_id",authSession.user.id).limit(10),
+      supabaseClient.from("card_base_profiles")
+        .select("user_id,player_code,display_name,last_seen")
+        .eq("player_code",code).neq("user_id",authSession.user.id).limit(3)
+    ]);
+    const merged=new Map();
+    [...(nameRes.data||[]),...(codeRes.data||[])].forEach(p=>{merged.set(p.user_id,p);socialProfiles.set(p.user_id,p)});
+    const list=[...merged.values()];
+    if(list.length){
+      const br=await supabaseClient.from("card_base_public_bases").select("user_id,base_level,title,updated_at").in("user_id",list.map(p=>p.user_id));
+      (br.data||[]).forEach(b=>onlineCache.bases.set(b.user_id,b));
+    }
+    out.innerHTML=list.length?list.map(p=>socialRow(p)).join(""):'<div class="social-empty">ไม่พบผู้เล่น</div>';
+  }
+
+  async function sendFriendRequest(userId){
+    if(!authSession||!supabaseClient||userId===authSession.user.id)return;
+    const {error}=await supabaseClient.from("card_base_friendships").insert({
+      requester_id:authSession.user.id,
+      addressee_id:userId,
+      status:"pending"
+    });
+    if(error){
+      toast(error.code==="23505"?"มีคำขอหรือเป็นเพื่อนกันอยู่แล้ว":"ส่งคำขอไม่สำเร็จ");
+      console.error(error);return;
+    }
+    toast("ส่งคำขอเป็นเพื่อนแล้ว");
+    await refreshOnline();
+  }
+
+  async function acceptFriend(friendshipId){
+    const {error}=await supabaseClient.from("card_base_friendships")
+      .update({status:"accepted",updated_at:new Date().toISOString()})
+      .eq("id",friendshipId);
+    if(error){toast("รับเพื่อนไม่สำเร็จ");console.error(error);return}
+    toast("เป็นเพื่อนกันแล้ว 🎉");await refreshOnline();
+  }
+
+  async function removeFriend(friendshipId){
+    const {error}=await supabaseClient.from("card_base_friendships").delete().eq("id",friendshipId);
+    if(error){toast("ดำเนินการไม่สำเร็จ");console.error(error);return}
+    toast("อัปเดตรายชื่อเพื่อนแล้ว");await refreshOnline();
+  }
+
+  async function visitPlayerBase(userId){
+    if(!authSession||!supabaseClient)return;
+    const profile=socialProfiles.get(userId)||onlineCache.profiles.get(userId);
+    $("#socialBaseName").textContent=(profile?profile.display_name:"Player")+"'s Base";
+    $("#socialBaseMeta").textContent="กำลังโหลด…";
+    $("#socialBaseStands").innerHTML="";
+    $("#socialBaseModal").classList.add("show");
+    $("#socialBaseModal").setAttribute("aria-hidden","false");
+
+    const {data,error}=await supabaseClient.from("card_base_public_bases")
+      .select("user_id,base_level,title,stands,updated_at")
+      .eq("user_id",userId).maybeSingle();
+    if(error||!data){
+      $("#socialBaseMeta").textContent="ผู้เล่นคนนี้ยังไม่ได้เผยแพร่ฐาน";
+      $("#socialBaseStands").innerHTML='<div class="social-empty">ยังไม่มีข้อมูลฐาน</div>';
+      return;
+    }
+    $("#socialBaseMeta").textContent="Base Lv."+data.base_level+" · "+data.title;
+    const max=STANDS[data.base_level-1]||30;
+    const bySlot=new Map((Array.isArray(data.stands)?data.stands:[]).map(x=>[x.slot,x]));
+    const wrap=$("#socialBaseStands");
+    let html="";
+    for(let i=0;i<max;i++){
+      const c=bySlot.get(i);
+      if(!c){html+='<div class="visitor-stand empty"><span>แท่น '+(i+1)+'</span></div>';continue}
+      const t=TIERS[c.tier]||TIERS[0],g=GRADES[c.grade]||GRADES[0];
+      html+='<div class="visitor-stand" style="--tier:'+t.color+'"><div class="visitor-card">'+
+        '<img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div>'+
+        '<div class="stand-grade grade-'+c.grade+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
+        '<div class="visitor-meta"><b>'+padId(c.charId)+' · '+t.name+'</b><span>Lv.'+c.level+' · '+fmt(c.income||0)+'/s</span></div>'+
+        '</div></div>';
+    }
+    wrap.innerHTML=html;
+    wrap.querySelectorAll("img").forEach(img=>img.addEventListener("error",e=>e.currentTarget.style.display="none"));
+  }
+
+  function closeSocialBase(){
+    $("#socialBaseModal").classList.remove("show");
+    $("#socialBaseModal").setAttribute("aria-hidden","true");
   }
 
   function toast(msg,found=false){
@@ -528,7 +841,7 @@
   }
 
   function renderAll(){
-    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderCollection();renderRebirth();save();
+    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderCollection();renderRebirth();renderOnlineShell();save();
   }
 
   function beginRoll(){
@@ -674,7 +987,9 @@
   function bind(){
     $$(".tab").forEach(btn=>btn.addEventListener("click",()=>{
       $$(".tab").forEach(x=>x.classList.remove("active"));$$(".panel").forEach(x=>x.classList.remove("active"));
-      btn.classList.add("active");$("#panel-"+btn.dataset.tab).classList.add("active");if(btn.dataset.tab==="collection")renderCollection();
+      btn.classList.add("active");$("#panel-"+btn.dataset.tab).classList.add("active");
+      if(btn.dataset.tab==="collection")renderCollection();
+      if(btn.dataset.tab==="online")refreshOnline();
     }));
     $("#accountBtn").addEventListener("click",openAuth);
     $("#closeAuthModal").addEventListener("click",closeAuth);
@@ -683,6 +998,21 @@
     $("#signupBtn").addEventListener("click",signupAccount);
     $("#logoutBtn").addEventListener("click",logoutAccount);
     $("#authPassword").addEventListener("keydown",e=>{if(e.key==="Enter")loginAccount()});
+    $("#onlineLoginBtn").addEventListener("click",openAuth);
+    $("#refreshOnlineBtn").addEventListener("click",refreshOnline);
+    $("#saveOnlineNameBtn").addEventListener("click",saveOnlineName);
+    $("#playerSearchBtn").addEventListener("click",searchPlayers);
+    $("#playerSearchInput").addEventListener("keydown",e=>{if(e.key==="Enter")searchPlayers()});
+    $("#closeSocialBaseModal").addEventListener("click",closeSocialBase);
+    $("[data-close-social-base]").addEventListener("click",closeSocialBase);
+    document.addEventListener("click",e=>{
+      const btn=e.target.closest("[data-social-action]");if(!btn)return;
+      const action=btn.dataset.socialAction;
+      if(action==="visit")visitPlayerBase(btn.dataset.user);
+      if(action==="add")sendFriendRequest(btn.dataset.user);
+      if(action==="accept")acceptFriend(btn.dataset.friend);
+      if(action==="remove")removeFriend(btn.dataset.friend);
+    });
     $("#rollBtn").addEventListener("click",beginRoll);$("#autoBtn").addEventListener("click",toggleAuto);$("#packCard").addEventListener("click",openPack);
     $("#closeReveal").addEventListener("click",closeReveal);$("#closeStandModal").addEventListener("click",closeStand);$("[data-close-modal]").addEventListener("click",closeStand);
     $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);$("#rebirthBtn").addEventListener("click",doRebirth);
@@ -697,7 +1027,7 @@
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
     document.addEventListener("keydown",e=>{
       if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling)beginRoll();
-      if(e.key==="Escape"){closeReveal();closeStand();closeAuth()}
+      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSocialBase()}
     });
     window.addEventListener("beforeunload",save);
   }
@@ -710,7 +1040,10 @@
     if(state.rollingUntil>Date.now())tickRoll();
     else if(state.rollingUntil&&!state.currentPack){state.rollingUntil=0;state.currentPack={tier:randomTier()};renderAll()}
     setInterval(economyTick,1000);
-    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&authSession)loadCloudState()});
+    onlineHeartbeatTimer=setInterval(()=>{if(document.visibilityState==="visible"&&authSession)heartbeatOnline()},45000);
+    document.addEventListener("visibilitychange",()=>{
+      if(document.visibilityState==="visible"&&authSession){loadCloudState();heartbeatOnline()}
+    });
     initCloud();
   }
 
