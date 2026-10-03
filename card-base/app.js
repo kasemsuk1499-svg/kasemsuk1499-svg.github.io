@@ -71,7 +71,7 @@
   let cloudTimer = 0;
   let onlineProfile = null;
   let onlineHeartbeatTimer = 0;
-  let onlineCache = {online:[],requests:[],friends:[]};
+  let onlineCache = {online:[],requests:[],friends:[],leaders:[],myRank:null,totalPlayers:0};
   let socialProfiles = new Map();
   let authRequestBusy = false;
 
@@ -516,6 +516,8 @@
     content.hidden=!signedIn;
     if(!signedIn)return;
     $("#onlineBaseLevel").textContent="Lv."+state.baseLevel;
+    $("#onlineTitle").textContent=TITLES[state.baseLevel-1]||"Collector";
+    $("#onlineServerRank").textContent=onlineCache.myRank?"#"+onlineCache.myRank:"#—";
     if(onlineProfile){
       $("#onlineDisplayName").value=onlineProfile.display_name||onlineProfile.username||"";
       $("#onlinePlayerCode").textContent="#"+(onlineProfile.player_code||"—");
@@ -538,8 +540,10 @@
       actions+='<button data-social-action="add" data-user="'+accountId+'">+ เพื่อน</button>';
     }
     const baseText=profile.base_level?"Base Lv."+profile.base_level:"ยังไม่เผยแพร่ฐาน";
-    return '<div class="player-row"><div class="player-main"><strong>'+escapeHtml(profile.display_name)+'</strong>'+
-      '<small>#'+escapeHtml(profile.player_code)+' · '+baseText+'</small></div>'+
+    const rankText=profile.server_rank?'<span class="player-rank-badge">#'+profile.server_rank+'</span>':'';
+    const titleText=profile.title?'<span class="rank-title-badge">'+escapeHtml(profile.title)+'</span>':'';
+    return '<div class="player-row"><div class="player-main"><strong>'+escapeHtml(profile.display_name)+rankText+'</strong>'+
+      '<small>#'+escapeHtml(profile.player_code)+' · '+baseText+'</small>'+titleText+'</div>'+
       '<div class="player-actions">'+actions+'</div></div>';
   }
 
@@ -554,18 +558,72 @@
     friendsEl.innerHTML=onlineCache.friends.length?onlineCache.friends.map(fr=>socialRow(fr,{friend:fr})).join(""):'<div class="social-empty">ยังไม่มีเพื่อน — ลองค้นหาผู้เล่นด้านบน</div>';
   }
 
+  function leaderboardRow(profile){
+    const accountId=profile.account_id;
+    const isMe=!!gameAccount&&accountId===gameAccount.account_id;
+    socialProfiles.set(accountId,profile);
+    const rank=Number(profile.server_rank)||0;
+    const medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":"#"+rank;
+    const rowClass="leaderboard-row"+(rank<=3?" top-"+rank:"")+(isMe?" me":"");
+    let actions='<button data-social-action="visit" data-user="'+accountId+'">ดูฐาน</button>';
+    if(isMe){
+      actions='<button disabled>คุณ</button>';
+    }else if(profile.friendship_status){
+      actions+='<button disabled>'+(profile.friendship_status==="accepted"?"เพื่อนแล้ว":"มีคำขออยู่")+'</button>';
+    }else{
+      actions+='<button data-social-action="add" data-user="'+accountId+'">+ เพื่อน</button>';
+    }
+    return '<div class="'+rowClass+'">'+
+      '<div class="leaderboard-rank">'+medal+'</div>'+
+      '<div class="leaderboard-player"><strong>'+escapeHtml(profile.display_name)+'</strong>'+
+        '<small><span>#'+escapeHtml(profile.player_code)+'</span><span>Base Lv.'+profile.base_level+'</span>'+(profile.online?'<span>● Online</span>':'')+'</small>'+
+        '<span class="rank-title-badge">'+escapeHtml(profile.title||"Rookie Collector")+'</span>'+
+      '</div>'+
+      '<div class="leaderboard-stats"><b>'+fmt(Number(profile.base_income)||0)+'/s</b><span>รายได้ฐาน</span></div>'+
+      '<div class="leaderboard-actions">'+actions+'</div>'+
+    '</div>';
+  }
+
+  function renderLeaderboard(){
+    const wrap=$("#serverLeaderboard");
+    if(!wrap)return;
+    $("#leaderboardTotal").textContent=String(onlineCache.totalPlayers||0);
+    $("#leaderboardMyRank").textContent=onlineCache.myRank?"#"+onlineCache.myRank:"#—";
+    $("#onlineServerRank").textContent=onlineCache.myRank?"#"+onlineCache.myRank:"#—";
+    wrap.innerHTML=onlineCache.leaders.length
+      ? onlineCache.leaders.map(leaderboardRow).join("")
+      : '<div class="social-empty">ยังไม่มีข้อมูลอันดับ</div>';
+  }
+
   async function refreshOnline(){
     renderOnlineShell();
     if(!gameToken||!supabaseClient)return;
     await publishPublicBase();
-    const result=await rpc("cb_social_snapshot",{p_token:gameToken});
-    if(!result.ok){
-      if(result.error==="invalid_session")clearGameSession();
+    const [socialResult,leaderResult]=await Promise.all([
+      rpc("cb_social_snapshot",{p_token:gameToken}),
+      rpc("cb_leaderboard",{p_token:gameToken,p_limit:50})
+    ]);
+    if(!socialResult.ok){
+      if(socialResult.error==="invalid_session")clearGameSession();
       return;
     }
-    onlineCache={online:result.online||[],requests:result.requests||[],friends:result.friends||[]};
-    [...onlineCache.online,...onlineCache.requests,...onlineCache.friends].forEach(p=>socialProfiles.set(p.account_id,p));
+    if(!leaderResult.ok&&leaderResult.error==="invalid_session"){
+      clearGameSession();
+      return;
+    }
+    onlineCache={
+      online:socialResult.online||[],
+      requests:socialResult.requests||[],
+      friends:socialResult.friends||[],
+      leaders:leaderResult.ok?(leaderResult.leaders||[]):[],
+      myRank:leaderResult.ok?(leaderResult.my_rank||null):null,
+      totalPlayers:leaderResult.ok?(leaderResult.total_players||0):0
+    };
+    [...onlineCache.online,...onlineCache.requests,...onlineCache.friends,...onlineCache.leaders]
+      .forEach(p=>socialProfiles.set(p.account_id,p));
     renderOnlineLists();
+    renderLeaderboard();
+    renderOnlineShell();
   }
 
   async function saveOnlineName(){
