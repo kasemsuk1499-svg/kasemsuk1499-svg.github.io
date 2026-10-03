@@ -45,6 +45,13 @@
     "Card Baron","Vault Lord","Collection Master","Grand Collector","Card Duke",
     "Legend Keeper","Collector King","Card Emperor","Legend Sovereign","Grand Sovereign"
   ];
+  const TITLE_FX = [
+    ["#aab2c0","#e8edf5"],["#6ee7a8","#c7ffe1"],["#58c7ff","#c9f2ff"],["#6688ff","#d2dbff"],
+    ["#a979ff","#eadcff"],["#d66cff","#f5d7ff"],["#ff72bd","#ffd7ee"],["#ff8e68","#ffe0d5"],
+    ["#ffc857","#fff1bd"],["#ff675f","#ffd29e"],["#54e0c1","#ffe287"],["#8b78ff","#ff9ee9"],
+    ["#67d8ff","#ffe99b"],["#ff5578","#ffd7e0"],["#d26cff","#70efff"],["#83a8ff","#ffffff"],
+    ["#48f2ff","#a478ff"],["#ffd45a","#ff665f"],["#ff63e6","#55f5ff"],["#fff3a8","#ffffff"]
+  ];
   const STANDS = [10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30];
 
   const $ = s => document.querySelector(s);
@@ -151,20 +158,38 @@
 
   function fmt(n){
     if(!Number.isFinite(n)) return "∞";
-    if(n<1000) return Math.floor(n).toLocaleString("th-TH");
-    const units=["K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc"];
-    let v=n,i=-1;
-    while(v>=1000&&i<units.length-1){v/=1000;i++}
-    return v.toFixed(v>=100?0:v>=10?1:2)+units[i];
+    const sign=n<0?"-":"",a=Math.abs(n);
+    if(a<1000) return sign+Math.floor(a).toLocaleString("th-TH");
+    const units=["K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Ud","Dd","Td","Qad","Qid","Sxd","Spd","Ocd","Nod","Vg","Uvg","Dvg","Tvg","Qavg","Qivg"];
+    const group=Math.floor(Math.log10(a)/3);
+    if(group<=units.length){
+      const v=a/Math.pow(1000,group);
+      return sign+v.toFixed(v>=100?0:v>=10?1:2)+units[group-1];
+    }
+    return sign+a.toExponential(2).replace("+","");
   }
 
   function padId(id){return "#"+String(id).padStart(4,"0")}
   function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
   function imageFor(id){return "../assets/cards/"+id+".png"}
   function baseIncomeMultiplier(level=state.baseLevel){return 1+(level-1)*0.25}
+  function economyScale(level=state.baseLevel){return Math.pow(5,Math.max(0,level-1))}
   function luckValue(level=state.baseLevel){return 1+(level-1)*0.145}
   function standLimit(level=state.baseLevel){return STANDS[level-1]||30}
   function charBaseIncome(id){return 80+((id*7919+113)%921)}
+  function wealthLevel(value){
+    if(!Number.isFinite(value)||value<=0)return 0;
+    return Math.min(9,Math.max(0,Math.floor(Math.log10(value)/3)));
+  }
+  function wealthClass(value){return "wealth-value wealth-"+wealthLevel(value)}
+  function rankBand(level){return Math.min(5,Math.floor((Math.max(1,level)-1)/4))}
+  function rankFxStyle(level){
+    const lv=Math.max(1,Math.min(20,Number(level)||1)),fx=TITLE_FX[lv-1];
+    return "--rank:"+fx[0]+";--rank2:"+fx[1]+";--rank-glow:"+(10+lv*1.6)+"px;--rank-speed:"+Math.max(2.4,6.4-lv*.18)+"s";
+  }
+  function rankFxClass(level){return "rank-fx rank-level-"+Math.max(1,Math.min(20,Number(level)||1))+" rank-band-"+rankBand(level)}
+  function tierFxClass(tier){return "tier-fx tier-"+Math.max(0,Math.min(9,Number(tier)||0))}
+  function gradeFxClass(grade){return "grade-fx grade-"+Math.max(0,Math.min(9,Number(grade)||0))}
 
   function normalizeSlots(){
     const count=standLimit();
@@ -184,7 +209,7 @@
   }
 
   function cardIncome(card){
-    return cardIntrinsicIncome(card)*baseIncomeMultiplier();
+    return cardIntrinsicIncome(card)*baseIncomeMultiplier()*economyScale();
   }
 
   function totalIncome(){
@@ -198,16 +223,16 @@
   function upgradeCost(card){
     const income=cardIntrinsicIncome(card);
     const seconds=6+Math.min(24,card.level*0.12);
-    return roundUpNice(Math.min(income*seconds,Number.MAX_SAFE_INTEGER));
+    return roundUpNice(income*seconds*economyScale());
   }
 
   function rerollCost(card){
-    return GRADE_REROLL_COSTS[card.tier]||GRADE_REROLL_COSTS[0];
+    return (GRADE_REROLL_COSTS[card.tier]||GRADE_REROLL_COSTS[0])*economyScale();
   }
 
   function sellValue(card){
     const income=cardIntrinsicIncome(card);
-    return roundUpNice(income*(4+Math.min(20,card.level*0.14)));
+    return roundUpNice(income*(4+Math.min(20,card.level*0.14))*economyScale());
   }
 
   function roundUpNice(value){
@@ -264,7 +289,7 @@
       Math.pow(1.04,assumedCardLevel-1)*
       baseIncomeMultiplier(level);
     const expectedBaseIncome=expectedCardIncome*standLimit(level);
-    return roundUpNice(expectedBaseIncome*rebirthTargetSeconds(level)*optimizationFactor);
+    return roundUpNice(expectedBaseIncome*rebirthTargetSeconds(level)*optimizationFactor*economyScale(level));
   }
 
   function updateSyncUi(mode="local"){
@@ -516,10 +541,15 @@
     content.hidden=!signedIn;
     if(!signedIn)return;
     $("#onlineBaseLevel").textContent="Lv."+state.baseLevel;
-    $("#onlineTitle").textContent=TITLES[state.baseLevel-1]||"Collector";
+    const onlineTitle=$("#onlineTitle"),onlineName=$("#onlineDisplayName");
+    onlineTitle.textContent=TITLES[state.baseLevel-1]||"Collector";
+    onlineTitle.className=rankFxClass(state.baseLevel);
+    onlineTitle.style.cssText=rankFxStyle(state.baseLevel);
     $("#onlineServerRank").textContent=onlineCache.myRank?"#"+onlineCache.myRank:"#—";
     if(onlineProfile){
-      $("#onlineDisplayName").value=onlineProfile.display_name||onlineProfile.username||"";
+      onlineName.value=onlineProfile.display_name||onlineProfile.username||"";
+      onlineName.className="rank-name-input "+rankFxClass(state.baseLevel);
+      onlineName.style.cssText=rankFxStyle(state.baseLevel);
       $("#onlinePlayerCode").textContent="#"+(onlineProfile.player_code||"—");
     }
   }
@@ -540,9 +570,10 @@
       actions+='<button data-social-action="add" data-user="'+accountId+'">+ เพื่อน</button>';
     }
     const baseText=profile.base_level?"Base Lv."+profile.base_level:"ยังไม่เผยแพร่ฐาน";
+    const lv=Number(profile.base_level)||1;
     const rankText=profile.server_rank?'<span class="player-rank-badge">#'+profile.server_rank+'</span>':'';
-    const titleText=profile.title?'<span class="rank-title-badge">'+escapeHtml(profile.title)+'</span>':'';
-    return '<div class="player-row"><div class="player-main"><strong>'+escapeHtml(profile.display_name)+rankText+'</strong>'+
+    const titleText=profile.title?'<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.title)+'</span>':'';
+    return '<div class="player-row rank-row rank-band-'+rankBand(lv)+'"><div class="player-main"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.display_name)+rankText+'</strong>'+
       '<small>#'+escapeHtml(profile.player_code)+' · '+baseText+'</small>'+titleText+'</div>'+
       '<div class="player-actions">'+actions+'</div></div>';
   }
@@ -573,13 +604,15 @@
     }else{
       actions+='<button data-social-action="add" data-user="'+accountId+'">+ เพื่อน</button>';
     }
-    return '<div class="'+rowClass+'">'+
+    const lv=Number(profile.base_level)||1;
+    const income=Number(profile.base_income)||0;
+    return '<div class="'+rowClass+' rank-row rank-band-'+rankBand(lv)+'">'+
       '<div class="leaderboard-rank">'+medal+'</div>'+
-      '<div class="leaderboard-player"><strong>'+escapeHtml(profile.display_name)+'</strong>'+
+      '<div class="leaderboard-player"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.display_name)+'</strong>'+
         '<small><span>#'+escapeHtml(profile.player_code)+'</span><span>Base Lv.'+profile.base_level+'</span>'+(profile.online?'<span>● Online</span>':'')+'</small>'+
-        '<span class="rank-title-badge">'+escapeHtml(profile.title||"Rookie Collector")+'</span>'+
+        '<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.title||"Rookie Collector")+'</span>'+
       '</div>'+
-      '<div class="leaderboard-stats"><b>'+fmt(Number(profile.base_income)||0)+'/s</b><span>รายได้ฐาน</span></div>'+
+      '<div class="leaderboard-stats"><b class="'+wealthClass(income)+'">'+fmt(income)+'/s</b><span>รายได้ฐาน</span></div>'+
       '<div class="leaderboard-actions">'+actions+'</div>'+
     '</div>';
   }
@@ -719,13 +752,21 @@
   function tierStyle(index){return "--tier:"+TIERS[index].color}
 
   function renderHeader(){
-    $("#money").textContent=fmt(state.money);
-    $("#income").textContent=fmt(totalIncome())+"/s";
+    const incomeValue=totalIncome();
+    const moneyEl=$("#money"),incomeEl=$("#income"),titleEl=$("#baseTitle");
+    moneyEl.textContent=fmt(state.money);
+    moneyEl.className=wealthClass(state.money);
+    incomeEl.textContent=fmt(incomeValue)+"/s";
+    incomeEl.className=wealthClass(incomeValue);
     $("#baseLevel").textContent="Lv."+state.baseLevel;
     $("#luck").textContent="×"+luckValue().toFixed(2);
-    $("#baseTitle").textContent=TITLES[state.baseLevel-1];
+    titleEl.textContent=TITLES[state.baseLevel-1];
+    titleEl.className=rankFxClass(state.baseLevel)+" base-rank-title";
+    titleEl.style.cssText=rankFxStyle(state.baseLevel);
+    document.body.dataset.rankStage=String(rankBand(state.baseLevel));
+    document.body.style.cssText=rankFxStyle(state.baseLevel);
     $("#standCount").textContent=standLimit()+" แท่น";
-    $("#incomeMulti").textContent="Income ×"+baseIncomeMultiplier().toFixed(2);
+    $("#incomeMulti").textContent="Income ×"+baseIncomeMultiplier().toFixed(2)+" · Wealth ×"+fmt(economyScale());
   }
 
   function renderBase(){
@@ -736,7 +777,7 @@
       const c=uid?state.cards.find(x=>x.uid===uid):null;
       const slot=document.createElement("button");
       slot.type="button";
-      slot.className="stand"+(c?"":" empty");
+      slot.className="stand"+(c?" tier-shell tier-"+c.tier+" grade-shell-"+c.grade:" empty");
       slot.dataset.slot=i;
       if(!c){
         slot.innerHTML='<span class="stand-number">แท่น '+(i+1)+'</span><div class="empty-stand"><b>＋</b><span>เลือกการ์ดจากคลัง</span></div>';
@@ -744,10 +785,10 @@
         const t=TIERS[c.tier],g=GRADES[c.grade];
         slot.innerHTML=
           '<span class="stand-number">แท่น '+(i+1)+'</span>'+
-          '<div class="mini-card" style="'+tierStyle(c.tier)+'">'+
+          '<div class="mini-card '+tierFxClass(c.tier)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+'">'+
             '<img src="'+imageFor(c.charId)+'" alt="Card '+padId(c.charId)+'">'+
             '<div class="tier-ring"></div>'+
-            '<div class="stand-grade grade-'+c.grade+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
+            '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
             '<div class="mini-meta"><b>'+padId(c.charId)+' · '+t.name+'</b><span>Lv.'+c.level+' · '+fmt(cardIncome(c))+'/s</span></div>'+
           '</div>';
         const img=slot.querySelector("img"); if(img) img.addEventListener("error",e=>e.currentTarget.style.display="none");
@@ -797,7 +838,7 @@
       return;
     }
     const t=TIERS[p.tier];
-    card.className="pack-card sparkle"+(state.targetFound?" found":"");
+    card.className="pack-card sparkle "+tierFxClass(p.tier)+(state.targetFound?" found":"");
     card.style.setProperty("--pack",t.color);
     $("#packTier").textContent=t.name.toUpperCase();
     $("#packHint").textContent="คลิกเพื่อเปิด · การ์ดด้านในเป็น "+t.name+" แน่นอน";
@@ -815,7 +856,7 @@
     state.storedPacks.forEach(p=>groups.set(p.tier,(groups.get(p.tier)||0)+1));
     wrap.innerHTML=[...groups.entries()].sort((a,b)=>b[0]-a[0]).map(([tier,n])=>{
       const t=TIERS[tier];
-      return '<div class="stored-pack-row" style="--tier:'+t.color+'">'+
+      return '<div class="stored-pack-row tier-shell tier-'+tier+'" style="--tier:'+t.color+'">'+
         '<div class="stored-pack-main"><strong>'+t.name+'</strong><span>'+n+' ซอง</span></div>'+
         '<button data-open-stored-tier="'+tier+'">เปิด 1 ซอง</button></div>';
     }).join("");
@@ -855,14 +896,14 @@
     $("#emptyCollection").style.display=arr.length?"none":"block";
     arr.forEach(c=>{
       const t=TIERS[c.tier],g=GRADES[c.grade],placed=state.placed.includes(c.uid);
-      const el=document.createElement("article"); el.className="card-item";
+      const el=document.createElement("article"); el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade;
       el.innerHTML=
-        '<div class="card-art" style="'+tierStyle(c.tier)+'">'+
+        '<div class="card-art '+tierFxClass(c.tier)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+'">'+
           '<img src="'+imageFor(c.charId)+'" alt="Character '+padId(c.charId)+'"><div class="tier-ring"></div>'+
-          '<div class="card-grade" style="--grade:'+g.color+'">'+g.name+'</div><div class="card-tier">'+t.name+'</div><div class="card-id">'+padId(c.charId)+'</div>'+
+          '<div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div><div class="card-tier tier-label tier-'+c.tier+'">'+t.name+'</div><div class="card-id">'+padId(c.charId)+'</div>'+
         '</div>'+
         '<div class="card-body"><div class="card-stats">'+
-          '<div><span>Level</span><b>'+c.level+'</b></div><div><span>รายได้</span><b>'+fmt(cardIncome(c))+'/s</b></div>'+
+          '<div><span>Level</span><b>'+c.level+'</b></div><div><span>รายได้</span><b class="'+wealthClass(cardIncome(c))+'">'+fmt(cardIncome(c))+'/s</b></div>'+
           '<div><span>อัป Lv.</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div>'+
         '</div><div class="card-actions">'+
           '<button data-a="place">'+(placed?"เอาออกจากฐาน":"วางในแท่นว่าง")+'</button><button data-a="level">อัป Level</button>'+
@@ -909,7 +950,10 @@
     const focusTier=nextMax-1;
 
     $("#rebirthHeadline").textContent="Lv."+state.baseLevel+" → Lv."+next;
+    $("#rebirthHeadline").className=rankFxClass(next);
+    $("#rebirthHeadline").style.cssText=rankFxStyle(next);
     $("#rebirthMoney").textContent=fmt(cost);
+    $("#rebirthMoney").className=wealthClass(cost);
     $("#rebirthRule").textContent="ใช้เงินอย่างเดียว · ไม่มีเงื่อนไข Character ID / Card Level";
     $("#rebirthTierGain").textContent=newlyUnlocked
       ?"ปลด "+TIERS[focusTier].name+" · "+(nextOdds[focusTier]*100).toFixed(nextOdds[focusTier]*100<0.1?3:2)+"%"
@@ -917,6 +961,8 @@
     const pace=$("#rebirthPace");if(pace)pace.textContent="~"+formatDuration(rebirthTargetSeconds());
     $("#rebirthBtn").disabled=state.money<cost;
     $("#nextTitle").textContent=TITLES[next-1];
+    $("#nextTitle").className=rankFxClass(next);
+    $("#nextTitle").style.cssText=rankFxStyle(next);
     $("#nextStands").textContent=standLimit(next);
     $("#nextIncome").textContent="×"+baseIncomeMultiplier(next).toFixed(2);
     $("#nextLuck").textContent="×"+luckValue(next).toFixed(2);
@@ -1086,7 +1132,7 @@
 
   function showReveal(c){
     const t=TIERS[c.tier],g=GRADES[c.grade];
-    $("#revealVisual").innerHTML='<div class="reveal-visual" style="--tier:'+t.color+'"><div class="reveal-art"><img src="'+imageFor(c.charId)+'" alt="Card '+padId(c.charId)+'"><div class="tier-ring"></div></div><div class="reveal-info"><h2>'+t.name+'</h2><p>'+padId(c.charId)+' · Grade '+g.name+'</p></div></div>';
+    $("#revealVisual").innerHTML='<div class="reveal-visual tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+'"><div class="reveal-art '+tierFxClass(c.tier)+'"><img src="'+imageFor(c.charId)+'" alt="Card '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div></div><div class="reveal-info"><h2 class="tier-label tier-'+c.tier+'">'+t.name+'</h2><p>'+padId(c.charId)+' · Grade '+g.name+'</p></div></div>';
     $("#reveal").classList.add("show");$("#reveal").setAttribute("aria-hidden","false");
     const img=$("#revealVisual img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
   }
@@ -1106,8 +1152,8 @@
     if(!c){renderPicker(body,activeStand);return}
     const t=TIERS[c.tier],g=GRADES[c.grade];
     body.innerHTML=
-      '<div class="stand-detail"><div class="stand-detail-art" style="'+tierStyle(c.tier)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade" style="--grade:'+g.color+'">'+g.name+'</div><div class="card-tier">'+t.name+'</div><div class="card-id">'+padId(c.charId)+'</div></div>'+
-      '<div class="stand-detail-info"><div><div class="eyebrow">INCOME</div><div class="big-income">'+fmt(cardIncome(c))+'/s</div></div>'+
+      '<div class="stand-detail"><div class="stand-detail-art '+tierFxClass(c.tier)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div><div class="card-tier tier-label tier-'+c.tier+'">'+t.name+'</div><div class="card-id">'+padId(c.charId)+'</div></div>'+
+      '<div class="stand-detail-info"><div><div class="eyebrow">INCOME</div><div class="big-income '+wealthClass(cardIncome(c))+'">'+fmt(cardIncome(c))+'/s</div></div>'+
       '<div class="card-stats"><div><span>Level</span><b>'+c.level+'</b></div><div><span>Grade</span><b>'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>อัป Level</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div></div>'+
       '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
@@ -1127,7 +1173,7 @@
     choices.forEach(c=>{
       const t=TIERS[c.tier],g=GRADES[c.grade],btn=document.createElement("button");
       btn.type="button";btn.className="picker-card";
-      btn.innerHTML='<div class="picker-art" style="'+tierStyle(c.tier)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div></div><div class="picker-meta"><b>'+padId(c.charId)+' · '+t.name+'</b><span>Lv.'+c.level+' · '+g.name+' · '+fmt(cardIncome(c))+'/s</span></div>';
+      btn.innerHTML='<div class="picker-art '+tierFxClass(c.tier)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div></div><div class="picker-meta"><b class="tier-label tier-'+c.tier+'">'+padId(c.charId)+' · '+t.name+'</b><span>Lv.'+c.level+' · '+g.name+' · '+fmt(cardIncome(c))+'/s</span></div>';
       const img=btn.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
       btn.addEventListener("click",()=>{state.placed[slot]=c.uid;toast("วาง "+padId(c.charId)+" ที่แท่น "+(slot+1));renderAll();renderStandModal()});
       grid.appendChild(btn);
