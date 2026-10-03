@@ -1364,3 +1364,265 @@ body::before{
   .mutation-event-bar.active .mutation-event-title-row strong,
   .mutation-event-bar.active .mutation-event-wave{animation:none!important}
 }
+
+
+/* =========================================================
+   TIER TYPOGRAPHY — Card ID / Tier / Income
+   Text itself communicates rarity. Heavy motion only on T8/T9.
+   ========================================================= */
+.tier-copy{
+  --tier-text:var(--tier,#e8edf5);
+  --tier-bright:#fff;
+  --tier-shadow:color-mix(in srgb,var(--tier) 42%,transparent);
+  font-variant-numeric:tabular-nums;
+}
+.tier-copy .tier-card-id,
+.tier-copy.tier-card-id{
+  color:#f5f7fb;
+  font-weight:1000;
+  letter-spacing:-.025em;
+  text-shadow:0 1px 2px rgba(0,0,0,.8);
+}
+.tier-copy .tier-card-name,
+.tier-copy.tier-card-name{
+  color:var(--tier-text);
+  font-weight:1000;
+  letter-spacing:.015em;
+  text-shadow:0 0 8px var(--tier-shadow),0 1px 2px rgba(0,0,0,.8);
+}
+.tier-copy .tier-card-income,
+.tier-copy.tier-card-income{
+  color:var(--tier-text);
+  font-weight:1000;
+  letter-spacing:-.025em;
+  text-shadow:0 0 8px var(--tier-shadow),0 1px 2px rgba(0,0,0,.9);
+}
+.tier-copy .tier-card-sub{color:#d8deea}
+.tier-copy .tier-dot{color:color-mix(in srgb,var(--tier) 62%,#fff)}
+
+/* COMMON */
+.tier-copy.tier-0{
+  --tier-text:#d3d8e1;
+  --tier-shadow:rgba(180,188,202,.12);
+}
+.tier-copy.tier-0 .tier-card-name,
+.tier-copy.tier-0.tier-card-name{font-weight:850}
+
+/* UNCOMMON */
+.tier-copy.tier-1{
+  --tier-text:#7ee8a2;
+  --tier-shadow:rgba(98,213,139,.28);
+}
+.tier-copy.tier-1 .tier-card-id,
+.tier-copy.tier-1.tier-card-id{color:#e8fff0}
+
+/* RARE */
+.tier-copy.tier-2{
+  --tier-text:#72c7ff;
+  --tier-shadow:rgba(88,169,255,.38);
+}
+.tier-copy.tier-2 .tier-card-name,
+.tier-copy.tier-2.tier-card-name,
+.tier-copy.tier-2 .tier-card-income,
+.tier-copy.tier-2.tier-card-income{
+  text-shadow:0 0 9px rgba(88,169,255,.44),0 1px 2px rgba(0,0,0,.88);
+}
+
+/* EPIC */
+.tier-copy.tier-3{
+  --tier-text:#bd91ff;
+  --tier-shadow:rgba(165,121,255,.48);
+}
+.tier-copy.tier-3 .tier-card-name,
+.tier-copy.tier-3.tier-card-name{
+  letter-spacing:.035em;
+}
+.tier-copy.tier-3 .tier-card-name,
+.tier-copy.tier-3.tier-card-name,
+.tier-copy.tier-3 .tier-card-income,
+.tier-copy.tier-3.tier-card-income{
+  text-shadow:0 0 11px rgba(165,121,255,.52),0 0 3px rgba(224,205,255,.22),0 1px 2px #000;
+}
+
+/* LEGENDARY — forged gold */
+.tier-copy.tier-4{
+  --tier-text:#ffd766;
+  --tier-shadow:rgba(255,189,74,.58);
+}
+.tier-copy.tier-4 .tier-card-id,
+.tier-copy.tier-4.tier-card-id{color:#fff0bd}
+.tier-copy.tier-4 .tier-card-name,
+.tier-copy.tier-4.tier-card-name,
+.tier-copy.tier-4 .tier-card-income,
+.tier-copy.tier-4.tier-card-income{
+  color:#ffd766;
+  background:linear-gradient(180deg,#fff7cf 0%,#ffd866 38%,#ffb52e 72%,#fff1a6 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 5px rgba(255,189,74,.44));
+}
+
+/* MYTHIC — molten crimson */
+.tier-copy.tier-5{
+  --tier-text:#ff829e;
+  --tier-shadow:rgba(255,99,139,.62);
+}
+.tier-copy.tier-5 .tier-card-id,
+.tier-copy.tier-5.tier-card-id{color:#ffd5df}
+.tier-copy.tier-5 .tier-card-name,
+.tier-copy.tier-5.tier-card-name,
+.tier-copy.tier-5 .tier-card-income,
+.tier-copy.tier-5.tier-card-income{
+  background:linear-gradient(180deg,#fff0f5 0%,#ff91ad 32%,#ff557d 66%,#ffb1c3 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 6px rgba(255,79,124,.52));
+}
+
+/* DIVINE — holy aqua */
+.tier-copy.tier-6{
+  --tier-text:#8dfff4;
+  --tier-shadow:rgba(103,241,228,.65);
+}
+.tier-copy.tier-6 .tier-card-id,
+.tier-copy.tier-6.tier-card-id{color:#e6fffc}
+.tier-copy.tier-6 .tier-card-name,
+.tier-copy.tier-6.tier-card-name,
+.tier-copy.tier-6 .tier-card-income,
+.tier-copy.tier-6.tier-card-income{
+  background:linear-gradient(180deg,#ffffff 0%,#9ffff6 33%,#55e9e2 65%,#dcfffc 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 7px rgba(94,241,230,.56));
+}
+
+/* CELESTIAL — deep star blue */
+.tier-copy.tier-7{
+  --tier-text:#a9b0ff;
+  --tier-shadow:rgba(127,140,255,.72);
+}
+.tier-copy.tier-7 .tier-card-id,
+.tier-copy.tier-7.tier-card-id{color:#e8eaff}
+.tier-copy.tier-7 .tier-card-name,
+.tier-copy.tier-7.tier-card-name,
+.tier-copy.tier-7 .tier-card-income,
+.tier-copy.tier-7.tier-card-income{
+  background:linear-gradient(180deg,#ffffff 0%,#a8c8ff 28%,#8c83ff 61%,#d7b1ff 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 8px rgba(127,140,255,.64));
+}
+
+/* TRANSCENDENT — living prism */
+.tier-copy.tier-8 .tier-card-id,
+.tier-copy.tier-8.tier-card-id,
+.tier-copy.tier-8 .tier-card-name,
+.tier-copy.tier-8.tier-card-name,
+.tier-copy.tier-8 .tier-card-income,
+.tier-copy.tier-8.tier-card-income{
+  background:linear-gradient(90deg,#ff79ee,#ffffff,#79eaff,#c287ff,#ff79ee);
+  background-size:280% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 7px rgba(255,121,238,.62));
+  animation:tierTextFlow 3.1s linear infinite;
+}
+.tier-copy.tier-8 .tier-card-name,
+.tier-copy.tier-8.tier-card-name{letter-spacing:.045em}
+
+/* ETERNAL — white-gold stellar metal */
+.tier-copy.tier-9 .tier-card-id,
+.tier-copy.tier-9.tier-card-id,
+.tier-copy.tier-9 .tier-card-name,
+.tier-copy.tier-9.tier-card-name,
+.tier-copy.tier-9 .tier-card-income,
+.tier-copy.tier-9.tier-card-income{
+  background:linear-gradient(90deg,#fff2a8 0%,#ffffff 20%,#9af8ff 38%,#ffffff 54%,#ffd96b 72%,#ffffff 88%,#fff2a8 100%);
+  background-size:320% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 7px rgba(255,240,168,.68)) drop-shadow(0 0 2px rgba(255,255,255,.72));
+  animation:tierTextFlow 2.35s linear infinite;
+}
+.tier-copy.tier-9 .tier-card-name,
+.tier-copy.tier-9.tier-card-name{
+  letter-spacing:.055em;
+  font-weight:1000;
+}
+
+@keyframes tierTextFlow{
+  from{background-position:0% 50%}
+  to{background-position:320% 50%}
+}
+
+/* Main base cards need stronger readability over artwork. */
+.mini-meta.tier-copy b{
+  display:flex;align-items:baseline;gap:1px;
+  font-size:clamp(11px,.82vw,15px);
+  line-height:1.08;
+}
+.mini-meta.tier-copy .tier-card-sub{
+  display:block;margin-top:3px;font-size:clamp(9px,.62vw,12px);
+}
+.mini-meta.tier-copy .tier-card-income{
+  font-size:1.08em;
+}
+
+/* Visitor cards */
+.visitor-meta.tier-copy b{
+  display:flex;align-items:baseline;gap:1px;font-size:11px;line-height:1.05
+}
+.visitor-meta.tier-copy>span{font-size:9px;color:#d4d8e3}
+.visitor-meta.tier-copy .tier-card-income{font-size:1.07em}
+
+/* Collection overlay */
+.card-tier.tier-copy{
+  border:1px solid color-mix(in srgb,var(--tier) 50%,transparent);
+  box-shadow:0 0 13px color-mix(in srgb,var(--tier) 16%,transparent)
+}
+.card-id.tier-copy{
+  font-size:14px;
+  text-shadow:0 1px 3px #000
+}
+
+/* Picker + Trade */
+.picker-meta.tier-copy b,
+.trade-card-meta.tier-copy strong{
+  display:flex;align-items:baseline;gap:1px
+}
+.picker-meta.tier-copy .tier-card-income,
+.trade-card-meta.tier-copy .tier-card-income{font-weight:1000}
+
+/* Reveal and detail income get the biggest typography. */
+.reveal-info.tier-copy .tier-card-name{
+  font-size:clamp(28px,6vw,44px);
+  line-height:1;
+}
+.reveal-info.tier-copy .tier-card-id{font-size:1.05em}
+.big-income.tier-copy{
+  font-size:clamp(30px,5vw,52px);
+  line-height:1;
+  font-weight:1000;
+}
+
+@media (max-width:700px){
+  .mini-meta.tier-copy b{font-size:11px}
+  .mini-meta.tier-copy .tier-card-sub{font-size:9px}
+  .card-id.tier-copy{font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  .tier-copy.tier-8 .tier-card-id,
+  .tier-copy.tier-8.tier-card-id,
+  .tier-copy.tier-8 .tier-card-name,
+  .tier-copy.tier-8.tier-card-name,
+  .tier-copy.tier-8 .tier-card-income,
+  .tier-copy.tier-8.tier-card-income,
+  .tier-copy.tier-9 .tier-card-id,
+  .tier-copy.tier-9.tier-card-id,
+  .tier-copy.tier-9 .tier-card-name,
+  .tier-copy.tier-9.tier-card-name,
+  .tier-copy.tier-9 .tier-card-income,
+  .tier-copy.tier-9.tier-card-income{
+    animation:none!important
+  }
+}
