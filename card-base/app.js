@@ -1105,8 +1105,18 @@
     const g=GRADES[c.grade];
     $("#gradeAutoCardInfo").innerHTML='<strong>'+padId(c.charId)+' · '+TIERS[c.tier].name+'</strong>'+
       '<span>Grade ปัจจุบัน '+g.name+' · '+fmt(rerollCost(c))+' ต่อครั้ง</span>';
-    $("#gradeTargetSelect").innerHTML=GRADES.map((x,i)=>'<option value="'+i+'">'+x.name+'</option>').join("");
-    $("#gradeTargetSelect").value=String(Math.min(9,c.grade+1));
+
+    const activeTargets=state.gradeAuto&&state.gradeAuto.uid===uid&&Array.isArray(state.gradeAuto.targets)
+      ? state.gradeAuto.targets
+      : GRADES.map((_,i)=>i).filter(i=>i>c.grade);
+
+    $("#gradeTargetList").innerHTML=GRADES.map((x,i)=>
+      '<label class="grade-target-option" style="--grade:'+x.color+'">'+
+        '<input type="checkbox" data-grade-target="'+i+'" '+(activeTargets.includes(i)?'checked':'')+'>'+
+        '<span>'+x.name+'</span>'+
+      '</label>'
+    ).join("");
+
     $("#startGradeAutoBtn").hidden=!!state.gradeAuto;
     $("#stopGradeAutoBtn").hidden=!state.gradeAuto;
     $("#gradeAutoModal").classList.add("show");
@@ -1119,21 +1129,32 @@
     gradeAutoSetupUid=null;
   }
 
+  function selectedGradeTargets(){
+    return [...document.querySelectorAll('#gradeTargetList input[data-grade-target]:checked')]
+      .map(input=>Number(input.dataset.gradeTarget))
+      .filter(i=>Number.isInteger(i)&&i>=0&&i<GRADES.length);
+  }
+
   function startGradeAuto(){
     const c=state.cards.find(x=>x.uid===gradeAutoSetupUid);if(!c)return;
-    const target=Number($("#gradeTargetSelect").value);
-    if(!Number.isInteger(target)||target<0||target>=GRADES.length)return;
-    if(c.grade===target){toast("การ์ดใบนี้เป็น Grade "+GRADES[target].name+" อยู่แล้ว");return}
+    const targets=selectedGradeTargets();
+    if(!targets.length){toast("ติ๊ก Grade เป้าหมายอย่างน้อย 1 ระดับก่อน");return}
+    if(targets.includes(c.grade)){
+      toast("Grade ปัจจุบัน "+GRADES[c.grade].name+" อยู่ในเป้าหมายที่ติ๊กไว้แล้ว");
+      return;
+    }
     const cost=rerollCost(c);
+    const targetNames=targets.map(i=>GRADES[i].name).join(", ");
     const ok=window.confirm(
-      "เริ่ม Auto Grade "+padId(c.charId)+" → "+GRADES[target].name+
+      "เริ่ม Auto Grade "+padId(c.charId)+
+      "\nหยุดเมื่อเจอ: "+targetNames+
       "\nค่าใช้จ่ายคงที่ "+fmt(cost)+" ต่อครั้ง"+
-      "\n\nGrade จะเปลี่ยนทุกครั้ง แม้ต่ำลง และระบบจะสุ่มจนเจอเป้าหมายหรือเงินไม่พอ ต้องการเริ่มไหม?"
+      "\n\nGrade จะเปลี่ยนทุกครั้ง แม้ต่ำลง และระบบจะสุ่มจนเจอหนึ่งใน Grade ที่เลือกไว้หรือเงินไม่พอ ต้องการเริ่มไหม?"
     );
     if(!ok)return;
-    state.gradeAuto={uid:c.uid,target,nextAt:Date.now(),startedAt:Date.now()};
+    state.gradeAuto={uid:c.uid,targets:[...new Set(targets)],nextAt:Date.now(),startedAt:Date.now()};
     closeGradeAuto();
-    toast("เริ่ม Auto Grade → "+GRADES[target].name);
+    toast("เริ่ม Auto Grade → "+targetNames);
     save();
     processGradeAuto();
   }
@@ -1154,7 +1175,13 @@
     accrueIncomeToNow();
     const c=state.cards.find(x=>x.uid===job.uid);
     if(!c){stopGradeAuto("ไม่พบการ์ด · Auto Grade หยุดแล้ว");return}
-    if(c.grade===job.target){stopGradeAuto("ได้ Grade "+GRADES[c.grade].name+" แล้ว! ✨");return}
+
+    const targets=Array.isArray(job.targets)
+      ? job.targets.filter(i=>Number.isInteger(i)&&i>=0&&i<GRADES.length)
+      : Number.isInteger(job.target) ? [job.target] : [];
+
+    if(!targets.length){stopGradeAuto("ไม่มี Grade เป้าหมาย · Auto Grade หยุดแล้ว");return}
+    if(targets.includes(c.grade)){stopGradeAuto("ได้ Grade "+GRADES[c.grade].name+" แล้ว! ✨");return}
 
     const now=Date.now();
     let loops=0;
@@ -1169,7 +1196,7 @@
       state.money-=cost;
       c.grade=randomGrade();
       loops++;
-      if(c.grade===job.target){
+      if(targets.includes(c.grade)){
         state.gradeAuto=null;
         toast("Auto Grade สำเร็จ: "+GRADES[c.grade].name+" ✨",true);
         break;
@@ -1251,6 +1278,14 @@
     $("#storedPacks").addEventListener("click",e=>{const b=e.target.closest("[data-open-stored-tier]");if(b)openStoredPack(Number(b.dataset.openStoredTier))});
     $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
     $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
+    $("#gradeSelectHighBtn").addEventListener("click",()=>{
+      document.querySelectorAll('#gradeTargetList input[data-grade-target]').forEach(input=>{
+        input.checked=Number(input.dataset.gradeTarget)>=4;
+      });
+    });
+    $("#gradeClearTargetsBtn").addEventListener("click",()=>{
+      document.querySelectorAll('#gradeTargetList input[data-grade-target]').forEach(input=>input.checked=false);
+    });
     $("#closeReveal").addEventListener("click",closeReveal);$("#closeStandModal").addEventListener("click",closeStand);$("[data-close-modal]").addEventListener("click",closeStand);
     $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);$("#rebirthBtn").addEventListener("click",doRebirth);
     $("#tierFilters").addEventListener("change",e=>{
