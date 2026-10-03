@@ -1400,19 +1400,24 @@
     const discoveredIds=Object.keys(state.cardIndex).map(Number).filter(id=>id>=CARD_MIN_ID&&id<=CARD_MAX_ID);
     const charFound=discoveredIds.length;
     const variantFound=discoveredIds.reduce((sum,id)=>sum+(state.cardIndex[id]?.tiers?.length||0),0);
-    const totalChars=CARD_MAX_ID-CARD_MIN_ID+1,totalVariants=totalChars*TIERS.length;
+    const mutationFound=discoveredIds.reduce((sum,id)=>sum+(state.cardIndex[id]?.mutations?.length||0),0);
+    const totalChars=CARD_MAX_ID-CARD_MIN_ID+1,totalVariants=totalChars*TIERS.length,totalMutationVariants=totalChars*(MUTATIONS.length-1);
     $("#indexCharacterCount").textContent=charFound+"/"+totalChars;
     $("#indexVariantCount").textContent=variantFound+"/"+totalVariants;
+    const mutationCount=$("#indexMutationCount");if(mutationCount)mutationCount.textContent=mutationFound+"/"+totalMutationVariants;
     $("#indexCompletion").textContent=(charFound/totalChars*100).toFixed(charFound===totalChars?0:1)+"%";
     $("#indexVariantCompletion").textContent=(variantFound/totalVariants*100).toFixed(1)+"%";
+    const mutationCompletion=$("#indexMutationCompletion");if(mutationCompletion)mutationCompletion.textContent=(mutationFound/totalMutationVariants*100).toFixed(1)+"%";
     $("#indexProgressFill").style.width=(charFound/totalChars*100)+"%";
     $("#indexVariantFill").style.width=(variantFound/totalVariants*100)+"%";
+    const mutationFill=$("#indexMutationFill");if(mutationFill)mutationFill.style.width=(mutationFound/totalMutationVariants*100)+"%";
 
     let ids=Array.from({length:totalChars},(_,i)=>CARD_MIN_ID+i);
     if(query)ids=ids.filter(id=>String(id).includes(query)||padId(id).includes(query));
     if(filter==="found")ids=ids.filter(id=>!!state.cardIndex[id]);
     if(filter==="missing")ids=ids.filter(id=>!state.cardIndex[id]);
     if(filter==="complete")ids=ids.filter(id=>(state.cardIndex[id]?.tiers?.length||0)===TIERS.length);
+    if(filter==="mutated")ids=ids.filter(id=>(state.cardIndex[id]?.mutations?.length||0)>0);
     if(filter==="owned")ids=ids.filter(id=>(ownedByChar.get(id)||[]).length>0);
 
     wrap.innerHTML=ids.map(id=>{
@@ -1421,10 +1426,12 @@
         return '<article class="index-card locked">'+
           '<div class="index-lock-art"><span>?</span></div>'+
           '<div class="index-card-body"><strong>'+padId(id)+'</strong><small>ยังไม่ค้นพบ</small>'+
-          '<div class="index-tier-strip">'+TIERS.map((t,i)=>'<i title="'+t.name+'" style="--tier:'+t.color+'"></i>').join("")+'</div></div>'+
+          '<div class="index-tier-strip">'+TIERS.map((t,i)=>'<i title="'+t.name+'" style="--tier:'+t.color+'"></i>').join("")+'</div>'+
+          '<div class="index-mutation-strip">'+MUTATIONS.slice(1).map(m=>'<i title="'+m.name+'" style="--mutation:'+m.color+'"></i>').join("")+'</div></div>'+
         '</article>';
       }
       const tiers=Array.isArray(entry.tiers)?entry.tiers:[];
+      const mutations=Array.isArray(entry.mutations)?entry.mutations:[];
       const highestTier=tiers.length?Math.max(...tiers):0;
       const bestGrade=GRADES[Math.max(0,Math.min(GRADES.length-1,entry.bestGrade||0))];
       const t=TIERS[highestTier];
@@ -1437,8 +1444,9 @@
         '</div>'+
         '<div class="index-card-body">'+
           '<div class="index-id-row"><strong>'+padId(id)+'</strong><span class="tier-label tier-'+highestTier+'" style="color:'+t.color+'">'+t.name+'</span></div>'+
-          '<small>Variants '+tiers.length+'/10 · Best Grade '+bestGrade.name+'</small>'+
+          '<small>Variants '+tiers.length+'/10 · Mutations '+mutations.length+'/10 · Best Grade '+bestGrade.name+'</small>'+
           '<div class="index-tier-strip">'+TIERS.map((tier,i)=>'<i class="'+(tiers.includes(i)?'on':'')+'" title="'+tier.name+'" style="--tier:'+tier.color+'"></i>').join("")+'</div>'+
+          '<div class="index-mutation-strip">'+MUTATIONS.slice(1).map((m,i)=>'<i class="'+(mutations.includes(i+1)?'on':'')+'" title="'+m.name+'" style="--mutation:'+m.color+'"></i>').join("")+'</div>'+
         '</div>'+
       '</article>';
     }).join("")||'<div class="empty-state index-empty">ไม่มีรายการตามตัวกรองนี้</div>';
@@ -1752,6 +1760,31 @@
     c.grade=randomGrade();
     toast("Grade ใหม่: "+GRADES[c.grade].name+(c.grade>=8?" ✨":""));
     renderAll();if(fromModal&&activeStand!==null)renderStandModal();
+  }
+
+  function rerollMutation(uid,fromModal=false){
+    const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
+    if(state.gradeAuto&&state.gradeAuto.uid===uid){toast("หยุด Auto Grade ใบนี้ก่อนสุ่ม Mutation");return}
+    const cost=mutationRerollCost(c);
+    if(state.money<cost){toast("เงินไม่พอ · Mutation ต้องใช้ "+fmt(cost));return}
+    const current=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(c.mutation)||0))];
+    const ok=window.confirm(
+      "สุ่ม Mutation ใหม่ของ "+padId(c.charId)+" ใช้เงิน "+fmt(cost)+
+      "\nปัจจุบัน: "+current.icon+" "+current.name+
+      " · Income ×"+current.income.toFixed(2)+" · Luck ×"+current.luck.toFixed(2)+
+      "\n\nมีโอกาสกลับเป็น Normal และผลใหม่จะเขียนทับทันที ต้องการสุ่มต่อไหม?"
+    );
+    if(!ok)return;
+    state.money-=cost;
+    c.mutation=randomMutation();
+    recordCardInIndex(c,Date.now());
+    const next=MUTATIONS[c.mutation];
+    toast(c.mutation
+      ?"Mutation ใหม่: "+next.icon+" "+next.name+" · Income ×"+next.income.toFixed(2)+" · Luck ×"+next.luck.toFixed(2)+" ✨"
+      :"Mutation กลับเป็น Normal",!!c.mutation);
+    renderAll();
+    if(fromModal&&activeStand!==null)renderStandModal();
   }
 
   function openGradeAuto(uid){
