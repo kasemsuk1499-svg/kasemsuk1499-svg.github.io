@@ -3,8 +3,8 @@
 
   const SAVE_KEY = "card-base-prototype-v01";
   const CARD_MIN_ID = 1;
-  const CARD_MAX_ID = 46;
-  const ROLL_MS = 3500;
+  const CARD_MAX_ID = 50;
+  const ROLL_MS = 2500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
   const CLOUD_TABLE = "card_base_saves";
@@ -67,11 +67,11 @@
   // priceSeconds: ไม่ใส่ = ใช้ราคามาตรฐานตามลำดับแพ็ก
   // =========================================================
   const ID_PACK_CUSTOM = {
-    1:  {name:"ID Pack 01", image:"", priceSeconds:null},
-    11: {name:"ID Pack 02", image:"", priceSeconds:null},
-    21: {name:"ID Pack 03", image:"", priceSeconds:null},
-    31: {name:"ID Pack 04", image:"", priceSeconds:null},
-    41: {name:"ID Pack 05", image:"", priceSeconds:null}
+    1:  {name:"WUWA pack v1", image:"./assets/cards/10.png", priceSeconds:null},
+    11: {name:"ARISA pack v1", image:"./assets/cards/12.png", priceSeconds:null},
+    21: {name:"NARUTO pack v1", image:"./assets/cards/30.png", priceSeconds:null},
+    31: {name:"FATE pack v1", image:"./assets/cards/40.png", priceSeconds:null},
+    41: {name:"VG pack v1", image:"./assets/cards/50.png", priceSeconds:null}
   };
 
   const TITLES = [
