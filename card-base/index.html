@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261003-index2">
+  <link rel="stylesheet" href="./style.css?v=20261003-mutation1">
 </head>
 <body>
   <div class="app-shell">
@@ -123,6 +123,14 @@
               <span>Luck ไม่ส่งผล</span>
             </div>
             <div id="gradeOdds" class="odds grade-odds"></div>
+            <div class="odds-divider"></div>
+            <div class="eyebrow">MUTATION RATE</div>
+            <div class="grade-rate-head">
+              <h3>โอกาสกลายพันธุ์</h3>
+              <span>รวม 4% · Luck ไม่เพิ่มเรท Mutation</span>
+            </div>
+            <div id="mutationLuckSummary" class="mutation-luck-summary">Luck จากการ์ดบนฐาน ×1.00</div>
+            <div id="mutationOdds" class="odds mutation-odds"></div>
           </aside>
         </div>
       </section>
@@ -161,6 +169,7 @@
               <option value="found">ค้นพบแล้ว</option>
               <option value="missing">ยังไม่พบ</option>
               <option value="owned">ถืออยู่ตอนนี้</option>
+              <option value="mutated">เคยเจอ Mutation</option>
               <option value="complete">Tier ครบ 10/10</option>
             </select>
           </div>
@@ -179,10 +188,16 @@
             <small id="indexVariantCompletion">0%</small>
             <div class="index-progress variant"><i id="indexVariantFill"></i></div>
           </div>
+          <div class="index-summary-card">
+            <span>Mutation Discoveries</span>
+            <strong id="indexMutationCount">0/460</strong>
+            <small id="indexMutationCompletion">0%</small>
+            <div class="index-progress mutation"><i id="indexMutationFill"></i></div>
+          </div>
           <div class="index-summary-note">
             <strong>เป้าหมายสะสม</strong>
-            <span>Character 46 ตัว × Tier 10 ระดับ = 460 Variants</span>
-            <small>Grade สูงสุดของแต่ละ Character จะถูกบันทึกไว้ด้วย</small>
+            <span>46 Character × 10 Tier + 10 Mutation</span>
+            <small>Grade สูงสุดและ Mutation ที่เคยพบจะถูกบันทึกถาวร</small>
           </div>
         </div>
 
@@ -493,7 +508,7 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261003-index2" defer></script>
-  <script src="./fx.js?v=20261003-index2" defer></script>
+  <script src="./app.js?v=20261003-mutation1" defer></script>
+  <script src="./fx.js?v=20261003-mutation1" defer></script>
 </body>
 </html>
