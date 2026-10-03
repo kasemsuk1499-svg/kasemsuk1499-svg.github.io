@@ -44,16 +44,16 @@
 
   const MUTATIONS = [
     {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:96.00},
-    {name:"Blaze",icon:"🔥",color:"#ff7043",income:1.35,luck:1.08,weight:.65},
-    {name:"Thunder",icon:"⚡",color:"#69e7ff",income:1.30,luck:1.15,weight:.55},
-    {name:"Frost",icon:"❄",color:"#9deaff",income:1.28,luck:1.12,weight:.50},
-    {name:"Gale",icon:"◌",color:"#72ffd5",income:1.25,luck:1.18,weight:.45},
-    {name:"Nature",icon:"❧",color:"#7ee47e",income:1.33,luck:1.10,weight:.45},
-    {name:"Solar",icon:"☀",color:"#ffd761",income:1.42,luck:1.09,weight:.40},
-    {name:"Lunar",icon:"☾",color:"#bdc9ff",income:1.26,luck:1.20,weight:.35},
-    {name:"Void",icon:"◆",color:"#aa69ff",income:1.45,luck:1.14,weight:.30},
-    {name:"Prismatic",icon:"◇",color:"#ff83e8",income:1.38,luck:1.16,weight:.20},
-    {name:"Celestial Surge",icon:"✦",color:"#fff0a5",income:1.55,luck:1.22,weight:.15}
+    {name:"Blaze",icon:"🔥",color:"#ff7043",income:2.00,luck:1.15,weight:.65},
+    {name:"Thunder",icon:"⚡",color:"#69e7ff",income:2.20,luck:1.18,weight:.55},
+    {name:"Frost",icon:"❄",color:"#9deaff",income:2.40,luck:1.21,weight:.50},
+    {name:"Gale",icon:"◌",color:"#72ffd5",income:2.60,luck:1.24,weight:.45},
+    {name:"Nature",icon:"❧",color:"#7ee47e",income:2.80,luck:1.27,weight:.45},
+    {name:"Solar",icon:"☀",color:"#ffd761",income:3.00,luck:1.30,weight:.40},
+    {name:"Lunar",icon:"☾",color:"#bdc9ff",income:3.30,luck:1.34,weight:.35},
+    {name:"Void",icon:"◆",color:"#aa69ff",income:3.60,luck:1.38,weight:.30},
+    {name:"Prismatic",icon:"◇",color:"#ff83e8",income:4.20,luck:1.45,weight:.20},
+    {name:"Celestial Surge",icon:"✦",color:"#fff0a5",income:5.00,luck:1.55,weight:.15}
   ];
   // Event pool: rarer mutations are still rarer, but the gap stays intentionally modest.
   const MUTATION_EVENT_WEIGHTS = [0,13,12,11.5,11,10.5,10,9.5,8.5,7.5,6.5];
@@ -357,7 +357,8 @@
     return 1+((safe-1)*0.003);
   }
   function charBaseIncome(id){
-    return 500*charIncomeMultiplier(id);
+    // Economy normalization: big Mutation jackpots, nearly unchanged early-game average pace.
+    return 470*charIncomeMultiplier(id);
   }
   function charIncomeBonusText(id){
     return "+"+((charIncomeMultiplier(id)-1)*100).toFixed(1)+"%";
