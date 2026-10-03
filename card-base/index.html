@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261003-online1">
+  <link rel="stylesheet" href="./style.css?v=20261003-auto1">
 </head>
 <body>
   <div class="app-shell">
@@ -72,7 +72,8 @@
 
             <div class="roll-row">
               <button id="rollBtn" class="primary" type="button">สุ่มซอง</button>
-              <button id="autoBtn" class="secondary" type="button">เริ่ม Auto Roll</button>
+              <button id="autoBtn" class="secondary" type="button">Auto · หยุดเมื่อเจอ</button>
+              <button id="fullAutoBtn" class="secondary full-auto-btn" type="button">Full Auto</button>
               <div class="timer-wrap">
                 <div class="timer-bar"><i id="timerFill"></i></div>
                 <span id="timerText">พร้อมสุ่ม</span>
@@ -92,6 +93,19 @@
               </div>
               <div id="tierFilters" class="tier-filters"></div>
               <div id="autoStatus" class="auto-status">Auto Roll ปิดอยู่</div>
+            </div>
+
+            <div class="pack-vault">
+              <div class="pack-vault-head">
+                <div>
+                  <div class="eyebrow">PACK STORAGE</div>
+                  <strong>คลังซองจาก Full Auto</strong>
+                </div>
+                <span id="storedPackCount" class="badge">0 ซอง</span>
+              </div>
+              <div id="storedPacks" class="stored-packs">
+                <div class="social-empty">ยังไม่มีซองที่เก็บไว้</div>
+              </div>
             </div>
 
             <div class="micro">คีย์ลัด: กด <kbd>1</kbd> เพื่อสุ่ม 1 ครั้ง · คลิกซองเพื่อเปิด</div>
@@ -237,6 +251,28 @@
     </div>
 
 
+
+    <div id="gradeAutoModal" class="modal grade-auto-modal" aria-hidden="true">
+      <button class="modal-backdrop" data-close-grade-auto type="button" aria-label="ปิด"></button>
+      <div class="modal-card grade-auto-card">
+        <div class="modal-top">
+          <div>
+            <div class="eyebrow">AUTO GRADE</div>
+            <h2>ตั้งเป้า Grade</h2>
+          </div>
+          <button id="closeGradeAutoModal" class="icon-btn" type="button" aria-label="ปิด">✕</button>
+        </div>
+        <div id="gradeAutoCardInfo" class="grade-auto-info"></div>
+        <label class="grade-target-field">
+          <span>หยุดเมื่อสุ่มได้</span>
+          <select id="gradeTargetSelect"></select>
+        </label>
+        <p class="warning">ทุกครั้งที่สุ่ม Grade ใหม่จะเขียนทับ Grade เดิมทันที แม้ผลจะต่ำลง หากเงินหมด ระบบจะหยุดและคง Grade ล่าสุดที่สุ่มได้</p>
+        <button id="startGradeAutoBtn" class="primary" type="button">เริ่ม Auto Grade</button>
+        <button id="stopGradeAutoBtn" class="secondary" type="button" hidden>หยุด Auto Grade</button>
+      </div>
+    </div>
+
     <div id="socialBaseModal" class="modal social-base-modal" aria-hidden="true">
       <button class="modal-backdrop" data-close-social-base type="button" aria-label="ปิด"></button>
       <div class="modal-card social-base-card">
@@ -289,6 +325,6 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261003-online1" defer></script>
+  <script src="./app.js?v=20261003-auto1" defer></script>
 </body>
 </html>
