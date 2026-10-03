@@ -38,7 +38,8 @@
     "Card Baron","Vault Lord","Collection Master","Grand Collector","Card Duke",
     "Legend Keeper","Collector King","Card Emperor","Legend Sovereign","Grand Sovereign"
   ];
-  const STANDS = [10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30];\n  const REBIRTH_CARD_LEVELS = [3,5,8,12,16,21,27,34,42,51,61,72,84,97,111,126,142,159,177];
+  const STANDS = [10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30];
+  const REBIRTH_CARD_LEVELS = [3,5,8,12,16,21,27,34,42,51,61,72,84,97,111,126,142,159,177];
 
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
@@ -87,7 +88,8 @@
     return v.toFixed(v>=100?0:v>=10?1:2)+units[i];
   }
 
-  function padId(id){return "#"+String(id).padStart(4,"0")}\n  function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
+  function padId(id){return "#"+String(id).padStart(4,"0")}
+  function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
   function imageFor(id){return "../assets/cards/"+id+".png"}
   function baseIncomeMultiplier(level=state.baseLevel){return 1+(level-1)*0.25}
   function luckValue(level=state.baseLevel){return 1+(level-1)*0.145}
