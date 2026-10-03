@@ -59,6 +59,21 @@
   const MUTATION_EVENT_WEIGHTS = [0,13,12,11.5,11,10.5,10,9.5,8.5,7.5,6.5];
   const MUTATION_EVENT_PULSE_CHANCE = 0.005; // 0.5% per Normal displayed card every 30 sec
 
+  // =========================================================
+  // ID PACK CUSTOMIZATION
+  // แก้ชื่อ/รูปแพ็กตรงนี้ได้เลย
+  // image: ใช้ path เช่น "./assets/packs/my-pack.png" หรือ URL รูปก็ได้
+  // เว้น image:"" = ใช้หน้าปกสำรองของเกม
+  // priceSeconds: ไม่ใส่ = ใช้ราคามาตรฐานตามลำดับแพ็ก
+  // =========================================================
+  const ID_PACK_CUSTOM = {
+    1:  {name:"ID Pack 01", image:"", priceSeconds:null},
+    11: {name:"ID Pack 02", image:"", priceSeconds:null},
+    21: {name:"ID Pack 03", image:"", priceSeconds:null},
+    31: {name:"ID Pack 04", image:"", priceSeconds:null},
+    41: {name:"ID Pack 05", image:"", priceSeconds:null}
+  };
+
   const TITLES = [
     "Rookie Collector","Card Scout","Pack Seeker","Card Hunter","Vault Keeper",
     "Elite Collector","Card Warden","Treasure Keeper","Renowned Collector","Hall Master",
@@ -499,7 +514,16 @@
     const ranges=[];
     let index=0;
     for(let start=CARD_MIN_ID;start<=CARD_MAX_ID;start+=10,index++){
-      ranges.push({index,start,end:Math.min(CARD_MAX_ID,start+9)});
+      const end=Math.min(CARD_MAX_ID,start+9);
+      const custom=ID_PACK_CUSTOM[start]||{};
+      ranges.push({
+        index,start,end,
+        name:String(custom.name||("ID Pack "+String(index+1).padStart(2,"0"))),
+        image:String(custom.image||""),
+        priceSeconds:Number.isFinite(Number(custom.priceSeconds))&&Number(custom.priceSeconds)>0
+          ? Number(custom.priceSeconds)
+          : null
+      });
     }
     return ranges;
   }
@@ -517,8 +541,14 @@
     return expectedCardIncome*standLimit(level);
   }
 
-  function idPackCost(rangeIndex,level=state.baseLevel){
-    const seconds=12+(Math.max(0,Number(rangeIndex)||0)*10);
+  function idPackCost(rangeOrIndex,level=state.baseLevel){
+    const range=typeof rangeOrIndex==="object"&&rangeOrIndex
+      ? rangeOrIndex
+      : idPackRanges().find(r=>r.index===Number(rangeOrIndex));
+    const index=range?range.index:Math.max(0,Number(rangeOrIndex)||0);
+    const seconds=range&&range.priceSeconds
+      ? range.priceSeconds
+      : 12+(index*10);
     return roundUpNice(modeledBaseIncomeForShop(level)*seconds);
   }
 
@@ -526,29 +556,45 @@
     const wrap=$("#idPackShop");if(!wrap)return;
     const ranges=idPackRanges();
     wrap.innerHTML=ranges.map(r=>{
-      const cost=idPackCost(r.index);
+      const cost=idPackCost(r);
       const minBonus=charIncomeBonusText(r.start),maxBonus=charIncomeBonusText(r.end);
+      const cover=r.image
+        ? '<div class="id-pack-cover has-image"><img src="'+escapeHtml(r.image)+'" alt="'+escapeHtml(r.name)+'"></div>'
+        : '<div class="id-pack-cover fallback"><span>PACK</span><b>'+String(r.index+1).padStart(2,"0")+'</b></div>';
       return '<article class="id-pack-card" style="--pack-index:'+r.index+'">'+
-        '<div class="id-pack-top"><span>ID PACK</span><strong>'+padId(r.start)+'–'+padId(r.end)+'</strong></div>'+
-        '<div class="id-pack-range"><b>'+r.start+'–'+r.end+'</b><small>Character Pool</small></div>'+
-        '<div class="id-pack-meta"><span>ID Income '+minBonus+' → '+maxBonus+'</span><span>Tier ใช้ Luck ปัจจุบัน</span></div>'+
-        '<button type="button" data-buy-id-pack="'+r.index+'">สุ่ม '+fmt(cost)+'</button>'+
+        cover+
+        '<div class="id-pack-content">'+
+          '<div class="id-pack-top"><span>ID PACK</span><strong>'+padId(r.start)+'–'+padId(r.end)+'</strong></div>'+
+          '<div class="id-pack-name">'+escapeHtml(r.name)+'</div>'+
+          '<div class="id-pack-range"><b>'+r.start+'–'+r.end+'</b><small>Character Pool</small></div>'+
+          '<div class="id-pack-meta"><span>ID Income '+minBonus+' → '+maxBonus+'</span><span>Tier ใช้ Luck ปัจจุบัน</span></div>'+
+          '<button type="button" data-buy-id-pack="'+r.index+'">สุ่ม '+fmt(cost)+'</button>'+
+        '</div>'+
       '</article>';
     }).join("");
+    wrap.querySelectorAll(".id-pack-cover img").forEach(img=>{
+      img.addEventListener("error",()=>{
+        const cover=img.closest(".id-pack-cover");
+        if(cover){
+          cover.className="id-pack-cover fallback";
+          cover.innerHTML="<span>NO IMAGE</span><b>PACK</b>";
+        }
+      },{once:true});
+    });
   }
 
   function buyIdPack(rangeIndex){
     const ranges=idPackRanges(),range=ranges.find(r=>r.index===rangeIndex);
     if(!range)return;
-    const cost=idPackCost(range.index);
+    const cost=idPackCost(range);
     if(state.money<cost){
-      toast("เงินไม่พอ · ID Pack "+range.start+"–"+range.end+" ใช้ "+fmt(cost));
+      toast("เงินไม่พอ · "+range.name+" ใช้ "+fmt(cost));
       return;
     }
     state.money-=cost;
     const tier=randomTier();
     const card=createCardFromTier(tier,range.start,range.end);
-    toast("เปิด ID Pack "+range.start+"–"+range.end+" · ได้ "+padId(card.charId)+" "+TIERS[tier].name+" ✨",true);
+    toast("เปิด "+range.name+" · ได้ "+padId(card.charId)+" "+TIERS[tier].name+" ✨",true);
     showReveal(card);
     renderAll();
   }
