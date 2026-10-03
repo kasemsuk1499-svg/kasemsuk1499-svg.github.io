@@ -7,7 +7,7 @@
   const ROLL_MS = 3500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
-  const CLOUD_TABLE = "card_base_saves";
+  const CLOUD_TABLE = "player_progress";
 
   const TIERS = [
     {name:"Common",color:"#9aa1ad",multi:1},
@@ -105,7 +105,6 @@
     const {error}=await supabaseClient.from(CLOUD_TABLE).upsert({
       user_id:authSession.user.id,
       state:snapshot,
-      save_version:1,
       updated_at:new Date().toISOString()
     },{onConflict:"user_id"});
     if(error){
@@ -295,7 +294,7 @@
     cloudLoading=true;cloudReady=false;updateSyncUi("syncing");
     const userId=authSession.user.id;
     const {data,error}=await supabaseClient.from(CLOUD_TABLE)
-      .select("state,updated_at,save_version")
+      .select("state,updated_at")
       .eq("user_id",userId)
       .maybeSingle();
 
