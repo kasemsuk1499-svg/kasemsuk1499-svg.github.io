@@ -5,6 +5,9 @@
   const CARD_MIN_ID = 1;
   const CARD_MAX_ID = 20;
   const ROLL_MS = 3500;
+  const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
+  const CLOUD_TABLE = "card_base_saves";
 
   const TIERS = [
     {name:"Common",color:"#9aa1ad",multi:1},
@@ -54,29 +57,69 @@
   let activeStand = null;
   let rollFrame = 0;
   let autoTimer = 0;
+  let supabaseClient = null;
+  let authSession = null;
+  let cloudReady = false;
+  let cloudLoading = false;
+  let cloudTimer = 0;
+  let activeCloudUserId = null;
+
+  function hydrateState(parsed){
+    const s={...newState(),...(parsed||{})};
+    s.cards=(Array.isArray(s.cards)?s.cards:[]).filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID);
+    s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
+    s.autoRolling=false;
+    s.targetFound=false;
+    const valid=new Set(s.cards.map(c=>c.uid));
+    const old=Array.isArray(s.placed)?s.placed:[];
+    s.placed=old.map(uid=>valid.has(uid)?uid:null);
+    s.uidCounter=Math.max(Number(s.uidCounter)||1,...s.cards.map(c=>(Number(c.uid)||0)+1));
+    return s;
+  }
 
   function load(){
     try{
       const raw=localStorage.getItem(SAVE_KEY);
       if(!raw) return newState();
-      const parsed=JSON.parse(raw);
-      const s={...newState(),...parsed};
-      s.cards=(Array.isArray(s.cards)?s.cards:[]).filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID);
-      s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
-      s.autoRolling=false;
-      s.targetFound=false;
-      const valid=new Set(s.cards.map(c=>c.uid));
-      const old=Array.isArray(s.placed)?s.placed:[];
-      s.placed=old.map(uid=>valid.has(uid)?uid:null);
-      return s;
+      return hydrateState(JSON.parse(raw));
     }catch{
       return newState();
     }
   }
 
+  function cloudPayload(){
+    return {...state,autoRolling:false,targetFound:false};
+  }
+
+  function scheduleCloudSave(){
+    if(!cloudReady||cloudLoading||!authSession||!supabaseClient)return;
+    clearTimeout(cloudTimer);
+    cloudTimer=setTimeout(()=>flushCloudSave(),900);
+    updateSyncUi("syncing");
+  }
+
+  async function flushCloudSave(){
+    if(!cloudReady||cloudLoading||!authSession||!supabaseClient)return;
+    clearTimeout(cloudTimer);
+    const snapshot=JSON.parse(JSON.stringify(cloudPayload()));
+    const {error}=await supabaseClient.from(CLOUD_TABLE).upsert({
+      user_id:authSession.user.id,
+      state:snapshot,
+      save_version:1,
+      updated_at:new Date().toISOString()
+    },{onConflict:"user_id"});
+    if(error){
+      console.error("Cloud save failed",error);
+      updateSyncUi("error");
+      return;
+    }
+    updateSyncUi("online");
+  }
+
   function save(){
     state.lastTick=Date.now();
     localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+    scheduleCloudSave();
   }
 
   function fmt(n){
@@ -205,6 +248,134 @@
   function hasRequiredCard(id,level){
     const card=bestRequiredCard(id);
     return !!card&&card.level>=level;
+  }
+
+  function updateSyncUi(mode="local"){
+    const dot=$("#syncDot"),label=$("#accountLabel"),sync=$("#syncLabel");
+    if(!dot||!label||!sync)return;
+    dot.className="sync-dot";
+    if(!authSession){
+      label.textContent="เล่นแบบ Local";
+      sync.textContent="ล็อกอินเพื่อใช้ Cloud Save";
+      return;
+    }
+    label.textContent=authSession.user.email||"Player";
+    if(mode==="syncing"){dot.classList.add("syncing");sync.textContent="กำลังซิงก์…"}
+    else if(mode==="error"){dot.classList.add("error");sync.textContent="Cloud มีปัญหา · เก็บ Local ไว้ก่อน"}
+    else{dot.classList.add("online");sync.textContent="Cloud Save พร้อมใช้งาน"}
+  }
+
+  function setAuthMessage(message,type=""){
+    const el=$("#authMessage");if(!el)return;
+    el.textContent=message||"";
+    el.className="auth-message"+(type?" "+type:"");
+  }
+
+  function renderAuth(){
+    const signedIn=!!authSession;
+    $("#authSignedOut").hidden=signedIn;
+    $("#authSignedIn").hidden=!signedIn;
+    if(signedIn)$("#authUserEmail").textContent=authSession.user.email||"Player";
+    updateSyncUi(signedIn?(cloudReady?"online":"syncing"):"local");
+  }
+
+  function openAuth(){
+    renderAuth();
+    $("#authModal").classList.add("show");
+    $("#authModal").setAttribute("aria-hidden","false");
+  }
+
+  function closeAuth(){
+    $("#authModal").classList.remove("show");
+    $("#authModal").setAttribute("aria-hidden","true");
+  }
+
+  async function loadCloudState(){
+    if(!authSession||!supabaseClient)return;
+    cloudLoading=true;cloudReady=false;updateSyncUi("syncing");
+    const userId=authSession.user.id;
+    const {data,error}=await supabaseClient.from(CLOUD_TABLE)
+      .select("state,updated_at,save_version")
+      .eq("user_id",userId)
+      .maybeSingle();
+
+    if(error){
+      console.error("Cloud load failed",error);
+      cloudLoading=false;updateSyncUi("error");return;
+    }
+
+    if(data&&data.state){
+      state=hydrateState(data.state);
+      const now=Date.now();
+      const offlineSeconds=Math.min(8*3600,Math.max(0,(now-(state.lastTick||now))/1000));
+      normalizeSlots();
+      if(offlineSeconds>2&&state.placed.some(Boolean)){
+        state.money+=totalIncome()*offlineSeconds;
+      }
+      state.lastTick=now;
+      localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+    }
+
+    cloudLoading=false;cloudReady=true;activeCloudUserId=userId;
+    if(!data)await flushCloudSave();
+    renderAll();
+    updateSyncUi("online");
+  }
+
+  async function handleAuthSession(session){
+    const previous=activeCloudUserId;
+    authSession=session||null;
+    renderAuth();
+    if(!authSession){
+      cloudReady=false;activeCloudUserId=null;return;
+    }
+    if(previous!==authSession.user.id||!cloudReady)await loadCloudState();
+  }
+
+  async function initCloud(){
+    if(!window.supabase||typeof window.supabase.createClient!=="function"){
+      updateSyncUi("error");
+      return;
+    }
+    supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+    const {data:{session},error}=await supabaseClient.auth.getSession();
+    if(error)console.error("Session read failed",error);
+    await handleAuthSession(session);
+    supabaseClient.auth.onAuthStateChange((_event,nextSession)=>{
+      Promise.resolve().then(()=>handleAuthSession(nextSession));
+    });
+  }
+
+  async function loginAccount(){
+    if(!supabaseClient){setAuthMessage("Cloud ยังไม่พร้อม ลองรีเฟรชหน้าเว็บ","error");return}
+    const email=$("#authEmail").value.trim(),password=$("#authPassword").value;
+    if(!email||!password){setAuthMessage("กรอกอีเมลและรหัสผ่านก่อนนะ","error");return}
+    setAuthMessage("กำลังเข้าสู่ระบบ…");
+    const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+    if(error){setAuthMessage(error.message,"error");return}
+    setAuthMessage("เข้าสู่ระบบสำเร็จ","ok");
+  }
+
+  async function signupAccount(){
+    if(!supabaseClient){setAuthMessage("Cloud ยังไม่พร้อม ลองรีเฟรชหน้าเว็บ","error");return}
+    const email=$("#authEmail").value.trim(),password=$("#authPassword").value;
+    if(!email||password.length<6){setAuthMessage("กรอกอีเมล และรหัสผ่านอย่างน้อย 6 ตัวอักษร","error");return}
+    setAuthMessage("กำลังสร้างบัญชี…");
+    const {data,error}=await supabaseClient.auth.signUp({email,password});
+    if(error){setAuthMessage(error.message,"error");return}
+    if(data.session)setAuthMessage("สร้างบัญชีและเข้าสู่ระบบแล้ว","ok");
+    else setAuthMessage("สร้างบัญชีแล้ว · เช็กอีเมลเพื่อยืนยัน จากนั้นกลับมาเข้าสู่ระบบ","ok");
+  }
+
+  async function logoutAccount(){
+    if(!supabaseClient)return;
+    await flushCloudSave();
+    const {error}=await supabaseClient.auth.signOut();
+    if(error){setAuthMessage(error.message,"error");return}
+    authSession=null;cloudReady=false;activeCloudUserId=null;
+    renderAuth();closeAuth();toast("ออกจากระบบแล้ว · เล่น Local ต่อได้");
   }
 
   function toast(msg,found=false){
@@ -506,6 +677,13 @@
       $$(".tab").forEach(x=>x.classList.remove("active"));$$(".panel").forEach(x=>x.classList.remove("active"));
       btn.classList.add("active");$("#panel-"+btn.dataset.tab).classList.add("active");if(btn.dataset.tab==="collection")renderCollection();
     }));
+    $("#accountBtn").addEventListener("click",openAuth);
+    $("#closeAuthModal").addEventListener("click",closeAuth);
+    $("[data-close-auth]").addEventListener("click",closeAuth);
+    $("#loginBtn").addEventListener("click",loginAccount);
+    $("#signupBtn").addEventListener("click",signupAccount);
+    $("#logoutBtn").addEventListener("click",logoutAccount);
+    $("#authPassword").addEventListener("keydown",e=>{if(e.key==="Enter")loginAccount()});
     $("#rollBtn").addEventListener("click",beginRoll);$("#autoBtn").addEventListener("click",toggleAuto);$("#packCard").addEventListener("click",openPack);
     $("#closeReveal").addEventListener("click",closeReveal);$("#closeStandModal").addEventListener("click",closeStand);$("[data-close-modal]").addEventListener("click",closeStand);
     $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);$("#rebirthBtn").addEventListener("click",doRebirth);
@@ -520,7 +698,7 @@
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
     document.addEventListener("keydown",e=>{
       if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling)beginRoll();
-      if(e.key==="Escape"){closeReveal();closeStand()}
+      if(e.key==="Escape"){closeReveal();closeStand();closeAuth()}
     });
     window.addEventListener("beforeunload",save);
   }
@@ -533,6 +711,8 @@
     if(state.rollingUntil>Date.now())tickRoll();
     else if(state.rollingUntil&&!state.currentPack){state.rollingUntil=0;state.currentPack={tier:randomTier()};renderAll()}
     setInterval(economyTick,1000);
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&authSession)loadCloudState()});
+    initCloud();
   }
 
   init();
