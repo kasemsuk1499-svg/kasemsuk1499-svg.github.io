@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261003-rebirth2">
+  <link rel="stylesheet" href="./style.css?v=20261003-leaderboard1">
 </head>
 <body>
   <div class="app-shell">
@@ -167,9 +167,19 @@
               </div>
               <div class="player-code">Player Code: <strong id="onlinePlayerCode">—</strong></div>
             </div>
-            <div class="online-self-stat">
-              <span>Base</span>
-              <strong id="onlineBaseLevel">Lv.1</strong>
+            <div class="online-self-stats">
+              <div class="online-self-stat">
+                <span>Base</span>
+                <strong id="onlineBaseLevel">Lv.1</strong>
+              </div>
+              <div class="online-self-stat">
+                <span>ยศ</span>
+                <strong id="onlineTitle">Rookie Collector</strong>
+              </div>
+              <div class="online-self-stat">
+                <span>อันดับเซิร์ฟ</span>
+                <strong id="onlineServerRank">#—</strong>
+              </div>
             </div>
           </div>
 
@@ -178,6 +188,23 @@
             <button id="playerSearchBtn" class="primary" type="button">ค้นหา</button>
           </div>
           <div id="playerSearchResults" class="social-list compact"></div>
+
+          <section class="leaderboard-box">
+            <div class="leaderboard-head">
+              <div>
+                <div class="eyebrow">SERVER LEADERBOARD</div>
+                <h3>อันดับทั้งเซิร์ฟ</h3>
+                <p class="muted">เรียงจาก Base Level ก่อน แล้วใช้รายได้รวมของฐานเป็นตัวตัดสิน</p>
+              </div>
+              <div class="leaderboard-summary">
+                <span>ผู้เล่นทั้งหมด <strong id="leaderboardTotal">—</strong></span>
+                <span>อันดับของฉัน <strong id="leaderboardMyRank">#—</strong></span>
+              </div>
+            </div>
+            <div id="serverLeaderboard" class="server-leaderboard">
+              <div class="social-empty">กำลังโหลดอันดับ…</div>
+            </div>
+          </section>
 
           <div class="online-columns">
             <section class="social-box">
@@ -345,6 +372,6 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261003-rebirth3" defer></script>
+  <script src="./app.js?v=20261003-leaderboard1" defer></script>
 </body>
 </html>
