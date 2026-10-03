@@ -1758,7 +1758,7 @@
 
   function renderAll(){
     syncCardIndex();
-    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();renderMutationEvent();save();
+    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();renderMutationEvent();save();
   }
 
   function rollTargetsReady(){
