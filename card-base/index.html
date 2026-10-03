@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261003-auth1">
+  <link rel="stylesheet" href="./style.css?v=20261003-userauth1">
 </head>
 <body>
   <div class="app-shell">
@@ -300,22 +300,36 @@
         </div>
 
         <div id="authSignedOut">
-          <p class="muted">ล็อกอินเพื่อเก็บฐาน การ์ด เงิน และ Progress ไว้บน Cloud ส่วนคนที่ไม่ล็อกอินยังเล่นแบบ Local ได้ตามปกติ</p>
+          <p class="muted">ใช้ Username + Password ได้เลย ไม่ต้องใช้อีเมล และเล่นเซฟเดียวกันได้ทุกเครื่อง</p>
           <div class="auth-fields">
-            <label><span>อีเมล</span><input id="authEmail" type="email" autocomplete="email" placeholder="player@example.com"></label>
-            <label><span>รหัสผ่าน</span><input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="อย่างน้อย 6 ตัวอักษร"></label>
+            <label><span>Username</span><input id="authUsername" type="text" autocomplete="username" maxlength="20" autocapitalize="none" spellcheck="false" placeholder="เช่น alice_01"></label>
+            <label><span>รหัสผ่าน</span><input id="authPassword" type="password" autocomplete="current-password" minlength="8" maxlength="72" placeholder="อย่างน้อย 8 ตัวอักษร"></label>
+            <label><span>ยืนยันรหัสผ่าน <small>(ตอนสร้างบัญชี)</small></span><input id="authPasswordConfirm" type="password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="กรอกซ้ำเมื่อสมัคร"></label>
           </div>
           <div class="auth-actions">
             <button id="loginBtn" class="primary" type="button">เข้าสู่ระบบ</button>
             <button id="signupBtn" class="secondary" type="button">สร้างบัญชี</button>
           </div>
           <p id="authMessage" class="auth-message"></p>
+          <div id="recoveryCodeBox" class="recovery-code-box" hidden>
+            <span>Recovery Code — เก็บไว้ใช้กู้รหัสผ่าน</span>
+            <strong id="recoveryCodeValue"></strong>
+            <small>โค้ดนี้จะแสดงตอนสมัคร/กู้บัญชีเท่านั้น ถ้าหายและลืมรหัสผ่านจะกู้บัญชีไม่ได้</small>
+          </div>
+          <details class="recover-panel">
+            <summary>ลืมรหัสผ่าน / ใช้ Recovery Code</summary>
+            <div class="auth-fields recover-fields">
+              <label><span>Recovery Code</span><input id="authRecoveryCode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"></label>
+              <label><span>รหัสผ่านใหม่</span><input id="authNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="อย่างน้อย 8 ตัวอักษร"></label>
+            </div>
+            <button id="recoverBtn" class="secondary" type="button">กู้บัญชีและเปลี่ยนรหัสผ่าน</button>
+          </details>
         </div>
 
         <div id="authSignedIn" class="auth-signed-in" hidden>
           <div class="cloud-orb">☁</div>
-          <strong id="authUserEmail">Player</strong>
-          <p class="muted">บัญชีนี้ใช้เซฟเดียวกันบนมือถือ แท็บเล็ต และเดสก์ท็อป</p>
+          <strong id="authUsernameLabel">Player</strong>
+          <p class="muted">Cloud Save และ Online Lobby เชื่อมกับ Username นี้แล้ว</p>
           <button id="logoutBtn" class="secondary" type="button">ออกจากระบบ</button>
         </div>
       </div>
@@ -325,6 +339,6 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261003-auth1" defer></script>
+  <script src="./app.js?v=20261003-userauth1" defer></script>
 </body>
 </html>
