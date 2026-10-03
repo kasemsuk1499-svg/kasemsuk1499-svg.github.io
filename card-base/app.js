@@ -794,7 +794,7 @@
       html+='<div class="visitor-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+'"><div class="visitor-card '+tierFxClass(c.tier)+'">'+
         '<img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div>'+
         '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
-        '<div class="visitor-meta"><b>'+padId(c.charId)+' · '+t.name+'</b><span>Lv.'+c.level+' · '+fmt(c.income||0)+'/s</span></div>'+
+        '<div class="visitor-meta"><b>'+padId(c.charId)+' · <span class="visitor-tier-name tier-label tier-'+c.tier+'" style="--tier:'+t.color+';color:'+t.color+'">'+t.name+'</span></b><span>Lv.'+c.level+' · '+fmt(c.income||0)+'/s</span></div>'+
         '</div></div>';
     }
     wrap.innerHTML=html;
