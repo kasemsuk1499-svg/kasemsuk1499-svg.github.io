@@ -1868,6 +1868,7 @@
       slot.type="button";
       slot.className="stand"+(c?" tier-shell tier-"+c.tier+" grade-shell-"+c.grade:" empty");
       slot.dataset.slot=i;
+      if(c)slot.dataset.cardUid=c.uid;
       if(!c){
         slot.innerHTML='<span class="stand-number">แท่น '+(i+1)+'</span><div class="empty-stand"><b>＋</b><span>เลือกการ์ดจากคลัง</span></div>';
       }else{
@@ -1880,7 +1881,7 @@
             '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
             '<div class="mini-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+
               '<b><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span><span class="tier-card-name">'+t.name+'</span></b>'+
-              '<span class="tier-card-sub">Lv.'+c.level+' · <strong class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></span>'+
+              '<span class="tier-card-sub">Lv.<span data-stand-stat="level">'+c.level+'</span> · <strong data-stand-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></span>'+
             '</div>'+
           '</div>';
         const img=slot.querySelector("img"); if(img) img.addEventListener("error",e=>e.currentTarget.style.display="none");
@@ -2015,16 +2016,16 @@
     $("#emptyCollection").style.display=arr.length?"none":"block";
     arr.forEach(c=>{
       const t=TIERS[c.tier],g=GRADES[c.grade],placed=state.placed.includes(c.uid),tradeLocked=cardIsTradeLocked(c);
-      const el=document.createElement("article"); el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade+(tradeLocked?" trade-locked":"");
+      const el=document.createElement("article"); el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade+(tradeLocked?" trade-locked":""); el.dataset.cardUid=c.uid;
       el.innerHTML=
         '<div class="card-art '+tierFxClass(c.tier)+mutationFxClass(c.mutation)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+mutationStyle(c.mutation)+'">'+
           '<img src="'+imageFor(c.charId)+'" alt="Character '+padId(c.charId)+'"><div class="tier-ring"></div>'+
           '<div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'<div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div>'+
         '</div>'+
         '<div class="card-body"><div class="card-stats">'+
-          '<div><span>Level</span><b>'+c.level+'</b></div><div><span>รายได้</span><b class="tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</b></div>'+
+          '<div><span>Level</span><b data-card-stat="level">'+c.level+'</b></div><div><span>รายได้</span><b data-card-stat="income" class="tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</b></div>'+
           '<div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div>'+
-          '<div><span>อัป Lv.</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div>'+
+          '<div><span>อัป Lv.</span><b data-card-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-card-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div>'+
           '<div><span>Mutation</span><b style="color:'+MUTATIONS[c.mutation||0].color+'">'+MUTATIONS[c.mutation||0].name+'</b></div><div><span>ได้จาก</span><b>'+(c.mutation?'First Open / Event':'รอ Mutation Event')+'</b></div>'+
         '</div>'+(tradeLocked?'<div class="trade-lock-banner">🔒 TRADE LOCK · รออีกฝ่ายตอบรับ</div>':'')+'<div class="card-actions">'+
           '<button data-a="place" '+(tradeLocked?"disabled":"")+'>'+(placed?"เอาออกจากฐาน":"วางในแท่นว่าง")+'</button><button data-a="level" '+(tradeLocked?"disabled":"")+'>อัป Level</button>'+
@@ -2362,9 +2363,9 @@
     if(!c){renderPicker(body,activeStand);return}
     const t=TIERS[c.tier],g=GRADES[c.grade];
     body.innerHTML=
-      '<div class="stand-detail"><div class="stand-detail-art '+tierFxClass(c.tier)+mutationFxClass(c.mutation)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+mutationStyle(c.mutation)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div><div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div></div>'+
-      '<div class="stand-detail-info"><div><div class="eyebrow">INCOME</div><div class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
-      '<div class="card-stats"><div><span>Level</span><b>'+c.level+'</b></div><div><span>Grade</span><b>'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b style="color:'+MUTATIONS[c.mutation||0].color+'">'+MUTATIONS[c.mutation||0].name+' · Income ×'+MUTATIONS[c.mutation||0].income.toFixed(2)+' · Luck ×'+MUTATIONS[c.mutation||0].luck.toFixed(2)+'</b></div><div><span>อัป Level</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Source</span><b>'+(c.mutation?'First Open / Event':'วางโชว์เพื่อรอ Event')+'</b></div></div>'+
+      '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+mutationFxClass(c.mutation)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+mutationStyle(c.mutation)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div><div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div></div>'+
+      '<div class="stand-detail-info"><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
+      '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b style="color:'+MUTATIONS[c.mutation||0].color+'">'+MUTATIONS[c.mutation||0].name+' · Income ×'+MUTATIONS[c.mutation||0].income.toFixed(2)+' · Luck ×'+MUTATIONS[c.mutation||0].luck.toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Source</span><b>'+(c.mutation?'First Open / Event':'วางโชว์เพื่อรอ Event')+'</b></div></div>'+
       '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
     body.querySelector('[data-modal-a="level"]').addEventListener("click",()=>{levelUp(c.uid,true)});
@@ -2401,11 +2402,103 @@
     state.placed[empty]=uid;toast("วางการ์ดที่แท่น "+(empty+1));renderAll();
   }
 
+  function replaceNumericClass(el,prefix,value){
+    if(!el)return;
+    [...el.classList].forEach(cls=>{if(cls.startsWith(prefix))el.classList.remove(cls)});
+    el.classList.add(prefix+value);
+  }
+
+  function refreshCardSurface(uid){
+    const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    const g=GRADES[c.grade],t=TIERS[c.tier];
+    const placed=state.placed.includes(c.uid);
+    const tradeLocked=cardIsTradeLocked(c);
+
+    // Collection card: update in place so its DOM node, hover state and FX timeline survive.
+    const el=document.querySelector('.card-item[data-card-uid="'+c.uid+'"]');
+    if(el){
+      replaceNumericClass(el,"grade-shell-",c.grade);
+      const art=el.querySelector(".card-art");
+      if(art)replaceNumericClass(art,"grade-shell-",c.grade);
+      const badge=el.querySelector(".card-grade");
+      if(badge){
+        badge.className="card-grade "+gradeFxClass(c.grade);
+        badge.style.setProperty("--grade",g.color);
+        badge.textContent=g.name;
+      }
+      const level=el.querySelector('[data-card-stat="level"]');if(level)level.textContent=c.level;
+      const income=el.querySelector('[data-card-stat="income"]');if(income)income.textContent=fmt(cardIncome(c))+"/s";
+      const upgrade=el.querySelector('[data-card-stat="upgrade"]');if(upgrade)upgrade.textContent=fmt(upgradeCost(c));
+      const gradeCost=el.querySelector('[data-card-stat="grade-cost"]');if(gradeCost)gradeCost.textContent=fmt(rerollCost(c));
+      const sell=el.querySelector('[data-a="sell"]');if(sell){
+        sell.textContent="ขาย "+fmt(sellValue(c));
+        sell.disabled=placed||c.locked||tradeLocked;
+      }
+      const auto=el.querySelector('[data-a="grade-auto"]');if(auto){
+        const running=!!(state.gradeAuto&&state.gradeAuto.uid===c.uid);
+        auto.classList.toggle("grade-running",running);
+        auto.textContent=running?"Auto Grade…":"Auto Grade";
+      }
+    }
+
+    // Base stand: also update without reconstructing every stand.
+    const stand=document.querySelector('.stand[data-card-uid="'+c.uid+'"]');
+    if(stand){
+      replaceNumericClass(stand,"grade-shell-",c.grade);
+      const mini=stand.querySelector(".mini-card");
+      if(mini)replaceNumericClass(mini,"grade-shell-",c.grade);
+      const badge=stand.querySelector(".stand-grade");
+      if(badge){
+        badge.className="stand-grade "+gradeFxClass(c.grade);
+        badge.style.setProperty("--grade",g.color);
+        badge.textContent=g.name;
+      }
+      const level=stand.querySelector('[data-stand-stat="level"]');if(level)level.textContent=c.level;
+      const income=stand.querySelector('[data-stand-stat="income"]');if(income)income.textContent=fmt(cardIncome(c))+"/s";
+    }
+
+    // Open stand modal, if this is the same card.
+    const detail=document.querySelector('.stand-detail[data-card-uid="'+c.uid+'"]');
+    if(detail){
+      const art=detail.querySelector(".stand-detail-art");
+      if(art)replaceNumericClass(art,"grade-shell-",c.grade);
+      const badge=detail.querySelector(".card-grade");
+      if(badge){
+        badge.className="card-grade "+gradeFxClass(c.grade);
+        badge.style.setProperty("--grade",g.color);
+        badge.textContent=g.name;
+      }
+      const level=detail.querySelector('[data-modal-stat="level"]');if(level)level.textContent=c.level;
+      const income=detail.querySelector('[data-modal-stat="income"]');if(income)income.textContent=fmt(cardIncome(c))+"/s";
+      const grade=detail.querySelector('[data-modal-stat="grade"]');if(grade)grade.textContent=g.name+" ×"+g.multi.toFixed(2);
+      const upgrade=detail.querySelector('[data-modal-stat="upgrade"]');if(upgrade)upgrade.textContent=fmt(upgradeCost(c));
+      const gradeCost=detail.querySelector('[data-modal-stat="grade-cost"]');if(gradeCost)gradeCost.textContent=fmt(rerollCost(c));
+      const auto=detail.querySelector('[data-modal-a="grade-auto"]');if(auto){
+        const running=!!(state.gradeAuto&&state.gradeAuto.uid===c.uid);
+        auto.classList.toggle("grade-running",running);
+        auto.textContent=running?"Auto Grade…":"Auto Grade";
+      }
+    }
+
+    // Only cheap global numbers need refreshing.
+    renderHeader();
+    renderRebirth();
+  }
+
+  function commitCardMicroUpdate(uid){
+    refreshCardSurface(uid);
+    recordCardInIndex(state.cards.find(x=>x.uid===uid));
+    localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+    scheduleCloudSave();
+  }
+
   function levelUp(uid,fromModal=false){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
     if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
     const cost=upgradeCost(c);if(state.money<cost){toast("เงินไม่พอ");return}
-    state.money-=cost;c.level++;toast("อัปเป็น Lv."+c.level);renderAll();if(fromModal)renderStandModal();
+    state.money-=cost;c.level++;
+    toast("อัปเป็น Lv."+c.level);
+    commitCardMicroUpdate(c.uid);
   }
   function rerollGrade(uid,fromModal=false){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
@@ -2422,7 +2515,7 @@
     state.money-=cost;
     c.grade=randomGrade();
     toast("Grade ใหม่: "+GRADES[c.grade].name+(c.grade>=8?" ✨":""));
-    renderAll();if(fromModal&&activeStand!==null)renderStandModal();
+    commitCardMicroUpdate(c.uid);
   }
 
   function openGradeAuto(uid){
@@ -2503,11 +2596,11 @@
 
   function stopGradeAuto(message="หยุด Auto Grade แล้ว"){
     if(!state.gradeAuto)return;
+    const uid=state.gradeAuto.uid;
     state.gradeAuto=null;
     clearTimeout(gradeTimer);
     toast(message);
-    renderAll();
-    if(activeStand!==null)renderStandModal();
+    commitCardMicroUpdate(uid);
   }
 
   function processGradeAuto(){
@@ -2546,8 +2639,7 @@
       job.nextAt+=GRADE_ROLL_MS;
     }
 
-    renderAll();
-    if(activeStand!==null&&state.placed[activeStand]===c.uid)renderStandModal();
+    commitCardMicroUpdate(c.uid);
 
     if(state.gradeAuto){
       const delay=Math.max(20,Math.min(250,state.gradeAuto.nextAt-Date.now()));
