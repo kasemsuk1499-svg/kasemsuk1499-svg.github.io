@@ -716,6 +716,7 @@
   async function refreshOnline(){
     renderOnlineShell();
     if(!gameToken||!supabaseClient)return;
+    await flushCloudSave();
     await publishPublicBase();
     const [socialResult,leaderResult,tradeResult]=await Promise.all([
       rpc("cb_social_snapshot",{p_token:gameToken}),
@@ -1763,7 +1764,7 @@
       if(action==="remove")removeFriend(btn.dataset.friend);
       if(action==="trade")openTradeOffer(btn.dataset.user);
     });
-    $("#refreshTradesBtn").addEventListener("click",()=>refreshTrades());
+    $("#refreshTradesBtn").addEventListener("click",async()=>{await flushCloudSave();await refreshTrades()});
     $("#closeTradeModal").addEventListener("click",closeTrade);
     $("[data-close-trade]").addEventListener("click",closeTrade);
     $("#tradeConfirmBtn").addEventListener("click",confirmTrade);
