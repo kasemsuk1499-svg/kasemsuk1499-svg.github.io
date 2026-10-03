@@ -790,7 +790,7 @@ body[data-rank-stage="5"] .primary.danger{
   width:100vw;
   height:100vh;
   pointer-events:none;
-  z-index:105;
+  z-index:125;
   contain:strict;
   transform:translateZ(0);
 }
@@ -863,4 +863,28 @@ body::before{
 @media (max-width:700px){
   #cardFxCanvas{z-index:105}
   .tier-ring{box-shadow:inset 0 0 10px color-mix(in srgb,var(--tier) 20%,transparent)!important}
+}
+
+/* Visit Base = showcase mode */
+#socialBaseName{
+  display:flex;align-items:baseline;gap:5px;flex-wrap:wrap
+}
+.visit-player-name{
+  display:inline-block;font-weight:1000;letter-spacing:.01em
+}
+.visit-base-suffix{
+  color:var(--text);font-weight:900
+}
+#socialBaseMeta{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap
+}
+.visit-base-level{color:var(--muted)}
+.visit-rank-badge{margin-top:0!important}
+.social-base-card{
+  border-color:color-mix(in srgb,var(--rank,#8d7cff) 22%,var(--border));
+  box-shadow:0 0 34px color-mix(in srgb,var(--rank,#8d7cff) 10%,transparent)
+}
+#socialBaseStands .visitor-stand.tier-8,
+#socialBaseStands .visitor-stand.tier-9{
+  border-width:2px
 }
