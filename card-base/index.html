@@ -115,6 +115,13 @@
             <div class="eyebrow">LUCK PROFILE</div>
             <h3 id="luckTitle">Luck ×1.00</h3>
             <div id="odds" class="odds"></div>
+            <div class="odds-divider"></div>
+            <div class="eyebrow">GRADE RATE</div>
+            <div class="grade-rate-head">
+              <h3>โอกาสสุ่ม Grade</h3>
+              <span>Luck ไม่ส่งผล</span>
+            </div>
+            <div id="gradeOdds" class="odds grade-odds"></div>
           </aside>
         </div>
       </section>
@@ -222,6 +229,31 @@
               <div id="friendsList" class="social-list"></div>
             </section>
           </div>
+
+          <section class="trade-center">
+            <div class="trade-center-head">
+              <div>
+                <div class="eyebrow">CARD TRADE</div>
+                <h3>ตลาดแลกการ์ดกับเพื่อน</h3>
+                <p class="muted">แลก 1 ใบ ↔ 1 ใบ · การ์ดที่เสนอจะถูกล็อกจนกว่าจะยกเลิกหรือจบการแลก</p>
+              </div>
+              <button id="refreshTradesBtn" class="secondary" type="button">รีเฟรช Trade</button>
+            </div>
+            <div class="trade-columns">
+              <div class="trade-box">
+                <div class="social-title"><strong>ข้อเสนอที่ได้รับ</strong><small id="tradeIncomingCount">0</small></div>
+                <div id="tradeIncomingList" class="trade-list"></div>
+              </div>
+              <div class="trade-box">
+                <div class="social-title"><strong>ข้อเสนอที่ส่ง</strong><small id="tradeOutgoingCount">0</small></div>
+                <div id="tradeOutgoingList" class="trade-list"></div>
+              </div>
+              <div class="trade-box trade-history">
+                <div class="social-title"><strong>ประวัติล่าสุด</strong><small>12 รายการ</small></div>
+                <div id="tradeRecentList" class="trade-list"></div>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -252,6 +284,14 @@
             </div>
           </div>
         </div>
+
+        <details class="rank-catalog-box" open>
+          <summary>
+            <span><span class="eyebrow">RANK CATALOG</span><strong>ยศทั้งหมด 40 ระดับ</strong></span>
+            <small>Base Lv.1 → Lv.40</small>
+          </summary>
+          <div id="rankCatalog" class="rank-catalog"></div>
+        </details>
       </section>
     </main>
 
@@ -317,6 +357,30 @@
           <button id="closeSocialBaseModal" class="icon-btn" type="button" aria-label="ปิด">✕</button>
         </div>
         <div id="socialBaseStands" class="visitor-stands"></div>
+      </div>
+    </div>
+
+    <div id="tradeModal" class="modal trade-modal" aria-hidden="true">
+      <button class="modal-backdrop" data-close-trade type="button" aria-label="ปิด"></button>
+      <div class="modal-card trade-modal-card">
+        <div class="modal-top">
+          <div>
+            <div class="eyebrow">CARD TRADE</div>
+            <h2 id="tradeModalTitle">เสนอแลกการ์ด</h2>
+            <p id="tradeModalSubtitle" class="muted"></p>
+          </div>
+          <button id="closeTradeModal" class="icon-btn" type="button" aria-label="ปิด">✕</button>
+        </div>
+        <div id="tradeOfferedPreview" class="trade-offered-preview" hidden></div>
+        <div class="trade-picker-head">
+          <div>
+            <strong id="tradePickerTitle">เลือกการ์ดของคุณ</strong>
+            <small>การ์ดที่วางฐาน ล็อก หรืออยู่ใน Trade อื่นจะเลือกไม่ได้</small>
+          </div>
+          <span id="tradeSelectedLabel" class="badge">ยังไม่เลือก</span>
+        </div>
+        <div id="tradeCardPicker" class="trade-card-picker"></div>
+        <button id="tradeConfirmBtn" class="primary" type="button" disabled>ยืนยัน Trade</button>
       </div>
     </div>
 
