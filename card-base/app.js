@@ -8,6 +8,7 @@
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
   const CLOUD_TABLE = "card_base_saves";
+  const GRADE_ROLL_MS = 450;
 
   const TIERS = [
     {name:"Common",color:"#9aa1ad",multi:1},
@@ -35,6 +36,8 @@
     {name:"SSS★",color:"#fff2a9",multi:5.00}
   ];
 
+  const GRADE_REROLL_COSTS = [1000,2000,3000,5500,10000,18000,32000,60000,110000,200000];
+
   const TITLES = [
     "Rookie Collector","Card Scout","Pack Seeker","Card Hunter","Vault Keeper",
     "Elite Collector","Card Warden","Treasure Keeper","Renowned Collector","Hall Master",
@@ -50,13 +53,16 @@
   const newState = () => ({
     money:0, baseLevel:1, cards:[], placed:[],
     currentPack:null, rollingUntil:0, lastTick:Date.now(), uidCounter:1,
-    autoTargets:[], autoRolling:false, targetFound:false
+    autoTargets:[], autoRolling:false, fullAuto:false, targetFound:false,
+    storedPacks:[], packUidCounter:1, gradeAuto:null
   });
 
   let state = load();
   let activeStand = null;
   let rollFrame = 0;
   let autoTimer = 0;
+  let gradeTimer = 0;
+  let gradeAutoSetupUid = null;
   let supabaseClient = null;
   let authSession = null;
   let cloudReady = false;
@@ -72,12 +78,17 @@
     const s={...newState(),...(parsed||{})};
     s.cards=(Array.isArray(s.cards)?s.cards:[]).filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID);
     s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
+    s.storedPacks=(Array.isArray(s.storedPacks)?s.storedPacks:[]).filter(p=>p&&Number.isInteger(p.tier)&&p.tier>=0&&p.tier<10);
     s.autoRolling=false;
+    s.fullAuto=false;
     s.targetFound=false;
+    s.gradeAuto=null;
+    s.rollingUntil=0;
     const valid=new Set(s.cards.map(c=>c.uid));
     const old=Array.isArray(s.placed)?s.placed:[];
     s.placed=old.map(uid=>valid.has(uid)?uid:null);
     s.uidCounter=Math.max(Number(s.uidCounter)||1,...s.cards.map(c=>(Number(c.uid)||0)+1));
+    s.packUidCounter=Math.max(Number(s.packUidCounter)||1,...s.storedPacks.map(p=>(Number(p.uid)||0)+1));
     return s;
   }
 
@@ -92,7 +103,7 @@
   }
 
   function cloudPayload(){
-    return {...state,autoRolling:false,targetFound:false};
+    return {...state,autoRolling:false,fullAuto:false,targetFound:false,gradeAuto:null,rollingUntil:0};
   }
 
   function scheduleCloudSave(){
@@ -121,7 +132,6 @@
   }
 
   function save(){
-    state.lastTick=Date.now();
     localStorage.setItem(SAVE_KEY,JSON.stringify(state));
     scheduleCloudSave();
   }
@@ -179,9 +189,7 @@
   }
 
   function rerollCost(card){
-    const income=cardIntrinsicIncome(card);
-    const gradePressure=18*Math.pow(1.72,card.grade);
-    return roundUpNice(Math.min(income*gradePressure,Number.MAX_SAFE_INTEGER));
+    return GRADE_REROLL_COSTS[card.tier]||GRADE_REROLL_COSTS[0];
   }
 
   function sellValue(card){
@@ -311,7 +319,7 @@
     if(data&&data.state){
       state=hydrateState(data.state);
       const now=Date.now();
-      const offlineSeconds=Math.min(8*3600,Math.max(0,(now-(state.lastTick||now))/1000));
+      const offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
       normalizeSlots();
       if(offlineSeconds>2&&state.placed.some(Boolean)){
         state.money+=totalIncome()*offlineSeconds;
@@ -758,11 +766,16 @@
         '<span>'+t.name+(locked?' · Locked':'')+'</span></label>';
     }).join("");
     $("#autoBtn").classList.toggle("on",state.autoRolling);
-    $("#autoBtn").textContent=state.autoRolling?"หยุด Auto Roll":"เริ่ม Auto Roll";
-    $("#autoStatus").className="auto-status"+(state.autoRolling?" on":"");
-    $("#autoStatus").textContent=state.autoRolling
-      ?"กำลังหา: "+state.autoTargets.map(i=>TIERS[i].name).join(", ")
-      :"Auto Roll ปิดอยู่";
+    $("#autoBtn").textContent=state.autoRolling?"หยุด Auto":"Auto · หยุดเมื่อเจอ";
+    $("#fullAutoBtn").classList.toggle("on",state.fullAuto);
+    $("#fullAutoBtn").textContent=state.fullAuto?"หยุด Full Auto":"Full Auto";
+    const active=state.autoRolling||state.fullAuto;
+    $("#autoStatus").className="auto-status"+(active?" on":"");
+    $("#autoStatus").textContent=state.fullAuto
+      ?"Full Auto · เก็บซองเป้าหมายแล้วสุ่มต่อ: "+state.autoTargets.map(i=>TIERS[i].name).join(", ")
+      :state.autoRolling
+        ?"Auto · หยุดเมื่อเจอ: "+state.autoTargets.map(i=>TIERS[i].name).join(", ")
+        :"Auto Roll ปิดอยู่";
   }
 
   function renderPack(){
@@ -771,7 +784,7 @@
       card.className="pack-card empty";
       card.style.removeProperty("--pack");
       $("#packTier").textContent="NO PACK";
-      $("#packHint").textContent=state.autoRolling?"Auto Roll กำลังทำงาน…":"กดสุ่มซองก่อน";
+      $("#packHint").textContent=state.fullAuto?"Full Auto กำลังสุ่มและเก็บซองเป้าหมาย…":state.autoRolling?"Auto Roll กำลังทำงาน…":"กดสุ่มซองก่อน";
       return;
     }
     const t=TIERS[p.tier];
@@ -779,6 +792,44 @@
     card.style.setProperty("--pack",t.color);
     $("#packTier").textContent=t.name.toUpperCase();
     $("#packHint").textContent="คลิกเพื่อเปิด · การ์ดด้านในเป็น "+t.name+" แน่นอน";
+  }
+
+  function renderStoredPacks(){
+    const count=state.storedPacks.length;
+    $("#storedPackCount").textContent=count+" ซอง";
+    const wrap=$("#storedPacks");
+    if(!count){
+      wrap.innerHTML='<div class="social-empty">ยังไม่มีซองที่เก็บไว้</div>';
+      return;
+    }
+    const groups=new Map();
+    state.storedPacks.forEach(p=>groups.set(p.tier,(groups.get(p.tier)||0)+1));
+    wrap.innerHTML=[...groups.entries()].sort((a,b)=>b[0]-a[0]).map(([tier,n])=>{
+      const t=TIERS[tier];
+      return '<div class="stored-pack-row" style="--tier:'+t.color+'">'+
+        '<div class="stored-pack-main"><strong>'+t.name+'</strong><span>'+n+' ซอง</span></div>'+
+        '<button data-open-stored-tier="'+tier+'">เปิด 1 ซอง</button></div>';
+    }).join("");
+  }
+
+  function storePack(tier,obtainedAt=Date.now()){
+    state.storedPacks.push({uid:state.packUidCounter++,tier,obtainedAt});
+  }
+
+  function openStoredPack(tier){
+    const idx=state.storedPacks.findIndex(p=>p.tier===tier);
+    if(idx<0)return;
+    const [pack]=state.storedPacks.splice(idx,1);
+    const card=createCardFromTier(pack.tier);
+    showReveal(card);
+    renderAll();
+  }
+
+  function createCardFromTier(tier){
+    const charId=CARD_MIN_ID+Math.floor(Math.random()*(CARD_MAX_ID-CARD_MIN_ID+1));
+    const card={uid:state.uidCounter++,charId,tier,grade:0,level:1,locked:false,obtainedAt:Date.now()};
+    state.cards.push(card);
+    return card;
   }
 
   function renderCollection(){
@@ -806,7 +857,8 @@
           '<div><span>อัป Lv.</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div>'+
         '</div><div class="card-actions">'+
           '<button data-a="place">'+(placed?"เอาออกจากฐาน":"วางในแท่นว่าง")+'</button><button data-a="level">อัป Level</button>'+
-          '<button data-a="grade">สุ่ม Grade</button><button class="'+(c.locked?"locked":"")+'" data-a="lock">'+(c.locked?"🔒 ปลดล็อก":"🔓 ล็อก")+'</button>'+
+          '<button data-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button>'+
+          '<button class="'+(c.locked?"locked":"")+'" data-a="lock">'+(c.locked?"🔒 ปลดล็อก":"🔓 ล็อก")+'</button>'+
           '<button class="sell" data-a="sell" '+((placed||c.locked)?"disabled":"")+'>ขาย '+fmt(sellValue(c))+'</button>'+
         '</div></div>';
       const img=el.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
@@ -816,6 +868,7 @@
         if(a==="place")togglePlace(c.uid);
         if(a==="level")levelUp(c.uid);
         if(a==="grade")rerollGrade(c.uid);
+        if(a==="grade-auto")openGradeAuto(c.uid);
         if(a==="lock")toggleLock(c.uid);
         if(a==="sell")sellCard(c.uid);
       });
@@ -841,59 +894,164 @@
   }
 
   function renderAll(){
-    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderCollection();renderRebirth();renderOnlineShell();save();
+    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderRebirth();renderOnlineShell();save();
+  }
+
+  function rollTargetsReady(){
+    const max=maxTierForLevel();
+    state.autoTargets=state.autoTargets.filter(i=>i<max);
+    if(!state.autoTargets.length){
+      toast("ติ๊ก Tier ที่ต้องการอย่างน้อย 1 ระดับก่อน");
+      return false;
+    }
+    return true;
+  }
+
+  function updateRollProgress(){
+    if(!state.rollingUntil){
+      $("#timerFill").style.width="100%";
+      $("#timerText").textContent=state.targetFound?"เจอเป้าหมายแล้ว":"พร้อมสุ่ม";
+      $("#rollBtn").disabled=false;
+      return;
+    }
+    const remaining=Math.max(0,state.rollingUntil-Date.now());
+    const p=Math.max(0,Math.min(1,1-(remaining/ROLL_MS)));
+    $("#timerFill").style.width=(p*100)+"%";
+    $("#timerText").textContent="กำลังสุ่ม… "+(remaining/1000).toFixed(1)+" วิ";
+    $("#rollBtn").disabled=true;
+  }
+
+  function scheduleRollEngine(){
+    clearTimeout(autoTimer);
+    if(!state.rollingUntil)return;
+    const remaining=Math.max(0,state.rollingUntil-Date.now());
+    autoTimer=setTimeout(processRollEngine,Math.min(250,Math.max(20,remaining)));
   }
 
   function beginRoll(){
     if(Date.now()<state.rollingUntil)return;
-    state.currentPack=null;state.targetFound=false;state.rollingUntil=Date.now()+ROLL_MS;
-    $("#rollBtn").disabled=true;renderPack();cancelAnimationFrame(rollFrame);tickRoll();save();
+    state.currentPack=null;
+    state.targetFound=false;
+    state.rollingUntil=Date.now()+ROLL_MS;
+    renderPack();renderFilters();updateRollProgress();save();
+    scheduleRollEngine();
+  }
+
+  function manualRoll(){
+    if(state.autoRolling||state.fullAuto){
+      state.autoRolling=false;state.fullAuto=false;
+      clearTimeout(autoTimer);state.rollingUntil=0;
+    }
+    beginRoll();
+  }
+
+  function processRollEngine(){
+    clearTimeout(autoTimer);
+    if(!state.rollingUntil){updateRollProgress();return}
+    const now=Date.now();
+    if(now<state.rollingUntil){
+      updateRollProgress();
+      scheduleRollEngine();
+      return;
+    }
+
+    let processed=0,storedHits=0,lastStoredTier=null;
+    while(state.rollingUntil&&now>=state.rollingUntil&&processed<2000){
+      const finishedAt=state.rollingUntil;
+      const tier=randomTier();
+      processed++;
+
+      if(state.fullAuto){
+        if(state.autoTargets.includes(tier)){
+          storePack(tier,finishedAt);
+          storedHits++;
+          lastStoredTier=tier;
+        }
+        state.currentPack=null;
+        state.targetFound=false;
+        state.rollingUntil=finishedAt+ROLL_MS;
+        continue;
+      }
+
+      if(state.autoRolling){
+        if(state.autoTargets.includes(tier)){
+          state.currentPack={tier};
+          state.autoRolling=false;
+          state.targetFound=true;
+          state.rollingUntil=0;
+          toast("เจอ "+TIERS[tier].name+" แล้ว! Auto หยุดให้แล้ว ✨",true);
+          break;
+        }
+        state.currentPack=null;
+        state.rollingUntil=finishedAt+ROLL_MS;
+        continue;
+      }
+
+      state.currentPack={tier};
+      state.rollingUntil=0;
+      toast("ได้ซอง "+TIERS[tier].name+"!");
+      break;
+    }
+
+    if(storedHits){
+      toast("Full Auto เก็บ "+storedHits+" ซอง"+(lastStoredTier!==null?" · ล่าสุด "+TIERS[lastStoredTier].name:"")+" ✨",true);
+    }
+
+    renderPack();renderFilters();renderStoredPacks();updateRollProgress();save();
+
+    if(state.rollingUntil){
+      if(Date.now()>=state.rollingUntil)setTimeout(processRollEngine,0);
+      else scheduleRollEngine();
+    }
   }
 
   function tickRoll(){
-    const remaining=state.rollingUntil-Date.now();
-    if(remaining<=0){
-      state.rollingUntil=0;
-      state.currentPack={tier:randomTier()};
-      const hit=state.autoRolling&&state.autoTargets.includes(state.currentPack.tier);
-      if(hit){
-        state.autoRolling=false;state.targetFound=true;
-        clearTimeout(autoTimer);
-        toast("เจอ "+TIERS[state.currentPack.tier].name+" แล้ว! Auto Roll หยุดให้แล้ว ✨",true);
-      }else if(state.autoRolling){
-        autoTimer=setTimeout(()=>{if(state.autoRolling)beginRoll()},450);
-      }else{
-        toast("ได้ซอง "+TIERS[state.currentPack.tier].name+"!");
-      }
-      $("#rollBtn").disabled=false;$("#timerFill").style.width="100%";$("#timerText").textContent=hit?"เจอเป้าหมายแล้ว":"พร้อม · สุ่มใหม่ได้";
-      renderAll();return;
-    }
-    const p=1-(remaining/ROLL_MS);
-    $("#timerFill").style.width=(p*100)+"%";$("#timerText").textContent="กำลังสุ่ม… "+(remaining/1000).toFixed(1)+" วิ";
-    $("#rollBtn").disabled=true;rollFrame=requestAnimationFrame(tickRoll);
+    processRollEngine();
   }
 
   function toggleAuto(){
     if(state.autoRolling){
-      state.autoRolling=false;clearTimeout(autoTimer);toast("หยุด Auto Roll แล้ว");renderFilters();save();return;
+      state.autoRolling=false;state.rollingUntil=0;clearTimeout(autoTimer);
+      toast("หยุด Auto Roll แล้ว");renderFilters();renderPack();updateRollProgress();save();return;
     }
-    const max=maxTierForLevel();
-    state.autoTargets=state.autoTargets.filter(i=>i<max);
-    if(!state.autoTargets.length){toast("ติ๊ก Tier ที่ต้องการอย่างน้อย 1 ระดับก่อน");return}
+    if(!rollTargetsReady())return;
+    state.fullAuto=false;
+    state.autoRolling=true;
+    state.targetFound=false;
     if(state.currentPack&&state.autoTargets.includes(state.currentPack.tier)){
-      state.targetFound=true;toast("ซองปัจจุบันตรงกับ Filter อยู่แล้ว ✨",true);renderAll();return;
+      state.autoRolling=false;state.targetFound=true;
+      toast("ซองปัจจุบันตรงกับ Filter อยู่แล้ว ✨",true);
+      renderAll();return;
     }
-    state.autoRolling=true;state.targetFound=false;renderFilters();save();
-    if(Date.now()>=state.rollingUntil)beginRoll();
+    state.currentPack=null;
+    state.rollingUntil=0;
+    renderFilters();save();beginRoll();
+  }
+
+  function toggleFullAuto(){
+    if(state.fullAuto){
+      state.fullAuto=false;state.rollingUntil=0;clearTimeout(autoTimer);
+      toast("หยุด Full Auto แล้ว");renderFilters();renderPack();updateRollProgress();save();return;
+    }
+    if(!rollTargetsReady())return;
+    state.autoRolling=false;
+    state.fullAuto=true;
+    state.targetFound=false;
+    if(state.currentPack&&state.autoTargets.includes(state.currentPack.tier)){
+      storePack(state.currentPack.tier);
+      toast("เก็บซอง "+TIERS[state.currentPack.tier].name+" เข้าคลังแล้ว ✨",true);
+    }
+    state.currentPack=null;
+    state.rollingUntil=0;
+    renderFilters();renderStoredPacks();save();beginRoll();
   }
 
   function openPack(){
     if(!state.currentPack||Date.now()<state.rollingUntil)return;
-    state.autoRolling=false;clearTimeout(autoTimer);
     const tier=state.currentPack.tier;
-    const charId=CARD_MIN_ID+Math.floor(Math.random()*(CARD_MAX_ID-CARD_MIN_ID+1));
-    const card={uid:state.uidCounter++,charId,tier,grade:0,level:1,locked:false,obtainedAt:Date.now()};
-    state.cards.push(card);state.currentPack=null;state.targetFound=false;showReveal(card);renderAll();
+    const card=createCardFromTier(tier);
+    state.currentPack=null;state.targetFound=false;
+    showReveal(card);renderAll();
   }
 
   function showReveal(c){
@@ -921,10 +1079,11 @@
       '<div class="stand-detail"><div class="stand-detail-art" style="'+tierStyle(c.tier)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade" style="--grade:'+g.color+'">'+g.name+'</div><div class="card-tier">'+t.name+'</div><div class="card-id">'+padId(c.charId)+'</div></div>'+
       '<div class="stand-detail-info"><div><div class="eyebrow">INCOME</div><div class="big-income">'+fmt(cardIncome(c))+'/s</div></div>'+
       '<div class="card-stats"><div><span>Level</span><b>'+c.level+'</b></div><div><span>Grade</span><b>'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>อัป Level</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div></div>'+
-      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
+      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
     body.querySelector('[data-modal-a="level"]').addEventListener("click",()=>{levelUp(c.uid,true)});
     body.querySelector('[data-modal-a="grade"]').addEventListener("click",()=>{rerollGrade(c.uid,true)});
+    body.querySelector('[data-modal-a="grade-auto"]').addEventListener("click",()=>{openGradeAuto(c.uid)});
     body.querySelector('[data-modal-a="remove"]').addEventListener("click",()=>{state.placed[activeStand]=null;toast("ถอดการ์ดจากแท่นแล้ว");renderAll();renderStandModal()});
     body.querySelector('[data-modal-a="change"]').addEventListener("click",()=>renderPicker(body,activeStand,c.uid));
   }
@@ -961,11 +1120,108 @@
   }
   function rerollGrade(uid,fromModal=false){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
-    const cost=rerollCost(c);if(state.money<cost){toast("เงินไม่พอ");return}
-    state.money-=cost;const rolled=randomGrade();
-    if(rolled>c.grade){c.grade=rolled;toast("Grade ใหม่: "+GRADES[rolled].name+" ✨")}else toast("ได้ "+GRADES[rolled].name+" · เก็บ Grade เดิมไว้");
-    renderAll();if(fromModal)renderStandModal();
+    if(state.gradeAuto&&state.gradeAuto.uid===uid){toast("Auto Grade กำลังทำงานอยู่");return}
+    const cost=rerollCost(c);
+    if(state.money<cost){toast("เงินไม่พอ · ต้องใช้ "+fmt(cost));return}
+    const ok=window.confirm(
+      "สุ่ม Grade ใหม่ของ "+padId(c.charId)+" ใช้เงิน "+fmt(cost)+
+      "\nGrade ปัจจุบัน: "+GRADES[c.grade].name+
+      "\n\nผลใหม่จะเขียนทับ Grade เดิมทันที แม้จะต่ำลง ต้องการสุ่มต่อไหม?"
+    );
+    if(!ok)return;
+    state.money-=cost;
+    c.grade=randomGrade();
+    toast("Grade ใหม่: "+GRADES[c.grade].name+(c.grade>=8?" ✨":""));
+    renderAll();if(fromModal&&activeStand!==null)renderStandModal();
   }
+
+  function openGradeAuto(uid){
+    const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    gradeAutoSetupUid=uid;
+    const g=GRADES[c.grade];
+    $("#gradeAutoCardInfo").innerHTML='<strong>'+padId(c.charId)+' · '+TIERS[c.tier].name+'</strong>'+
+      '<span>Grade ปัจจุบัน '+g.name+' · '+fmt(rerollCost(c))+' ต่อครั้ง</span>';
+    $("#gradeTargetSelect").innerHTML=GRADES.map((x,i)=>'<option value="'+i+'">'+x.name+'</option>').join("");
+    $("#gradeTargetSelect").value=String(Math.min(9,c.grade+1));
+    $("#startGradeAutoBtn").hidden=!!state.gradeAuto;
+    $("#stopGradeAutoBtn").hidden=!state.gradeAuto;
+    $("#gradeAutoModal").classList.add("show");
+    $("#gradeAutoModal").setAttribute("aria-hidden","false");
+  }
+
+  function closeGradeAuto(){
+    $("#gradeAutoModal").classList.remove("show");
+    $("#gradeAutoModal").setAttribute("aria-hidden","true");
+    gradeAutoSetupUid=null;
+  }
+
+  function startGradeAuto(){
+    const c=state.cards.find(x=>x.uid===gradeAutoSetupUid);if(!c)return;
+    const target=Number($("#gradeTargetSelect").value);
+    if(!Number.isInteger(target)||target<0||target>=GRADES.length)return;
+    if(c.grade===target){toast("การ์ดใบนี้เป็น Grade "+GRADES[target].name+" อยู่แล้ว");return}
+    const cost=rerollCost(c);
+    const ok=window.confirm(
+      "เริ่ม Auto Grade "+padId(c.charId)+" → "+GRADES[target].name+
+      "\nค่าใช้จ่ายคงที่ "+fmt(cost)+" ต่อครั้ง"+
+      "\n\nGrade จะเปลี่ยนทุกครั้ง แม้ต่ำลง และระบบจะสุ่มจนเจอเป้าหมายหรือเงินไม่พอ ต้องการเริ่มไหม?"
+    );
+    if(!ok)return;
+    state.gradeAuto={uid:c.uid,target,nextAt:Date.now(),startedAt:Date.now()};
+    closeGradeAuto();
+    toast("เริ่ม Auto Grade → "+GRADES[target].name);
+    save();
+    processGradeAuto();
+  }
+
+  function stopGradeAuto(message="หยุด Auto Grade แล้ว"){
+    if(!state.gradeAuto)return;
+    state.gradeAuto=null;
+    clearTimeout(gradeTimer);
+    toast(message);
+    renderAll();
+    if(activeStand!==null)renderStandModal();
+  }
+
+  function processGradeAuto(){
+    clearTimeout(gradeTimer);
+    const job=state.gradeAuto;
+    if(!job)return;
+    accrueIncomeToNow();
+    const c=state.cards.find(x=>x.uid===job.uid);
+    if(!c){stopGradeAuto("ไม่พบการ์ด · Auto Grade หยุดแล้ว");return}
+    if(c.grade===job.target){stopGradeAuto("ได้ Grade "+GRADES[c.grade].name+" แล้ว! ✨");return}
+
+    const now=Date.now();
+    let loops=0;
+    while(state.gradeAuto&&now>=state.gradeAuto.nextAt&&loops<1000){
+      const cost=rerollCost(c);
+      if(state.money<cost){
+        const latest=GRADES[c.grade].name;
+        state.gradeAuto=null;
+        toast("เงินไม่พอ · Auto Grade หยุดที่ "+latest);
+        break;
+      }
+      state.money-=cost;
+      c.grade=randomGrade();
+      loops++;
+      if(c.grade===job.target){
+        state.gradeAuto=null;
+        toast("Auto Grade สำเร็จ: "+GRADES[c.grade].name+" ✨",true);
+        break;
+      }
+      job.nextAt+=GRADE_ROLL_MS;
+    }
+
+    renderAll();
+    if(activeStand!==null&&state.placed[activeStand]===c.uid)renderStandModal();
+
+    if(state.gradeAuto){
+      const delay=Math.max(20,Math.min(250,state.gradeAuto.nextAt-Date.now()));
+      gradeTimer=setTimeout(processGradeAuto,delay);
+    }
+  }
+
   function toggleLock(uid){const c=state.cards.find(x=>x.uid===uid);if(!c)return;c.locked=!c.locked;renderAll()}
   function sellCard(uid){
     const c=state.cards.find(x=>x.uid===uid);if(!c||c.locked||state.placed.includes(uid))return;
@@ -979,9 +1235,21 @@
     state.money=0;state.baseLevel++;normalizeSlots();toast("Rebirth สำเร็จ! ฐาน Lv."+state.baseLevel);renderAll();
   }
 
+  function accrueIncomeToNow(){
+    const now=Date.now();
+    const dt=Math.max(0,(now-(state.lastTick||now))/1000);
+    if(dt>0){
+      state.money+=totalIncome()*dt;
+      state.lastTick=now;
+    }
+    return dt;
+  }
+
   function economyTick(){
-    const now=Date.now(),dt=Math.min(5,(now-state.lastTick)/1000);
-    if(dt>0){state.money+=totalIncome()*dt;state.lastTick=now;renderHeader();renderRebirth();if(Math.random()<0.15)save()}
+    if(accrueIncomeToNow()>0){
+      renderHeader();renderRebirth();
+      if(Math.random()<0.15)save();
+    }
   }
 
   function bind(){
@@ -1013,7 +1281,10 @@
       if(action==="accept")acceptFriend(btn.dataset.friend);
       if(action==="remove")removeFriend(btn.dataset.friend);
     });
-    $("#rollBtn").addEventListener("click",beginRoll);$("#autoBtn").addEventListener("click",toggleAuto);$("#packCard").addEventListener("click",openPack);
+    $("#rollBtn").addEventListener("click",manualRoll);$("#autoBtn").addEventListener("click",toggleAuto);$("#fullAutoBtn").addEventListener("click",toggleFullAuto);$("#packCard").addEventListener("click",openPack);
+    $("#storedPacks").addEventListener("click",e=>{const b=e.target.closest("[data-open-stored-tier]");if(b)openStoredPack(Number(b.dataset.openStoredTier))});
+    $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
+    $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
     $("#closeReveal").addEventListener("click",closeReveal);$("#closeStandModal").addEventListener("click",closeStand);$("[data-close-modal]").addEventListener("click",closeStand);
     $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);$("#rebirthBtn").addEventListener("click",doRebirth);
     $("#tierFilters").addEventListener("change",e=>{
@@ -1023,26 +1294,31 @@
       if(!input.checked)state.autoTargets=state.autoTargets.filter(x=>x!==tier);
       renderFilters();save();
     });
-    $("#clearFilters").addEventListener("click",()=>{state.autoTargets=[];if(state.autoRolling){state.autoRolling=false;clearTimeout(autoTimer)}renderFilters();save()});
+    $("#clearFilters").addEventListener("click",()=>{state.autoTargets=[];if(state.autoRolling||state.fullAuto){state.autoRolling=false;state.fullAuto=false;state.rollingUntil=0;clearTimeout(autoTimer)}renderFilters();renderPack();updateRollProgress();save()});
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
     document.addEventListener("keydown",e=>{
-      if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling)beginRoll();
-      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSocialBase()}
+      if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling&&!state.fullAuto)manualRoll();
+      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSocialBase();closeGradeAuto()}
     });
     window.addEventListener("beforeunload",save);
   }
 
   function init(){
     normalizeSlots();bind();
-    const now=Date.now(),offlineSeconds=Math.min(8*3600,Math.max(0,(now-(state.lastTick||now))/1000));
+    const now=Date.now(),offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
     if(offlineSeconds>2&&state.placed.some(Boolean)){const gain=totalIncome()*offlineSeconds;state.money+=gain;toast("รับรายได้ออฟไลน์ "+fmt(gain))}
-    state.lastTick=now;renderAll();
-    if(state.rollingUntil>Date.now())tickRoll();
-    else if(state.rollingUntil&&!state.currentPack){state.rollingUntil=0;state.currentPack={tier:randomTier()};renderAll()}
+    state.lastTick=now;renderAll();updateRollProgress();
+    state.rollingUntil=0;
     setInterval(economyTick,1000);
     onlineHeartbeatTimer=setInterval(()=>{if(document.visibilityState==="visible"&&authSession)heartbeatOnline()},45000);
     document.addEventListener("visibilitychange",()=>{
-      if(document.visibilityState==="visible"&&authSession){loadCloudState();heartbeatOnline()}
+      if(document.visibilityState==="visible"){
+        accrueIncomeToNow();
+        if(state.rollingUntil)processRollEngine();
+        if(state.gradeAuto)processGradeAuto();
+        renderHeader();renderRebirth();
+        if(authSession){heartbeatOnline();flushCloudSave()}
+      }
     });
     initCloud();
   }
