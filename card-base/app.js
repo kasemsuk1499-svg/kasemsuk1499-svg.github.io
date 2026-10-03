@@ -1227,8 +1227,8 @@
     const wrap=$("#collection"); wrap.innerHTML="";
     $("#emptyCollection").style.display=arr.length?"none":"block";
     arr.forEach(c=>{
-      const t=TIERS[c.tier],g=GRADES[c.grade],placed=state.placed.includes(c.uid);
-      const el=document.createElement("article"); el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade;
+      const t=TIERS[c.tier],g=GRADES[c.grade],placed=state.placed.includes(c.uid),tradeLocked=cardIsTradeLocked(c);
+      const el=document.createElement("article"); el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade+(tradeLocked?" trade-locked":"");
       el.innerHTML=
         '<div class="card-art '+tierFxClass(c.tier)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+'">'+
           '<img src="'+imageFor(c.charId)+'" alt="Character '+padId(c.charId)+'"><div class="tier-ring"></div>'+
@@ -1237,11 +1237,11 @@
         '<div class="card-body"><div class="card-stats">'+
           '<div><span>Level</span><b>'+c.level+'</b></div><div><span>รายได้</span><b class="'+wealthClass(cardIncome(c))+'">'+fmt(cardIncome(c))+'/s</b></div>'+
           '<div><span>อัป Lv.</span><b>'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b>'+fmt(rerollCost(c))+'</b></div>'+
-        '</div><div class="card-actions">'+
-          '<button data-a="place">'+(placed?"เอาออกจากฐาน":"วางในแท่นว่าง")+'</button><button data-a="level">อัป Level</button>'+
-          '<button data-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button>'+
-          '<button class="'+(c.locked?"locked":"")+'" data-a="lock">'+(c.locked?"🔒 ปลดล็อก":"🔓 ล็อก")+'</button>'+
-          '<button class="sell" data-a="sell" '+((placed||c.locked)?"disabled":"")+'>ขาย '+fmt(sellValue(c))+'</button>'+
+        '</div>'+(tradeLocked?'<div class="trade-lock-banner">🔒 TRADE LOCK · รออีกฝ่ายตอบรับ</div>':'')+'<div class="card-actions">'+
+          '<button data-a="place" '+(tradeLocked?"disabled":"")+'>'+(placed?"เอาออกจากฐาน":"วางในแท่นว่าง")+'</button><button data-a="level" '+(tradeLocked?"disabled":"")+'>อัป Level</button>'+
+          '<button data-a="grade" '+(tradeLocked?"disabled":"")+'>สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-a="grade-auto" '+(tradeLocked?"disabled":"")+'>'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button>'+
+          '<button class="'+(c.locked?"locked":"")+'" data-a="lock" '+(tradeLocked?"disabled":"")+'>'+(c.locked?"🔒 ปลดล็อก":"🔓 ล็อก")+'</button>'+
+          '<button class="sell" data-a="sell" '+((placed||c.locked||tradeLocked)?"disabled":"")+'>ขาย '+fmt(sellValue(c))+'</button>'+
         '</div></div>';
       const img=el.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
       el.addEventListener("click",ev=>{
@@ -1531,6 +1531,8 @@
 
   function togglePlace(uid){
     normalizeSlots();
+    const card=state.cards.find(x=>x.uid===uid);
+    if(cardIsTradeLocked(card)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
     const existing=state.placed.indexOf(uid);
     if(existing>=0){state.placed[existing]=null;toast("นำการ์ดออกจากฐานแล้ว");renderAll();return}
     const empty=state.placed.findIndex(x=>!x);
@@ -1540,11 +1542,13 @@
 
   function levelUp(uid,fromModal=false){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
     const cost=upgradeCost(c);if(state.money<cost){toast("เงินไม่พอ");return}
     state.money-=cost;c.level++;toast("อัปเป็น Lv."+c.level);renderAll();if(fromModal)renderStandModal();
   }
   function rerollGrade(uid,fromModal=false){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
     if(state.gradeAuto&&state.gradeAuto.uid===uid){toast("Auto Grade กำลังทำงานอยู่");return}
     const cost=rerollCost(c);
     if(state.money<cost){toast("เงินไม่พอ · ต้องใช้ "+fmt(cost));return}
@@ -1562,6 +1566,7 @@
 
   function openGradeAuto(uid){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
     if(state.gradeAuto&&state.gradeAuto.uid!==uid){
       toast("มี Auto Grade อีกใบกำลังทำงานอยู่ · หยุดใบนั้นก่อน");
       return;
@@ -1575,12 +1580,14 @@
       ? state.gradeAuto.targets
       : GRADES.map((_,i)=>i).filter(i=>i>c.grade);
 
+    const gOdds=gradeOdds();
     $("#gradeTargetList").innerHTML=GRADES.map((x,i)=>
       '<label class="grade-target-option grade-shell-'+i+'" style="--grade:'+x.color+'">'+
         '<input type="checkbox" data-grade-target="'+i+'" '+(activeTargets.includes(i)?'checked':'')+'>'+
-        '<span>'+x.name+'</span>'+
+        '<span><b>'+x.name+'</b><small>'+chanceText(gOdds[i])+'</small></span>'+
       '</label>'
     ).join("");
+    updateGradeTargetChance();
 
     $("#startGradeAutoBtn").hidden=!!state.gradeAuto;
     $("#stopGradeAutoBtn").hidden=!state.gradeAuto;
@@ -1598,6 +1605,15 @@
     return [...document.querySelectorAll('#gradeTargetList input[data-grade-target]:checked')]
       .map(input=>Number(input.dataset.gradeTarget))
       .filter(i=>Number.isInteger(i)&&i>=0&&i<GRADES.length);
+  }
+
+  function updateGradeTargetChance(){
+    const out=$("#gradeTargetChance");if(!out)return;
+    const targets=selectedGradeTargets(),odds=gradeOdds();
+    const chance=targets.reduce((sum,i)=>sum+(odds[i]||0),0);
+    if(!targets.length){out.textContent="เลือก Grade เพื่อดูโอกาสรวม";return}
+    const expected=chance>0?1/chance:Infinity;
+    out.innerHTML='<strong>โอกาสรวม '+chanceText(chance)+'/ครั้ง</strong><span>เฉลี่ยประมาณ 1 ใน '+(expected>=1000?fmt(expected):expected.toFixed(expected>=100?0:expected>=10?1:2))+' ครั้ง</span>';
   }
 
   function startGradeAuto(){
@@ -1678,9 +1694,9 @@
     }
   }
 
-  function toggleLock(uid){const c=state.cards.find(x=>x.uid===uid);if(!c)return;c.locked=!c.locked;renderAll()}
+  function toggleLock(uid){const c=state.cards.find(x=>x.uid===uid);if(!c)return;if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}c.locked=!c.locked;renderAll()}
   function sellCard(uid){
-    const c=state.cards.find(x=>x.uid===uid);if(!c||c.locked||state.placed.includes(uid))return;
+    const c=state.cards.find(x=>x.uid===uid);if(!c||c.locked||cardIsTradeLocked(c)||state.placed.includes(uid))return;
     const value=sellValue(c);state.money+=value;state.cards=state.cards.filter(x=>x.uid!==uid);toast("ขายการ์ดแล้ว +"+fmt(value));renderAll();
   }
 
@@ -1745,18 +1761,38 @@
       if(action==="add")sendFriendRequest(btn.dataset.user);
       if(action==="accept")acceptFriend(btn.dataset.friend);
       if(action==="remove")removeFriend(btn.dataset.friend);
+      if(action==="trade")openTradeOffer(btn.dataset.user);
+    });
+    $("#refreshTradesBtn").addEventListener("click",()=>refreshTrades());
+    $("#closeTradeModal").addEventListener("click",closeTrade);
+    $("[data-close-trade]").addEventListener("click",closeTrade);
+    $("#tradeConfirmBtn").addEventListener("click",confirmTrade);
+    $("#tradeCardPicker").addEventListener("click",e=>{
+      const pick=e.target.closest("[data-trade-card]");if(!pick)return;
+      tradeModalState.selectedGid=pick.dataset.tradeCard;
+      renderTradePicker();
+    });
+    document.addEventListener("click",e=>{
+      const btn=e.target.closest("[data-trade-action]");if(!btn)return;
+      const action=btn.dataset.tradeAction,tradeId=btn.dataset.trade;
+      if(action==="accept-open")openTradeAccept(tradeId);
+      if(action==="decline")declineTrade(tradeId);
+      if(action==="cancel")cancelTrade(tradeId);
     });
     $("#rollBtn").addEventListener("click",manualRoll);$("#autoBtn").addEventListener("click",toggleAuto);$("#fullAutoBtn").addEventListener("click",toggleFullAuto);$("#packCard").addEventListener("click",openPack);
     $("#storedPacks").addEventListener("click",e=>{const b=e.target.closest("[data-open-stored-tier]");if(b)openStoredPack(Number(b.dataset.openStoredTier))});
     $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
     $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
+    $("#gradeTargetList").addEventListener("change",updateGradeTargetChance);
     $("#gradeSelectHighBtn").addEventListener("click",()=>{
       document.querySelectorAll('#gradeTargetList input[data-grade-target]').forEach(input=>{
         input.checked=Number(input.dataset.gradeTarget)>=4;
       });
+      updateGradeTargetChance();
     });
     $("#gradeClearTargetsBtn").addEventListener("click",()=>{
       document.querySelectorAll('#gradeTargetList input[data-grade-target]').forEach(input=>input.checked=false);
+      updateGradeTargetChance();
     });
     $("#closeReveal").addEventListener("click",closeReveal);$("#closeStandModal").addEventListener("click",closeStand);$("[data-close-modal]").addEventListener("click",closeStand);
     $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);$("#rebirthBtn").addEventListener("click",doRebirth);
@@ -1775,7 +1811,7 @@
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
     document.addEventListener("keydown",e=>{
       if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling&&!state.fullAuto)manualRoll();
-      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSocialBase();closeGradeAuto()}
+      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSocialBase();closeGradeAuto();closeTrade()}
     });
     window.addEventListener("beforeunload",save);
   }
