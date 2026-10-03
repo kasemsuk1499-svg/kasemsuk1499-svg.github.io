@@ -8,6 +8,7 @@
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
   const CLOUD_TABLE = "card_base_saves";
+  const GAME_SESSION_KEY = "card-base-username-session-v1";
   const GRADE_ROLL_MS = 450;
 
   const TIERS = [
@@ -64,18 +65,16 @@
   let gradeTimer = 0;
   let gradeAutoSetupUid = null;
   let supabaseClient = null;
-  let authSession = null;
+  let gameToken = localStorage.getItem(GAME_SESSION_KEY) || null;
+  let gameAccount = null;
   let cloudReady = false;
   let cloudLoading = false;
   let cloudTimer = 0;
-  let activeCloudUserId = null;
   let onlineProfile = null;
   let onlineHeartbeatTimer = 0;
-  let onlineCache = {online:[],friendships:[],profiles:new Map(),bases:new Map()};
+  let onlineCache = {online:[],requests:[],friends:[]};
   let socialProfiles = new Map();
   let authRequestBusy = false;
-  let signupCooldownUntil = 0;
-  let signupCooldownTimer = 0;
 
   function hydrateState(parsed){
     const s={...newState(),...(parsed||{})};
@@ -110,24 +109,36 @@
   }
 
   function scheduleCloudSave(){
-    if(!cloudReady||cloudLoading||!authSession||!supabaseClient)return;
+    if(!cloudReady||cloudLoading||!gameToken||!supabaseClient)return;
     clearTimeout(cloudTimer);
     cloudTimer=setTimeout(()=>flushCloudSave(),900);
     updateSyncUi("syncing");
   }
 
+  async function rpc(name,args={}){
+    if(!supabaseClient)return {ok:false,error:"cloud_unavailable",message:"Cloud ยังไม่พร้อม"};
+    const {data,error}=await supabaseClient.rpc(name,args);
+    if(error){
+      console.error("RPC "+name+" failed",error);
+      return {ok:false,error:"rpc_error",message:error.message||"Cloud error"};
+    }
+    return data&&typeof data==="object"?data:{ok:false,error:"invalid_response"};
+  }
+
+  function clearGameSession(){
+    gameToken=null;gameAccount=null;onlineProfile=null;cloudReady=false;cloudLoading=false;
+    localStorage.removeItem(GAME_SESSION_KEY);
+    renderAuth();renderOnlineShell();updateSyncUi("local");
+  }
+
   async function flushCloudSave(){
-    if(!cloudReady||cloudLoading||!authSession||!supabaseClient)return;
+    if(!cloudReady||cloudLoading||!gameToken||!supabaseClient)return;
     clearTimeout(cloudTimer);
     const snapshot=JSON.parse(JSON.stringify(cloudPayload()));
-    const {error}=await supabaseClient.from(CLOUD_TABLE).upsert({
-      user_id:authSession.user.id,
-      state:snapshot,
-      updated_at:new Date().toISOString()
-    },{onConflict:"user_id"});
-    if(error){
-      console.error("Cloud save failed",error);
-      updateSyncUi("error");
+    const result=await rpc("cb_save_state",{p_token:gameToken,p_state:snapshot});
+    if(!result.ok){
+      if(result.error==="invalid_session")clearGameSession();
+      else updateSyncUi("error");
       return;
     }
     updateSyncUi("online");
@@ -269,12 +280,12 @@
     const dot=$("#syncDot"),label=$("#accountLabel"),sync=$("#syncLabel");
     if(!dot||!label||!sync)return;
     dot.className="sync-dot";
-    if(!authSession){
+    if(!gameAccount||!gameToken){
       label.textContent="เล่นแบบ Local";
       sync.textContent="ล็อกอินเพื่อใช้ Cloud Save";
       return;
     }
-    label.textContent=authSession.user.email||"Player";
+    label.textContent="@"+gameAccount.username;
     if(mode==="syncing"){dot.classList.add("syncing");sync.textContent="กำลังซิงก์…"}
     else if(mode==="error"){dot.classList.add("error");sync.textContent="Cloud มีปัญหา · เก็บ Local ไว้ก่อน"}
     else{dot.classList.add("online");sync.textContent="Cloud Save พร้อมใช้งาน"}
@@ -286,11 +297,18 @@
     el.className="auth-message"+(type?" "+type:"");
   }
 
+  function showRecoveryCode(code){
+    const box=$("#recoveryCodeBox"),value=$("#recoveryCodeValue");
+    if(!box||!value)return;
+    if(!code){box.hidden=true;value.textContent="";return}
+    value.textContent=code;box.hidden=false;
+  }
+
   function renderAuth(){
-    const signedIn=!!authSession;
+    const signedIn=!!(gameAccount&&gameToken);
     $("#authSignedOut").hidden=signedIn;
     $("#authSignedIn").hidden=!signedIn;
-    if(signedIn)$("#authUserEmail").textContent=authSession.user.email||"Player";
+    if(signedIn)$("#authUsernameLabel").textContent="@"+gameAccount.username;
     updateSyncUi(signedIn?(cloudReady?"online":"syncing"):"local");
   }
 
@@ -305,50 +323,68 @@
     $("#authModal").setAttribute("aria-hidden","true");
   }
 
-  async function loadCloudState(){
-    if(!authSession||!supabaseClient)return;
-    cloudLoading=true;cloudReady=false;updateSyncUi("syncing");
-    const userId=authSession.user.id;
-    const {data,error}=await supabaseClient.from(CLOUD_TABLE)
-      .select("state,updated_at")
-      .eq("user_id",userId)
-      .maybeSingle();
+  function setAuthBusy(busy){
+    authRequestBusy=busy;
+    $("#loginBtn").disabled=busy;
+    $("#signupBtn").disabled=busy;
+    $("#recoverBtn").disabled=busy;
+  }
 
-    if(error){
-      console.error("Cloud load failed",error);
-      cloudLoading=false;updateSyncUi("error");return;
+  async function fetchMe(){
+    if(!gameToken)return null;
+    const result=await rpc("cb_me",{p_token:gameToken});
+    if(!result.ok)return null;
+    gameAccount=result;
+    onlineProfile=result;
+    socialProfiles.set(result.account_id,result);
+    return result;
+  }
+
+  async function loadCloudState(){
+    if(!gameToken||!supabaseClient)return;
+    cloudLoading=true;cloudReady=false;updateSyncUi("syncing");
+    const result=await rpc("cb_load_save",{p_token:gameToken});
+    if(!result.ok){
+      cloudLoading=false;
+      if(result.error==="invalid_session")clearGameSession();
+      else updateSyncUi("error");
+      return;
     }
 
-    if(data&&data.state){
-      state=hydrateState(data.state);
+    if(result.exists&&result.state){
+      state=hydrateState(result.state);
       const now=Date.now();
       const offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
       normalizeSlots();
-      if(offlineSeconds>2&&state.placed.some(Boolean)){
-        state.money+=totalIncome()*offlineSeconds;
-      }
+      if(offlineSeconds>2&&state.placed.some(Boolean))state.money+=totalIncome()*offlineSeconds;
       state.lastTick=now;
       localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+    }else{
+      state.lastTick=Date.now();
     }
 
-    cloudLoading=false;cloudReady=true;activeCloudUserId=userId;
-    if(!data)await flushCloudSave();
+    cloudLoading=false;cloudReady=true;
+    if(!result.exists)await flushCloudSave();
     renderAll();
     updateSyncUi("online");
   }
 
-  async function handleAuthSession(session){
-    const previous=activeCloudUserId;
-    authSession=session||null;
+  async function activateGameSession(token,username,recoveryCode=null){
+    gameToken=token;
+    localStorage.setItem(GAME_SESSION_KEY,token);
+    gameAccount={username};
     renderAuth();
-    if(!authSession){
-      cloudReady=false;activeCloudUserId=null;onlineProfile=null;renderOnlineShell();return;
+    const me=await fetchMe();
+    if(!me){
+      clearGameSession();
+      setAuthMessage("Session ใช้งานไม่ได้ กรุณาลองเข้าสู่ระบบใหม่","error");
+      return false;
     }
-    if(previous!==authSession.user.id||!cloudReady)await loadCloudState();
-    await ensureOnlineProfile();
-    await heartbeatOnline();
+    await loadCloudState();
     await publishPublicBase();
-    renderOnlineShell();
+    if(recoveryCode)showRecoveryCode(recoveryCode);
+    renderAuth();renderOnlineShell();
+    return true;
   }
 
   async function initCloud(){
@@ -357,129 +393,93 @@
       return;
     }
     supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
-      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
     });
-    const {data:{session},error}=await supabaseClient.auth.getSession();
-    if(error)console.error("Session read failed",error);
-    await handleAuthSession(session);
-    supabaseClient.auth.onAuthStateChange((_event,nextSession)=>{
-      Promise.resolve().then(()=>handleAuthSession(nextSession));
-    });
-  }
-
-  function authErrorMessage(error,context="login"){
-    const code=error?.code||"";
-    const msg=String(error?.message||"").toLowerCase();
-    if(code==="over_email_send_rate_limit"||msg.includes("email rate limit")){
-      return "ระบบส่งอีเมลยืนยันถึงขีดจำกัดชั่วคราว กรุณารอสักพักก่อนลองใหม่ หากเคยสมัครแล้วให้เช็กอีเมลยืนยันเดิมและใช้ปุ่มเข้าสู่ระบบ ไม่ต้องกดสร้างบัญชีซ้ำ";
-    }
-    if(code==="email_not_confirmed"||msg.includes("email not confirmed")){
-      return "อีเมลนี้สมัครแล้ว แต่ยังไม่ได้ยืนยันค่ะ กรุณาเปิดอีเมลยืนยันที่ได้รับก่อน แล้วกลับมาเข้าสู่ระบบ";
-    }
-    if(msg.includes("invalid login credentials")){
-      return "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
-    }
-    if(msg.includes("user already registered")||msg.includes("already registered")){
-      return "อีเมลนี้มีบัญชีแล้วค่ะ ใช้ปุ่มเข้าสู่ระบบได้เลย";
-    }
-    if(msg.includes("email address")&&msg.includes("invalid")){
-      return "อีเมลนี้ไม่ถูกต้องหรือผู้ให้บริการไม่ยอมรับ กรุณาตรวจสอบอีเมลอีกครั้ง";
-    }
-    if(msg.includes("password")&&msg.includes("weak")){
-      return "รหัสผ่านยังไม่แข็งแรงพอ กรุณาใช้รหัสผ่านที่ยาวและคาดเดายากขึ้น";
-    }
-    return context==="signup"
-      ?"สมัครบัญชีไม่สำเร็จชั่วคราว กรุณาลองใหม่อีกครั้ง"
-      :"เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูลแล้วลองใหม่";
-  }
-
-  function setAuthBusy(busy){
-    authRequestBusy=busy;
-    $("#loginBtn").disabled=busy;
-    $("#signupBtn").disabled=busy||Date.now()<signupCooldownUntil;
-  }
-
-  function startSignupCooldown(seconds=60){
-    signupCooldownUntil=Math.max(signupCooldownUntil,Date.now()+seconds*1000);
-    clearInterval(signupCooldownTimer);
-    const update=()=>{
-      const left=Math.max(0,Math.ceil((signupCooldownUntil-Date.now())/1000));
-      const btn=$("#signupBtn");
-      if(left>0){
-        btn.disabled=true;
-        btn.textContent="สร้างบัญชีอีกครั้งใน "+left+" วิ";
+    if(gameToken){
+      const me=await fetchMe();
+      if(me){
+        await loadCloudState();
+        await publishPublicBase();
       }else{
-        clearInterval(signupCooldownTimer);
-        btn.disabled=authRequestBusy;
-        btn.textContent="สร้างบัญชี";
+        clearGameSession();
       }
-    };
-    update();
-    signupCooldownTimer=setInterval(update,1000);
+    }else{
+      renderAuth();renderOnlineShell();
+    }
+  }
+
+  function normalizeUsername(value){
+    return String(value||"").trim().toLowerCase();
+  }
+
+  function validateUsername(username){
+    return /^[a-z0-9_]{3,20}$/.test(username);
   }
 
   async function loginAccount(){
     if(authRequestBusy)return;
-    if(!supabaseClient){setAuthMessage("Cloud ยังไม่พร้อม ลองรีเฟรชหน้าเว็บ","error");return}
-    const email=$("#authEmail").value.trim(),password=$("#authPassword").value;
-    if(!email||!password){setAuthMessage("กรอกอีเมลและรหัสผ่านก่อนนะ","error");return}
-    setAuthBusy(true);
-    setAuthMessage("กำลังเข้าสู่ระบบ…");
+    const username=normalizeUsername($("#authUsername").value);
+    const password=$("#authPassword").value;
+    showRecoveryCode(null);
+    if(!validateUsername(username)){setAuthMessage("Username ใช้ได้เฉพาะ a-z, 0-9, _ และยาว 3–20 ตัว","error");return}
+    if(!password){setAuthMessage("กรอกรหัสผ่านก่อนนะ","error");return}
+    setAuthBusy(true);setAuthMessage("กำลังเข้าสู่ระบบ…");
     try{
-      const {error}=await supabaseClient.auth.signInWithPassword({email,password});
-      if(error){setAuthMessage(authErrorMessage(error,"login"),"error");return}
-      setAuthMessage("เข้าสู่ระบบสำเร็จ ✓","ok");
-    }finally{
-      setAuthBusy(false);
-    }
+      const result=await rpc("cb_login",{p_username:username,p_password:password});
+      if(!result.ok){setAuthMessage(result.message||"Username หรือรหัสผ่านไม่ถูกต้อง","error");return}
+      const ok=await activateGameSession(result.token,result.username);
+      if(ok){setAuthMessage("เข้าสู่ระบบสำเร็จ ✓","ok");toast("ยินดีต้อนรับ @"+result.username+" ✨",true)}
+    }finally{setAuthBusy(false)}
   }
 
   async function signupAccount(){
     if(authRequestBusy)return;
-    if(Date.now()<signupCooldownUntil){
-      const left=Math.ceil((signupCooldownUntil-Date.now())/1000);
-      setAuthMessage("กรุณารอ "+left+" วินาทีก่อนส่งคำขอสมัครอีกครั้ง","error");
-      return;
-    }
-    if(!supabaseClient){setAuthMessage("Cloud ยังไม่พร้อม ลองรีเฟรชหน้าเว็บ","error");return}
-    const email=$("#authEmail").value.trim(),password=$("#authPassword").value;
-    if(!email||password.length<6){setAuthMessage("กรอกอีเมล และรหัสผ่านอย่างน้อย 6 ตัวอักษร","error");return}
-    setAuthBusy(true);
-    startSignupCooldown(60);
-    setAuthMessage("กำลังสร้างบัญชี… กรุณากดเพียงครั้งเดียว");
+    const username=normalizeUsername($("#authUsername").value);
+    const password=$("#authPassword").value;
+    const confirm=$("#authPasswordConfirm").value;
+    showRecoveryCode(null);
+    if(!validateUsername(username)){setAuthMessage("Username ใช้ได้เฉพาะ a-z, 0-9, _ และยาว 3–20 ตัว","error");return}
+    if(password.length<8||password.length>72){setAuthMessage("รหัสผ่านต้องยาว 8–72 ตัวอักษร","error");return}
+    if(password!==confirm){setAuthMessage("รหัสผ่านกับช่องยืนยันไม่ตรงกัน","error");return}
+    setAuthBusy(true);setAuthMessage("กำลังสร้างบัญชี…");
     try{
-      const redirectTo=window.location.origin+window.location.pathname;
-      const {data,error}=await supabaseClient.auth.signUp({
-        email,password,
-        options:{emailRedirectTo:redirectTo}
-      });
-      if(error){
-        setAuthMessage(authErrorMessage(error,"signup"),"error");
-        return;
+      const result=await rpc("cb_register",{p_username:username,p_password:password});
+      if(!result.ok){setAuthMessage(result.message||"สร้างบัญชีไม่สำเร็จ","error");return}
+      const ok=await activateGameSession(result.token,result.username,result.recovery_code);
+      if(ok){
+        setAuthMessage("สร้างบัญชีสำเร็จ ✓ เก็บ Recovery Code ด้านล่างไว้ด้วยนะ","ok");
+        toast("สร้างบัญชี @"+result.username+" สำเร็จ 🎉",true);
       }
-      if(data.session){
-        setAuthMessage("สร้างบัญชีและเข้าสู่ระบบแล้ว ✓","ok");
-      }else{
-        setAuthMessage("ส่งอีเมลยืนยันแล้ว ✓ กรุณาเช็ก Inbox/Spam แล้วกดลิงก์ยืนยันก่อนเข้าสู่ระบบ อย่ากดสร้างบัญชีซ้ำ","ok");
-      }
-    }finally{
-      setAuthBusy(false);
-    }
+    }finally{setAuthBusy(false)}
+  }
+
+  async function recoverAccount(){
+    if(authRequestBusy)return;
+    const username=normalizeUsername($("#authUsername").value);
+    const code=$("#authRecoveryCode").value.trim().toUpperCase();
+    const newPassword=$("#authNewPassword").value;
+    showRecoveryCode(null);
+    if(!validateUsername(username)){setAuthMessage("กรอก Username ของบัญชีที่ต้องการกู้ก่อน","error");return}
+    if(!code){setAuthMessage("กรอก Recovery Code ก่อน","error");return}
+    if(newPassword.length<8||newPassword.length>72){setAuthMessage("รหัสผ่านใหม่ต้องยาว 8–72 ตัวอักษร","error");return}
+    setAuthBusy(true);setAuthMessage("กำลังกู้บัญชี…");
+    try{
+      const result=await rpc("cb_recover",{p_username:username,p_recovery_code:code,p_new_password:newPassword});
+      if(!result.ok){setAuthMessage(result.message||"กู้บัญชีไม่สำเร็จ","error");return}
+      const ok=await activateGameSession(result.token,result.username,result.recovery_code);
+      if(ok)setAuthMessage("เปลี่ยนรหัสผ่านสำเร็จ ✓ Recovery Code ถูกเปลี่ยนใหม่แล้ว กรุณาเก็บโค้ดใหม่ไว้","ok");
+    }finally{setAuthBusy(false)}
   }
 
   async function logoutAccount(){
-    if(!supabaseClient)return;
+    if(!gameToken)return;
     await flushCloudSave();
-    if(authSession){
-      const oldSeen=new Date(Date.now()-5*60*1000).toISOString();
-      await supabaseClient.from("card_base_profiles").update({last_seen:oldSeen,updated_at:new Date().toISOString()}).eq("user_id",authSession.user.id);
-    }
-    const {error}=await supabaseClient.auth.signOut();
-    if(error){setAuthMessage(error.message,"error");return}
-    authSession=null;cloudReady=false;activeCloudUserId=null;
-    renderAuth();closeAuth();toast("ออกจากระบบแล้ว · เล่น Local ต่อได้");
+    await rpc("cb_logout",{p_token:gameToken});
+    clearGameSession();
+    state=newState();
+    localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+    renderAll();closeAuth();toast("ออกจากระบบแล้ว · กลับสู่ Local ใหม่");
   }
-
 
   function escapeHtml(value){
     return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -490,272 +490,150 @@
     return state.placed.map((uid,slot)=>{
       const c=uid?state.cards.find(x=>x.uid===uid):null;
       if(!c)return null;
-      return {
-        slot,
-        charId:c.charId,
-        tier:c.tier,
-        grade:c.grade,
-        level:c.level,
-        income:Math.round(cardIncome(c))
-      };
+      return {slot,charId:c.charId,tier:c.tier,grade:c.grade,level:c.level,income:Math.round(cardIncome(c))};
     }).filter(Boolean);
   }
 
   async function publishPublicBase(){
-    if(!authSession||!supabaseClient)return;
-    const payload={
-      user_id:authSession.user.id,
-      base_level:state.baseLevel,
-      title:TITLES[state.baseLevel-1]||"Collector",
-      stands:publicStandSnapshot(),
-      updated_at:new Date().toISOString()
-    };
-    const {error}=await supabaseClient.from("card_base_public_bases").upsert(payload,{onConflict:"user_id"});
-    if(error)console.error("Public base publish failed",error);
+    if(!gameToken||!supabaseClient)return;
+    const result=await rpc("cb_publish_presence",{
+      p_token:gameToken,
+      p_base_level:state.baseLevel,
+      p_title:TITLES[state.baseLevel-1]||"Collector",
+      p_stands:publicStandSnapshot()
+    });
+    if(!result.ok&&result.error==="invalid_session")clearGameSession();
   }
 
   async function ensureOnlineProfile(){
-    if(!authSession||!supabaseClient)return null;
-    const uid=authSession.user.id;
-    let {data,error}=await supabaseClient.from("card_base_profiles")
-      .select("user_id,player_code,display_name,last_seen")
-      .eq("user_id",uid).maybeSingle();
-    if(error){console.error("Profile load failed",error);return null}
-    if(!data){
-      const created=await supabaseClient.from("card_base_profiles")
-        .insert({user_id:uid})
-        .select("user_id,player_code,display_name,last_seen").single();
-      if(created.error){console.error("Profile create failed",created.error);return null}
-      data=created.data;
-    }
-    if(data.display_name==="Player"){
-      const generated="Player-"+String(data.player_code||"0000").slice(0,4);
-      const renamed=await supabaseClient.from("card_base_profiles")
-        .update({display_name:generated,updated_at:new Date().toISOString()})
-        .eq("user_id",uid)
-        .select("user_id,player_code,display_name,last_seen").single();
-      if(!renamed.error)data=renamed.data;
-    }
-    onlineProfile=data;
-    socialProfiles.set(data.user_id,data);
-    renderOnlineShell();
-    return data;
+    if(!gameToken||!supabaseClient)return null;
+    const me=await fetchMe();
+    if(me)renderOnlineShell();
+    return me;
   }
 
   async function heartbeatOnline(){
-    if(!authSession||!supabaseClient)return;
-    if(!onlineProfile)await ensureOnlineProfile();
-    if(!onlineProfile)return;
-    const now=new Date().toISOString();
-    const {error}=await supabaseClient.from("card_base_profiles")
-      .update({last_seen:now,updated_at:now})
-      .eq("user_id",authSession.user.id);
-    if(!error)onlineProfile.last_seen=now;
+    if(!gameToken||!supabaseClient)return;
+    await publishPublicBase();
   }
 
   function renderOnlineShell(){
     const gate=$("#onlineGate"),content=$("#onlineContent");
     if(!gate||!content)return;
-    const signedIn=!!authSession;
+    const signedIn=!!(gameToken&&gameAccount);
     gate.hidden=signedIn;
     content.hidden=!signedIn;
     if(!signedIn)return;
     $("#onlineBaseLevel").textContent="Lv."+state.baseLevel;
     if(onlineProfile){
-      $("#onlineDisplayName").value=onlineProfile.display_name||"";
+      $("#onlineDisplayName").value=onlineProfile.display_name||onlineProfile.username||"";
       $("#onlinePlayerCode").textContent="#"+(onlineProfile.player_code||"—");
     }
   }
 
-  function friendshipFor(userId){
-    return onlineCache.friendships.find(f=>f.requester_id===userId||f.addressee_id===userId)||null;
-  }
-
   function socialRow(profile,options={}){
     if(!profile)return '<div class="social-empty">ไม่พบข้อมูลผู้เล่น</div>';
-    socialProfiles.set(profile.user_id,profile);
-    const base=onlineCache.bases.get(profile.user_id);
-    const relation=friendshipFor(profile.user_id);
-    let actions='<button data-social-action="visit" data-user="'+profile.user_id+'">ดูฐาน</button>';
+    const accountId=profile.account_id;
+    socialProfiles.set(accountId,profile);
+    let actions='<button data-social-action="visit" data-user="'+accountId+'">ดูฐาน</button>';
     if(options.request){
-      actions+='<button class="accept" data-social-action="accept" data-friend="'+options.request.id+'">รับเพื่อน</button>'+
-               '<button class="remove" data-social-action="remove" data-friend="'+options.request.id+'">ปฏิเสธ</button>';
+      actions+='<button class="accept" data-social-action="accept" data-friend="'+options.request.friendship_id+'">รับเพื่อน</button>'+
+               '<button class="remove" data-social-action="remove" data-friend="'+options.request.friendship_id+'">ปฏิเสธ</button>';
     }else if(options.friend){
-      actions+='<button class="remove" data-social-action="remove" data-friend="'+options.friend.id+'">ลบเพื่อน</button>';
-    }else if(relation){
-      const text=relation.status==="accepted"?"เพื่อนแล้ว":(relation.requester_id===authSession.user.id?"ส่งคำขอแล้ว":"มีคำขอเข้า");
-      actions+='<button disabled>'+text+'</button>';
+      actions+='<button class="remove" data-social-action="remove" data-friend="'+options.friend.friendship_id+'">ลบเพื่อน</button>';
+    }else if(profile.friendship_status){
+      actions+='<button disabled>'+(profile.friendship_status==="accepted"?"เพื่อนแล้ว":"มีคำขออยู่")+'</button>';
     }else{
-      actions+='<button data-social-action="add" data-user="'+profile.user_id+'">+ เพื่อน</button>';
+      actions+='<button data-social-action="add" data-user="'+accountId+'">+ เพื่อน</button>';
     }
+    const baseText=profile.base_level?"Base Lv."+profile.base_level:"ยังไม่เผยแพร่ฐาน";
     return '<div class="player-row"><div class="player-main"><strong>'+escapeHtml(profile.display_name)+'</strong>'+
-      '<small>#'+escapeHtml(profile.player_code)+' · '+(base?'Base Lv.'+base.base_level:'ยังไม่เผยแพร่ฐาน')+'</small></div>'+
+      '<small>#'+escapeHtml(profile.player_code)+' · '+baseText+'</small></div>'+
       '<div class="player-actions">'+actions+'</div></div>';
   }
 
   function renderOnlineLists(){
-    if(!authSession)return;
+    if(!gameAccount)return;
     const onlineEl=$("#onlinePlayersList"),requestsEl=$("#friendRequestsList"),friendsEl=$("#friendsList");
     if(!onlineEl||!requestsEl||!friendsEl)return;
-
-    onlineEl.innerHTML=onlineCache.online.length
-      ? onlineCache.online.map(p=>socialRow(p)).join("")
-      : '<div class="social-empty">ยังไม่มีผู้เล่นอื่นออนไลน์ในตอนนี้</div>';
-
-    const uid=authSession.user.id;
-    const requests=onlineCache.friendships.filter(f=>f.status==="pending"&&f.addressee_id===uid);
-    $("#requestCount").textContent=requests.length+" รายการ";
-    requestsEl.innerHTML=requests.length
-      ? requests.map(f=>socialRow(onlineCache.profiles.get(f.requester_id),{request:f})).join("")
-      : '<div class="social-empty">ไม่มีคำขอใหม่</div>';
-
-    const friends=onlineCache.friendships.filter(f=>f.status==="accepted");
-    $("#friendCount").textContent=friends.length+" คน";
-    friendsEl.innerHTML=friends.length
-      ? friends.map(f=>{
-          const other=f.requester_id===uid?f.addressee_id:f.requester_id;
-          return socialRow(onlineCache.profiles.get(other),{friend:f});
-        }).join("")
-      : '<div class="social-empty">ยังไม่มีเพื่อน — ลองค้นหาผู้เล่นด้านบน</div>';
+    onlineEl.innerHTML=onlineCache.online.length?onlineCache.online.map(p=>socialRow(p)).join(""):'<div class="social-empty">ยังไม่มีผู้เล่นอื่นออนไลน์ในตอนนี้</div>';
+    $("#requestCount").textContent=onlineCache.requests.length+" รายการ";
+    requestsEl.innerHTML=onlineCache.requests.length?onlineCache.requests.map(r=>socialRow(r,{request:r})).join(""):'<div class="social-empty">ไม่มีคำขอใหม่</div>';
+    $("#friendCount").textContent=onlineCache.friends.length+" คน";
+    friendsEl.innerHTML=onlineCache.friends.length?onlineCache.friends.map(fr=>socialRow(fr,{friend:fr})).join(""):'<div class="social-empty">ยังไม่มีเพื่อน — ลองค้นหาผู้เล่นด้านบน</div>';
   }
 
   async function refreshOnline(){
     renderOnlineShell();
-    if(!authSession||!supabaseClient)return;
-    await ensureOnlineProfile();
-    await heartbeatOnline();
+    if(!gameToken||!supabaseClient)return;
     await publishPublicBase();
-
-    const uid=authSession.user.id;
-    const cutoff=new Date(Date.now()-120000).toISOString();
-
-    const [onlineRes,friendsRes]=await Promise.all([
-      supabaseClient.from("card_base_profiles")
-        .select("user_id,player_code,display_name,last_seen")
-        .gte("last_seen",cutoff).neq("user_id",uid)
-        .order("last_seen",{ascending:false}).limit(20),
-      supabaseClient.from("card_base_friendships")
-        .select("id,requester_id,addressee_id,status,created_at,updated_at")
-        .or("requester_id.eq."+uid+",addressee_id.eq."+uid)
-        .order("updated_at",{ascending:false})
-    ]);
-
-    if(onlineRes.error)console.error("Online players load failed",onlineRes.error);
-    if(friendsRes.error)console.error("Friends load failed",friendsRes.error);
-
-    const online=onlineRes.data||[];
-    const friendships=friendsRes.data||[];
-    const ids=new Set(online.map(p=>p.user_id));
-    friendships.forEach(fr=>ids.add(fr.requester_id===uid?fr.addressee_id:fr.requester_id));
-
-    let profiles=[];
-    let bases=[];
-    const idList=[...ids];
-    if(idList.length){
-      const [profileRes,baseRes]=await Promise.all([
-        supabaseClient.from("card_base_profiles")
-          .select("user_id,player_code,display_name,last_seen").in("user_id",idList),
-        supabaseClient.from("card_base_public_bases")
-          .select("user_id,base_level,title,updated_at").in("user_id",idList)
-      ]);
-      if(!profileRes.error)profiles=profileRes.data||[];
-      if(!baseRes.error)bases=baseRes.data||[];
+    const result=await rpc("cb_social_snapshot",{p_token:gameToken});
+    if(!result.ok){
+      if(result.error==="invalid_session")clearGameSession();
+      return;
     }
-
-    const profileMap=new Map();
-    [...online,...profiles].forEach(p=>{profileMap.set(p.user_id,p);socialProfiles.set(p.user_id,p)});
-    onlineCache={
-      online,
-      friendships,
-      profiles:profileMap,
-      bases:new Map(bases.map(b=>[b.user_id,b]))
-    };
+    onlineCache={online:result.online||[],requests:result.requests||[],friends:result.friends||[]};
+    [...onlineCache.online,...onlineCache.requests,...onlineCache.friends].forEach(p=>socialProfiles.set(p.account_id,p));
     renderOnlineLists();
   }
 
   async function saveOnlineName(){
-    if(!authSession||!supabaseClient)return;
+    if(!gameToken||!supabaseClient)return;
     const name=$("#onlineDisplayName").value.trim();
     if(name.length<2||name.length>20){toast("ชื่อผู้เล่นต้องยาว 2–20 ตัวอักษร");return}
-    const {data,error}=await supabaseClient.from("card_base_profiles")
-      .update({display_name:name,updated_at:new Date().toISOString()})
-      .eq("user_id",authSession.user.id)
-      .select("user_id,player_code,display_name,last_seen").single();
-    if(error){toast("บันทึกชื่อไม่สำเร็จ");console.error(error);return}
-    onlineProfile=data;socialProfiles.set(data.user_id,data);toast("เปลี่ยนชื่อเป็น "+name+" แล้ว");
-    await refreshOnline();
+    const result=await rpc("cb_update_profile",{p_token:gameToken,p_display_name:name});
+    if(!result.ok){toast(result.message||"บันทึกชื่อไม่สำเร็จ");return}
+    gameAccount={...gameAccount,...result};onlineProfile=result;
+    socialProfiles.set(result.account_id,result);
+    toast("เปลี่ยนชื่อเป็น "+name+" แล้ว");renderOnlineShell();await refreshOnline();
   }
 
   async function searchPlayers(){
-    if(!authSession||!supabaseClient)return;
-    const q=$("#playerSearchInput").value.trim();
-    const out=$("#playerSearchResults");
+    if(!gameToken||!supabaseClient)return;
+    const q=$("#playerSearchInput").value.trim(),out=$("#playerSearchResults");
     if(!q){out.innerHTML="";return}
-    const code=q.replace(/^#/,"").toUpperCase();
-    const [nameRes,codeRes]=await Promise.all([
-      supabaseClient.from("card_base_profiles")
-        .select("user_id,player_code,display_name,last_seen")
-        .ilike("display_name","%"+q+"%").neq("user_id",authSession.user.id).limit(10),
-      supabaseClient.from("card_base_profiles")
-        .select("user_id,player_code,display_name,last_seen")
-        .eq("player_code",code).neq("user_id",authSession.user.id).limit(3)
-    ]);
-    const merged=new Map();
-    [...(nameRes.data||[]),...(codeRes.data||[])].forEach(p=>{merged.set(p.user_id,p);socialProfiles.set(p.user_id,p)});
-    const list=[...merged.values()];
-    if(list.length){
-      const br=await supabaseClient.from("card_base_public_bases").select("user_id,base_level,title,updated_at").in("user_id",list.map(p=>p.user_id));
-      (br.data||[]).forEach(b=>onlineCache.bases.set(b.user_id,b));
-    }
+    const result=await rpc("cb_search_players",{p_token:gameToken,p_query:q});
+    if(!result.ok){out.innerHTML='<div class="social-empty">ค้นหาไม่สำเร็จ</div>';return}
+    const list=result.players||[];
+    list.forEach(p=>socialProfiles.set(p.account_id,p));
     out.innerHTML=list.length?list.map(p=>socialRow(p)).join(""):'<div class="social-empty">ไม่พบผู้เล่น</div>';
   }
 
   async function sendFriendRequest(userId){
-    if(!authSession||!supabaseClient||userId===authSession.user.id)return;
-    const {error}=await supabaseClient.from("card_base_friendships").insert({
-      requester_id:authSession.user.id,
-      addressee_id:userId,
-      status:"pending"
-    });
-    if(error){
-      toast(error.code==="23505"?"มีคำขอหรือเป็นเพื่อนกันอยู่แล้ว":"ส่งคำขอไม่สำเร็จ");
-      console.error(error);return;
-    }
-    toast("ส่งคำขอเป็นเพื่อนแล้ว");
-    await refreshOnline();
+    if(!gameToken||!supabaseClient)return;
+    const result=await rpc("cb_send_friend",{p_token:gameToken,p_target:userId});
+    if(!result.ok){toast(result.message||"ส่งคำขอไม่สำเร็จ");return}
+    toast("ส่งคำขอเป็นเพื่อนแล้ว");await refreshOnline();
   }
 
   async function acceptFriend(friendshipId){
-    const {error}=await supabaseClient.from("card_base_friendships")
-      .update({status:"accepted",updated_at:new Date().toISOString()})
-      .eq("id",friendshipId);
-    if(error){toast("รับเพื่อนไม่สำเร็จ");console.error(error);return}
+    const result=await rpc("cb_accept_friend",{p_token:gameToken,p_friendship:friendshipId});
+    if(!result.ok){toast("รับเพื่อนไม่สำเร็จ");return}
     toast("เป็นเพื่อนกันแล้ว 🎉");await refreshOnline();
   }
 
   async function removeFriend(friendshipId){
-    const {error}=await supabaseClient.from("card_base_friendships").delete().eq("id",friendshipId);
-    if(error){toast("ดำเนินการไม่สำเร็จ");console.error(error);return}
+    const result=await rpc("cb_remove_friend",{p_token:gameToken,p_friendship:friendshipId});
+    if(!result.ok){toast("ดำเนินการไม่สำเร็จ");return}
     toast("อัปเดตรายชื่อเพื่อนแล้ว");await refreshOnline();
   }
 
   async function visitPlayerBase(userId){
-    if(!authSession||!supabaseClient)return;
-    const profile=socialProfiles.get(userId)||onlineCache.profiles.get(userId);
+    if(!gameToken||!supabaseClient)return;
+    const profile=socialProfiles.get(userId);
     $("#socialBaseName").textContent=(profile?profile.display_name:"Player")+"'s Base";
     $("#socialBaseMeta").textContent="กำลังโหลด…";
     $("#socialBaseStands").innerHTML="";
     $("#socialBaseModal").classList.add("show");
     $("#socialBaseModal").setAttribute("aria-hidden","false");
 
-    const {data,error}=await supabaseClient.from("card_base_public_bases")
-      .select("user_id,base_level,title,stands,updated_at")
-      .eq("user_id",userId).maybeSingle();
-    if(error||!data){
+    const data=await rpc("cb_visit_base",{p_token:gameToken,p_target:userId});
+    if(!data.ok||!data.base_level){
       $("#socialBaseMeta").textContent="ผู้เล่นคนนี้ยังไม่ได้เผยแพร่ฐาน";
       $("#socialBaseStands").innerHTML='<div class="social-empty">ยังไม่มีข้อมูลฐาน</div>';
       return;
     }
+    $("#socialBaseName").textContent=(data.display_name||"Player")+"'s Base";
     $("#socialBaseMeta").textContent="Base Lv."+data.base_level+" · "+data.title;
     const max=STANDS[data.base_level-1]||30;
     const bySlot=new Map((Array.isArray(data.stands)?data.stands:[]).map(x=>[x.slot,x]));
@@ -1351,7 +1229,9 @@
     $("#loginBtn").addEventListener("click",loginAccount);
     $("#signupBtn").addEventListener("click",signupAccount);
     $("#logoutBtn").addEventListener("click",logoutAccount);
+    $("#recoverBtn").addEventListener("click",recoverAccount);
     $("#authPassword").addEventListener("keydown",e=>{if(e.key==="Enter")loginAccount()});
+    $("#authPasswordConfirm").addEventListener("keydown",e=>{if(e.key==="Enter")signupAccount()});
     $("#onlineLoginBtn").addEventListener("click",openAuth);
     $("#refreshOnlineBtn").addEventListener("click",refreshOnline);
     $("#saveOnlineNameBtn").addEventListener("click",saveOnlineName);
@@ -1400,13 +1280,13 @@
     state.lastTick=now;renderAll();updateRollProgress();
     state.rollingUntil=0;
     setInterval(economyTick,1000);
-    onlineHeartbeatTimer=setInterval(()=>{if(document.visibilityState==="visible"&&authSession)heartbeatOnline()},45000);
+    onlineHeartbeatTimer=setInterval(()=>{if(document.visibilityState==="visible"&&gameToken)heartbeatOnline()},45000);
     const catchUpActiveSystems=()=>{
       accrueIncomeToNow();
       if(state.rollingUntil)processRollEngine();
       if(state.gradeAuto)processGradeAuto();
       renderHeader();renderRebirth();
-      if(authSession){heartbeatOnline();flushCloudSave()}
+      if(gameToken){heartbeatOnline();flushCloudSave()}
     };
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")catchUpActiveSystems()});
     window.addEventListener("focus",catchUpActiveSystems);
