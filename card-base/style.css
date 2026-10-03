@@ -888,3 +888,19 @@ body::before{
 #socialBaseStands .visitor-stand.tier-9{
   border-width:2px
 }
+
+.visitor-tier-name{
+  font-weight:1000;
+  text-shadow:0 0 10px color-mix(in srgb,var(--tier) 55%,transparent);
+}
+.visitor-tier-name.tier-4,
+.visitor-tier-name.tier-5,
+.visitor-tier-name.tier-6,
+.visitor-tier-name.tier-7{
+  filter:drop-shadow(0 0 4px color-mix(in srgb,var(--tier) 45%,transparent));
+}
+.visitor-tier-name.tier-8,
+.visitor-tier-name.tier-9{
+  font-weight:1000;
+  filter:drop-shadow(0 0 7px color-mix(in srgb,var(--tier) 65%,transparent));
+}
