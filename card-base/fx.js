@@ -123,9 +123,14 @@
     else if(tier===7) rate=1.45;
     else if(tier===8) rate=1.9;
     else if(tier>=9) rate=2.45;
+
     if(grade===7) rate+=0.38;
     else if(grade===8) rate+=0.72;
-    else if(grade>=9) rate+=1.15;
+    else if(grade===9) rate+=1.15;
+    else if(grade===10) rate+=1.55;
+    else if(grade===11) rate+=1.95;
+    else if(grade>=12) rate+=2.4;
+
     if(mutation>0) rate+=mutation>=8?2.35:mutation>=6?1.95:1.55;
     return rate*quality;
   }
@@ -133,6 +138,9 @@
   function chooseTexture(tier,grade,mutation=0){
     const r=Math.random();
     if(mutation>0 && r<.72) return MUTATION_TEXTURES[mutation]||"spark";
+    if(grade>=12) return r<.44?"flare":r<.78?"star":"spark";
+    if(grade>=11) return r<.36?"flare":r<.68?"star":"spark";
+    if(grade>=10) return r<.30?"flare":r<.58?"star":"spark";
     if(grade>=9 && r<.22) return "flare";
     if(tier>=9) return r<.18?"flare":r<.58?"spark":"star";
     if(tier===8) return r<.38?"flare":r<.68?"star":"spark";
