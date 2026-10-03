@@ -61,3 +61,34 @@ button,input,select{font:inherit}button{color:inherit}
 @media (max-width:850px){.topbar{align-items:flex-start;flex-direction:column}.stats{width:100%;grid-template-columns:repeat(2,1fr)}.pack-layout,.rebirth-grid{grid-template-columns:1fr}}
 @media (max-width:620px){.auto-head{align-items:flex-start;flex-direction:column}.stand-detail{grid-template-columns:1fr}.stand-detail-art{width:min(260px,100%);margin:auto}}
 @media (max-width:560px){.app-shell{padding:12px}.hero-row,.collection-head{align-items:flex-start;flex-direction:column}.stands{grid-template-columns:repeat(2,minmax(0,1fr))}.collection{grid-template-columns:repeat(2,minmax(0,1fr))}.tier-filters{grid-template-columns:1fr}.card-item{min-width:0}.card-actions,.stand-actions{grid-template-columns:1fr}.card-body{padding:9px}.card-grade{font-size:12px;min-width:34px}}
+
+.stand-grade{
+  position:absolute;top:10px;left:10px;z-index:5;
+  min-width:48px;padding:7px 10px;border-radius:12px;
+  background:linear-gradient(145deg,rgba(8,9,13,.92),rgba(20,22,31,.86));
+  border:1px solid var(--grade,#aaa);color:var(--grade,#fff);
+  font-weight:1000;font-size:13px;letter-spacing:.04em;text-align:center;
+  box-shadow:0 0 16px color-mix(in srgb,var(--grade) 26%,transparent),
+             inset 0 0 14px color-mix(in srgb,var(--grade) 10%,transparent);
+  text-shadow:0 0 10px color-mix(in srgb,var(--grade) 45%,transparent);
+}
+.stand-grade.grade-3,.stand-grade.grade-4,.stand-grade.grade-5{
+  box-shadow:0 0 20px color-mix(in srgb,var(--grade) 36%,transparent),
+             inset 0 0 16px color-mix(in srgb,var(--grade) 14%,transparent);
+}
+.stand-grade.grade-6,.stand-grade.grade-7{
+  border-width:2px;
+  box-shadow:0 0 24px color-mix(in srgb,var(--grade) 46%,transparent),
+             inset 0 0 18px color-mix(in srgb,var(--grade) 18%,transparent);
+}
+.stand-grade.grade-8,.stand-grade.grade-9{
+  border-width:2px;
+  background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(8,9,13,.9));
+  box-shadow:0 0 30px color-mix(in srgb,var(--grade) 58%,transparent),
+             inset 0 0 22px color-mix(in srgb,var(--grade) 24%,transparent);
+  animation:gradePulse 2.1s ease-in-out infinite;
+}
+@keyframes gradePulse{
+  0%,100%{transform:scale(1);filter:brightness(1)}
+  50%{transform:scale(1.045);filter:brightness(1.2)}
+}
