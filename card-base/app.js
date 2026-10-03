@@ -2488,6 +2488,7 @@
   function commitCardMicroUpdate(uid){
     refreshCardSurface(uid);
     recordCardInIndex(state.cards.find(x=>x.uid===uid));
+    if($("#panel-index")?.classList.contains("active"))renderCardIndex();
     localStorage.setItem(SAVE_KEY,JSON.stringify(state));
     scheduleCloudSave();
   }
