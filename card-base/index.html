@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261003-tiertype1">
+  <link rel="stylesheet" href="./style.css?v=20261003-idpacks1">
 </head>
 <body>
   <div class="app-shell">
@@ -125,7 +125,24 @@
               </div>
             </div>
 
-            <div class="micro">คีย์ลัด: กด <kbd>1</kbd> เพื่อสุ่ม 1 ครั้ง · คลิกซองเพื่อเปิด</div>
+            <section class="id-pack-shop">
+              <div class="id-pack-shop-head">
+                <div>
+                  <div class="eyebrow">ID PACK SHOP</div>
+                  <h3>สุ่มเจาะช่วง Character ID</h3>
+                  <p class="muted">ใช้เงินสุ่มทันที · จำกัด Character เฉพาะช่วง ID · Tier ใช้ Luck ปัจจุบัน · Mutation มีโอกาสติดตอนเปิดครั้งแรก</p>
+                </div>
+                <span class="badge">ID สูง = Income สูงขึ้นเล็กน้อย</span>
+              </div>
+              <div id="idPackShop" class="id-pack-grid"></div>
+              <div class="id-pack-note">
+                <span>#0001 เป็นค่าฐาน</span>
+                <span>ทุก +1 ID เพิ่ม Base Income ประมาณ +0.3%</span>
+                <span>Tier / Grade / Level / Mutation ยังมีผลมากกว่า ID</span>
+              </div>
+            </section>
+
+            <div class="micro">คีย์ลัด: กด <kbd>1</kbd> เพื่อสุ่มฟรี 1 ครั้ง · คลิกซองเพื่อเปิด</div>
           </div>
 
           <aside class="luck-panel">
@@ -524,7 +541,7 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261003-tiertype1" defer></script>
-  <script src="./fx.js?v=20261003-tiertype1" defer></script>
+  <script src="./app.js?v=20261003-idpacks1" defer></script>
+  <script src="./fx.js?v=20261003-idpacks1" defer></script>
 </body>
 </html>
