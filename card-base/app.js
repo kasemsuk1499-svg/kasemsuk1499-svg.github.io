@@ -494,15 +494,15 @@
     // Rebirth quality curve: almost no suppression in early game,
     // then low tiers fade out gradually through mid/late game.
     const lv=Math.max(1,Number(level)||1);
-    return Math.max(0,Math.min(1,(lv-10)/25));
+    return Math.max(0,Math.min(1,(lv-8)/18));
   }
 
   function lowTierWeightMultiplier(tier,level=state.baseLevel){
     const p=tierQualityProgress(level);
-    if(tier===0)return 1-(0.72*p); // Common: strongest suppression
-    if(tier===1)return 1-(0.50*p); // Uncommon
-    if(tier===2)return 1-(0.25*p); // Rare
-    if(tier===3)return 1-(0.08*p); // Epic: only a small fade
+    if(tier===0)return 1-(0.88*p); // Common: strongest suppression
+    if(tier===1)return 1-(0.68*p); // Uncommon
+    if(tier===2)return 1-(0.38*p); // Rare
+    if(tier===3)return 1-(0.12*p); // Epic: only a small fade
     return 1;
   }
 
@@ -512,7 +512,7 @@
 
     // Slightly stronger Luck conversion + Rebirth-based low-tier suppression.
     // This improves pack quality without making top-end tiers common.
-    const ratio=Math.min(0.405,0.235+0.08*Math.max(0,luck-1));
+    const ratio=Math.min(0.40,0.235+0.08*Math.max(0,luck-1));
     const weights=TIERS.map((_,i)=>
       i<maxTier
         ? Math.pow(ratio,i)*lowTierWeightMultiplier(i,level)
