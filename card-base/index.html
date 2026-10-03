@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261003-userauth2">
+  <link rel="stylesheet" href="./style.css?v=20261003-grade-multi1">
 </head>
 <body>
   <div class="app-shell">
@@ -263,10 +263,14 @@
           <button id="closeGradeAutoModal" class="icon-btn" type="button" aria-label="ปิด">✕</button>
         </div>
         <div id="gradeAutoCardInfo" class="grade-auto-info"></div>
-        <label class="grade-target-field">
-          <span>หยุดเมื่อสุ่มได้</span>
-          <select id="gradeTargetSelect"></select>
-        </label>
+        <div class="grade-target-field">
+          <span>หยุดเมื่อสุ่มได้ Grade ใด Grade หนึ่งที่ติ๊กไว้</span>
+          <div class="grade-target-actions">
+            <button id="gradeSelectHighBtn" type="button">เลือก S ขึ้นไป</button>
+            <button id="gradeClearTargetsBtn" type="button">ล้างทั้งหมด</button>
+          </div>
+          <div id="gradeTargetList" class="grade-target-list"></div>
+        </div>
         <p class="warning">ทุกครั้งที่สุ่ม Grade ใหม่จะเขียนทับ Grade เดิมทันที แม้ผลจะต่ำลง หากเงินหมด ระบบจะหยุดและคง Grade ล่าสุดที่สุ่มได้</p>
         <button id="startGradeAutoBtn" class="primary" type="button">เริ่ม Auto Grade</button>
         <button id="stopGradeAutoBtn" class="secondary" type="button" hidden>หยุด Auto Grade</button>
@@ -340,6 +344,6 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261003-userauth2" defer></script>
+  <script src="./app.js?v=20261003-grade-multi1" defer></script>
 </body>
 </html>
