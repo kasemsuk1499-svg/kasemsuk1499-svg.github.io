@@ -247,20 +247,24 @@
   }
 
   function rebirthTargetSeconds(level=state.baseLevel){
-    // ไม่มี Card gate แล้ว จึงใช้เงินเป็น progression gate หลัก
-    return 100+24*Math.max(0,level-1);
+    // เงินเป็น gate หลัก: ต้นเกมยังเดินได้ แต่ปลายเกมต้องสะสมจริงและไม่ตันเร็ว
+    const x=Math.max(0,level-1);
+    return Math.round(240*Math.pow(1.16,x)+35*x);
   }
 
   function rebirthCost(level=state.baseLevel){
+    const x=Math.max(0,level-1);
     const avgCharacterIncome=545;
-    const assumedCardLevel=1+Math.round(Math.max(0,level-1)*2.5);
+    // ประเมินว่าผู้เล่นจะปั้นเลเวลและคัดการ์ดดีขึ้นเรื่อย ๆ ไม่ใช่ใช้ค่าเฉลี่ยซองล้วน
+    const assumedCardLevel=1+Math.round(x*4.2);
+    const optimizationFactor=1+(0.10*x)+(0.018*x*x);
     const expectedCardIncome=
       avgCharacterIncome*
       expectedTierMultiplier(level)*
       Math.pow(1.04,assumedCardLevel-1)*
       baseIncomeMultiplier(level);
     const expectedBaseIncome=expectedCardIncome*standLimit(level);
-    return roundUpNice(expectedBaseIncome*rebirthTargetSeconds(level));
+    return roundUpNice(expectedBaseIncome*rebirthTargetSeconds(level)*optimizationFactor);
   }
 
   function updateSyncUi(mode="local"){
