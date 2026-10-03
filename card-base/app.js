@@ -725,9 +725,9 @@
       const c=bySlot.get(i);
       if(!c){html+='<div class="visitor-stand empty"><span>แท่น '+(i+1)+'</span></div>';continue}
       const t=TIERS[c.tier]||TIERS[0],g=GRADES[c.grade]||GRADES[0];
-      html+='<div class="visitor-stand" style="--tier:'+t.color+'"><div class="visitor-card">'+
+      html+='<div class="visitor-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+'"><div class="visitor-card '+tierFxClass(c.tier)+'">'+
         '<img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div>'+
-        '<div class="stand-grade grade-'+c.grade+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
+        '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
         '<div class="visitor-meta"><b>'+padId(c.charId)+' · '+t.name+'</b><span>Lv.'+c.level+' · '+fmt(c.income||0)+'/s</span></div>'+
         '</div></div>';
     }
@@ -1227,7 +1227,7 @@
       : GRADES.map((_,i)=>i).filter(i=>i>c.grade);
 
     $("#gradeTargetList").innerHTML=GRADES.map((x,i)=>
-      '<label class="grade-target-option" style="--grade:'+x.color+'">'+
+      '<label class="grade-target-option grade-shell-'+i+'" style="--grade:'+x.color+'">'+
         '<input type="checkbox" data-grade-target="'+i+'" '+(activeTargets.includes(i)?'checked':'')+'>'+
         '<span>'+x.name+'</span>'+
       '</label>'
