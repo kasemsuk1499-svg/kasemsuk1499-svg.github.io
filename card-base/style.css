@@ -707,6 +707,36 @@ body[data-rank-stage="5"]::before{opacity:.82;filter:saturate(1.65) brightness(1
 .grade-shell-8{box-shadow:0 0 30px rgba(130,255,243,.18)}
 .grade-shell-9{box-shadow:0 0 38px rgba(255,242,169,.24),0 0 20px rgba(130,255,243,.12)}
 
+/* EX grade endgame */
+.card-grade.grade-10,.stand-grade.grade-10,.grade-fx.grade-10{
+  border-width:2px;
+  background:linear-gradient(105deg,#061b23,#8ff6ff,#ffffff,#8ff6ff,#061b23);
+  background-size:300% 100%;color:#061017;
+  box-shadow:0 0 46px rgba(143,246,255,.92),0 0 22px rgba(255,255,255,.34),inset 0 0 18px rgba(255,255,255,.5);
+  animation:wealthPrism 1.55s linear infinite,gradeSpark 1.55s ease-in-out infinite
+}
+.card-grade.grade-11,.stand-grade.grade-11,.grade-fx.grade-11{
+  border-width:2px;
+  background:linear-gradient(100deg,#160820,#d798ff,#ffffff,#7ee8ff,#d798ff,#160820);
+  background-size:340% 100%;color:#100815;
+  box-shadow:0 0 54px rgba(215,152,255,.95),0 0 28px rgba(126,232,255,.45),inset 0 0 20px rgba(255,255,255,.55);
+  animation:wealthPrism 1.35s linear infinite,gradeSpark 1.4s ease-in-out infinite
+}
+.card-grade.grade-12,.stand-grade.grade-12,.grade-fx.grade-12{
+  border-width:2px;
+  background:linear-gradient(90deg,#fff3a4,#ffffff,#8ff8ff,#e1a0ff,#ffffff,#ffd86b,#ffffff);
+  background-size:420% 100%;color:#0b0d12;
+  box-shadow:
+    0 0 64px rgba(255,255,255,.95),
+    0 0 34px rgba(143,248,255,.58),
+    0 0 24px rgba(225,160,255,.48),
+    inset 0 0 22px rgba(255,255,255,.7);
+  animation:wealthPrism 1.05s linear infinite,gradeSpark 1.18s ease-in-out infinite
+}
+.grade-shell-10{box-shadow:0 0 42px rgba(143,246,255,.28),0 0 20px rgba(255,255,255,.10)}
+.grade-shell-11{box-shadow:0 0 50px rgba(215,152,255,.32),0 0 26px rgba(126,232,255,.16)}
+.grade-shell-12{box-shadow:0 0 62px rgba(255,255,255,.34),0 0 34px rgba(143,248,255,.20),0 0 26px rgba(225,160,255,.16)}
+
 /* Rebirth becomes a spectacle */
 #rebirthHeadline.rank-fx{width:max-content;max-width:100%;font-weight:1000}
 #rebirthMoney.wealth-value{font-size:1.15em;font-weight:1000}
