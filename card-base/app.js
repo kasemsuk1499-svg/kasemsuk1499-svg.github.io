@@ -41,6 +41,21 @@
   const GRADE_REROLL_COSTS = [1000,2000,3000,5500,10000,18000,32000,60000,110000,200000];
   const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02];
 
+  const MUTATIONS = [
+    {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:96.00},
+    {name:"Blaze",icon:"🔥",color:"#ff7043",income:1.35,luck:1.08,weight:.65},
+    {name:"Thunder",icon:"⚡",color:"#69e7ff",income:1.30,luck:1.15,weight:.55},
+    {name:"Frost",icon:"❄",color:"#9deaff",income:1.28,luck:1.12,weight:.50},
+    {name:"Gale",icon:"◌",color:"#72ffd5",income:1.25,luck:1.18,weight:.45},
+    {name:"Nature",icon:"❧",color:"#7ee47e",income:1.33,luck:1.10,weight:.45},
+    {name:"Solar",icon:"☀",color:"#ffd761",income:1.42,luck:1.09,weight:.40},
+    {name:"Lunar",icon:"☾",color:"#bdc9ff",income:1.26,luck:1.20,weight:.35},
+    {name:"Void",icon:"◆",color:"#aa69ff",income:1.45,luck:1.14,weight:.30},
+    {name:"Prismatic",icon:"◇",color:"#ff83e8",income:1.38,luck:1.16,weight:.20},
+    {name:"Celestial Surge",icon:"✦",color:"#fff0a5",income:1.55,luck:1.22,weight:.15}
+  ];
+  const MUTATION_ROLL_SECONDS = 120;
+
   const TITLES = [
     "Rookie Collector","Card Scout","Pack Seeker","Card Hunter","Vault Keeper",
     "Elite Collector","Card Warden","Treasure Keeper","Renowned Collector","Hall Master",
@@ -126,8 +141,10 @@
       if(!Number.isInteger(charId)||charId<CARD_MIN_ID||charId>CARD_MAX_ID||!value||typeof value!=="object")continue;
       const tiers=[...new Set((Array.isArray(value.tiers)?value.tiers:[]).map(Number).filter(i=>Number.isInteger(i)&&i>=0&&i<TIERS.length))].sort((a,b)=>a-b);
       const bestGrade=Math.max(0,Math.min(GRADES.length-1,Number(value.bestGrade)||0));
+      const mutations=[...new Set((Array.isArray(value.mutations)?value.mutations:[]).map(Number).filter(i=>Number.isInteger(i)&&i>0&&i<MUTATIONS.length))].sort((a,b)=>a-b);
       out[charId]={
         tiers,
+        mutations,
         bestGrade,
         firstSeen:Number(value.firstSeen)||Date.now(),
         lastSeen:Number(value.lastSeen)||Number(value.firstSeen)||Date.now()
@@ -142,10 +159,13 @@
     const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
     if(charId<CARD_MIN_ID||charId>CARD_MAX_ID)return;
     if(!targetState.cardIndex||typeof targetState.cardIndex!=="object")targetState.cardIndex={};
-    const old=targetState.cardIndex[charId]||{tiers:[],bestGrade:0,firstSeen:seenAt,lastSeen:seenAt};
+    const mutation=Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0));
+    const old=targetState.cardIndex[charId]||{tiers:[],mutations:[],bestGrade:0,firstSeen:seenAt,lastSeen:seenAt};
     const tiers=[...new Set([...(Array.isArray(old.tiers)?old.tiers:[]),tier])].sort((a,b)=>a-b);
+    const mutations=[...new Set([...(Array.isArray(old.mutations)?old.mutations:[]),...(mutation>0?[mutation]:[])])].sort((a,b)=>a-b);
     targetState.cardIndex[charId]={
       tiers,
+      mutations,
       bestGrade:Math.max(Number(old.bestGrade)||0,grade),
       firstSeen:Number(old.firstSeen)||seenAt,
       lastSeen:Math.max(Number(old.lastSeen)||0,seenAt)
@@ -161,7 +181,11 @@
     const s={...newState(),...(parsed||{})};
     s.cards=(Array.isArray(s.cards)?s.cards:[])
       .filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID)
-      .map(c=>({...c,gid:validCardGid(c.gid)?c.gid:makeCardGid()}));
+      .map(c=>({
+        ...c,
+        gid:validCardGid(c.gid)?c.gid:makeCardGid(),
+        mutation:Number.isInteger(Number(c.mutation))&&Number(c.mutation)>=0&&Number(c.mutation)<MUTATIONS.length?Number(c.mutation):0
+      }));
     s.cardIndex=normalizeCardIndex(s.cardIndex);
     syncCardIndex(s);
     s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
@@ -291,6 +315,47 @@
   function rankFxClass(level){return "rank-fx rank-level-"+Math.max(1,Math.min(40,Number(level)||1))+" rank-band-"+rankBand(level)}
   function tierFxClass(tier){return "tier-fx tier-"+Math.max(0,Math.min(9,Number(tier)||0))}
   function gradeFxClass(grade){return "grade-fx grade-"+Math.max(0,Math.min(9,Number(grade)||0))}
+  function mutationFxClass(mutation){
+    const m=Math.max(0,Math.min(MUTATIONS.length-1,Number(mutation)||0));
+    return m?" mutation-fx mutation-"+m:"";
+  }
+  function mutationStyle(mutation){
+    const m=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(mutation)||0))]||MUTATIONS[0];
+    return "--mutation:"+m.color;
+  }
+  function mutationBadge(card){
+    const i=Math.max(0,Math.min(MUTATIONS.length-1,Number(card?.mutation)||0));
+    if(!i)return "";
+    const m=MUTATIONS[i];
+    return '<span class="mutation-badge mutation-'+i+'" style="--mutation:'+m.color+'">'+m.icon+' '+m.name+'</span>';
+  }
+
+  function mutationOdds(){
+    const sum=MUTATIONS.reduce((s,m)=>s+m.weight,0);
+    return MUTATIONS.map(m=>m.weight/sum);
+  }
+  function randomMutation(){
+    let r=Math.random()*MUTATIONS.reduce((s,m)=>s+m.weight,0);
+    for(let i=0;i<MUTATIONS.length;i++){r-=MUTATIONS[i].weight;if(r<=0)return i}
+    return 0;
+  }
+
+  function placedMutationRawBonus(){
+    normalizeSlots();
+    return state.placed.reduce((sum,uid)=>{
+      const c=uid?state.cards.find(x=>x.uid===uid):null;
+      const m=c?MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(c.mutation)||0))]:null;
+      return sum+(m?Math.max(0,m.luck-1):0);
+    },0);
+  }
+  function mutationLuckMultiplier(){
+    const raw=placedMutationRawBonus();
+    const soft=raw/(1+(raw/1.25));
+    return 1+soft;
+  }
+  function effectiveLuckValue(level=state.baseLevel){
+    return luckValue(level)*mutationLuckMultiplier();
+  }
 
   function normalizeSlots(){
     const count=standLimit();
@@ -303,10 +368,14 @@
     state.placed=next;
   }
 
-  function cardIntrinsicIncome(card){
+  function cardCoreIncome(card){
     const tier=TIERS[card.tier],grade=GRADES[card.grade];
     const levelMulti=Math.pow(1.04,Math.max(0,card.level-1));
     return charBaseIncome(card.charId)*tier.multi*grade.multi*levelMulti;
+  }
+  function cardIntrinsicIncome(card){
+    const mutation=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0))]||MUTATIONS[0];
+    return cardCoreIncome(card)*mutation.income;
   }
 
   function cardIncome(card){
@@ -332,6 +401,9 @@
   function rerollCost(card){
     return (GRADE_REROLL_COSTS[card.tier]||GRADE_REROLL_COSTS[0])*economyScale();
   }
+  function mutationRerollCost(card){
+    return roundUpNice(cardCoreIncome(card)*baseIncomeMultiplier()*economyScale()*MUTATION_ROLL_SECONDS);
+  }
 
   function sellValue(card){
     const income=cardIntrinsicIncome(card);
@@ -353,7 +425,7 @@
   }
   function tierOdds(level=state.baseLevel){
     const maxTier=maxTierForLevel(level);
-    const luck=luckValue(level);
+    const luck=effectiveLuckValue(level);
     // ลด power creep: Tier สูงยังมีโอกาสตั้งแต่ปลด แต่ต้องไต่ Luck หลาย Rebirth จึงเห็นผลชัด
     const ratio=Math.min(0.39,0.23+0.075*Math.max(0,luck-1));
     const weights=TIERS.map((_,i)=>i<maxTier?Math.pow(ratio,i):0);
@@ -1251,7 +1323,7 @@
 
   function createCardFromTier(tier){
     const charId=CARD_MIN_ID+Math.floor(Math.random()*(CARD_MAX_ID-CARD_MIN_ID+1));
-    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,level:1,locked:false,obtainedAt:Date.now()};
+    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),level:1,locked:false,obtainedAt:Date.now()};
     state.cards.push(card);
     recordCardInIndex(card,card.obtainedAt);
     return card;
