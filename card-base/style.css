@@ -904,3 +904,189 @@ body::before{
   font-weight:1000;
   filter:drop-shadow(0 0 7px color-mix(in srgb,var(--tier) 65%,transparent));
 }
+
+
+/* =========================================================
+   Grade rates, Rank Catalog & Card Trade
+   ========================================================= */
+.odds-divider{
+  height:1px;background:var(--border);margin:16px 0
+}
+.grade-rate-head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px
+}
+.grade-rate-head h3{margin:3px 0}
+.grade-rate-head span{font-size:9px;color:var(--muted)}
+.grade-odd small{font-size:8px;color:var(--muted);margin-left:4px}
+.grade-target-option>span{
+  display:flex;flex-direction:column;gap:2px;min-width:0
+}
+.grade-target-option>span b{font-size:11px}
+.grade-target-option>span small{font-size:8px;color:var(--muted)}
+.grade-target-chance{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-top:10px;padding:9px 10px;border:1px solid #303748;border-radius:11px;background:#0b0e15
+}
+.grade-target-chance strong{font-size:11px}
+.grade-target-chance span{font-size:9px;color:var(--muted);text-align:right}
+
+/* Rank catalog */
+.rank-catalog-box{
+  margin-top:16px;border:1px solid var(--border);border-radius:18px;background:#10131b;overflow:hidden
+}
+.rank-catalog-box>summary{
+  list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.rank-catalog-box>summary::-webkit-details-marker{display:none}
+.rank-catalog-box>summary>span{display:grid;gap:3px}
+.rank-catalog-box>summary strong{font-size:16px}
+.rank-catalog-box>summary small{font-size:10px;color:var(--muted)}
+.rank-catalog{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 14px 14px
+}
+.rank-catalog-item{
+  position:relative;display:grid;gap:5px;min-height:86px;padding:11px;
+  border:1px solid #292f3d;border-radius:13px;background:#0c0e14;overflow:hidden
+}
+.rank-catalog-item::after{
+  content:"";position:absolute;inset:auto -10% -40% -10%;height:60%;
+  background:radial-gradient(ellipse,color-mix(in srgb,var(--rank) 12%,transparent),transparent 70%);
+  pointer-events:none
+}
+.rank-catalog-item.current{
+  border-color:color-mix(in srgb,var(--rank) 72%,#333);
+  box-shadow:0 0 20px color-mix(in srgb,var(--rank) 16%,transparent)
+}
+.rank-catalog-item.locked{opacity:.52}
+.rank-catalog-item.reached{opacity:1}
+.rank-catalog-item strong{font-size:12px;line-height:1.25;z-index:1}
+.rank-catalog-item small{font-size:8px;color:var(--muted);z-index:1}
+.rank-level-chip{
+  width:max-content;padding:3px 6px;border-radius:999px;border:1px solid color-mix(in srgb,var(--rank) 35%,#303747);
+  font-size:8px;color:var(--rank);z-index:1
+}
+
+/* Trade center */
+.trade-center{
+  margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:18px;background:#10131b
+}
+.trade-center-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px
+}
+.trade-center-head h3{margin:3px 0}
+.trade-center-head p{margin:4px 0 0;font-size:10px}
+.trade-columns{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px
+}
+.trade-box{
+  min-width:0;padding:10px;border:1px solid #262c3a;border-radius:13px;background:#0c0e14
+}
+.trade-history{grid-column:1/-1}
+.trade-list{display:grid;gap:8px;margin-top:8px}
+.trade-row{
+  display:grid;grid-template-columns:minmax(90px,.8fr) minmax(150px,1.2fr);gap:8px;
+  padding:9px;border:1px solid #292f3d;border-radius:12px;background:#10131a
+}
+.trade-person{min-width:0}
+.trade-person strong,.trade-person small{display:block}
+.trade-person strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trade-person small{font-size:8px;color:var(--muted);margin-top:3px}
+.trade-row-actions{
+  grid-column:1/-1;display:flex;justify-content:flex-end;gap:6px
+}
+.trade-row-actions button{padding:7px 9px;font-size:9px}
+.player-actions .trade{
+  border-color:#6278a8;background:#171e30
+}
+
+/* Trade cards */
+.trade-card-visual{
+  display:grid;grid-template-columns:58px minmax(0,1fr);gap:8px;align-items:center;
+  min-width:0;border:1px solid color-mix(in srgb,var(--tier,#777) 42%,#282d3a);
+  border-radius:11px;background:#0a0c11;overflow:hidden
+}
+.trade-card-visual.compact{grid-template-columns:52px minmax(0,1fr)}
+.trade-card-art{
+  position:relative;aspect-ratio:.72;background:#090a0d;overflow:hidden
+}
+.trade-card-art img{
+  width:100%;height:100%;display:block;object-fit:cover
+}
+.trade-card-art .card-grade{
+  top:5px;left:5px;font-size:7px;padding:3px 5px
+}
+.trade-card-meta{min-width:0;padding:5px 7px 5px 0}
+.trade-card-meta strong,.trade-card-meta span{display:block}
+.trade-card-meta strong{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trade-card-meta span{font-size:8px;color:var(--muted);margin-top:3px}
+.trade-card-meta .tier-label{text-shadow:0 0 8px currentColor}
+
+.trade-history-row{
+  padding:9px;border:1px solid #292f3d;border-radius:11px;background:#0f1219
+}
+.trade-history-row>div:first-child{display:flex;justify-content:space-between;gap:8px}
+.trade-history-row small{font-size:9px;color:var(--muted)}
+.trade-history-row.accepted{border-color:#315e52}
+.trade-history-cards{
+  display:grid!important;grid-template-columns:auto minmax(120px,1fr) auto auto minmax(120px,1fr);
+  align-items:center;gap:6px;margin-top:8px
+}
+.trade-history-cards>span{font-size:8px;color:var(--muted)}
+.trade-history-cards>b{text-align:center}
+
+/* Trade modal */
+.trade-modal-card{width:min(920px,96vw)}
+.trade-offered-preview{
+  margin-top:12px;padding:12px;border:1px solid #344057;border-radius:14px;background:#0d111a
+}
+.trade-offered-preview>div{display:grid;gap:7px;max-width:360px}
+.trade-picker-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:14px 0 8px
+}
+.trade-picker-head>div{display:grid;gap:3px}
+.trade-picker-head small{font-size:9px;color:var(--muted)}
+.trade-card-picker{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;
+  max-height:54vh;overflow:auto;padding:2px 2px 8px
+}
+.trade-pick{
+  padding:0;border:1px solid #2d3342;border-radius:13px;background:#0a0c11;overflow:hidden;cursor:pointer;text-align:left
+}
+.trade-pick:hover{border-color:#596984}
+.trade-pick.selected{
+  border-color:#79e6ff;box-shadow:0 0 18px rgba(121,230,255,.22)
+}
+.trade-pick .trade-card-visual{
+  display:block;border:0;border-radius:0
+}
+.trade-pick .trade-card-art{aspect-ratio:.72}
+.trade-pick .trade-card-meta{padding:7px}
+#tradeConfirmBtn{width:100%;margin-top:10px}
+
+.trade-locked{
+  border-color:#5272a4!important;
+  box-shadow:inset 0 0 24px rgba(82,114,164,.08)!important
+}
+.trade-lock-banner{
+  margin:0 10px 8px;padding:7px 9px;border:1px solid #4d6690;border-radius:9px;
+  background:#111a2b;color:#91c9ff;font-size:9px;font-weight:900;letter-spacing:.04em
+}
+
+@media (max-width:850px){
+  .rank-catalog{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .trade-card-picker{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:700px){
+  .grade-target-chance{align-items:flex-start;display:grid}
+  .grade-target-chance span{text-align:left}
+  .rank-catalog{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .rank-catalog-item{min-height:78px;padding:9px}
+  .trade-center-head{align-items:flex-start;display:grid}
+  .trade-columns{grid-template-columns:1fr}
+  .trade-history{grid-column:auto}
+  .trade-row{grid-template-columns:1fr}
+  .trade-row-actions{grid-column:auto}
+  .trade-card-picker{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .trade-history-cards{grid-template-columns:1fr}
+  .trade-history-cards>b{transform:rotate(90deg)}
+}
