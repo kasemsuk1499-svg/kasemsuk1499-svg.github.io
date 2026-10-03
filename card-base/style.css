@@ -2024,3 +2024,15 @@ body::before{
   .rot-pack::before,.id-pack-card::after{animation:none!important}
   .rot-pack,.id-pack-card{transition:none}
 }
+
+.rot-out-pool{
+  grid-column:1/-1;
+  margin-top:1px;padding:5px 6px;
+  border:1px dashed rgba(255,235,145,.20);border-radius:8px;
+  background:rgba(255,232,128,.035);
+  color:#b9ad78;font-size:6.5px;line-height:1.35;
+  letter-spacing:.03em;text-align:center
+}
+@media (max-width:700px){
+  .rot-out-pool{grid-column:1}
+}
