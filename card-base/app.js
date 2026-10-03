@@ -183,17 +183,28 @@
   }
 
   async function flushCloudSave(){
-    if(!cloudReady||cloudLoading||!gameToken||!supabaseClient)return;
+    if(!cloudReady||cloudLoading||!gameToken||!supabaseClient)return {ok:false,error:"cloud_not_ready"};
     clearTimeout(cloudTimer);
     const snapshot=JSON.parse(JSON.stringify(cloudPayload()));
     const result=await rpc("cb_save_state",{p_token:gameToken,p_state:snapshot});
     if(!result.ok){
       if(result.error==="invalid_session")clearGameSession();
-      else updateSyncUi("error");
-      return;
+      else if(result.error==="trade_card_locked"){
+        toast("การ์ดที่อยู่ใน Trade ถูกล็อก · ยกเลิก Trade ก่อนแก้ไข");
+        await loadCloudState();
+      }else updateSyncUi("error");
+      return result;
+    }
+    if(Number(result.trade_receipts)>0&&result.state){
+      state=hydrateState(result.state);
+      localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+      renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderRebirth();renderRankCatalog();renderOnlineShell();
+      toast("Trade สำเร็จ · คลังการ์ดอัปเดตแล้ว ✨",true);
+      setTimeout(()=>refreshTrades(true),0);
     }
     updateSyncUi("online");
     publishPublicBase();
+    return result;
   }
 
   function save(){
@@ -631,9 +642,12 @@
       actions+='<button class="accept" data-social-action="accept" data-friend="'+options.request.friendship_id+'">รับเพื่อน</button>'+
                '<button class="remove" data-social-action="remove" data-friend="'+options.request.friendship_id+'">ปฏิเสธ</button>';
     }else if(options.friend){
-      actions+='<button class="remove" data-social-action="remove" data-friend="'+options.friend.friendship_id+'">ลบเพื่อน</button>';
+      actions+='<button class="trade" data-social-action="trade" data-user="'+accountId+'">Trade</button>'+
+               '<button class="remove" data-social-action="remove" data-friend="'+options.friend.friendship_id+'">ลบเพื่อน</button>';
     }else if(profile.friendship_status){
-      actions+='<button disabled>'+(profile.friendship_status==="accepted"?"เพื่อนแล้ว":"มีคำขออยู่")+'</button>';
+      actions+=profile.friendship_status==="accepted"
+        ?'<button class="trade" data-social-action="trade" data-user="'+accountId+'">Trade</button><button disabled>เพื่อนแล้ว</button>'
+        :'<button disabled>มีคำขออยู่</button>';
     }else{
       actions+='<button data-social-action="add" data-user="'+accountId+'">+ เพื่อน</button>';
     }
@@ -668,7 +682,9 @@
     if(isMe){
       actions='<button disabled>คุณ</button>';
     }else if(profile.friendship_status){
-      actions+='<button disabled>'+(profile.friendship_status==="accepted"?"เพื่อนแล้ว":"มีคำขออยู่")+'</button>';
+      actions+=profile.friendship_status==="accepted"
+        ?'<button data-social-action="trade" data-user="'+accountId+'">Trade</button><button disabled>เพื่อนแล้ว</button>'
+        :'<button disabled>มีคำขออยู่</button>';
     }else{
       actions+='<button data-social-action="add" data-user="'+accountId+'">+ เพื่อน</button>';
     }
@@ -884,11 +900,23 @@
     }
   }
 
+  function chanceText(prob){
+    const p=Math.max(0,Number(prob)||0)*100;
+    if(p<0.1)return p.toFixed(3)+"%";
+    if(p<1)return p.toFixed(2)+"%";
+    return p.toFixed(1)+"%";
+  }
+
   function renderOdds(){
     const odds=tierOdds();
     $("#luckTitle").textContent="Luck ×"+luckValue().toFixed(2)+" · ปลด Tier "+maxTierForLevel()+"/10";
     $("#odds").innerHTML=TIERS.map((t,i)=>
-      '<div class="odd" style="--tier:'+t.color+';opacity:'+(odds[i]>0?1:.28)+'"><span>'+t.name+'</span><b>'+(odds[i]*100).toFixed(odds[i]*100<1?2:1)+'%</b></div>'
+      '<div class="odd" style="--tier:'+t.color+';opacity:'+(odds[i]>0?1:.28)+'"><span>'+t.name+'</span><b>'+chanceText(odds[i])+'</b></div>'
+    ).join("");
+
+    const gOdds=gradeOdds(),gradeWrap=$("#gradeOdds");
+    if(gradeWrap)gradeWrap.innerHTML=GRADES.map((g,i)=>
+      '<div class="odd grade-odd" style="--tier:'+g.color+'"><span>'+g.name+' <small>×'+g.multi.toFixed(2)+'</small></span><b>'+chanceText(gOdds[i])+'</b></div>'
     ).join("");
   }
 
@@ -1055,8 +1083,21 @@
     $("#nextTier").textContent=TIERS[nextMax-1].name;
   }
 
+  function renderRankCatalog(){
+    const wrap=$("#rankCatalog");if(!wrap)return;
+    wrap.innerHTML=TITLES.map((title,i)=>{
+      const lv=i+1,current=lv===state.baseLevel,reached=lv<=state.baseLevel;
+      const topTier=TIERS[maxTierForLevel(lv)-1];
+      return '<div class="rank-catalog-item '+(current?'current ':'')+(reached?'reached':'locked')+'" style="'+rankFxStyle(lv)+'">'+
+        '<span class="rank-level-chip">Lv.'+lv+'</span>'+
+        '<strong class="'+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(title)+'</strong>'+
+        '<small>Luck ×'+luckValue(lv).toFixed(2)+' · '+topTier.name+'</small>'+
+      '</div>';
+    }).join("");
+  }
+
   function renderAll(){
-    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderRebirth();renderOnlineShell();save();
+    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderCollection();renderRebirth();renderRankCatalog();renderOnlineShell();save();
   }
 
   function rollTargetsReady(){
