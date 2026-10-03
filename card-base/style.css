@@ -1660,6 +1660,40 @@ body::before{
 .id-pack-card:nth-child(3)::before{background:radial-gradient(circle,rgba(165,121,255,.14),transparent 72%)}
 .id-pack-card:nth-child(4)::before{background:radial-gradient(circle,rgba(255,189,74,.12),transparent 72%)}
 .id-pack-card:nth-child(5)::before{background:radial-gradient(circle,rgba(255,99,139,.12),transparent 72%)}
+
+.id-pack-cover{
+  position:relative;z-index:1;overflow:hidden;
+  width:100%;aspect-ratio:1.55;border-radius:11px;
+  border:1px solid #30394b;background:#0a0d13
+}
+.id-pack-cover.has-image img{
+  width:100%;height:100%;display:block;object-fit:cover
+}
+.id-pack-cover.has-image::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 46%,rgba(4,6,10,.42) 100%)
+}
+.id-pack-cover.fallback{
+  display:grid;place-items:center;align-content:center;gap:2px;
+  background:
+    radial-gradient(circle at 50% 30%,rgba(126,150,255,.24),transparent 44%),
+    linear-gradient(145deg,#151b2a,#090c12)
+}
+.id-pack-cover.fallback span{
+  font-size:8px;font-weight:950;letter-spacing:.18em;color:#a8b4cb
+}
+.id-pack-cover.fallback b{
+  font-size:26px;line-height:1;font-weight:1000;
+  background:linear-gradient(90deg,#fff,#91d9ff,#c0a2ff);
+  -webkit-background-clip:text;background-clip:text;color:transparent
+}
+.id-pack-content{
+  position:relative;z-index:1;display:grid;gap:8px
+}
+.id-pack-name{
+  font-size:15px;line-height:1.15;font-weight:1000;letter-spacing:-.02em;
+  color:#f5f7fb;text-shadow:0 0 12px rgba(151,164,255,.16)
+}
 .id-pack-top{
   position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px
 }
