@@ -54,6 +54,7 @@ local function defaultProfile()
 		Tower = {Floor=1,Best=0,Shards=0},
 		Boosts = {DoubleIncomeUntil=0},
 		RotatingShop = {RotationId=0,Bought={}},
+		Daily = {Day="",LastLoginDay="",Streak=0,LoginClaimed=false,Progress={Rolls=0,Upgrades=0,Places=0},Claimed={Rolls=false,Upgrades=false,Places=false},BonusClaimed=false},
 		Receipts = {},
 		LastSeen = os.time(),
 		Meta = {
@@ -77,6 +78,9 @@ local function reconcile(raw)
 	if type(p.RotatingShop) ~= "table" then p.RotatingShop = deepCopy(d.RotatingShop) end
 	if type(p.RotatingShop.Bought) ~= "table" then p.RotatingShop.Bought = {} end
 	p.RotatingShop.RotationId = math.max(0,math.floor(tonumber(p.RotatingShop.RotationId) or 0))
+	if type(p.Daily) ~= "table" then p.Daily = deepCopy(d.Daily) end
+	if type(p.Daily.Progress) ~= "table" then p.Daily.Progress = deepCopy(d.Daily.Progress) end
+	if type(p.Daily.Claimed) ~= "table" then p.Daily.Claimed = deepCopy(d.Daily.Claimed) end
 	if type(p.Receipts) ~= "table" then p.Receipts = {} end
 	if type(p.Meta) ~= "table" then p.Meta = deepCopy(d.Meta) end
 
