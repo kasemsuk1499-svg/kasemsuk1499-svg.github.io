@@ -11,6 +11,7 @@ local Economy = require(Root.Shared.Economy)
 local Remotes = Root:WaitForChild("Remotes")
 local Action = Remotes:WaitForChild("Action")
 local StateEvent = Remotes:WaitForChild("State")
+local EconomyTickEvent = Remotes:WaitForChild("EconomyTick")
 local ToastEvent = Remotes:WaitForChild("Toast")
 local OpenStandEvent = Remotes:WaitForChild("OpenStand")
 local OpenPanelEvent = Remotes:WaitForChild("OpenPanel")
@@ -1586,6 +1587,19 @@ tradeDecline.MouseButton1Click:Connect(function()
 	incomingTradeFrom=nil
 end)
 StateEvent.OnClientEvent:Connect(handleState)
+EconomyTickEvent.OnClientEvent:Connect(function(money,income)
+	if not state then return end
+	state.Money=math.max(0,tonumber(money) or state.Money or 0)
+	state.Computed=state.Computed or {}
+	state.Computed.Income=math.max(0,tonumber(income) or state.Computed.Income or 0)
+	statLabels.Money.Text=fmt(state.Money)
+	local boostLeft=math.max(0,(tonumber(state.Boosts and state.Boosts.DoubleIncomeUntil) or 0)-os.time())
+	statLabels.Income.Text=fmt(state.Computed.Income).."/s"..(boostLeft>0 and " ⚡2X" or "")
+	if state.BaseLevel < Config.BaseLevelCap and state.Computed.RebirthCost then
+		hintBar.Text="NEXT → Rebirth Lv."..(state.BaseLevel+1).." ที่ "..fmt(state.Computed.RebirthCost).." · ตอนนี้ "..fmt(state.Money)
+		hintBar.TextColor3=state.Money >= state.Computed.RebirthCost and COLORS.accent2 or COLORS.text
+	end
+end)
 
 local function applyResponsive()
 	local camera = workspace.CurrentCamera
