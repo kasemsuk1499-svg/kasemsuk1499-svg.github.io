@@ -172,8 +172,8 @@ padding(actionBar,8,8,8,8)
 
 local actionLayout = Instance.new("UIGridLayout")
 actionLayout.CellPadding = UDim2.new(0,7,0,0)
-actionLayout.CellSize = UDim2.new(0.135,-2,1,0)
-actionLayout.FillDirectionMaxCells = 7
+actionLayout.CellSize = UDim2.new(0.118,-2,1,0)
+actionLayout.FillDirectionMaxCells = 8
 actionLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 actionLayout.Parent = actionBar
 
@@ -183,6 +183,7 @@ local baseBtn = makeButton(actionBar,"⌂ BASE",UDim2.new(),UDim2.new())
 local collectionBtn = makeButton(actionBar,"▦ CARDS",UDim2.new(),UDim2.new())
 local endgameBtn = makeButton(actionBar,"✦ ENDGAME",UDim2.new(),UDim2.new())
 local packShopBtn = makeButton(actionBar,"▣ PACKS",UDim2.new(),UDim2.new())
+local dailyBtn = makeButton(actionBar,"☀ DAILY",UDim2.new(),UDim2.new())
 local socialBtn = makeButton(actionBar,"♟ SOCIAL",UDim2.new(),UDim2.new())
 local storeBtn = makeButton(actionBar,"R$ STORE",UDim2.new(),UDim2.new())
 
@@ -908,6 +909,66 @@ local function storeItem(title,subtitle,id,kind)
 	return row
 end
 
+local function openDaily()
+	if not state or not state.Computed or not state.Computed.Daily then return end
+	local daily = state.Computed.Daily
+	activePanel="daily"
+	overlay.Visible=true
+	panelTitle.Text="DAILY MISSIONS"
+	panelSub.Text="UTC Daily Reset · Login Streak "..tostring(daily.Streak or 0)
+	clearContent()
+
+	makeSectionHeader("DAILY LOGIN","เข้าเกมทุกวันเพื่อเพิ่ม Streak · Reward โตขึ้นตาม Streak")
+	local login=makeButton(content,daily.LoginClaimed and "LOGIN REWARD CLAIMED ✓" or ("CLAIM LOGIN · +"..fmt(daily.LoginReward)),UDim2.new(1,-4,0,50),UDim2.new())
+	login.ZIndex=24
+	login.BackgroundColor3=daily.LoginClaimed and Color3.fromRGB(35,58,54) or COLORS.accent
+	login.Active=not daily.LoginClaimed
+	login.AutoButtonColor=not daily.LoginClaimed
+	login.MouseButton1Click:Connect(function()
+		local reward=invoke("ClaimDailyLogin")
+		if reward then showToast("Daily Login +"..fmt(reward.Money),true) end
+	end)
+
+	makeSectionHeader("MISSIONS","ทำจาก Gameplay ปกติ · กดรับทีละ Mission")
+	for _,mission in ipairs(daily.Missions or {}) do
+		local row=Instance.new("Frame")
+		row.BackgroundColor3=COLORS.panel2
+		row.Size=UDim2.new(1,-4,0,76)
+		row.ZIndex=23
+		row.Parent=content
+		corner(row,11)
+		stroke(row,mission.Claimed and COLORS.accent2 or COLORS.line,mission.Claimed and 0.25 or 0.45,1)
+		local title=makeLabel(row,mission.Label,UDim2.new(0.60,0,0,24),UDim2.new(0,12,0,7),11,COLORS.text,true)
+		title.ZIndex=24
+		local meta=makeLabel(row,tostring(mission.Progress).."/"..tostring(mission.Target).." · Reward +"..fmt(mission.Reward),UDim2.new(0.60,0,0,22),UDim2.new(0,12,0,38),9,COLORS.muted,false)
+		meta.ZIndex=24
+		local ready=(mission.Progress or 0)>=(mission.Target or 1) and not mission.Claimed
+		local claim=makeButton(row,mission.Claimed and "CLAIMED ✓" or (ready and "CLAIM" or "IN PROGRESS"),UDim2.new(0,132,0,40),UDim2.new(1,-144,0,18))
+		claim.ZIndex=24
+		claim.BackgroundColor3=mission.Claimed and Color3.fromRGB(35,58,54) or (ready and COLORS.accent or COLORS.panel)
+		claim.Active=ready
+		claim.AutoButtonColor=ready
+		claim.MouseButton1Click:Connect(function()
+			local reward=invoke("ClaimDailyMission",{Key=mission.Key})
+			if reward then showToast("Mission Reward +"..fmt(reward.Money),true) end
+		end)
+	end
+
+	makeSectionHeader("DAILY CLEAR BONUS","รับได้หลัง Claim Mission ครบทั้ง 3")
+	local allClaimed=true
+	for _,mission in ipairs(daily.Missions or {}) do if not mission.Claimed then allClaimed=false end end
+	local bonus=makeButton(content,daily.BonusClaimed and "DAILY BONUS CLAIMED ✓" or ("DAILY CLEAR BONUS · +"..fmt(daily.BonusReward)),UDim2.new(1,-4,0,52),UDim2.new())
+	bonus.ZIndex=24
+	bonus.BackgroundColor3=daily.BonusClaimed and Color3.fromRGB(35,58,54) or (allClaimed and COLORS.gold or COLORS.panel2)
+	bonus.TextColor3=allClaimed and not daily.BonusClaimed and Color3.fromRGB(28,24,18) or COLORS.text
+	bonus.Active=allClaimed and not daily.BonusClaimed
+	bonus.AutoButtonColor=bonus.Active
+	bonus.MouseButton1Click:Connect(function()
+		local reward=invoke("ClaimDailyBonus")
+		if reward then showToast("Daily Clear Bonus +"..fmt(reward.Money).." ✦",true) end
+	end)
+end
+
 local function openStore()
 	activePanel="store";overlay.Visible=true;panelTitle.Text="COLLECTOR STORE";panelSub.Text="ไม่ขายสุ่มการ์ดด้วย Robux · ราคาอ่านจาก Roblox ตามภูมิภาค";clearContent()
 	makeSectionHeader("GAME PASSES","ซื้อครั้งเดียว · สิทธิ์ถาวร")
@@ -1172,7 +1233,8 @@ local function renderHud()
 	elseif activePanel=="stand" and overlay.Visible and selectedSlot then openStand(selectedSlot)
 	elseif activePanel=="mutation" and overlay.Visible and mutationTargetGuid then openMutationLab(mutationTargetGuid)
 	elseif activePanel=="packs" and overlay.Visible then openPackShop()
-	elseif activePanel=="base" and overlay.Visible then openBasePanel() end
+	elseif activePanel=="base" and overlay.Visible then openBasePanel()
+	elseif activePanel=="daily" and overlay.Visible then openDaily() end
 end
 
 local function handleState(newState)
@@ -1188,6 +1250,7 @@ baseBtn.MouseButton1Click:Connect(openBasePanel)
 collectionBtn.MouseButton1Click:Connect(openCollection)
 endgameBtn.MouseButton1Click:Connect(openEndgame)
 packShopBtn.MouseButton1Click:Connect(openPackShop)
+dailyBtn.MouseButton1Click:Connect(openDaily)
 socialBtn.MouseButton1Click:Connect(openSocial)
 storeBtn.MouseButton1Click:Connect(openStore)
 closeBtn.MouseButton1Click:Connect(function() overlay.Visible=false;activePanel=nil;selectedSlot=nil;mutationTargetGuid=nil end)
@@ -1260,11 +1323,11 @@ local function applyResponsive()
 		hintBar.Size = UDim2.new(0,560,0,36)
 		stats.Position = UDim2.new(0,200,0,6)
 		stats.Size = UDim2.new(1,-210,1,-12)
-		actionBar.Size = UDim2.new(0,900,0,64)
+		actionBar.Size = UDim2.new(0,1000,0,64)
 		actionBar.Position = UDim2.new(0.5,0,1,-16)
 		actionLayout.CellPadding = UDim2.new(0,7,0,0)
-		actionLayout.CellSize = UDim2.new(0.135,-2,1,0)
-		actionLayout.FillDirectionMaxCells = 7
+		actionLayout.CellSize = UDim2.new(0.118,-2,1,0)
+		actionLayout.FillDirectionMaxCells = 8
 		panel.Size = UDim2.new(0.78,0,0.78,0)
 	end
 end
