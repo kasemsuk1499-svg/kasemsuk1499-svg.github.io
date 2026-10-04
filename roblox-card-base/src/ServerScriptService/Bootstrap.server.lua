@@ -15,6 +15,7 @@ local MonetizationService = require(Services.MonetizationService)
 local PlotService = require(Services.PlotService)
 local GlobalLeaderboardService = require(Services.GlobalLeaderboardService)
 local TradeService = require(Services.TradeService)
+local DailyService = require(Services.DailyService)
 
 local RemotesFolder = Root:FindFirstChild("Remotes") or Instance.new("Folder")
 RemotesFolder.Name = "Remotes"
@@ -60,6 +61,7 @@ local function enrichedSnapshot(player)
 		TowerConditionOk = conditionOk,
 		TowerCondition = conditionText,
 		RotatingShop = RotatingShopService.ClientState(profile),
+		Daily = DailyService.ClientState(profile,entitlements),
 		Entitlements = entitlements,
 	}
 	return snapshot
@@ -120,6 +122,8 @@ end
 local function joinPlayer(player)
 	local profile = DataService.Load(player)
 	if not profile then return end
+	DailyService.TouchLogin(profile)
+	DataService.MarkDirty(player)
 	MonetizationService.RefreshPasses(player)
 	local offlineGain = BaseService.ApplyOfflineIncome(player)
 	PlotService.Assign(player)
@@ -211,6 +215,21 @@ Action.OnServerInvoke = function(player,action,args)
 			Trade=TradeService.GetSession(player),
 		})
 	end
+	if action == "ClaimDailyLogin" then
+		local ok,payload=DailyService.ClaimLogin(profile,MonetizationService.GetEntitlements(player))
+		if ok then markAndPush(player,false) end
+		return result(ok,payload)
+	end
+	if action == "ClaimDailyMission" then
+		local ok,payload=DailyService.ClaimMission(profile,args.Key,MonetizationService.GetEntitlements(player))
+		if ok then markAndPush(player,false) end
+		return result(ok,payload)
+	end
+	if action == "ClaimDailyBonus" then
+		local ok,payload=DailyService.ClaimBonus(profile,MonetizationService.GetEntitlements(player))
+		if ok then markAndPush(player,false) end
+		return result(ok,payload)
+	end
 	if action == "TradeRequest" then
 		local ok,payload=TradeService.Request(player,args.TargetUserId)
 		return result(ok,payload)
@@ -245,24 +264,29 @@ Action.OnServerInvoke = function(player,action,args)
 	if action == "RollPack" then
 		local hadPlaced = next(profile.Placed) ~= nil
 		ok,payload = CardService.Roll(profile,MonetizationService.GetEntitlements(player),player.UserId)
+		if ok then DailyService.Add(profile,"Rolls",1) end
 		if ok and not hadPlaced then
 			local placed = BaseService.Place(profile,payload.Guid,1)
 			if placed then
+				DailyService.Add(profile,"Places",1)
 				Toast:FireClient(player,"การ์ดใบแรกถูกวางที่ Stand 1 อัตโนมัติ ✦",true)
 			end
 		end
 	elseif action == "RollIdPack" then
 		local hadPlaced = next(profile.Placed) ~= nil
 		ok,payload = CardService.RollIdPack(profile,args.PackIndex)
+		if ok then DailyService.Add(profile,"Rolls",1) end
 		if ok and not hadPlaced then
 			local placed = BaseService.Place(profile,payload.Guid,1)
 			if placed then
+				DailyService.Add(profile,"Places",1)
 				Toast:FireClient(player,"การ์ดใบแรกถูกวางที่ Stand 1 อัตโนมัติ ✦",true)
 			end
 		end
 	elseif action == "BuyRotatingPack" then
 		local hadPlaced = next(profile.Placed) ~= nil
 		ok,payload = RotatingShopService.Buy(profile,args.OfferId,CardService)
+		if ok then DailyService.Add(profile,"Rolls",1) end
 		if ok and not hadPlaced and payload.Card then
 			local placed = BaseService.Place(profile,payload.Card.Guid,1)
 			if placed then
@@ -271,6 +295,7 @@ Action.OnServerInvoke = function(player,action,args)
 		end
 	elseif action == "LevelUp" then
 		ok,payload = CardService.LevelUp(profile,args.Guid)
+		if ok then DailyService.Add(profile,"Upgrades",1) end
 	elseif action == "RerollGrade" then
 		ok,payload = CardService.RerollGrade(profile,args.Guid)
 	elseif action == "Awaken" then
@@ -283,10 +308,12 @@ Action.OnServerInvoke = function(player,action,args)
 		ok,payload = CardService.ToggleLock(profile,args.Guid)
 	elseif action == "Place" then
 		ok,payload = BaseService.Place(profile,args.Guid,args.Slot)
+		if ok then DailyService.Add(profile,"Places",1) end
 	elseif action == "Remove" then
 		ok,payload = BaseService.Remove(profile,args.Slot)
 	elseif action == "AutoEquipBest" then
 		ok,payload = BaseService.AutoEquipBest(profile,MonetizationService.GetEntitlements(player))
+		if ok then DailyService.Add(profile,"Places",1) end
 	elseif action == "Rebirth" then
 		ok,payload = BaseService.Rebirth(profile)
 	elseif action == "Ascend" then
