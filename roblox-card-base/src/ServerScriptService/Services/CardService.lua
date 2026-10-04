@@ -125,9 +125,7 @@ function CardService.Sell(profile,guid)
 	for _,placedGuid in pairs(profile.Placed) do
 		if placedGuid == guid then return false,"ถอดการ์ดจากฐานก่อน" end
 	end
-	local income = Economy.CardIntrinsicIncome(card)
-	local level = math.max(1,tonumber(card.Level) or 1)
-	local value = income*(4+math.min(20,level*0.14))*Economy.EconomyScale(profile.BaseLevel)
+	local value = Economy.SellValue(profile,card)
 	profile.Cards[guid] = nil
 	profile.Money += value
 	return true,value
