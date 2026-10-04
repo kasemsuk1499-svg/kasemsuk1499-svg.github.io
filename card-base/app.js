@@ -1475,6 +1475,37 @@
     friendsEl.innerHTML=onlineCache.friends.length?onlineCache.friends.map(fr=>socialRow(fr,{friend:fr})).join(""):'<div class="social-empty">ยังไม่มีเพื่อน — ลองค้นหาผู้เล่นด้านบน</div>';
   }
 
+  function leaderboardCardShowcase(profile){
+    const cards=Array.isArray(profile?.top_cards)?profile.top_cards.slice(0,5):[];
+    if(!cards.length){
+      return '<div class="leaderboard-showcase empty"><span>ยังไม่มีการ์ดบนฐาน</span></div>';
+    }
+    return '<div class="leaderboard-showcase" aria-label="Top 5 income cards">'+cards.map((card,index)=>{
+      const tier=Math.max(0,Math.min(TIERS.length-1,Number(card.tier)||0));
+      const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
+      const visual={
+        ...card,
+        mutation:Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0)),
+        mutation2:Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation2)||0))
+      };
+      const t=TIERS[tier],g=GRADES[grade],muts=cardMutationIds(visual);
+      const income=Math.max(0,Number(card.income)||0);
+      const mutIcons=muts.map(id=>{
+        const m=MUTATIONS[id];
+        return '<i title="'+escapeHtml(m.name)+'" style="--show-mut:'+m.color+'">'+m.icon+'</i>';
+      }).join("");
+      const title=padId(Number(card.charId)||0)+" · "+t.name+" · Grade "+g.name+
+        (muts.length?" · "+mutationNames(visual):"")+" · "+fmt(income)+"/s";
+      return '<div class="leaderboard-card tier-'+tier+' grade-'+grade+'" style="--show-tier:'+t.color+';--show-grade:'+g.color+'" title="'+escapeHtml(title)+'">'+
+        '<img src="'+imageFor(Number(card.charId)||CARD_MIN_ID)+'" alt="'+padId(Number(card.charId)||0)+'">'+
+        '<span class="leaderboard-card-grade">'+escapeHtml(g.name)+'</span>'+
+        (mutIcons?'<span class="leaderboard-card-mutations">'+mutIcons+'</span>':'')+
+        '<span class="leaderboard-card-rank">#'+(index+1)+'</span>'+
+        '<div class="leaderboard-card-meta"><b>'+padId(Number(card.charId)||0)+'</b><small>'+fmt(income)+'/s</small></div>'+
+      '</div>';
+    }).join("")+'</div>';
+  }
+
   function leaderboardRow(profile){
     const accountId=profile.account_id;
     const isMe=!!gameAccount&&accountId===gameAccount.account_id;
@@ -1500,6 +1531,7 @@
         '<small><span>#'+escapeHtml(profile.player_code)+'</span><span>Base Lv.'+profile.base_level+'</span>'+(profile.online?'<span>● Online</span>':'')+'</small>'+
         '<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.title||"Rookie Collector")+'</span>'+
       '</div>'+
+      leaderboardCardShowcase(profile)+
       '<div class="leaderboard-stats"><b class="'+wealthClass(income)+'">'+fmt(income)+'/s</b><span>รายได้ฐาน</span></div>'+
       '<div class="leaderboard-actions">'+actions+'</div>'+
     '</div>';
@@ -1514,6 +1546,9 @@
     wrap.innerHTML=onlineCache.leaders.length
       ? onlineCache.leaders.map(leaderboardRow).join("")
       : '<div class="social-empty">ยังไม่มีข้อมูลอันดับ</div>';
+    wrap.querySelectorAll(".leaderboard-card img").forEach(img=>img.addEventListener("error",e=>{
+      e.currentTarget.style.opacity=".12";
+    },{once:true}));
   }
 
   async function refreshOnline(){
