@@ -109,6 +109,9 @@ Action.OnServerInvoke = function(player,action,args)
 	if action == "TeleportHome" then
 		return result(PlotService.TeleportHome(player),true)
 	end
+	if action == "TeleportFloor" then
+		return result(PlotService.TeleportFloor(player,args.Floor),true)
+	end
 
 	local ok,payload
 	if action == "RollPack" then
@@ -154,6 +157,8 @@ Action.OnServerInvoke = function(player,action,args)
 		ok,payload = BaseService.Place(profile,args.Guid,args.Slot)
 	elseif action == "Remove" then
 		ok,payload = BaseService.Remove(profile,args.Slot)
+	elseif action == "AutoEquipBest" then
+		ok,payload = BaseService.AutoEquipBest(profile,MonetizationService.GetEntitlements(player))
 	elseif action == "Rebirth" then
 		ok,payload = BaseService.Rebirth(profile)
 	elseif action == "Ascend" then
