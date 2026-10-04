@@ -406,7 +406,7 @@
           <div class="rebirth-card">
             <div class="eyebrow">BASE PROGRESSION</div>
             <h2 id="rebirthHeadline">Lv.1 → Lv.2</h2>
-            <p class="muted">Rebirth คือการอัปเลเวลฐานระบบเดียวกัน ใช้เงินเป็นเงื่อนไขหลัก เงินจะถูกรีเซ็ต แต่คลังและการ์ดทั้งหมดอยู่ครบ</p>
+            <p class="muted">Rebirth คือการอัป Base Level แบบไม่จำกัด ใช้เงินเป็นเงื่อนไขหลัก เงินจะถูกรีเซ็ต แต่คลัง การ์ด และ Endgame Progress อยู่ครบ</p>
             <div class="req-list">
               <div><span>เงินที่ต้องใช้</span><strong id="rebirthMoney">0</strong></div>
               <div><span>เงื่อนไข</span><strong id="rebirthRule">เงินอย่างเดียว</strong></div>
@@ -414,7 +414,7 @@
               <div><span>เวลาสะสมเป้าหมาย</span><strong id="rebirthPace">~1 นาที 40 วิ</strong></div>
             </div>
             <button id="rebirthBtn" class="primary danger" type="button">Rebirth / อัปฐาน</button>
-            <p class="warning">Rebirth ทุกครั้งเพิ่ม Luck และจะปลด Tier สูงขึ้นตาม Base Level</p>
+            <p class="warning">Base Level ไม่มีเพดาน · หลัง Lv.40 การเติบโตจะเข้าสู่ Endless Progression และทุก 200 เลเวลมี Ascension Milestone</p>
           </div>
 
           <div class="next-card">
@@ -431,11 +431,89 @@
 
         <details class="rank-catalog-box" open>
           <summary>
-            <span><span class="eyebrow">RANK CATALOG</span><strong>ยศทั้งหมด 40 ระดับ</strong></span>
-            <small>Base Lv.1 → Lv.40</small>
+            <span><span class="eyebrow">RANK CATALOG</span><strong>Milestone Titles 40 ระดับ</strong></span>
+            <small>Lv.1 → Lv.40 · หลังจากนั้น Base Level ไปต่อได้ไม่จำกัด</small>
           </summary>
           <div id="rankCatalog" class="rank-catalog"></div>
         </details>
+
+        <section class="endgame-grid">
+          <article class="endgame-card ascension-console">
+            <div class="eyebrow">ENDGAME ASCENSION</div>
+            <div class="endgame-title-row">
+              <div>
+                <h2 id="ascensionHeadline">Ascension ★0</h2>
+                <p class="muted">ทุก 200 Base Levels รับ Ascension Star + Ascension Core โดยไม่รีเซ็ต Base Level</p>
+              </div>
+              <div class="core-counter"><span>ASCENSION CORE</span><strong id="ascensionCores">0</strong></div>
+            </div>
+            <div class="ascension-progress-track"><i id="ascensionProgressFill"></i></div>
+            <div class="endgame-stats">
+              <div><span>Base Level</span><strong id="ascensionBaseLevel">Lv.1</strong></div>
+              <div><span>Milestone ถัดไป</span><strong id="ascensionNext">Lv.200</strong></div>
+              <div><span>Ascension Stars</span><strong id="ascensionStars">★0</strong></div>
+              <div><span>Core ที่ถือ</span><strong id="ascensionCoreCount">0</strong></div>
+            </div>
+            <button id="ascendBtn" class="primary ascension-btn" type="button">ไปให้ถึง Lv.200 ก่อน</button>
+          </article>
+
+          <article class="endgame-card core-tree-card">
+            <div class="eyebrow">ASCENSION CORE TREE</div>
+            <h3>ใช้ Core เลือกเส้นทางถาวร</h3>
+            <p class="muted">แต่ละสายอัปได้ 10 ขั้น และไม่ถูกรีเซ็ตด้วย Rebirth</p>
+            <div class="core-tree">
+              <button class="core-node" data-asc-perk="income" type="button">
+                <span class="core-node-icon">◆</span>
+                <span><b>Income Core</b><small>+10% รายได้ทั้งหมด / ขั้น</small></span>
+                <strong id="perkIncomeRank">0/10</strong>
+              </button>
+              <button class="core-node" data-asc-perk="luck" type="button">
+                <span class="core-node-icon">✦</span>
+                <span><b>Fortune Core</b><small>+3% Luck ทั้งระบบ / ขั้น</small></span>
+                <strong id="perkLuckRank">0/10</strong>
+              </button>
+              <button class="core-node" data-asc-perk="forge" type="button">
+                <span class="core-node-icon">◇</span>
+                <span><b>Forge Core</b><small>ลดค่าอัป Level / Grade 6% / ขั้น</small></span>
+                <strong id="perkForgeRank">0/10</strong>
+              </button>
+            </div>
+          </article>
+        </section>
+
+        <section class="endgame-grid endgame-grid-secondary">
+          <article class="endgame-card awakening-guide">
+            <div class="eyebrow">CARD AWAKENING</div>
+            <h3>ปั้นการ์ดใบโปรดให้ไปไกลกว่าปกติ</h3>
+            <p class="muted">Awaken ★1 ต้อง Card Lv.100 + EX★ + Dual Mutation + 1 Ascension Core หลังจากนั้นทุกดาวเพิ่มเงื่อนไข Level อีก 100</p>
+            <div class="awakening-preview">
+              <span>ทุก ★</span>
+              <strong>Card Income +35%</strong>
+              <small>กดการ์ดในคลังหรือฐานเพื่อ Awaken เมื่อเงื่อนไขครบ</small>
+            </div>
+          </article>
+
+          <article class="endgame-card endless-tower-card">
+            <div class="eyebrow">ENDLESS TOWER</div>
+            <div class="tower-head">
+              <div>
+                <h3>Floor <span id="endlessTowerFloor">1</span></h3>
+                <p id="endlessTowerCondition" class="muted">ปลดล็อกหลัง Ascension ครั้งแรก</p>
+              </div>
+              <div class="tower-shards"><span>SHARDS</span><strong id="towerShards">0</strong></div>
+            </div>
+            <div class="endgame-stats tower-stats">
+              <div><span>Base Power</span><strong id="towerPower">0</strong></div>
+              <div><span>Power ที่ต้องการ</span><strong id="towerRequirement">0</strong></div>
+              <div><span>Best Floor</span><strong id="towerBest">0</strong></div>
+              <div><span>Reward</span><strong>+1 Shard</strong></div>
+            </div>
+            <div class="tower-actions">
+              <button id="towerChallengeBtn" class="primary" type="button">ท้าทาย Floor 1</button>
+              <button id="towerCoreBtn" class="secondary" type="button">หลอม 10 Shards → 1 Core</button>
+            </div>
+          </article>
+        </section>
       </section>
     </main>
 
