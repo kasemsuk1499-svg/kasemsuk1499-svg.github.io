@@ -1586,6 +1586,7 @@
     }
     const baseText=profile.base_level?"Base Lv."+profile.base_level:"ยังไม่เผยแพร่ฐาน";
     const lv=Number(profile.base_level)||1;
+    const asc=Math.max(0,Math.floor(Number(profile.ascension)||ascensionFromTitle(profile.title)));
     const rankText=profile.server_rank?'<span class="player-rank-badge">#'+profile.server_rank+'</span>':'';
     const titleText=profile.title?'<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+escapeHtml(profile.title)+'</span>':'';
     return '<div class="player-row rank-row rank-stage-'+rankBand(lv)+'"><div class="player-main"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+escapeHtml(profile.display_name)+rankText+'</strong>'+
@@ -2731,6 +2732,7 @@
   }
   function renderRankCatalog(){
     const wrap=$("#rankCatalog");if(!wrap)return;
+    const asc=state.ascension?.stars||0;
     wrap.innerHTML=TITLES.map((title,i)=>{
       const lv=i+1,current=lv===state.baseLevel,reached=lv<=state.baseLevel;
       const topTier=TIERS[maxTierForLevel(lv)-1];
