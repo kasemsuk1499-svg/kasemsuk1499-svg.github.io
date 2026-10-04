@@ -15,7 +15,7 @@
   const ID_PACK_AUTO_MS = 1200;
   const ROTATING_SHOP_RESTOCK_MS = 10*60*1000;
   const ROTATING_SHOP_SLOTS = 5;
-  const ASCENSION_STEP = 200;
+  const ASCENSION_LEVEL_CAP = 40;
   const ASCENSION_PERK_MAX = 10;
 
   const TIERS = [
@@ -146,6 +146,19 @@
     "Nebula Sovereign","Infinite Collector","Fate Archivist","Void Monarch","Omni Warden",
     "Supreme Curator","Transcendent King","Eternal Emperor","Apex Sovereign","Absolute Collector"
   ];
+  const ASCENSION_REWARDS = [
+    {name:"Ascension Aura",desc:"ออร่าพิเศษรอบยศและโปรไฟล์"},
+    {name:"Roman Radiance",desc:"เลขโรมันและยศเรืองแสงเด่นขึ้น"},
+    {name:"Ascended Tower",desc:"กรอบ Card Tower แบบ Ascended"},
+    {name:"Base Arrival FX",desc:"เอฟเฟกต์พิเศษเวลาคนอื่นเปิดดูฐาน"},
+    {name:"Awaken Showcase",desc:"การ์ด Awaken ได้กรอบ Showcase เพิ่ม"},
+    {name:"Stellar Field",desc:"พื้นฐานมีสนามดาว Ascension"},
+    {name:"Ascended Leader Frame",desc:"กรอบพิเศษบน Leaderboard"},
+    {name:"Dual Mutation Prestige",desc:"Dual Mutation ได้ Prestige Border"},
+    {name:"Sovereign Crown",desc:"มงกุฎบนยศและโปรไฟล์"},
+    {name:"Cosmic Sovereign",desc:"Cosmic Base Theme ขั้นสูงสุด"}
+  ];
+
   const TITLE_FX = [
     ["#aab2c0","#e8edf5"],["#6ee7a8","#c7ffe1"],["#58c7ff","#c9f2ff"],["#6688ff","#d2dbff"],
     ["#a979ff","#eadcff"],["#d66cff","#f5d7ff"],["#ff72bd","#ffd7ee"],["#ff8e68","#ffe0d5"],
@@ -447,26 +460,45 @@
   function padId(id){return "#"+String(id).padStart(4,"0")}
   function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
   function imageFor(id){return "../assets/cards/"+id+".png"}
-  function titleForLevel(level=state.baseLevel){
-    const lv=Math.max(1,Math.floor(Number(level)||1));
-    if(lv<=TITLES.length)return TITLES[lv-1];
-    const star=state.ascension?.stars||0;
-    const band=lv<100?"Infinite Collector":lv<200?"Beyond Collector":lv<500?"Ascendant Collector":"Endless Sovereign";
-    return band+(star?" ★"+star:"")+" · Lv."+lv;
+  function romanNumeral(value){
+    let n=Math.max(0,Math.floor(Number(value)||0));
+    if(!n)return "";
+    const map=[[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
+    let out="";
+    for(const [v,s] of map){while(n>=v){out+=s;n-=v}}
+    return out;
+  }
+  function ascensionFromTitle(title){
+    const m=String(title||"").match(/\s([IVXLCDM]+)$/);
+    if(!m)return 0;
+    const values={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+    let total=0,prev=0;
+    for(let i=m[1].length-1;i>=0;i--){
+      const v=values[m[1][i]]||0;
+      if(v<prev)total-=v;else{total+=v;prev=v}
+    }
+    return Math.max(0,total);
+  }
+  function titleForLevel(level=state.baseLevel,ascension=state.ascension?.stars||0){
+    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1));
+    const base=TITLES[lv-1]||TITLES[0];
+    const roman=romanNumeral(ascension);
+    return base+(roman?" "+roman:"");
   }
   function ascensionIncomeMultiplier(){
-    return 1+((state.ascension?.perks?.income||0)*0.10);
+    const stars=state.ascension?.stars||0;
+    return 1+(stars*0.20)+((state.ascension?.perks?.income||0)*0.10);
   }
   function ascensionLuckMultiplier(){
-    return 1+((state.ascension?.perks?.luck||0)*0.03);
+    const stars=state.ascension?.stars||0;
+    return 1+(stars*0.02)+((state.ascension?.perks?.luck||0)*0.03);
   }
   function forgeCostMultiplier(){
     return Math.pow(0.94,state.ascension?.perks?.forge||0);
   }
   function baseIncomeMultiplier(level=state.baseLevel){return 1+(Math.max(1,Number(level)||1)-1)*0.25}
   function economyScale(level=state.baseLevel){
-    // Base Level is endless; cap only the floating-point exponent so JS never turns the economy into Infinity.
-    return Math.pow(5,Math.min(400,Math.max(0,(Number(level)||1)-1)));
+    return Math.pow(5,Math.max(0,Math.min(ASCENSION_LEVEL_CAP,Number(level)||1)-1));
   }
   function luckValue(level=state.baseLevel){
     const x=Math.max(0,level-1);
@@ -1123,23 +1155,16 @@
   }
 
   function rebirthTargetSeconds(level=state.baseLevel){
-    // Lv.1–40 keeps the original curve. Endless levels use a soft progression curve
-    // so milestones such as Lv.200 are long-term goals, not mathematical impossibilities.
-    const lv=Math.max(1,Math.floor(Number(level)||1));
+    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1));
     const x=Math.max(0,lv-1);
-    if(lv<=40)return Math.round(240*Math.pow(1.16,x)+35*x);
-    const post=lv-40;
-    return Math.round(1800+(post*22)+Math.pow(post,1.18)*7);
+    return Math.round(240*Math.pow(1.16,x)+35*x);
   }
 
   function rebirthCost(level=state.baseLevel){
-    const x=Math.max(0,(Number(level)||1)-1);
-    const balanceX=Math.min(39,x);
+    const x=Math.max(0,Math.min(ASCENSION_LEVEL_CAP-1,(Number(level)||1)-1));
     const avgCharacterIncome=545;
-    // Freeze the old optimization assumptions after Lv.40; the endless economy
-    // continues through Base multiplier / Wealth scaling without exploding wait times.
-    const assumedCardLevel=1+Math.round(balanceX*4.2);
-    const optimizationFactor=1+(0.10*balanceX)+(0.018*balanceX*balanceX);
+    const assumedCardLevel=1+Math.round(x*4.2);
+    const optimizationFactor=1+(0.10*x)+(0.018*x*x);
     const expectedCardIncome=
       avgCharacterIncome*
       rebirthExpectedTierMultiplier(level)*
@@ -1612,7 +1637,8 @@
     socialProfiles.set(accountId,profile);
     const rank=Number(profile.server_rank)||0;
     const medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":"#"+rank;
-    const rowClass="leaderboard-row"+(rank<=3?" top-"+rank:"")+(isMe?" me":"");
+    const asc=Math.max(0,Math.floor(Number(profile.ascension)||ascensionFromTitle(profile.title)));
+    const rowClass="leaderboard-row"+(rank<=3?" top-"+rank:"")+(isMe?" me":"")+(asc?" ascension-rank ascension-rank-"+Math.min(10,asc):"");
     let actions='<button data-social-action="visit" data-user="'+accountId+'">ดูฐาน</button>';
     if(isMe){
       actions='<button disabled>คุณ</button>';
@@ -1628,7 +1654,7 @@
     return '<div class="'+rowClass+' rank-row rank-stage-'+rankBand(lv)+'">'+
       '<div class="leaderboard-rank">'+medal+'</div>'+
       '<div class="leaderboard-player"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.display_name)+'</strong>'+
-        '<small><span>#'+escapeHtml(profile.player_code)+'</span><span>Base Lv.'+profile.base_level+'</span>'+(profile.online?'<span>● Online</span>':'')+'</small>'+
+        '<small><span>#'+escapeHtml(profile.player_code)+'</span><span>Base Lv.'+profile.base_level+'</span>'+(asc?'<span class="ascension-leader-chip">ASC '+romanNumeral(asc)+'</span>':'')+(profile.online?'<span>● Online</span>':'')+'</small>'+
         '<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.title||"Rookie Collector")+'</span>'+
       '</div>'+
       leaderboardCardShowcase(profile)+
@@ -1946,9 +1972,15 @@
     toast("ยกเลิกข้อเสนอแล้ว · การ์ดปลดล็อก");await refreshTrades(true);
   }
 
-  function renderVisitorIdentity(name,level,title=null){
-    const lv=Math.max(1,Math.floor(Number(level)||1));
+  function renderVisitorIdentity(name,level,title=null,ascension=null){
+    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1));
+    const asc=Math.max(0,Number.isFinite(Number(ascension))?Math.floor(Number(ascension)):ascensionFromTitle(title));
     const safeName=escapeHtml(name||"Player");
+    const modal=$("#socialBaseModal");
+    if(modal){
+      for(let i=1;i<=10;i++)modal.classList.toggle("visitor-ascension-unlock-"+i,asc>=i);
+      modal.dataset.ascension=String(asc);
+    }
     const nameEl=$("#socialBaseName"),metaEl=$("#socialBaseMeta");
     nameEl.innerHTML=
       '<span class="visit-player-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+safeName+'</span>'+
@@ -1956,7 +1988,8 @@
     if(title){
       metaEl.innerHTML=
         '<span class="visit-base-level">Base Lv.'+lv+'</span>'+
-        '<span class="rank-title-badge visit-rank-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(title)+'</span>';
+        '<span class="rank-title-badge visit-rank-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(title)+'</span>'+
+        (asc?'<span class="visitor-ascension-chip">ASCENSION '+romanNumeral(asc)+'</span>':'');
     }else{
       metaEl.textContent="กำลังโหลด…";
     }
@@ -2057,7 +2090,7 @@
       return;
     }
 
-    renderVisitorIdentity(data.display_name||"Player",data.base_level,data.title||"Collector");
+    renderVisitorIdentity(data.display_name||"Player",data.base_level,data.title||"Collector",data.ascension);
     const max=STANDS[Math.min(39,Math.max(0,data.base_level-1))]||30;
     const bySlot=new Map((Array.isArray(data.stands)?data.stands:[]).map(x=>[Number(x.slot),x]));
     visitorBaseView={max,bySlot};
@@ -2095,6 +2128,9 @@
     titleEl.className=rankFxClass(state.baseLevel)+" base-rank-title";
     titleEl.style.cssText=rankFxStyle(state.baseLevel);
     document.body.dataset.rankStage=String(rankBand(state.baseLevel));
+    const asc=state.ascension?.stars||0;
+    document.body.dataset.ascension=String(asc);
+    for(let i=1;i<=10;i++)document.body.classList.toggle("ascension-unlock-"+i,asc>=i);
     document.body.style.cssText=rankFxStyle(state.baseLevel);
     $("#standCount").textContent=standLimit()+" แท่น";
     $("#incomeMulti").textContent="Income ×"+baseIncomeMultiplier().toFixed(2)+" · Core ×"+ascensionIncomeMultiplier().toFixed(2)+" · Wealth ×"+fmt(economyScale());
@@ -2410,6 +2446,29 @@
   }
 
   function renderRebirth(){
+    const capped=state.baseLevel>=ASCENSION_LEVEL_CAP;
+    if(capped){
+      $("#rebirthHeadline").textContent="Lv.40 · ASCENSION READY";
+      $("#rebirthHeadline").className=rankFxClass(40);
+      $("#rebirthHeadline").style.cssText=rankFxStyle(40);
+      $("#rebirthMoney").textContent="—";
+      $("#rebirthMoney").className="";
+      $("#rebirthRule").textContent="ถึง Base Lv.40 แล้ว · จุติเพื่อเริ่มรอบใหม่";
+      $("#rebirthTierGain").textContent="รับ Ascension "+romanNumeral((state.ascension?.stars||0)+1)+" · Core +1 · Permanent Buff";
+      const pace=$("#rebirthPace");if(pace)pace.textContent="READY";
+      $("#rebirthBtn").disabled=true;
+      $("#rebirthBtn").textContent="ไปที่ ASCENSION ด้านล่าง";
+      $("#nextTitle").textContent=titleForLevel(1,(state.ascension?.stars||0)+1);
+      $("#nextTitle").className=rankFxClass(1);
+      $("#nextTitle").style.cssText=rankFxStyle(1);
+      $("#nextStands").textContent=standLimit(1);
+      $("#nextIncome").textContent="Ascend ×"+(1+((state.ascension?.stars||0)+1)*0.20).toFixed(2);
+      $("#nextLuck").textContent="Ascend ×"+(1+((state.ascension?.stars||0)+1)*0.02).toFixed(2);
+      $("#nextTier").textContent=TIERS[maxTierForLevel(1)-1].name;
+      renderEndgame();
+      return;
+    }
+
     const next=state.baseLevel+1,cost=rebirthCost();
     const currentMax=maxTierForLevel(state.baseLevel);
     const nextMax=maxTierForLevel(next);
@@ -2418,14 +2477,13 @@
     const nextOdds=tierOdds(next);
     const focusTier=nextMax-1;
 
+    $("#rebirthBtn").textContent="Rebirth / อัปฐาน";
     $("#rebirthHeadline").textContent="Lv."+state.baseLevel+" → Lv."+next;
     $("#rebirthHeadline").className=rankFxClass(next);
     $("#rebirthHeadline").style.cssText=rankFxStyle(next);
     $("#rebirthMoney").textContent=fmt(cost);
     $("#rebirthMoney").className=wealthClass(cost);
-    $("#rebirthRule").textContent=state.baseLevel>=40
-      ?"Endless Level · ใช้เงินอย่างเดียว · ไม่มี Level Cap"
-      :"ใช้เงินอย่างเดียว · ไม่มีเงื่อนไข Character ID / Card Level";
+    $("#rebirthRule").textContent="ใช้เงินอย่างเดียว · ถึง Lv.40 จะเปิด Ascension";
     const currentLow=currentOdds.slice(0,3).reduce((a,b)=>a+b,0)*100;
     const nextLow=nextOdds.slice(0,3).reduce((a,b)=>a+b,0)*100;
     $("#rebirthTierGain").textContent=newlyUnlocked
@@ -2442,19 +2500,40 @@
     $("#nextTier").textContent=TIERS[nextMax-1].name;
     renderEndgame();
   }
-
-  function nextAscensionLevel(){return ((state.ascension?.stars||0)+1)*ASCENSION_STEP}
+  function nextAscensionLevel(){return ASCENSION_LEVEL_CAP}
   function ascensionProgress(){
-    const prev=(state.ascension?.stars||0)*ASCENSION_STEP;
-    const next=nextAscensionLevel();
-    return Math.max(0,Math.min(1,(state.baseLevel-prev)/Math.max(1,next-prev)));
+    return Math.max(0,Math.min(1,state.baseLevel/ASCENSION_LEVEL_CAP));
   }
   function claimAscension(){
-    const need=nextAscensionLevel();
-    if(state.baseLevel<need){toast("ต้องถึง Base Lv."+need+" ก่อน");return}
-    state.ascension.stars++;
+    if(state.baseLevel<ASCENSION_LEVEL_CAP){toast("ต้องถึง Base Lv."+ASCENSION_LEVEL_CAP+" ก่อน");return}
+    const next=(state.ascension?.stars||0)+1;
+    const reward=ASCENSION_REWARDS[Math.min(9,next-1)];
+    const ok=window.confirm(
+      "ASCEND "+romanNumeral(next)+" ?\n"+
+      "Base Lv.40 → Lv.1 และเงินจะรีเซ็ต\n"+
+      "การ์ด / Grade / Mutation / Awakening / Collection อยู่ครบ\n"+
+      "ได้รับ Core +1 · Income +20% · Luck +2% ถาวร"+
+      (next<=10?"\nSpecial: "+reward.name:"")
+    );
+    if(!ok)return;
+
+    if(idPackAutoIndex!==null)stopIdPackAuto("Auto ID Pack หยุดเพราะ Ascension");
+    state.autoRolling=false;
+    state.fullAuto=false;
+    state.targetFound=false;
+    state.currentPack=null;
+    state.rollingUntil=0;
+    setPackAutoSession(false);
+
+    state.ascension.stars=next;
     state.ascension.cores++;
-    toast("ASCENSION ★"+state.ascension.stars+" · ได้ Ascension Core +1 ✦",true);
+    state.money=0;
+    state.baseLevel=1;
+    state.lastTick=Date.now();
+    activeBaseFloor=0;
+    normalizeSlots();
+
+    toast("ASCENSION "+romanNumeral(next)+" สำเร็จ! · "+(next<=10?reward.name+" · ":"")+"Core +1 ✦",true);
     renderAll();
   }
   function buyAscensionPerk(key){
@@ -2558,18 +2637,36 @@
   }
 
   function renderEndgame(){
-    const stars=state.ascension?.stars||0,cores=state.ascension?.cores||0,need=nextAscensionLevel(),ready=state.baseLevel>=need;
+    const stars=state.ascension?.stars||0,cores=state.ascension?.cores||0,ready=state.baseLevel>=ASCENSION_LEVEL_CAP;
     const headline=$("#ascensionHeadline");if(!headline)return;
-    headline.textContent="Ascension ★"+stars;
+    const roman=romanNumeral(stars);
+    headline.textContent="Ascension "+(roman||"0");
     $("#ascensionCores").textContent=cores;
-    $("#ascensionBaseLevel").textContent="Lv."+state.baseLevel;
-    $("#ascensionNext").textContent="Lv."+need;
-    $("#ascensionStars").textContent="★"+stars;
+    $("#ascensionBaseLevel").textContent="Lv."+state.baseLevel+"/40";
+    $("#ascensionNext").textContent=ready?"ASCENSION READY":"Lv.40";
+    $("#ascensionStars").textContent=roman||"0";
     $("#ascensionCoreCount").textContent=cores;
     $("#ascensionProgressFill").style.width=(ascensionProgress()*100).toFixed(1)+"%";
     const ascend=$("#ascendBtn");
     ascend.disabled=!ready;
-    ascend.textContent=ready?"ASCEND · รับ ★"+(stars+1)+" + Core":"ไปให้ถึง Lv."+need+" ก่อน";
+    ascend.textContent=ready
+      ?"ASCEND "+romanNumeral(stars+1)+" · กลับ Lv.1 + Core"
+      :"ไปให้ถึง Lv.40 ก่อน · "+state.baseLevel+"/40";
+
+    const rewardTrack=$("#ascensionRewardTrack");
+    if(rewardTrack){
+      rewardTrack.innerHTML=ASCENSION_REWARDS.map((reward,i)=>{
+        const step=i+1,claimed=stars>=step,current=stars+1===step;
+        return '<div class="ascension-reward '+(claimed?"claimed":current?"next":"locked")+'">'+
+          '<span class="ascension-reward-no">'+romanNumeral(step)+'</span>'+
+          '<span><b>'+escapeHtml(reward.name)+'</b><small>'+escapeHtml(reward.desc)+'</small></span>'+
+          '<strong>'+(claimed?"✓":current?"NEXT":"🔒")+'</strong>'+
+        '</div>';
+      }).join("");
+    }
+    const permanent=$("#ascensionPermanentBonus");
+    if(permanent)permanent.textContent=
+      "Permanent: Income +"+(stars*20)+"% · Luck +"+(stars*2)+"% · รอบถัดไปเร็วขึ้น";
 
     const perks=state.ascension.perks;
     $("#perkIncomeRank").textContent=perks.income+"/"+ASCENSION_PERK_MAX;
@@ -2586,13 +2683,12 @@
     $("#towerRequirement").textContent=req.toLocaleString("th-TH");
     $("#towerBest").textContent=state.tower.best;
     $("#towerShards").textContent=state.tower.shards;
-    $("#endlessTowerCondition").textContent=(stars<1?"LOCKED · ต้อง Ascension ★1":"Floor "+floor+" · "+cond.text);
+    $("#endlessTowerCondition").textContent=(stars<1?"LOCKED · ต้อง Ascension I":"Floor "+floor+" · "+cond.text);
     const challenge=$("#towerChallengeBtn");
     challenge.disabled=stars<1||power<req||!cond.ok;
-    challenge.textContent=stars<1?"ปลดล็อกหลัง Ascension ★1":"ท้าทาย Floor "+floor;
+    challenge.textContent=stars<1?"ปลดล็อกหลัง Ascension I":"ท้าทาย Floor "+floor;
     $("#towerCoreBtn").disabled=state.tower.shards<10;
   }
-
   function renderRankCatalog(){
     const wrap=$("#rankCatalog");if(!wrap)return;
     wrap.innerHTML=TITLES.map((title,i)=>{
@@ -3281,6 +3377,7 @@
   }
 
   function doRebirth(){
+    if(state.baseLevel>=ASCENSION_LEVEL_CAP){toast("ถึง Lv.40 แล้ว · ใช้ ASCENSION เพื่อจุติรอบใหม่");return}
     if(idPackAutoIndex!==null)stopIdPackAuto("Auto ID Pack หยุดเพราะ Rebirth");
     const cost=rebirthCost();
     if(state.money<cost){toast("เงินยังไม่พอสำหรับ Rebirth");return}
