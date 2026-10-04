@@ -1139,6 +1139,14 @@ local function getPrice(id,infoType)
 end
 
 local function storeItem(title,subtitle,id,kind)
+	local passKey=nil
+	if kind=="pass" then
+		if id==Config.PassIds.VIPCollector then passKey="VIPCollector"
+		elseif id==Config.PassIds.TurboCollector then passKey="TurboCollector"
+		elseif id==Config.PassIds.OfflineVault then passKey="OfflineVault"
+		elseif id==Config.PassIds.ShowcasePro then passKey="ShowcasePro" end
+	end
+	local owned=passKey and state and state.Computed and state.Computed.Entitlements and state.Computed.Entitlements[passKey] == true
 	local row=Instance.new("Frame")
 	row.BackgroundColor3=COLORS.panel2;row.Size=UDim2.new(1,-4,0,72);row.ZIndex=23;row.Parent=content;corner(row,12);stroke(row,COLORS.line,0.25,1)
 	local a=makeLabel(row,title,UDim2.new(0.62,0,0,24),UDim2.new(0,12,0,8),11,COLORS.text,true);a.ZIndex=24
