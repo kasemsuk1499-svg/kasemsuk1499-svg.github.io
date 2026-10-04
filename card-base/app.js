@@ -480,7 +480,7 @@
     return Math.max(0,total);
   }
   function titleForLevel(level=state.baseLevel,ascension=state.ascension?.stars||0){
-    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1));
+    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1)));
     const base=TITLES[lv-1]||TITLES[0];
     const roman=romanNumeral(ascension);
     return base+(roman?" "+roman:"");
