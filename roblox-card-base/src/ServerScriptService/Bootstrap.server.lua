@@ -59,11 +59,38 @@ local function enrichedSnapshot(player)
 	return snapshot
 end
 
+local function updateLeaderstats(player,profile,snapshot)
+	local folder = player:FindFirstChild("leaderstats")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "leaderstats"
+		folder.Parent = player
+	end
+
+	local function numberValue(name,value)
+		local item = folder:FindFirstChild(name)
+		if not item then
+			item = Instance.new("IntValue")
+			item.Name = name
+			item.Parent = folder
+		end
+		item.Value = math.max(0,math.floor(tonumber(value) or 0))
+	end
+
+	numberValue("Base",profile.BaseLevel)
+	numberValue("Asc",profile.Ascension)
+	numberValue("Income",snapshot.Computed.Income)
+end
+
 local function pushState(player,renderWorld)
 	if not player.Parent then return end
 	if renderWorld then PlotService.Render(player) end
 	local snapshot = enrichedSnapshot(player)
-	if snapshot then State:FireClient(player,snapshot) end
+	if snapshot then
+		local profile = DataService.Get(player)
+		if profile then updateLeaderstats(player,profile,snapshot) end
+		State:FireClient(player,snapshot)
+	end
 end
 
 DataService.Start()
