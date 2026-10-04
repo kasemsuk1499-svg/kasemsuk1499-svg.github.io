@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261004-ascension-loop-v2">
+  <link rel="stylesheet" href="./style.css?v=20261004-card-lounge-v1">
 </head>
 <body>
   <div class="app-shell">
@@ -34,6 +34,7 @@
 
     <nav class="tabs" aria-label="เมนูหลัก">
       <button class="tab active" data-tab="base"><span class="tab-icon">⌂</span><span>ฐาน</span></button>
+      <button class="tab" data-tab="lounge"><span class="tab-icon">☕</span><span>Lounge</span></button>
       <button class="tab" data-tab="pack"><span class="tab-icon">◇</span><span>สุ่มซอง</span></button>
       <button class="tab" data-tab="collection"><span class="tab-icon">▦</span><span>คลังการ์ด</span></button>
       <button class="tab" data-tab="index"><span class="tab-icon">◫</span><span>Index</span></button>
@@ -79,6 +80,103 @@
           <div id="baseFloorNav" class="base-floor-nav" aria-label="เลือกชั้นฐาน"></div>
         </div>
         <div id="stands" class="stands"></div>
+      </section>
+
+      <section id="panel-lounge" class="panel lounge-panel">
+        <div class="lounge-hero">
+          <div>
+            <div class="eyebrow">CARD LOUNGE · CHILL MODE</div>
+            <h2>ห้องพักการ์ด</h2>
+            <p class="muted">เลือกการ์ดโปรดสูงสุด 5 ใบมานั่งเล่นด้วยกัน · ไม่มีแพ้ ไม่มีเสียเงิน · กดตัวจิบิเพื่อแกล้ง เอ๊ย…เล่นด้วยได้ 😆</p>
+          </div>
+          <div class="lounge-hero-actions">
+            <button id="loungeSoundBtn" class="secondary" type="button">🔊 เสียงจิบิ ON</button>
+            <button id="loungeThemeBtn" class="secondary" type="button">🌙 Night Room</button>
+          </div>
+        </div>
+
+        <div class="lounge-layout">
+          <section class="lounge-room-card">
+            <div id="loungeRoom" class="lounge-room theme-night" aria-label="Card Lounge">
+              <div class="lounge-window"><i></i><b></b></div>
+              <div class="lounge-lamp"><i></i></div>
+              <div class="lounge-couch"></div>
+              <div class="lounge-rug"></div>
+              <div id="loungeBuddies" class="lounge-buddies"></div>
+              <div id="loungeEmpty" class="lounge-empty">
+                <strong>ยังไม่มีจิบิในห้อง</strong>
+                <span>เลือกการ์ดจากด้านล่างแล้วพาเข้าห้องได้เลย</span>
+              </div>
+            </div>
+
+            <div class="lounge-actions">
+              <button id="loungePatBtn" type="button">💗 ลูบหัว</button>
+              <button id="loungeSnackBtn" type="button">🍪 แจกขนม</button>
+              <button id="loungeNapBtn" type="button">💤 งีบกัน</button>
+              <button id="loungePartyBtn" type="button">✨ ปาร์ตี้จิบิ</button>
+            </div>
+
+            <div class="lounge-picker-head">
+              <div>
+                <div class="eyebrow">ROOM MEMBERS</div>
+                <strong>เลือกการ์ดเข้าห้อง · สูงสุด 5 ใบ</strong>
+              </div>
+              <span id="loungeSelectedCount" class="badge">0/5</span>
+            </div>
+            <div id="loungeCardPicker" class="lounge-card-picker"></div>
+          </section>
+
+          <aside class="lounge-jukebox">
+            <div class="jukebox-head">
+              <div class="jukebox-disc">♫</div>
+              <div>
+                <div class="eyebrow">YOUTUBE JUKEBOX</div>
+                <h3>เปิดเพลงจาก YouTube</h3>
+                <p class="muted">รองรับ YouTube, YouTube Music และ Playlist · วางลิงก์แล้วกดเล่นได้เลย</p>
+              </div>
+            </div>
+
+            <div class="youtube-search-row">
+              <input id="youtubeSearchInput" placeholder="ค้นหาเพลง เช่น lofi chill">
+              <button id="youtubeSearchBtn" class="secondary" type="button">ค้นหา YouTube ↗</button>
+            </div>
+
+            <div class="youtube-load-row">
+              <input id="youtubeUrlInput" placeholder="วางลิงก์ YouTube / YouTube Music / Playlist">
+              <button id="youtubeLoadBtn" class="primary" type="button">▶ เล่น</button>
+            </div>
+
+            <div id="youtubePlayerShell" class="youtube-player-shell">
+              <div id="youtubePlayerEmpty" class="youtube-player-empty">
+                <span>♫</span>
+                <strong>ยังไม่ได้เลือกเพลง</strong>
+                <small>ค้นหาเพลงแล้ววางลิงก์ที่นี่ได้เลย</small>
+              </div>
+              <iframe id="youtubePlayer" title="YouTube music player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
+            </div>
+
+            <div class="youtube-now">
+              <div>
+                <span>NOW PLAYING</span>
+                <strong id="youtubeNowPlaying">—</strong>
+              </div>
+              <button id="youtubeStopBtn" class="secondary" type="button">หยุดเพลง</button>
+            </div>
+
+            <div class="youtube-history-head">
+              <strong>เพลงล่าสุด</strong>
+              <button id="youtubeClearHistoryBtn" type="button">ล้าง</button>
+            </div>
+            <div id="youtubeHistory" class="youtube-history">
+              <div class="social-empty">ยังไม่มีประวัติเพลง</div>
+            </div>
+
+            <div class="lounge-note">
+              <strong>เสียงจิบิ</strong>
+              <span>เป็นเสียงเอฟเฟกต์น่ารักที่สร้างในเบราว์เซอร์ เช่น “poyo!”, “nya~”, “muu…”, “zzz” ไม่ใช้เสียงจากอนิเมะหรือเกมต้นฉบับ</span>
+            </div>
+          </aside>
+        </div>
       </section>
 
       <section id="panel-pack" class="panel">
@@ -715,7 +813,7 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261004-cloud-runtimefix-v1" defer></script>
+  <script src="./app.js?v=20261004-card-lounge-v1" defer></script>
   <script src="./fx.js?v=20261004-mobileparticles-v1" defer></script>
 </body>
 </html>
