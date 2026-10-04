@@ -70,13 +70,13 @@ local function mutationColor(card)
 	return tierDef(card.Tier).color
 end
 
-local function teleportCharacter(player,position)
+local function teleportCharacter(player,position,lookAt)
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	if not root then return false end
 	root.AssemblyLinearVelocity = Vector3.zero
 	root.AssemblyAngularVelocity = Vector3.zero
-	root.CFrame = CFrame.new(position)
+	root.CFrame = lookAt and CFrame.lookAt(position,lookAt) or CFrame.new(position)
 	return true
 end
 
@@ -572,7 +572,7 @@ function PlotService.TeleportHome(player)
 	local slot = SlotByUser[player.UserId]
 	local origin = slot and PlotOrigins[slot]
 	if not origin then return false end
-	return teleportCharacter(player,origin+Vector3.new(0,3,-13.5))
+	return teleportCharacter(player,origin+Vector3.new(0,3,-22),origin+Vector3.new(0,4,0))
 end
 
 function PlotService.Assign(player)
