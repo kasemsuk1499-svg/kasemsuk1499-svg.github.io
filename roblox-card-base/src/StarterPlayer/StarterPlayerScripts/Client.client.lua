@@ -20,6 +20,7 @@ local activePanel = nil
 local busy = false
 local selectedTradeGuids = {}
 local incomingTradeFrom = nil
+local currentTradeSessionId = nil
 
 local COLORS = {
 	bg = Color3.fromRGB(8,10,16),
@@ -962,8 +963,11 @@ openTradeSession = function(session)
 	panelSub.Text = "กับ "..tostring(session.PartnerName).." · สูงสุด 4 ใบ · ไม่มีเงิน/Robux ใน Trade"
 	clearContent()
 
-	selectedTradeGuids = {}
-	for _,card in ipairs(session.MyOffer or {}) do selectedTradeGuids[card.Guid] = true end
+	if currentTradeSessionId ~= session.Id then
+		currentTradeSessionId = session.Id
+		selectedTradeGuids = {}
+		for _,card in ipairs(session.MyOffer or {}) do selectedTradeGuids[card.Guid] = true end
+	end
 
 	makeSectionHeader("SAFETY LOCK","เปลี่ยน Offer เมื่อไร Ready ทั้งสองฝั่งจะถูกยกเลิก · หลัง Ready ครบต้องรอ 3 วิแล้ว Confirm อีกครั้ง")
 
@@ -1206,6 +1210,8 @@ TradeEvent.OnClientEvent:Connect(function(payload)
 	elseif payload.Type == "Ended" then
 		tradePrompt.Visible = false
 		incomingTradeFrom = nil
+		currentTradeSessionId = nil
+		selectedTradeGuids = {}
 		if activePanel == "social" then
 			overlay.Visible=false
 			activePanel=nil
