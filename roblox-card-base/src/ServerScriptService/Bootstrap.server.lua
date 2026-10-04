@@ -118,6 +118,15 @@ Action.OnServerInvoke = function(player,action,args)
 				Toast:FireClient(player,"การ์ดใบแรกถูกวางที่ Stand 1 อัตโนมัติ ✦",true)
 			end
 		end
+	elseif action == "RollIdPack" then
+		local hadPlaced = next(profile.Placed) ~= nil
+		ok,payload = CardService.RollIdPack(profile,args.PackIndex)
+		if ok and not hadPlaced then
+			local placed = BaseService.Place(profile,payload.Guid,1)
+			if placed then
+				Toast:FireClient(player,"การ์ดใบแรกถูกวางที่ Stand 1 อัตโนมัติ ✦",true)
+			end
+		end
 	elseif action == "LevelUp" then
 		ok,payload = CardService.LevelUp(profile,args.Guid)
 	elseif action == "RerollGrade" then
