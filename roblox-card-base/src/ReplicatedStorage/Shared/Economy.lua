@@ -253,6 +253,10 @@ function Economy.IdPackCost(level,packIndex)
 	return roundUpNice(Economy.ModeledBaseIncomeForShop(level)*seconds)
 end
 
+function Economy.RotatingPackCost(level,priceSeconds)
+	return roundUpNice(Economy.ModeledBaseIncomeForShop(level)*math.max(1,tonumber(priceSeconds) or 1))
+end
+
 function Economy.RebirthTargetSeconds(level)
 	local lv = math.clamp(math.floor(tonumber(level) or 1),1,Config.BaseLevelCap)
 	local x = lv-1
