@@ -18,6 +18,7 @@ local PlotByUser = {}
 local SlotByUser = {}
 local UserBySlot = {}
 local CharacterConnections = {}
+local ServerBoardGui
 
 local PlotOrigins = {
 	Vector3.new(-62,0,-48), Vector3.new(0,0,-48), Vector3.new(62,0,-48), Vector3.new(124,0,-48),
@@ -78,6 +79,15 @@ local function teleportCharacter(player,position,lookAt)
 	root.AssemblyAngularVelocity = Vector3.zero
 	root.CFrame = lookAt and CFrame.lookAt(position,lookAt) or CFrame.new(position)
 	return true
+end
+
+local function compactNumber(value)
+	local n = tonumber(value) or 0
+	if math.abs(n) < 1000 then return string.format("%.0f",n) end
+	local units = {"K","M","B","T","Qa","Qi","Sx","Sp","Oc","No"}
+	local index = math.min(#units,math.floor(math.log10(math.max(1,math.abs(n)))/3))
+	local scaled = n/(1000^index)
+	return string.format(scaled >= 100 and "%.0f%s" or scaled >= 10 and "%.1f%s" or "%.2f%s",scaled,units[index])
 end
 
 local function buildWorldShell()
@@ -173,6 +183,32 @@ local function buildWorldShell()
 	makeText(signGui,"Title","CARD BASE",UDim2.fromScale(0.94,0.28),UDim2.fromScale(0.03,0.10),62,Color3.fromRGB(244,246,255))
 	makeText(signGui,"Sub","ROLL · BUILD · ASCEND",UDim2.fromScale(0.94,0.18),UDim2.fromScale(0.03,0.42),28,Color3.fromRGB(112,236,224))
 	makeText(signGui,"Hint","Your Card Tower is assigned when you join.",UDim2.fromScale(0.94,0.20),UDim2.fromScale(0.03,0.66),23,Color3.fromRGB(155,164,188))
+
+	local serverBoard = makePart(
+		world,
+		"ServerLeaderboard",
+		Vector3.new(18,10,0.6),
+		CFrame.new(-80,5,-13),
+		Color3.fromRGB(11,15,23),
+		Enum.Material.SmoothPlastic
+	)
+	serverBoard.CanCollide = false
+	local boardGui = Instance.new("SurfaceGui")
+	boardGui.Face = Enum.NormalId.Front
+	boardGui.CanvasSize = Vector2.new(760,620)
+	boardGui.AlwaysOnTop = true
+	boardGui.Parent = serverBoard
+	ServerBoardGui = boardGui
+
+	local boardTitle = makeText(boardGui,"Title","SERVER RANKING",UDim2.fromScale(0.92,0.11),UDim2.fromScale(0.04,0.04),42,Color3.fromRGB(246,248,255))
+	boardTitle.TextXAlignment = Enum.TextXAlignment.Center
+	local boardSub = makeText(boardGui,"Sub","ASCENSION · BASE · INCOME",UDim2.fromScale(0.92,0.07),UDim2.fromScale(0.04,0.14),20,Color3.fromRGB(104,235,224))
+	boardSub.TextXAlignment = Enum.TextXAlignment.Center
+	local rows = makeText(boardGui,"Rows","Waiting for players...",UDim2.fromScale(0.90,0.72),UDim2.fromScale(0.05,0.23),25,Color3.fromRGB(222,228,240))
+	rows.Name = "Rows"
+	rows.TextYAlignment = Enum.TextYAlignment.Top
+	rows.TextWrapped = false
+	rows.RichText = true
 
 	ground:SetAttribute("CardBaseWorld",true)
 	plaza:SetAttribute("CardBaseWorld",true)
@@ -606,6 +642,41 @@ function PlotService.Render(player)
 	end
 end
 
+function PlotService.RenderServerLeaderboard()
+	if not ServerBoardGui then return end
+	local rowsLabel = ServerBoardGui:FindFirstChild("Rows")
+	if not rowsLabel then return end
+
+	local entries = {}
+	for _,player in ipairs(Players:GetPlayers()) do
+		local profile = DataService and DataService.Get(player)
+		if profile then
+			local entitlements = MonetizationService and MonetizationService.GetEntitlements(player) or {}
+			table.insert(entries,{
+				Player = player,
+				Ascension = math.max(0,math.floor(tonumber(profile.Ascension) or 0)),
+				BaseLevel = math.max(1,math.floor(tonumber(profile.BaseLevel) or 1)),
+				Income = Economy.TotalIncome(profile,entitlements),
+			})
+		end
+	end
+
+	table.sort(entries,function(a,b)
+		if a.Ascension ~= b.Ascension then return a.Ascension > b.Ascension end
+		if a.BaseLevel ~= b.BaseLevel then return a.BaseLevel > b.BaseLevel end
+		return a.Income > b.Income
+	end)
+
+	local lines = {}
+	for rank,entry in ipairs(entries) do
+		if rank > 8 then break end
+		local medal = rank == 1 and "🥇" or rank == 2 and "🥈" or rank == 3 and "🥉" or ("#"..rank)
+		local asc = entry.Ascension > 0 and ("ASC "..require(script.Parent.BaseService).Roman(entry.Ascension)) or "ASC —"
+		table.insert(lines,string.format("%s  %s\n     %s · Base %d · %s/s",medal,entry.Player.DisplayName,asc,entry.BaseLevel,compactNumber(entry.Income)))
+	end
+	rowsLabel.Text = #lines > 0 and table.concat(lines,"\n\n") or "Waiting for players..."
+end
+
 function PlotService.TeleportHome(player)
 	local slot = SlotByUser[player.UserId]
 	local origin = slot and PlotOrigins[slot]
@@ -672,7 +743,16 @@ function PlotService.Start(dataService,monetizationService,remotes)
 	MonetizationService = monetizationService
 	Remotes = remotes
 	buildWorldShell()
-	Players.PlayerRemoving:Connect(PlotService.Remove)
+	Players.PlayerRemoving:Connect(function(player)
+		PlotService.Remove(player)
+		task.defer(PlotService.RenderServerLeaderboard)
+	end)
+
+	task.spawn(function()
+		while task.wait(3) do
+			PlotService.RenderServerLeaderboard()
+		end
+	end)
 end
 
 return PlotService
