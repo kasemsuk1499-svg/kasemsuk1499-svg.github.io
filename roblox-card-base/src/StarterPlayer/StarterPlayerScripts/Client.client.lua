@@ -168,8 +168,8 @@ padding(actionBar,8,8,8,8)
 
 local actionLayout = Instance.new("UIGridLayout")
 actionLayout.CellPadding = UDim2.new(0,7,0,0)
-actionLayout.CellSize = UDim2.new(0.19,-2,1,0)
-actionLayout.FillDirectionMaxCells = 5
+actionLayout.CellSize = UDim2.new(0.158,-2,1,0)
+actionLayout.FillDirectionMaxCells = 6
 actionLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 actionLayout.Parent = actionBar
 
@@ -178,6 +178,7 @@ rollBtn.BackgroundColor3 = COLORS.accent
 local baseBtn = makeButton(actionBar,"⌂ BASE",UDim2.new(),UDim2.new())
 local collectionBtn = makeButton(actionBar,"▦ CARDS",UDim2.new(),UDim2.new())
 local endgameBtn = makeButton(actionBar,"✦ ENDGAME",UDim2.new(),UDim2.new())
+local packShopBtn = makeButton(actionBar,"▣ PACKS",UDim2.new(),UDim2.new())
 local storeBtn = makeButton(actionBar,"R$ STORE",UDim2.new(),UDim2.new())
 
 local overlay = Instance.new("Frame")
@@ -644,6 +645,55 @@ local function openEndgame()
 	end
 end
 
+local function showCardReveal(card,extra)
+	local tier = Config.Tiers[(card.Tier or 0)+1]
+	local grade = Config.Grades[(card.Grade or 0)+1]
+	revealMain.Text = string.format("#%04d\n%s",card.Id,tier.name)
+	revealMain.TextColor3 = tier.color
+	local autoPlaced = state and state.Placed and state.Placed["1"] == card.Guid
+	local suffix = autoPlaced and "\n✦ Auto-placed on Stand 1" or ""
+	if extra and extra ~= "" then suffix ..= "\n"..extra end
+	revealMeta.Text = grade.name.." · "..cardMutationText(card)..suffix
+	reveal.Visible = true
+end
+
+local function openPackShop()
+	if not state then return end
+	activePanel = "packs"
+	selectedSlot = nil
+	mutationTargetGuid = nil
+	overlay.Visible = true
+	panelTitle.Text = "ID PACK SHOP"
+	panelSub.Text = "เลือก Character Pool 10 ใบ · Tier ใช้ Luck ปัจจุบัน · ราคาอิง Base Level"
+	clearContent()
+
+	makeSectionHeader("CHARACTER PACKS","เงินในเกมเท่านั้น · ไม่มี Robux RNG")
+	for index,pack in ipairs(Config.IdPacks) do
+		local cost = Economy.IdPackCost(state.BaseLevel,index)
+		local row = Instance.new("Frame")
+		row.BackgroundColor3 = COLORS.panel2
+		row.Size = UDim2.new(1,-4,0,78)
+		row.ZIndex = 23
+		row.Parent = content
+		corner(row,12)
+		stroke(row,index%2==0 and COLORS.accent2 or COLORS.accent,0.45,1)
+
+		local title = makeLabel(row,pack.name,UDim2.new(0.58,0,0,24),UDim2.new(0,12,0,8),12,COLORS.text,true)
+		title.ZIndex = 24
+		local meta = makeLabel(row,string.format("ID #%04d–#%04d · Cost %s",pack.minId,pack.maxId,fmt(cost)),UDim2.new(0.60,0,0,22),UDim2.new(0,12,0,36),9,COLORS.muted,false)
+		meta.ZIndex = 24
+		local buy = makeButton(row,"OPEN · "..fmt(cost),UDim2.new(0,150,0,44),UDim2.new(1,-162,0,17))
+		buy.ZIndex = 24
+		buy.BackgroundColor3 = state.Money >= cost and COLORS.accent or Color3.fromRGB(46,49,61)
+		buy.MouseButton1Click:Connect(function()
+			local card = invoke("RollIdPack",{PackIndex=index})
+			if card then
+				showCardReveal(card,pack.name)
+			end
+		end)
+	end
+end
+
 local function getPrice(id,infoType)
 	if not id or id <= 0 then return "ID NOT SET" end
 	local ok,info = pcall(MarketplaceService.GetProductInfo,MarketplaceService,id,infoType)
@@ -716,7 +766,8 @@ local function renderHud()
 	if activePanel=="collection" and overlay.Visible then openCollection()
 	elseif activePanel=="endgame" and overlay.Visible then openEndgame()
 	elseif activePanel=="stand" and overlay.Visible and selectedSlot then openStand(selectedSlot)
-	elseif activePanel=="mutation" and overlay.Visible and mutationTargetGuid then openMutationLab(mutationTargetGuid) end
+	elseif activePanel=="mutation" and overlay.Visible and mutationTargetGuid then openMutationLab(mutationTargetGuid)
+	elseif activePanel=="packs" and overlay.Visible then openPackShop() end
 end
 
 local function handleState(newState)
@@ -726,15 +777,7 @@ end
 
 rollBtn.MouseButton1Click:Connect(function()
 	local card = invoke("RollPack")
-	if card then
-		local tier = Config.Tiers[(card.Tier or 0)+1]
-		local grade = Config.Grades[(card.Grade or 0)+1]
-		revealMain.Text = string.format("#%04d\n%s",card.Id,tier.name)
-		revealMain.TextColor3 = tier.color
-		local autoPlaced = state and state.Placed and state.Placed["1"] == card.Guid
-		revealMeta.Text = grade.name.." · "..cardMutationText(card)..(autoPlaced and "\n✦ Auto-placed on Stand 1" or "")
-		reveal.Visible = true
-	end
+	if card then showCardReveal(card) end
 end)
 baseBtn.MouseButton1Click:Connect(function()
 	overlay.Visible=false
@@ -746,6 +789,7 @@ baseBtn.MouseButton1Click:Connect(function()
 end)
 collectionBtn.MouseButton1Click:Connect(openCollection)
 endgameBtn.MouseButton1Click:Connect(openEndgame)
+packShopBtn.MouseButton1Click:Connect(openPackShop)
 storeBtn.MouseButton1Click:Connect(openStore)
 closeBtn.MouseButton1Click:Connect(function() overlay.Visible=false;activePanel=nil;selectedSlot=nil;mutationTargetGuid=nil end)
 revealClose.MouseButton1Click:Connect(function() reveal.Visible=false end)
@@ -767,9 +811,11 @@ local function applyResponsive()
 		stats.Position = UDim2.new(0,8,0,60)
 		stats.Size = UDim2.new(1,-16,0,44)
 		grid.CellSize = UDim2.new(0.245,-4,1,0)
-		actionBar.Size = UDim2.new(1,-12,0,58)
+		actionBar.Size = UDim2.new(1,-12,0,104)
 		actionBar.Position = UDim2.new(0.5,0,1,-6)
-		actionLayout.CellPadding = UDim2.new(0,3,0,0)
+		actionLayout.CellPadding = UDim2.new(0,3,0,4)
+		actionLayout.CellSize = UDim2.new(0.32,-2,0,42)
+		actionLayout.FillDirectionMaxCells = 3
 		panel.Size = UDim2.new(0.96,0,0.80,0)
 	else
 		top.Size = UDim2.new(1,-24,0,74)
@@ -778,9 +824,11 @@ local function applyResponsive()
 		hintBar.Size = UDim2.new(0,560,0,36)
 		stats.Position = UDim2.new(0,200,0,6)
 		stats.Size = UDim2.new(1,-210,1,-12)
-		actionBar.Size = UDim2.new(0,640,0,64)
+		actionBar.Size = UDim2.new(0,760,0,64)
 		actionBar.Position = UDim2.new(0.5,0,1,-16)
 		actionLayout.CellPadding = UDim2.new(0,7,0,0)
+		actionLayout.CellSize = UDim2.new(0.158,-2,1,0)
+		actionLayout.FillDirectionMaxCells = 6
 		panel.Size = UDim2.new(0.78,0,0.78,0)
 	end
 end
