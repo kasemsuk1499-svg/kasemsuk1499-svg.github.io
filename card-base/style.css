@@ -2224,3 +2224,7 @@ body::before{
 @media (prefers-reduced-motion:reduce){
   .mutation-donor-row{transition:none}
 }
+
+
+/* Clean showcase base: stand position labels intentionally hidden */
+.stand-number{display:none!important}
