@@ -267,9 +267,7 @@ function PlotService.Render(player)
 			local mutationText = ""
 			if (tonumber(card.Mutation1) or 0) > 0 then mutationText = Config.Mutations[card.Mutation1].name end
 			if (tonumber(card.Mutation2) or 0) > 0 then mutationText ..= " + "..Config.Mutations[card.Mutation2].name end
-			gui.Meta.Text = string.format("%.0f/s%s%s",income,mutationText ~= "" and ("
-"..mutationText) or "",(card.Awakening or 0)>0 and ("
-AWAKEN ★"..card.Awakening) or "")
+			gui.Meta.Text = string.format("%.0f/s%s%s",income,mutationText ~= "" and ("\n"..mutationText) or "",(card.Awakening or 0)>0 and ("\nAWAKEN ★"..card.Awakening) or "")
 			if prompt then prompt.Enabled = true end
 
 			local emitter = board:FindFirstChild("FxAttachment") and board.FxAttachment:FindFirstChild("CardParticles")
