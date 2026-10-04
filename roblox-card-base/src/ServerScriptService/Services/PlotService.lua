@@ -661,6 +661,18 @@ function PlotService.Render(player)
 			or Color3.fromRGB(12,15,22)
 	end
 
+	for _,name in ipairs({"EntrancePostL","EntrancePostR","EntranceTop"}) do
+		local entrance=model:FindFirstChild(name)
+		if entrance then
+			if entitlements.ShowcasePro then
+				entrance.Color = name=="EntrancePostR" and Color3.fromRGB(100,255,230) or Color3.fromRGB(185,114,255)
+				entrance.Material = Enum.Material.Neon
+			else
+				entrance.Color = name=="EntrancePostR" and Color3.fromRGB(91,232,219) or Color3.fromRGB(106,94,255)
+			end
+		end
+	end
+
 	for floor=1,Config.BaseFloorCount do
 		local rail = model:FindFirstChild("BackRail_"..floor)
 		if rail then
