@@ -53,6 +53,16 @@ function BaseService.Remove(profile,slot)
 	return true
 end
 
+function BaseService.SetFeatured(profile,guid)
+	if guid == nil or guid == "" then
+		profile.FeaturedCard = ""
+		return true,"cleared"
+	end
+	if type(guid) ~= "string" or not profile.Cards[guid] then return false,"ไม่พบการ์ด" end
+	profile.FeaturedCard = guid
+	return true,profile.Cards[guid]
+end
+
 function BaseService.AutoEquipBest(profile,entitlements)
 	local cards = {}
 	for _,card in pairs(profile.Cards or {}) do
