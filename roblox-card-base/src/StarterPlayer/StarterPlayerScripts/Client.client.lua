@@ -298,17 +298,19 @@ local function invoke(action,args)
 	return response.data
 end
 
-local function frameHomeCamera()
-	local character = player.Character
-	local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+local function frameHomeCamera(duration)
 	local camera = workspace.CurrentCamera
-	if not rootPart or not camera then return end
-	local look = rootPart.CFrame.LookVector
-	local target = rootPart.Position + look*18 + Vector3.new(0,4,0)
-	local eye = rootPart.Position - look*13 + Vector3.new(0,7,0)
+	if not camera then return end
+	local x = player:GetAttribute("CardBasePlotX")
+	local y = player:GetAttribute("CardBasePlotY")
+	local z = player:GetAttribute("CardBasePlotZ")
+	if x == nil or z == nil then return end
+	y = tonumber(y) or 0
+	local target = Vector3.new(x,y+9,z)
+	local eye = Vector3.new(x,y+12,z-34)
 	camera.CameraType = Enum.CameraType.Scriptable
 	camera.CFrame = CFrame.lookAt(eye,target)
-	task.delay(0.45,function()
+	task.delay(duration or 1.6,function()
 		if workspace.CurrentCamera == camera then
 			camera.CameraType = Enum.CameraType.Custom
 		end
@@ -879,7 +881,7 @@ baseBtn.MouseButton1Click:Connect(function()
 	selectedSlot=nil
 	if invoke("TeleportHome") then
 		task.wait(0.08)
-		frameHomeCamera()
+		frameHomeCamera(2.2)
 		showToast("กลับมาที่ Card Tower แล้ว · กด E ที่ Stand เพื่อจัดการการ์ด",true)
 	end
 end)
@@ -938,6 +940,6 @@ task.spawn(function()
 	if initial then
 		handleState(initial)
 		task.wait(0.8)
-		frameHomeCamera()
+		frameHomeCamera(2.4)
 	end
 end)
