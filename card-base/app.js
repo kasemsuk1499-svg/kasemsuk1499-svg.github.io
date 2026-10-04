@@ -1903,11 +1903,10 @@
       slot.dataset.slot=i;
       if(c)slot.dataset.cardUid=c.uid;
       if(!c){
-        slot.innerHTML='<span class="stand-number">แท่น '+(i+1)+'</span><div class="empty-stand"><b>＋</b><span>เลือกการ์ดจากคลัง</span></div>';
+        slot.innerHTML='<div class="empty-stand"><b>＋</b><span>เลือกการ์ดจากคลัง</span></div>';
       }else{
         const t=TIERS[c.tier],g=GRADES[c.grade];
         slot.innerHTML=
-          '<span class="stand-number">แท่น '+(i+1)+'</span>'+
           '<div class="mini-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
             '<img src="'+imageFor(c.charId)+'" alt="Card '+padId(c.charId)+'">'+
             '<div class="tier-ring"></div>'+
