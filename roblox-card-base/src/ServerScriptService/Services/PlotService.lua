@@ -821,6 +821,17 @@ function PlotService.TeleportFloor(player,floor)
 	return teleportCharacter(player,origin+Vector3.new(0,y+3,-8),origin+Vector3.new(0,y+4,0))
 end
 
+function PlotService.TeleportToPlayer(player,targetUserId)
+	targetUserId = tonumber(targetUserId)
+	if not targetUserId or targetUserId == player.UserId then return false end
+	local target = Players:GetPlayerByUserId(targetUserId)
+	if not target then return false end
+	local slot = SlotByUser[targetUserId]
+	local origin = slot and PlotOrigins[slot]
+	if not origin then return false end
+	return teleportCharacter(player,origin+Vector3.new(0,3,-22),origin+Vector3.new(0,6,0))
+end
+
 function PlotService.Assign(player)
 	local chosen
 	for i=1,#PlotOrigins do
