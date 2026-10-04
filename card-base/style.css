@@ -3382,3 +3382,236 @@ body::before{
 @media (max-width:700px) and (prefers-reduced-motion:reduce){
   .mobile-card-particle{display:none!important;animation:none!important}
 }
+
+
+/* =========================================================
+   ENDGAME — Ascension / Awakening / Endless Tower
+   ========================================================= */
+.endgame-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);
+  gap:14px;
+  margin-top:14px
+}
+.endgame-grid-secondary{grid-template-columns:minmax(280px,.72fr) minmax(0,1.28fr)}
+.endgame-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid #2b3242;
+  border-radius:20px;
+  padding:18px;
+  background:
+    radial-gradient(circle at 8% 4%,rgba(125,109,255,.10),transparent 34%),
+    linear-gradient(145deg,rgba(18,21,31,.96),rgba(9,11,17,.98));
+  box-shadow:inset 0 1px rgba(255,255,255,.035)
+}
+.endgame-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(115deg,transparent 0 72%,rgba(255,255,255,.025) 72% 73%,transparent 73% 100%)
+}
+.endgame-title-row,.tower-head{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px
+}
+.core-counter,.tower-shards{
+  flex:0 0 auto;
+  min-width:92px;
+  padding:9px 11px;
+  border:1px solid #41495f;
+  border-radius:12px;
+  background:#090d14;
+  text-align:center
+}
+.core-counter span,.tower-shards span{
+  display:block;
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.12em;
+  color:#8792a8
+}
+.core-counter strong,.tower-shards strong{
+  display:block;
+  margin-top:3px;
+  font-size:19px;
+  color:#fff1a8;
+  text-shadow:0 0 14px rgba(255,226,112,.30)
+}
+.ascension-progress-track{
+  position:relative;
+  z-index:1;
+  height:9px;
+  margin:14px 0 12px;
+  overflow:hidden;
+  border:1px solid #303749;
+  border-radius:999px;
+  background:#080b10
+}
+.ascension-progress-track i{
+  display:block;
+  width:0;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#7c72ff,#65f3e7,#fff0a8);
+  box-shadow:0 0 14px rgba(111,241,232,.35);
+  transition:width .25s ease
+}
+.endgame-stats{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px
+}
+.endgame-stats>div{
+  min-width:0;
+  padding:9px 10px;
+  border:1px solid #272e3d;
+  border-radius:11px;
+  background:rgba(7,10,15,.66)
+}
+.endgame-stats span{
+  display:block;
+  font-size:8px;
+  color:#7f899e
+}
+.endgame-stats strong{
+  display:block;
+  margin-top:3px;
+  overflow-wrap:anywhere;
+  font-size:11px
+}
+.ascension-btn{width:100%;margin-top:12px}
+.core-tree{
+  position:relative;
+  z-index:1;
+  display:grid;
+  gap:8px;
+  margin-top:12px
+}
+.core-node{
+  min-width:0;
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  padding:10px;
+  border:1px solid #31394b;
+  border-radius:13px;
+  background:linear-gradient(145deg,#141925,#0b0f16);
+  text-align:left;
+  cursor:pointer
+}
+.core-node:not(:disabled):hover{
+  border-color:#68758f;
+  transform:translateY(-1px)
+}
+.core-node:disabled{opacity:.46;cursor:not-allowed}
+.core-node-icon{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border:1px solid #46516a;
+  border-radius:11px;
+  background:#090d14;
+  color:#fff0a8;
+  font-size:16px
+}
+.core-node>span:nth-child(2){min-width:0;display:grid;gap:2px}
+.core-node b{font-size:10px}
+.core-node small{font-size:7px;color:#7f899d}
+.core-node strong{font-size:10px;color:#9ff8ef}
+.awakening-preview{
+  position:relative;
+  z-index:1;
+  margin-top:13px;
+  padding:14px;
+  border:1px solid rgba(255,240,168,.25);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 20% 0,rgba(255,240,168,.10),transparent 48%),
+    #0a0d13
+}
+.awakening-preview span,.awakening-preview small{display:block;color:#8d96a9}
+.awakening-preview span{font-size:8px;letter-spacing:.12em;font-weight:900}
+.awakening-preview strong{
+  display:block;
+  margin:4px 0;
+  font-size:17px;
+  color:#fff2b6;
+  text-shadow:0 0 14px rgba(255,232,140,.18)
+}
+.awakening-preview small{font-size:8px;line-height:1.5}
+.tower-stats{margin-top:12px}
+.tower-actions{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px
+}
+.tower-actions button{min-width:0}
+.awakening-badge{
+  position:absolute;
+  z-index:10;
+  left:7px;
+  bottom:52px;
+  max-width:72%;
+  padding:4px 7px;
+  border:1px solid rgba(255,241,169,.72);
+  border-radius:999px;
+  background:rgba(8,9,14,.88);
+  color:#fff0a8;
+  box-shadow:0 0 15px rgba(255,224,109,.20);
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.06em;
+  white-space:nowrap
+}
+.awaken-action{
+  border-color:rgba(255,240,168,.42)!important;
+  color:#fff0a8!important;
+  background:
+    radial-gradient(circle at 50% 0,rgba(255,240,168,.10),transparent 55%),
+    #151823!important
+}
+.awaken-action:not(:disabled){
+  box-shadow:inset 0 0 16px rgba(255,240,168,.04),0 0 12px rgba(255,224,109,.06)
+}
+.rank-endless{
+  text-shadow:
+    0 0 10px var(--rank),
+    0 0 20px color-mix(in srgb,var(--rank) 34%,transparent)
+}
+
+@media (max-width:900px){
+  .endgame-grid,.endgame-grid-secondary{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  .endgame-card{padding:13px;border-radius:16px}
+  .endgame-title-row,.tower-head{gap:8px}
+  .core-counter,.tower-shards{min-width:78px;padding:8px}
+  .core-counter strong,.tower-shards strong{font-size:16px}
+  .endgame-stats{gap:6px}
+  .endgame-stats>div{padding:8px}
+  .core-node{
+    grid-template-columns:34px minmax(0,1fr) auto;
+    padding:9px 8px
+  }
+  .core-node-icon{width:34px;height:34px}
+  .tower-actions{grid-template-columns:1fr}
+  .awakening-badge{
+    left:6px;
+    bottom:48px;
+    padding:3px 5px;
+    font-size:6px
+  }
+}
