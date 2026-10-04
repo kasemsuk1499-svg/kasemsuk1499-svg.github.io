@@ -79,18 +79,29 @@ local function updateLeaderstats(player,profile,snapshot)
 		folder.Parent = player
 	end
 
-	local function numberValue(name,value)
+	local function intValue(name,value)
 		local item = folder:FindFirstChild(name)
+		if item and not item:IsA("IntValue") then item:Destroy(); item=nil end
 		if not item then
 			item = Instance.new("IntValue")
 			item.Name = name
 			item.Parent = folder
 		end
-		item.Value = math.max(0,math.floor(tonumber(value) or 0))
+		item.Value = math.clamp(math.floor(tonumber(value) or 0),0,2147483647)
+	end
+	local function numberValue(name,value)
+		local item = folder:FindFirstChild(name)
+		if item and not item:IsA("NumberValue") then item:Destroy(); item=nil end
+		if not item then
+			item = Instance.new("NumberValue")
+			item.Name = name
+			item.Parent = folder
+		end
+		item.Value = math.max(0,tonumber(value) or 0)
 	end
 
-	numberValue("Base",profile.BaseLevel)
-	numberValue("Asc",profile.Ascension)
+	intValue("Base",profile.BaseLevel)
+	intValue("Asc",profile.Ascension)
 	numberValue("Income",snapshot.Computed.Income)
 end
 
