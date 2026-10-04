@@ -3,7 +3,7 @@
 
   const SAVE_KEY = "card-base-prototype-v01";
   const CARD_MIN_ID = 1;
-  const CARD_MAX_ID = 100;
+  const CARD_MAX_ID = 110;
   const ROLL_MS = 2500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
@@ -99,7 +99,8 @@
     61: {name:"Slime pack v1", image:"./assets/packs/62.png", priceSeconds:null},
     71: {name:"Mushoku pack v1", image:"./assets/packs/77.png", priceSeconds:null},
     81: {name:"Frieren pack v1", image:"./assets/packs/90.png", priceSeconds:null},
-    91: {name:"AOT pack v1", image:"./assets/packs/98.png", priceSeconds:null}
+    91: {name:"AOT pack v1", image:"./assets/packs/98.png", priceSeconds:null},
+    101: {name:"Oshi pack v1", image:"./assets/packs/108.png", priceSeconds:null}
   };
 
   const ROTATING_PACK_ARCHETYPES = [
