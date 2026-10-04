@@ -67,10 +67,10 @@ Config.TurboRollMultiplier = 0.50
 Config.AwakeningIncomePerStar = 0.35
 
 Config.PassIds = {
-	VIPCollector = 0,
-	TurboCollector = 0,
-	OfflineVault = 0,
-	ShowcasePro = 0,
+	VIPCollector = 2005329121,
+	TurboCollector = 2006937106,
+	OfflineVault = 2006211092,
+	ShowcasePro = 2006799099,
 }
 
 Config.ProductIds = {
