@@ -2777,3 +2777,142 @@ body::before{
 @media (prefers-reduced-motion:reduce){
   .leaderboard-featured-card{transition:none!important}
 }
+
+
+/* =========================================================
+   CARD TOWER — 3 floors, 10 stands per floor
+   ========================================================= */
+.base-tower-bar{
+  margin:14px 0 12px;
+  display:grid;
+  grid-template-columns:minmax(220px,.55fr) minmax(0,1.45fr);
+  gap:12px;
+  align-items:stretch;
+  padding:11px;
+  border:1px solid #2b3344;
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 8% 10%,rgba(103,241,228,.08),transparent 28%),
+    linear-gradient(145deg,#10151f,#0a0d13);
+  box-shadow:inset 0 1px rgba(255,255,255,.035),0 10px 28px rgba(0,0,0,.16)
+}
+.base-tower-copy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:4px;
+  padding:5px 7px
+}
+.base-tower-copy strong{font-size:14px;color:#eef3fb}
+.base-tower-copy small{font-size:8px;line-height:1.45;color:#7f8ba1}
+.base-floor-nav{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px
+}
+.base-floor-btn{
+  min-width:0;
+  min-height:66px;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+  padding:8px 9px;
+  border:1px solid #323a4d;
+  border-radius:13px;
+  background:linear-gradient(145deg,#151a25,#0c1017);
+  color:#aeb8c9;
+  text-align:left;
+  cursor:pointer;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease,background .15s ease
+}
+.base-floor-btn:not(:disabled):hover{
+  transform:translateY(-2px);
+  border-color:#536078
+}
+.base-floor-btn.active{
+  border-color:#6ceee3;
+  color:#efffff;
+  background:
+    radial-gradient(circle at 12% 50%,rgba(103,241,228,.14),transparent 40%),
+    linear-gradient(145deg,#121d24,#0b1117);
+  box-shadow:0 0 18px rgba(103,241,228,.10),inset 0 0 18px rgba(103,241,228,.045)
+}
+.base-floor-btn.locked{
+  opacity:.38;
+  cursor:not-allowed;
+  filter:saturate(.45)
+}
+.base-floor-no{
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  border:1px solid #3b465a;
+  border-radius:10px;
+  background:#090d13;
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.06em
+}
+.base-floor-btn.active .base-floor-no{
+  border-color:#67f1e4;
+  color:#8ffff5;
+  box-shadow:inset 0 0 12px rgba(103,241,228,.10),0 0 10px rgba(103,241,228,.08)
+}
+.base-floor-meta{min-width:0;display:grid;gap:3px}
+.base-floor-meta b{font-size:9px;color:inherit}
+.base-floor-meta small{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:7px;color:#7e899f
+}
+.base-floor-btn.active .base-floor-meta small{color:#91b8bb}
+.base-floor-arrow{font-size:12px;color:#667188}
+.base-floor-btn.active .base-floor-arrow{color:#75f7ec;text-shadow:0 0 9px rgba(103,241,228,.55)}
+
+#panel-base .stands{
+  grid-template-columns:repeat(10,minmax(0,1fr));
+  gap:8px
+}
+#panel-base .stand,
+#panel-base .mini-card{min-height:218px}
+.stand.locked-floor-slot{
+  border-style:dashed;
+  border-color:#252b38;
+  background:
+    linear-gradient(145deg,rgba(18,22,30,.76),rgba(8,10,14,.92));
+  box-shadow:none;
+  cursor:not-allowed
+}
+.stand.locked-floor-slot:hover{transform:none;border-color:#252b38}
+.floor-locked{opacity:.46}
+.floor-locked b{font-size:17px;color:#566078}
+.floor-locked span{display:block;margin-top:5px;font-size:8px;color:#798397;font-weight:900}
+.floor-locked small{display:block;margin-top:3px;font-size:6.5px;color:#535c6e}
+
+@media (max-width:1250px){
+  #panel-base .stands{grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+}
+@media (max-width:900px){
+  .base-tower-bar{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  .base-floor-nav{grid-template-columns:1fr 1fr 1fr}
+  .base-floor-btn{
+    min-height:54px;
+    grid-template-columns:28px minmax(0,1fr);
+    padding:7px;
+    gap:6px
+  }
+  .base-floor-no{width:28px;height:28px;border-radius:8px;font-size:8px}
+  .base-floor-arrow{display:none}
+  .base-floor-meta b{font-size:8px}
+  .base-floor-meta small{font-size:6px}
+  #panel-base .stands{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #panel-base .stand,#panel-base .mini-card{min-height:205px}
+}
+@media (max-width:430px){
+  .base-tower-bar{padding:9px}
+  .base-floor-nav{gap:5px}
+  .base-floor-btn{grid-template-columns:1fr;text-align:center;justify-items:center}
+  .base-floor-meta small{white-space:normal;text-align:center;line-height:1.25}
+}
