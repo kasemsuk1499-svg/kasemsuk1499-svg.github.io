@@ -71,7 +71,7 @@ function BaseService.Ascend(profile)
 	return true,{
 		Ascension=profile.Ascension,
 		Core=1,
-		Reward=Config.AscensionRewards[math.min(10,profile.Ascension)],
+		Reward=profile.Ascension <= 10 and Config.AscensionRewards[profile.Ascension] or nil,
 	}
 end
 
