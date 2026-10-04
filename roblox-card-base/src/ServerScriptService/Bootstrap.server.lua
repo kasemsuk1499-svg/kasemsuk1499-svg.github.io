@@ -263,12 +263,35 @@ Action.OnServerInvoke = function(player,action,args)
 	if action == "TeleportFloor" then
 		return result(PlotService.TeleportFloor(player,args.Floor),true)
 	end
+	if action == "VisitPlayer" then
+		local target=Players:GetPlayerByUserId(tonumber(args.TargetUserId) or 0)
+		if not target or not DataService.Get(target) then return result(false,"ผู้เล่นไม่อยู่ในเซิร์ฟเวอร์แล้ว") end
+		local ok=PlotService.TeleportToPlayer(player,target.UserId)
+		return result(ok,ok and ("ไปฐานของ "..target.DisplayName.." แล้ว") or "ไปฐานไม่ได้")
+	end
+
+	local function announceRare(card,sourceLabel)
+		if not card or (tonumber(card.Tier) or 0) < 4 then return end
+		local tier=Config.Tiers[(tonumber(card.Tier) or 0)+1]
+		local mutation=""
+		if (tonumber(card.Mutation1) or 0)>0 and Config.Mutations[card.Mutation1] then
+			mutation=" · "..Config.Mutations[card.Mutation1].name
+		end
+		local message="✦ "..player.DisplayName.." pulled "..tier.name.." #"..string.format("%04d",card.Id)..mutation
+		if sourceLabel and sourceLabel~="" then message..=" · "..sourceLabel end
+		for _,other in ipairs(Players:GetPlayers()) do
+			Toast:FireClient(other,message,true)
+		end
+	end
 
 	local ok,payload
 	if action == "RollPack" then
 		local hadPlaced = next(profile.Placed) ~= nil
 		ok,payload = CardService.Roll(profile,MonetizationService.GetEntitlements(player),player.UserId)
-		if ok then DailyService.Add(profile,"Rolls",1) end
+		if ok then
+			DailyService.Add(profile,"Rolls",1)
+			announceRare(payload,"FREE PACK")
+		end
 		if ok and not hadPlaced then
 			local placed = BaseService.Place(profile,payload.Guid,1)
 			if placed then
@@ -279,7 +302,10 @@ Action.OnServerInvoke = function(player,action,args)
 	elseif action == "RollIdPack" then
 		local hadPlaced = next(profile.Placed) ~= nil
 		ok,payload = CardService.RollIdPack(profile,args.PackIndex)
-		if ok then DailyService.Add(profile,"Rolls",1) end
+		if ok then
+			DailyService.Add(profile,"Rolls",1)
+			announceRare(payload,"ID PACK")
+		end
 		if ok and not hadPlaced then
 			local placed = BaseService.Place(profile,payload.Guid,1)
 			if placed then
@@ -290,7 +316,10 @@ Action.OnServerInvoke = function(player,action,args)
 	elseif action == "BuyRotatingPack" then
 		local hadPlaced = next(profile.Placed) ~= nil
 		ok,payload = RotatingShopService.Buy(profile,args.OfferId,CardService)
-		if ok then DailyService.Add(profile,"Rolls",1) end
+		if ok then
+			DailyService.Add(profile,"Rolls",1)
+			announceRare(payload.Card,payload.OfferName)
+		end
 		if ok and not hadPlaced and payload.Card then
 			local placed = BaseService.Place(profile,payload.Card.Guid,1)
 			if placed then
