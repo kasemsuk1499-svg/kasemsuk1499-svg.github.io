@@ -2870,11 +2870,17 @@ body::before{
 .base-floor-btn.active .base-floor-arrow{color:#75f7ec;text-shadow:0 0 9px rgba(103,241,228,.55)}
 
 #panel-base .stands{
-  grid-template-columns:repeat(10,minmax(0,1fr));
-  gap:8px
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px
 }
-#panel-base .stand,
-#panel-base .mini-card{min-height:218px}
+#panel-base .stand{
+  min-height:0;
+  aspect-ratio:.72
+}
+#panel-base .mini-card{
+  min-height:0;
+  height:100%
+}
 .stand.locked-floor-slot{
   border-style:dashed;
   border-color:#252b38;
@@ -2889,8 +2895,8 @@ body::before{
 .floor-locked span{display:block;margin-top:5px;font-size:8px;color:#798397;font-weight:900}
 .floor-locked small{display:block;margin-top:3px;font-size:6.5px;color:#535c6e}
 
-@media (max-width:1250px){
-  #panel-base .stands{grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+@media (max-width:1050px){
+  #panel-base .stands{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 }
 @media (max-width:900px){
   .base-tower-bar{grid-template-columns:1fr}
@@ -2907,8 +2913,9 @@ body::before{
   .base-floor-arrow{display:none}
   .base-floor-meta b{font-size:8px}
   .base-floor-meta small{font-size:6px}
-  #panel-base .stands{grid-template-columns:repeat(2,minmax(0,1fr))}
-  #panel-base .stand,#panel-base .mini-card{min-height:205px}
+  #panel-base .stands{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  #panel-base .stand{aspect-ratio:.72}
+  #panel-base .mini-card{height:100%}
 }
 @media (max-width:430px){
   .base-tower-bar{padding:9px}
