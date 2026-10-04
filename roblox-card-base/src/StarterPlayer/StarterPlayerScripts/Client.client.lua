@@ -11,12 +11,15 @@ local Action = Remotes:WaitForChild("Action")
 local StateEvent = Remotes:WaitForChild("State")
 local ToastEvent = Remotes:WaitForChild("Toast")
 local OpenStandEvent = Remotes:WaitForChild("OpenStand")
+local TradeEvent = Remotes:WaitForChild("TradeEvent")
 
 local state = nil
 local selectedSlot = nil
 local mutationTargetGuid = nil
 local activePanel = nil
 local busy = false
+local selectedTradeGuids = {}
+local incomingTradeFrom = nil
 
 local COLORS = {
 	bg = Color3.fromRGB(8,10,16),
@@ -168,8 +171,8 @@ padding(actionBar,8,8,8,8)
 
 local actionLayout = Instance.new("UIGridLayout")
 actionLayout.CellPadding = UDim2.new(0,7,0,0)
-actionLayout.CellSize = UDim2.new(0.158,-2,1,0)
-actionLayout.FillDirectionMaxCells = 6
+actionLayout.CellSize = UDim2.new(0.135,-2,1,0)
+actionLayout.FillDirectionMaxCells = 7
 actionLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 actionLayout.Parent = actionBar
 
@@ -179,6 +182,7 @@ local baseBtn = makeButton(actionBar,"⌂ BASE",UDim2.new(),UDim2.new())
 local collectionBtn = makeButton(actionBar,"▦ CARDS",UDim2.new(),UDim2.new())
 local endgameBtn = makeButton(actionBar,"✦ ENDGAME",UDim2.new(),UDim2.new())
 local packShopBtn = makeButton(actionBar,"▣ PACKS",UDim2.new(),UDim2.new())
+local socialBtn = makeButton(actionBar,"♟ SOCIAL",UDim2.new(),UDim2.new())
 local storeBtn = makeButton(actionBar,"R$ STORE",UDim2.new(),UDim2.new())
 
 local overlay = Instance.new("Frame")
@@ -264,6 +268,29 @@ revealMeta.ZIndex = 81
 local revealClose = makeButton(reveal,"เก็บเข้าคลัง",UDim2.new(1,-30,0,48),UDim2.new(0,15,1,-64))
 revealClose.BackgroundColor3 = COLORS.accent
 revealClose.ZIndex = 81
+
+local tradePrompt = Instance.new("Frame")
+tradePrompt.Visible = false
+tradePrompt.AnchorPoint = Vector2.new(0.5,0.5)
+tradePrompt.Position = UDim2.fromScale(0.5,0.5)
+tradePrompt.Size = UDim2.new(0,390,0,190)
+tradePrompt.BackgroundColor3 = COLORS.panel
+tradePrompt.ZIndex = 110
+tradePrompt.Parent = gui
+corner(tradePrompt,16)
+stroke(tradePrompt,COLORS.accent2,0.08,2)
+
+local tradePromptTitle = makeLabel(tradePrompt,"TRADE REQUEST",UDim2.new(1,-28,0,28),UDim2.new(0,14,0,14),15,COLORS.text,true)
+tradePromptTitle.ZIndex = 111
+local tradePromptSub = makeLabel(tradePrompt,"",UDim2.new(1,-28,0,48),UDim2.new(0,14,0,50),11,COLORS.muted,false)
+tradePromptSub.TextWrapped = true
+tradePromptSub.ZIndex = 111
+local tradeAccept = makeButton(tradePrompt,"ACCEPT",UDim2.new(0.46,0,0,44),UDim2.new(0.03,0,1,-58))
+tradeAccept.BackgroundColor3 = COLORS.accent
+tradeAccept.ZIndex = 111
+local tradeDecline = makeButton(tradePrompt,"DECLINE",UDim2.new(0.46,0,0,44),UDim2.new(0.51,0,1,-58))
+tradeDecline.BackgroundColor3 = Color3.fromRGB(73,35,46)
+tradeDecline.ZIndex = 111
 
 local function showToast(message,good)
 	toast.Text = tostring(message)
@@ -971,8 +998,8 @@ local function applyResponsive()
 		actionBar.Size = UDim2.new(1,-12,0,104)
 		actionBar.Position = UDim2.new(0.5,0,1,-6)
 		actionLayout.CellPadding = UDim2.new(0,3,0,4)
-		actionLayout.CellSize = UDim2.new(0.32,-2,0,42)
-		actionLayout.FillDirectionMaxCells = 3
+		actionLayout.CellSize = UDim2.new(0.24,-2,0,42)
+		actionLayout.FillDirectionMaxCells = 4
 		panel.Size = UDim2.new(0.96,0,0.80,0)
 	else
 		top.Size = UDim2.new(1,-24,0,74)
@@ -981,11 +1008,11 @@ local function applyResponsive()
 		hintBar.Size = UDim2.new(0,560,0,36)
 		stats.Position = UDim2.new(0,200,0,6)
 		stats.Size = UDim2.new(1,-210,1,-12)
-		actionBar.Size = UDim2.new(0,760,0,64)
+		actionBar.Size = UDim2.new(0,900,0,64)
 		actionBar.Position = UDim2.new(0.5,0,1,-16)
 		actionLayout.CellPadding = UDim2.new(0,7,0,0)
-		actionLayout.CellSize = UDim2.new(0.158,-2,1,0)
-		actionLayout.FillDirectionMaxCells = 6
+		actionLayout.CellSize = UDim2.new(0.135,-2,1,0)
+		actionLayout.FillDirectionMaxCells = 7
 		panel.Size = UDim2.new(0.78,0,0.78,0)
 	end
 end
