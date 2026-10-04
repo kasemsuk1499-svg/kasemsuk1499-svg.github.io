@@ -91,7 +91,7 @@
     const now=performance.now();
     if(!force && now-lastScan<700) return;
     lastScan=now;
-    const els=[...document.querySelectorAll(".tier-fx")];
+    const els=[...document.querySelectorAll(".tier-fx")].filter(activeLayerAllows);
     targets=els.slice(0,90).map(el=>({
       el,
       tier:classNumber(el,"tier-"),
@@ -114,6 +114,8 @@
     if(modal) return modal.contains(el);
     const reveal=document.querySelector("#reveal.show");
     if(reveal) return reveal.contains(el);
+    const panel=el.closest(".panel");
+    if(panel && !panel.classList.contains("active")) return false;
     return true;
   }
 
