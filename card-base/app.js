@@ -1605,16 +1605,18 @@
     const tier=Math.max(0,Math.min(9,Number(card.tier)||0));
     const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
     const mutation=Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0));
-    const t=TIERS[tier],g=GRADES[grade],m=MUTATIONS[mutation];
+    const mutation2=Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation2)||0));
+    const visualCard={...card,mutation,mutation2};
+    const t=TIERS[tier],g=GRADES[grade];
     return '<div class="trade-card-visual tier-shell tier-'+tier+' grade-shell-'+grade+(compact?' compact':'')+'" style="--tier:'+t.color+'">'+
-      '<div class="trade-card-art '+tierFxClass(tier)+mutationFxClass(mutation)+' grade-shell-'+grade+'" style="'+mutationStyle(mutation)+'">'+
+      '<div class="trade-card-art '+tierFxClass(tier)+cardMutationFxClass(visualCard)+' grade-shell-'+grade+'" style="'+cardMutationStyle(visualCard)+'">'+
         '<img src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
         '<div class="tier-ring"></div>'+
-        '<span class="card-grade '+gradeFxClass(grade)+'" style="--grade:'+g.color+'">'+g.name+'</span>'+mutationBadge({mutation})+
+        '<span class="card-grade '+gradeFxClass(grade)+'" style="--grade:'+g.color+'">'+g.name+'</span>'+mutationBadge(visualCard)+
       '</div>'+
       '<div class="trade-card-meta tier-copy tier-'+tier+'" style="--tier:'+t.color+'">'+
         '<strong><span class="tier-card-id">'+padId(card.charId)+'</span><span class="tier-dot"> · </span><span class="tier-card-name">'+t.name+'</span></strong>'+
-        '<span>Lv.'+Math.max(1,Number(card.level)||1)+' · Grade '+g.name+(mutation?' · '+m.icon+' '+m.name:'')+'</span>'+
+        '<span>Lv.'+Math.max(1,Number(card.level)||1)+' · Grade '+g.name+(cardMutationIds(visualCard).length?' · '+mutationNames(visualCard):'')+'</span>'+
       '</div>'+
     '</div>';
   }
@@ -1840,13 +1842,13 @@
     for(let i=0;i<max;i++){
       const c=bySlot.get(i);
       if(!c){html+='<div class="visitor-stand empty"><span>แท่น '+(i+1)+'</span></div>';continue}
-      const t=TIERS[c.tier]||TIERS[0],g=GRADES[c.grade]||GRADES[0],m=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(c.mutation)||0))]||MUTATIONS[0];
-      html+='<div class="visitor-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';--mutation:'+m.color+'"><div class="visitor-card '+tierFxClass(c.tier)+mutationFxClass(c.mutation)+'">'+
+      const t=TIERS[c.tier]||TIERS[0],g=GRADES[c.grade]||GRADES[0];
+      html+='<div class="visitor-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="visitor-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+'">'+
         '<img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div>'+
         '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+mutationBadge(c)+
         '<div class="visitor-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><b>'+
           '<span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span><span class="tier-card-name">'+t.name+'</span></b>'+
-          '<span class="tier-card-sub">Lv.'+c.level+(c.mutation?' · '+m.icon+' '+m.name:'')+' · <strong class="tier-card-income">'+fmt(c.income||0)+'/s</strong></span>'+
+          '<span class="tier-card-sub">Lv.'+c.level+(cardMutationIds(c).length?' · '+mutationNames(c):'')+' · <strong class="tier-card-income">'+fmt(c.income||0)+'/s</strong></span>'+
         '</div>'+
         '</div></div>';
     }
