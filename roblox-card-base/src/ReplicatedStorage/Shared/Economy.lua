@@ -216,6 +216,12 @@ function Economy.GradeRerollCost(profile, card)
 		* Economy.ForgeCostMultiplier(profile)
 end
 
+function Economy.SellValue(profile,card)
+	local income = Economy.CardIntrinsicIncome(card)
+	local level = math.max(1,tonumber(card.Level) or 1)
+	return income*(4+math.min(20,level*0.14))*Economy.EconomyScale(profile.BaseLevel)
+end
+
 local function expectedTierMultiplier(level)
 	local lv = math.max(1,tonumber(level) or 1)
 	local legacyMax = math.min(10,math.max(3,lv+2))
