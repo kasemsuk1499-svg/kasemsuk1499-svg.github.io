@@ -50,11 +50,13 @@ function CardService.Roll(profile, entitlements, playerUserId)
 	return true,card
 end
 
-function CardService.RollIdPack(profile, packIndex, cost)
-	local pack = Config.IdPacks[tonumber(packIndex) or 0]
+function CardService.RollIdPack(profile, packIndex)
+	packIndex = math.floor(tonumber(packIndex) or 0)
+	local pack = Config.IdPacks[packIndex]
 	if not pack then return false,"ไม่พบแพ็ก" end
-	cost = math.max(0,tonumber(cost) or 0)
-	if profile.Money < cost then return false,"เงินไม่พอ" end
+	if cardCount(profile) >= Config.MaxCards then return false,"คลังเต็ม "..Config.MaxCards.." ใบ" end
+	local cost = Economy.IdPackCost(profile.BaseLevel,packIndex)
+	if profile.Money < cost then return false,"เงินไม่พอ · ต้องใช้ "..math.floor(cost) end
 	profile.Money -= cost
 	local rng = Random.new()
 	local guid = HttpService:GenerateGUID(false)
