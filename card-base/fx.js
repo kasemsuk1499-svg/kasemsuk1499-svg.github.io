@@ -25,11 +25,11 @@
     "#ff5fb7","#77fff1","#5fffea","#b9ff6a","#ff7cf5","#6fe7ff",
     "#7aa2ff","#ff9ad5","#8a64ff","#ffe47a"
   ];
-  const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic",null,null,null,null,null,null,null,null,null,null];
+  const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic","halo",null,null,null,null,null,null,null,null,null];
 
   function mutationParticleKind(m){
     return ({
-      11:"abyss",12:"chrono",13:"glitch",14:"helix",15:"shard",
+      12:"chrono",13:"glitch",14:"helix",15:"shard",
       16:"inverse",17:"scan",18:"echo",19:"gravity",20:"rune"
     })[m]||"";
   }
@@ -164,7 +164,7 @@
     const pickedMutation=mutation2&&mutation
       ? (Math.random()<.5?mutation:mutation2)
       : (mutation||mutation2);
-    if(pickedMutation>=11) return "__special";
+    if(pickedMutation>=12) return "__special";
     if(pickedMutation>0 && r<.78) return MUTATION_TEXTURES[pickedMutation]||"spark";
     if(grade>=12) return r<.44?"flare":r<.78?"star":"spark";
     if(grade>=11) return r<.36?"flare":r<.68?"star":"spark";
@@ -189,7 +189,7 @@
     else {nx=Math.random()<.5?.05:.95;ny=.12+Math.random()*.78}
 
     const key=chooseTexture(tier,grade,mutation,mutation2);
-    const kind=mutationParticleKind(activeMutation);
+    const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
     const high=Math.max(tier-3,grade-6);
     const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1);
     const life=950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0);
@@ -447,7 +447,8 @@
   }
 
   function drawHalo(target,rect,time){
-    // Halo is reserved for high Tier / Grade only. Mutation uses particles + borders, not rings.
+    // EX+ uses its own crystal particle language; do not give it the bubble/halo look.
+    if(target.grade===11 && target.tier<8) return;
     if(target.tier<8 && target.grade<9) return;
     const img=images.halo;
     if(!img || !img.complete) return;
@@ -497,9 +498,19 @@
       ctx.beginPath();ctx.arc(0,0,size*.38,0,Math.PI*2);ctx.stroke();
       ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(phase)*size*.30,Math.sin(phase)*size*.30);ctx.stroke();
       ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(-phase*.55)*size*.22,Math.sin(-phase*.55)*size*.22);ctx.stroke();
-    }else if(p.kind==="abyss"){
-      ctx.beginPath();ctx.moveTo(0,-size*.48);ctx.bezierCurveTo(size*.55,-size*.15,size*.40,size*.42,0,size*.52);
-      ctx.bezierCurveTo(-size*.42,size*.40,-size*.55,-size*.15,0,-size*.48);ctx.stroke();
+    }else if(p.kind==="gradePrism"){
+      const h=size*.54,w=size*.34;
+      const grad=ctx.createLinearGradient(-w,-h,w,h);
+      grad.addColorStop(0,"#d798ff");
+      grad.addColorStop(.48,"#ffffff");
+      grad.addColorStop(1,"#7ee8ff");
+      ctx.strokeStyle=grad;
+      ctx.lineWidth=Math.max(1.1,size*.075);
+      ctx.beginPath();
+      ctx.moveTo(0,-h);ctx.lineTo(w,0);ctx.lineTo(0,h);ctx.lineTo(-w,0);ctx.closePath();
+      ctx.stroke();
+      ctx.globalAlpha*=.62;
+      ctx.beginPath();ctx.moveTo(-w*.78,0);ctx.lineTo(w*.78,0);ctx.moveTo(0,-h*.78);ctx.lineTo(0,h*.78);ctx.stroke();
     }
   }
 
@@ -529,7 +540,7 @@
       ctx.rotate(p.rot);
 
       if(p.kind){
-        drawSpecialParticle(p,size,time,MUTATION_COLORS[p.mutation]||"#fff");
+        drawSpecialParticle(p,size,time,p.kind==="gradePrism"?"#d798ff":(MUTATION_COLORS[p.mutation]||"#fff"));
       }else{
         const img=images[p.key];
         if(img&&img.complete)ctx.drawImage(img,-size/2,-size/2,size,size);
