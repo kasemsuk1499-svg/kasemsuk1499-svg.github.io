@@ -1153,9 +1153,14 @@ local function storeItem(title,subtitle,id,kind)
 	local a=makeLabel(row,title,UDim2.new(0.62,0,0,24),UDim2.new(0,12,0,8),11,COLORS.text,true);a.ZIndex=24
 	local s=makeLabel(row,subtitle,UDim2.new(0.62,0,0,31),UDim2.new(0,12,0,32),8,COLORS.muted,false);s.TextWrapped=true;s.ZIndex=24
 	local infoType = kind=="pass" and Enum.InfoType.GamePass or Enum.InfoType.Product
-	local buy=makeButton(row,getPrice(id,infoType),UDim2.new(0,128,0,40),UDim2.new(1,-140,0,16));buy.ZIndex=24
-	if id <= 0 then buy.Active=false;buy.AutoButtonColor=false;buy.BackgroundColor3=Color3.fromRGB(40,42,50) end
+	local buy=makeButton(row,owned and "OWNED" or getPrice(id,infoType),UDim2.new(0,128,0,40),UDim2.new(1,-140,0,16));buy.ZIndex=24
+	if owned then
+		buy.Active=false;buy.AutoButtonColor=false;buy.BackgroundColor3=Color3.fromRGB(31,77,63);buy.TextColor3=COLORS.accent2
+	elseif id <= 0 then
+		buy.Active=false;buy.AutoButtonColor=false;buy.BackgroundColor3=Color3.fromRGB(40,42,50)
+	end
 	buy.MouseButton1Click:Connect(function()
+		if owned then return end
 		if id <= 0 then showToast("ยังไม่ได้ใส่ Roblox ID ของสินค้านี้",false);return end
 		if kind=="pass" then MarketplaceService:PromptGamePassPurchase(player,id)
 		else MarketplaceService:PromptProductPurchase(player,id) end
