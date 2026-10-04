@@ -1526,7 +1526,10 @@
   }
 
   function leaderboardCardShowcase(profile){
-    const cards=Array.isArray(profile?.top_cards)?profile.top_cards.slice(0,5):[];
+    const cards=(Array.isArray(profile?.top_cards)?profile.top_cards:[])
+      .slice()
+      .sort((a,b)=>(Number(b?.income)||0)-(Number(a?.income)||0))
+      .slice(0,5);
     if(!cards.length){
       return '<div class="leaderboard-showcase empty"><span>ยังไม่มีการ์ดบนฐาน</span></div>';
     }
