@@ -1155,7 +1155,7 @@
   }
 
   function rebirthTargetSeconds(level=state.baseLevel){
-    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1));
+    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1)));
     const x=Math.max(0,lv-1);
     return Math.round(240*Math.pow(1.16,x)+35*x);
   }
@@ -1973,7 +1973,7 @@
   }
 
   function renderVisitorIdentity(name,level,title=null,ascension=null){
-    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1));
+    const lv=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(level)||1)));
     const asc=Math.max(0,Number.isFinite(Number(ascension))?Math.floor(Number(ascension)):ascensionFromTitle(title));
     const safeName=escapeHtml(name||"Player");
     const modal=$("#socialBaseModal");
