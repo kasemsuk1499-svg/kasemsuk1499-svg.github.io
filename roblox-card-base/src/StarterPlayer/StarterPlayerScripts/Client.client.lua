@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MarketplaceService = game:GetService("MarketplaceService")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local Root = ReplicatedStorage:WaitForChild("CardBase")
@@ -680,6 +681,17 @@ local function openBasePanel()
 		end
 	end)
 
+	local hub = makeButton(content,"✦ SOCIAL HUB · DAILY · PACKS · STORE",UDim2.new(1,-4,0,46),UDim2.new())
+	hub.ZIndex = 24
+	hub.BackgroundColor3 = Color3.fromRGB(24,54,58)
+	hub.MouseButton1Click:Connect(function()
+		if invoke("TeleportHub") then
+			overlay.Visible = false
+			activePanel = nil
+			showToast("ไป Social Hub แล้ว · เดินเข้า Kiosk แล้วกด E ได้เลย",true)
+		end
+	end)
+
 	makeSectionHeader("BASE LOADOUT","จัดฐานแบบเร็ว แล้วค่อยแต่งราย Stand ทีหลัง")
 	local equipped = 0
 	for _,guid in pairs(state.Placed or {}) do
@@ -1267,6 +1279,19 @@ storeBtn.MouseButton1Click:Connect(openStore)
 closeBtn.MouseButton1Click:Connect(function() overlay.Visible=false;activePanel=nil;selectedSlot=nil;mutationTargetGuid=nil end)
 revealClose.MouseButton1Click:Connect(function() reveal.Visible=false end)
 OpenStandEvent.OnClientEvent:Connect(openStand)
+UserInputService.InputBegan:Connect(function(input,processed)
+	if processed then return end
+	if input.KeyCode == Enum.KeyCode.H then
+		if invoke("TeleportHub") then
+			overlay.Visible=false
+			activePanel=nil
+			showToast("HUB · กด E ที่ Kiosk เพื่อเปิดเมนู",true)
+		end
+	elseif input.KeyCode == Enum.KeyCode.B then
+		openBasePanel()
+	end
+end)
+
 OpenPanelEvent.OnClientEvent:Connect(function(panelKey)
 	if panelKey=="daily" then openDaily()
 	elseif panelKey=="packs" then openPackShop()
