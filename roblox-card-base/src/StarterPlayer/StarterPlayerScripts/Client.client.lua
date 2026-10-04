@@ -926,6 +926,216 @@ local function openStore()
 	storeItem("Support DEV · 100","Tip ไม่มีพลังเพิ่ม",Config.ProductIds.Tip100,"product")
 end
 
+local function romanNumeral(value)
+	local n = math.max(0,math.floor(tonumber(value) or 0))
+	if n == 0 then return "—" end
+	local map = {{1000,"M"},{900,"CM"},{500,"D"},{400,"CD"},{100,"C"},{90,"XC"},{50,"L"},{40,"XL"},{10,"X"},{9,"IX"},{5,"V"},{4,"IV"},{1,"I"}}
+	local out = ""
+	for _,pair in ipairs(map) do
+		while n >= pair[1] do out ..= pair[2]; n -= pair[1] end
+	end
+	return out
+end
+
+local function tradeCardLabel(card)
+	local tier = Config.Tiers[(card.Tier or 0)+1]
+	local grade = Config.Grades[(card.Grade or 0)+1]
+	return string.format("#%04d · %s · %s · Lv.%d",card.Id,tier.name,grade.name,card.Level or 1)
+end
+
+local function selectedTradeList()
+	local out = {}
+	for guid,selected in pairs(selectedTradeGuids) do
+		if selected then table.insert(out,guid) end
+	end
+	return out
+end
+
+local openSocial
+local openTradeSession
+
+openTradeSession = function(session)
+	if not state or not session then return end
+	activePanel = "social"
+	overlay.Visible = true
+	panelTitle.Text = "SECURE CARD TRADE"
+	panelSub.Text = "กับ "..tostring(session.PartnerName).." · สูงสุด 4 ใบ · ไม่มีเงิน/Robux ใน Trade"
+	clearContent()
+
+	selectedTradeGuids = {}
+	for _,card in ipairs(session.MyOffer or {}) do selectedTradeGuids[card.Guid] = true end
+
+	makeSectionHeader("SAFETY LOCK","เปลี่ยน Offer เมื่อไร Ready ทั้งสองฝั่งจะถูกยกเลิก · หลัง Ready ครบต้องรอ 3 วิแล้ว Confirm อีกครั้ง")
+
+	local statusText
+	if session.State == "LOCKED" then
+		statusText = "LOCKED · "..(session.MyConfirmed and "YOU CONFIRMED" or "WAITING CONFIRM").." · "..(session.TheirConfirmed and "PARTNER CONFIRMED" or "PARTNER NOT CONFIRMED")
+	else
+		statusText = "ACTIVE · "..(session.MyReady and "YOU READY" or "YOU NOT READY").." · "..(session.TheirReady and "PARTNER READY" or "PARTNER NOT READY")
+	end
+	makeInfoCard("TRADE STATUS",statusText,"Session #"..tostring(session.Id))
+
+	makeSectionHeader("THEIR OFFER",#(session.TheirOffer or {}).." card(s)")
+	if #(session.TheirOffer or {}) == 0 then
+		makeSectionHeader("ยังไม่มีการ์ดจากอีกฝั่ง","รออีกฝ่ายเลือก Offer")
+	else
+		for _,card in ipairs(session.TheirOffer or {}) do
+			local tier = Config.Tiers[(card.Tier or 0)+1]
+			local row = Instance.new("Frame")
+			row.BackgroundColor3 = COLORS.panel2
+			row.Size = UDim2.new(1,-4,0,58)
+			row.ZIndex = 23
+			row.Parent = content
+			corner(row,10)
+			stroke(row,tier.color,0.45,1)
+			local label = makeLabel(row,tradeCardLabel(card),UDim2.new(0.72,0,1,0),UDim2.new(0,12,0,0),11,COLORS.text,true)
+			label.ZIndex = 24
+			local mutation = makeLabel(row,cardMutationText(card),UDim2.new(0.25,-12,1,0),UDim2.new(0.75,0,0,0),9,COLORS.muted,false)
+			mutation.TextXAlignment = Enum.TextXAlignment.Right
+			mutation.ZIndex = 24
+		end
+	end
+
+	makeSectionHeader("YOUR OFFER","เลือกได้สูงสุด 4 ใบ · ต้องถอดออกจากฐานและ Unlock ก่อน")
+	local eligible = {}
+	for guid,card in pairs(state.Cards or {}) do
+		if not card.Locked and not isGuidPlaced(guid) then table.insert(eligible,card) end
+	end
+	table.sort(eligible,function(a,b)
+		return Economy.CardIncome(state,a,state.Computed.Entitlements) > Economy.CardIncome(state,b,state.Computed.Entitlements)
+	end)
+
+	for _,card in ipairs(eligible) do
+		local tier = Config.Tiers[(card.Tier or 0)+1]
+		local picked = selectedTradeGuids[card.Guid] == true
+		local row = Instance.new("Frame")
+		row.BackgroundColor3 = COLORS.panel2
+		row.Size = UDim2.new(1,-4,0,64)
+		row.ZIndex = 23
+		row.Parent = content
+		corner(row,10)
+		stroke(row,picked and COLORS.accent2 or tier.color,picked and 0.05 or 0.55,picked and 2 or 1)
+		local label = makeLabel(row,tradeCardLabel(card),UDim2.new(0.65,0,1,0),UDim2.new(0,12,0,0),10,picked and COLORS.accent2 or COLORS.text,true)
+		label.ZIndex = 24
+		local toggle = makeButton(row,picked and "SELECTED ✓" or "SELECT",UDim2.new(0,125,0,38),UDim2.new(1,-137,0,13))
+		toggle.ZIndex = 24
+		toggle.BackgroundColor3 = picked and Color3.fromRGB(25,80,76) or COLORS.panel
+		toggle.MouseButton1Click:Connect(function()
+			if selectedTradeGuids[card.Guid] then
+				selectedTradeGuids[card.Guid]=nil
+			else
+				local count=0
+				for _,v in pairs(selectedTradeGuids) do if v then count+=1 end end
+				if count >= 4 then showToast("Trade ได้สูงสุด 4 ใบ",false); return end
+				selectedTradeGuids[card.Guid]=true
+			end
+			openTradeSession(session)
+		end)
+	end
+	if #eligible == 0 then makeSectionHeader("ไม่มีการ์ดที่ Trade ได้","ถอดการ์ดจากฐาน หรือ Unlock การ์ดก่อน") end
+
+	local update = makeButton(content,"UPDATE OFFER · "..#selectedTradeList().."/4",UDim2.new(1,-4,0,46),UDim2.new())
+	update.ZIndex = 24
+	update.BackgroundColor3 = COLORS.accent
+	update.Active = session.State ~= "LOCKED"
+	update.AutoButtonColor = session.State ~= "LOCKED"
+	update.MouseButton1Click:Connect(function()
+		local result = invoke("TradeSetOffer",{CardGuids=selectedTradeList()})
+		if result then openTradeSession(result) end
+	end)
+
+	local ready = makeButton(content,session.MyReady and "UNREADY" or "READY ✓",UDim2.new(1,-4,0,46),UDim2.new())
+	ready.ZIndex = 24
+	ready.BackgroundColor3 = session.MyReady and Color3.fromRGB(79,48,56) or Color3.fromRGB(30,91,79)
+	ready.Active = session.State ~= "LOCKED"
+	ready.AutoButtonColor = session.State ~= "LOCKED"
+	ready.MouseButton1Click:Connect(function()
+		local result = invoke("TradeReady",{Ready=not session.MyReady})
+		if result then openTradeSession(result) end
+	end)
+
+	if session.State == "LOCKED" then
+		local confirm = makeButton(content,session.MyConfirmed and "CONFIRMED ✓" or "CONFIRM TRADE",UDim2.new(1,-4,0,52),UDim2.new())
+		confirm.ZIndex = 24
+		confirm.BackgroundColor3 = COLORS.gold
+		confirm.TextColor3 = Color3.fromRGB(24,22,19)
+		confirm.Active = not session.MyConfirmed
+		confirm.AutoButtonColor = not session.MyConfirmed
+		confirm.MouseButton1Click:Connect(function()
+			local result = invoke("TradeConfirm")
+			if result then showToast(tostring(result),true) end
+		end)
+	end
+
+	local cancel = makeButton(content,"CANCEL TRADE",UDim2.new(1,-4,0,44),UDim2.new())
+	cancel.ZIndex = 24
+	cancel.BackgroundColor3 = Color3.fromRGB(76,34,45)
+	cancel.MouseButton1Click:Connect(function()
+		invoke("TradeCancel")
+		overlay.Visible=false
+		activePanel=nil
+	end)
+end
+
+openSocial = function()
+	if not state then return end
+	local social = invoke("GetSocial")
+	if not social then return end
+	if social.Trade then
+		openTradeSession(social.Trade)
+		return
+	end
+
+	activePanel = "social"
+	overlay.Visible = true
+	panelTitle.Text = "SOCIAL / RANKING"
+	panelSub.Text = "Global Prestige · Server Players · Safe Card Trading"
+	clearContent()
+
+	makeSectionHeader("SERVER PLAYERS","Trade ใช้ได้เฉพาะผู้เล่นที่อยู่ในเซิร์ฟเวอร์เดียวกัน")
+	if #(social.ServerPlayers or {}) == 0 then
+		makeSectionHeader("อยู่คนเดียวในเซิร์ฟเวอร์","ชวนเพื่อนเข้ามาแล้วกด SOCIAL ใหม่เพื่อ Trade")
+	else
+		for _,entry in ipairs(social.ServerPlayers or {}) do
+			local row = Instance.new("Frame")
+			row.BackgroundColor3=COLORS.panel2
+			row.Size=UDim2.new(1,-4,0,70)
+			row.ZIndex=23
+			row.Parent=content
+			corner(row,11)
+			stroke(row,COLORS.line,0.3,1)
+			local name=makeLabel(row,entry.DisplayName.."  @"..entry.Name,UDim2.new(0.60,0,0,24),UDim2.new(0,12,0,7),11,COLORS.text,true)
+			name.ZIndex=24
+			local meta=makeLabel(row,"ASC "..romanNumeral(entry.Ascension).." · Base "..entry.BaseLevel.." · "..fmt(entry.Income).."/s",UDim2.new(0.60,0,0,22),UDim2.new(0,12,0,36),9,COLORS.muted,false)
+			meta.ZIndex=24
+			local trade=makeButton(row,"TRADE",UDim2.new(0,120,0,40),UDim2.new(1,-132,0,15))
+			trade.ZIndex=24
+			trade.BackgroundColor3=COLORS.accent
+			trade.MouseButton1Click:Connect(function()
+				local result=invoke("TradeRequest",{TargetUserId=entry.UserId})
+				if result then showToast("ส่ง Trade Request ให้ "..entry.DisplayName.." แล้ว",true) end
+			end)
+		end
+	end
+
+	makeSectionHeader("GLOBAL PRESTIGE","จัดอันดับ Ascension → Base Level → Income · อัปเดตเป็นช่วงเพื่อลด DataStore load")
+	for _,entry in ipairs(social.Global or {}) do
+		local row=Instance.new("Frame")
+		row.BackgroundColor3=COLORS.panel2
+		row.Size=UDim2.new(1,-4,0,58)
+		row.ZIndex=23
+		row.Parent=content
+		corner(row,10)
+		if entry.Rank and entry.Rank <= 3 then stroke(row,COLORS.gold,0.25,1.5) else stroke(row,COLORS.line,0.45,1) end
+		local rankText = entry.Rank == 1 and "🥇" or entry.Rank == 2 and "🥈" or entry.Rank == 3 and "🥉" or ("#"..tostring(entry.Rank or "?"))
+		local name=makeLabel(row,rankText.."  "..tostring(entry.DisplayName or entry.Name or "Collector"),UDim2.new(0.56,0,1,0),UDim2.new(0,12,0,0),11,COLORS.text,true)
+		name.ZIndex=24
+		local meta=makeLabel(row,"ASC "..romanNumeral(entry.Ascension).." · B"..tostring(entry.BaseLevel or 1).." · "..fmt(entry.Income).."/s",UDim2.new(0.40,-10,1,0),UDim2.new(0.60,0,0,0),9,COLORS.muted,false)
+		meta.TextXAlignment=Enum.TextXAlignment.Right
+		meta.ZIndex=24
+	end
+end
+
 local function renderHud()
 	if not state then return end
 	statLabels.Money.Text = fmt(state.Money)
@@ -974,11 +1184,47 @@ baseBtn.MouseButton1Click:Connect(openBasePanel)
 collectionBtn.MouseButton1Click:Connect(openCollection)
 endgameBtn.MouseButton1Click:Connect(openEndgame)
 packShopBtn.MouseButton1Click:Connect(openPackShop)
+socialBtn.MouseButton1Click:Connect(openSocial)
 storeBtn.MouseButton1Click:Connect(openStore)
 closeBtn.MouseButton1Click:Connect(function() overlay.Visible=false;activePanel=nil;selectedSlot=nil;mutationTargetGuid=nil end)
 revealClose.MouseButton1Click:Connect(function() reveal.Visible=false end)
 OpenStandEvent.OnClientEvent:Connect(openStand)
 ToastEvent.OnClientEvent:Connect(showToast)
+TradeEvent.OnClientEvent:Connect(function(payload)
+	if type(payload) ~= "table" then return end
+	if payload.Type == "Request" then
+		incomingTradeFrom = payload.FromUserId
+		tradePromptTitle.Text = "TRADE REQUEST"
+		tradePromptSub.Text = tostring(payload.FromName).." ต้องการแลกการ์ดกับคุณ\nตรวจ Offer ให้ชัดก่อน Ready และ Confirm"
+		tradePrompt.Visible = true
+	elseif payload.Type == "Session" and payload.Session then
+		tradePrompt.Visible = false
+		incomingTradeFrom = nil
+		openTradeSession(payload.Session)
+	elseif payload.Type == "Declined" then
+		showToast(tostring(payload.ByName).." ปฏิเสธ Trade",false)
+	elseif payload.Type == "Ended" then
+		tradePrompt.Visible = false
+		incomingTradeFrom = nil
+		if activePanel == "social" then
+			overlay.Visible=false
+			activePanel=nil
+		end
+		showToast(tostring(payload.Reason or "Trade ended"),true)
+	end
+end)
+tradeAccept.MouseButton1Click:Connect(function()
+	if not incomingTradeFrom then return end
+	local result=invoke("TradeRespond",{FromUserId=incomingTradeFrom,Accept=true})
+	tradePrompt.Visible=false
+	incomingTradeFrom=nil
+	if type(result)=="table" then openTradeSession(result) end
+end)
+tradeDecline.MouseButton1Click:Connect(function()
+	if incomingTradeFrom then invoke("TradeRespond",{FromUserId=incomingTradeFrom,Accept=false}) end
+	tradePrompt.Visible=false
+	incomingTradeFrom=nil
+end)
 StateEvent.OnClientEvent:Connect(handleState)
 
 local function applyResponsive()
