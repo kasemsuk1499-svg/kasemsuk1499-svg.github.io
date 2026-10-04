@@ -13,6 +13,8 @@ local TowerService = require(Services.TowerService)
 local RotatingShopService = require(Services.RotatingShopService)
 local MonetizationService = require(Services.MonetizationService)
 local PlotService = require(Services.PlotService)
+local GlobalLeaderboardService = require(Services.GlobalLeaderboardService)
+local TradeService = require(Services.TradeService)
 
 local RemotesFolder = Root:FindFirstChild("Remotes") or Instance.new("Folder")
 RemotesFolder.Name = "Remotes"
@@ -34,7 +36,11 @@ local OpenStand = RemotesFolder:FindFirstChild("OpenStand") or Instance.new("Rem
 OpenStand.Name = "OpenStand"
 OpenStand.Parent = RemotesFolder
 
-local Remotes = {Action=Action,State=State,Toast=Toast,OpenStand=OpenStand}
+local TradeEvent = RemotesFolder:FindFirstChild("TradeEvent") or Instance.new("RemoteEvent")
+TradeEvent.Name = "TradeEvent"
+TradeEvent.Parent = RemotesFolder
+
+local Remotes = {Action=Action,State=State,Toast=Toast,OpenStand=OpenStand,TradeEvent=TradeEvent}
 
 local function enrichedSnapshot(player)
 	local profile = DataService.Get(player)
@@ -97,6 +103,8 @@ DataService.Start()
 PlotService.Start(DataService,MonetizationService,Remotes)
 MonetizationService.Start(DataService,pushState)
 BaseService.Start(DataService,MonetizationService,pushState)
+GlobalLeaderboardService.Start(DataService,MonetizationService)
+TradeService.Start(DataService,pushState,TradeEvent)
 
 local function markAndPush(player,renderWorld)
 	DataService.MarkDirty(player)
@@ -125,6 +133,32 @@ local function result(ok,payload)
 	return {ok=ok,data=ok and payload or nil,error=not ok and payload or nil}
 end
 
+local function serverPlayersSnapshot(viewer)
+	local rows = {}
+	for _,other in ipairs(Players:GetPlayers()) do
+		if other ~= viewer then
+			local profile = DataService.Get(other)
+			if profile then
+				local entitlements = MonetizationService.GetEntitlements(other)
+				table.insert(rows,{
+					UserId=other.UserId,
+					Name=other.Name,
+					DisplayName=other.DisplayName,
+					BaseLevel=profile.BaseLevel,
+					Ascension=profile.Ascension,
+					Income=Economy.TotalIncome(profile,entitlements),
+				})
+			end
+		end
+	end
+	table.sort(rows,function(a,b)
+		if a.Ascension ~= b.Ascension then return a.Ascension > b.Ascension end
+		if a.BaseLevel ~= b.BaseLevel then return a.BaseLevel > b.BaseLevel end
+		return a.Income > b.Income
+	end)
+	return rows
+end
+
 Action.OnServerInvoke = function(player,action,args)
 	local profile = DataService.Get(player)
 	if not profile then return result(false,"Profile ยังไม่พร้อม") end
@@ -132,6 +166,36 @@ Action.OnServerInvoke = function(player,action,args)
 
 	if action == "GetState" then
 		return result(true,enrichedSnapshot(player))
+	end
+	if action == "GetSocial" then
+		return result(true,{
+			ServerPlayers=serverPlayersSnapshot(player),
+			Global=GlobalLeaderboardService.GetTop(25),
+			Trade=TradeService.GetSession(player),
+		})
+	end
+	if action == "TradeRequest" then
+		local ok,payload=TradeService.Request(player,args.TargetUserId)
+		return result(ok,payload)
+	end
+	if action == "TradeRespond" then
+		local ok,payload=TradeService.Respond(player,args.FromUserId,args.Accept==true)
+		return result(ok,payload)
+	end
+	if action == "TradeSetOffer" then
+		local ok,payload=TradeService.SetOffer(player,args.CardGuids)
+		return result(ok,payload)
+	end
+	if action == "TradeReady" then
+		local ok,payload=TradeService.SetReady(player,args.Ready==true)
+		return result(ok,payload)
+	end
+	if action == "TradeConfirm" then
+		local ok,payload=TradeService.Confirm(player)
+		return result(ok,payload)
+	end
+	if action == "TradeCancel" then
+		return result(TradeService.Cancel(player),"Trade cancelled")
 	end
 	if action == "TeleportHome" then
 		return result(PlotService.TeleportHome(player),true)
