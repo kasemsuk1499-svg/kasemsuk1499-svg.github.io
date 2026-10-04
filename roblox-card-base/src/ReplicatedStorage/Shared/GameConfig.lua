@@ -6,6 +6,7 @@ Config.BaseLevelCap = 40
 Config.BaseFloorSize = 10
 Config.BaseFloorCount = 3
 Config.MaxStandSlots = 30
+Config.MaxCards = 500
 Config.RollSeconds = 2.5
 Config.DefaultOfflineCapSeconds = 2 * 60 * 60
 Config.OfflineVaultCapSeconds = 8 * 60 * 60
