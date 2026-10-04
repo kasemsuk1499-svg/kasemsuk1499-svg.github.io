@@ -142,8 +142,27 @@ local function swapCards(session)
 		cardsB[guid]=profileB.Cards[guid]
 	end
 
-	for guid in pairs(cardsA) do profileA.Cards[guid]=nil end
-	for guid in pairs(cardsB) do profileB.Cards[guid]=nil end
+	profileA.Collection = type(profileA.Collection)=="table" and profileA.Collection or {}
+	profileB.Collection = type(profileB.Collection)=="table" and profileB.Collection or {}
+	local oldFeaturedA,oldFeaturedB=profileA.FeaturedCard,profileB.FeaturedCard
+	local oldCollectionA,oldCollectionB={},{}
+	for _,card in pairs(cardsB) do
+		local key=tostring(card.Id)
+		oldCollectionA[key]=profileA.Collection[key]
+	end
+	for _,card in pairs(cardsA) do
+		local key=tostring(card.Id)
+		oldCollectionB[key]=profileB.Collection[key]
+	end
+
+	for guid in pairs(cardsA) do
+		profileA.Cards[guid]=nil
+		if profileA.FeaturedCard==guid then profileA.FeaturedCard="" end
+	end
+	for guid in pairs(cardsB) do
+		profileB.Cards[guid]=nil
+		if profileB.FeaturedCard==guid then profileB.FeaturedCard="" end
+	end
 	for guid,card in pairs(cardsA) do
 		if profileB.Cards[guid] then
 			-- Extremely unlikely GUID collision; rollback before touching saves.
@@ -152,8 +171,12 @@ local function swapCards(session)
 			return false,"Card GUID collision"
 		end
 		profileB.Cards[guid]=card
+		profileB.Collection[tostring(card.Id)]=true
 	end
-	for guid,card in pairs(cardsB) do profileA.Cards[guid]=card end
+	for guid,card in pairs(cardsB) do
+		profileA.Cards[guid]=card
+		profileA.Collection[tostring(card.Id)]=true
+	end
 
 	DataService.MarkDirty(playerA)
 	DataService.MarkDirty(playerB)
@@ -166,6 +189,10 @@ local function swapCards(session)
 		for guid in pairs(cardsB) do profileA.Cards[guid]=nil end
 		for guid,card in pairs(cardsA) do profileA.Cards[guid]=card end
 		for guid,card in pairs(cardsB) do profileB.Cards[guid]=card end
+		profileA.FeaturedCard=oldFeaturedA
+		profileB.FeaturedCard=oldFeaturedB
+		for key,value in pairs(oldCollectionA) do profileA.Collection[key]=value end
+		for key,value in pairs(oldCollectionB) do profileB.Collection[key]=value end
 		DataService.MarkDirty(playerA)
 		DataService.MarkDirty(playerB)
 		DataService.Save(playerA,false)
