@@ -12,6 +12,53 @@ Config.DefaultOfflineCapSeconds = 2 * 60 * 60
 Config.OfflineVaultCapSeconds = 8 * 60 * 60
 Config.AutosaveSeconds = 60
 Config.SessionLockSeconds = 180
+Config.RotatingShopRestockSeconds = 10 * 60
+Config.RotatingShopSlots = 5
+
+Config.RotatingPackArchetypes = {
+	{
+		key="rare-bloom", name="Rare Bloom", label="RATE UP", minLevel=1, weight=30,
+		featuredTier=2, stockMin=4, stockMax=7, priceSeconds=18, outRate=0.020,
+		rates={[1]=15,[2]=55,[3]=24,[4]=6},
+		outPool={[5]=75,[6]=20,[7]=5},
+	},
+	{
+		key="epic-mirage", name="Epic Mirage", label="RATE UP", minLevel=3, weight=26,
+		featuredTier=3, stockMin=3, stockMax=5, priceSeconds=30, outRate=0.025,
+		rates={[2]=18,[3]=56,[4]=20,[5]=6},
+		outPool={[6]=72,[7]=23,[8]=5},
+	},
+	{
+		key="legendary-crown", name="Legendary Crown", label="LIMITED", minLevel=6, weight=20,
+		featuredTier=4, stockMin=2, stockMax=4, priceSeconds=55, outRate=0.020,
+		rates={[3]=22,[4]=58,[5]=15,[6]=5},
+		outPool={[7]=70,[8]=25,[9]=5},
+	},
+	{
+		key="mythic-rift", name="Mythic Rift", label="LIMITED", minLevel=10, weight=13,
+		featuredTier=5, stockMin=2, stockMax=3, priceSeconds=90, outRate=0.018,
+		rates={[4]=24,[5]=56,[6]=16,[7]=4},
+		outPool={[8]=82,[9]=18},
+	},
+	{
+		key="divine-vault", name="Divine Vault", label="PREMIUM", minLevel=15, weight=7,
+		featuredTier=6, stockMin=1, stockMax=2, priceSeconds=150, outRate=0.015,
+		rates={[5]=28,[6]=55,[7]=14,[8]=3},
+		outPool={[9]=100},
+	},
+	{
+		key="celestial-gate", name="Celestial Gate", label="PREMIUM", minLevel=21, weight=3,
+		featuredTier=7, stockMin=1, stockMax=1, priceSeconds=230, outRate=0.012,
+		rates={[6]=32,[7]=56,[8]=12},
+		outPool={[9]=100},
+	},
+	{
+		key="jackpot-echo", name="Jackpot Echo", label="JACKPOT", minLevel=10, weight=1,
+		featuredTier=5, stockMin=1, stockMax=1, priceSeconds=320, outRate=0.050,
+		rates={[4]=35,[5]=35,[6]=20,[7]=10},
+		outPool={[8]=70,[9]=30},
+	},
+}
 
 Config.AscensionIncomePerCycle = 0.20
 Config.AscensionLuckPerCycle = 0.02
