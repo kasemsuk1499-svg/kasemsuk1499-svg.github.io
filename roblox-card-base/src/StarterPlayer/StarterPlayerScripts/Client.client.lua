@@ -23,6 +23,8 @@ local busy = false
 local selectedTradeGuids = {}
 local incomingTradeFrom = nil
 local currentTradeSessionId = nil
+local autoRollEnabled = false
+local autoRollGeneration = 0
 
 local COLORS = {
 	bg = Color3.fromRGB(8,10,16),
@@ -839,6 +841,43 @@ local function offerRateSummary(offer)
 	return table.concat(entries," · ")
 end
 
+local function setAutoRoll(enabled)
+	enabled = enabled == true
+	if enabled and not (state and state.Computed and state.Computed.Entitlements and state.Computed.Entitlements.TurboCollector) then
+		showToast("AUTO ROLL ต้องมี Turbo Collector",false)
+		return
+	end
+	autoRollEnabled = enabled
+	autoRollGeneration += 1
+	local generation = autoRollGeneration
+	if not enabled then
+		showToast("AUTO ROLL ปิดแล้ว",true)
+		return
+	end
+	showToast("AUTO ROLL เปิดแล้ว ⚡",true)
+	task.spawn(function()
+		while autoRollEnabled and generation == autoRollGeneration do
+			local count=0
+			for _ in pairs(state and state.Cards or {}) do count+=1 end
+			if count >= Config.MaxCards then
+				autoRollEnabled=false
+				showToast("คลังเต็ม · AUTO ROLL หยุดแล้ว",false)
+				break
+			end
+			local card=invoke("RollPack")
+			if card then
+				local tier=Config.Tiers[(card.Tier or 0)+1]
+				if (card.Tier or 0) >= 4 then
+					showCardReveal(card,"AUTO ROLL ✦")
+				else
+					showToast("AUTO · "..tier.name.." #"..string.format("%04d",card.Id),true)
+				end
+			end
+			task.wait(math.max(0.35,Config.RollSeconds*Config.TurboRollMultiplier+0.08))
+		end
+	end)
+end
+
 local function openPackShop()
 	if not state then return end
 	activePanel = "packs"
@@ -848,6 +887,28 @@ local function openPackShop()
 	panelTitle.Text = "PACK SHOP"
 	panelSub.Text = "Character Packs + Limited Rotation · เงินในเกมเท่านั้น · ไม่มี Robux RNG"
 	clearContent()
+
+	local turboOwned = state.Computed and state.Computed.Entitlements and state.Computed.Entitlements.TurboCollector
+	makeSectionHeader("QUICK ROLL","Free Pack ใช้ Luck ปัจจุบัน · Robux ไม่เพิ่ม Odds")
+	local quick=makeButton(content,"◇ ROLL FREE PACK",UDim2.new(1,-4,0,48),UDim2.new())
+	quick.ZIndex=24
+	quick.BackgroundColor3=COLORS.accent
+	quick.MouseButton1Click:Connect(function()
+		local card=invoke("RollPack")
+		if card then showCardReveal(card,"FREE PACK") end
+	end)
+	local auto=makeButton(content,turboOwned and (autoRollEnabled and "⚡ AUTO ROLL · ON" or "⚡ AUTO ROLL · OFF") or "⚡ AUTO ROLL · TURBO PASS",UDim2.new(1,-4,0,46),UDim2.new())
+	auto.ZIndex=24
+	auto.BackgroundColor3=turboOwned and (autoRollEnabled and Color3.fromRGB(32,88,74) or COLORS.panel2) or Color3.fromRGB(41,43,52)
+	auto.TextColor3=turboOwned and COLORS.text or COLORS.muted
+	auto.MouseButton1Click:Connect(function()
+		if not turboOwned then
+			showToast("ซื้อ Turbo Collector ที่ R$ STORE เพื่อใช้ Auto Roll",false)
+			return
+		end
+		setAutoRoll(not autoRollEnabled)
+		task.defer(openPackShop)
+	end)
 
 	local rotating = state.Computed and state.Computed.RotatingShop
 	if rotating and type(rotating.Offers)=="table" then
