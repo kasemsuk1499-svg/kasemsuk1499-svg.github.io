@@ -1386,7 +1386,7 @@
         const hits=Array.isArray(result.hits)?result.hits:[];
         const names=hits.slice(0,3).map(hit=>{
           const m=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(hit.mutation)||0))];
-          return padId(Number(hit.charId)||0)+" "+m.icon+" "+m.name;
+          return padId(Number(hit.charId)||0)+(Number(hit.slot)===2?" [SLOT 2] ":" ")+m.icon+" "+m.name;
         });
         toast("⚡ Mutation Event! "+result.hit_count+" ใบกลายพันธุ์"+(names.length?" · "+names.join(", "):""),true);
         renderAll();
