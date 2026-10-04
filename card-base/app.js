@@ -171,6 +171,8 @@
   let state = load();
   let activeStand = null;
   let activeBaseFloor = 0;
+  let activeVisitorFloor = 0;
+  let visitorBaseView = null;
   const BASE_FLOOR_SIZE = 10;
   const BASE_FLOOR_COUNT = 3;
   let rollFrame = 0;
@@ -1899,34 +1901,63 @@
     }
   }
 
-  async function visitPlayerBase(userId){
-    if(!gameToken||!supabaseClient)return;
-    const profile=socialProfiles.get(userId);
-    renderVisitorIdentity(
-      profile?profile.display_name:"Player",
-      profile&&profile.base_level?profile.base_level:1,
-      profile&&profile.title?profile.title:null
-    );
-    $("#socialBaseStands").innerHTML="";
-    $("#socialBaseModal").classList.add("show");
-    $("#socialBaseModal").setAttribute("aria-hidden","false");
-
-    const data=await rpc("cb_visit_base",{p_token:gameToken,p_target:userId});
-    if(!data.ok||!data.base_level){
-      $("#socialBaseMeta").textContent="ผู้เล่นคนนี้ยังไม่ได้เผยแพร่ฐาน";
-      $("#socialBaseStands").innerHTML='<div class="social-empty">ยังไม่มีข้อมูลฐาน</div>';
-      return;
-    }
-    renderVisitorIdentity(data.display_name||"Player",data.base_level,data.title||"Collector");
-    const max=STANDS[Math.min(39,Math.max(0,data.base_level-1))]||30;
-    const bySlot=new Map((Array.isArray(data.stands)?data.stands:[]).map(x=>[x.slot,x]));
+  function renderVisitorBaseFloor(){
+    if(!visitorBaseView)return;
+    const total=visitorBaseView.max;
+    const bySlot=visitorBaseView.bySlot;
     const wrap=$("#socialBaseStands");
+    const nav=$("#visitorFloorNav");
+    const title=$("#visitorFloorTitle");
+    const hint=$("#visitorFloorHint");
+    if(!wrap||!nav)return;
+
+    const maxOpenFloor=Math.max(0,Math.min(BASE_FLOOR_COUNT-1,Math.ceil(total/BASE_FLOOR_SIZE)-1));
+    activeVisitorFloor=Math.max(0,Math.min(activeVisitorFloor,maxOpenFloor));
+
+    nav.innerHTML="";
+    for(let floor=0;floor<BASE_FLOOR_COUNT;floor++){
+      const start=floor*BASE_FLOOR_SIZE;
+      const unlocked=Math.max(0,Math.min(BASE_FLOOR_SIZE,total-start));
+      let occupied=0;
+      for(let i=start;i<start+unlocked;i++)if(bySlot.has(i))occupied++;
+
+      const btn=document.createElement("button");
+      btn.type="button";
+      btn.className="base-floor-btn visitor-floor-btn"+(floor===activeVisitorFloor?" active":"")+(unlocked?"":" locked");
+      btn.disabled=!unlocked;
+      btn.setAttribute("aria-pressed",floor===activeVisitorFloor?"true":"false");
+      btn.innerHTML=
+        '<span class="base-floor-no">F'+(floor+1)+'</span>'+
+        '<span class="base-floor-meta"><b>Floor '+(floor+1)+'</b><small>'+(start+1)+'–'+(start+BASE_FLOOR_SIZE)+' · '+(unlocked?occupied+'/'+unlocked+' ใบ':'LOCKED')+'</small></span>'+
+        '<span class="base-floor-arrow">'+(floor===activeVisitorFloor?'◆':'›')+'</span>';
+      if(unlocked)btn.addEventListener("click",()=>{
+        if(activeVisitorFloor===floor)return;
+        activeVisitorFloor=floor;
+        renderVisitorBaseFloor();
+      });
+      nav.appendChild(btn);
+    }
+
+    const start=activeVisitorFloor*BASE_FLOOR_SIZE;
+    const unlocked=Math.max(0,Math.min(BASE_FLOOR_SIZE,total-start));
+    if(title)title.textContent="Floor "+(activeVisitorFloor+1)+" · Slots "+(start+1)+"–"+(start+BASE_FLOOR_SIZE);
+    if(hint)hint.textContent=unlocked<BASE_FLOOR_SIZE
+      ?"ปลดแล้ว "+unlocked+"/10 ช่องบนชั้นนี้ · เอฟเฟกต์ทำงานเฉพาะชั้นที่กำลังชม"
+      :"10 ช่องบนชั้นนี้ · เอฟเฟกต์ Showcase ทำงานเฉพาะชั้นที่กำลังชม";
+
     let html="";
-    for(let i=0;i<max;i++){
+    for(let i=start;i<start+BASE_FLOOR_SIZE;i++){
+      if(i>=total){
+        html+='<div class="visitor-stand empty locked-floor-slot"><div class="empty-stand floor-locked"><b>◆</b><span>Slot '+(i+1)+'</span><small>LOCKED</small></div></div>';
+        continue;
+      }
       const c=bySlot.get(i);
-      if(!c){html+='<div class="visitor-stand empty"><span>แท่น '+(i+1)+'</span></div>';continue}
+      if(!c){
+        html+='<div class="visitor-stand empty"><div class="visitor-empty-slot"><b>＋</b><span>Slot '+(i+1)+'</span><small>EMPTY</small></div></div>';
+        continue;
+      }
       const t=TIERS[c.tier]||TIERS[0],g=GRADES[c.grade]||GRADES[0];
-      html+='<div class="visitor-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="visitor-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+'">'+
+      html+='<div class="visitor-stand visitor-showcase-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="visitor-card visitor-showcase-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+'">'+
         '<img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div>'+
         '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+
         '<div class="visitor-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><b>'+
@@ -1939,9 +1970,44 @@
     wrap.querySelectorAll("img").forEach(img=>img.addEventListener("error",e=>e.currentTarget.style.display="none"));
   }
 
+  async function visitPlayerBase(userId){
+    if(!gameToken||!supabaseClient)return;
+    const profile=socialProfiles.get(userId);
+    renderVisitorIdentity(
+      profile?profile.display_name:"Player",
+      profile&&profile.base_level?profile.base_level:1,
+      profile&&profile.title?profile.title:null
+    );
+
+    activeVisitorFloor=0;
+    visitorBaseView=null;
+    $("#socialBaseStands").innerHTML='<div class="social-empty">กำลังโหลดฐาน…</div>';
+    $("#visitorFloorNav").innerHTML="";
+    $("#visitorFloorTitle").textContent="Floor 1 · Slots 1–10";
+    $("#visitorFloorHint").textContent="กำลังโหลดฐานของผู้เล่น…";
+    $("#socialBaseModal").classList.add("show");
+    $("#socialBaseModal").setAttribute("aria-hidden","false");
+
+    const data=await rpc("cb_visit_base",{p_token:gameToken,p_target:userId});
+    if(!data.ok||!data.base_level){
+      $("#socialBaseMeta").textContent="ผู้เล่นคนนี้ยังไม่ได้เผยแพร่ฐาน";
+      $("#socialBaseStands").innerHTML='<div class="social-empty">ยังไม่มีข้อมูลฐาน</div>';
+      $("#visitorFloorHint").textContent="ไม่มีข้อมูลฐานให้แสดง";
+      return;
+    }
+
+    renderVisitorIdentity(data.display_name||"Player",data.base_level,data.title||"Collector");
+    const max=STANDS[Math.min(39,Math.max(0,data.base_level-1))]||30;
+    const bySlot=new Map((Array.isArray(data.stands)?data.stands:[]).map(x=>[Number(x.slot),x]));
+    visitorBaseView={max,bySlot};
+    renderVisitorBaseFloor();
+  }
+
   function closeSocialBase(){
     $("#socialBaseModal").classList.remove("show");
     $("#socialBaseModal").setAttribute("aria-hidden","true");
+    visitorBaseView=null;
+    activeVisitorFloor=0;
   }
 
   function toast(msg,found=false){
