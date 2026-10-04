@@ -1146,7 +1146,8 @@
       Math.pow(1.04,assumedCardLevel-1)*
       baseIncomeMultiplier(level);
     const expectedBaseIncome=expectedCardIncome*standLimit(level);
-    return roundUpNice(expectedBaseIncome*rebirthTargetSeconds(level)*optimizationFactor*economyScale(level));
+    const raw=expectedBaseIncome*rebirthTargetSeconds(level)*optimizationFactor*economyScale(level);
+    return roundUpNice(Math.min(1e300,Number.isFinite(raw)?raw:1e300));
   }
 
   function updateSyncUi(mode="local"){
