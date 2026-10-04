@@ -10,6 +10,7 @@ local DataService = require(Services.DataService)
 local CardService = require(Services.CardService)
 local BaseService = require(Services.BaseService)
 local TowerService = require(Services.TowerService)
+local RotatingShopService = require(Services.RotatingShopService)
 local MonetizationService = require(Services.MonetizationService)
 local PlotService = require(Services.PlotService)
 
@@ -52,6 +53,7 @@ local function enrichedSnapshot(player)
 		TowerRequirement = TowerService.Requirement(profile.Tower.Floor),
 		TowerConditionOk = conditionOk,
 		TowerCondition = conditionText,
+		RotatingShop = RotatingShopService.ClientState(profile),
 		Entitlements = entitlements,
 	}
 	return snapshot
@@ -123,6 +125,15 @@ Action.OnServerInvoke = function(player,action,args)
 		ok,payload = CardService.RollIdPack(profile,args.PackIndex)
 		if ok and not hadPlaced then
 			local placed = BaseService.Place(profile,payload.Guid,1)
+			if placed then
+				Toast:FireClient(player,"การ์ดใบแรกถูกวางที่ Stand 1 อัตโนมัติ ✦",true)
+			end
+		end
+	elseif action == "BuyRotatingPack" then
+		local hadPlaced = next(profile.Placed) ~= nil
+		ok,payload = RotatingShopService.Buy(profile,args.OfferId,CardService)
+		if ok and not hadPlaced and payload.Card then
+			local placed = BaseService.Place(profile,payload.Card.Guid,1)
 			if placed then
 				Toast:FireClient(player,"การ์ดใบแรกถูกวางที่ Stand 1 อัตโนมัติ ✦",true)
 			end
