@@ -29,6 +29,10 @@ local State = RemotesFolder:FindFirstChild("State") or Instance.new("RemoteEvent
 State.Name = "State"
 State.Parent = RemotesFolder
 
+local EconomyTick = RemotesFolder:FindFirstChild("EconomyTick") or Instance.new("RemoteEvent")
+EconomyTick.Name = "EconomyTick"
+EconomyTick.Parent = RemotesFolder
+
 local Toast = RemotesFolder:FindFirstChild("Toast") or Instance.new("RemoteEvent")
 Toast.Name = "Toast"
 Toast.Parent = RemotesFolder
@@ -45,7 +49,7 @@ local TradeEvent = RemotesFolder:FindFirstChild("TradeEvent") or Instance.new("R
 TradeEvent.Name = "TradeEvent"
 TradeEvent.Parent = RemotesFolder
 
-local Remotes = {Action=Action,State=State,Toast=Toast,OpenStand=OpenStand,OpenPanel=OpenPanel,TradeEvent=TradeEvent}
+local Remotes = {Action=Action,State=State,EconomyTick=EconomyTick,Toast=Toast,OpenStand=OpenStand,OpenPanel=OpenPanel,TradeEvent=TradeEvent}
 
 local function enrichedSnapshot(player)
 	local profile = DataService.Get(player)
@@ -116,10 +120,20 @@ local function pushState(player,renderWorld)
 	end
 end
 
+local function pushEconomyTick(player,money,income)
+	if not player.Parent then return end
+	EconomyTick:FireClient(player,money,income)
+	local folder=player:FindFirstChild("leaderstats")
+	local incomeValue=folder and folder:FindFirstChild("Income")
+	if incomeValue and incomeValue:IsA("NumberValue") then
+		incomeValue.Value=math.max(0,tonumber(income) or 0)
+	end
+end
+
 DataService.Start()
 PlotService.Start(DataService,MonetizationService,Remotes)
 MonetizationService.Start(DataService,pushState)
-BaseService.Start(DataService,MonetizationService,pushState)
+BaseService.Start(DataService,MonetizationService,pushState,pushEconomyTick)
 GlobalLeaderboardService.Start(DataService,MonetizationService)
 TradeService.Start(DataService,pushState,TradeEvent)
 
