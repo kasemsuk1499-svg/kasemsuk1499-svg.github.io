@@ -352,6 +352,7 @@
       best:Math.max(0,Math.floor(Number(rawTower.best)||0)),
       shards:Math.max(0,Math.floor(Number(rawTower.shards)||0))
     };
+    s.baseLevel=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(s.baseLevel)||1)));
     syncCardIndex(s);
     s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
     s.storedPacks=(Array.isArray(s.storedPacks)?s.storedPacks:[]).filter(p=>p&&Number.isInteger(p.tier)&&p.tier>=0&&p.tier<10);
@@ -2518,6 +2519,8 @@
     if(!ok)return;
 
     if(idPackAutoIndex!==null)stopIdPackAuto("Auto ID Pack หยุดเพราะ Ascension");
+    clearTimeout(gradeTimer);
+    state.gradeAuto=null;
     state.autoRolling=false;
     state.fullAuto=false;
     state.targetFound=false;
