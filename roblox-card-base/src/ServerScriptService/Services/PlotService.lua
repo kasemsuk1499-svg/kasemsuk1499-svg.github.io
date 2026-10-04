@@ -620,6 +620,48 @@ local function buildPlot(player,slotIndex)
 	local frontSub = makeText(frontGui,"Sub","30 STANDS · 3 FLOORS",UDim2.fromScale(0.94,0.30),UDim2.fromScale(0.03,0.57),23,Color3.fromRGB(99,235,223))
 	frontSub.TextXAlignment = Enum.TextXAlignment.Center
 
+	local showcase = makePart(
+		model,
+		"FeaturedShowcase",
+		Vector3.new(8.2,9.6,0.45),
+		CFrame.new(origin+Vector3.new(12.6,5.4,-11.25)),
+		Color3.fromRGB(13,17,25),
+		Enum.Material.SmoothPlastic
+	)
+	showcase.CanCollide = false
+	local showcaseGui = Instance.new("SurfaceGui")
+	showcaseGui.Face = Enum.NormalId.Front
+	showcaseGui.CanvasSize = Vector2.new(600,760)
+	showcaseGui.AlwaysOnTop = true
+	showcaseGui.Parent = showcase
+	local shTitle = makeText(showcaseGui,"Header","FEATURED CARD",UDim2.fromScale(0.92,0.10),UDim2.fromScale(0.04,0.04),34,Color3.fromRGB(255,232,143))
+	shTitle.TextXAlignment = Enum.TextXAlignment.Center
+	local shId = makeText(showcaseGui,"CardId","—",UDim2.fromScale(0.90,0.28),UDim2.fromScale(0.05,0.18),74,Color3.fromRGB(235,239,250))
+	shId.TextXAlignment = Enum.TextXAlignment.Center
+	local shTier = makeText(showcaseGui,"Tier","Set a card from COLLECTION",UDim2.fromScale(0.90,0.14),UDim2.fromScale(0.05,0.50),30,Color3.fromRGB(151,162,187))
+	shTier.TextXAlignment = Enum.TextXAlignment.Center
+	local shMeta = makeText(showcaseGui,"Meta","",UDim2.fromScale(0.90,0.24),UDim2.fromScale(0.05,0.66),24,Color3.fromRGB(193,202,220))
+	shMeta.TextXAlignment = Enum.TextXAlignment.Center
+
+	local shAttach=Instance.new("Attachment")
+	shAttach.Name="ShowcaseFx"
+	shAttach.Parent=showcase
+	local shEmitter=Instance.new("ParticleEmitter")
+	shEmitter.Name="FeaturedParticles"
+	shEmitter.Enabled=false
+	shEmitter.Texture="rbxasset://textures/particles/sparkles_main.dds"
+	shEmitter.LightEmission=1
+	shEmitter.Lifetime=NumberRange.new(0.8,1.5)
+	shEmitter.Speed=NumberRange.new(0.6,1.6)
+	shEmitter.SpreadAngle=Vector2.new(180,180)
+	shEmitter.Rate=5
+	shEmitter.Size=NumberSequence.new({
+		NumberSequenceKeypoint.new(0,0.22),
+		NumberSequenceKeypoint.new(0.45,0.34),
+		NumberSequenceKeypoint.new(1,0),
+	})
+	shEmitter.Parent=shAttach
+
 	local sign = makePart(
 		model,
 		"OwnerSign",
@@ -659,6 +701,41 @@ function PlotService.Render(player)
 		sign.Color = profile.Ascension >= 10 and Color3.fromRGB(34,25,50)
 			or profile.Ascension >= 3 and Color3.fromRGB(15,31,38)
 			or Color3.fromRGB(12,15,22)
+	end
+
+	local featured = profile.FeaturedCard ~= "" and profile.Cards[profile.FeaturedCard] or nil
+	local showcase = model:FindFirstChild("FeaturedShowcase")
+	if showcase and showcase:FindFirstChild("SurfaceGui") then
+		local sg=showcase.SurfaceGui
+		local emitter=showcase:FindFirstChild("ShowcaseFx") and showcase.ShowcaseFx:FindFirstChild("FeaturedParticles")
+		if featured then
+			local tier=tierDef(featured.Tier)
+			local grade=gradeDef(featured.Grade)
+			sg.CardId.Text=string.format("#%04d",featured.Id)
+			sg.CardId.TextColor3=tier.color
+			sg.Tier.Text=tier.name.." · "..grade.name.." · Lv."..featured.Level
+			sg.Tier.TextColor3=grade.color
+			local mutations={}
+			for _,id in ipairs({featured.Mutation1,featured.Mutation2}) do
+				if (tonumber(id) or 0)>0 and Config.Mutations[id] then table.insert(mutations,Config.Mutations[id].name) end
+			end
+			local mutationText=#mutations>0 and table.concat(mutations," + ") or "Normal"
+			sg.Meta.Text=compactNumber(Economy.CardIncome(profile,featured,entitlements)).."/s\n"..mutationText..((featured.Awakening or 0)>0 and ("\nAWAKEN ★"..featured.Awakening) or "")
+			showcase.Color=tier.color:Lerp(Color3.fromRGB(13,17,25),0.72)
+			if emitter then
+				emitter.Enabled=true
+				emitter.Color=ColorSequence.new(mutationColor(featured))
+				emitter.Rate=entitlements.ShowcasePro and 10 or 5
+			end
+		else
+			sg.CardId.Text="—"
+			sg.CardId.TextColor3=Color3.fromRGB(225,230,242)
+			sg.Tier.Text="Set a card from COLLECTION"
+			sg.Tier.TextColor3=Color3.fromRGB(151,162,187)
+			sg.Meta.Text=""
+			showcase.Color=Color3.fromRGB(13,17,25)
+			if emitter then emitter.Enabled=false end
+		end
 	end
 
 	for _,name in ipairs({"EntrancePostL","EntrancePostR","EntranceTop"}) do
