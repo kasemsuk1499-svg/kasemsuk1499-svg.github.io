@@ -37,11 +37,15 @@ local OpenStand = RemotesFolder:FindFirstChild("OpenStand") or Instance.new("Rem
 OpenStand.Name = "OpenStand"
 OpenStand.Parent = RemotesFolder
 
+local OpenPanel = RemotesFolder:FindFirstChild("OpenPanel") or Instance.new("RemoteEvent")
+OpenPanel.Name = "OpenPanel"
+OpenPanel.Parent = RemotesFolder
+
 local TradeEvent = RemotesFolder:FindFirstChild("TradeEvent") or Instance.new("RemoteEvent")
 TradeEvent.Name = "TradeEvent"
 TradeEvent.Parent = RemotesFolder
 
-local Remotes = {Action=Action,State=State,Toast=Toast,OpenStand=OpenStand,TradeEvent=TradeEvent}
+local Remotes = {Action=Action,State=State,Toast=Toast,OpenStand=OpenStand,OpenPanel=OpenPanel,TradeEvent=TradeEvent}
 
 local function enrichedSnapshot(player)
 	local profile = DataService.Get(player)
