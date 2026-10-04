@@ -649,6 +649,17 @@ local function buildPlot(player,slotIndex)
 	showcaseGui.Parent = showcase
 	local shTitle = makeText(showcaseGui,"Header","FEATURED CARD",UDim2.fromScale(0.92,0.10),UDim2.fromScale(0.04,0.04),34,Color3.fromRGB(255,232,143))
 	shTitle.TextXAlignment = Enum.TextXAlignment.Center
+	local shArt=Instance.new("ImageLabel")
+	shArt.Name="CardArt"
+	shArt.BackgroundTransparency=1
+	shArt.Size=UDim2.fromScale(0.62,0.48)
+	shArt.Position=UDim2.fromScale(0.19,0.15)
+	shArt.ScaleType=Enum.ScaleType.Crop
+	shArt.Visible=false
+	shArt.Parent=showcaseGui
+	local shArtCorner=Instance.new("UICorner")
+	shArtCorner.CornerRadius=UDim.new(0,20)
+	shArtCorner.Parent=shArt
 	local shId = makeText(showcaseGui,"CardId","—",UDim2.fromScale(0.90,0.28),UDim2.fromScale(0.05,0.18),74,Color3.fromRGB(235,239,250))
 	shId.TextXAlignment = Enum.TextXAlignment.Center
 	local shTier = makeText(showcaseGui,"Tier","Set a card from COLLECTION",UDim2.fromScale(0.90,0.14),UDim2.fromScale(0.05,0.50),30,Color3.fromRGB(151,162,187))
@@ -724,6 +735,16 @@ function PlotService.Render(player)
 		if featured then
 			local tier=tierDef(featured.Tier)
 			local grade=gradeDef(featured.Grade)
+			local image=Config.CardImage(featured.Id)
+			if sg:FindFirstChild("CardArt") then
+				sg.CardArt.Image=image
+				sg.CardArt.Visible=image~=""
+			end
+			sg.CardId.Position=image~="" and UDim2.fromScale(0.05,0.61) or UDim2.fromScale(0.05,0.18)
+			sg.CardId.Size=image~="" and UDim2.fromScale(0.90,0.11) or UDim2.fromScale(0.90,0.28)
+			sg.CardId.TextSize=image~="" and 42 or 74
+			sg.Tier.Position=image~="" and UDim2.fromScale(0.05,0.72) or UDim2.fromScale(0.05,0.50)
+			sg.Meta.Position=image~="" and UDim2.fromScale(0.05,0.82) or UDim2.fromScale(0.05,0.66)
 			sg.CardId.Text=string.format("#%04d",featured.Id)
 			sg.CardId.TextColor3=tier.color
 			sg.Tier.Text=tier.name.." · "..grade.name.." · Lv."..featured.Level
@@ -741,6 +762,12 @@ function PlotService.Render(player)
 				emitter.Rate=entitlements.ShowcasePro and 10 or 5
 			end
 		else
+			if sg:FindFirstChild("CardArt") then sg.CardArt.Visible=false end
+			sg.CardId.Position=UDim2.fromScale(0.05,0.18)
+			sg.CardId.Size=UDim2.fromScale(0.90,0.28)
+			sg.CardId.TextSize=74
+			sg.Tier.Position=UDim2.fromScale(0.05,0.50)
+			sg.Meta.Position=UDim2.fromScale(0.05,0.66)
 			sg.CardId.Text="—"
 			sg.CardId.TextColor3=Color3.fromRGB(225,230,242)
 			sg.Tier.Text="Set a card from COLLECTION"
