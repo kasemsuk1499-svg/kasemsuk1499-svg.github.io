@@ -3204,3 +3204,129 @@ body::before{
     touch-action:none
   }
 }
+
+
+/* =========================================================
+   FRIEND BASE SHOWCASE — same 3-floor tower, stronger FX
+   ========================================================= */
+.social-base-card{
+  width:min(1180px,96vw)
+}
+.visitor-tower-bar{
+  margin-top:12px
+}
+#socialBaseStands.visitor-stands{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+  margin-top:12px
+}
+#socialBaseStands .visitor-stand{
+  width:100%;
+  min-width:0;
+  min-height:0;
+  aspect-ratio:.72;
+  border-radius:16px
+}
+#socialBaseStands .visitor-card{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  border-radius:inherit;
+  isolation:isolate
+}
+#socialBaseStands .visitor-showcase-stand.tier-shell{
+  border-color:color-mix(in srgb,var(--tier) 64%,#30394a);
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.34),
+    0 0 18px color-mix(in srgb,var(--tier) 24%,transparent),
+    inset 0 0 18px color-mix(in srgb,var(--tier) 10%,transparent)!important
+}
+#socialBaseStands .visitor-showcase-card .tier-ring{
+  border-width:2px;
+  box-shadow:
+    inset 0 0 24px color-mix(in srgb,var(--tier) 30%,transparent),
+    inset 0 0 50px rgba(0,0,0,.10),
+    0 0 12px color-mix(in srgb,var(--tier) 18%,transparent)
+}
+#socialBaseStands .visitor-showcase-card::before{
+  content:"";
+  position:absolute;
+  z-index:3;
+  inset:-45% -70%;
+  pointer-events:none;
+  background:linear-gradient(110deg,transparent 42%,rgba(255,255,255,.10) 49%,rgba(255,255,255,.20) 50%,rgba(255,255,255,.08) 52%,transparent 58%);
+  transform:translateX(-38%) rotate(4deg);
+  animation:visitorShowcaseSweep 4.8s ease-in-out infinite
+}
+@keyframes visitorShowcaseSweep{
+  0%,52%,100%{transform:translateX(-38%) rotate(4deg);opacity:0}
+  64%{opacity:.9}
+  82%{transform:translateX(38%) rotate(4deg);opacity:0}
+}
+#socialBaseStands .visitor-meta{
+  left:8px;
+  right:8px;
+  bottom:8px;
+  z-index:8;
+  display:grid;
+  gap:3px;
+  padding:7px 8px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(12,16,23,.55),rgba(5,8,12,.91));
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px)
+}
+#socialBaseStands .visitor-meta.tier-copy b{
+  min-width:0;
+  display:flex;
+  justify-content:space-between;
+  gap:5px
+}
+#socialBaseStands .visitor-meta .tier-card-name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
+#socialBaseStands .visitor-empty-slot{
+  width:100%;
+  height:100%;
+  min-height:160px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:4px;
+  text-align:center
+}
+#socialBaseStands .visitor-empty-slot b{font-size:24px;color:#586278}
+#socialBaseStands .visitor-empty-slot span{font-size:9px;font-weight:900;color:#7f899c}
+#socialBaseStands .visitor-empty-slot small{font-size:7px;color:#525b6c}
+
+@media (max-width:1050px){
+  #socialBaseStands.visitor-stands{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+}
+@media (max-width:700px){
+  .social-base-card{width:100%;max-width:none}
+  .visitor-tower-bar{margin-top:8px}
+  #socialBaseStands.visitor-stands{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px
+  }
+  #socialBaseStands .visitor-stand{border-radius:14px}
+  #socialBaseStands .visitor-meta{
+    left:6px;right:6px;bottom:6px;
+    padding:6px 7px
+  }
+  #socialBaseStands .visitor-meta.tier-copy b{font-size:9px}
+  #socialBaseStands .visitor-meta.tier-copy>span{font-size:7px}
+  #socialBaseStands .visitor-card .stand-grade{
+    top:6px;left:6px;min-width:38px;padding:5px 6px;font-size:9px
+  }
+  #socialBaseStands .visitor-card .mutation-badges{
+    top:6px;right:6px;max-width:64%
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  #socialBaseStands .visitor-showcase-card::before{animation:none;opacity:.18}
+}
