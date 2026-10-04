@@ -257,6 +257,9 @@ Action.OnServerInvoke = function(player,action,args)
 	if action == "TradeCancel" then
 		return result(TradeService.Cancel(player),"Trade cancelled")
 	end
+	if action == "TeleportHub" then
+		return result(PlotService.TeleportHub(player),true)
+	end
 	if action == "TeleportHome" then
 		return result(PlotService.TeleportHome(player),true)
 	end
