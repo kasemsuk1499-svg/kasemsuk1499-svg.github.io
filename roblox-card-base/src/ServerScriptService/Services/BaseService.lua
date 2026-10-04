@@ -127,7 +127,7 @@ function BaseService.ApplyOfflineIncome(player)
 	return gain
 end
 
-function BaseService.Start(dataService,monetizationService,onChanged)
+function BaseService.Start(dataService,monetizationService,onChanged,onEconomyTick)
 	DataService = dataService
 	MonetizationService = monetizationService
 	OnChanged = onChanged
@@ -146,7 +146,9 @@ function BaseService.Start(dataService,monetizationService,onChanged)
 						profile.Money += income*dt
 						DataService.MarkDirty(player)
 					end
-					if OnChanged then OnChanged(player,false) end
+					if onEconomyTick then
+						onEconomyTick(player,profile.Money,income)
+					end
 				end
 			end
 		end
