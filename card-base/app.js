@@ -523,10 +523,10 @@
   }
   function wealthClass(value){return "wealth-value wealth-"+wealthLevel(value)}
   function rankBand(level){return Math.min(5,Math.floor((Math.max(1,level)-1)/4))}
-  function rankFxStyle(level){
+  function rankFxStyle(level,ascension=state.ascension?.stars||0){
     const actual=Math.max(1,Math.floor(Number(level)||1));
     const lv=Math.max(1,Math.min(40,actual)),fx=TITLE_FX[lv-1];
-    const asc=state.ascension?.stars||0;
+    const asc=Math.max(0,Math.floor(Number(ascension)||0));
     return "--rank:"+fx[0]+";--rank2:"+fx[1]+";--rank-glow:"+(10+lv*1.25+Math.min(24,asc*2))+"px;--rank-speed:"+Math.max(1.9,6.4-lv*.11)+"s";
   }
   function rankFxClass(level){
@@ -1550,8 +1550,8 @@
     const baseText=profile.base_level?"Base Lv."+profile.base_level:"ยังไม่เผยแพร่ฐาน";
     const lv=Number(profile.base_level)||1;
     const rankText=profile.server_rank?'<span class="player-rank-badge">#'+profile.server_rank+'</span>':'';
-    const titleText=profile.title?'<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.title)+'</span>':'';
-    return '<div class="player-row rank-row rank-stage-'+rankBand(lv)+'"><div class="player-main"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.display_name)+rankText+'</strong>'+
+    const titleText=profile.title?'<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+escapeHtml(profile.title)+'</span>':'';
+    return '<div class="player-row rank-row rank-stage-'+rankBand(lv)+'"><div class="player-main"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+escapeHtml(profile.display_name)+rankText+'</strong>'+
       '<small>#'+escapeHtml(profile.player_code)+' · '+baseText+'</small>'+titleText+'</div>'+
       '<div class="player-actions">'+actions+'</div></div>';
   }
@@ -1654,9 +1654,9 @@
     const income=Number(profile.base_income)||0;
     return '<div class="'+rowClass+' rank-row rank-stage-'+rankBand(lv)+'">'+
       '<div class="leaderboard-rank">'+medal+'</div>'+
-      '<div class="leaderboard-player"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.display_name)+'</strong>'+
+      '<div class="leaderboard-player"><strong class="rank-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+escapeHtml(profile.display_name)+'</strong>'+
         '<small><span>#'+escapeHtml(profile.player_code)+'</span><span>Base Lv.'+profile.base_level+'</span>'+(asc?'<span class="ascension-leader-chip">ASC '+romanNumeral(asc)+'</span>':'')+(profile.online?'<span>● Online</span>':'')+'</small>'+
-        '<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(profile.title||"Rookie Collector")+'</span>'+
+        '<span class="rank-title-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+escapeHtml(profile.title||"Rookie Collector")+'</span>'+
       '</div>'+
       leaderboardCardShowcase(profile)+
       '<div class="leaderboard-stats"><b class="'+wealthClass(income)+'">'+fmt(income)+'/s</b><span>รายได้ฐาน</span></div>'+
@@ -1984,12 +1984,12 @@
     }
     const nameEl=$("#socialBaseName"),metaEl=$("#socialBaseMeta");
     nameEl.innerHTML=
-      '<span class="visit-player-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+safeName+'</span>'+
+      '<span class="visit-player-name '+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+safeName+'</span>'+
       '<span class="visit-base-suffix">’s Base</span>';
     if(title){
       metaEl.innerHTML=
         '<span class="visit-base-level">Base Lv.'+lv+'</span>'+
-        '<span class="rank-title-badge visit-rank-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(title)+'</span>'+
+        '<span class="rank-title-badge visit-rank-badge '+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+escapeHtml(title)+'</span>'+
         (asc?'<span class="visitor-ascension-chip">ASCENSION '+romanNumeral(asc)+'</span>':'');
     }else{
       metaEl.textContent="กำลังโหลด…";
@@ -2697,9 +2697,9 @@
     wrap.innerHTML=TITLES.map((title,i)=>{
       const lv=i+1,current=lv===state.baseLevel,reached=lv<=state.baseLevel;
       const topTier=TIERS[maxTierForLevel(lv)-1];
-      return '<div class="rank-catalog-item '+(current?'current ':'')+(reached?'reached':'locked')+'" style="'+rankFxStyle(lv)+'">'+
+      return '<div class="rank-catalog-item '+(current?'current ':'')+(reached?'reached':'locked')+'" style="'+rankFxStyle(lv,asc)+'">'+
         '<span class="rank-level-chip">Lv.'+lv+'</span>'+
-        '<strong class="'+rankFxClass(lv)+'" style="'+rankFxStyle(lv)+'">'+escapeHtml(title)+'</strong>'+
+        '<strong class="'+rankFxClass(lv)+'" style="'+rankFxStyle(lv,asc)+'">'+escapeHtml(title)+'</strong>'+
         '<small>Luck ×'+luckValue(lv).toFixed(2)+' · '+topTier.name+'</small>'+
       '</div>';
     }).join("");
