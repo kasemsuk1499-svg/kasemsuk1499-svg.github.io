@@ -52,6 +52,7 @@
   const images = {};
   const spawnState = new WeakMap();
   const frameRects = new Map();
+  let spawnCursor = 0;
 
   function loadTextures(){
     Object.entries(TEX).forEach(([key,src])=>{
@@ -194,16 +195,39 @@
   }
 
   function updateSpawns(dt){
+    // Build a ready queue first, then spend the shared particle budget in
+    // round-robin order. Previously targets were processed from slot 1 onward,
+    // so when maxParticles filled up the later stands could be starved forever.
+    const ready=[];
     for(const t of targets){
       const r=frameRects.get(t.el);
       if(!r) continue;
       let s=spawnState.get(t.el);
       if(!s){s={acc:Math.random()};spawnState.set(t.el,s)}
-      s.acc += rateFor(t.tier,t.grade,t.mutation,t.mutation2)*dt;
-      while(s.acc>=1 && particles.length<maxParticles){
-        s.acc-=1; spawn(t,r);
-      }
+      s.acc=Math.min(4,s.acc+rateFor(t.tier,t.grade,t.mutation,t.mutation2)*dt);
+      if(s.acc>=1)ready.push({t,r,s});
     }
+    if(!ready.length || particles.length>=maxParticles) return;
+
+    const start=spawnCursor%ready.length;
+    let free=maxParticles-particles.length;
+    let progressed=true,rounds=0;
+
+    // One particle per ready card per pass keeps every visible stand alive,
+    // while a few extra passes still let stronger cards look stronger.
+    while(free>0 && progressed && rounds<4){
+      progressed=false;
+      for(let i=0;i<ready.length && free>0;i++){
+        const item=ready[(start+i)%ready.length];
+        if(item.s.acc<1) continue;
+        item.s.acc-=1;
+        spawn(item.t,item.r);
+        free--;
+        progressed=true;
+      }
+      rounds++;
+    }
+    spawnCursor=(start+1)%ready.length;
   }
 
   function roundedRectPath(rect,pad=0,radius=12){
