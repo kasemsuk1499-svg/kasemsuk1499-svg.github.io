@@ -91,6 +91,68 @@ local function compactNumber(value)
 	return string.format(scaled >= 100 and "%.0f%s" or scaled >= 10 and "%.1f%s" or "%.2f%s",scaled,units[index])
 end
 
+local function createHubKiosk(parent,name,label,panelKey,position,color)
+	local base = makePart(
+		parent,
+		name,
+		Vector3.new(9,5,5),
+		CFrame.new(position),
+		Color3.fromRGB(17,21,31),
+		Enum.Material.Metal
+	)
+	local top = makePart(
+		base,
+		"Glow",
+		Vector3.new(8.3,0.22,4.3),
+		CFrame.new(position+Vector3.new(0,2.62,0)),
+		color,
+		Enum.Material.Neon
+	)
+	top.CanCollide = false
+
+	local screen = makePart(
+		base,
+		"Screen",
+		Vector3.new(7.6,3.1,0.25),
+		CFrame.new(position+Vector3.new(0,0.45,-2.55)),
+		Color3.fromRGB(10,13,20),
+		Enum.Material.SmoothPlastic
+	)
+	screen.CanCollide = false
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = Enum.NormalId.Front
+	gui.CanvasSize = Vector2.new(620,260)
+	gui.AlwaysOnTop = true
+	gui.Parent = screen
+	local title = makeText(gui,"Title",label,UDim2.fromScale(0.92,0.50),UDim2.fromScale(0.04,0.10),42,Color3.fromRGB(244,247,255))
+	title.TextXAlignment = Enum.TextXAlignment.Center
+	local hint = makeText(gui,"Hint","PRESS E",UDim2.fromScale(0.92,0.24),UDim2.fromScale(0.04,0.64),22,color)
+	hint.TextXAlignment = Enum.TextXAlignment.Center
+
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = panelKey.."Prompt"
+	prompt.ActionText = "Open "..label
+	prompt.ObjectText = "Card Base Hub"
+	prompt.KeyboardKeyCode = Enum.KeyCode.E
+	prompt.MaxActivationDistance = 12
+	prompt.RequiresLineOfSight = false
+	prompt.HoldDuration = 0
+	prompt.Parent = base
+	prompt.Triggered:Connect(function(player)
+		if Remotes and Remotes.OpenPanel then
+			Remotes.OpenPanel:FireClient(player,panelKey)
+		end
+	end)
+
+	local light = Instance.new("PointLight")
+	light.Color = color
+	light.Brightness = 1.5
+	light.Range = 13
+	light.Shadows = false
+	light.Parent = top
+	return base
+end
+
 local function buildWorldShell()
 	local existing = Workspace:FindFirstChild("CardBaseWorld")
 	if existing then existing:Destroy() end
@@ -146,6 +208,32 @@ local function buildWorldShell()
 			Enum.Material.Neon
 		)
 		strip.CanCollide = false
+	end
+
+	createHubKiosk(world,"DailyKiosk","DAILY","daily",Vector3.new(-111,2.5,18),Color3.fromRGB(255,206,92))
+	createHubKiosk(world,"PackKiosk","PACK SHOP","packs",Vector3.new(-101,2.5,18),Color3.fromRGB(120,101,255))
+	createHubKiosk(world,"SocialKiosk","SOCIAL","social",Vector3.new(-91,2.5,18),Color3.fromRGB(88,221,211))
+	createHubKiosk(world,"StoreKiosk","STORE","store",Vector3.new(-81,2.5,18),Color3.fromRGB(255,121,214))
+
+	local road = makePart(
+		world,
+		"TowerRoad",
+		Vector3.new(192,0.18,12),
+		CFrame.new(18,0.02,0),
+		Color3.fromRGB(30,36,50),
+		Enum.Material.Metal
+	)
+	road.CanCollide = false
+	for i=0,11 do
+		local markerPart = makePart(
+			world,
+			"RoadGlow_"..i,
+			Vector3.new(8,0.12,0.35),
+			CFrame.new(-78+i*16,0.14,0),
+			i%2==0 and Color3.fromRGB(105,91,255) or Color3.fromRGB(72,224,213),
+			Enum.Material.Neon
+		)
+		markerPart.CanCollide = false
 	end
 
 	PlotsFolder = Instance.new("Folder")
