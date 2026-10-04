@@ -63,6 +63,7 @@ local function stroke(instance,color,transparency,thickness)
 	s.Transparency = transparency or 0
 	s.Thickness = thickness or 1
 	s.Parent = instance
+	return s
 end
 
 local function padding(instance,left,right,top,bottom)
@@ -120,7 +121,7 @@ top.Size = UDim2.new(1,-24,0,74)
 top.Position = UDim2.new(0,12,0,10)
 top.Parent = gui
 corner(top,15)
-stroke(top,COLORS.line,0.15,1)
+local topStroke=stroke(top,COLORS.line,0.15,1)
 
 local brand = makeLabel(top,"CARD BASE",UDim2.new(0,160,0,26),UDim2.new(0,16,0,10),18,COLORS.text,true)
 local subtitle = makeLabel(top,"ROBLOX · SERVER AUTHORITY",UDim2.new(0,220,0,18),UDim2.new(0,16,0,38),9,COLORS.muted,true)
@@ -1314,6 +1315,11 @@ local function renderHud()
 	statLabels.Income.Text = fmt(state.Computed.Income).."/s"
 	statLabels.Base.Text = "Lv."..state.BaseLevel
 	statLabels.Ascension.Text = state.Computed.AscensionRoman ~= "" and state.Computed.AscensionRoman or "—"
+	local vipOwned=state.Computed and state.Computed.Entitlements and state.Computed.Entitlements.VIPCollector
+	topStroke.Color=vipOwned and COLORS.gold or COLORS.line
+	topStroke.Thickness=vipOwned and 2 or 1
+	brand.Text=vipOwned and "CARD BASE · VIP" or "CARD BASE"
+	brand.TextColor3=vipOwned and COLORS.gold or COLORS.text
 
 	local cardCount = 0
 	for _ in pairs(state.Cards or {}) do cardCount += 1 end
