@@ -53,6 +53,7 @@ local function defaultProfile()
 		Placed = {},
 		Tower = {Floor=1,Best=0,Shards=0},
 		Boosts = {DoubleIncomeUntil=0},
+		RotatingShop = {RotationId=0,Bought={}},
 		Receipts = {},
 		LastSeen = os.time(),
 		Meta = {
@@ -73,6 +74,9 @@ local function reconcile(raw)
 	if type(p.Placed) ~= "table" then p.Placed = {} end
 	if type(p.Tower) ~= "table" then p.Tower = deepCopy(d.Tower) end
 	if type(p.Boosts) ~= "table" then p.Boosts = deepCopy(d.Boosts) end
+	if type(p.RotatingShop) ~= "table" then p.RotatingShop = deepCopy(d.RotatingShop) end
+	if type(p.RotatingShop.Bought) ~= "table" then p.RotatingShop.Bought = {} end
+	p.RotatingShop.RotationId = math.max(0,math.floor(tonumber(p.RotatingShop.RotationId) or 0))
 	if type(p.Receipts) ~= "table" then p.Receipts = {} end
 	if type(p.Meta) ~= "table" then p.Meta = deepCopy(d.Meta) end
 
