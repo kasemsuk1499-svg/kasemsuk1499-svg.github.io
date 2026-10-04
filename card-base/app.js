@@ -2283,7 +2283,7 @@
     const low=Math.max(CARD_MIN_ID,Math.min(CARD_MAX_ID,Math.floor(Number(minId)||CARD_MIN_ID)));
     const high=Math.max(low,Math.min(CARD_MAX_ID,Math.floor(Number(maxId)||CARD_MAX_ID)));
     const charId=low+Math.floor(Math.random()*(high-low+1));
-    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),mutation2:0,level:1,locked:false,obtainedAt:Date.now()};
+    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),mutation2:0,level:1,awakening:0,locked:false,obtainedAt:Date.now()};
     state.cards.push(card);
     recordCardInIndex(card,card.obtainedAt);
     return card;
@@ -2870,6 +2870,10 @@
         auto.classList.toggle("grade-running",running);
         auto.textContent=running?"Auto Grade…":"Auto Grade";
       }
+      const awaken=el.querySelector('[data-a="awaken"]');if(awaken){
+        awaken.disabled=tradeLocked||!canAwaken(c);
+        awaken.textContent="✦ Awaken ★"+(awakeningStars(c)+1);
+      }
     }
 
     // Base stand: also update without reconstructing every stand.
@@ -2908,6 +2912,10 @@
         const running=!!(state.gradeAuto&&state.gradeAuto.uid===c.uid);
         auto.classList.toggle("grade-running",running);
         auto.textContent=running?"Auto Grade…":"Auto Grade";
+      }
+      const awaken=detail.querySelector('[data-modal-a="awaken"]');if(awaken){
+        awaken.disabled=!canAwaken(c);
+        awaken.textContent="✦ Awaken ★"+(awakeningStars(c)+1);
       }
     }
 
