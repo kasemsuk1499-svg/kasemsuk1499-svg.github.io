@@ -174,6 +174,7 @@
   let autoTimer = 0;
   let gradeTimer = 0;
   let gradeAutoSetupUid = null;
+  let mutationLabTargetUid = null;
   let idPackAutoTimer = 0;
   let idPackAutoIndex = null;
   let idPackAutoCount = 0;
@@ -2552,6 +2553,192 @@
     commitCardMicroUpdate(c.uid);
   }
 
+  function mutationDonorEligible(card,targetUid,mutationId=null){
+    if(!card||card.uid===targetUid)return false;
+    if(card.locked||state.placed.includes(card.uid)||cardIsTradeLocked(card))return false;
+    if(state.gradeAuto&&state.gradeAuto.uid===card.uid)return false;
+    const ids=cardMutationIds(card);
+    if(!ids.length)return false;
+    return mutationId===null?true:ids.includes(Number(mutationId));
+  }
+
+  function mutationInheritanceSingleChance(target,donor){
+    const occupied=cardMutationIds(target).length;
+    const base=occupied>0?0.18:0.38;
+    const diff=(Number(donor.tier)||0)-(Number(target.tier)||0);
+    const tierFactor=diff>=0
+      ? Math.min(1.82,1+(diff*0.18))
+      : Math.pow(0.72,Math.abs(diff));
+    return Math.max(0.01,Math.min(0.78,base*tierFactor));
+  }
+
+  function mutationInheritanceCombinedChance(target,donors){
+    if(!target||!donors.length)return 0;
+    let fail=1;
+    donors.forEach(d=>{fail*=1-mutationInheritanceSingleChance(target,d)});
+    return Math.min(0.95,1-fail);
+  }
+
+  function mutationLabAvailableTypes(target){
+    if(!target)return [];
+    const owned=new Set(cardMutationIds(target));
+    const types=new Set();
+    state.cards.forEach(c=>{
+      if(!mutationDonorEligible(c,target.uid))return;
+      cardMutationIds(c).forEach(id=>{if(!owned.has(id))types.add(id)});
+    });
+    return [...types].sort((a,b)=>a-b);
+  }
+
+  function openMutationLab(uid){
+    const target=state.cards.find(c=>c.uid===uid);if(!target)return;
+    if(cardIsTradeLocked(target)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
+    if(state.gradeAuto&&state.gradeAuto.uid===target.uid){toast("หยุด Auto Grade ของใบนี้ก่อนสืบทอด Mutation");return}
+    if(cardMutationIds(target).length>=2){toast("การ์ดใบนี้มี Mutation ครบ 2 ช่องแล้ว");return}
+    mutationLabTargetUid=uid;
+    const modal=$("#mutationLabModal");
+    modal.classList.add("show");modal.setAttribute("aria-hidden","false");
+    renderMutationLab(true);
+  }
+
+  function closeMutationLab(){
+    $("#mutationLabModal").classList.remove("show");
+    $("#mutationLabModal").setAttribute("aria-hidden","true");
+    mutationLabTargetUid=null;
+  }
+
+  function renderMutationLab(resetType=false){
+    const target=state.cards.find(c=>c.uid===mutationLabTargetUid);
+    if(!target){closeMutationLab();return}
+
+    const ids=cardMutationIds(target);
+    const slotText=ids.length?mutationNames(target):"ยังไม่มี Mutation";
+    $("#mutationLabTarget").innerHTML=
+      '<div class="mutation-lab-target-card">'+tradeCardVisual(target,true)+'</div>'+
+      '<div class="mutation-lab-target-copy"><span>TARGET · '+ids.length+'/2 SLOT</span><strong>'+escapeHtml(slotText)+'</strong>'+
+      '<small>Tier '+TIERS[target.tier].name+' · ช่องถัดไป '+(ids.length===0?'เรทพื้นฐานสูงกว่า':'เป็นช่องที่ 2 · เรทยากขึ้น')+'</small></div>';
+
+    const types=mutationLabAvailableTypes(target);
+    const select=$("#mutationLabType");
+    const previous=Number(select.value)||0;
+    select.innerHTML=types.length
+      ? types.map(id=>'<option value="'+id+'">'+MUTATIONS[id].icon+' '+MUTATIONS[id].name+' · Income ×'+MUTATIONS[id].income.toFixed(2)+'</option>').join("")
+      : '<option value="">ไม่มี Donor ที่ใช้ได้</option>';
+    if(!resetType&&types.includes(previous))select.value=String(previous);
+    renderMutationLabDonors(true);
+  }
+
+  function renderMutationLabDonors(clearSelection=false){
+    const target=state.cards.find(c=>c.uid===mutationLabTargetUid);
+    const mutationId=Number($("#mutationLabType").value)||0;
+    const wrap=$("#mutationLabDonors");
+    if(!target||!mutationId){
+      wrap.innerHTML='<div class="social-empty">ยังไม่มีการ์ดกลายพันธุ์ที่พร้อมใช้เป็น Donor</div>';
+      updateMutationLabChance();
+      return;
+    }
+
+    const selected=clearSelection?new Set():new Set(
+      [...wrap.querySelectorAll('input[data-mutation-donor]:checked')].map(x=>Number(x.dataset.mutationDonor))
+    );
+    const donors=state.cards
+      .filter(c=>mutationDonorEligible(c,target.uid,mutationId))
+      .sort((a,b)=>mutationInheritanceSingleChance(target,b)-mutationInheritanceSingleChance(target,a)||b.tier-a.tier||b.level-a.level);
+
+    wrap.innerHTML=donors.length?donors.map(c=>{
+      const chance=mutationInheritanceSingleChance(target,c);
+      const diff=c.tier-target.tier;
+      const tierDelta=diff===0?"Tier เท่ากัน":diff>0?"Tier +"+diff:"Tier "+diff;
+      return '<label class="mutation-donor-row" style="--mutation:'+MUTATIONS[mutationId].color+'">'+
+        '<input type="checkbox" data-mutation-donor="'+c.uid+'" '+(selected.has(c.uid)?'checked':'')+'>'+
+        '<span class="mutation-donor-id">'+padId(c.charId)+'</span>'+
+        '<span class="mutation-donor-meta"><b>'+TIERS[c.tier].name+' · '+mutationNames(c)+'</b><small>'+tierDelta+' · ใบนี้ช่วย '+(chance*100).toFixed(chance<.1?1:0)+'%</small></span>'+
+        '<strong>'+Math.round(chance*100)+'%</strong>'+
+      '</label>';
+    }).join(""):'<div class="social-empty">ไม่มี Donor '+escapeHtml(MUTATIONS[mutationId].name)+' ที่ว่างอยู่</div>';
+    updateMutationLabChance();
+  }
+
+  function selectedMutationDonors(){
+    return [...document.querySelectorAll('#mutationLabDonors input[data-mutation-donor]:checked')]
+      .map(input=>state.cards.find(c=>c.uid===Number(input.dataset.mutationDonor)))
+      .filter(Boolean);
+  }
+
+  function updateMutationLabChance(){
+    const target=state.cards.find(c=>c.uid===mutationLabTargetUid);
+    const donors=selectedMutationDonors();
+    const chance=mutationInheritanceCombinedChance(target,donors);
+    $("#mutationLabChance").textContent=(chance*100).toFixed(chance>0&&chance<.1?1:0)+"%";
+    $("#mutationLabConfirm").disabled=!target||!donors.length;
+    const factors=$("#mutationLabFactors");
+    if(!target){factors.textContent="ไม่พบ Target";return}
+    if(!donors.length){
+      factors.textContent="เลือก donor อย่างน้อย 1 ใบ · "+(cardMutationIds(target).length?"ช่อง 2 มี penalty":"ช่อง 1 ใช้เรทฐาน");
+      return;
+    }
+    const high=donors.filter(d=>d.tier>target.tier).length;
+    const same=donors.filter(d=>d.tier===target.tier).length;
+    const low=donors.length-high-same;
+    factors.textContent=donors.length+" Donor · Tier สูงกว่า "+high+" · เท่ากัน "+same+" · ต่ำกว่า "+low+
+      (cardMutationIds(target).length?" · ช่อง 2 ยากขึ้น":" · ช่อง 1");
+  }
+
+  function mutationLabSelectBest(){
+    const target=state.cards.find(c=>c.uid===mutationLabTargetUid);
+    const mutationId=Number($("#mutationLabType").value)||0;
+    if(!target||!mutationId)return;
+    const best=state.cards
+      .filter(c=>mutationDonorEligible(c,target.uid,mutationId))
+      .sort((a,b)=>mutationInheritanceSingleChance(target,b)-mutationInheritanceSingleChance(target,a))
+      .slice(0,3);
+    const ids=new Set(best.map(c=>c.uid));
+    document.querySelectorAll('#mutationLabDonors input[data-mutation-donor]').forEach(input=>{
+      input.checked=ids.has(Number(input.dataset.mutationDonor));
+    });
+    updateMutationLabChance();
+  }
+
+  function performMutationInheritance(){
+    const target=state.cards.find(c=>c.uid===mutationLabTargetUid);
+    const mutationId=Number($("#mutationLabType").value)||0;
+    const donors=selectedMutationDonors();
+    if(!target||!mutationId||!donors.length)return;
+    if(cardMutationIds(target).length>=2){toast("Mutation เต็ม 2 ช่องแล้ว");closeMutationLab();return}
+    if(cardMutationIds(target).includes(mutationId)){toast("Target มี Mutation ชนิดนี้อยู่แล้ว");return}
+    if(donors.some(d=>!mutationDonorEligible(d,target.uid,mutationId))){
+      toast("Donor บางใบไม่พร้อมใช้งานแล้ว");renderMutationLabDonors(true);return;
+    }
+
+    const chance=mutationInheritanceCombinedChance(target,donors);
+    const mutation=MUTATIONS[mutationId];
+    const ok=window.confirm(
+      "สืบทอด "+mutation.icon+" "+mutation.name+" ไปยัง "+padId(target.charId)+
+      "\nใช้ Donor "+donors.length+" ใบ · โอกาสสำเร็จ "+(chance*100).toFixed(chance<.1?1:0)+"%"+
+      "\n\nDonor ทุกใบจะถูกใช้และหายไป แม้การสืบทอดล้มเหลว ต้องการดำเนินการไหม?"
+    );
+    if(!ok)return;
+
+    const donorIds=new Set(donors.map(d=>d.uid));
+    state.cards=state.cards.filter(c=>!donorIds.has(c.uid));
+    const success=Math.random()<chance;
+    if(success){
+      if(!Number(target.mutation))target.mutation=mutationId;
+      else target.mutation2=mutationId;
+      recordCardInIndex(target);
+    }
+
+    normalizeSlots();
+    closeMutationLab();
+    if(success){
+      toast("🧬 สืบทอดสำเร็จ! "+mutation.icon+" "+mutation.name+" → "+padId(target.charId),true);
+    }else{
+      toast("สืบทอดไม่สำเร็จ · Donor ถูกใช้ไป "+donors.length+" ใบ");
+    }
+    renderAll();
+    if(gameToken)publishPublicBase();
+  }
+
   function openGradeAuto(uid){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
     if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
@@ -2783,6 +2970,15 @@
       const buy=e.target.closest("[data-buy-rot-pack]");
       if(buy)buyRotatingPack(buy.dataset.buyRotPack);
     });
+    $("#closeMutationLabModal").addEventListener("click",closeMutationLab);$("[data-close-mutation-lab]").addEventListener("click",closeMutationLab);
+    $("#mutationLabType").addEventListener("change",()=>renderMutationLabDonors(true));
+    $("#mutationLabDonors").addEventListener("change",updateMutationLabChance);
+    $("#mutationLabBestDonors").addEventListener("click",mutationLabSelectBest);
+    $("#mutationLabClear").addEventListener("click",()=>{
+      document.querySelectorAll('#mutationLabDonors input[data-mutation-donor]').forEach(input=>input.checked=false);
+      updateMutationLabChance();
+    });
+    $("#mutationLabConfirm").addEventListener("click",performMutationInheritance);
     $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
     $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
     $("#gradeTargetList").addEventListener("change",updateGradeTargetChance);
