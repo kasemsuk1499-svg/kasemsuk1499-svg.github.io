@@ -3171,3 +3171,36 @@ body::before{
     will-change:auto
   }
 }
+
+
+/* Mobile scroll recovery — keep desktop untouched. */
+@media (max-width:700px){
+  html{
+    overflow-x:hidden;
+    overflow-y:auto!important;
+    height:auto!important;
+    min-height:100%;
+    overscroll-behavior-y:auto!important;
+    touch-action:pan-y
+  }
+  body{
+    position:static!important;
+    overflow-x:hidden;
+    overflow-y:visible!important;
+    height:auto!important;
+    min-height:100%;
+    overscroll-behavior-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y
+  }
+  .app-shell,
+  main,
+  .panel.active{
+    overflow:visible!important;
+    touch-action:pan-y
+  }
+  #cardFxCanvas{
+    pointer-events:none!important;
+    touch-action:none
+  }
+}
