@@ -208,26 +208,33 @@ function DataService.ProcessReceipt(player, purchaseId, grantFn)
 
 	local duplicate = false
 	local grantError = nil
-	local ok,result = pcall(function()
-		return Store:UpdateAsync(keyFor(player.UserId),function(old)
-			local profile = reconcile(old)
-			local key = tostring(purchaseId)
-			if profile.Receipts[key] then
-				duplicate = true
+	local ok,result
+	for attempt=1,3 do
+		duplicate = false
+		grantError = nil
+		ok,result = pcall(function()
+			return Store:UpdateAsync(keyFor(player.UserId),function(old)
+				local profile = reconcile(old)
+				local key = tostring(purchaseId)
+				if profile.Receipts[key] then
+					duplicate = true
+					return profile
+				end
+				local success,err = pcall(grantFn,profile)
+				if not success then
+					grantError = tostring(err)
+					return nil
+				end
+				profile.Receipts[key] = os.time()
+				profile.LastSeen = os.time()
+				profile.Meta.SessionJobId = game.JobId
+				profile.Meta.SessionUpdatedAt = os.time()
 				return profile
-			end
-			local success,err = pcall(grantFn,profile)
-			if not success then
-				grantError = tostring(err)
-				return nil
-			end
-			profile.Receipts[key] = os.time()
-			profile.LastSeen = os.time()
-			profile.Meta.SessionJobId = game.JobId
-			profile.Meta.SessionUpdatedAt = os.time()
-			return profile
+			end)
 		end)
-	end)
+		if ok or grantError then break end
+		if attempt < 3 then task.wait(0.55*attempt) end
+	end
 	if not ok or grantError then
 		warn("[DataService] Receipt failed",purchaseId,result,grantError)
 		return false,grantError or tostring(result)
