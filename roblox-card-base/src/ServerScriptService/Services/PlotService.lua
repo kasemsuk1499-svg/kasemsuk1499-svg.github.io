@@ -462,7 +462,7 @@ local function buildPlot(player,slotIndex)
 	local frontSign = makePart(model,"FrontTowerSign",Vector3.new(12,3.1,0.35),CFrame.new(origin+Vector3.new(0,10.1,-11.4)),Color3.fromRGB(17,21,32),Enum.Material.SmoothPlastic)
 	frontSign.CanCollide = false
 	local frontGui = Instance.new("SurfaceGui")
-	frontGui.Face = Enum.NormalId.Back
+	frontGui.Face = Enum.NormalId.Front
 	frontGui.CanvasSize = Vector2.new(720,190)
 	frontGui.AlwaysOnTop = true
 	frontGui.Parent = frontSign
