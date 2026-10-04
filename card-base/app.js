@@ -397,14 +397,49 @@
     updateSyncUi("syncing");
   }
 
+  function makeRestRpcClient(){
+    return {
+      async rpc(name,args={}){
+        const controller=new AbortController();
+        const timeout=setTimeout(()=>controller.abort(),12000);
+        try{
+          const response=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+encodeURIComponent(name),{
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              "apikey":SUPABASE_PUBLISHABLE_KEY,
+              "Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY
+            },
+            body:JSON.stringify(args||{}),
+            signal:controller.signal,
+            cache:"no-store"
+          });
+          let data=null;
+          try{data=await response.json()}catch{}
+          if(!response.ok){
+            return {data:null,error:{message:(data&&data.message)||("HTTP "+response.status)}};
+          }
+          return {data,error:null};
+        }catch(err){
+          return {data:null,error:{message:err&&err.name==="AbortError"?"Cloud timeout":String(err&&err.message||err)}};
+        }finally{
+          clearTimeout(timeout);
+        }
+      }
+    };
+  }
+
   async function rpc(name,args={}){
     if(!supabaseClient)return {ok:false,error:"cloud_unavailable",message:"Cloud ยังไม่พร้อม"};
-    const {data,error}=await supabaseClient.rpc(name,args);
-    if(error){
-      console.error("RPC "+name+" failed",error);
-      return {ok:false,error:"rpc_error",message:error.message||"Cloud error"};
+    let lastError=null;
+    for(let attempt=0;attempt<2;attempt++){
+      const {data,error}=await supabaseClient.rpc(name,args);
+      if(!error)return data&&typeof data==="object"?data:{ok:false,error:"invalid_response"};
+      lastError=error;
+      if(attempt===0)await new Promise(r=>setTimeout(r,350));
     }
-    return data&&typeof data==="object"?data:{ok:false,error:"invalid_response"};
+    console.error("RPC "+name+" failed",lastError);
+    return {ok:false,error:"rpc_error",message:lastError?.message||"Cloud error"};
   }
 
   function clearGameSession(){
@@ -1289,13 +1324,15 @@
   }
 
   async function initCloud(){
-    if(!window.supabase||typeof window.supabase.createClient!=="function"){
-      updateSyncUi("error");
-      return;
+    if(window.supabase&&typeof window.supabase.createClient==="function"){
+      supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+        auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+      });
+    }else{
+      // CDN can occasionally fail on some networks/devices. The game only needs RPC,
+      // so fall back to direct REST instead of disabling Cloud entirely.
+      supabaseClient=makeRestRpcClient();
     }
-    supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
-      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
-    });
     if(gameToken){
       const me=await fetchMe();
       if(me){
