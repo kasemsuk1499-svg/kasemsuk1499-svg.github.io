@@ -131,6 +131,124 @@ function CardService.Sell(profile,guid)
 	return true,value
 end
 
+local function mutationIds(card)
+	local ids = {}
+	local seen = {}
+	for _,id in ipairs({tonumber(card.Mutation1) or 0,tonumber(card.Mutation2) or 0}) do
+		id = math.floor(id)
+		if id > 0 and Config.Mutations[id] and not seen[id] then
+			seen[id] = true
+			table.insert(ids,id)
+		end
+	end
+	return ids
+end
+
+local function isPlaced(profile,guid)
+	for _,placedGuid in pairs(profile.Placed or {}) do
+		if placedGuid == guid then return true end
+	end
+	return false
+end
+
+local function donorChance(target,donor)
+	local occupied = #mutationIds(target)
+	local base = occupied > 0 and 0.18 or 0.38
+	local diff = (tonumber(donor.Tier) or 0)-(tonumber(target.Tier) or 0)
+	local tierFactor
+	if diff >= 0 then
+		tierFactor = math.min(1.82,1+(diff*0.18))
+	else
+		tierFactor = 0.72 ^ math.abs(diff)
+	end
+	return math.clamp(base*tierFactor,0.01,0.78)
+end
+
+function CardService.MutationInheritanceChance(profile,targetGuid,mutationId,donorGuids)
+	local target = getCard(profile,targetGuid)
+	mutationId = math.floor(tonumber(mutationId) or 0)
+	if not target or mutationId <= 0 or not Config.Mutations[mutationId] then return 0 end
+	local owned = {}
+	for _,id in ipairs(mutationIds(target)) do owned[id] = true end
+	if owned[mutationId] or #mutationIds(target) >= 2 then return 0 end
+
+	local fail = 1
+	local seen = {}
+	local count = 0
+	for _,guid in ipairs(type(donorGuids)=="table" and donorGuids or {}) do
+		if count >= 3 then break end
+		if type(guid)=="string" and guid ~= targetGuid and not seen[guid] then
+			seen[guid] = true
+			local donor = getCard(profile,guid)
+			if donor and not donor.Locked and not isPlaced(profile,guid) then
+				local hasMutation = false
+				for _,id in ipairs(mutationIds(donor)) do
+					if id == mutationId then hasMutation = true break end
+				end
+				if hasMutation then
+					fail *= (1-donorChance(target,donor))
+					count += 1
+				end
+			end
+		end
+	end
+	if count == 0 then return 0 end
+	return math.min(0.95,1-fail)
+end
+
+function CardService.InheritMutation(profile,targetGuid,mutationId,donorGuids)
+	local target = getCard(profile,targetGuid)
+	if not target then return false,"ไม่พบ Target" end
+	if #mutationIds(target) >= 2 then return false,"Mutation เต็ม 2 ช่องแล้ว" end
+
+	mutationId = math.floor(tonumber(mutationId) or 0)
+	if mutationId <= 0 or not Config.Mutations[mutationId] then return false,"Mutation ไม่ถูกต้อง" end
+	for _,id in ipairs(mutationIds(target)) do
+		if id == mutationId then return false,"Target มี Mutation นี้อยู่แล้ว" end
+	end
+
+	local valid = {}
+	local seen = {}
+	for _,guid in ipairs(type(donorGuids)=="table" and donorGuids or {}) do
+		if #valid >= 3 then break end
+		if type(guid)=="string" and guid ~= targetGuid and not seen[guid] then
+			seen[guid] = true
+			local donor = getCard(profile,guid)
+			if donor and not donor.Locked and not isPlaced(profile,guid) then
+				for _,id in ipairs(mutationIds(donor)) do
+					if id == mutationId then
+						table.insert(valid,guid)
+						break
+					end
+				end
+			end
+		end
+	end
+	if #valid == 0 then return false,"ไม่มี Donor ที่ใช้ได้" end
+
+	local chance = CardService.MutationInheritanceChance(profile,targetGuid,mutationId,valid)
+	for _,guid in ipairs(valid) do
+		profile.Cards[guid] = nil
+	end
+
+	local success = Random.new():NextNumber() < chance
+	if success then
+		if (tonumber(target.Mutation1) or 0) <= 0 then
+			target.Mutation1 = mutationId
+		else
+			target.Mutation2 = mutationId
+		end
+	end
+
+	return true,{
+		Success = success,
+		Chance = chance,
+		Consumed = #valid,
+		MutationId = mutationId,
+		TargetGuid = targetGuid,
+	}
+end
+
 function CardService.ToggleLock(profile,guid)
 	local card = getCard(profile,guid)
 	if not card then return false,"ไม่พบการ์ด" end
