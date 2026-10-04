@@ -1519,6 +1519,44 @@
     }
   }
 
+  function mergeMutationEventState(remoteState){
+    const remoteCards=Array.isArray(remoteState?.cards)?remoteState.cards:[];
+    if(!remoteCards.length)return 0;
+
+    const byGid=new Map();
+    const byUid=new Map();
+    state.cards.forEach(card=>{
+      if(validCardGid(card.gid))byGid.set(card.gid,card);
+      if(Number.isFinite(Number(card.uid)))byUid.set(Number(card.uid),card);
+    });
+
+    let changed=0;
+    remoteCards.forEach(remoteCard=>{
+      if(!remoteCard||typeof remoteCard!=="object")return;
+      let local=null;
+      if(validCardGid(remoteCard.gid))local=byGid.get(remoteCard.gid)||null;
+      if(!local&&Number.isFinite(Number(remoteCard.uid)))local=byUid.get(Number(remoteCard.uid))||null;
+      if(!local)return;
+
+      const mutation=Number.isInteger(Number(remoteCard.mutation))&&Number(remoteCard.mutation)>=0&&Number(remoteCard.mutation)<MUTATIONS.length
+        ? Number(remoteCard.mutation)
+        : 0;
+      const mutation2=Number.isInteger(Number(remoteCard.mutation2))&&Number(remoteCard.mutation2)>0&&Number(remoteCard.mutation2)<MUTATIONS.length&&Number(remoteCard.mutation2)!==mutation
+        ? Number(remoteCard.mutation2)
+        : 0;
+
+      if(Number(local.mutation||0)!==mutation||Number(local.mutation2||0)!==mutation2){
+        local.mutation=mutation;
+        local.mutation2=mutation2;
+        recordCardInIndex(local);
+        changed++;
+      }
+    });
+
+    if(changed)syncCardIndex();
+    return changed;
+  }
+
   async function tickMutationEvent(){
     if(mutationEventBusy||!gameToken||!supabaseClient)return;
     mutationEventBusy=true;
@@ -1538,9 +1576,11 @@
       mutationEventStatus=result;
 
       if(Number(result.hit_count)>0&&result.state){
-        state=hydrateState(result.state);
+        // Mutation Event must never replace the whole live state: doing so kills
+        // Auto Roll / Full Auto / Auto Grade and can overwrite rolls performed
+        // while the event RPC is in flight. Merge only the mutation fields.
+        mergeMutationEventState(result.state);
         localStorage.setItem(SAVE_KEY,JSON.stringify(state));
-        syncCardIndex();
         const hits=Array.isArray(result.hits)?result.hits:[];
         const names=hits.slice(0,3).map(hit=>{
           const m=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(hit.mutation)||0))];
