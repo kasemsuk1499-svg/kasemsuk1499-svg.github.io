@@ -306,13 +306,16 @@ local function frameHomeCamera(duration)
 	local z = player:GetAttribute("CardBasePlotZ")
 	if x == nil or z == nil then return end
 	y = tonumber(y) or 0
-	local target = Vector3.new(x,y+9,z)
-	local eye = Vector3.new(x,y+12,z-34)
+	local oldFov = camera.FieldOfView
+	local target = Vector3.new(x,y+18,z+1)
+	local eye = Vector3.new(x,y+28,z-48)
+	camera.FieldOfView = 68
 	camera.CameraType = Enum.CameraType.Scriptable
 	camera.CFrame = CFrame.lookAt(eye,target)
-	task.delay(duration or 1.6,function()
+	task.delay(duration or 1.8,function()
 		if workspace.CurrentCamera == camera then
 			camera.CameraType = Enum.CameraType.Custom
+			camera.FieldOfView = oldFov
 		end
 	end)
 end
