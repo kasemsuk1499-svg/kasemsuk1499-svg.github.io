@@ -406,7 +406,7 @@
           <div class="rebirth-card">
             <div class="eyebrow">BASE PROGRESSION</div>
             <h2 id="rebirthHeadline">Lv.1 → Lv.2</h2>
-            <p class="muted">Rebirth คือการอัป Base Level แบบไม่จำกัด ใช้เงินเป็นเงื่อนไขหลัก เงินจะถูกรีเซ็ต แต่คลัง การ์ด และ Endgame Progress อยู่ครบ</p>
+            <p class="muted">Rebirth คือการไต่ Base Lv.1 → 40 ในแต่ละรอบ พอถึง Lv.40 จะเปิด Ascension เพื่อจุติกลับ Lv.1 โดยการ์ดและ Endgame Progress อยู่ครบ</p>
             <div class="req-list">
               <div><span>เงินที่ต้องใช้</span><strong id="rebirthMoney">0</strong></div>
               <div><span>เงื่อนไข</span><strong id="rebirthRule">เงินอย่างเดียว</strong></div>
@@ -414,7 +414,7 @@
               <div><span>เวลาสะสมเป้าหมาย</span><strong id="rebirthPace">~1 นาที 40 วิ</strong></div>
             </div>
             <button id="rebirthBtn" class="primary danger" type="button">Rebirth / อัปฐาน</button>
-            <p class="warning">Base Level ไม่มีเพดาน · หลัง Lv.40 การเติบโตจะเข้าสู่ Endless Progression และทุก 200 เลเวลมี Ascension Milestone</p>
+            <p class="warning">ทุก Ascension จะรีเซ็ตเฉพาะ Base Level และเงิน แต่ให้ Income +20% · Luck +2% ถาวร พร้อม Ascension Core +1</p>
           </div>
 
           <div class="next-card">
@@ -431,8 +431,8 @@
 
         <details class="rank-catalog-box" open>
           <summary>
-            <span><span class="eyebrow">RANK CATALOG</span><strong>Milestone Titles 40 ระดับ</strong></span>
-            <small>Lv.1 → Lv.40 · หลังจากนั้น Base Level ไปต่อได้ไม่จำกัด</small>
+            <span><span class="eyebrow">RANK CATALOG</span><strong>ยศ 40 ระดับต่อรอบ</strong></span>
+            <small>หลังจุติ ยศเดิมจะมีเลขโรมันต่อท้าย เช่น Rookie Collector II</small>
           </summary>
           <div id="rankCatalog" class="rank-catalog"></div>
         </details>
@@ -442,19 +442,24 @@
             <div class="eyebrow">ENDGAME ASCENSION</div>
             <div class="endgame-title-row">
               <div>
-                <h2 id="ascensionHeadline">Ascension ★0</h2>
-                <p class="muted">ทุก 200 Base Levels รับ Ascension Star + Ascension Core โดยไม่รีเซ็ต Base Level</p>
+                <h2 id="ascensionHeadline">Ascension 0</h2>
+                <p class="muted">ถึง Base Lv.40 แล้วจุติกลับ Lv.1 เพื่อเพิ่ม Ascension ถาวร รอบใหม่จะไวขึ้น และยศจะมีเลขโรมันไว้โชว์จำนวนครั้งที่จุติ</p>
               </div>
               <div class="core-counter"><span>ASCENSION CORE</span><strong id="ascensionCores">0</strong></div>
             </div>
             <div class="ascension-progress-track"><i id="ascensionProgressFill"></i></div>
             <div class="endgame-stats">
               <div><span>Base Level</span><strong id="ascensionBaseLevel">Lv.1</strong></div>
-              <div><span>Milestone ถัดไป</span><strong id="ascensionNext">Lv.200</strong></div>
-              <div><span>Ascension Stars</span><strong id="ascensionStars">★0</strong></div>
+              <div><span>เป้าหมายรอบนี้</span><strong id="ascensionNext">Lv.40</strong></div>
+              <div><span>Ascension</span><strong id="ascensionStars">0</strong></div>
               <div><span>Core ที่ถือ</span><strong id="ascensionCoreCount">0</strong></div>
             </div>
-            <button id="ascendBtn" class="primary ascension-btn" type="button">ไปให้ถึง Lv.200 ก่อน</button>
+            <div id="ascensionPermanentBonus" class="ascension-permanent">Permanent: Income +0% · Luck +0%</div>
+            <button id="ascendBtn" class="primary ascension-btn" type="button">ไปให้ถึง Lv.40 ก่อน</button>
+            <div class="ascension-reward-box">
+              <div class="social-title"><strong>SPECIAL REWARDS I–X</strong><small>หลัง X ยังจุติต่อได้และรับ Core + Buff ตามปกติ</small></div>
+              <div id="ascensionRewardTrack" class="ascension-reward-track"></div>
+            </div>
           </article>
 
           <article class="endgame-card core-tree-card">
