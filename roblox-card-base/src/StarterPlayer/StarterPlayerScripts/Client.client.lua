@@ -11,6 +11,7 @@ local Action = Remotes:WaitForChild("Action")
 local StateEvent = Remotes:WaitForChild("State")
 local ToastEvent = Remotes:WaitForChild("Toast")
 local OpenStandEvent = Remotes:WaitForChild("OpenStand")
+local OpenPanelEvent = Remotes:WaitForChild("OpenPanel")
 local TradeEvent = Remotes:WaitForChild("TradeEvent")
 
 local state = nil
@@ -1256,6 +1257,15 @@ storeBtn.MouseButton1Click:Connect(openStore)
 closeBtn.MouseButton1Click:Connect(function() overlay.Visible=false;activePanel=nil;selectedSlot=nil;mutationTargetGuid=nil end)
 revealClose.MouseButton1Click:Connect(function() reveal.Visible=false end)
 OpenStandEvent.OnClientEvent:Connect(openStand)
+OpenPanelEvent.OnClientEvent:Connect(function(panelKey)
+	if panelKey=="daily" then openDaily()
+	elseif panelKey=="packs" then openPackShop()
+	elseif panelKey=="social" then openSocial()
+	elseif panelKey=="store" then openStore()
+	elseif panelKey=="endgame" then openEndgame()
+	elseif panelKey=="base" then openBasePanel()
+	end
+end)
 ToastEvent.OnClientEvent:Connect(showToast)
 TradeEvent.OnClientEvent:Connect(function(payload)
 	if type(payload) ~= "table" then return end
