@@ -1475,35 +1475,66 @@
     friendsEl.innerHTML=onlineCache.friends.length?onlineCache.friends.map(fr=>socialRow(fr,{friend:fr})).join(""):'<div class="social-empty">ยังไม่มีเพื่อน — ลองค้นหาผู้เล่นด้านบน</div>';
   }
 
+  function leaderboardMiniShowcaseCard(card,rankNo){
+    const tier=Math.max(0,Math.min(TIERS.length-1,Number(card.tier)||0));
+    const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
+    const visual={
+      ...card,
+      mutation:Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0)),
+      mutation2:Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation2)||0))
+    };
+    const t=TIERS[tier],g=GRADES[grade],muts=cardMutationIds(visual);
+    const income=Math.max(0,Number(card.income)||0);
+    const mutIcons=muts.map(id=>{
+      const m=MUTATIONS[id];
+      return '<i title="'+escapeHtml(m.name)+'" style="--show-mut:'+m.color+'">'+m.icon+'</i>';
+    }).join("");
+    return '<div class="leaderboard-card tier-'+tier+' grade-'+grade+'" style="--show-tier:'+t.color+';--show-grade:'+g.color+'" title="'+escapeHtml(padId(Number(card.charId)||0)+' · '+t.name+' · '+fmt(income)+'/s')+'">'+
+      '<img src="'+imageFor(Number(card.charId)||CARD_MIN_ID)+'" alt="'+padId(Number(card.charId)||0)+'">'+
+      '<span class="leaderboard-card-grade">'+escapeHtml(g.name)+'</span>'+
+      (mutIcons?'<span class="leaderboard-card-mutations">'+mutIcons+'</span>':'')+
+      '<span class="leaderboard-card-rank">#'+rankNo+'</span>'+
+      '<div class="leaderboard-card-meta"><b>'+padId(Number(card.charId)||0)+'</b><small>'+fmt(income)+'/s</small></div>'+
+    '</div>';
+  }
+
+  function leaderboardFeaturedShowcaseCard(card){
+    if(!card)return "";
+    const tier=Math.max(0,Math.min(TIERS.length-1,Number(card.tier)||0));
+    const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
+    const visual={
+      ...card,
+      mutation:Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0)),
+      mutation2:Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation2)||0))
+    };
+    const t=TIERS[tier],g=GRADES[grade],income=Math.max(0,Number(card.income)||0);
+    const title=padId(Number(card.charId)||0)+" · "+t.name+" · Grade "+g.name+
+      (cardMutationIds(visual).length?" · "+mutationNames(visual):"")+" · "+fmt(income)+"/s";
+    return '<div class="leaderboard-featured-card tier-shell '+tierFxClass(tier)+' grade-shell-'+grade+cardMutationFxClass(visual)+'" '+
+      'style="'+tierStyle(tier)+';'+cardMutationStyle(visual)+';--grade:'+g.color+';--show-tier:'+t.color+';--show-grade:'+g.color+'" '+
+      'title="'+escapeHtml(title)+'">'+
+      '<img src="'+imageFor(Number(card.charId)||CARD_MIN_ID)+'" alt="'+padId(Number(card.charId)||0)+'">'+
+      '<div class="tier-ring"></div>'+
+      '<div class="card-grade '+gradeFxClass(grade)+'" style="--grade:'+g.color+'">'+escapeHtml(g.name)+'</div>'+
+      mutationBadge(visual)+
+      '<span class="leaderboard-featured-crown">👑 BEST</span>'+
+      '<div class="leaderboard-featured-meta tier-copy tier-'+tier+'" style="--tier:'+t.color+'">'+
+        '<div class="leaderboard-featured-top"><b class="tier-card-id">'+padId(Number(card.charId)||0)+'</b><span class="tier-card-name">'+escapeHtml(t.name)+'</span></div>'+
+        '<strong class="leaderboard-featured-income tier-card-income">'+fmt(income)+'/s</strong>'+
+      '</div>'+
+    '</div>';
+  }
+
   function leaderboardCardShowcase(profile){
     const cards=Array.isArray(profile?.top_cards)?profile.top_cards.slice(0,5):[];
     if(!cards.length){
       return '<div class="leaderboard-showcase empty"><span>ยังไม่มีการ์ดบนฐาน</span></div>';
     }
-    return '<div class="leaderboard-showcase" aria-label="Top 5 income cards">'+cards.map((card,index)=>{
-      const tier=Math.max(0,Math.min(TIERS.length-1,Number(card.tier)||0));
-      const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
-      const visual={
-        ...card,
-        mutation:Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0)),
-        mutation2:Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation2)||0))
-      };
-      const t=TIERS[tier],g=GRADES[grade],muts=cardMutationIds(visual);
-      const income=Math.max(0,Number(card.income)||0);
-      const mutIcons=muts.map(id=>{
-        const m=MUTATIONS[id];
-        return '<i title="'+escapeHtml(m.name)+'" style="--show-mut:'+m.color+'">'+m.icon+'</i>';
-      }).join("");
-      const title=padId(Number(card.charId)||0)+" · "+t.name+" · Grade "+g.name+
-        (muts.length?" · "+mutationNames(visual):"")+" · "+fmt(income)+"/s";
-      return '<div class="leaderboard-card tier-'+tier+' grade-'+grade+'" style="--show-tier:'+t.color+';--show-grade:'+g.color+'" title="'+escapeHtml(title)+'">'+
-        '<img src="'+imageFor(Number(card.charId)||CARD_MIN_ID)+'" alt="'+padId(Number(card.charId)||0)+'">'+
-        '<span class="leaderboard-card-grade">'+escapeHtml(g.name)+'</span>'+
-        (mutIcons?'<span class="leaderboard-card-mutations">'+mutIcons+'</span>':'')+
-        '<span class="leaderboard-card-rank">#'+(index+1)+'</span>'+
-        '<div class="leaderboard-card-meta"><b>'+padId(Number(card.charId)||0)+'</b><small>'+fmt(income)+'/s</small></div>'+
-      '</div>';
-    }).join("")+'</div>';
+    const best=cards[0],others=cards.slice(1);
+    return '<div class="leaderboard-showcase featured-layout" aria-label="Top 5 income cards">'+
+      leaderboardFeaturedShowcaseCard(best)+
+      '<div class="leaderboard-side-cards">'+others.map((card,index)=>leaderboardMiniShowcaseCard(card,index+2)).join("")+'</div>'+
+    '</div>';
   }
 
   function leaderboardRow(profile){
@@ -1546,7 +1577,7 @@
     wrap.innerHTML=onlineCache.leaders.length
       ? onlineCache.leaders.map(leaderboardRow).join("")
       : '<div class="social-empty">ยังไม่มีข้อมูลอันดับ</div>';
-    wrap.querySelectorAll(".leaderboard-card img").forEach(img=>img.addEventListener("error",e=>{
+    wrap.querySelectorAll(".leaderboard-card img,.leaderboard-featured-card img").forEach(img=>img.addEventListener("error",e=>{
       e.currentTarget.style.opacity=".12";
     },{once:true}));
   }
