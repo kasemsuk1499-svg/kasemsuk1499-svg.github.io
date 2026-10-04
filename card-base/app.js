@@ -473,12 +473,22 @@
     const a=MUTATIONS[ids[0]||0],b=MUTATIONS[ids[1]||ids[0]||0];
     return "--mutation:"+a.color+";--mutation2:"+b.color;
   }
+  function mutationShortName(id){
+    const map={
+      9:"Prism",
+      10:"Celestial",
+      11:"Abyssal",
+      12:"Chrono"
+    };
+    return map[id]||MUTATIONS[id]?.name||"Mutation";
+  }
+
   function mutationBadge(card){
     const ids=cardMutationIds(card);
     if(!ids.length)return "";
     return '<span class="mutation-badges">'+ids.map((i,slot)=>{
       const m=MUTATIONS[i];
-      return '<span class="mutation-badge mutation-'+i+' slot-'+(slot+1)+'" style="--mutation:'+m.color+'">'+m.icon+' '+m.name+'</span>';
+      return '<span class="mutation-badge mutation-'+i+' slot-'+(slot+1)+'" title="'+escapeHtml(m.name)+'" style="--mutation:'+m.color+'">'+m.icon+' '+escapeHtml(mutationShortName(i))+'</span>';
     }).join("")+'</span>';
   }
   function mutationNames(card){
