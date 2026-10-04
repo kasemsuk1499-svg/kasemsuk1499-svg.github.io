@@ -298,6 +298,23 @@ local function invoke(action,args)
 	return response.data
 end
 
+local function frameHomeCamera()
+	local character = player.Character
+	local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+	local camera = workspace.CurrentCamera
+	if not rootPart or not camera then return end
+	local look = rootPart.CFrame.LookVector
+	local target = rootPart.Position + look*18 + Vector3.new(0,4,0)
+	local eye = rootPart.Position - look*13 + Vector3.new(0,7,0)
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.CFrame = CFrame.lookAt(eye,target)
+	task.delay(0.45,function()
+		if workspace.CurrentCamera == camera then
+			camera.CameraType = Enum.CameraType.Custom
+		end
+	end)
+end
+
 local function cardMutationText(card)
 	local names = {}
 	for _,id in ipairs({card.Mutation1,card.Mutation2}) do
@@ -784,6 +801,8 @@ baseBtn.MouseButton1Click:Connect(function()
 	activePanel=nil
 	selectedSlot=nil
 	if invoke("TeleportHome") then
+		task.wait(0.08)
+		frameHomeCamera()
 		showToast("กลับมาที่ Card Tower แล้ว · กด E ที่ Stand เพื่อจัดการการ์ด",true)
 	end
 end)
@@ -839,5 +858,9 @@ applyResponsive()
 
 task.spawn(function()
 	local initial = invoke("GetState")
-	if initial then handleState(initial) end
+	if initial then
+		handleState(initial)
+		task.wait(0.8)
+		frameHomeCamera()
+	end
 end)
