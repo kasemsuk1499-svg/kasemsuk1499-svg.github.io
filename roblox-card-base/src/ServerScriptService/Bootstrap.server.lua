@@ -124,6 +124,8 @@ Action.OnServerInvoke = function(player,action,args)
 		ok,payload = CardService.RerollGrade(profile,args.Guid)
 	elseif action == "Awaken" then
 		ok,payload = CardService.Awaken(profile,args.Guid)
+	elseif action == "MutationInherit" then
+		ok,payload = CardService.InheritMutation(profile,args.TargetGuid,args.MutationId,args.DonorGuids)
 	elseif action == "Sell" then
 		ok,payload = CardService.Sell(profile,args.Guid)
 	elseif action == "ToggleLock" then
