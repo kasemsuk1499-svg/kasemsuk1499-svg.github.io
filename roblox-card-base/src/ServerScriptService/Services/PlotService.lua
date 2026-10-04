@@ -222,9 +222,13 @@ function PlotService.Render(player)
 	local sign = model:FindFirstChild("OwnerSign")
 	if sign and sign:FindFirstChild("SurfaceGui") then
 		local gui = sign.SurfaceGui
-		gui.Owner.Text = player.DisplayName
+		gui.Owner.Text = (entitlements.VIPCollector and "VIP · " or "")..player.DisplayName
+		gui.Owner.TextColor3 = entitlements.VIPCollector and Color3.fromRGB(255,235,157) or Color3.new(1,1,1)
 		local roman = require(script.Parent.BaseService).Roman(profile.Ascension)
 		gui.Title.Text = "Base Lv."..profile.BaseLevel.." · "..(roman ~= "" and ("ASC "..roman) or "No Ascension")
+		sign.Color = profile.Ascension >= 10 and Color3.fromRGB(34,25,50)
+			or profile.Ascension >= 3 and Color3.fromRGB(15,31,38)
+			or Color3.fromRGB(12,15,22)
 	end
 
 	for slot=1,Config.MaxStandSlots do
@@ -272,7 +276,7 @@ AWAKEN ★"..card.Awakening) or "")
 			if emitter then
 				local fx = (card.Tier or 0) >= 4 or (card.Mutation1 or 0) > 0 or (card.Mutation2 or 0) > 0
 				emitter.Enabled = fx
-				emitter.Rate = math.clamp(2+(card.Tier or 0)*0.7+((card.Mutation1 or 0)>0 and 2 or 0),2,11)
+				emitter.Rate = math.clamp((2+(card.Tier or 0)*0.7+((card.Mutation1 or 0)>0 and 2 or 0))*(entitlements.ShowcasePro and 1.35 or 1),2,15)
 				emitter.Color = ColorSequence.new(mutationColor(card))
 			end
 		end
