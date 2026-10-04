@@ -183,7 +183,8 @@
     storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{},
     rotatingShop:{rotationId:null,bought:{}},
     ascension:{stars:0,cores:0,perks:{income:0,luck:0,forge:0}},
-    tower:{floor:1,best:0,shards:0}
+    tower:{floor:1,best:0,shards:0},
+    lounge:{initialized:false,selected:[],sound:true,theme:"night",music:{current:"",history:[]}}
   });
 
   let state = load();
@@ -222,6 +223,10 @@
   let tradeModalState = {mode:null,targetId:null,tradeId:null,selectedGid:null};
   let tradeBusy = false;
   let authRequestBusy = false;
+  let loungeAudioContext = null;
+  let loungeAmbientTimer = 0;
+  let loungeTalkTimers = new Map();
+  let loungeMood = new Map();
 
   function newMutationEventSession(){
     const raw=globalThis.crypto&&typeof crypto.randomUUID==="function"
@@ -351,6 +356,18 @@
       floor:Math.max(1,Math.floor(Number(rawTower.floor)||1)),
       best:Math.max(0,Math.floor(Number(rawTower.best)||0)),
       shards:Math.max(0,Math.floor(Number(rawTower.shards)||0))
+    };
+    const rawLounge=s.lounge&&typeof s.lounge==="object"?s.lounge:{};
+    const rawMusic=rawLounge.music&&typeof rawLounge.music==="object"?rawLounge.music:{};
+    s.lounge={
+      initialized:!!rawLounge.initialized,
+      selected:[...new Set((Array.isArray(rawLounge.selected)?rawLounge.selected:[]).map(Number).filter(Number.isFinite))].slice(0,5),
+      sound:rawLounge.sound!==false,
+      theme:rawLounge.theme==="day"?"day":"night",
+      music:{
+        current:typeof rawMusic.current==="string"?rawMusic.current.slice(0,600):"",
+        history:[...new Set((Array.isArray(rawMusic.history)?rawMusic.history:[]).filter(x=>typeof x==="string"&&x).map(x=>x.slice(0,600)))].slice(0,8)
+      }
     };
     s.baseLevel=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(s.baseLevel)||1)));
     syncCardIndex(s);
@@ -2744,9 +2761,242 @@
     }).join("");
   }
 
+  function loungeEnsureState(){
+    if(!state.lounge||typeof state.lounge!=="object")state.lounge={initialized:false,selected:[],sound:true,theme:"night",music:{current:"",history:[]}};
+    if(!state.lounge.music||typeof state.lounge.music!=="object")state.lounge.music={current:"",history:[]};
+    const valid=new Set(state.cards.map(card=>Number(card.uid)));
+    state.lounge.selected=[...new Set((Array.isArray(state.lounge.selected)?state.lounge.selected:[]).map(Number).filter(uid=>valid.has(uid)))].slice(0,5);
+    state.lounge.music.history=[...new Set((Array.isArray(state.lounge.music.history)?state.lounge.music.history:[]).filter(x=>typeof x==="string"&&x))].slice(0,8);
+    if(!state.lounge.initialized){
+      state.lounge.selected=[...state.cards]
+        .sort((a,b)=>cardIncome(b)-cardIncome(a)||b.tier-a.tier||b.level-a.level)
+        .slice(0,Math.min(3,state.cards.length))
+        .map(card=>card.uid);
+      state.lounge.initialized=true;
+    }
+  }
+
+  function loungeSelectedCards(){
+    loungeEnsureState();
+    return state.lounge.selected.map(uid=>state.cards.find(card=>card.uid===uid)).filter(Boolean);
+  }
+
+  function loungeMoodFor(uid){
+    if(!loungeMood.has(uid))loungeMood.set(uid,{label:"ชิล ๆ",bubble:"",kind:"idle"});
+    return loungeMood.get(uid);
+  }
+
+  function loungeAudio(){
+    if(!state.lounge?.sound)return null;
+    const Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx)return null;
+    if(!loungeAudioContext)loungeAudioContext=new Ctx();
+    if(loungeAudioContext.state==="suspended")loungeAudioContext.resume().catch(()=>{});
+    return loungeAudioContext;
+  }
+
+  function playChibiSfx(kind="poyo",soft=false){
+    const ctx=loungeAudio();
+    if(!ctx)return;
+    const patterns={
+      poyo:[560,760,650],
+      nya:[720,920,820],
+      muu:[430,380],
+      heart:[700,910,1080],
+      munch:[240,330,250],
+      sleepy:[420,350,300],
+      party:[520,700,900,1120],
+      boop:[820,620]
+    };
+    const notes=patterns[kind]||patterns.poyo;
+    const now=ctx.currentTime+.01;
+    const volume=soft?.035:.075;
+    notes.forEach((freq,i)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type=i%2?"sine":"triangle";
+      osc.frequency.setValueAtTime(freq,now+i*.075);
+      if(kind==="munch")osc.frequency.exponentialRampToValueAtTime(Math.max(90,freq*.72),now+i*.075+.07);
+      gain.gain.setValueAtTime(.0001,now+i*.075);
+      gain.gain.exponentialRampToValueAtTime(volume,now+i*.075+.015);
+      gain.gain.exponentialRampToValueAtTime(.0001,now+i*.075+.095);
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.start(now+i*.075);osc.stop(now+i*.075+.11);
+    });
+  }
+
+  const LOUNGE_REACTIONS={
+    pat:[["nya","nya~ 💗","ฟินมาก"],["heart","kyu! ♡","ดีใจ"],["poyo","poyo!","อารมณ์ดี"]],
+    snack:[["munch","nom nom 🍪","หิวพอดี"],["poyo","อ้าม~","อิ่มแล้ว"],["heart","ของอร่อย! ✨","แฮปปี้"]],
+    nap:[["sleepy","zzz…","ง่วงแล้ว"],["muu","muu… 💤","เคลิ้ม"],["sleepy","…zzZ","หลับปุ๋ย"]],
+    click:[["boop","เอ๊ะ!?","ตกใจนิดนึง"],["nya","nya!","โดนจิ้ม"],["muu","muu~","งอแง"],["poyo","poyo!","ทักทาย"]]
+  };
+
+  function loungeReact(uid,action="click",soft=false){
+    const buddy=document.querySelector('.chibi-buddy[data-lounge-uid="'+uid+'"]');
+    if(!buddy)return;
+    const list=LOUNGE_REACTIONS[action]||LOUNGE_REACTIONS.click;
+    const [sound,bubble,label]=list[Math.floor(Math.random()*list.length)];
+    loungeMood.set(Number(uid),{label,bubble,kind:action});
+    buddy.classList.remove("reacting","sleeping","party");
+    void buddy.offsetWidth;
+    buddy.classList.add(action==="nap"?"sleeping":"reacting","talking");
+    const bubbleEl=buddy.querySelector(".chibi-bubble"),moodEl=buddy.querySelector(".chibi-mood");
+    if(bubbleEl)bubbleEl.textContent=bubble;
+    if(moodEl)moodEl.textContent=label;
+    playChibiSfx(sound,soft);
+    clearTimeout(loungeTalkTimers.get(Number(uid)));
+    loungeTalkTimers.set(Number(uid),setTimeout(()=>{
+      buddy.classList.remove("talking","reacting");
+      if(action!=="nap")buddy.classList.remove("sleeping");
+    },action==="nap"?4200:1800));
+  }
+
+  function loungeParty(){
+    const cards=loungeSelectedCards();
+    if(!cards.length){toast("พาจิบิเข้าห้องก่อนนน 😆");return}
+    playChibiSfx("party");
+    cards.forEach((card,i)=>{
+      const buddy=document.querySelector('.chibi-buddy[data-lounge-uid="'+card.uid+'"]');
+      if(!buddy)return;
+      buddy.classList.remove("sleeping","reacting");
+      buddy.classList.add("party","talking");
+      const bubble=buddy.querySelector(".chibi-bubble");
+      if(bubble)bubble.textContent=["♪ poyo!","✨ yay!","♫ nya~","☆ hey!","♪ woo!"][i%5];
+      setTimeout(()=>buddy.classList.remove("party","talking"),4200);
+    });
+  }
+
+  function renderLounge(){
+    const room=$("#loungeRoom"),wrap=$("#loungeBuddies"),empty=$("#loungeEmpty"),picker=$("#loungeCardPicker");
+    if(!room||!wrap||!picker)return;
+    loungeEnsureState();
+    room.classList.toggle("theme-day",state.lounge.theme==="day");
+    room.classList.toggle("theme-night",state.lounge.theme!=="day");
+    const soundBtn=$("#loungeSoundBtn"),themeBtn=$("#loungeThemeBtn");
+    if(soundBtn)soundBtn.textContent=state.lounge.sound?"🔊 เสียงจิบิ ON":"🔇 เสียงจิบิ OFF";
+    if(themeBtn)themeBtn.textContent=state.lounge.theme==="day"?"☀️ Day Room":"🌙 Night Room";
+
+    const selected=loungeSelectedCards();
+    if(empty)empty.hidden=selected.length>0;
+    wrap.innerHTML=selected.map((card,index)=>{
+      const tier=TIERS[card.tier]||TIERS[0];
+      const mood=loungeMoodFor(card.uid);
+      return '<button class="chibi-buddy" type="button" data-lounge-uid="'+card.uid+'" style="--tier:'+tier.color+';--buddy-delay:'+(-index*.31)+'s">'+
+        '<span class="chibi-bubble">'+escapeHtml(mood.bubble||"poyo~")+'</span>'+
+        '<span class="chibi-head"><img src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'"></span>'+
+        '<span class="chibi-body"></span>'+
+        '<strong class="chibi-name">'+padId(card.charId)+' · '+escapeHtml(tier.name)+'</strong>'+
+        '<small class="chibi-mood">'+escapeHtml(mood.label)+'</small>'+
+      '</button>';
+    }).join("");
+
+    $("#loungeSelectedCount").textContent=selected.length+"/5";
+    const selectedSet=new Set(state.lounge.selected);
+    const choices=[...state.cards].sort((a,b)=>selectedSet.has(b.uid)-selectedSet.has(a.uid)||cardIncome(b)-cardIncome(a)).slice(0,80);
+    picker.innerHTML=choices.length?choices.map(card=>{
+      const tier=TIERS[card.tier]||TIERS[0],selectedCard=selectedSet.has(card.uid);
+      return '<button type="button" class="lounge-pick-card '+(selectedCard?'selected':'')+'" data-lounge-pick="'+card.uid+'" style="--tier:'+tier.color+'">'+
+        '<img src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
+        '<strong>'+(selectedCard?'✓ ':'')+padId(card.charId)+'</strong>'+
+        '<small>'+escapeHtml(tier.name)+' · '+fmt(cardIncome(card))+'/s</small>'+
+      '</button>';
+    }).join(""):'<div class="social-empty">ยังไม่มีการ์ดในคลัง · ไปสุ่มใบแรกก่อน ✨</div>';
+    renderLoungeMusic();
+  }
+
+  function parseYouTubeSource(raw){
+    const input=String(raw||"").trim();
+    if(!input)return null;
+    if(/^[A-Za-z0-9_-]{11}$/.test(input)){
+      return {embed:"https://www.youtube-nocookie.com/embed/"+input+"?autoplay=1&rel=0",label:"Video · "+input};
+    }
+    let url;
+    try{url=new URL(input)}catch{
+      try{url=new URL("https://"+input)}catch{return null}
+    }
+    const host=url.hostname.replace(/^www\./,"").toLowerCase();
+    if(!["youtube.com","m.youtube.com","music.youtube.com","youtu.be","youtube-nocookie.com"].some(x=>host===x||host.endsWith("."+x)))return null;
+    const list=url.searchParams.get("list");
+    let id=url.searchParams.get("v")||"";
+    if(host==="youtu.be")id=url.pathname.split("/").filter(Boolean)[0]||"";
+    const parts=url.pathname.split("/").filter(Boolean);
+    const shortsIndex=parts.indexOf("shorts"),embedIndex=parts.indexOf("embed");
+    if(!id&&shortsIndex>=0)id=parts[shortsIndex+1]||"";
+    if(!id&&embedIndex>=0&&parts[embedIndex+1]!=="videoseries")id=parts[embedIndex+1]||"";
+    id=id.replace(/[^A-Za-z0-9_-]/g,"").slice(0,20);
+    const safeList=String(list||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,80);
+    if(id){
+      return {
+        embed:"https://www.youtube-nocookie.com/embed/"+id+"?autoplay=1&rel=0"+(safeList?"&list="+safeList:""),
+        label:"YouTube · "+id,
+        canonical:"https://www.youtube.com/watch?v="+id+(safeList?"&list="+safeList:"")
+      };
+    }
+    if(safeList){
+      return {
+        embed:"https://www.youtube-nocookie.com/embed/videoseries?list="+safeList+"&autoplay=1&rel=0",
+        label:"YouTube Playlist · "+safeList.slice(0,18),
+        canonical:"https://www.youtube.com/playlist?list="+safeList
+      };
+    }
+    return null;
+  }
+
+  function renderLoungeMusic(){
+    const iframe=$("#youtubePlayer"),empty=$("#youtubePlayerEmpty"),now=$("#youtubeNowPlaying"),history=$("#youtubeHistory");
+    if(!iframe||!history)return;
+    const current=state.lounge?.music?.current||"";
+    const parsed=parseYouTubeSource(current);
+    if(parsed){
+      if(iframe.dataset.source!==parsed.embed){
+        iframe.src=parsed.embed;
+        iframe.dataset.source=parsed.embed;
+      }
+      iframe.hidden=false;
+      if(empty)empty.hidden=true;
+      if(now)now.textContent=parsed.label;
+    }else{
+      iframe.hidden=true;
+      iframe.removeAttribute("src");
+      iframe.dataset.source="";
+      if(empty)empty.hidden=false;
+      if(now)now.textContent="—";
+    }
+    const items=state.lounge?.music?.history||[];
+    history.innerHTML=items.length?items.map((url,index)=>{
+      const item=parseYouTubeSource(url);
+      return '<div class="youtube-history-item"><button type="button" data-youtube-history="'+index+'">'+escapeHtml(item?.label||url)+'</button><small>เล่นอีกครั้ง</small></div>';
+    }).join(""):'<div class="social-empty">ยังไม่มีประวัติเพลง</div>';
+  }
+
+  function loungeLoadYouTube(raw){
+    loungeEnsureState();
+    const parsed=parseYouTubeSource(raw);
+    if(!parsed){toast("ลิงก์ YouTube / YouTube Music นี้อ่านไม่ได้");return false}
+    const canonical=parsed.canonical||String(raw).trim();
+    state.lounge.music.current=canonical;
+    state.lounge.music.history=[canonical,...state.lounge.music.history.filter(x=>x!==canonical)].slice(0,8);
+    $("#youtubeUrlInput").value=canonical;
+    renderLoungeMusic();
+    save();
+    toast("เปิด YouTube Jukebox แล้ว 🎵",true);
+    return true;
+  }
+
+  function loungeAmbientEvent(){
+    clearTimeout(loungeAmbientTimer);
+    const active=$("#panel-lounge")?.classList.contains("active");
+    const cards=active?loungeSelectedCards():[];
+    if(cards.length){
+      const card=cards[Math.floor(Math.random()*cards.length)];
+      loungeReact(card.uid,Math.random()<.18?"nap":"click",true);
+    }
+    loungeAmbientTimer=setTimeout(loungeAmbientEvent,9000+Math.random()*8000);
+  }
+
   function renderAll(){
     syncCardIndex();
-    renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();renderMutationEvent();save();
+    renderHeader();renderBase();renderLounge();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();renderMutationEvent();save();
   }
 
   function rollTargetsReady(){
@@ -3455,9 +3705,62 @@
       $$(".tab").forEach(x=>x.classList.remove("active"));$$(".panel").forEach(x=>x.classList.remove("active"));
       btn.classList.add("active");$("#panel-"+btn.dataset.tab).classList.add("active");
       if(btn.dataset.tab==="collection")renderCollection();
+      if(btn.dataset.tab==="lounge")renderLounge();
       if(btn.dataset.tab==="index")renderCardIndex();
       if(btn.dataset.tab==="online")refreshOnline();
     }));
+    $("#loungeSoundBtn")?.addEventListener("click",()=>{
+      loungeEnsureState();
+      state.lounge.sound=!state.lounge.sound;
+      if(state.lounge.sound){playChibiSfx("heart");toast("เปิดเสียงจิบิแล้ว 🔊")}
+      else toast("ปิดเสียงจิบิแล้ว 🔇");
+      renderLounge();save();
+    });
+    $("#loungeThemeBtn")?.addEventListener("click",()=>{
+      loungeEnsureState();state.lounge.theme=state.lounge.theme==="day"?"night":"day";renderLounge();save();
+    });
+    $("#loungeCardPicker")?.addEventListener("click",e=>{
+      const pick=e.target.closest("[data-lounge-pick]");if(!pick)return;
+      loungeEnsureState();
+      const uid=Number(pick.dataset.loungePick);
+      if(state.lounge.selected.includes(uid))state.lounge.selected=state.lounge.selected.filter(x=>x!==uid);
+      else if(state.lounge.selected.length<5)state.lounge.selected.push(uid);
+      else{toast("ห้องเต็มแล้ว · สูงสุด 5 จิบิ 😆");return}
+      playChibiSfx("boop");renderLounge();save();
+    });
+    $("#loungeBuddies")?.addEventListener("click",e=>{
+      const buddy=e.target.closest("[data-lounge-uid]");if(buddy)loungeReact(Number(buddy.dataset.loungeUid),"click");
+    });
+    $("#loungePatBtn")?.addEventListener("click",()=>{
+      const cards=loungeSelectedCards();if(!cards.length){toast("ยังไม่มีจิบิในห้อง");return}
+      loungeReact(cards[Math.floor(Math.random()*cards.length)].uid,"pat");
+    });
+    $("#loungeSnackBtn")?.addEventListener("click",()=>{
+      const cards=loungeSelectedCards();if(!cards.length){toast("ยังไม่มีจิบิในห้อง");return}
+      cards.forEach((card,i)=>setTimeout(()=>loungeReact(card.uid,"snack",i>0),i*180));
+    });
+    $("#loungeNapBtn")?.addEventListener("click",()=>{
+      const cards=loungeSelectedCards();if(!cards.length){toast("ยังไม่มีจิบิในห้อง");return}
+      cards.forEach((card,i)=>setTimeout(()=>loungeReact(card.uid,"nap",i>0),i*220));
+    });
+    $("#loungePartyBtn")?.addEventListener("click",loungeParty);
+    $("#youtubeSearchBtn")?.addEventListener("click",()=>{
+      const q=$("#youtubeSearchInput").value.trim();if(!q){toast("พิมพ์ชื่อเพลงก่อน");return}
+      window.open("https://www.youtube.com/results?search_query="+encodeURIComponent(q),"_blank","noopener,noreferrer");
+    });
+    $("#youtubeSearchInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")$("#youtubeSearchBtn").click()});
+    $("#youtubeLoadBtn")?.addEventListener("click",()=>loungeLoadYouTube($("#youtubeUrlInput").value));
+    $("#youtubeUrlInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")loungeLoadYouTube(e.currentTarget.value)});
+    $("#youtubeStopBtn")?.addEventListener("click",()=>{
+      loungeEnsureState();state.lounge.music.current="";renderLoungeMusic();save();
+    });
+    $("#youtubeClearHistoryBtn")?.addEventListener("click",()=>{
+      loungeEnsureState();state.lounge.music.history=[];renderLoungeMusic();save();
+    });
+    $("#youtubeHistory")?.addEventListener("click",e=>{
+      const btn=e.target.closest("[data-youtube-history]");if(!btn)return;
+      const url=state.lounge.music.history[Number(btn.dataset.youtubeHistory)];if(url)loungeLoadYouTube(url);
+    });
     $("#accountBtn").addEventListener("click",openAuth);
     $("#closeAuthModal").addEventListener("click",closeAuth);
     $("[data-close-auth]").addEventListener("click",closeAuth);
@@ -3580,6 +3883,7 @@
     onlineHeartbeatTimer=setInterval(()=>{if(gameToken)heartbeatOnline()},30000);
     mutationEventTimer=setInterval(renderMutationEvent,1000);
     rotatingShopTimer=setInterval(renderRotatingShopClock,1000);
+    loungeAmbientTimer=setTimeout(loungeAmbientEvent,7000);
     const catchUpActiveSystems=()=>{
       accrueIncomeToNow();
       if(state.rollingUntil)processRollEngine();
