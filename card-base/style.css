@@ -2371,3 +2371,13 @@ body::before{
   .mini-meta-sub,.mini-meta-sub>span{font-size:7px}
   .mini-meta-sub .tier-card-income{font-size:8px}
 }
+
+.mini-meta-sub>span b{
+  display:inline;
+}
+.mini-card .mutation-badges .mutation-badge{
+  font-size:7.5px;
+}
+@media (max-width:700px){
+  .mini-card .mutation-badges .mutation-badge{font-size:6.5px}
+}
