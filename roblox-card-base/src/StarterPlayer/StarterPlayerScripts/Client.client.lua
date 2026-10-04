@@ -635,7 +635,11 @@ local function openCollection()
 	selectedSlot = nil
 	overlay.Visible = true
 	panelTitle.Text = "CARD COLLECTION"
-	panelSub.Text = tostring((function() local n=0 for _ in pairs(state.Cards or {}) do n+=1 end return n end)()).." cards"
+	local inventoryCount=0
+	for _ in pairs(state.Cards or {}) do inventoryCount+=1 end
+	local discoveredCount=0
+	for id=1,100 do if state.Collection and state.Collection[tostring(id)] then discoveredCount+=1 end end
+	panelSub.Text = inventoryCount.."/"..Config.MaxCards.." cards · "..discoveredCount.."/100 discovered"
 	clearContent()
 	local cards = {}
 	for _,card in pairs(state.Cards or {}) do table.insert(cards,card) end
@@ -1354,7 +1358,8 @@ end
 local function renderHud()
 	if not state then return end
 	statLabels.Money.Text = fmt(state.Money)
-	statLabels.Income.Text = fmt(state.Computed.Income).."/s"
+	local boostLeft=math.max(0,(tonumber(state.Boosts and state.Boosts.DoubleIncomeUntil) or 0)-os.time())
+	statLabels.Income.Text = fmt(state.Computed.Income).."/s"..(boostLeft>0 and " ⚡2X" or "")
 	statLabels.Base.Text = "Lv."..state.BaseLevel
 	statLabels.Ascension.Text = state.Computed.AscensionRoman ~= "" and state.Computed.AscensionRoman or "—"
 	local vipOwned=state.Computed and state.Computed.Entitlements and state.Computed.Entitlements.VIPCollector
