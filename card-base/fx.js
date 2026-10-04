@@ -34,7 +34,7 @@
   const lowPower = memory <= 4 || cores <= 4;
 
   const quality = reducedMotion ? 0.18 : lowPower ? 0.52 : isMobile ? 0.66 : 1;
-  const maxParticles = Math.round((isMobile ? 84 : 176) * quality);
+  const maxParticles = Math.round((isMobile ? 64 : 132) * quality);
   const targetFps = reducedMotion ? 16 : lowPower ? 28 : isMobile ? 36 : 50;
   const frameMs = 1000 / targetFps;
 
@@ -173,7 +173,7 @@
 
     const key=chooseTexture(tier,grade,mutation,mutation2);
     const high=Math.max(tier-3,grade-6);
-    const size=(8+Math.random()*8+high*1.5)*(isMobile?.86:1);
+    const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1);
     const life=950+Math.random()*1050+(tier>=8?500:0);
 
     particles.push({
@@ -186,7 +186,7 @@
       rot:Math.random()*Math.PI*2,
       vr:(Math.random()-.5)*1.1,
       key,mutation:activeMutation,
-      alpha:.42+Math.random()*.45,
+      alpha:.56+Math.random()*.36,
       pulse:Math.random()*Math.PI*2
     });
   }
@@ -329,13 +329,13 @@
   }
 
   function drawHalo(target,rect,time){
-    const mutationPower=(target.mutation>=10?0.38:target.mutation?0.16:0)+(target.mutation2>=10?0.42:target.mutation2?0.20:0);
-    if(target.tier<8 && target.grade<9 && mutationPower<=0) return;
+    // Halo is reserved for high Tier / Grade only. Mutation uses particles + borders, not rings.
+    if(target.tier<8 && target.grade<9) return;
     const img=images.halo;
     if(!img || !img.complete) return;
     const tierPower=target.tier>=9?1:target.tier===8?.58:.35;
     const gradePower=target.grade>=9?.34:0;
-    const alpha=(tierPower+gradePower+mutationPower)*(.40+.14*Math.sin(time*.0016));
+    const alpha=(tierPower+gradePower)*(.38+.12*Math.sin(time*.0016));
     const pad=Math.min(44,Math.max(18,rect.width*.13));
     ctx.save();
     ctx.globalCompositeOperation="lighter";
