@@ -3615,3 +3615,255 @@ body::before{
     font-size:6px
   }
 }
+
+
+/* =========================================================
+   ASCENSION PRESTIGE — 40-level loop + I–X showcase rewards
+   ========================================================= */
+.ascension-permanent{
+  position:relative;
+  z-index:1;
+  margin-top:10px;
+  padding:9px 11px;
+  border:1px solid rgba(112,242,224,.22);
+  border-radius:11px;
+  background:rgba(8,14,18,.78);
+  color:#9ff5e8;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.02em
+}
+.ascension-reward-box{
+  position:relative;
+  z-index:1;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #252c3a
+}
+.ascension-reward-box .social-title{
+  align-items:flex-start
+}
+.ascension-reward-box .social-title small{
+  max-width:330px;
+  text-align:right;
+  line-height:1.35
+}
+.ascension-reward-track{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:9px
+}
+.ascension-reward{
+  min-width:0;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  padding:8px 9px;
+  border:1px solid #2a3140;
+  border-radius:11px;
+  background:rgba(9,12,18,.82)
+}
+.ascension-reward-no{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border:1px solid #40495e;
+  border-radius:9px;
+  background:#090c12;
+  color:#929db0;
+  font-size:9px;
+  font-weight:1000
+}
+.ascension-reward>span:nth-child(2){min-width:0;display:grid;gap:2px}
+.ascension-reward b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:9px
+}
+.ascension-reward small{
+  color:#7f899d;
+  font-size:7px;
+  line-height:1.35
+}
+.ascension-reward>strong{
+  font-size:7px;
+  color:#626d82
+}
+.ascension-reward.claimed{
+  border-color:rgba(117,239,225,.36);
+  background:
+    radial-gradient(circle at 0 0,rgba(105,241,224,.09),transparent 55%),
+    rgba(9,15,19,.88)
+}
+.ascension-reward.claimed .ascension-reward-no{
+  border-color:rgba(111,242,225,.42);
+  color:#a9fff5;
+  box-shadow:0 0 12px rgba(92,239,224,.10)
+}
+.ascension-reward.claimed>strong{color:#88f5e7}
+.ascension-reward.next{
+  border-color:rgba(255,236,151,.52);
+  box-shadow:0 0 18px rgba(255,220,105,.08)
+}
+.ascension-reward.next .ascension-reward-no{
+  border-color:rgba(255,236,151,.65);
+  color:#fff0a8
+}
+.ascension-reward.next>strong{color:#fff0a8}
+.ascension-reward.locked{opacity:.56}
+
+/* Every Ascension is visible in the title; I–X progressively unlock cosmetics. */
+.ascension-leader-chip,
+.visitor-ascension-chip{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  min-height:18px;
+  padding:3px 6px;
+  border:1px solid rgba(255,238,159,.36);
+  border-radius:999px;
+  background:rgba(16,14,9,.72);
+  color:#fff0a8!important;
+  font-size:7px!important;
+  font-weight:1000!important;
+  letter-spacing:.06em;
+  box-shadow:0 0 10px rgba(255,224,100,.08)
+}
+
+/* I — Ascension Aura */
+body.ascension-unlock-1 .base-rank-title{
+  text-shadow:
+    0 0 8px var(--rank),
+    0 0 20px color-mix(in srgb,var(--rank) 50%,transparent),
+    0 0 34px rgba(107,240,226,.16)
+}
+
+/* II — Roman Radiance */
+body.ascension-unlock-2 .base-rank-title{
+  letter-spacing:.025em;
+  filter:drop-shadow(0 0 7px rgba(255,238,160,.18))
+}
+
+/* III — Ascended Tower */
+body.ascension-unlock-3 .base-tower-bar{
+  border-color:rgba(108,236,224,.38);
+  box-shadow:
+    inset 0 0 22px rgba(88,231,218,.055),
+    0 0 26px rgba(81,221,209,.055)
+}
+
+/* IV — visitor entrance showcase */
+#socialBaseModal.visitor-ascension-unlock-4.show .social-base-card{
+  animation:ascensionVisitorArrival .72s cubic-bezier(.2,.8,.2,1)
+}
+@keyframes ascensionVisitorArrival{
+  0%{transform:translateY(14px) scale(.975);filter:brightness(.72)}
+  60%{transform:translateY(-2px) scale(1.006);filter:brightness(1.16)}
+  100%{transform:none;filter:none}
+}
+
+/* V — Awaken Showcase */
+body.ascension-unlock-5 .mini-card:has(.awakening-badge),
+body.ascension-unlock-5 .card-art:has(.awakening-badge),
+#socialBaseModal.visitor-ascension-unlock-5 .visitor-card:has(.awakening-badge){
+  box-shadow:
+    inset 0 0 24px rgba(255,237,155,.10),
+    0 0 15px rgba(255,224,105,.11)
+}
+body.ascension-unlock-5 .awakening-badge,
+#socialBaseModal.visitor-ascension-unlock-5 .awakening-badge{
+  border-color:#fff0a8;
+  text-shadow:0 0 7px currentColor
+}
+
+/* VI — Stellar Field */
+body.ascension-unlock-6 #panel-base{
+  position:relative;
+  isolation:isolate
+}
+body.ascension-unlock-6 #panel-base::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-10px;
+  pointer-events:none;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 12% 18%,rgba(112,246,236,.10) 0 1px,transparent 2px),
+    radial-gradient(circle at 78% 24%,rgba(255,239,166,.11) 0 1px,transparent 2px),
+    radial-gradient(circle at 38% 72%,rgba(154,130,255,.11) 0 1px,transparent 2px),
+    radial-gradient(circle at 88% 76%,rgba(112,246,236,.09) 0 1px,transparent 2px);
+  background-size:92px 92px,130px 130px,110px 110px,150px 150px
+}
+
+/* VII — Ascended Leader Frame */
+.leaderboard-row.ascension-rank-7,
+.leaderboard-row.ascension-rank-8,
+.leaderboard-row.ascension-rank-9,
+.leaderboard-row.ascension-rank-10{
+  border-color:rgba(121,238,226,.38)!important;
+  box-shadow:
+    inset 0 0 20px rgba(91,230,217,.045),
+    0 0 18px rgba(91,230,217,.045)
+}
+
+/* VIII — Dual Mutation Prestige */
+body.ascension-unlock-8 .dual-mutation,
+#socialBaseModal.visitor-ascension-unlock-8 .dual-mutation{
+  box-shadow:
+    inset 0 0 20px color-mix(in srgb,var(--mutation) 13%,transparent),
+    inset 0 0 38px color-mix(in srgb,var(--mutation2) 10%,transparent),
+    0 0 14px color-mix(in srgb,var(--mutation2) 11%,transparent)
+}
+
+/* IX — Sovereign Crown */
+body.ascension-unlock-9 .base-rank-title::before{
+  content:"♛";
+  margin-right:.32em;
+  color:#fff0a8;
+  -webkit-text-fill-color:#fff0a8;
+  text-shadow:0 0 11px rgba(255,227,112,.55)
+}
+#socialBaseModal.visitor-ascension-unlock-9 #socialBaseName::before{
+  content:"♛ ";
+  color:#fff0a8;
+  text-shadow:0 0 10px rgba(255,227,112,.4)
+}
+
+/* X — Cosmic Sovereign */
+body.ascension-unlock-10 #panel-base{
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 18% 0,rgba(99,244,231,.08),transparent 32%),
+    radial-gradient(circle at 88% 14%,rgba(255,114,226,.07),transparent 34%),
+    radial-gradient(circle at 50% 100%,rgba(255,231,135,.055),transparent 38%)
+}
+body.ascension-unlock-10 .base-tower-bar,
+#socialBaseModal.visitor-ascension-unlock-10 .visitor-tower-bar{
+  border-color:rgba(255,238,157,.46);
+  background:
+    radial-gradient(circle at 0 0,rgba(103,247,233,.08),transparent 46%),
+    radial-gradient(circle at 100% 0,rgba(255,117,229,.07),transparent 42%),
+    linear-gradient(145deg,#111722,#090c13)
+}
+#socialBaseModal.visitor-ascension-unlock-10 .social-base-card{
+  border-color:rgba(255,238,157,.44);
+  box-shadow:
+    0 0 40px rgba(104,237,225,.08),
+    0 0 72px rgba(255,111,225,.045)
+}
+
+@media (max-width:700px){
+  .ascension-reward-track{grid-template-columns:1fr}
+  .ascension-reward-box .social-title{display:grid;gap:3px}
+  .ascension-reward-box .social-title small{max-width:none;text-align:left}
+  .ascension-reward{grid-template-columns:32px minmax(0,1fr) auto}
+  .ascension-reward-no{width:32px;height:32px}
+}
+@media (prefers-reduced-motion:reduce){
+  #socialBaseModal.visitor-ascension-unlock-4.show .social-base-card{animation:none}
+}
