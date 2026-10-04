@@ -4656,3 +4656,80 @@ body.ascension-unlock-10 .base-tower-bar,
       bottom var(--walk-ms,3.4s) linear;
   }
 }
+
+
+/* ===== SINGULARITY + OMEGA + DISTINCT MUTATION VISUALS ===== */
+/* Tier 10: Singularity — cold white/cyan with a restrained event-horizon feel. */
+.tier-shell.tier-10{
+  border-color:#e8fbff;
+  box-shadow:0 0 72px rgba(193,245,255,.42),0 0 30px rgba(174,129,255,.20);
+}
+.tier-fx.tier-10 .tier-ring{
+  border-color:#e8fbff;
+  box-shadow:
+    inset 0 0 18px rgba(232,251,255,.34),
+    inset 0 0 42px rgba(151,116,255,.13)!important;
+}
+.reveal-visual.tier-10{
+  box-shadow:0 0 82px rgba(216,249,255,.56),0 0 34px rgba(174,129,255,.24)!important;
+}
+.tier-copy.tier-10 .tier-card-id,
+.tier-copy.tier-10.tier-card-id,
+.tier-copy.tier-10 .tier-card-name,
+.tier-copy.tier-10.tier-card-name,
+.tier-copy.tier-10 .tier-card-income,
+.tier-copy.tier-10.tier-card-income{
+  background:linear-gradient(90deg,#a976ff 0%,#e8fbff 22%,#ffffff 44%,#72f7ff 62%,#ffffff 80%,#a976ff 100%);
+  background-size:340% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 8px rgba(190,245,255,.72));
+  animation:tierTextFlow 1.9s linear infinite;
+}
+.tier-copy.tier-10 .tier-card-name,
+.tier-copy.tier-10.tier-card-name{letter-spacing:.065em;font-weight:1000}
+
+/* Grade Ω remains a premium clean aura, intentionally unlike Mutation FX. */
+.card-grade.grade-13,.stand-grade.grade-13,.grade-fx.grade-13{
+  border-width:2px;
+  background:linear-gradient(100deg,#1b0920,#ffb7ff,#ffffff,#a8f7ff,#ffffff,#ffb7ff,#1b0920);
+  background-size:380% 100%;
+  color:#100713;
+  box-shadow:0 0 58px rgba(255,183,255,.92),0 0 28px rgba(168,247,255,.38),inset 0 0 20px rgba(255,255,255,.58);
+  animation:wealthPrism 1.2s linear infinite,gradeSpark 1.28s ease-in-out infinite;
+}
+.grade-shell-13{
+  box-shadow:0 0 66px rgba(255,183,255,.28),0 0 30px rgba(168,247,255,.14);
+}
+
+/* New Mutation cards keep a sharper techno border in CSS; procedural particles are in fx.js. */
+.mutation-fx.mutation-13::after,
+.mutation-fx.mutation-14::after,
+.mutation-fx.mutation-15::after,
+.mutation-fx.mutation-16::after,
+.mutation-fx.mutation-17::after,
+.mutation-fx.mutation-18::after,
+.mutation-fx.mutation-19::after,
+.mutation-fx.mutation-20::after{
+  border-color:color-mix(in srgb,var(--mutation) 76%,#ffffff);
+  box-shadow:
+    inset 0 0 8px color-mix(in srgb,var(--mutation) 18%,transparent),
+    inset 0 0 28px rgba(0,0,0,.12);
+}
+.mutation-fx.mutation-13::after{border-style:dashed}
+.mutation-fx.mutation-15::after{clip-path:polygon(0 0,100% 0,100% 82%,92% 100%,8% 100%,0 84%)}
+.mutation-fx.mutation-17::after{border-style:double}
+.mutation-fx.mutation-19::after{box-shadow:inset 0 0 38px rgba(0,0,0,.38),0 0 16px color-mix(in srgb,var(--mutation) 36%,transparent)}
+.mutation-fx.mutation-20::after{border-style:dotted}
+
+@media (prefers-reduced-motion:reduce){
+  .tier-copy.tier-10 .tier-card-id,
+  .tier-copy.tier-10.tier-card-id,
+  .tier-copy.tier-10 .tier-card-name,
+  .tier-copy.tier-10.tier-card-name,
+  .tier-copy.tier-10 .tier-card-income,
+  .tier-copy.tier-10.tier-card-income,
+  .card-grade.grade-13,.stand-grade.grade-13,.grade-fx.grade-13{
+    animation:none!important;
+  }
+}
