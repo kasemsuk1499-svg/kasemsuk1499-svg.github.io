@@ -139,6 +139,33 @@ local function result(ok,payload)
 	return {ok=ok,data=ok and payload or nil,error=not ok and payload or nil}
 end
 
+local ActionRate = {}
+
+local function actionAllowed(player,action)
+	local userId = player.UserId
+	local now = os.clock()
+	local bucket = ActionRate[userId]
+	if not bucket or now-bucket.Window >= 1 then
+		bucket = {Window=now,Count=0,Last={}}
+		ActionRate[userId]=bucket
+	end
+	bucket.Count += 1
+	if bucket.Count > 28 then return false end
+
+	local cooldown = action == "GetSocial" and 0.8
+		or string.sub(action,1,5) == "Trade" and 0.12
+		or action == "GetState" and 0.25
+		or 0.04
+	local last = bucket.Last[action] or 0
+	if now-last < cooldown then return false end
+	bucket.Last[action]=now
+	return true
+end
+
+Players.PlayerRemoving:Connect(function(player)
+	ActionRate[player.UserId]=nil
+end)
+
 local function serverPlayersSnapshot(viewer)
 	local rows = {}
 	for _,other in ipairs(Players:GetPlayers()) do
@@ -166,6 +193,10 @@ local function serverPlayersSnapshot(viewer)
 end
 
 Action.OnServerInvoke = function(player,action,args)
+	action = tostring(action or "")
+	if not actionAllowed(player,action) then
+		return result(false,"ทำรายการเร็วเกินไป กรุณารอสักครู่")
+	end
 	local profile = DataService.Get(player)
 	if not profile then return result(false,"Profile ยังไม่พร้อม") end
 	args = type(args)=="table" and args or {}
