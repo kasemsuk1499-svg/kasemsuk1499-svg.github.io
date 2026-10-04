@@ -805,6 +805,10 @@ function PlotService.RenderServerLeaderboard()
 	rowsLabel.Text = #lines > 0 and table.concat(lines,"\n\n") or "Waiting for players..."
 end
 
+function PlotService.TeleportHub(player)
+	return teleportCharacter(player,Vector3.new(-96,3,3),Vector3.new(-96,3,18))
+end
+
 function PlotService.TeleportHome(player)
 	local slot = SlotByUser[player.UserId]
 	local origin = slot and PlotOrigins[slot]
