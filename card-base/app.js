@@ -227,6 +227,8 @@
   let loungeAmbientTimer = 0;
   let loungeTalkTimers = new Map();
   let loungeMood = new Map();
+  let loungeWalkTimers = new Map();
+  let loungeWalkState = new Map();
 
   function newMutationEventSession(){
     const raw=globalThis.crypto&&typeof crypto.randomUUID==="function"
@@ -2866,6 +2868,70 @@
     });
   }
 
+  function loungeInitialWalkPos(uid,index,total){
+    const key=Number(uid);
+    const existing=loungeWalkState.get(key);
+    if(existing)return existing;
+    const slots=Math.max(1,total);
+    const x=slots===1?50:14+(72*(index/Math.max(1,slots-1)));
+    const pos={x:Math.max(11,Math.min(89,x)),y:4+(index%3)*5};
+    loungeWalkState.set(key,pos);
+    return pos;
+  }
+
+  function loungeWalkBuddy(uid){
+    const key=Number(uid);
+    clearTimeout(loungeWalkTimers.get(key));
+    loungeWalkTimers.delete(key);
+    const panel=$("#panel-lounge");
+    const buddy=document.querySelector('.chibi-buddy[data-lounge-uid="'+key+'"]');
+    if(!panel?.classList.contains("active")||!buddy)return;
+
+    const current=loungeWalkState.get(key)||{x:50,y:6};
+    let nextX=current.x;
+    for(let tries=0;tries<8&&Math.abs(nextX-current.x)<13;tries++){
+      nextX=11+Math.random()*78;
+    }
+    const nextY=2+Math.random()*18;
+    const distance=Math.abs(nextX-current.x);
+    const duration=Math.round(2500+distance*34+Math.random()*950);
+
+    buddy.style.setProperty("--walk-ms",duration+"ms");
+    buddy.classList.add("walking");
+    requestAnimationFrame(()=>{
+      buddy.style.left=nextX.toFixed(2)+"%";
+      buddy.style.bottom=nextY.toFixed(1)+"px";
+    });
+    loungeWalkState.set(key,{x:nextX,y:nextY});
+
+    loungeWalkTimers.set(key,setTimeout(()=>{
+      const live=document.querySelector('.chibi-buddy[data-lounge-uid="'+key+'"]');
+      if(live)live.classList.remove("walking");
+      const rest=900+Math.random()*2400;
+      loungeWalkTimers.set(key,setTimeout(()=>loungeWalkBuddy(key),rest));
+    },duration+80));
+  }
+
+  function loungeStartWalking(cards){
+    const list=Array.isArray(cards)?cards:loungeSelectedCards();
+    const live=new Set(list.map(card=>Number(card.uid)));
+    for(const [uid,timer] of loungeWalkTimers){
+      if(!live.has(uid)){
+        clearTimeout(timer);
+        loungeWalkTimers.delete(uid);
+        loungeWalkState.delete(uid);
+      }
+    }
+    if(!$("#panel-lounge")?.classList.contains("active"))return;
+    list.forEach((card,index)=>{
+      const key=Number(card.uid);
+      loungeInitialWalkPos(key,index,list.length);
+      clearTimeout(loungeWalkTimers.get(key));
+      loungeWalkTimers.set(key,setTimeout(()=>loungeWalkBuddy(key),450+index*360+Math.random()*650));
+    });
+    if(!loungeAmbientTimer)loungeAmbientEvent();
+  }
+
   function renderLounge(){
     const room=$("#loungeRoom"),wrap=$("#loungeBuddies"),empty=$("#loungeEmpty"),picker=$("#loungeCardPicker");
     if(!room||!wrap||!picker)return;
@@ -2881,7 +2947,8 @@
     wrap.innerHTML=selected.map((card,index)=>{
       const tier=TIERS[card.tier]||TIERS[0];
       const mood=loungeMoodFor(card.uid);
-      return '<button class="chibi-buddy full-art" type="button" data-lounge-uid="'+card.uid+'" style="--tier:'+tier.color+';--buddy-delay:'+(-index*.31)+'s;--wander-speed:'+(7.2+(index*.63)).toFixed(2)+'s;--wander-step:'+(8+(index*2))+'px">'+
+      const walk=loungeInitialWalkPos(card.uid,index,selected.length);
+      return '<button class="chibi-buddy full-art" type="button" data-lounge-uid="'+card.uid+'" style="--tier:'+tier.color+';--buddy-delay:'+(-index*.31)+'s;--walk-ms:320ms;left:'+walk.x.toFixed(2)+'%;bottom:'+walk.y.toFixed(1)+'px">'+
         '<span class="chibi-bubble">'+escapeHtml(mood.bubble||"poyo~")+'</span>'+
         '<img class="chibi-full-art" src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
         '<strong class="chibi-name">'+padId(card.charId)+' · '+escapeHtml(tier.name)+'</strong>'+
@@ -2901,6 +2968,7 @@
       '</button>';
     }).join(""):'<div class="social-empty">ยังไม่มีการ์ดในคลัง · ไปสุ่มใบแรกก่อน ✨</div>';
     renderLoungeMusic();
+    loungeStartWalking(selected);
   }
 
   function parseYouTubeSource(raw){
