@@ -42,7 +42,10 @@
   canvas.id = "cardFxCanvas";
   canvas.setAttribute("aria-hidden","true");
   document.body.appendChild(canvas);
-  const ctx = canvas.getContext("2d", {alpha:true, desynchronized:true});
+  // Some mobile Chromium/WebView GPU paths can composite a desynchronized
+  // transparent canvas as an opaque black layer. Keep the desktop fast path,
+  // but use the regular alpha context on phones/tablets.
+  const ctx = canvas.getContext("2d", isMobile ? {alpha:true} : {alpha:true, desynchronized:true});
   if(!ctx) return;
 
   let dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.35 : 1.7);
