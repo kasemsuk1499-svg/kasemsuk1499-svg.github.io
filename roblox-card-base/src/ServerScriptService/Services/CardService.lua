@@ -21,7 +21,7 @@ local function cardCount(profile)
 end
 
 function CardService.Roll(profile, entitlements, playerUserId)
-	if cardCount(profile) >= 500 then return false,"คลังเต็ม 500 ใบ" end
+	if cardCount(profile) >= Config.MaxCards then return false,"คลังเต็ม "..Config.MaxCards.." ใบ" end
 	local now = os.clock()
 	local cooldown = Config.RollSeconds * ((entitlements and entitlements.TurboCollector) and Config.TurboRollMultiplier or 1)
 	local readyAt = RollCooldowns[playerUserId] or 0
