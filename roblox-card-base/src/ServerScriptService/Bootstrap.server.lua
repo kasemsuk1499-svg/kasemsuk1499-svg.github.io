@@ -106,6 +106,12 @@ BaseService.Start(DataService,MonetizationService,pushState)
 GlobalLeaderboardService.Start(DataService,MonetizationService)
 TradeService.Start(DataService,pushState,TradeEvent)
 
+task.spawn(function()
+	while task.wait(30) do
+		PlotService.RenderGlobalLeaderboard(GlobalLeaderboardService.GetTop(8))
+	end
+end)
+
 local function markAndPush(player,renderWorld)
 	DataService.MarkDirty(player)
 	pushState(player,renderWorld)
