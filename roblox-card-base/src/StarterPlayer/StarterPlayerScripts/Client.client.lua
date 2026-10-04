@@ -116,6 +116,22 @@ stroke(top,COLORS.line,0.15,1)
 local brand = makeLabel(top,"CARD BASE",UDim2.new(0,160,0,26),UDim2.new(0,16,0,10),18,COLORS.text,true)
 local subtitle = makeLabel(top,"ROBLOX · SERVER AUTHORITY",UDim2.new(0,220,0,18),UDim2.new(0,16,0,38),9,COLORS.muted,true)
 
+local hintBar = Instance.new("TextLabel")
+hintBar.Name = "ProgressHint"
+hintBar.AnchorPoint = Vector2.new(0.5,0)
+hintBar.Position = UDim2.new(0.5,0,0,92)
+hintBar.Size = UDim2.new(0,560,0,36)
+hintBar.BackgroundColor3 = Color3.fromRGB(14,18,27)
+hintBar.BackgroundTransparency = 0.08
+hintBar.Text = "Loading collector profile..."
+hintBar.TextColor3 = COLORS.accent2
+hintBar.TextSize = 11
+hintBar.Font = Enum.Font.GothamBold
+hintBar.TextWrapped = true
+hintBar.Parent = gui
+corner(hintBar,12)
+stroke(hintBar,COLORS.line,0.28,1)
+
 local stats = Instance.new("Frame")
 stats.BackgroundTransparency = 1
 stats.Size = UDim2.new(1,-210,1,-12)
@@ -360,8 +376,10 @@ local function makeCardRow(card,mode)
 			end
 		end)
 	else
-		actionButton("Level Up",function() invoke("LevelUp",{Guid=card.Guid}) end)
-		actionButton("Reroll Grade",function() invoke("RerollGrade",{Guid=card.Guid}) end)
+		local levelCost = state and Economy.UpgradeCost(state,card) or 0
+		local gradeCost = state and Economy.GradeRerollCost(state,card) or 0
+		actionButton("Level +1 · "..fmt(levelCost),function() invoke("LevelUp",{Guid=card.Guid}) end)
+		actionButton("Grade Roll · "..fmt(gradeCost),function() invoke("RerollGrade",{Guid=card.Guid}) end)
 		actionButton("Awaken",function() invoke("Awaken",{Guid=card.Guid}) end)
 		actionButton(card.Locked and "Unlock" or "Lock",function() invoke("ToggleLock",{Guid=card.Guid}) end)
 	end
@@ -451,7 +469,12 @@ local function openEndgame()
 	makeInfoCard("ASCENSION CORE",tostring(state.AscensionCores),"ใช้กับ Core Tree หรือ Awakening")
 	makeInfoCard("ENDLESS TOWER","Floor "..state.Tower.Floor,"Power "..fmt(state.Computed.TowerPower).." / "..fmt(state.Computed.TowerRequirement).." · "..state.Computed.TowerCondition)
 
-	local progressText = state.BaseLevel >= Config.BaseLevelCap and "ASCENSION READY" or ("Base Lv."..state.BaseLevel.."/40")
+	local progressText
+	if state.BaseLevel >= Config.BaseLevelCap then
+		progressText = "ASCENSION READY · RESET TO Lv.1"
+	else
+		progressText = "REBIRTH → Lv."..(state.BaseLevel+1).." · COST "..fmt(state.Computed.RebirthCost)
+	end
 	local main = makeButton(content,progressText,UDim2.new(1,-4,0,48),UDim2.new())
 	main.ZIndex=24
 	main.BackgroundColor3 = state.BaseLevel >= Config.BaseLevelCap and COLORS.accent or COLORS.panel2
@@ -536,6 +559,27 @@ local function renderHud()
 	statLabels.Income.Text = fmt(state.Computed.Income).."/s"
 	statLabels.Base.Text = "Lv."..state.BaseLevel
 	statLabels.Ascension.Text = state.Computed.AscensionRoman ~= "" and state.Computed.AscensionRoman or "—"
+
+	local cardCount = 0
+	for _ in pairs(state.Cards or {}) do cardCount += 1 end
+	local placedCount = 0
+	for _,guid in pairs(state.Placed or {}) do
+		if guid and state.Cards and state.Cards[guid] then placedCount += 1 end
+	end
+	if cardCount == 0 then
+		hintBar.Text = "START → กด ROLL PACK เพื่อรับการ์ดใบแรกฟรี"
+		hintBar.TextColor3 = COLORS.accent2
+	elseif placedCount == 0 then
+		hintBar.Text = "NEXT → ไปที่ BASE แล้วกด E ที่ Stand เพื่อวางการ์ด"
+		hintBar.TextColor3 = COLORS.gold
+	elseif state.BaseLevel >= Config.BaseLevelCap then
+		hintBar.Text = "ASCENSION READY ✦ เข้า ENDGAME เพื่อจุติและรับ Permanent Buff"
+		hintBar.TextColor3 = COLORS.gold
+	else
+		hintBar.Text = "NEXT → Rebirth Lv."..(state.BaseLevel+1).." ที่ "..fmt(state.Computed.RebirthCost).." · ตอนนี้ "..fmt(state.Money)
+		hintBar.TextColor3 = state.Money >= state.Computed.RebirthCost and COLORS.accent2 or COLORS.text
+	end
+
 	if activePanel=="collection" and overlay.Visible then openCollection()
 	elseif activePanel=="endgame" and overlay.Visible then openEndgame()
 	elseif activePanel=="stand" and overlay.Visible and selectedSlot then openStand(selectedSlot) end
@@ -553,13 +597,18 @@ rollBtn.MouseButton1Click:Connect(function()
 		local grade = Config.Grades[(card.Grade or 0)+1]
 		revealMain.Text = string.format("#%04d\n%s",card.Id,tier.name)
 		revealMain.TextColor3 = tier.color
-		revealMeta.Text = grade.name.." · "..cardMutationText(card)
+		local autoPlaced = state and state.Placed and state.Placed["1"] == card.Guid
+		revealMeta.Text = grade.name.." · "..cardMutationText(card)..(autoPlaced and "\n✦ Auto-placed on Stand 1" or "")
 		reveal.Visible = true
 	end
 end)
 baseBtn.MouseButton1Click:Connect(function()
 	overlay.Visible=false
-	showToast("เดินไปที่ Card Tower ของคุณ แล้วกด E ที่ Stand ได้เลย",true)
+	activePanel=nil
+	selectedSlot=nil
+	if invoke("TeleportHome") then
+		showToast("กลับมาที่ Card Tower แล้ว · กด E ที่ Stand เพื่อจัดการการ์ด",true)
+	end
 end)
 collectionBtn.MouseButton1Click:Connect(openCollection)
 endgameBtn.MouseButton1Click:Connect(openEndgame)
@@ -577,6 +626,8 @@ local function applyResponsive()
 	if width < 720 then
 		top.Size = UDim2.new(1,-12,0,112)
 		top.Position = UDim2.new(0,6,0,6)
+		hintBar.Position = UDim2.new(0.5,0,0,124)
+		hintBar.Size = UDim2.new(1,-12,0,38)
 		brand.Size = UDim2.new(1,-20,0,22)
 		subtitle.Size = UDim2.new(1,-20,0,16)
 		stats.Position = UDim2.new(0,8,0,60)
@@ -589,6 +640,8 @@ local function applyResponsive()
 	else
 		top.Size = UDim2.new(1,-24,0,74)
 		top.Position = UDim2.new(0,12,0,10)
+		hintBar.Position = UDim2.new(0.5,0,0,92)
+		hintBar.Size = UDim2.new(0,560,0,36)
 		stats.Position = UDim2.new(0,200,0,6)
 		stats.Size = UDim2.new(1,-210,1,-12)
 		actionBar.Size = UDim2.new(0,640,0,64)
