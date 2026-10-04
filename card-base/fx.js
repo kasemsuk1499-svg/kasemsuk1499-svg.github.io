@@ -56,6 +56,7 @@
   const spawnState = new WeakMap();
   const frameRects = new Map();
   let spawnCursor = 0;
+  let mobileParticleCount = 0;
 
   function loadTextures(){
     Object.entries(TEX).forEach(([key,src])=>{
@@ -198,7 +199,76 @@
     });
   }
 
+  function spawnMobileParticle(target){
+    if(!isMobile || reducedMotion || !target?.el?.isConnected) return;
+    const cap=target.visitor?34:26;
+    if(mobileParticleCount>=cap) return;
+
+    const m1=target.mutation||0,m2=target.mutation2||0;
+    const activeMutation=m1&&m2?(Math.random()<.5?m1:m2):(m1||m2);
+    const computed=getComputedStyle(target.el);
+    const color=activeMutation
+      ? (MUTATION_COLORS[activeMutation]||"#ffffff")
+      : (computed.getPropertyValue("--tier").trim()||"#ffffff");
+
+    const p=document.createElement("i");
+    p.className="mobile-card-particle";
+    p.setAttribute("aria-hidden","true");
+    p.textContent=Math.random()<.58?"✦":Math.random()<.72?"✧":"•";
+
+    const edge=Math.random();
+    let x,y;
+    if(edge<.42){x=8+Math.random()*84;y=72+Math.random()*22}
+    else if(edge<.72){x=8+Math.random()*84;y=6+Math.random()*18}
+    else{x=Math.random()<.5?5+Math.random()*8:87+Math.random()*8;y=18+Math.random()*66}
+
+    const strength=target.visitor?1.2:1;
+    const dx=(Math.random()-.5)*(30*strength);
+    const dy=-(20+Math.random()*34)*strength;
+    const size=(10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1);
+    const life=Math.round((900+Math.random()*650)*(target.visitor?1.05:1));
+
+    p.style.left=x+"%";
+    p.style.top=y+"%";
+    p.style.setProperty("--fx-color",color);
+    p.style.setProperty("--fx-dx",dx.toFixed(1)+"px");
+    p.style.setProperty("--fx-dy",dy.toFixed(1)+"px");
+    p.style.setProperty("--fx-size",size.toFixed(1)+"px");
+    p.style.setProperty("--fx-life",life+"ms");
+    p.style.setProperty("--fx-rot",((Math.random()-.5)*150).toFixed(0)+"deg");
+
+    mobileParticleCount++;
+    const cleanup=()=>{
+      if(!p.isConnected)return;
+      p.remove();
+      mobileParticleCount=Math.max(0,mobileParticleCount-1);
+    };
+    p.addEventListener("animationend",cleanup,{once:true});
+    target.el.appendChild(p);
+    setTimeout(cleanup,life+180);
+  }
+
+
+
   function updateSpawns(dt){
+    // Mobile browsers can fail to composite the canvas particles even while
+    // borders/halos still draw. Use lightweight DOM sparks on mobile only.
+    if(isMobile){
+      for(const t of targets){
+        if(!frameRects.get(t.el)) continue;
+        let s=spawnState.get(t.el);
+        if(!s){s={acc:Math.random()};spawnState.set(t.el,s)}
+        const nativeRate=rateFor(t.tier,t.grade,t.mutation,t.mutation2,t.visitor?2.15:1.25);
+        const floorRate=t.visitor?1.45:.85;
+        s.acc=Math.min(3,s.acc+Math.max(floorRate,nativeRate)*dt);
+        while(s.acc>=1 && mobileParticleCount<(t.visitor?34:26)){
+          s.acc-=1;
+          spawnMobileParticle(t);
+        }
+      }
+      return;
+    }
+
     // Build a ready queue first, then spend the shared particle budget in
     // round-robin order. Previously targets were processed from slot 1 onward,
     // so when maxParticles filled up the later stands could be starved forever.
