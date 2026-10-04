@@ -4306,3 +4306,41 @@ body.ascension-unlock-10 .base-tower-bar,
 @media (prefers-reduced-motion:reduce){
   .chibi-buddy,.jukebox-disc{animation:none!important}
 }
+
+
+/* Lounge full-art buddies — keep the complete card image, no face crop/body reconstruction */
+.chibi-buddy.full-art{
+  width:clamp(84px,11.5vw,132px);
+  padding:0;
+  border:0;
+  background:transparent;
+  color:inherit;
+}
+.chibi-full-art{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:190px;
+  object-fit:contain;
+  object-position:center;
+  border-radius:10px;
+  filter:
+    drop-shadow(0 10px 13px rgba(0,0,0,.34))
+    drop-shadow(0 0 12px color-mix(in srgb,var(--tier) 30%,transparent));
+  transition:transform .18s ease,filter .18s ease;
+  pointer-events:none;
+  user-select:none;
+}
+.chibi-buddy.full-art:hover .chibi-full-art{
+  transform:translateY(-5px) scale(1.035);
+  filter:
+    drop-shadow(0 13px 16px rgba(0,0,0,.38))
+    drop-shadow(0 0 18px color-mix(in srgb,var(--tier) 43%,transparent));
+}
+.chibi-buddy.full-art.reacting .chibi-full-art{transform:scale(1.04)}
+.chibi-buddy.full-art.sleeping .chibi-full-art{filter:brightness(.82) saturate(.86) drop-shadow(0 8px 10px rgba(0,0,0,.30))}
+.chibi-buddy.full-art.party .chibi-full-art{filter:brightness(1.12) saturate(1.14) drop-shadow(0 0 20px color-mix(in srgb,var(--tier) 48%,transparent))}
+@media (max-width:700px){
+  .chibi-buddy.full-art{width:19.2%}
+  .chibi-full-art{max-height:142px;border-radius:8px}
+}
