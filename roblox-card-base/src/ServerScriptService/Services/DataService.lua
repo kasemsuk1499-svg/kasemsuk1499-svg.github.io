@@ -50,6 +50,7 @@ local function defaultProfile()
 		AscensionCores = 0,
 		Perks = {Income=0,Luck=0,Forge=0},
 		Cards = {},
+		Collection = {},
 		Placed = {},
 		Tower = {Floor=1,Best=0,Shards=0},
 		Boosts = {DoubleIncomeUntil=0},
@@ -72,6 +73,11 @@ local function reconcile(raw)
 	end
 	if type(p.Perks) ~= "table" then p.Perks = deepCopy(d.Perks) end
 	if type(p.Cards) ~= "table" then p.Cards = {} end
+	if type(p.Collection) ~= "table" then p.Collection = {} end
+	for _,card in pairs(p.Cards) do
+		local id=math.clamp(math.floor(tonumber(card.Id) or 0),0,100)
+		if id > 0 then p.Collection[tostring(id)] = true end
+	end
 	if type(p.Placed) ~= "table" then p.Placed = {} end
 	if type(p.Tower) ~= "table" then p.Tower = deepCopy(d.Tower) end
 	if type(p.Boosts) ~= "table" then p.Boosts = deepCopy(d.Boosts) end
