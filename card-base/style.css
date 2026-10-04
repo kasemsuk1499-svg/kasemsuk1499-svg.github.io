@@ -2046,3 +2046,181 @@ body::before{
   background:rgba(7,9,14,.42);backdrop-filter:blur(1px);
   color:#e4e8f1;font-size:11px;font-weight:1000;letter-spacing:.14em
 }
+
+
+/* =========================================================
+   DUAL MUTATION + INHERITANCE LAB
+   ========================================================= */
+.mutation-badges{
+  position:absolute;z-index:8;top:7px;right:7px;
+  display:grid;justify-items:end;gap:3px;
+  max-width:72%;pointer-events:none
+}
+.mutation-badges .mutation-badge{
+  position:relative;top:auto;right:auto;
+  max-width:100%;
+  box-shadow:
+    0 0 13px color-mix(in srgb,var(--mutation) 36%,transparent),
+    inset 0 0 9px color-mix(in srgb,var(--mutation) 8%,transparent)
+}
+.mutation-badges .mutation-badge.slot-2{
+  transform:translateX(-5px);
+  border-style:double;
+  background:rgba(4,7,12,.92)
+}
+.mini-card .mutation-badges,
+.visitor-card .mutation-badges{top:34px}
+.mini-card .mutation-badges .mutation-badge,
+.visitor-card .mutation-badges .mutation-badge{top:auto}
+.trade-card-art .mutation-badges{top:auto;bottom:5px;right:5px;max-width:82%}
+.trade-card-art .mutation-badges .mutation-badge{top:auto;bottom:auto;right:auto;font-size:6px}
+.reveal-art .mutation-badges{top:12px;right:12px}
+.reveal-art .mutation-badges .mutation-badge{top:auto;right:auto;font-size:9px;padding:6px 9px}
+.stand-detail-art .mutation-badges{top:9px;right:9px}
+.stand-detail-art .mutation-badges .mutation-badge{top:auto;right:auto}
+.picker-art .mutation-badges{top:auto;bottom:6px;right:6px}
+.picker-art .mutation-badges .mutation-badge{top:auto;bottom:auto;right:auto;font-size:6px}
+
+.mutation-fx.dual-mutation::after{
+  border-color:color-mix(in srgb,var(--mutation) 60%,var(--mutation2));
+  box-shadow:
+    inset 0 0 20px color-mix(in srgb,var(--mutation) 15%,transparent),
+    inset 0 0 42px color-mix(in srgb,var(--mutation2) 12%,transparent),
+    0 0 15px color-mix(in srgb,var(--mutation2) 13%,transparent)
+}
+.mutation-fx.mutation-11::after,
+.mutation-fx.mutation2-11::after{
+  border-color:#ff70c4;
+  box-shadow:inset 0 0 28px rgba(255,68,173,.18),0 0 16px rgba(157,45,255,.14)
+}
+.mutation-fx.mutation-12::after,
+.mutation-fx.mutation2-12::after{
+  border-color:#8dfff4;
+  box-shadow:inset 0 0 30px rgba(119,255,241,.17),0 0 18px rgba(255,220,116,.13)
+}
+.mutation-stat{
+  color:#f5f7ff;
+  text-shadow:0 0 12px color-mix(in srgb,var(--mutation,#fff) 28%,transparent)
+}
+.index-mutation-strip{grid-template-columns:repeat(12,1fr)}
+
+.mutation-lab-banner{
+  margin:0 0 12px;padding:12px 14px;
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:center;
+  border:1px solid #3d3754;border-radius:16px;
+  background:
+    radial-gradient(circle at 7% 50%,rgba(255,95,183,.12),transparent 24%),
+    radial-gradient(circle at 94% 20%,rgba(119,255,241,.08),transparent 25%),
+    linear-gradient(145deg,#121522,#0b0e15);
+  box-shadow:inset 0 1px rgba(255,255,255,.035)
+}
+.mutation-lab-orb{
+  width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+  border:1px solid rgba(255,121,207,.34);
+  background:linear-gradient(145deg,rgba(255,95,183,.12),rgba(119,255,241,.08));
+  font-size:19px;box-shadow:0 0 22px rgba(255,95,183,.08)
+}
+.mutation-lab-banner strong{display:block;font-size:11px;color:#eef1f8}
+.mutation-lab-banner p{margin:3px 0 0;color:#8994aa;font-size:8px;line-height:1.45}
+.mutation-lab-banner>.badge{white-space:nowrap}
+
+.mutation-lab-card{width:min(760px,calc(100% - 20px))}
+.mutation-lab-target{
+  display:grid;grid-template-columns:minmax(180px,240px) minmax(0,1fr);gap:12px;align-items:center;
+  margin-bottom:12px;padding:10px;border:1px solid #32394a;border-radius:15px;
+  background:linear-gradient(145deg,#10151f,#0a0d13)
+}
+.mutation-lab-target-card{min-width:0}
+.mutation-lab-target-copy{display:grid;gap:4px;min-width:0}
+.mutation-lab-target-copy>span{
+  color:#7f8ba1;font-size:7px;font-weight:950;letter-spacing:.12em
+}
+.mutation-lab-target-copy>strong{
+  color:#f3f6fc;font-size:15px;line-height:1.2;overflow-wrap:anywhere
+}
+.mutation-lab-target-copy>small{color:#8993a6;font-size:8px;line-height:1.4}
+
+.mutation-lab-type-field{display:grid;gap:5px;margin-bottom:10px}
+.mutation-lab-type-field>span{font-size:8px;color:#9aa5b9;font-weight:900}
+.mutation-lab-type-field select{
+  width:100%;min-height:42px;padding:8px 10px;border-radius:11px;
+  border:1px solid #3a4356;background:#0b0f16;color:#eef2fa;font-size:10px
+}
+
+.mutation-lab-chance{
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;
+  margin:10px 0;padding:11px;border:1px solid #423d55;border-radius:14px;
+  background:
+    radial-gradient(circle at 7% 50%,rgba(255,95,183,.10),transparent 35%),
+    #0b0f16
+}
+.mutation-lab-chance>div:first-child{display:grid;gap:1px}
+.mutation-lab-chance span{font-size:7px;color:#8993aa;font-weight:950;letter-spacing:.12em}
+.mutation-lab-chance strong{
+  font-size:25px;line-height:1;color:#fff;
+  text-shadow:0 0 18px rgba(119,255,241,.25)
+}
+.mutation-lab-factors{font-size:8px;line-height:1.5;color:#aab4c7}
+
+.mutation-lab-donor-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 7px
+}
+.mutation-lab-donor-head>div{display:grid;gap:2px}
+.mutation-lab-donor-head strong{font-size:10px}
+.mutation-lab-donor-head small{font-size:7px;color:#8a95aa}
+.mutation-lab-donor-head button{font-size:8px}
+
+.mutation-lab-donors{
+  max-height:310px;overflow:auto;padding:3px;
+  display:grid;gap:6px;overscroll-behavior:contain
+}
+.mutation-donor-row{
+  display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px;align-items:center;
+  min-height:52px;padding:8px 9px;border:1px solid #30384a;border-radius:12px;
+  background:linear-gradient(145deg,#111621,#0b0f16);
+  cursor:pointer;transition:border-color .15s ease,background .15s ease
+}
+.mutation-donor-row:has(input:checked){
+  border-color:color-mix(in srgb,var(--mutation) 58%,#fff);
+  background:color-mix(in srgb,var(--mutation) 7%,#0c1119);
+  box-shadow:inset 0 0 16px color-mix(in srgb,var(--mutation) 6%,transparent)
+}
+.mutation-donor-row input{width:16px;height:16px;accent-color:var(--mutation)}
+.mutation-donor-id{
+  min-width:46px;color:#edf1f8;font-size:9px;font-weight:1000
+}
+.mutation-donor-meta{display:grid;gap:2px;min-width:0}
+.mutation-donor-meta b{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#dfe5f0;font-size:8px
+}
+.mutation-donor-meta small{color:#8390a6;font-size:7px}
+.mutation-donor-row>strong{
+  min-width:38px;text-align:right;color:var(--mutation);font-size:11px
+}
+.mutation-lab-actions{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:11px
+}
+.mutation-inherit-btn{
+  border-color:#51405b!important;
+  background:linear-gradient(135deg,rgba(255,95,183,.08),rgba(119,255,241,.06))!important
+}
+.mutation-inherit-btn:not(:disabled):hover{border-color:#b56faf!important}
+
+@media (max-width:700px){
+  .mutation-lab-banner{grid-template-columns:auto minmax(0,1fr)}
+  .mutation-lab-banner>.badge{grid-column:1/-1;justify-self:start}
+  .mutation-lab-target{grid-template-columns:1fr}
+  .mutation-lab-target-card{max-width:270px}
+  .mutation-lab-donor-head{align-items:flex-end}
+}
+@media (max-width:430px){
+  .mutation-lab-banner{padding:10px}
+  .mutation-lab-orb{width:36px;height:36px}
+  .mutation-lab-chance{grid-template-columns:1fr}
+  .mutation-donor-row{grid-template-columns:auto minmax(0,1fr) auto}
+  .mutation-donor-id{display:none}
+  .mutation-lab-actions{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .mutation-donor-row{transition:none}
+}
