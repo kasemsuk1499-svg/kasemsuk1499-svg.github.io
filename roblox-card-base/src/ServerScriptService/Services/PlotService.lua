@@ -613,6 +613,15 @@ function PlotService.TeleportHome(player)
 	return teleportCharacter(player,origin+Vector3.new(0,3,-22),origin+Vector3.new(0,4,0))
 end
 
+function PlotService.TeleportFloor(player,floor)
+	floor = math.clamp(math.floor(tonumber(floor) or 1),1,Config.BaseFloorCount)
+	local slot = SlotByUser[player.UserId]
+	local origin = slot and PlotOrigins[slot]
+	if not origin then return false end
+	local y = (floor-1)*18
+	return teleportCharacter(player,origin+Vector3.new(0,y+3,-8),origin+Vector3.new(0,y+4,0))
+end
+
 function PlotService.Assign(player)
 	local chosen
 	for i=1,#PlotOrigins do
