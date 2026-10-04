@@ -435,7 +435,7 @@ local function makeCardRow(card,mode)
 	local grade = Config.Grades[(card.Grade or 0)+1]
 	local row = Instance.new("Frame")
 	row.BackgroundColor3 = COLORS.panel2
-	row.Size = UDim2.new(1,-4,0,132)
+	row.Size = UDim2.new(1,-4,0,(mode=="place" or mode=="preview") and 112 or 168)
 	row.ZIndex = 23
 	row.Parent = content
 	corner(row,12)
@@ -495,6 +495,11 @@ local function makeCardRow(card,mode)
 		actionButton("Mutation Lab",function() openMutationLab(card.Guid) end)
 		actionButton("Awaken",function() invoke("Awaken",{Guid=card.Guid}) end)
 		actionButton(card.Locked and "Unlock" or "Lock",function() invoke("ToggleLock",{Guid=card.Guid}) end)
+		actionButton(state.FeaturedCard==card.Guid and "FEATURED ★" or "FEATURE ★",function()
+			local guid = state.FeaturedCard==card.Guid and "" or card.Guid
+			local result=invoke("SetFeatured",{Guid=guid})
+			if result then showToast(guid=="" and "เอาออกจาก Featured Showcase แล้ว" or "ตั้งเป็น Featured Card แล้ว ★",true) end
+		end)
 		local sellValue = state and Economy.SellValue(state,card) or 0
 		local sell = actionButton("SELL · "..fmt(sellValue),function()
 			local sold = invoke("Sell",{Guid=card.Guid})
