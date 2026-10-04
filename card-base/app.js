@@ -1911,7 +1911,7 @@
           '<div class="mini-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
             '<img src="'+imageFor(c.charId)+'" alt="Card '+padId(c.charId)+'">'+
             '<div class="tier-ring"></div>'+
-            '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+
+            '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+
             '<div class="mini-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+
               '<b><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span><span class="tier-card-name">'+t.name+'</span></b>'+
               '<span class="tier-card-sub">Lv.<span data-stand-stat="level">'+c.level+'</span> · <strong data-stand-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></span>'+
