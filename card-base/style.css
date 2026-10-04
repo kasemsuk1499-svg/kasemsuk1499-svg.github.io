@@ -4593,3 +4593,66 @@ body.ascension-unlock-10 .base-tower-bar,
 @media (prefers-reduced-motion:reduce){
   .online-gate-orbit::after{animation:none}
 }
+
+
+/* ===== Lounge real roaming movement ===== */
+/* Buddies now occupy the floor freely instead of staying in a flex row. */
+.lounge-buddies{
+  display:block;
+  pointer-events:none;
+}
+.chibi-buddy,
+.chibi-buddy.full-art{
+  position:absolute;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  transition:
+    left var(--walk-ms,3.4s) cubic-bezier(.38,.02,.34,1),
+    bottom var(--walk-ms,3.4s) cubic-bezier(.38,.02,.34,1),
+    filter .18s ease;
+  animation:none!important;
+  will-change:left,bottom;
+  pointer-events:auto;
+}
+.chibi-buddy:hover,
+.chibi-buddy.full-art:hover{
+  transform:translateX(-50%);
+  filter:brightness(1.14);
+}
+.chibi-full-art{
+  animation:chibiRoomIdle 1.8s ease-in-out infinite;
+  transform-origin:50% 92%;
+}
+.chibi-buddy.walking .chibi-full-art{
+  animation:chibiRoomWalk .34s ease-in-out infinite alternate;
+}
+.chibi-buddy.reacting .chibi-full-art{
+  animation:chibiReact .65s cubic-bezier(.2,.8,.2,1);
+}
+.chibi-buddy.sleeping .chibi-full-art{
+  animation:chibiSleep 3.4s ease-in-out infinite;
+}
+.chibi-buddy.party .chibi-full-art{
+  animation:chibiParty .54s ease-in-out infinite alternate;
+}
+@keyframes chibiRoomIdle{
+  0%,100%{transform:translateY(0) rotate(-.45deg)}
+  50%{transform:translateY(-4px) rotate(.45deg)}
+}
+@keyframes chibiRoomWalk{
+  from{transform:translateY(0) rotate(-1.2deg) scale(1)}
+  to{transform:translateY(-8px) rotate(1.2deg) scale(1.018)}
+}
+@media (max-width:700px){
+  .lounge-buddies{left:2%;right:2%}
+}
+@media (prefers-reduced-motion:reduce){
+  .chibi-full-art{animation:none!important}
+  .chibi-buddy,
+  .chibi-buddy.full-art{
+    transition:
+      left var(--walk-ms,3.4s) linear,
+      bottom var(--walk-ms,3.4s) linear;
+  }
+}
