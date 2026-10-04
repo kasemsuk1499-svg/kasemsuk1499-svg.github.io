@@ -101,7 +101,8 @@
       tier:classNumber(el,"tier-"),
       grade:classNumber(el,"grade-shell-"),
       mutation:classNumber(el,"mutation-"),
-      mutation2:classNumber(el,"mutation2-")
+      mutation2:classNumber(el,"mutation2-"),
+      visitor:!!el.closest("#socialBaseModal")
     })).filter(t=>t.tier>=4 || t.grade>=7 || t.mutation>0 || t.mutation2>0);
   }
 
@@ -123,7 +124,7 @@
     return true;
   }
 
-  function rateFor(tier,grade,mutation=0,mutation2=0){
+  function rateFor(tier,grade,mutation=0,mutation2=0,showcaseBoost=1){
     let rate=0;
     if(tier===4) rate=0.55;
     else if(tier===5) rate=0.8;
@@ -146,7 +147,7 @@
     addMutationRate(mutation);
     addMutationRate(mutation2);
     if(mutation&&mutation2)rate+=1.05;
-    return rate*quality;
+    return rate*quality*showcaseBoost;
   }
 
   function chooseTexture(tier,grade,mutation=0,mutation2=0){
@@ -179,7 +180,7 @@
 
     const key=chooseTexture(tier,grade,mutation,mutation2);
     const high=Math.max(tier-3,grade-6);
-    const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1);
+    const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1);
     const life=950+Math.random()*1050+(tier>=8?500:0);
 
     particles.push({
@@ -192,7 +193,7 @@
       rot:Math.random()*Math.PI*2,
       vr:(Math.random()-.5)*1.1,
       key,mutation:activeMutation,
-      alpha:.56+Math.random()*.36,
+      alpha:Math.min(1,(.56+Math.random()*.36)*(target.visitor?1.12:1)),
       pulse:Math.random()*Math.PI*2
     });
   }
@@ -207,7 +208,7 @@
       if(!r) continue;
       let s=spawnState.get(t.el);
       if(!s){s={acc:Math.random()};spawnState.set(t.el,s)}
-      s.acc=Math.min(4,s.acc+rateFor(t.tier,t.grade,t.mutation,t.mutation2)*dt);
+      s.acc=Math.min(4,s.acc+rateFor(t.tier,t.grade,t.mutation,t.mutation2,t.visitor?1.75:1)*dt);
       if(s.acc>=1)ready.push({t,r,s});
     }
     if(!ready.length || particles.length>=maxParticles) return;
@@ -368,7 +369,7 @@
     const pad=Math.min(44,Math.max(18,rect.width*.13));
     ctx.save();
     ctx.globalCompositeOperation="lighter";
-    ctx.globalAlpha=Math.min(.8,alpha*quality);
+    ctx.globalAlpha=Math.min(.92,alpha*quality*(target.visitor?1.28:1));
     ctx.translate(rect.left+rect.width/2,rect.top+rect.height/2);
     ctx.rotate(time*.00008*(target.tier>=9?1:-1));
     ctx.drawImage(img,-rect.width/2-pad,-rect.height/2-pad,rect.width+pad*2,rect.height+pad*2);
