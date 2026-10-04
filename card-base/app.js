@@ -51,7 +51,7 @@
   const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02,.01,.0025,.0005];
 
   const MUTATIONS = [
-    {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:96.00},
+    {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:95.85},
     {name:"Blaze",icon:"🔥",color:"#ff7043",income:2.00,luck:1.15,weight:.65},
     {name:"Thunder",icon:"⚡",color:"#69e7ff",income:2.20,luck:1.18,weight:.55},
     {name:"Frost",icon:"❄",color:"#9deaff",income:2.40,luck:1.21,weight:.50},
@@ -61,10 +61,12 @@
     {name:"Lunar",icon:"☾",color:"#bdc9ff",income:3.30,luck:1.34,weight:.35},
     {name:"Void",icon:"◆",color:"#aa69ff",income:3.60,luck:1.38,weight:.30},
     {name:"Prismatic",icon:"◇",color:"#ff83e8",income:4.20,luck:1.45,weight:.20},
-    {name:"Celestial Surge",icon:"✦",color:"#fff0a5",income:5.00,luck:1.55,weight:.15}
+    {name:"Celestial Surge",icon:"✦",color:"#fff0a5",income:5.00,luck:1.55,weight:.15},
+    {name:"Abyssal Bloom",icon:"✺",color:"#ff5fb7",income:5.80,luck:1.62,weight:.10},
+    {name:"Chrono Flux",icon:"⧖",color:"#77fff1",income:6.80,luck:1.72,weight:.05}
   ];
-  // Event pool: rarer mutations are still rarer, but the gap stays intentionally modest.
-  const MUTATION_EVENT_WEIGHTS = [0,13,12,11.5,11,10.5,10,9.5,8.5,7.5,6.5];
+  // Mutation Storm pool totals 100%. New ultra mutations are rarer, but obtainable.
+  const MUTATION_EVENT_WEIGHTS = [0,12,11.5,11,10.5,10,9.5,9,8,7,5.5,3.5,2.5];
   const MUTATION_EVENT_PULSE_CHANCE = 0.005; // 0.5% per Normal displayed card every 30 sec
 
   // =========================================================
@@ -271,10 +273,11 @@
     const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
     if(charId<CARD_MIN_ID||charId>CARD_MAX_ID)return;
     if(!targetState.cardIndex||typeof targetState.cardIndex!=="object")targetState.cardIndex={};
-    const mutation=Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0));
+    const cardMutationList=[Number(card.mutation)||0,Number(card.mutation2)||0]
+      .filter(i=>Number.isInteger(i)&&i>0&&i<MUTATIONS.length);
     const old=targetState.cardIndex[charId]||{tiers:[],mutations:[],bestGrade:0,firstSeen:seenAt,lastSeen:seenAt};
     const tiers=[...new Set([...(Array.isArray(old.tiers)?old.tiers:[]),tier])].sort((a,b)=>a-b);
-    const mutations=[...new Set([...(Array.isArray(old.mutations)?old.mutations:[]),...(mutation>0?[mutation]:[])])].sort((a,b)=>a-b);
+    const mutations=[...new Set([...(Array.isArray(old.mutations)?old.mutations:[]),...cardMutationList])].sort((a,b)=>a-b);
     targetState.cardIndex[charId]={
       tiers,
       mutations,
@@ -296,7 +299,8 @@
       .map(c=>({
         ...c,
         gid:validCardGid(c.gid)?c.gid:makeCardGid(),
-        mutation:Number.isInteger(Number(c.mutation))&&Number(c.mutation)>=0&&Number(c.mutation)<MUTATIONS.length?Number(c.mutation):0
+        mutation:Number.isInteger(Number(c.mutation))&&Number(c.mutation)>=0&&Number(c.mutation)<MUTATIONS.length?Number(c.mutation):0,
+        mutation2:Number.isInteger(Number(c.mutation2))&&Number(c.mutation2)>0&&Number(c.mutation2)<MUTATIONS.length&&Number(c.mutation2)!==Number(c.mutation)?Number(c.mutation2):0
       }));
     s.cardIndex=normalizeCardIndex(s.cardIndex);
     const rawRotating=s.rotatingShop&&typeof s.rotatingShop==="object"?s.rotatingShop:{};
@@ -453,11 +457,38 @@
     const m=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(mutation)||0))]||MUTATIONS[0];
     return "--mutation:"+m.color;
   }
+  function cardMutationIds(card){
+    const a=Math.max(0,Math.min(MUTATIONS.length-1,Number(card?.mutation)||0));
+    const b=Math.max(0,Math.min(MUTATIONS.length-1,Number(card?.mutation2)||0));
+    return [...new Set([a,b].filter(Boolean))].slice(0,2);
+  }
+  function cardMutationFxClass(card){
+    const ids=cardMutationIds(card);
+    if(!ids.length)return "";
+    return " mutation-fx mutation-"+ids[0]+(ids[1]?" mutation2-"+ids[1]+" dual-mutation":"");
+  }
+  function cardMutationStyle(card){
+    const ids=cardMutationIds(card);
+    const a=MUTATIONS[ids[0]||0],b=MUTATIONS[ids[1]||ids[0]||0];
+    return "--mutation:"+a.color+";--mutation2:"+b.color;
+  }
   function mutationBadge(card){
-    const i=Math.max(0,Math.min(MUTATIONS.length-1,Number(card?.mutation)||0));
-    if(!i)return "";
-    const m=MUTATIONS[i];
-    return '<span class="mutation-badge mutation-'+i+'" style="--mutation:'+m.color+'">'+m.icon+' '+m.name+'</span>';
+    const ids=cardMutationIds(card);
+    if(!ids.length)return "";
+    return '<span class="mutation-badges">'+ids.map((i,slot)=>{
+      const m=MUTATIONS[i];
+      return '<span class="mutation-badge mutation-'+i+' slot-'+(slot+1)+'" style="--mutation:'+m.color+'">'+m.icon+' '+m.name+'</span>';
+    }).join("")+'</span>';
+  }
+  function mutationNames(card){
+    const ids=cardMutationIds(card);
+    return ids.length?ids.map(i=>MUTATIONS[i].icon+" "+MUTATIONS[i].name).join(" + "):"Normal";
+  }
+  function mutationIncomeMultiplier(card){
+    return cardMutationIds(card).reduce((multi,i)=>multi*MUTATIONS[i].income,1);
+  }
+  function mutationLuckRawBonus(card){
+    return cardMutationIds(card).reduce((sum,i)=>sum+Math.max(0,MUTATIONS[i].luck-1),0);
   }
 
   function mutationOdds(){
@@ -474,8 +505,7 @@
     normalizeSlots();
     return state.placed.reduce((sum,uid)=>{
       const c=uid?state.cards.find(x=>x.uid===uid):null;
-      const m=c?MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(c.mutation)||0))]:null;
-      return sum+(m?Math.max(0,m.luck-1):0);
+      return sum+(c?mutationLuckRawBonus(c):0);
     },0);
   }
   function mutationLuckMultiplier(){
@@ -504,8 +534,7 @@
     return charBaseIncome(card.charId)*tier.multi*grade.multi*levelMulti;
   }
   function cardIntrinsicIncome(card){
-    const mutation=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0))]||MUTATIONS[0];
-    return cardCoreIncome(card)*mutation.income;
+    return cardCoreIncome(card)*mutationIncomeMultiplier(card);
   }
 
   function cardIncome(card){
@@ -1259,7 +1288,7 @@
     return state.placed.map((uid,slot)=>{
       const c=uid?state.cards.find(x=>x.uid===uid):null;
       if(!c)return null;
-      return {slot,charId:c.charId,tier:c.tier,grade:c.grade,mutation:Number(c.mutation)||0,level:c.level,income:Math.round(cardIncome(c))};
+      return {slot,charId:c.charId,tier:c.tier,grade:c.grade,mutation:Number(c.mutation)||0,mutation2:Number(c.mutation2)||0,level:c.level,income:Math.round(cardIncome(c))};
     }).filter(Boolean);
   }
 
@@ -1558,6 +1587,7 @@
       tier:Number(card.tier),
       grade:Number(card.grade),
       mutation:Number(card.mutation)||0,
+      mutation2:Number(card.mutation2)||0,
       level:Number(card.level)
     };
   }
@@ -1996,7 +2026,7 @@
     const low=Math.max(CARD_MIN_ID,Math.min(CARD_MAX_ID,Math.floor(Number(minId)||CARD_MIN_ID)));
     const high=Math.max(low,Math.min(CARD_MAX_ID,Math.floor(Number(maxId)||CARD_MAX_ID)));
     const charId=low+Math.floor(Math.random()*(high-low+1));
-    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),level:1,locked:false,obtainedAt:Date.now()};
+    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),mutation2:0,level:1,locked:false,obtainedAt:Date.now()};
     state.cards.push(card);
     recordCardInIndex(card,card.obtainedAt);
     return card;
