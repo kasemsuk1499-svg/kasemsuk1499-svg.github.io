@@ -21,9 +21,10 @@
 
   const MUTATION_COLORS = [
     "#8d94a3","#ff7043","#69e7ff","#9deaff","#72ffd5",
-    "#7ee47e","#ffd761","#bdc9ff","#aa69ff","#ff83e8","#fff0a5"
+    "#7ee47e","#ffd761","#bdc9ff","#aa69ff","#ff83e8","#fff0a5",
+    "#ff5fb7","#77fff1"
   ];
-  const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic"];
+  const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic","halo","flare"];
 
   const isMobile = matchMedia("(max-width: 700px)").matches ||
     /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -33,7 +34,7 @@
   const lowPower = memory <= 4 || cores <= 4;
 
   const quality = reducedMotion ? 0.18 : lowPower ? 0.52 : isMobile ? 0.66 : 1;
-  const maxParticles = Math.round((isMobile ? 72 : 150) * quality);
+  const maxParticles = Math.round((isMobile ? 84 : 176) * quality);
   const targetFps = reducedMotion ? 16 : lowPower ? 28 : isMobile ? 36 : 50;
   const frameMs = 1000 / targetFps;
 
@@ -95,8 +96,9 @@
       el,
       tier:classNumber(el,"tier-"),
       grade:classNumber(el,"grade-shell-"),
-      mutation:classNumber(el,"mutation-")
-    })).filter(t=>t.tier>=4 || t.grade>=7 || t.mutation>0);
+      mutation:classNumber(el,"mutation-"),
+      mutation2:classNumber(el,"mutation2-")
+    })).filter(t=>t.tier>=4 || t.grade>=7 || t.mutation>0 || t.mutation2>0);
   }
 
   function visibleRect(el){
@@ -115,7 +117,7 @@
     return true;
   }
 
-  function rateFor(tier,grade,mutation=0){
+  function rateFor(tier,grade,mutation=0,mutation2=0){
     let rate=0;
     if(tier===4) rate=0.55;
     else if(tier===5) rate=0.8;
@@ -131,13 +133,22 @@
     else if(grade===11) rate+=1.95;
     else if(grade>=12) rate+=2.4;
 
-    if(mutation>0) rate+=mutation>=8?2.35:mutation>=6?1.95:1.55;
+    const addMutationRate=m=>{
+      if(!m)return;
+      rate+=m>=11?3.15:m>=8?2.65:m>=6?2.2:1.8;
+    };
+    addMutationRate(mutation);
+    addMutationRate(mutation2);
+    if(mutation&&mutation2)rate+=1.05;
     return rate*quality;
   }
 
-  function chooseTexture(tier,grade,mutation=0){
+  function chooseTexture(tier,grade,mutation=0,mutation2=0){
     const r=Math.random();
-    if(mutation>0 && r<.72) return MUTATION_TEXTURES[mutation]||"spark";
+    const pickedMutation=mutation2&&mutation
+      ? (Math.random()<.5?mutation:mutation2)
+      : (mutation||mutation2);
+    if(pickedMutation>0 && r<.78) return MUTATION_TEXTURES[pickedMutation]||"spark";
     if(grade>=12) return r<.44?"flare":r<.78?"star":"spark";
     if(grade>=11) return r<.36?"flare":r<.68?"star":"spark";
     if(grade>=10) return r<.30?"flare":r<.58?"star":"spark";
@@ -152,14 +163,15 @@
 
   function spawn(target,rect){
     if(particles.length>=maxParticles) return;
-    const tier=target.tier,grade=target.grade,mutation=target.mutation||0;
+    const tier=target.tier,grade=target.grade,mutation=target.mutation||0,mutation2=target.mutation2||0;
+    const activeMutation=mutation2&&mutation?(Math.random()<.5?mutation:mutation2):(mutation||mutation2);
     const edge=Math.random();
     let nx,ny;
     if(edge<.34){nx=Math.random();ny=.06+Math.random()*.18}
     else if(edge<.67){nx=Math.random();ny=.72+Math.random()*.24}
     else {nx=Math.random()<.5?.05:.95;ny=.12+Math.random()*.78}
 
-    const key=chooseTexture(tier,grade,mutation);
+    const key=chooseTexture(tier,grade,mutation,mutation2);
     const high=Math.max(tier-3,grade-6);
     const size=(8+Math.random()*8+high*1.5)*(isMobile?.86:1);
     const life=950+Math.random()*1050+(tier>=8?500:0);
@@ -168,12 +180,12 @@
       el:target.el,nx,ny,
       dx:(Math.random()-.5)*18,
       dy:0,
-      vx:mutation===4?(10+Math.random()*20):(Math.random()-.5)*(mutation===8?16:tier>=8?10:6),
-      vy:mutation===1?-(18+Math.random()*22):mutation===3?-(2+Math.random()*8):-(7+Math.random()*14+(tier-4)*1.2),
+      vx:activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7),
+      vy:activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2),
       size,life,maxLife:life,
       rot:Math.random()*Math.PI*2,
       vr:(Math.random()-.5)*1.1,
-      key,mutation,
+      key,mutation:activeMutation,
       alpha:.42+Math.random()*.45,
       pulse:Math.random()*Math.PI*2
     });
@@ -185,7 +197,7 @@
       if(!r) continue;
       let s=spawnState.get(t.el);
       if(!s){s={acc:Math.random()};spawnState.set(t.el,s)}
-      s.acc += rateFor(t.tier,t.grade,t.mutation)*dt;
+      s.acc += rateFor(t.tier,t.grade,t.mutation,t.mutation2)*dt;
       while(s.acc>=1 && particles.length<maxParticles){
         s.acc-=1; spawn(t,r);
       }
@@ -233,18 +245,19 @@
     ctx.restore();
   }
 
-  function drawMutationBorder(target,rect,time){
-    const m=target.mutation||0;if(!m)return;
+  function drawSingleMutationBorder(m,rect,time,secondary=false){
+    if(!m)return;
     const color=MUTATION_COLORS[m]||"#fff";
-    const pulse=.72+.22*Math.sin(time*.003+m);
+    const phase=time+(secondary?760:0);
+    const pulse=.72+.22*Math.sin(phase*.003+m);
     ctx.save();
     ctx.globalCompositeOperation="lighter";
 
     if(m===2){
-      ctx.restore();drawThunderBorder(rect,time,color);return;
+      ctx.restore();drawThunderBorder(rect,phase,color);return;
     }
 
-    roundedRectPath(rect,2,m>=8?15:11);
+    roundedRectPath(rect,secondary?6:2,m>=8?15:11);
     if(m===9){
       const grad=ctx.createLinearGradient(rect.left,rect.top,rect.right,rect.bottom);
       grad.addColorStop(0,"#ff68d8");grad.addColorStop(.22,"#9c7cff");grad.addColorStop(.44,"#67eaff");
@@ -254,18 +267,31 @@
       const grad=ctx.createLinearGradient(rect.left,rect.top,rect.right,rect.bottom);
       grad.addColorStop(0,"#fff3a4");grad.addColorStop(.42,"#ffffff");grad.addColorStop(.68,"#70f5ff");grad.addColorStop(1,"#b080ff");
       ctx.strokeStyle=grad;
+    }else if(m===11){
+      const grad=ctx.createLinearGradient(rect.left,rect.bottom,rect.right,rect.top);
+      grad.addColorStop(0,"#6a174e");grad.addColorStop(.34,"#ff5fb7");grad.addColorStop(.68,"#ffc0e3");grad.addColorStop(1,"#8a2cff");
+      ctx.strokeStyle=grad;
+    }else if(m===12){
+      const grad=ctx.createLinearGradient(rect.left,rect.top,rect.right,rect.bottom);
+      grad.addColorStop(0,"#77fff1");grad.addColorStop(.36,"#ffffff");grad.addColorStop(.62,"#ffd56f");grad.addColorStop(1,"#7ea2ff");
+      ctx.strokeStyle=grad;
     }else{
       ctx.strokeStyle=color;
     }
-    ctx.lineWidth=m===10?3.2:m>=8?2.7:2.1;
-    ctx.globalAlpha=(m===1?.62:m===8?.56:.68)*pulse;
-    ctx.shadowBlur=m===10?18:m>=8?14:9;
+
+    ctx.lineWidth=(m>=11?3.5:m===10?3.2:m>=8?2.7:2.1)*(secondary?.8:1);
+    ctx.globalAlpha=(m===1?.65:m===8?.60:.74)*pulse*(secondary?.78:1);
+    ctx.shadowBlur=m>=11?22:m===10?18:m>=8?14:10;
     ctx.shadowColor=color;
 
     if(m===4){
-      ctx.setLineDash([18,10]);ctx.lineDashOffset=-time*.04;
+      ctx.setLineDash([18,10]);ctx.lineDashOffset=-phase*.04;
     }else if(m===7){
-      ctx.setLineDash([7,9]);ctx.lineDashOffset=time*.018;
+      ctx.setLineDash([7,9]);ctx.lineDashOffset=phase*.018;
+    }else if(m===11){
+      ctx.setLineDash([4,6,14,6]);ctx.lineDashOffset=-phase*.025;
+    }else if(m===12){
+      ctx.setLineDash([22,6]);ctx.lineDashOffset=phase*.035;
     }
     ctx.stroke();
     ctx.setLineDash([]);
@@ -278,17 +304,38 @@
       roundedRectPath(rect,6,14);ctx.strokeStyle="#3c145f";ctx.lineWidth=4;ctx.globalAlpha=.36;ctx.stroke();
     }else if(m===10){
       roundedRectPath(rect,7,16);ctx.strokeStyle="#ffffff";ctx.lineWidth=1.1;ctx.globalAlpha=.78;ctx.stroke();
+    }else if(m===11){
+      roundedRectPath(rect,8,17);ctx.strokeStyle="#ffb7dc";ctx.lineWidth=1.2;ctx.globalAlpha=.68*pulse;ctx.stroke();
+    }else if(m===12){
+      roundedRectPath(rect,9,18);ctx.strokeStyle="#ffffff";ctx.lineWidth=1.25;ctx.globalAlpha=.82*pulse;ctx.stroke();
     }
     ctx.restore();
   }
 
+  function drawMutationBorder(target,rect,time){
+    const m1=target.mutation||0,m2=target.mutation2||0;
+    if(m1)drawSingleMutationBorder(m1,rect,time,false);
+    if(m2)drawSingleMutationBorder(m2,rect,time,true);
+    if(m1&&m2){
+      const c1=MUTATION_COLORS[m1]||"#fff",c2=MUTATION_COLORS[m2]||"#fff";
+      const grad=ctx.createLinearGradient(rect.left,rect.top,rect.right,rect.bottom);
+      grad.addColorStop(0,c1);grad.addColorStop(.5,"#ffffff");grad.addColorStop(1,c2);
+      ctx.save();ctx.globalCompositeOperation="lighter";
+      roundedRectPath(rect,11,19);
+      ctx.strokeStyle=grad;ctx.lineWidth=1.4;
+      ctx.globalAlpha=(.48+.18*Math.sin(time*.004))*quality;
+      ctx.shadowBlur=18;ctx.shadowColor=c2;ctx.stroke();ctx.restore();
+    }
+  }
+
   function drawHalo(target,rect,time){
-    if(target.tier<8 && target.grade<9) return;
+    const mutationPower=(target.mutation>=10?0.38:target.mutation?0.16:0)+(target.mutation2>=10?0.42:target.mutation2?0.20:0);
+    if(target.tier<8 && target.grade<9 && mutationPower<=0) return;
     const img=images.halo;
     if(!img || !img.complete) return;
     const tierPower=target.tier>=9?1:target.tier===8?.58:.35;
     const gradePower=target.grade>=9?.34:0;
-    const alpha=(tierPower+gradePower)*(.38+.12*Math.sin(time*.0016));
+    const alpha=(tierPower+gradePower+mutationPower)*(.40+.14*Math.sin(time*.0016));
     const pad=Math.min(44,Math.max(18,rect.width*.13));
     ctx.save();
     ctx.globalCompositeOperation="lighter";
