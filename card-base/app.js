@@ -2881,7 +2881,7 @@
     wrap.innerHTML=selected.map((card,index)=>{
       const tier=TIERS[card.tier]||TIERS[0];
       const mood=loungeMoodFor(card.uid);
-      return '<button class="chibi-buddy full-art" type="button" data-lounge-uid="'+card.uid+'" style="--tier:'+tier.color+';--buddy-delay:'+(-index*.31)+'s">'+
+      return '<button class="chibi-buddy full-art" type="button" data-lounge-uid="'+card.uid+'" style="--tier:'+tier.color+';--buddy-delay:'+(-index*.31)+'s;--wander-speed:'+(7.2+(index*.63)).toFixed(2)+'s;--wander-step:'+(8+(index*2))+'px">'+
         '<span class="chibi-bubble">'+escapeHtml(mood.bubble||"poyo~")+'</span>'+
         '<img class="chibi-full-art" src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
         '<strong class="chibi-name">'+padId(card.charId)+' · '+escapeHtml(tier.name)+'</strong>'+
