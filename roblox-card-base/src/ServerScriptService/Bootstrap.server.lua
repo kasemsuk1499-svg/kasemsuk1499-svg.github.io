@@ -104,10 +104,20 @@ Action.OnServerInvoke = function(player,action,args)
 	if action == "GetState" then
 		return result(true,enrichedSnapshot(player))
 	end
+	if action == "TeleportHome" then
+		return result(PlotService.TeleportHome(player),true)
+	end
 
 	local ok,payload
 	if action == "RollPack" then
+		local hadPlaced = next(profile.Placed) ~= nil
 		ok,payload = CardService.Roll(profile,MonetizationService.GetEntitlements(player),player.UserId)
+		if ok and not hadPlaced then
+			local placed = BaseService.Place(profile,payload.Guid,1)
+			if placed then
+				Toast:FireClient(player,"การ์ดใบแรกถูกวางที่ Stand 1 อัตโนมัติ ✦",true)
+			end
+		end
 	elseif action == "LevelUp" then
 		ok,payload = CardService.LevelUp(profile,args.Guid)
 	elseif action == "RerollGrade" then
