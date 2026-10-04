@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MarketplaceService = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local Root = ReplicatedStorage:WaitForChild("CardBase")
@@ -261,7 +262,22 @@ reveal.BackgroundColor3 = COLORS.panel
 reveal.ZIndex = 80
 reveal.Parent = gui
 corner(reveal,18)
-stroke(reveal,COLORS.accent2,0.1,2)
+local revealStroke = stroke(reveal,COLORS.accent2,0.1,2)
+
+local revealFlash = Instance.new("Frame")
+revealFlash.Name = "RevealFlash"
+revealFlash.Visible = false
+revealFlash.BackgroundColor3 = Color3.new(1,1,1)
+revealFlash.BackgroundTransparency = 1
+revealFlash.BorderSizePixel = 0
+revealFlash.Size = UDim2.fromScale(1,1)
+revealFlash.ZIndex = 75
+revealFlash.Parent = gui
+
+local revealRarity = makeLabel(reveal,"",UDim2.new(1,-30,0,26),UDim2.new(0,15,0,47),11,COLORS.accent2,true)
+revealRarity.TextXAlignment = Enum.TextXAlignment.Center
+revealRarity.ZIndex = 81
+
 local revealTitle = makeLabel(reveal,"YOU GOT",UDim2.new(1,-30,0,30),UDim2.new(0,15,0,15),12,COLORS.muted,true)
 revealTitle.ZIndex = 81
 local revealMain = makeLabel(reveal,"",UDim2.new(1,-30,0,170),UDim2.new(0,15,0,75),28,COLORS.text,true)
@@ -857,15 +873,68 @@ local function openEndgame()
 end
 
 local function showCardReveal(card,extra)
-	local tier = Config.Tiers[(card.Tier or 0)+1]
+	local tierIndex = math.clamp(math.floor(tonumber(card.Tier) or 0),0,#Config.Tiers-1)
+	local tier = Config.Tiers[tierIndex+1]
 	local grade = Config.Grades[(card.Grade or 0)+1]
 	revealMain.Text = string.format("#%04d\n%s",card.Id,tier.name)
 	revealMain.TextColor3 = tier.color
+	revealRarity.Text = string.upper(tier.name).." DROP"
+	revealRarity.TextColor3 = tier.color
+	revealStroke.Color = tier.color
+	revealStroke.Thickness = tierIndex >= 7 and 4 or tierIndex >= 4 and 3 or 2
+	reveal.BackgroundColor3 = tier.color:Lerp(COLORS.panel,tierIndex >= 5 and 0.80 or 0.91)
+
 	local autoPlaced = state and state.Placed and state.Placed["1"] == card.Guid
 	local suffix = autoPlaced and "\n✦ Auto-placed on Stand 1" or ""
 	if extra and extra ~= "" then suffix ..= "\n"..extra end
 	revealMeta.Text = grade.name.." · "..cardMutationText(card)..suffix
+
 	reveal.Visible = true
+	reveal.Rotation = -4
+	reveal.Size = UDim2.new(0,300,0,360)
+	TweenService:Create(
+		reveal,
+		TweenInfo.new(0.32,Enum.EasingStyle.Back,Enum.EasingDirection.Out),
+		{Size=UDim2.new(0,360,0,430),Rotation=0}
+	):Play()
+
+	if tierIndex >= 3 then
+		revealFlash.BackgroundColor3 = tier.color
+		revealFlash.BackgroundTransparency = tierIndex >= 7 and 0.45 or 0.68
+		revealFlash.Visible = true
+		TweenService:Create(
+			revealFlash,
+			TweenInfo.new(tierIndex >= 7 and 0.75 or 0.45,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),
+			{BackgroundTransparency=1}
+		):Play()
+		task.delay(tierIndex >= 7 and 0.78 or 0.48,function()
+			revealFlash.Visible=false
+		end)
+
+		local burstCount = math.min(22,8+tierIndex*2)
+		for i=1,burstCount do
+			local dot=Instance.new("Frame")
+			dot.AnchorPoint=Vector2.new(0.5,0.5)
+			dot.BackgroundColor3=tier.color
+			dot.BorderSizePixel=0
+			dot.Size=UDim2.fromOffset(tierIndex>=7 and 9 or 6,tierIndex>=7 and 9 or 6)
+			dot.Position=UDim2.fromScale(0.5,0.5)
+			dot.ZIndex=79
+			dot.Parent=gui
+			corner(dot,99)
+			local angle=(math.pi*2)*(i/burstCount)+(i%3)*0.11
+			local distance=120+(i%5)*28+tierIndex*7
+			local dx=math.cos(angle)*distance
+			local dy=math.sin(angle)*distance
+			local tween=TweenService:Create(
+				dot,
+				TweenInfo.new(0.48+(i%4)*0.05,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),
+				{Position=UDim2.new(0.5,dx,0.5,dy),BackgroundTransparency=1}
+			)
+			tween:Play()
+			tween.Completed:Connect(function() dot:Destroy() end)
+		end
+	end
 end
 
 local function shopTimer(seconds)
