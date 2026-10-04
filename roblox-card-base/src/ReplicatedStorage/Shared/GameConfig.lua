@@ -74,14 +74,14 @@ Config.PassIds = {
 }
 
 Config.ProductIds = {
-	Cash15Minutes = 0,
-	Cash1Hour = 0,
-	Cash3Hours = 0,
-	DoubleIncome30Minutes = 0,
-	DoubleIncome2Hours = 0,
-	Tip10 = 0,
-	Tip50 = 0,
-	Tip100 = 0,
+	Cash15Minutes = 3716431728,
+	Cash1Hour = 3716432259,
+	Cash3Hours = 3716432298,
+	DoubleIncome30Minutes = 3716432334,
+	DoubleIncome2Hours = 3716432379,
+	Tip10 = 3716432419,
+	Tip50 = 3716432458,
+	Tip100 = 3716432495,
 }
 
 Config.ProductCashSeconds = {
