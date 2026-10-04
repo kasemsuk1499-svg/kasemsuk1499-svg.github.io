@@ -3482,6 +3482,13 @@
     return mutationId===null?true:ids.includes(Number(mutationId));
   }
 
+  function mutationInheritanceLevelBonus(donor){
+    // Old invested cards become valuable donors: Level can only add chance, never reduce it.
+    // +0.2 percentage points per level after Lv.1, capped at +25 percentage points.
+    const level=Math.max(1,Math.floor(Number(donor?.level)||1));
+    return Math.min(0.25,(level-1)*0.002);
+  }
+
   function mutationInheritanceSingleChance(target,donor){
     const occupied=cardMutationIds(target).length;
     const base=occupied>0?0.18:0.38;
@@ -3489,7 +3496,8 @@
     const tierFactor=diff>=0
       ? Math.min(1.82,1+(diff*0.18))
       : Math.pow(0.72,Math.abs(diff));
-    return Math.max(0.01,Math.min(0.78,base*tierFactor));
+    const levelBonus=mutationInheritanceLevelBonus(donor);
+    return Math.max(0.01,Math.min(0.78,(base*tierFactor)+levelBonus));
   }
 
   function mutationInheritanceCombinedChance(target,donors){
@@ -3569,10 +3577,11 @@
       const chance=mutationInheritanceSingleChance(target,c);
       const diff=c.tier-target.tier;
       const tierDelta=diff===0?"Tier เท่ากัน":diff>0?"Tier +"+diff:"Tier "+diff;
+      const levelBonus=mutationInheritanceLevelBonus(c);
       return '<label class="mutation-donor-row" style="--mutation:'+MUTATIONS[mutationId].color+'">'+
         '<input type="checkbox" data-mutation-donor="'+c.uid+'" '+(selected.has(c.uid)?'checked':'')+'>'+
         '<span class="mutation-donor-id">'+padId(c.charId)+'</span>'+
-        '<span class="mutation-donor-meta"><b>'+TIERS[c.tier].name+' · '+mutationNames(c)+'</b><small>'+tierDelta+' · ใบนี้ช่วย '+(chance*100).toFixed(chance<.1?1:0)+'%</small></span>'+
+        '<span class="mutation-donor-meta"><b>'+TIERS[c.tier].name+' · Lv.'+c.level+' · '+mutationNames(c)+'</b><small>'+tierDelta+' · Lv Bonus +'+(levelBonus*100).toFixed(1)+'% · ใบนี้ช่วย '+(chance*100).toFixed(chance<.1?1:0)+'%</small></span>'+
         '<strong>'+Math.round(chance*100)+'%</strong>'+
       '</label>';
     }).join(""):'<div class="social-empty">ไม่มี Donor '+escapeHtml(MUTATIONS[mutationId].name)+' ที่ว่างอยู่</div>';
@@ -3600,7 +3609,10 @@
     const high=donors.filter(d=>d.tier>target.tier).length;
     const same=donors.filter(d=>d.tier===target.tier).length;
     const low=donors.length-high-same;
+    const levelBonusTotal=donors.reduce((sum,d)=>sum+mutationInheritanceLevelBonus(d),0);
+    const bestLevel=Math.max(...donors.map(d=>Math.max(1,Number(d.level)||1)));
     factors.textContent=donors.length+" Donor · Tier สูงกว่า "+high+" · เท่ากัน "+same+" · ต่ำกว่า "+low+
+      " · Lv สูงสุด "+bestLevel+" · โบนัส Lv รวม +"+(levelBonusTotal*100).toFixed(1)+"%"+
       (cardMutationIds(target).length?" · ช่อง 2 ยากขึ้น":" · ช่อง 1");
   }
 
