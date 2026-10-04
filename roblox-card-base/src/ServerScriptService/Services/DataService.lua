@@ -7,7 +7,29 @@ local Config = require(Root.Shared.GameConfig)
 
 local DataService = {}
 
-local Store = DataStoreService:GetDataStore(Config.DataStoreName)
+local LocalStudioData = {}
+local Store
+
+-- Unpublished .rbxlx files have PlaceId 0 and Roblox throws immediately when
+-- GetDataStore is called. Use an in-memory adapter for local playtests, then
+-- switch automatically to the real DataStore as soon as the experience is published.
+if game.PlaceId ~= 0 then
+	local ok,result = pcall(function()
+		return DataStoreService:GetDataStore(Config.DataStoreName)
+	end)
+	if ok then Store = result end
+end
+
+if not Store then
+	Store = {}
+	function Store:UpdateAsync(key, transform)
+		local nextValue = transform(LocalStudioData[key])
+		if nextValue ~= nil then LocalStudioData[key] = nextValue end
+		return LocalStudioData[key]
+	end
+	warn("[DataService] Unpublished Studio session: using in-memory save data")
+end
+
 local Profiles = {}
 local Dirty = {}
 local Started = false
