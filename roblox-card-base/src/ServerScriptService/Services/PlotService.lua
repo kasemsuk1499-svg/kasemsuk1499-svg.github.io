@@ -19,6 +19,7 @@ local SlotByUser = {}
 local UserBySlot = {}
 local CharacterConnections = {}
 local ServerBoardGui
+local GlobalBoardGui
 
 local PlotOrigins = {
 	Vector3.new(-62,0,-48), Vector3.new(0,0,-48), Vector3.new(62,0,-48), Vector3.new(124,0,-48),
@@ -209,6 +210,30 @@ local function buildWorldShell()
 	rows.TextYAlignment = Enum.TextYAlignment.Top
 	rows.TextWrapped = false
 	rows.RichText = true
+
+	local globalBoard = makePart(
+		world,
+		"GlobalLeaderboard",
+		Vector3.new(18,10,0.6),
+		CFrame.new(-112,5,-13),
+		Color3.fromRGB(14,12,24),
+		Enum.Material.SmoothPlastic
+	)
+	globalBoard.CanCollide = false
+	local globalGui = Instance.new("SurfaceGui")
+	globalGui.Face = Enum.NormalId.Front
+	globalGui.CanvasSize = Vector2.new(760,620)
+	globalGui.AlwaysOnTop = true
+	globalGui.Parent = globalBoard
+	GlobalBoardGui = globalGui
+	local globalTitle = makeText(globalGui,"Title","GLOBAL PRESTIGE",UDim2.fromScale(0.92,0.11),UDim2.fromScale(0.04,0.04),42,Color3.fromRGB(255,242,181))
+	globalTitle.TextXAlignment = Enum.TextXAlignment.Center
+	local globalSub = makeText(globalGui,"Sub","TOP COLLECTORS",UDim2.fromScale(0.92,0.07),UDim2.fromScale(0.04,0.14),20,Color3.fromRGB(188,150,255))
+	globalSub.TextXAlignment = Enum.TextXAlignment.Center
+	local globalRows = makeText(globalGui,"Rows","Syncing global ranks...",UDim2.fromScale(0.90,0.72),UDim2.fromScale(0.05,0.23),24,Color3.fromRGB(229,225,242))
+	globalRows.Name = "Rows"
+	globalRows.TextYAlignment = Enum.TextYAlignment.Top
+	globalRows.RichText = true
 
 	ground:SetAttribute("CardBaseWorld",true)
 	plaza:SetAttribute("CardBaseWorld",true)
@@ -640,6 +665,21 @@ function PlotService.Render(player)
 		local emitter = board:FindFirstChild("FxAttachment") and board.FxAttachment:FindFirstChild("CardParticles")
 		if emitter and (not unlocked or not card) then emitter.Enabled = false end
 	end
+end
+
+function PlotService.RenderGlobalLeaderboard(rows)
+	if not GlobalBoardGui then return end
+	local label = GlobalBoardGui:FindFirstChild("Rows")
+	if not label then return end
+	local lines = {}
+	for index,entry in ipairs(rows or {}) do
+		if index > 8 then break end
+		local rank = tonumber(entry.Rank) or index
+		local medal = rank == 1 and "🥇" or rank == 2 and "🥈" or rank == 3 and "🥉" or ("#"..rank)
+		local asc = (tonumber(entry.Ascension) or 0) > 0 and ("ASC "..require(script.Parent.BaseService).Roman(entry.Ascension)) or "ASC —"
+		table.insert(lines,string.format("%s  %s\n     %s · Base %d · %s/s",medal,tostring(entry.DisplayName or entry.Name or "Collector"),asc,tonumber(entry.BaseLevel) or 1,compactNumber(entry.Income)))
+	end
+	label.Text = #lines > 0 and table.concat(lines,"\n\n") or "No global ranking data yet."
 end
 
 function PlotService.RenderServerLeaderboard()
