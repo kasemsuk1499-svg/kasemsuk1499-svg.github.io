@@ -198,7 +198,7 @@
             <h2>คลังการ์ด</h2>
           </div>
           <div class="collection-tools">
-            <input id="searchId" inputmode="numeric" placeholder="ค้นหา Character ID 1–46">
+            <input id="searchId" inputmode="numeric" placeholder="ค้นหา Character ID 1–90">
             <select id="sortCards">
               <option value="power">เรียง: รายได้สูงสุด</option>
               <option value="tier">เรียง: Tier สูงสุด</option>
@@ -206,6 +206,15 @@
               <option value="new">เรียง: ล่าสุด</option>
             </select>
           </div>
+        </div>
+        <div class="mutation-lab-banner">
+          <div class="mutation-lab-orb">🧬</div>
+          <div>
+            <div class="eyebrow">MUTATION INHERITANCE</div>
+            <strong>สืบทอด Mutation ได้สูงสุด 2 ชนิดต่อการ์ด</strong>
+            <p>ใช้การ์ดที่มี Mutation เป็นวัตถุดิบ · Tier ใกล้/สูงกว่าเป้าหมายสำเร็จง่ายกว่า · ช่องที่ 2 ยากกว่าช่องแรก</p>
+          </div>
+          <span class="badge">Donor ยิ่งเยอะ = เรทยิ่งสูง</span>
         </div>
         <div id="collection" class="collection"></div>
         <div id="emptyCollection" class="empty-state">ยังไม่มีการ์ด — ไปสุ่มซองใบแรกกัน ✨</div>
@@ -252,7 +261,7 @@
           </div>
           <div class="index-summary-note">
             <strong>เป้าหมายสะสม</strong>
-            <span>46 Character × 10 Tier + 10 Mutation</span>
+            <span>90 Character × 10 Tier + 12 Mutation</span>
             <small>Grade สูงสุดและ Mutation ที่เคยพบจะถูกบันทึกถาวร</small>
           </div>
         </div>
@@ -446,6 +455,49 @@
     </div>
 
 
+
+    <div id="mutationLabModal" class="modal mutation-lab-modal" aria-hidden="true">
+      <button class="modal-backdrop" data-close-mutation-lab type="button" aria-label="ปิด"></button>
+      <div class="modal-card mutation-lab-card">
+        <div class="modal-top">
+          <div>
+            <div class="eyebrow">MUTATION INHERITANCE LAB</div>
+            <h2>สืบทอดกลายพันธุ์</h2>
+            <p class="muted">เลือก Mutation และการ์ดวัตถุดิบชนิดเดียวกันเพื่อเพิ่มโอกาสสำเร็จ</p>
+          </div>
+          <button id="closeMutationLabModal" class="icon-btn" type="button" aria-label="ปิด">✕</button>
+        </div>
+
+        <div id="mutationLabTarget" class="mutation-lab-target"></div>
+
+        <label class="mutation-lab-type-field">
+          <span>Mutation ที่ต้องการสืบทอด</span>
+          <select id="mutationLabType"></select>
+        </label>
+
+        <div class="mutation-lab-chance">
+          <div>
+            <span>SUCCESS RATE</span>
+            <strong id="mutationLabChance">0%</strong>
+          </div>
+          <div id="mutationLabFactors" class="mutation-lab-factors">เลือก donor อย่างน้อย 1 ใบ</div>
+        </div>
+
+        <div class="mutation-lab-donor-head">
+          <div>
+            <strong>เลือก Donor</strong>
+            <small>ใช้การ์ดจริงและจะหายไปหลังพยายามสืบทอด ไม่ว่าสำเร็จหรือล้มเหลว</small>
+          </div>
+          <button id="mutationLabBestDonors" class="secondary" type="button">เลือก 3 ใบดีที่สุด</button>
+        </div>
+        <div id="mutationLabDonors" class="mutation-lab-donors"></div>
+
+        <div class="mutation-lab-actions">
+          <button id="mutationLabConfirm" class="primary" type="button" disabled>เริ่มสืบทอด</button>
+          <button id="mutationLabClear" class="secondary" type="button">ล้างที่เลือก</button>
+        </div>
+      </div>
+    </div>
 
     <div id="gradeAutoModal" class="modal grade-auto-modal" aria-hidden="true">
       <button class="modal-backdrop" data-close-grade-auto type="button" aria-label="ปิด"></button>
