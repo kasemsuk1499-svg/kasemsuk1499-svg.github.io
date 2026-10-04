@@ -53,6 +53,25 @@ function BaseService.Remove(profile,slot)
 	return true
 end
 
+function BaseService.AutoEquipBest(profile,entitlements)
+	local cards = {}
+	for _,card in pairs(profile.Cards or {}) do
+		table.insert(cards,card)
+	end
+	if #cards == 0 then return false,"ยังไม่มีการ์ด" end
+
+	table.sort(cards,function(a,b)
+		return Economy.CardIncome(profile,a,entitlements) > Economy.CardIncome(profile,b,entitlements)
+	end)
+
+	local limit = Economy.StandLimit(profile.BaseLevel)
+	profile.Placed = {}
+	for slot=1,math.min(limit,#cards) do
+		profile.Placed[tostring(slot)] = cards[slot].Guid
+	end
+	return true,{Placed=math.min(limit,#cards),Limit=limit}
+end
+
 function BaseService.Rebirth(profile)
 	if profile.BaseLevel >= Config.BaseLevelCap then return false,"ถึง Lv.40 แล้ว ใช้ Ascension" end
 	local cost = Economy.RebirthCost(profile.BaseLevel)
