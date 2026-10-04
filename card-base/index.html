@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261004-card-lounge-v3">
+  <link rel="stylesheet" href="./style.css?v=20261004-social-lounge-fix-v1">
 </head>
 <body>
   <div class="app-shell">
@@ -400,10 +400,51 @@
         </div>
 
         <div id="onlineGate" class="online-gate">
-          <div class="cloud-orb">◎</div>
-          <h3>ล็อกอินเพื่อเข้า Online Lobby</h3>
-          <p class="muted">ระบบเพื่อนและฐานสาธารณะผูกกับบัญชี Cloud Save</p>
-          <button id="onlineLoginBtn" class="primary" type="button">เข้าสู่ระบบ</button>
+          <div class="online-gate-main">
+            <div class="online-gate-orbit" aria-hidden="true">
+              <span class="orbit-core">◎</span>
+              <i class="orbit-dot d1"></i>
+              <i class="orbit-dot d2"></i>
+              <i class="orbit-dot d3"></i>
+            </div>
+            <div class="eyebrow">CLOUD SOCIAL HUB</div>
+            <h3>ล็อกอินเพื่อเข้า Online Lobby</h3>
+            <p class="muted">พกฐานและคลังการ์ดไปทุกเครื่อง · เจอเพื่อน · เยี่ยมฐาน · แลกการ์ดแบบปลอดภัย</p>
+            <button id="onlineLoginBtn" class="primary online-gate-login" type="button">เข้าสู่ระบบ Cloud</button>
+            <small class="online-gate-safe">เซฟ Local ของคุณยังเล่นต่อได้ตามปกติแม้ไม่ได้ล็อกอิน</small>
+          </div>
+
+          <div class="online-gate-preview">
+            <div class="online-preview-head">
+              <span>ONLINE FEATURES</span>
+              <b><i></i> PREVIEW</b>
+            </div>
+            <div class="online-preview-grid">
+              <div class="online-preview-card">
+                <span class="online-preview-icon">☁</span>
+                <div><strong>Cloud Save</strong><small>เล่นต่อจากเครื่องอื่นได้</small></div>
+              </div>
+              <div class="online-preview-card">
+                <span class="online-preview-icon">⌂</span>
+                <div><strong>Visit Base</strong><small>เข้าไปดู Tower ของเพื่อน</small></div>
+              </div>
+              <div class="online-preview-card">
+                <span class="online-preview-icon">⇄</span>
+                <div><strong>Safe Trade</strong><small>ล็อกการ์ดระหว่างข้อเสนอ</small></div>
+              </div>
+              <div class="online-preview-card">
+                <span class="online-preview-icon">♛</span>
+                <div><strong>Leaderboard</strong><small>โชว์ Base และ Ascension</small></div>
+              </div>
+            </div>
+            <div class="online-preview-network" aria-hidden="true">
+              <span class="network-user u1">YOU</span>
+              <span class="network-user u2">A</span>
+              <span class="network-user u3">B</span>
+              <span class="network-user u4">C</span>
+              <i class="network-line l1"></i><i class="network-line l2"></i><i class="network-line l3"></i>
+            </div>
+          </div>
         </div>
 
         <div id="onlineContent" hidden>
@@ -813,7 +854,7 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261004-card-lounge-v3" defer></script>
+  <script src="./app.js?v=20261004-social-lounge-fix-v1" defer></script>
   <script src="./fx.js?v=20261004-mobileparticles-v1" defer></script>
 </body>
 </html>
