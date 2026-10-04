@@ -20,6 +20,30 @@ local function cardCount(profile)
 	return n
 end
 
+function CardService.CreateCard(profile,minId,maxId,tier,rng)
+	rng = rng or Random.new()
+	if cardCount(profile) >= Config.MaxCards then
+		return nil,"คลังเต็ม "..Config.MaxCards.." ใบ"
+	end
+	local low = math.clamp(math.floor(tonumber(minId) or 1),1,100)
+	local high = math.clamp(math.floor(tonumber(maxId) or 100),low,100)
+	local guid = HttpService:GenerateGUID(false)
+	local card = {
+		Guid = guid,
+		Id = rng:NextInteger(low,high),
+		Tier = tier ~= nil and math.clamp(math.floor(tonumber(tier) or 0),0,#Config.Tiers-1) or Economy.RollTier(profile,rng),
+		Grade = 0,
+		Mutation1 = Economy.RollMutation(rng),
+		Mutation2 = 0,
+		Level = 1,
+		Awakening = 0,
+		Locked = false,
+		ObtainedAt = os.time(),
+	}
+	profile.Cards[guid] = card
+	return card
+end
+
 function CardService.Roll(profile, entitlements, playerUserId)
 	if cardCount(profile) >= Config.MaxCards then return false,"คลังเต็ม "..Config.MaxCards.." ใบ" end
 	local now = os.clock()
@@ -32,21 +56,8 @@ function CardService.Roll(profile, entitlements, playerUserId)
 
 	local rng = Random.new()
 	local tier = Economy.RollTier(profile,rng)
-	local id = rng:NextInteger(1,100)
-	local guid = HttpService:GenerateGUID(false)
-	local card = {
-		Guid = guid,
-		Id = id,
-		Tier = tier,
-		Grade = 0,
-		Mutation1 = Economy.RollMutation(rng),
-		Mutation2 = 0,
-		Level = 1,
-		Awakening = 0,
-		Locked = false,
-		ObtainedAt = os.time(),
-	}
-	profile.Cards[guid] = card
+	local card,err = CardService.CreateCard(profile,1,100,tier,rng)
+	if not card then return false,err end
 	return true,card
 end
 
@@ -59,20 +70,9 @@ function CardService.RollIdPack(profile, packIndex)
 	if profile.Money < cost then return false,"เงินไม่พอ · ต้องใช้ "..math.floor(cost) end
 	profile.Money -= cost
 	local rng = Random.new()
-	local guid = HttpService:GenerateGUID(false)
-	local card = {
-		Guid=guid,
-		Id=rng:NextInteger(pack.minId,pack.maxId),
-		Tier=Economy.RollTier(profile,rng),
-		Grade=0,
-		Mutation1=Economy.RollMutation(rng),
-		Mutation2=0,
-		Level=1,
-		Awakening=0,
-		Locked=false,
-		ObtainedAt=os.time(),
-	}
-	profile.Cards[guid]=card
+	local tier = Economy.RollTier(profile,rng)
+	local card,err = CardService.CreateCard(profile,pack.minId,pack.maxId,tier,rng)
+	if not card then return false,err end
 	return true,card
 end
 
