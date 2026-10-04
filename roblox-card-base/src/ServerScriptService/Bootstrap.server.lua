@@ -361,6 +361,8 @@ Action.OnServerInvoke = function(player,action,args)
 	elseif action == "AutoEquipBest" then
 		ok,payload = BaseService.AutoEquipBest(profile,MonetizationService.GetEntitlements(player))
 		if ok then DailyService.Add(profile,"Places",1) end
+	elseif action == "SetFeatured" then
+		ok,payload = BaseService.SetFeatured(profile,args.Guid)
 	elseif action == "Rebirth" then
 		ok,payload = BaseService.Rebirth(profile)
 	elseif action == "Ascend" then
