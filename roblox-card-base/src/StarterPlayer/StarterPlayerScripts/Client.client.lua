@@ -14,6 +14,7 @@ local OpenStandEvent = Remotes:WaitForChild("OpenStand")
 
 local state = nil
 local selectedSlot = nil
+local mutationTargetGuid = nil
 local activePanel = nil
 local busy = false
 
@@ -305,6 +306,60 @@ local function cardMutationText(card)
 	return #names > 0 and table.concat(names," + ") or "Normal"
 end
 
+local function cardMutationIds(card)
+	local out,seen = {},{}
+	for _,id in ipairs({tonumber(card.Mutation1) or 0,tonumber(card.Mutation2) or 0}) do
+		id = math.floor(id)
+		if id > 0 and Config.Mutations[id] and not seen[id] then
+			seen[id] = true
+			table.insert(out,id)
+		end
+	end
+	return out
+end
+
+local function isGuidPlaced(guid)
+	for _,placedGuid in pairs(state and state.Placed or {}) do
+		if placedGuid == guid then return true end
+	end
+	return false
+end
+
+local function mutationSingleChance(target,donor)
+	local occupied = #cardMutationIds(target)
+	local base = occupied > 0 and 0.18 or 0.38
+	local diff = (tonumber(donor.Tier) or 0)-(tonumber(target.Tier) or 0)
+	local tierFactor = diff >= 0 and math.min(1.82,1+(diff*0.18)) or (0.72 ^ math.abs(diff))
+	return math.clamp(base*tierFactor,0.01,0.78)
+end
+
+local function mutationBestDonors(target,mutationId)
+	local donors = {}
+	for guid,card in pairs(state and state.Cards or {}) do
+		if guid ~= target.Guid and not card.Locked and not isGuidPlaced(guid) then
+			for _,id in ipairs(cardMutationIds(card)) do
+				if id == mutationId then
+					table.insert(donors,card)
+					break
+				end
+			end
+		end
+	end
+	table.sort(donors,function(a,b)
+		return mutationSingleChance(target,a) > mutationSingleChance(target,b)
+	end)
+	while #donors > 3 do table.remove(donors) end
+	return donors
+end
+
+local function mutationCombinedChance(target,donors)
+	local fail = 1
+	for _,donor in ipairs(donors) do fail *= (1-mutationSingleChance(target,donor)) end
+	return math.min(0.95,1-fail)
+end
+
+local openMutationLab
+
 local function makeSectionHeader(text,sub)
 	local holder = Instance.new("Frame")
 	holder.BackgroundTransparency = 1
@@ -323,7 +378,7 @@ local function makeCardRow(card,mode)
 	local grade = Config.Grades[(card.Grade or 0)+1]
 	local row = Instance.new("Frame")
 	row.BackgroundColor3 = COLORS.panel2
-	row.Size = UDim2.new(1,-4,0,98)
+	row.Size = UDim2.new(1,-4,0,132)
 	row.ZIndex = 23
 	row.Parent = content
 	corner(row,12)
@@ -375,15 +430,93 @@ local function makeCardRow(card,mode)
 				overlay.Visible = false
 			end
 		end)
-	else
+	elseif mode ~= "preview" then
 		local levelCost = state and Economy.UpgradeCost(state,card) or 0
 		local gradeCost = state and Economy.GradeRerollCost(state,card) or 0
 		actionButton("Level +1 · "..fmt(levelCost),function() invoke("LevelUp",{Guid=card.Guid}) end)
 		actionButton("Grade Roll · "..fmt(gradeCost),function() invoke("RerollGrade",{Guid=card.Guid}) end)
+		actionButton("Mutation Lab",function() openMutationLab(card.Guid) end)
 		actionButton("Awaken",function() invoke("Awaken",{Guid=card.Guid}) end)
 		actionButton(card.Locked and "Unlock" or "Lock",function() invoke("ToggleLock",{Guid=card.Guid}) end)
 	end
 	return row
+end
+
+openMutationLab = function(guid)
+	if not state then return end
+	local target = state.Cards and state.Cards[guid]
+	if not target then
+		showToast("ไม่พบ Target",false)
+		return
+	end
+	mutationTargetGuid = guid
+	selectedSlot = nil
+	activePanel = "mutation"
+	overlay.Visible = true
+	panelTitle.Text = "MUTATION LAB"
+	panelSub.Text = string.format("Target #%04d · %d/2 Mutation Slot",target.Id,#cardMutationIds(target))
+	clearContent()
+
+	makeSectionHeader("TARGET",cardMutationText(target))
+	makeCardRow(target,"preview")
+
+	local owned = {}
+	for _,id in ipairs(cardMutationIds(target)) do owned[id] = true end
+	if #cardMutationIds(target) >= 2 then
+		makeSectionHeader("Mutation เต็มแล้ว","การ์ดใบนี้มี Mutation ครบ 2 ช่อง")
+		return
+	end
+
+	makeSectionHeader("INHERIT MUTATION","ใช้ Donor สูงสุด 3 ใบ · Donor จะหายไม่ว่าจะสำเร็จหรือล้มเหลว")
+	local any = false
+	for mutationId=1,12 do
+		if not owned[mutationId] then
+			local donors = mutationBestDonors(target,mutationId)
+			if #donors > 0 then
+				any = true
+				local chance = mutationCombinedChance(target,donors)
+				local def = Config.Mutations[mutationId]
+				local donorGuids = {}
+				for _,donor in ipairs(donors) do table.insert(donorGuids,donor.Guid) end
+
+				local box = Instance.new("Frame")
+				box.BackgroundColor3 = COLORS.panel2
+				box.Size = UDim2.new(1,-4,0,72)
+				box.ZIndex = 23
+				box.Parent = content
+				corner(box,12)
+				stroke(box,def.color,0.35,1)
+
+				local title = makeLabel(box,def.icon.." "..def.name,UDim2.new(0.56,0,0,24),UDim2.new(0,12,0,7),12,def.color,true)
+				title.ZIndex = 24
+				local info = makeLabel(box,string.format("%d Donor · %.1f%% chance · Income ×%.2f",#donors,chance*100,def.income),UDim2.new(0.58,0,0,22),UDim2.new(0,12,0,35),9,COLORS.muted,false)
+				info.ZIndex = 24
+				local inherit = makeButton(box,"INHERIT",UDim2.new(0,126,0,42),UDim2.new(1,-138,0,15))
+				inherit.ZIndex = 24
+				inherit.BackgroundColor3 = def.color:Lerp(COLORS.panel2,0.58)
+				inherit.MouseButton1Click:Connect(function()
+					local result = invoke("MutationInherit",{
+						TargetGuid = guid,
+						MutationId = mutationId,
+						DonorGuids = donorGuids,
+					})
+					if result then
+						if result.Success then
+							showToast("🧬 สืบทอด "..def.name.." สำเร็จ!",true)
+						else
+							showToast(string.format("สืบทอดไม่สำเร็จ · ใช้ Donor %d ใบ",result.Consumed or #donorGuids),false)
+						end
+						task.defer(function()
+							if state and state.Cards and state.Cards[guid] then openMutationLab(guid) end
+						end)
+					end
+				end)
+			end
+		end
+	end
+	if not any then
+		makeSectionHeader("ยังไม่มี Donor","หา Card ที่ติด Mutation และถอดออกจากฐานก่อน แล้วค่อยนำมาสืบทอด")
+	end
 end
 
 local function openCollection()
@@ -582,7 +715,8 @@ local function renderHud()
 
 	if activePanel=="collection" and overlay.Visible then openCollection()
 	elseif activePanel=="endgame" and overlay.Visible then openEndgame()
-	elseif activePanel=="stand" and overlay.Visible and selectedSlot then openStand(selectedSlot) end
+	elseif activePanel=="stand" and overlay.Visible and selectedSlot then openStand(selectedSlot)
+	elseif activePanel=="mutation" and overlay.Visible and mutationTargetGuid then openMutationLab(mutationTargetGuid) end
 end
 
 local function handleState(newState)
@@ -613,7 +747,7 @@ end)
 collectionBtn.MouseButton1Click:Connect(openCollection)
 endgameBtn.MouseButton1Click:Connect(openEndgame)
 storeBtn.MouseButton1Click:Connect(openStore)
-closeBtn.MouseButton1Click:Connect(function() overlay.Visible=false;activePanel=nil;selectedSlot=nil end)
+closeBtn.MouseButton1Click:Connect(function() overlay.Visible=false;activePanel=nil;selectedSlot=nil;mutationTargetGuid=nil end)
 revealClose.MouseButton1Click:Connect(function() reveal.Visible=false end)
 OpenStandEvent.OnClientEvent:Connect(openStand)
 ToastEvent.OnClientEvent:Connect(showToast)
