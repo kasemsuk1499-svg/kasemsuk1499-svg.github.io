@@ -2574,7 +2574,7 @@
     $("#perkIncomeRank").textContent=perks.income+"/"+ASCENSION_PERK_MAX;
     $("#perkLuckRank").textContent=perks.luck+"/"+ASCENSION_PERK_MAX;
     $("#perkForgeRank").textContent=perks.forge+"/"+ASCENSION_PERK_MAX;
-    $("[data-asc-perk]").forEach(btn=>{
+    $$("[data-asc-perk]").forEach(btn=>{
       const key=btn.dataset.ascPerk;
       btn.disabled=cores<1||perks[key]>=ASCENSION_PERK_MAX;
     });
@@ -3329,7 +3329,7 @@
     $("#authPasswordConfirm").addEventListener("keydown",e=>{if(e.key==="Enter")signupAccount()});
     $("#onlineLoginBtn").addEventListener("click",openAuth);
     $("#ascendBtn")?.addEventListener("click",claimAscension);
-    $("[data-asc-perk]").forEach(btn=>btn.addEventListener("click",()=>buyAscensionPerk(btn.dataset.ascPerk)));
+    $$("[data-asc-perk]").forEach(btn=>btn.addEventListener("click",()=>buyAscensionPerk(btn.dataset.ascPerk)));
     $("#towerChallengeBtn")?.addEventListener("click",challengeTower);
     $("#towerCoreBtn")?.addEventListener("click",forgeTowerCore);
     $("#refreshOnlineBtn").addEventListener("click",refreshOnline);
