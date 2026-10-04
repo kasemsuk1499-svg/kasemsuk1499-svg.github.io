@@ -2381,3 +2381,195 @@ body::before{
 @media (max-width:700px){
   .mini-card .mutation-badges .mutation-badge{font-size:6.5px}
 }
+
+
+/* =========================================================
+   LEADERBOARD CARD SHOWCASE — top 5 income cards
+   ========================================================= */
+.leaderboard-row{
+  grid-template-columns:52px minmax(160px,250px) minmax(300px,1fr) 112px auto;
+  min-height:118px;
+}
+.leaderboard-showcase{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:7px;
+  overflow:hidden;
+}
+.leaderboard-showcase.empty{
+  min-height:82px;
+  display:grid;
+  place-items:center;
+  border:1px dashed rgba(255,255,255,.08);
+  border-radius:12px;
+  color:#667086;
+  font-size:9px;
+}
+.leaderboard-card{
+  --show-tier:#8f98aa;
+  --show-grade:#a0a6b1;
+  position:relative;
+  flex:0 0 58px;
+  width:58px;
+  height:82px;
+  overflow:hidden;
+  border-radius:10px;
+  border:1px solid color-mix(in srgb,var(--show-tier) 66%,#2b3343);
+  background:#080b10;
+  box-shadow:
+    0 5px 12px rgba(0,0,0,.26),
+    0 0 9px color-mix(in srgb,var(--show-tier) 12%,transparent),
+    inset 0 0 9px color-mix(in srgb,var(--show-tier) 7%,transparent);
+}
+.leaderboard-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(4,7,11,.04) 42%,rgba(4,6,10,.28) 63%,rgba(4,6,10,.90) 100%);
+}
+.leaderboard-card img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
+.leaderboard-card-grade{
+  position:absolute;
+  z-index:3;
+  top:4px;
+  left:4px;
+  min-width:25px;
+  padding:3px 4px;
+  border-radius:6px;
+  border:1px solid color-mix(in srgb,var(--show-grade) 75%,#fff);
+  background:rgba(5,8,12,.88);
+  color:var(--show-grade);
+  font-size:6.5px;
+  font-weight:1000;
+  line-height:1;
+  text-align:center;
+  box-shadow:0 0 8px color-mix(in srgb,var(--show-grade) 24%,transparent);
+}
+.leaderboard-card-mutations{
+  position:absolute;
+  z-index:3;
+  top:4px;
+  right:4px;
+  display:grid;
+  gap:2px;
+}
+.leaderboard-card-mutations i{
+  width:15px;
+  height:15px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--show-mut) 65%,#fff);
+  background:rgba(5,8,12,.90);
+  color:var(--show-mut);
+  font-size:7px;
+  font-style:normal;
+  box-shadow:0 0 7px color-mix(in srgb,var(--show-mut) 28%,transparent);
+}
+.leaderboard-card-rank{
+  position:absolute;
+  z-index:3;
+  left:4px;
+  bottom:23px;
+  color:rgba(255,255,255,.58);
+  font-size:6px;
+  font-weight:900;
+}
+.leaderboard-card-meta{
+  position:absolute;
+  z-index:3;
+  left:4px;
+  right:4px;
+  bottom:4px;
+  min-width:0;
+  display:grid;
+  gap:1px;
+}
+.leaderboard-card-meta b,
+.leaderboard-card-meta small{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-shadow:0 1px 2px #000;
+}
+.leaderboard-card-meta b{
+  color:#fff;
+  font-size:6.5px;
+  line-height:1;
+}
+.leaderboard-card-meta small{
+  color:color-mix(in srgb,var(--show-tier) 72%,#fff);
+  font-size:6px;
+  font-weight:900;
+  line-height:1;
+}
+.leaderboard-actions{
+  grid-column:auto;
+  justify-content:flex-end;
+  align-content:center;
+  max-width:180px;
+}
+.leaderboard-stats{
+  align-self:center;
+}
+@media (hover:hover) and (pointer:fine){
+  .leaderboard-card{
+    transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;
+  }
+  .leaderboard-card:hover{
+    transform:translateY(-3px) scale(1.04);
+    z-index:5;
+    border-color:color-mix(in srgb,var(--show-tier) 84%,#fff);
+    box-shadow:
+      0 8px 18px rgba(0,0,0,.32),
+      0 0 15px color-mix(in srgb,var(--show-tier) 20%,transparent);
+  }
+}
+@media (max-width:980px){
+  .leaderboard-row{
+    grid-template-columns:42px minmax(150px,1fr) auto;
+  }
+  .leaderboard-showcase{
+    grid-column:2/4;
+    overflow-x:auto;
+    padding:2px 0 4px;
+    scrollbar-width:thin;
+  }
+  .leaderboard-stats{
+    grid-column:2;
+    text-align:left;
+    min-width:0;
+  }
+  .leaderboard-actions{
+    grid-column:3;
+    max-width:none;
+  }
+}
+@media (max-width:700px){
+  .leaderboard-row{
+    grid-template-columns:36px minmax(0,1fr);
+    min-height:0;
+  }
+  .leaderboard-showcase{
+    grid-column:2;
+  }
+  .leaderboard-card{
+    flex-basis:52px;
+    width:52px;
+    height:74px;
+  }
+  .leaderboard-stats{grid-column:2}
+  .leaderboard-actions{grid-column:2;justify-content:flex-start}
+}
+@media (prefers-reduced-motion:reduce){
+  .leaderboard-card{transition:none!important}
+}
