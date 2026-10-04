@@ -110,6 +110,22 @@ local function keyFor(userId)
 	return "u_"..tostring(userId)
 end
 
+local function updateWithRetry(key,transform,attempts)
+	attempts = math.max(1,math.floor(tonumber(attempts) or 3))
+	local lastError
+	for attempt=1,attempts do
+		local ok,result = pcall(function()
+			return Store:UpdateAsync(key,transform)
+		end)
+		if ok then return true,result end
+		lastError=result
+		if attempt < attempts then
+			task.wait(0.45*attempt)
+		end
+	end
+	return false,lastError
+end
+
 function DataService.Get(player)
 	return Profiles[player.UserId]
 end
@@ -121,20 +137,18 @@ end
 function DataService.Load(player)
 	local now = os.time()
 	local conflict = false
-	local ok,result = pcall(function()
-		return Store:UpdateAsync(keyFor(player.UserId),function(old)
-			local profile = reconcile(old)
-			local lockId = tostring(profile.Meta.SessionJobId or "")
-			local lockAt = tonumber(profile.Meta.SessionUpdatedAt) or 0
-			if lockId ~= "" and lockId ~= game.JobId and now-lockAt < Config.SessionLockSeconds then
-				conflict = true
-				return profile
-			end
-			profile.Meta.SessionJobId = game.JobId
-			profile.Meta.SessionUpdatedAt = now
+	local ok,result = updateWithRetry(keyFor(player.UserId),function(old)
+		local profile = reconcile(old)
+		local lockId = tostring(profile.Meta.SessionJobId or "")
+		local lockAt = tonumber(profile.Meta.SessionUpdatedAt) or 0
+		if lockId ~= "" and lockId ~= game.JobId and now-lockAt < Config.SessionLockSeconds then
+			conflict = true
 			return profile
-		end)
-	end)
+		end
+		profile.Meta.SessionJobId = game.JobId
+		profile.Meta.SessionUpdatedAt = now
+		return profile
+	end,3)
 	if not ok then
 		warn("[DataService] Load failed",player.UserId,result)
 		player:Kick("โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่")
@@ -159,17 +173,15 @@ function DataService.Save(player, release)
 	snapshot.Meta.SessionUpdatedAt = now
 	snapshot.Meta.SessionJobId = release and "" or game.JobId
 
-	local ok,result = pcall(function()
-		return Store:UpdateAsync(keyFor(player.UserId),function(old)
-			local current = reconcile(old)
-			local lockId = tostring(current.Meta.SessionJobId or "")
-			local lockAt = tonumber(current.Meta.SessionUpdatedAt) or 0
-			if lockId ~= "" and lockId ~= game.JobId and now-lockAt < Config.SessionLockSeconds then
-				return current
-			end
-			return snapshot
-		end)
-	end)
+	local ok,result = updateWithRetry(keyFor(player.UserId),function(old)
+		local current = reconcile(old)
+		local lockId = tostring(current.Meta.SessionJobId or "")
+		local lockAt = tonumber(current.Meta.SessionUpdatedAt) or 0
+		if lockId ~= "" and lockId ~= game.JobId and now-lockAt < Config.SessionLockSeconds then
+			return current
+		end
+		return snapshot
+	end,3)
 	if not ok then
 		warn("[DataService] Save failed",player.UserId,result)
 		return false
