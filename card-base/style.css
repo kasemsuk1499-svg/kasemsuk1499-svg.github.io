@@ -2923,3 +2923,240 @@ body::before{
   .base-floor-btn{grid-template-columns:1fr;text-align:center;justify-items:center}
   .base-floor-meta small{white-space:normal;text-align:center;line-height:1.25}
 }
+
+
+/* =========================================================
+   MOBILE POLISH — mobile-only overrides
+   Desktop (701px+) intentionally untouched.
+   ========================================================= */
+@media (max-width:700px){
+  html,body{
+    max-width:100%;
+    overflow-x:hidden
+  }
+  body{
+    padding-bottom:calc(74px + env(safe-area-inset-bottom))
+  }
+  .app-shell{
+    width:100%;
+    max-width:100%;
+    padding-left:max(10px,env(safe-area-inset-left));
+    padding-right:max(10px,env(safe-area-inset-right))
+  }
+
+  /* Compact header that never pushes the page wider than the phone. */
+  .topbar{
+    grid-template-columns:minmax(0,1fr) auto;
+    min-width:0
+  }
+  .brand,.brand>div,.account-chip,.account-copy{min-width:0}
+  .brand-title{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap
+  }
+  .account-copy strong{max-width:92px}
+
+  /* Swipeable stats, but without creating page-level horizontal scroll. */
+  .stats{
+    max-width:100%;
+    scroll-snap-type:x proximity;
+    overscroll-behavior-x:contain
+  }
+  .stat{
+    flex:1 0 88px;
+    scroll-snap-align:start
+  }
+
+  /* Six main tabs fit in one fixed bottom row on phones. */
+  .tabs{
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:2px;
+    padding:6px max(5px,env(safe-area-inset-right))
+      calc(6px + env(safe-area-inset-bottom))
+      max(5px,env(safe-area-inset-left))
+  }
+  .tab{
+    min-height:52px;
+    padding:6px 1px;
+    gap:2px;
+    border-radius:10px;
+    font-size:8px;
+    line-height:1.05
+  }
+  .tab-icon{font-size:16px;line-height:1}
+
+  /* Base header stacks cleanly instead of squeezing title + badges. */
+  #panel-base .hero-row{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:9px;
+    margin-bottom:10px
+  }
+  #panel-base .hero-row>div:first-child{min-width:0;width:100%}
+  #panel-base .hero-row h1{
+    font-size:clamp(25px,8vw,32px);
+    line-height:1.08;
+    overflow-wrap:anywhere
+  }
+  #panel-base .hero-row .muted{margin-bottom:0}
+  #panel-base .hero-badges{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px
+  }
+  #panel-base .hero-badges .badge{
+    min-width:0;
+    text-align:center;
+    white-space:normal;
+    line-height:1.25
+  }
+
+  /* Tower selector: thumb-friendly, compact, always contained. */
+  .base-tower-bar{
+    grid-template-columns:1fr;
+    gap:8px;
+    margin:10px 0 10px;
+    padding:9px;
+    border-radius:15px
+  }
+  .base-tower-copy{
+    padding:2px 3px;
+    gap:3px
+  }
+  .base-tower-copy strong{font-size:13px}
+  .base-tower-copy small{font-size:8px}
+  .base-floor-nav{
+    width:100%;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:6px
+  }
+  .base-floor-btn{
+    min-width:0;
+    min-height:58px;
+    grid-template-columns:28px minmax(0,1fr);
+    gap:6px;
+    padding:7px;
+    border-radius:11px;
+    touch-action:manipulation
+  }
+  .base-floor-no{
+    width:28px;
+    height:28px;
+    border-radius:8px
+  }
+  .base-floor-meta b{font-size:8px}
+  .base-floor-meta small{font-size:6px}
+  .base-floor-arrow{display:none}
+
+  /* Two large cards per row on phones. */
+  #panel-base .stands{
+    width:100%;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    align-items:start
+  }
+  #panel-base .stand{
+    width:100%;
+    min-width:0;
+    min-height:0;
+    aspect-ratio:.72;
+    border-radius:14px
+  }
+  #panel-base .mini-card{
+    width:100%;
+    min-width:0;
+    min-height:0;
+    height:100%
+  }
+
+  /* Keep important card data readable at phone size. */
+  #panel-base .mini-card .stand-grade{
+    top:6px;
+    left:6px;
+    min-width:38px;
+    padding:5px 6px;
+    font-size:9px
+  }
+  #panel-base .mini-card .mutation-badges{
+    top:6px;
+    right:6px;
+    max-width:64%
+  }
+  #panel-base .mini-card .mutation-badges .mutation-badge{
+    min-height:19px;
+    padding:3px 5px;
+    font-size:6.5px
+  }
+  #panel-base .mini-meta{
+    left:6px;
+    right:6px;
+    bottom:6px;
+    padding:6px 7px;
+    gap:3px
+  }
+  #panel-base .mini-meta-main .tier-card-id{font-size:9.5px}
+  #panel-base .mini-meta-main .tier-card-name{font-size:8.5px}
+  #panel-base .mini-meta-sub,
+  #panel-base .mini-meta-sub>span{font-size:7.5px}
+  #panel-base .mini-meta-sub .tier-card-income{font-size:8.5px}
+
+  /* Bottom-sheet actions stay tap-friendly on narrow screens. */
+  .modal-top{gap:8px}
+  .modal-top>div{min-width:0}
+  .modal-top h2{overflow-wrap:anywhere}
+  .stand-actions{grid-template-columns:1fr}
+  .stand-actions button,
+  .picker-card,
+  .base-floor-btn,
+  .tab{touch-action:manipulation}
+}
+
+@media (max-width:430px){
+  .app-shell{
+    padding-left:max(8px,env(safe-area-inset-left));
+    padding-right:max(8px,env(safe-area-inset-right))
+  }
+  .brand-mark{width:34px;height:34px}
+  .brand-title{font-size:12px}
+  .account-chip{padding:5px 7px}
+  .account-copy strong{max-width:72px;font-size:9px}
+
+  .stat{flex-basis:82px}
+  .stat span{font-size:8px}
+  .stat strong{font-size:12px}
+
+  .tab{font-size:7px;min-height:50px}
+  .tab-icon{font-size:15px}
+
+  .base-floor-nav{gap:5px}
+  .base-floor-btn{
+    grid-template-columns:1fr;
+    justify-items:center;
+    text-align:center;
+    min-height:58px;
+    gap:3px;
+    padding:6px 4px
+  }
+  .base-floor-no{width:30px;height:30px}
+  .base-floor-meta{justify-items:center}
+  .base-floor-meta small{display:none}
+
+  #panel-base .stands{gap:7px}
+  #panel-base .mini-card .mutation-badges{max-width:68%}
+  #panel-base .mini-meta-main .tier-card-name{font-size:8px}
+}
+
+@media (max-width:350px){
+  .tabs{gap:1px;padding-left:3px;padding-right:3px}
+  .tab{font-size:6.5px;padding-left:0;padding-right:0}
+  .tab-icon{font-size:14px}
+  #panel-base .stands{gap:6px}
+  #panel-base .mini-meta{padding:5px 6px}
+  #panel-base .mini-meta-main .tier-card-id{font-size:9px}
+  #panel-base .mini-meta-main .tier-card-name{font-size:7.5px}
+  #panel-base .mini-meta-sub,
+  #panel-base .mini-meta-sub>span{font-size:7px}
+  #panel-base .mini-meta-sub .tier-card-income{font-size:8px}
+}
