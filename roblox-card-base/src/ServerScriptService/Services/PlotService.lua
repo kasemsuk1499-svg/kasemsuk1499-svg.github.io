@@ -87,10 +87,12 @@ local function buildWorldShell()
 	world.Name = "CardBaseWorld"
 	world.Parent = Workspace
 
-	Lighting.Brightness = 2
-	Lighting.ClockTime = 18.2
-	Lighting.Ambient = Color3.fromRGB(70,76,96)
-	Lighting.OutdoorAmbient = Color3.fromRGB(44,52,72)
+	Lighting.Brightness = 2.8
+	Lighting.ClockTime = 16.4
+	Lighting.Ambient = Color3.fromRGB(96,104,132)
+	Lighting.OutdoorAmbient = Color3.fromRGB(72,84,112)
+	Lighting.EnvironmentDiffuseScale = 0.55
+	Lighting.EnvironmentSpecularScale = 0.65
 
 	local atmosphere = Lighting:FindFirstChild("CardBaseAtmosphere")
 	if not atmosphere then
@@ -110,7 +112,7 @@ local function buildWorldShell()
 		"Ground",
 		Vector3.new(230,1,150),
 		CFrame.new(30,-1,0),
-		Color3.fromRGB(10,13,20),
+		Color3.fromRGB(20,25,37),
 		Enum.Material.Slate
 	)
 
@@ -362,7 +364,7 @@ local function buildPlot(player,slotIndex)
 		"PlotBase",
 		Vector3.new(42,1.2,30),
 		CFrame.new(origin+Vector3.new(0,-0.4,0)),
-		Color3.fromRGB(14,17,25),
+		Color3.fromRGB(27,33,47),
 		Enum.Material.Slate
 	)
 
@@ -372,7 +374,7 @@ local function buildPlot(player,slotIndex)
 			"Floor_"..(floor+1),
 			Vector3.new(36,1,24),
 			CFrame.new(origin+Vector3.new(0,floor*18,0)),
-			Color3.fromRGB(18+floor*3,22+floor*3,31+floor*4),
+			Color3.fromRGB(34+floor*4,41+floor*4,57+floor*5),
 			Enum.Material.Metal
 		)
 
@@ -431,7 +433,43 @@ local function buildPlot(player,slotIndex)
 	end
 
 	for stand=1,Config.MaxStandSlots do createStand(model,origin,stand) end
-	for floor=1,Config.BaseFloorCount do createElevatorStop(model,origin,floor) end
+	for floor=1,Config.BaseFloorCount do
+		createElevatorStop(model,origin,floor)
+		local y = (floor-1)*18
+		local beacon = makePart(
+			model,
+			"FloorBeacon_"..floor,
+			Vector3.new(0.7,0.7,0.7),
+			CFrame.new(origin+Vector3.new(0,y+9.5,9.8)),
+			Color3.fromRGB(101,232,221),
+			Enum.Material.Neon
+		)
+		beacon.CanCollide = false
+		local light = Instance.new("PointLight")
+		light.Name = "FloorLight"
+		light.Color = Color3.fromRGB(169,222,255)
+		light.Brightness = 2.2
+		light.Range = 28
+		light.Shadows = false
+		light.Parent = beacon
+	end
+
+	local frontLeft = makePart(model,"EntrancePostL",Vector3.new(0.7,8,0.7),CFrame.new(origin+Vector3.new(-8,4,-11.5)),Color3.fromRGB(94,87,255),Enum.Material.Neon)
+	local frontRight = makePart(model,"EntrancePostR",Vector3.new(0.7,8,0.7),CFrame.new(origin+Vector3.new(8,4,-11.5)),Color3.fromRGB(91,232,219),Enum.Material.Neon)
+	local frontTop = makePart(model,"EntranceTop",Vector3.new(16.7,0.7,0.7),CFrame.new(origin+Vector3.new(0,8,-11.5)),Color3.fromRGB(116,105,255),Enum.Material.Neon)
+	frontLeft.CanCollide=false; frontRight.CanCollide=false; frontTop.CanCollide=false
+
+	local frontSign = makePart(model,"FrontTowerSign",Vector3.new(12,3.1,0.35),CFrame.new(origin+Vector3.new(0,10.1,-11.4)),Color3.fromRGB(17,21,32),Enum.Material.SmoothPlastic)
+	frontSign.CanCollide = false
+	local frontGui = Instance.new("SurfaceGui")
+	frontGui.Face = Enum.NormalId.Back
+	frontGui.CanvasSize = Vector2.new(720,190)
+	frontGui.AlwaysOnTop = true
+	frontGui.Parent = frontSign
+	local frontTitle = makeText(frontGui,"Title","CARD TOWER",UDim2.fromScale(0.94,0.48),UDim2.fromScale(0.03,0.05),48,Color3.fromRGB(242,245,255))
+	frontTitle.TextXAlignment = Enum.TextXAlignment.Center
+	local frontSub = makeText(frontGui,"Sub","30 STANDS · 3 FLOORS",UDim2.fromScale(0.94,0.30),UDim2.fromScale(0.03,0.57),23,Color3.fromRGB(99,235,223))
+	frontSub.TextXAlignment = Enum.TextXAlignment.Center
 
 	local sign = makePart(
 		model,
