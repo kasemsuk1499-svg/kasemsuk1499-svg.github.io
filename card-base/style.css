@@ -4344,3 +4344,39 @@ body.ascension-unlock-10 .base-tower-bar,
   .chibi-buddy.full-art{width:19.2%}
   .chibi-full-art{max-height:142px;border-radius:8px}
 }
+
+
+/* Chibi lounge wandering — tiny side steps + bobbing while they idle */
+.chibi-buddy.full-art{
+  animation:
+    chibiIdle 2.8s ease-in-out infinite,
+    chibiWander var(--wander-speed,8s) ease-in-out infinite;
+  animation-delay:var(--buddy-delay,0s),var(--buddy-delay,0s);
+  will-change:transform,translate;
+}
+.chibi-buddy.full-art:nth-child(even){
+  animation-direction:normal,reverse;
+}
+.chibi-buddy.full-art.reacting{
+  animation:chibiReact .65s cubic-bezier(.2,.8,.2,1),chibiWander var(--wander-speed,8s) ease-in-out infinite;
+}
+.chibi-buddy.full-art.sleeping{
+  animation:chibiSleep 3.4s ease-in-out infinite;
+  translate:0 3px;
+}
+.chibi-buddy.full-art.party{
+  animation:chibiParty .54s ease-in-out infinite alternate;
+}
+@keyframes chibiWander{
+  0%,100%{translate:0 0}
+  12%{translate:calc(var(--wander-step,10px) * -.45) -2px}
+  24%{translate:calc(var(--wander-step,10px) * -1) 0}
+  36%{translate:calc(var(--wander-step,10px) * -.55) -3px}
+  50%{translate:0 0}
+  63%{translate:calc(var(--wander-step,10px) * .55) -2px}
+  76%{translate:var(--wander-step,10px) 0}
+  88%{translate:calc(var(--wander-step,10px) * .4) -3px}
+}
+@media (max-width:700px){
+  .chibi-buddy.full-art{--wander-step:7px!important}
+}
