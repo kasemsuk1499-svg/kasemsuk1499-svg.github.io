@@ -175,6 +175,15 @@ Config.AscensionRewards = {
 	"Cosmic Sovereign",
 }
 
+-- Roblox image asset IDs for card art.
+-- Fill entries as assets are approved/uploaded; UI falls back to stylized ID cards.
+Config.CardImageIds = {}
+
+function Config.CardImage(id)
+	local assetId = tonumber(Config.CardImageIds[math.clamp(math.floor(tonumber(id) or 0),1,100)]) or 0
+	return assetId > 0 and ("rbxassetid://"..assetId) or ""
+end
+
 Config.IdPacks = {
 	{name="WUWA pack v1", minId=1, maxId=10},
 	{name="ARISA pack v1", minId=11, maxId=20},
