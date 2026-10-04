@@ -51,6 +51,7 @@ local function defaultProfile()
 		Perks = {Income=0,Luck=0,Forge=0},
 		Cards = {},
 		Collection = {},
+		FeaturedCard = "",
 		Placed = {},
 		Tower = {Floor=1,Best=0,Shards=0},
 		Boosts = {DoubleIncomeUntil=0},
@@ -78,6 +79,8 @@ local function reconcile(raw)
 		local id=math.clamp(math.floor(tonumber(card.Id) or 0),0,100)
 		if id > 0 then p.Collection[tostring(id)] = true end
 	end
+	p.FeaturedCard = type(p.FeaturedCard)=="string" and p.FeaturedCard or ""
+	if p.FeaturedCard ~= "" and not p.Cards[p.FeaturedCard] then p.FeaturedCard = "" end
 	if type(p.Placed) ~= "table" then p.Placed = {} end
 	if type(p.Tower) ~= "table" then p.Tower = deepCopy(d.Tower) end
 	if type(p.Boosts) ~= "table" then p.Boosts = deepCopy(d.Boosts) end
