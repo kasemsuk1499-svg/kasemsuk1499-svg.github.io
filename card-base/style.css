@@ -4733,3 +4733,12 @@ body.ascension-unlock-10 .base-tower-bar,
     animation:none!important;
   }
 }
+
+
+/* ===== ELEVEN-TIER INDEX FIX ===== */
+.index-tier-strip{grid-template-columns:repeat(11,minmax(0,1fr))}
+#socialBaseStands .visitor-showcase-stand.tier-10{border-width:2px}
+.visitor-tier-name.tier-10{
+  font-weight:1000;
+  filter:drop-shadow(0 0 8px color-mix(in srgb,var(--tier) 72%,transparent));
+}
