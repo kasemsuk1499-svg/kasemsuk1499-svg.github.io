@@ -3867,3 +3867,442 @@ body.ascension-unlock-10 .base-tower-bar,
 @media (prefers-reduced-motion:reduce){
   #socialBaseModal.visitor-ascension-unlock-4.show .social-base-card{animation:none}
 }
+
+
+/* =========================================================
+   CARD LOUNGE — chill room + chibi buddies + YouTube jukebox
+   ========================================================= */
+.lounge-panel{padding-bottom:32px}
+.lounge-hero{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:16px
+}
+.lounge-hero h2{margin:4px 0 6px}
+.lounge-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.lounge-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);
+  gap:16px;
+  align-items:start
+}
+.lounge-room-card,.lounge-jukebox{
+  border:1px solid #2b3344;
+  border-radius:18px;
+  background:linear-gradient(145deg,#10151f,#0a0e15);
+  box-shadow:inset 0 0 28px rgba(118,121,255,.035)
+}
+.lounge-room-card{padding:14px}
+.lounge-room{
+  position:relative;
+  min-height:460px;
+  overflow:hidden;
+  border:1px solid #384155;
+  border-radius:18px;
+  isolation:isolate;
+  background:
+    linear-gradient(180deg,rgba(13,20,34,.88),rgba(10,13,21,.96)),
+    radial-gradient(circle at 18% 18%,rgba(102,231,220,.08),transparent 34%)
+}
+.lounge-room.theme-day{
+  background:
+    linear-gradient(180deg,rgba(103,159,190,.46),rgba(32,48,64,.82)),
+    radial-gradient(circle at 20% 14%,rgba(255,235,168,.22),transparent 34%)
+}
+.lounge-room::before{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 16% 18%,rgba(255,255,255,.42) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 63% 11%,rgba(114,247,233,.36) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 83% 29%,rgba(255,232,153,.32) 0 1px,transparent 1.8px);
+  background-size:105px 105px,138px 138px,164px 164px;
+  opacity:.68
+}
+.lounge-room.theme-day::before{opacity:.12}
+.lounge-room::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:0;right:0;bottom:0;height:36%;
+  background:linear-gradient(180deg,#131923,#0b0f16);
+  border-top:1px solid rgba(255,255,255,.05)
+}
+.lounge-window{
+  position:absolute;
+  left:7%;top:9%;
+  width:180px;height:115px;
+  overflow:hidden;
+  border:8px solid #222b3a;
+  border-radius:16px;
+  background:linear-gradient(180deg,#0a1530,#182145 58%,#172033)
+}
+.lounge-window::before,.lounge-window::after{
+  content:"";
+  position:absolute;
+  background:rgba(171,205,255,.14)
+}
+.lounge-window::before{left:50%;top:0;bottom:0;width:4px}
+.lounge-window::after{left:0;right:0;top:50%;height:4px}
+.lounge-window i{
+  position:absolute;
+  width:28px;height:28px;
+  right:22px;top:15px;
+  border-radius:50%;
+  background:#fff2b0;
+  box-shadow:0 0 26px rgba(255,237,162,.45)
+}
+.lounge-window b{
+  position:absolute;
+  left:20px;bottom:13px;
+  width:70px;height:24px;
+  border-radius:50% 50% 0 0;
+  background:#102a2f
+}
+.theme-day .lounge-window{background:linear-gradient(#7dc8e5,#ffd7a4)}
+.theme-day .lounge-window i{background:#fff5c1;box-shadow:0 0 32px rgba(255,238,143,.65)}
+.lounge-lamp{
+  position:absolute;
+  right:8%;top:18%;
+  width:56px;height:120px
+}
+.lounge-lamp::before{
+  content:"";
+  position:absolute;
+  left:26px;top:34px;
+  width:4px;height:86px;
+  background:#667086
+}
+.lounge-lamp::after{
+  content:"";
+  position:absolute;
+  left:10px;top:0;
+  width:38px;height:40px;
+  clip-path:polygon(24% 0,76% 0,100% 100%,0 100%);
+  background:#ffe3a0;
+  box-shadow:0 0 26px rgba(255,220,135,.22)
+}
+.lounge-couch{
+  position:absolute;
+  left:50%;bottom:72px;
+  width:min(58%,520px);height:110px;
+  transform:translateX(-50%);
+  border:1px solid #45506a;
+  border-radius:22px 22px 14px 14px;
+  background:linear-gradient(#283348,#172030);
+  box-shadow:0 20px 35px rgba(0,0,0,.22)
+}
+.lounge-couch::before,.lounge-couch::after{
+  content:"";
+  position:absolute;
+  bottom:-24px;
+  width:12px;height:28px;
+  border-radius:5px;
+  background:#45506a
+}
+.lounge-couch::before{left:14%}.lounge-couch::after{right:14%}
+.lounge-rug{
+  position:absolute;
+  left:50%;bottom:20px;
+  width:70%;height:72px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(112,242,224,.12),rgba(109,100,255,.07) 50%,transparent 72%)
+}
+.lounge-buddies{
+  position:absolute;
+  z-index:4;
+  left:7%;right:7%;bottom:64px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:clamp(7px,2vw,28px);
+  min-height:210px
+}
+.chibi-buddy{
+  position:relative;
+  width:clamp(72px,10vw,118px);
+  min-width:0;
+  display:grid;
+  justify-items:center;
+  cursor:pointer;
+  transform-origin:50% 100%;
+  animation:chibiIdle 2.8s ease-in-out infinite;
+  animation-delay:var(--buddy-delay,0s);
+  user-select:none
+}
+.chibi-buddy:hover{filter:brightness(1.14);transform:translateY(-5px)}
+.chibi-buddy.reacting{animation:chibiReact .65s cubic-bezier(.2,.8,.2,1)}
+.chibi-buddy.sleeping{animation:chibiSleep 3.4s ease-in-out infinite}
+.chibi-buddy.party{animation:chibiParty .54s ease-in-out infinite alternate}
+.chibi-bubble{
+  min-height:24px;
+  max-width:118px;
+  margin-bottom:6px;
+  padding:5px 8px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:12px 12px 12px 3px;
+  background:rgba(7,10,15,.88);
+  color:#f5f7ff;
+  box-shadow:0 5px 16px rgba(0,0,0,.20);
+  font-size:9px;
+  font-weight:900;
+  text-align:center;
+  opacity:0;
+  transform:translateY(5px);
+  transition:.2s
+}
+.chibi-buddy.talking .chibi-bubble{opacity:1;transform:none}
+.chibi-head{
+  position:relative;
+  z-index:3;
+  width:72%;
+  aspect-ratio:1;
+  overflow:hidden;
+  border:2px solid var(--tier,#8a94aa);
+  border-radius:50%;
+  background:#171d29;
+  box-shadow:0 0 16px color-mix(in srgb,var(--tier) 26%,transparent)
+}
+.chibi-head img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;transform:scale(1.35)}
+.chibi-body{
+  position:relative;
+  z-index:2;
+  width:54%;
+  height:58px;
+  margin-top:-8px;
+  border:2px solid var(--tier,#8a94aa);
+  border-radius:24px 24px 14px 14px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--tier) 34%,#242b39),#151b26)
+}
+.chibi-body::before,.chibi-body::after{
+  content:"";
+  position:absolute;
+  top:12px;
+  width:26px;height:11px;
+  border-radius:10px;
+  background:color-mix(in srgb,var(--tier) 34%,#222a37)
+}
+.chibi-body::before{left:-18px;transform:rotate(18deg)}
+.chibi-body::after{right:-18px;transform:rotate(-18deg)}
+.chibi-name{
+  margin-top:4px;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#dfe5f1;
+  font-size:8px;
+  font-weight:1000
+}
+.chibi-mood{
+  margin-top:2px;
+  color:#8390a7;
+  font-size:7px
+}
+.lounge-empty{
+  position:absolute;
+  z-index:5;
+  inset:0;
+  display:grid;
+  place-content:center;
+  gap:5px;
+  text-align:center;
+  pointer-events:none
+}
+.lounge-empty strong{font-size:16px}.lounge-empty span{font-size:9px;color:#818ca0}
+.lounge-actions{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  margin-top:10px
+}
+.lounge-actions button{
+  min-height:42px;
+  border:1px solid #343d50;
+  border-radius:12px;
+  background:#121823;
+  color:#dfe5f1;
+  font-size:9px;
+  font-weight:900
+}
+.lounge-actions button:hover{border-color:#67758f;background:#172030}
+.lounge-picker-head,.youtube-history-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:14px
+}
+.lounge-card-picker{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+  padding:3px 1px 7px;
+  overflow-x:auto
+}
+.lounge-pick-card{
+  flex:0 0 90px;
+  min-width:0;
+  padding:6px;
+  border:1px solid #30384a;
+  border-radius:12px;
+  background:#0b1018;
+  color:#dfe5f1;
+  text-align:left
+}
+.lounge-pick-card.selected{
+  border-color:var(--tier,#70eee0);
+  box-shadow:0 0 16px color-mix(in srgb,var(--tier) 18%,transparent)
+}
+.lounge-pick-card img{
+  width:100%;aspect-ratio:530/742;
+  display:block;
+  object-fit:cover;
+  border-radius:8px;
+  background:#171d27
+}
+.lounge-pick-card strong,.lounge-pick-card small{display:block}
+.lounge-pick-card strong{margin-top:5px;font-size:8px}
+.lounge-pick-card small{margin-top:2px;color:#7f899e;font-size:7px}
+.lounge-jukebox{padding:14px}
+.jukebox-head{display:flex;gap:10px;align-items:flex-start}
+.jukebox-head h3{margin:2px 0 4px}
+.jukebox-disc{
+  flex:0 0 44px;
+  width:44px;height:44px;
+  display:grid;place-items:center;
+  border:1px solid #505a73;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,#0d1119 0 15%,#8894ff 16% 18%,#171c29 19% 46%,#727cff 47% 49%,#0b0f16 50%);
+  box-shadow:0 0 18px rgba(123,128,255,.15);
+  animation:jukeboxSpin 8s linear infinite
+}
+.youtube-search-row,.youtube-load-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:7px;
+  margin-top:10px
+}
+.youtube-search-row input,.youtube-load-row input{
+  min-width:0;
+  height:42px;
+  padding:0 11px;
+  border:1px solid #30394b;
+  border-radius:10px;
+  background:#080c12;
+  color:#edf2fb;
+  outline:none
+}
+.youtube-search-row input:focus,.youtube-load-row input:focus{border-color:#7d89ff}
+.youtube-player-shell{
+  position:relative;
+  margin-top:12px;
+  overflow:hidden;
+  aspect-ratio:16/9;
+  border:1px solid #30394b;
+  border-radius:14px;
+  background:#070a0f
+}
+.youtube-player-shell iframe{width:100%;height:100%;border:0}
+.youtube-player-empty{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-content:center;
+  gap:4px;
+  color:#7f899e;
+  text-align:center
+}
+.youtube-player-empty>span{font-size:30px;color:#939dff}
+.youtube-player-empty strong{color:#dfe5f1;font-size:11px}
+.youtube-player-empty small{font-size:8px}
+.youtube-now{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:10px;
+  padding:9px 10px;
+  border:1px solid #2b3446;
+  border-radius:11px;
+  background:#090d14
+}
+.youtube-now div{min-width:0}.youtube-now span,.youtube-now strong{display:block}
+.youtube-now span{font-size:7px;color:#707c91;letter-spacing:.12em;font-weight:1000}
+.youtube-now strong{margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
+.youtube-history-head button{
+  border:0;
+  background:transparent;
+  color:#707c91;
+  font-size:8px;
+  cursor:pointer
+}
+.youtube-history{display:grid;gap:6px;margin-top:7px}
+.youtube-history-item{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:7px;
+  padding:8px 9px;
+  border:1px solid #2b3343;
+  border-radius:10px;
+  background:#0a0e15
+}
+.youtube-history-item button{
+  min-width:0;
+  border:0;
+  background:transparent;
+  color:#dfe5f1;
+  font-size:8px;
+  text-align:left;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  cursor:pointer
+}
+.youtube-history-item small{color:#667289;font-size:7px}
+.lounge-note{
+  display:grid;
+  gap:4px;
+  margin-top:12px;
+  padding:10px;
+  border:1px solid rgba(117,239,225,.18);
+  border-radius:11px;
+  background:rgba(9,16,19,.72)
+}
+.lounge-note strong{color:#9bf4e9;font-size:9px}
+.lounge-note span{color:#7f8b9d;font-size:8px;line-height:1.5}
+@keyframes chibiIdle{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-6px) rotate(1deg)}}
+@keyframes chibiReact{0%{transform:scale(1)}35%{transform:translateY(-18px) scale(1.08) rotate(-5deg)}65%{transform:translateY(-7px) rotate(5deg)}100%{transform:none}}
+@keyframes chibiSleep{0%,100%{transform:translateY(3px) rotate(-2deg)}50%{transform:translateY(6px) rotate(2deg) scale(.98)}}
+@keyframes chibiParty{from{transform:translateY(-5px) rotate(-7deg)}to{transform:translateY(-14px) rotate(7deg)}}
+@keyframes jukeboxSpin{to{transform:rotate(360deg)}}
+
+@media (max-width:1050px){
+  .lounge-layout{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  .lounge-hero{display:grid}
+  .lounge-hero-actions{display:grid;grid-template-columns:1fr 1fr}
+  .lounge-room-card,.lounge-jukebox{padding:10px;border-radius:15px}
+  .lounge-room{min-height:390px}
+  .lounge-window{width:128px;height:84px;border-width:6px}
+  .lounge-couch{width:68%;height:88px;bottom:66px}
+  .lounge-buddies{left:2%;right:2%;gap:2px;bottom:58px}
+  .chibi-buddy{width:19%}
+  .chibi-body{height:48px}
+  .chibi-bubble{font-size:7px;padding:4px 5px}
+  .lounge-actions{grid-template-columns:1fr 1fr}
+  .youtube-search-row,.youtube-load-row{grid-template-columns:1fr}
+  .youtube-search-row button,.youtube-load-row button{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  .chibi-buddy,.jukebox-disc{animation:none!important}
+}
