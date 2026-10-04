@@ -104,7 +104,7 @@ function RotatingShopService.Offers(profile)
 		local stock = archetype.stockMin + math.floor(rng()*stockRange)
 		local offerId = tostring(id).."-"..tostring(slot-1)
 		local bought = math.max(0,math.floor(tonumber(profile.RotatingShop.Bought[offerId]) or 0))
-		local cost = Economy.ModeledBaseIncomeForShop(profile.BaseLevel)*archetype.priceSeconds
+		local cost = Economy.RotatingPackCost(profile.BaseLevel,archetype.priceSeconds)
 		local normalRates = {}
 		local maxTierCount = Economy.MaxTierForLevel(profile.BaseLevel)
 		for tier,weight in pairs(archetype.rates) do
