@@ -28,7 +28,8 @@
     {name:"Divine",color:"#67f1e4",multi:32},
     {name:"Celestial",color:"#7f8cff",multi:60},
     {name:"Transcendent",color:"#ff79ee",multi:110},
-    {name:"Eternal",color:"#fff0a8",multi:200}
+    {name:"Eternal",color:"#fff0a8",multi:200},
+    {name:"Singularity",color:"#e8fbff",multi:420}
   ];
 
   const GRADES = [
@@ -44,16 +45,18 @@
     {name:"SSS★",color:"#fff2a9",multi:5.00},
     {name:"EX",color:"#8ff6ff",multi:6.50},
     {name:"EX+",color:"#d798ff",multi:8.50},
-    {name:"EX★",color:"#ffffff",multi:12.00}
+    {name:"EX★",color:"#ffffff",multi:12.00},
+    {name:"Ω",color:"#ffb7ff",multi:18.00}
   ];
+  const AWAKEN_GRADE_INDEX = 12; // EX★ remains the Awaken requirement
 
   // Grade reroll is a major money sink. Base Level scaling is applied on top.
   const GRADE_REROLL_COSTS = [5000,10000,20000,40000,80000,160000,320000,640000,1280000,2560000];
   // Ultra-end grades are chase outcomes. Luck intentionally does not affect Grade.
-  const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02,.01,.0025,.0005];
+  const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02,.01,.0025,.0005,.0001];
 
   const MUTATIONS = [
-    {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:95.85},
+    {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:95.65},
     {name:"Blaze",icon:"🔥",color:"#ff7043",income:2.00,luck:1.15,weight:.65},
     {name:"Thunder",icon:"⚡",color:"#69e7ff",income:2.20,luck:1.18,weight:.55},
     {name:"Frost",icon:"❄",color:"#9deaff",income:2.40,luck:1.21,weight:.50},
@@ -65,10 +68,18 @@
     {name:"Prismatic",icon:"◇",color:"#ff83e8",income:4.20,luck:1.45,weight:.20},
     {name:"Celestial Surge",icon:"✦",color:"#fff0a5",income:5.00,luck:1.55,weight:.15},
     {name:"Abyssal Bloom",icon:"✺",color:"#ff5fb7",income:5.80,luck:1.62,weight:.10},
-    {name:"Chrono Flux",icon:"⧖",color:"#77fff1",income:6.80,luck:1.72,weight:.05}
+    {name:"Chrono Flux",icon:"⧖",color:"#77fff1",income:6.80,luck:1.72,weight:.05},
+    {name:"Glitch Core",icon:"▧",color:"#5fffea",income:7.50,luck:1.80,weight:.06},
+    {name:"Helix Drive",icon:"🧬",color:"#b9ff6a",income:8.00,luck:1.84,weight:.04},
+    {name:"Riftglass",icon:"◈",color:"#ff7cf5",income:8.60,luck:1.90,weight:.03},
+    {name:"Inverse Rain",icon:"⇡",color:"#6fe7ff",income:9.20,luck:1.96,weight:.025},
+    {name:"Quantum Scan",icon:"⌁",color:"#7aa2ff",income:10.00,luck:2.02,weight:.018},
+    {name:"Echo Frame",icon:"◫",color:"#ff9ad5",income:10.80,luck:2.08,weight:.012},
+    {name:"Event Horizon",icon:"◉",color:"#8a64ff",income:12.00,luck:2.16,weight:.009},
+    {name:"Rune Circuit",icon:"⌬",color:"#ffe47a",income:13.50,luck:2.25,weight:.006}
   ];
   // Mutation Storm pool totals 100%. New ultra mutations are rarer, but obtainable.
-  const MUTATION_EVENT_WEIGHTS = [0,12,11.5,11,10.5,10,9.5,9,8,7,5.5,3.5,2.5];
+  const MUTATION_EVENT_WEIGHTS = [0,11.88,11.385,10.89,10.395,9.9,9.405,8.91,7.92,6.93,5.445,3.465,2.475,.25,.20,.15,.12,.10,.08,.06,.04];
   const MUTATION_EVENT_PULSE_CHANCE = 0.005; // 0.5% per Normal displayed card every 30 sec
 
   // =========================================================
@@ -373,8 +384,8 @@
     };
     s.baseLevel=Math.max(1,Math.min(ASCENSION_LEVEL_CAP,Math.floor(Number(s.baseLevel)||1)));
     syncCardIndex(s);
-    s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
-    s.storedPacks=(Array.isArray(s.storedPacks)?s.storedPacks:[]).filter(p=>p&&Number.isInteger(p.tier)&&p.tier>=0&&p.tier<10);
+    s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<TIERS.length);
+    s.storedPacks=(Array.isArray(s.storedPacks)?s.storedPacks:[]).filter(p=>p&&Number.isInteger(p.tier)&&p.tier>=0&&p.tier<TIERS.length);
     const keepPackAuto=packAutoSessionActive();
     s.autoRolling=keepPackAuto&&!!s.autoRolling;
     s.fullAuto=keepPackAuto&&!!s.fullAuto;
@@ -587,7 +598,7 @@
     const actual=Math.max(1,Math.floor(Number(level)||1));
     return "rank-fx rank-level-"+Math.max(1,Math.min(40,actual))+" rank-band-"+rankBand(actual)+(actual>40?" rank-endless":"");
   }
-  function tierFxClass(tier){return "tier-fx tier-"+Math.max(0,Math.min(9,Number(tier)||0))}
+  function tierFxClass(tier){return "tier-fx tier-"+Math.max(0,Math.min(TIERS.length-1,Number(tier)||0))}
   function gradeFxClass(grade){return "grade-fx grade-"+Math.max(0,Math.min(GRADES.length-1,Number(grade)||0))}
   function mutationFxClass(mutation){
     const m=Math.max(0,Math.min(MUTATIONS.length-1,Number(mutation)||0));
@@ -617,7 +628,15 @@
       9:"Prism",
       10:"Celestial",
       11:"Abyssal",
-      12:"Chrono"
+      12:"Chrono",
+      13:"Glitch",
+      14:"Helix",
+      15:"Riftglass",
+      16:"Inverse",
+      17:"Quantum",
+      18:"Echo",
+      19:"Horizon",
+      20:"Rune"
     };
     return map[id]||MUTATIONS[id]?.name||"Mutation";
   }
@@ -731,10 +750,10 @@
   }
   function maxTierForLevel(level=state.baseLevel){
     const lv=Math.max(1,Number(level)||1);
-    const unlockAt=[1,1,1,3,6,10,15,21,28,36];
+    const unlockAt=[1,1,1,3,6,10,15,21,28,36,40];
     let count=0;
     for(const need of unlockAt)if(lv>=need)count++;
-    return Math.max(3,Math.min(10,count));
+    return Math.max(3,Math.min(TIERS.length,count));
   }
   function tierQualityProgress(level=state.baseLevel){
     // Rebirth quality curve: almost no suppression in early game,
@@ -1872,7 +1891,7 @@
 
   function tradeCardVisual(card,compact=false){
     if(!card)return '<div class="social-empty">ไม่มีข้อมูลการ์ด</div>';
-    const tier=Math.max(0,Math.min(9,Number(card.tier)||0));
+    const tier=Math.max(0,Math.min(TIERS.length-1,Number(card.tier)||0));
     const grade=Math.max(0,Math.min(GRADES.length-1,Number(card.grade)||0));
     const mutation=Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation)||0));
     const mutation2=Math.max(0,Math.min(MUTATIONS.length-1,Number(card.mutation2)||0));
@@ -2325,7 +2344,7 @@
   function renderOdds(){
     const odds=tierOdds();
     const qualityPct=Math.round(tierQualityProgress()*100);
-    $("#luckTitle").textContent="Luck ×"+effectiveLuckValue().toFixed(2)+" · Mutation ×"+mutationLuckMultiplier().toFixed(2)+" · Pack Quality "+qualityPct+"% · ปลด Tier "+maxTierForLevel()+"/10";
+    $("#luckTitle").textContent="Luck ×"+effectiveLuckValue().toFixed(2)+" · Mutation ×"+mutationLuckMultiplier().toFixed(2)+" · Pack Quality "+qualityPct+"% · ปลด Tier "+maxTierForLevel()+"/"+TIERS.length;
     $("#odds").innerHTML=TIERS.map((t,i)=>
       '<div class="odd" style="--tier:'+t.color+';opacity:'+(odds[i]>0?1:.28)+'"><span>'+t.name+'</span><b>'+chanceText(odds[i])+'</b></div>'
     ).join("");
@@ -2533,7 +2552,7 @@
         '</div>'+
         '<div class="index-card-body">'+
           '<div class="index-id-row"><strong>'+padId(id)+'</strong><span class="tier-label tier-'+highestTier+'" style="color:'+t.color+'">'+t.name+'</span></div>'+
-          '<small>Variants '+tiers.length+'/10 · Mutations '+mutations.length+'/'+(MUTATIONS.length-1)+' · Best Grade '+bestGrade.name+'</small>'+
+          '<small>Variants '+tiers.length+'/'+TIERS.length+' · Mutations '+mutations.length+'/'+(MUTATIONS.length-1)+' · Best Grade '+bestGrade.name+'</small>'+
           '<div class="index-tier-strip">'+TIERS.map((tier,i)=>'<i class="'+(tiers.includes(i)?'on':'')+'" title="'+tier.name+'" style="--tier:'+tier.color+'"></i>').join("")+'</div>'+
           '<div class="index-mutation-strip">'+MUTATIONS.slice(1).map((m,i)=>'<i class="'+(mutations.includes(i+1)?'on':'')+'" title="'+m.name+'" style="--mutation:'+m.color+'"></i>').join("")+'</div>'+
         '</div>'+
@@ -2716,7 +2735,7 @@
     const req=awakeningRequiredLevel(card);
     return !!card&&
       Number(card.level)>=req&&
-      Number(card.grade)>=GRADES.length-1&&
+      Number(card.grade)>=AWAKEN_GRADE_INDEX&&
       cardMutationIds(card).length>=2&&
       (state.ascension?.cores||0)>=1;
   }
@@ -2724,7 +2743,7 @@
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
     const req=awakeningRequiredLevel(c);
     if(Number(c.level)<req){toast("Awaken ★"+(awakeningStars(c)+1)+" ต้อง Card Lv."+req);return}
-    if(Number(c.grade)<GRADES.length-1){toast("ต้องเป็น Grade EX★ ก่อน");return}
+    if(Number(c.grade)<AWAKEN_GRADE_INDEX){toast("ต้องเป็น Grade "+GRADES[AWAKEN_GRADE_INDEX].name+" ก่อน");return}
     if(cardMutationIds(c).length<2){toast("ต้องมี Dual Mutation ก่อน");return}
     if((state.ascension?.cores||0)<1){toast("ต้องใช้ Ascension Core 1 ชิ้น");return}
     const next=awakeningStars(c)+1;
