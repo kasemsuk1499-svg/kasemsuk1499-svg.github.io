@@ -674,17 +674,85 @@ local function showCardReveal(card,extra)
 	reveal.Visible = true
 end
 
+local function shopTimer(seconds)
+	local total = math.max(0,math.floor(tonumber(seconds) or 0))
+	return string.format("%02d:%02d",math.floor(total/60),total%60)
+end
+
+local function offerRateSummary(offer)
+	local entries = {}
+	local total = 0
+	for tier,weight in pairs(offer.Rates or {}) do total += tonumber(weight) or 0 end
+	for tier=0,#Config.Tiers-1 do
+		local weight = tonumber((offer.Rates or {})[tier]) or 0
+		if weight > 0 and total > 0 then
+			local pct = (1-(tonumber(offer.OutRate) or 0))*(weight/total)*100
+			table.insert(entries,Config.Tiers[tier+1].name.." "..string.format(pct<10 and "%.1f%%" or "%.0f%%",pct))
+		end
+	end
+	table.insert(entries,"OUT "..string.format("%.1f%%",(tonumber(offer.OutRate) or 0)*100))
+	return table.concat(entries," · ")
+end
+
 local function openPackShop()
 	if not state then return end
 	activePanel = "packs"
 	selectedSlot = nil
 	mutationTargetGuid = nil
 	overlay.Visible = true
-	panelTitle.Text = "ID PACK SHOP"
-	panelSub.Text = "เลือก Character Pool 10 ใบ · Tier ใช้ Luck ปัจจุบัน · ราคาอิง Base Level"
+	panelTitle.Text = "PACK SHOP"
+	panelSub.Text = "Character Packs + Limited Rotation · เงินในเกมเท่านั้น · ไม่มี Robux RNG"
 	clearContent()
 
-	makeSectionHeader("CHARACTER PACKS","เงินในเกมเท่านั้น · ไม่มี Robux RNG")
+	local rotating = state.Computed and state.Computed.RotatingShop
+	if rotating and type(rotating.Offers)=="table" then
+		makeSectionHeader("LIMITED ROTATION · "..shopTimer(rotating.RemainingSeconds),"รีสต็อกทุก 10 นาที · Stock เป็นของผู้เล่นแต่ละคน")
+		for _,offer in ipairs(rotating.Offers) do
+			local tier = Config.Tiers[(offer.FeaturedTier or 0)+1]
+			local locked = state.BaseLevel < (offer.MinLevel or 1)
+			local sold = (offer.StockLeft or 0) <= 0
+
+			local row = Instance.new("Frame")
+			row.BackgroundColor3 = COLORS.panel2
+			row.Size = UDim2.new(1,-4,0,104)
+			row.ZIndex = 23
+			row.Parent = content
+			corner(row,12)
+			stroke(row,tier.color,0.20,2)
+
+			local ribbon = makeLabel(row,offer.Label.." · "..offer.Name,UDim2.new(0.57,0,0,24),UDim2.new(0,12,0,7),12,tier.color,true)
+			ribbon.ZIndex = 24
+			local theme = makeLabel(row,offer.ThemeName.." · ID "..string.format("#%04d–#%04d",offer.MinId,offer.MaxId),UDim2.new(0.58,0,0,20),UDim2.new(0,12,0,32),9,COLORS.text,true)
+			theme.ZIndex = 24
+			local rates = makeLabel(row,offerRateSummary(offer),UDim2.new(0.64,0,0,34),UDim2.new(0,12,0,55),8,COLORS.muted,false)
+			rates.TextWrapped = true
+			rates.ZIndex = 24
+			local stock = makeLabel(row,"STOCK "..offer.StockLeft.."/"..offer.Stock,UDim2.new(0,120,0,18),UDim2.new(1,-280,0,72),8,COLORS.muted,true)
+			stock.TextXAlignment = Enum.TextXAlignment.Right
+			stock.ZIndex = 24
+
+			local caption
+			if locked then caption = "UNLOCK Lv."..offer.MinLevel
+			elseif sold then caption = "SOLD OUT"
+			else caption = "OPEN · "..fmt(offer.Cost) end
+			local buy = makeButton(row,caption,UDim2.new(0,150,0,46),UDim2.new(1,-162,0,17))
+			buy.ZIndex = 24
+			buy.BackgroundColor3 = (not locked and not sold and state.Money >= offer.Cost) and tier.color:Lerp(COLORS.panel2,0.45) or Color3.fromRGB(44,47,58)
+			buy.Active = not locked and not sold
+			buy.AutoButtonColor = not locked and not sold
+			buy.MouseButton1Click:Connect(function()
+				if locked then showToast("ปลดที่ Base Lv."..offer.MinLevel,false) return end
+				if sold then showToast("แพ็กนี้ SOLD OUT แล้ว",false) return end
+				local result = invoke("BuyRotatingPack",{OfferId=offer.Id})
+				if result and result.Card then
+					local extra = result.OutOfRate and ("🌌 OUT OF RATE · "..result.OfferName) or result.OfferName
+					showCardReveal(result.Card,extra)
+				end
+			end)
+		end
+	end
+
+	makeSectionHeader("CHARACTER PACKS","เลือก Character Pool 10 ใบ · Tier ใช้ Luck ปัจจุบัน")
 	for index,pack in ipairs(Config.IdPacks) do
 		local cost = Economy.IdPackCost(state.BaseLevel,index)
 		local row = Instance.new("Frame")
@@ -704,9 +772,7 @@ local function openPackShop()
 		buy.BackgroundColor3 = state.Money >= cost and COLORS.accent or Color3.fromRGB(46,49,61)
 		buy.MouseButton1Click:Connect(function()
 			local card = invoke("RollIdPack",{PackIndex=index})
-			if card then
-				showCardReveal(card,pack.name)
-			end
+			if card then showCardReveal(card,pack.name) end
 		end)
 	end
 end
