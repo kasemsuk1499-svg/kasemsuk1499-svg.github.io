@@ -587,6 +587,43 @@ openMutationLab = function(guid)
 	end
 end
 
+local function openWelcome()
+	if not state then return end
+	activePanel="welcome"
+	selectedSlot=nil
+	overlay.Visible=true
+	panelTitle.Text="WELCOME TO CARD BASE"
+	panelSub.Text="ROLL · BUILD · ASCEND · SHOW OFF"
+	clearContent()
+
+	makeSectionHeader("1 · ROLL","สุ่มการ์ดใบแรกฟรี · ใบแรกจะวางที่ Stand 1 ให้อัตโนมัติ")
+	local roll=makeButton(content,"◇ ROLL YOUR FIRST CARD",UDim2.new(1,-4,0,54),UDim2.new())
+	roll.ZIndex=24
+	roll.BackgroundColor3=COLORS.accent
+	roll.MouseButton1Click:Connect(function()
+		local card=invoke("RollPack")
+		if card then
+			overlay.Visible=false
+			activePanel=nil
+			showCardReveal(card,"FIRST CARD ✦")
+		end
+	end)
+
+	makeSectionHeader("2 · BUILD","กด BASE เพื่อดู Tower 3 ชั้น · Stand จะปลดล็อกเพิ่มตาม Base Level")
+	makeSectionHeader("3 · GROW","อัป Card Level / Grade / Mutation เพื่อเพิ่ม Income แล้ว Rebirth ไปถึง Lv.40")
+	makeSectionHeader("4 · ASCEND","Lv.40 → Ascension → กลับ Lv.1 พร้อม Permanent Buff + Ascension Core")
+	makeSectionHeader("5 · SHOW OFF","SOCIAL มี Global Ranking, Visit Base และ Safe Card Trading")
+
+	local hub=makeButton(content,"ไปดู SOCIAL HUB",UDim2.new(1,-4,0,46),UDim2.new())
+	hub.ZIndex=24
+	hub.MouseButton1Click:Connect(function()
+		if invoke("TeleportHub") then
+			overlay.Visible=false
+			activePanel=nil
+		end
+	end)
+end
+
 local function openCollection()
 	if not state then return end
 	activePanel = "collection"
@@ -1477,5 +1514,11 @@ task.spawn(function()
 		handleState(initial)
 		task.wait(0.8)
 		frameHomeCamera(2.4)
+		local count=0
+		for _ in pairs(initial.Cards or {}) do count+=1 end
+		if count==0 then
+			task.wait(0.35)
+			openWelcome()
+		end
 	end
 end)
