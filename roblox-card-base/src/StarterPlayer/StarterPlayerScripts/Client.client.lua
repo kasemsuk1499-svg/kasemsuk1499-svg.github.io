@@ -603,6 +603,70 @@ local function openStand(slot)
 	for _,card in ipairs(cards) do makeCardRow(card,"place") end
 end
 
+local function openBasePanel()
+	if not state then return end
+	activePanel = "base"
+	selectedSlot = nil
+	overlay.Visible = true
+	panelTitle.Text = "YOUR CARD TOWER"
+	panelSub.Text = "3 Floors · "..state.Computed.StandLimit.." unlocked stands · "..fmt(state.Computed.Income).."/s"
+	clearContent()
+
+	makeSectionHeader("QUICK TRAVEL","ไปยังชั้นของฐานทันที")
+	for floor=1,Config.BaseFloorCount do
+		local firstSlot = (floor-1)*Config.BaseFloorSize+1
+		local unlocked = firstSlot <= state.Computed.StandLimit
+		local button = makeButton(content,"FLOOR "..floor.." · STANDS "..firstSlot.."–"..(firstSlot+Config.BaseFloorSize-1),UDim2.new(1,-4,0,46),UDim2.new())
+		button.ZIndex = 24
+		if unlocked then
+			button.BackgroundColor3 = floor == 1 and COLORS.accent or COLORS.panel2
+			button.MouseButton1Click:Connect(function()
+				if invoke("TeleportFloor",{Floor=floor}) then
+					overlay.Visible = false
+					activePanel = nil
+					showToast("ไป Floor "..floor.." แล้ว · กด E ที่ Stand เพื่อจัดการ",true)
+				end
+			end)
+		else
+			button.Text ..= " · LOCKED"
+			button.Active = false
+			button.AutoButtonColor = false
+			button.TextColor3 = COLORS.muted
+			button.BackgroundColor3 = Color3.fromRGB(31,33,41)
+		end
+	end
+
+	local overview = makeButton(content,"⌂ TOWER OVERVIEW",UDim2.new(1,-4,0,46),UDim2.new())
+	overview.ZIndex = 24
+	overview.MouseButton1Click:Connect(function()
+		if invoke("TeleportHome") then
+			overlay.Visible = false
+			activePanel = nil
+			task.wait(0.08)
+			frameHomeCamera(2.2)
+		end
+	end)
+
+	makeSectionHeader("BASE LOADOUT","จัดฐานแบบเร็ว แล้วค่อยแต่งราย Stand ทีหลัง")
+	local equipped = 0
+	for _,guid in pairs(state.Placed or {}) do
+		if guid and state.Cards and state.Cards[guid] then equipped += 1 end
+	end
+	makeSectionHeader("ACTIVE STANDS · "..equipped.." / "..state.Computed.StandLimit,"ระบบคิด Income จากการ์ดที่วางใน Stand ที่ปลดล็อกแล้ว")
+
+	local auto = makeButton(content,"⚡ AUTO EQUIP BEST CARDS",UDim2.new(1,-4,0,50),UDim2.new())
+	auto.ZIndex = 24
+	auto.BackgroundColor3 = COLORS.accent
+	auto.MouseButton1Click:Connect(function()
+		local result = invoke("AutoEquipBest")
+		if result then
+			showToast("จัด Best Cards ลงฐาน "..result.Placed.." ใบแล้ว ✦",true)
+		end
+	end)
+
+	makeSectionHeader("TIP","Card Tower มี 10 Stand ต่อชั้น · Base Level สูงขึ้นจะปลดล็อก Stand เพิ่ม")
+end
+
 local function makeInfoCard(title,value,sub)
 	local box = Instance.new("Frame")
 	box.BackgroundColor3 = COLORS.panel2
@@ -863,7 +927,8 @@ local function renderHud()
 	elseif activePanel=="endgame" and overlay.Visible then openEndgame()
 	elseif activePanel=="stand" and overlay.Visible and selectedSlot then openStand(selectedSlot)
 	elseif activePanel=="mutation" and overlay.Visible and mutationTargetGuid then openMutationLab(mutationTargetGuid)
-	elseif activePanel=="packs" and overlay.Visible then openPackShop() end
+	elseif activePanel=="packs" and overlay.Visible then openPackShop()
+	elseif activePanel=="base" and overlay.Visible then openBasePanel() end
 end
 
 local function handleState(newState)
@@ -875,16 +940,7 @@ rollBtn.MouseButton1Click:Connect(function()
 	local card = invoke("RollPack")
 	if card then showCardReveal(card) end
 end)
-baseBtn.MouseButton1Click:Connect(function()
-	overlay.Visible=false
-	activePanel=nil
-	selectedSlot=nil
-	if invoke("TeleportHome") then
-		task.wait(0.08)
-		frameHomeCamera(2.2)
-		showToast("กลับมาที่ Card Tower แล้ว · กด E ที่ Stand เพื่อจัดการการ์ด",true)
-	end
-end)
+baseBtn.MouseButton1Click:Connect(openBasePanel)
 collectionBtn.MouseButton1Click:Connect(openCollection)
 endgameBtn.MouseButton1Click:Connect(openEndgame)
 packShopBtn.MouseButton1Click:Connect(openPackShop)
