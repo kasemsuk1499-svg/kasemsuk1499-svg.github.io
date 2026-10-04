@@ -129,6 +129,7 @@ function CardService.Sell(profile,guid)
 	end
 	local value = Economy.SellValue(profile,card)
 	profile.Cards[guid] = nil
+	if profile.FeaturedCard == guid then profile.FeaturedCard = "" end
 	profile.Money += value
 	return true,value
 end
