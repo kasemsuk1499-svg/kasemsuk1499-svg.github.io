@@ -1912,8 +1912,8 @@
             '<div class="tier-ring"></div>'+
             '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+
             '<div class="mini-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+
-              '<b><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span><span class="tier-card-name">'+t.name+'</span></b>'+
-              '<span class="tier-card-sub">Lv.<span data-stand-stat="level">'+c.level+'</span> · <strong data-stand-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></span>'+
+              '<div class="mini-meta-main"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-card-name">'+t.name+'</span></div>'+
+              '<div class="mini-meta-sub"><span>Lv.<b data-stand-stat="level">'+c.level+'</b></span><strong data-stand-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div>'+
             '</div>'+
           '</div>';
         const img=slot.querySelector("img"); if(img) img.addEventListener("error",e=>e.currentTarget.style.display="none");
