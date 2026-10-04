@@ -456,6 +456,17 @@ local function makeCardRow(card,mode)
 		actionButton("Mutation Lab",function() openMutationLab(card.Guid) end)
 		actionButton("Awaken",function() invoke("Awaken",{Guid=card.Guid}) end)
 		actionButton(card.Locked and "Unlock" or "Lock",function() invoke("ToggleLock",{Guid=card.Guid}) end)
+		local sellValue = state and Economy.SellValue(state,card) or 0
+		local sell = actionButton("SELL · "..fmt(sellValue),function()
+			local sold = invoke("Sell",{Guid=card.Guid})
+			if sold then showToast("ขายการ์ด +"..fmt(sold),true) end
+		end)
+		if card.Locked or isGuidPlaced(card.Guid) then
+			sell.Active = false
+			sell.AutoButtonColor = false
+			sell.BackgroundColor3 = Color3.fromRGB(50,39,46)
+			sell.TextColor3 = COLORS.muted
+		end
 	end
 	return row
 end
