@@ -280,6 +280,16 @@ revealRarity.ZIndex = 81
 
 local revealTitle = makeLabel(reveal,"YOU GOT",UDim2.new(1,-30,0,30),UDim2.new(0,15,0,15),12,COLORS.muted,true)
 revealTitle.ZIndex = 81
+local revealArt = Instance.new("ImageLabel")
+revealArt.Name = "CardArt"
+revealArt.BackgroundTransparency = 1
+revealArt.Size = UDim2.new(0,136,0,190)
+revealArt.Position = UDim2.new(0.5,-68,0,76)
+revealArt.ScaleType = Enum.ScaleType.Crop
+revealArt.Visible = false
+revealArt.ZIndex = 81
+revealArt.Parent = reveal
+corner(revealArt,12)
 local revealMain = makeLabel(reveal,"",UDim2.new(1,-30,0,170),UDim2.new(0,15,0,75),28,COLORS.text,true)
 revealMain.TextWrapped = true
 revealMain.TextXAlignment = Enum.TextXAlignment.Center
@@ -457,6 +467,21 @@ local function makeCardRow(card,mode)
 	corner(row,12)
 	stroke(row,tier.color,0.45,1)
 
+	local rowLeft = 22
+	local thumbImage = Config.CardImage(card.Id)
+	if thumbImage ~= "" then
+		local thumb = Instance.new("ImageLabel")
+		thumb.BackgroundTransparency = 1
+		thumb.Size = UDim2.new(0,58,0,82)
+		thumb.Position = UDim2.new(0,16,0,8)
+		thumb.ScaleType = Enum.ScaleType.Crop
+		thumb.Image = thumbImage
+		thumb.ZIndex = 24
+		thumb.Parent = row
+		corner(thumb,9)
+		rowLeft = 84
+	end
+
 	local accent = Instance.new("Frame")
 	accent.BorderSizePixel = 0
 	accent.BackgroundColor3 = tier.color
@@ -466,13 +491,13 @@ local function makeCardRow(card,mode)
 	accent.Parent = row
 	corner(accent,5)
 
-	local title = makeLabel(row,string.format("#%04d · %s · %s",card.Id,tier.name,grade.name),UDim2.new(0.48,0,0,23),UDim2.new(0,22,0,9),13,COLORS.text,true)
+	local title = makeLabel(row,string.format("#%04d · %s · %s",card.Id,tier.name,grade.name),UDim2.new(0.48,0,0,23),UDim2.new(0,rowLeft,0,9),13,COLORS.text,true)
 	title.ZIndex = 24
-	local meta = makeLabel(row,"Lv."..card.Level.." · "..cardMutationText(card)..((card.Awakening or 0)>0 and (" · AWAKEN ★"..card.Awakening) or ""),UDim2.new(0.54,0,0,20),UDim2.new(0,22,0,35),9,COLORS.muted,false)
+	local meta = makeLabel(row,"Lv."..card.Level.." · "..cardMutationText(card)..((card.Awakening or 0)>0 and (" · AWAKEN ★"..card.Awakening) or ""),UDim2.new(0.54,0,0,20),UDim2.new(0,rowLeft,0,35),9,COLORS.muted,false)
 	meta.ZIndex = 24
 	if state then
 		local inc = Economy.CardIncome(state,card,state.Computed and state.Computed.Entitlements or {})
-		local incomeLabel = makeLabel(row,fmt(inc).."/s",UDim2.new(0.45,0,0,22),UDim2.new(0,22,0,61),11,tier.color,true)
+		local incomeLabel = makeLabel(row,fmt(inc).."/s",UDim2.new(0.45,0,0,22),UDim2.new(0,rowLeft,0,61),11,tier.color,true)
 		incomeLabel.ZIndex = 24
 	end
 
@@ -876,7 +901,14 @@ local function showCardReveal(card,extra)
 	local tierIndex = math.clamp(math.floor(tonumber(card.Tier) or 0),0,#Config.Tiers-1)
 	local tier = Config.Tiers[tierIndex+1]
 	local grade = Config.Grades[(card.Grade or 0)+1]
-	revealMain.Text = string.format("#%04d\n%s",card.Id,tier.name)
+	local image = Config.CardImage(card.Id)
+	revealArt.Image = image
+	revealArt.Visible = image ~= ""
+	revealMain.Position = image ~= "" and UDim2.new(0,15,0,272) or UDim2.new(0,15,0,75)
+	revealMain.Size = image ~= "" and UDim2.new(1,-30,0,56) or UDim2.new(1,-30,0,170)
+	revealMeta.Position = image ~= "" and UDim2.new(0,15,0,322) or UDim2.new(0,15,0,250)
+	revealMeta.Size = image ~= "" and UDim2.new(1,-30,0,48) or UDim2.new(1,-30,0,90)
+	revealMain.Text = image ~= "" and string.format("#%04d · %s",card.Id,tier.name) or string.format("#%04d\n%s",card.Id,tier.name)
 	revealMain.TextColor3 = tier.color
 	revealRarity.Text = string.upper(tier.name).." DROP"
 	revealRarity.TextColor3 = tier.color
