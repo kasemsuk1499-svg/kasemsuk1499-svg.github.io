@@ -234,6 +234,25 @@ local function expectedTierMultiplier(level)
 	return out
 end
 
+function Economy.ModeledBaseIncomeForShop(level)
+	local lv = math.clamp(math.floor(tonumber(level) or 1),1,Config.BaseLevelCap)
+	local x = lv-1
+	local avgCharacterIncome = 545
+	local assumedCardLevel = 1+math.floor(x*4.2+0.5)
+	local expectedCardIncome = avgCharacterIncome
+		* expectedTierMultiplier(lv)
+		* (1.04^(assumedCardLevel-1))
+		* Economy.BaseIncomeMultiplier(lv)
+		* Economy.EconomyScale(lv)
+	return expectedCardIncome*Economy.StandLimit(lv)
+end
+
+function Economy.IdPackCost(level,packIndex)
+	local index = math.clamp(math.floor(tonumber(packIndex) or 1),1,#Config.IdPacks)
+	local seconds = 12+((index-1)*10)
+	return roundUpNice(Economy.ModeledBaseIncomeForShop(level)*seconds)
+end
+
 function Economy.RebirthTargetSeconds(level)
 	local lv = math.clamp(math.floor(tonumber(level) or 1),1,Config.BaseLevelCap)
 	local x = lv-1
