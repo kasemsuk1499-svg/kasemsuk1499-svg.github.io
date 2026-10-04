@@ -2228,3 +2228,146 @@ body::before{
 
 /* Clean showcase base: stand position labels intentionally hidden */
 .stand-number{display:none!important}
+
+
+/* =========================================================
+   BASE CARD SHOWCASE UI — cleaner, more collectible
+   ========================================================= */
+.stand{
+  border-radius:17px;
+  background:#0a0d13;
+  box-shadow:0 10px 24px rgba(0,0,0,.18)
+}
+.mini-card{
+  min-height:230px;
+  border-radius:inherit
+}
+.mini-card:after{
+  z-index:1;
+  background:
+    linear-gradient(180deg,rgba(3,5,9,.10) 0%,transparent 18%,transparent 54%,rgba(4,6,10,.28) 67%,rgba(4,6,10,.92) 100%)
+}
+
+/* Grade: compact left badge */
+.mini-card .stand-grade{
+  top:8px;left:8px;
+  min-width:42px;
+  padding:5px 8px;
+  border-radius:10px;
+  font-size:11px;
+  line-height:1;
+  letter-spacing:.035em;
+  z-index:10;
+  background:linear-gradient(145deg,rgba(6,9,13,.94),rgba(15,19,27,.90));
+  box-shadow:
+    0 0 14px color-mix(in srgb,var(--grade) 28%,transparent),
+    inset 0 0 10px color-mix(in srgb,var(--grade) 9%,transparent)
+}
+.mini-card .stand-grade.grade-8,
+.mini-card .stand-grade.grade-9{
+  box-shadow:
+    0 0 18px color-mix(in srgb,var(--grade) 40%,transparent),
+    inset 0 0 12px color-mix(in srgb,var(--grade) 12%,transparent)
+}
+
+/* Mutation: opposite corner, no longer floats below an old stand label */
+.mini-card .mutation-badges{
+  top:8px;
+  right:8px;
+  max-width:58%;
+  gap:4px;
+  z-index:10
+}
+.mini-card .mutation-badges .mutation-badge{
+  top:auto;right:auto;
+  min-height:20px;
+  padding:3px 6px;
+  font-size:7px;
+  line-height:1;
+  border-radius:999px;
+  background:rgba(5,8,12,.92);
+  box-shadow:
+    0 0 10px color-mix(in srgb,var(--mutation) 26%,transparent),
+    inset 0 0 7px color-mix(in srgb,var(--mutation) 7%,transparent)
+}
+.mini-card .mutation-badges .mutation-badge.slot-2{
+  transform:none;
+  margin-right:5px
+}
+
+/* Bottom info: compact glass bar with predictable hierarchy */
+.mini-meta{
+  position:absolute;
+  left:8px;right:8px;bottom:8px;
+  z-index:9;
+  display:grid;
+  gap:3px;
+  padding:7px 8px 6px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:10px;
+  background:
+    linear-gradient(180deg,rgba(13,17,24,.62),rgba(6,9,13,.84));
+  box-shadow:
+    0 6px 18px rgba(0,0,0,.22),
+    inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px)
+}
+.mini-meta-main,
+.mini-meta-sub{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  min-width:0
+}
+.mini-meta-main{
+  line-height:1.05
+}
+.mini-meta-main .tier-card-id{
+  flex:0 0 auto;
+  font-size:10px
+}
+.mini-meta-main .tier-card-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:right;
+  font-size:9px
+}
+.mini-meta-sub{
+  color:#cbd3df;
+  font-size:8px;
+  line-height:1
+}
+.mini-meta-sub>span{
+  color:#aeb7c6;
+  font-size:8px
+}
+.mini-meta-sub>span b{
+  color:#eef2f8;
+  font-weight:900
+}
+.mini-meta-sub .tier-card-income{
+  margin-left:auto;
+  font-size:9px;
+  white-space:nowrap
+}
+
+/* Keep card art visually dominant */
+.mini-card .tier-ring{
+  border-width:1.5px;
+  box-shadow:inset 0 0 18px color-mix(in srgb,var(--tier) 22%,transparent)
+}
+
+@media (max-width:700px){
+  .mini-card .stand-grade{top:6px;left:6px;min-width:38px;padding:4px 6px;font-size:9px}
+  .mini-card .mutation-badges{top:6px;right:6px;max-width:60%}
+  .mini-card .mutation-badges .mutation-badge{min-height:18px;padding:3px 5px;font-size:6px}
+  .mini-meta{left:6px;right:6px;bottom:6px;padding:6px 7px 5px}
+  .mini-meta-main .tier-card-id{font-size:9px}
+  .mini-meta-main .tier-card-name{font-size:8px}
+  .mini-meta-sub,.mini-meta-sub>span{font-size:7px}
+  .mini-meta-sub .tier-card-income{font-size:8px}
+}
