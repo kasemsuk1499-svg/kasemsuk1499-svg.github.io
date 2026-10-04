@@ -1174,7 +1174,17 @@ openSocial = function()
 			name.ZIndex=24
 			local meta=makeLabel(row,"ASC "..romanNumeral(entry.Ascension).." · Base "..entry.BaseLevel.." · "..fmt(entry.Income).."/s",UDim2.new(0.60,0,0,22),UDim2.new(0,12,0,36),9,COLORS.muted,false)
 			meta.ZIndex=24
-			local trade=makeButton(row,"TRADE",UDim2.new(0,120,0,40),UDim2.new(1,-132,0,15))
+			local visit=makeButton(row,"VISIT",UDim2.new(0,92,0,40),UDim2.new(1,-218,0,15))
+			visit.ZIndex=24
+			visit.MouseButton1Click:Connect(function()
+				local result=invoke("VisitPlayer",{TargetUserId=entry.UserId})
+				if result then
+					overlay.Visible=false
+					activePanel=nil
+					showToast("กำลังไปดูฐานของ "..entry.DisplayName.." 👀",true)
+				end
+			end)
+			local trade=makeButton(row,"TRADE",UDim2.new(0,110,0,40),UDim2.new(1,-120,0,15))
 			trade.ZIndex=24
 			trade.BackgroundColor3=COLORS.accent
 			trade.MouseButton1Click:Connect(function()
