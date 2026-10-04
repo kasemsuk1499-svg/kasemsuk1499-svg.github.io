@@ -3330,3 +3330,55 @@ body::before{
 @media (prefers-reduced-motion:reduce){
   #socialBaseStands .visitor-showcase-card::before{animation:none;opacity:.18}
 }
+
+
+/* Mobile-only DOM particle fallback.
+   Desktop continues to use the canvas renderer unchanged. */
+.mobile-card-particle{display:none}
+@media (max-width:700px){
+  .mobile-card-particle{
+    position:absolute;
+    z-index:12;
+    display:block;
+    width:1em;
+    height:1em;
+    pointer-events:none;
+    color:var(--fx-color,#fff);
+    font-size:var(--fx-size,14px);
+    font-style:normal;
+    font-weight:900;
+    line-height:1;
+    text-align:center;
+    opacity:0;
+    transform:translate(-50%,-50%) scale(.35) rotate(0deg);
+    text-shadow:
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 16px currentColor;
+    filter:brightness(1.22);
+    mix-blend-mode:screen;
+    animation:mobileCardParticle var(--fx-life,1200ms) ease-out forwards;
+    will-change:transform,opacity
+  }
+  @keyframes mobileCardParticle{
+    0%{
+      opacity:0;
+      transform:translate(-50%,-50%) scale(.25) rotate(0deg)
+    }
+    12%{
+      opacity:1;
+      transform:translate(-50%,-50%) scale(1.05) rotate(8deg)
+    }
+    62%{opacity:.92}
+    100%{
+      opacity:0;
+      transform:
+        translate(calc(-50% + var(--fx-dx,0px)),calc(-50% + var(--fx-dy,-28px)))
+        scale(1.35)
+        rotate(var(--fx-rot,80deg))
+    }
+  }
+}
+@media (max-width:700px) and (prefers-reduced-motion:reduce){
+  .mobile-card-particle{display:none!important;animation:none!important}
+}
