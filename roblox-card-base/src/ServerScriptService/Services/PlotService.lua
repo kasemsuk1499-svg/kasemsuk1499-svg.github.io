@@ -624,6 +624,10 @@ function PlotService.Assign(player)
 	end
 	UserBySlot[chosen] = player.UserId
 	SlotByUser[player.UserId] = chosen
+	local origin = PlotOrigins[chosen]
+	player:SetAttribute("CardBasePlotX",origin.X)
+	player:SetAttribute("CardBasePlotY",origin.Y)
+	player:SetAttribute("CardBasePlotZ",origin.Z)
 	local model = buildPlot(player,chosen)
 	PlotService.Render(player)
 
