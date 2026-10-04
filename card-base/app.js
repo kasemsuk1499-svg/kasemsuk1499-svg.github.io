@@ -15,6 +15,8 @@
   const ID_PACK_AUTO_MS = 1200;
   const ROTATING_SHOP_RESTOCK_MS = 10*60*1000;
   const ROTATING_SHOP_SLOTS = 5;
+  const ASCENSION_STEP = 200;
+  const ASCENSION_PERK_MAX = 10;
 
   const TIERS = [
     {name:"Common",color:"#9aa1ad",multi:1},
@@ -166,7 +168,9 @@
     currentPack:null, rollingUntil:0, lastTick:Date.now(), uidCounter:1,
     autoTargets:[], autoRolling:false, fullAuto:false, targetFound:false,
     storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{},
-    rotatingShop:{rotationId:null,bought:{}}
+    rotatingShop:{rotationId:null,bought:{}},
+    ascension:{stars:0,cores:0,perks:{income:0,luck:0,forge:0}},
+    tower:{floor:1,best:0,shards:0}
   });
 
   let state = load();
@@ -307,7 +311,8 @@
         ...c,
         gid:validCardGid(c.gid)?c.gid:makeCardGid(),
         mutation:Number.isInteger(Number(c.mutation))&&Number(c.mutation)>=0&&Number(c.mutation)<MUTATIONS.length?Number(c.mutation):0,
-        mutation2:Number.isInteger(Number(c.mutation2))&&Number(c.mutation2)>0&&Number(c.mutation2)<MUTATIONS.length&&Number(c.mutation2)!==Number(c.mutation)?Number(c.mutation2):0
+        mutation2:Number.isInteger(Number(c.mutation2))&&Number(c.mutation2)>0&&Number(c.mutation2)<MUTATIONS.length&&Number(c.mutation2)!==Number(c.mutation)?Number(c.mutation2):0,
+        awakening:Math.max(0,Math.floor(Number(c.awakening)||0))
       }));
     s.cardIndex=normalizeCardIndex(s.cardIndex);
     const rawRotating=s.rotatingShop&&typeof s.rotatingShop==="object"?s.rotatingShop:{};
@@ -316,6 +321,23 @@
       bought:rawRotating.bought&&typeof rawRotating.bought==="object"&&!Array.isArray(rawRotating.bought)
         ? Object.fromEntries(Object.entries(rawRotating.bought).map(([k,v])=>[String(k),Math.max(0,Math.floor(Number(v)||0))]))
         : {}
+    };
+    const rawAsc=s.ascension&&typeof s.ascension==="object"?s.ascension:{};
+    const rawPerks=rawAsc.perks&&typeof rawAsc.perks==="object"?rawAsc.perks:{};
+    s.ascension={
+      stars:Math.max(0,Math.floor(Number(rawAsc.stars)||0)),
+      cores:Math.max(0,Math.floor(Number(rawAsc.cores)||0)),
+      perks:{
+        income:Math.max(0,Math.min(ASCENSION_PERK_MAX,Math.floor(Number(rawPerks.income)||0))),
+        luck:Math.max(0,Math.min(ASCENSION_PERK_MAX,Math.floor(Number(rawPerks.luck)||0))),
+        forge:Math.max(0,Math.min(ASCENSION_PERK_MAX,Math.floor(Number(rawPerks.forge)||0)))
+      }
+    };
+    const rawTower=s.tower&&typeof s.tower==="object"?s.tower:{};
+    s.tower={
+      floor:Math.max(1,Math.floor(Number(rawTower.floor)||1)),
+      best:Math.max(0,Math.floor(Number(rawTower.best)||0)),
+      shards:Math.max(0,Math.floor(Number(rawTower.shards)||0))
     };
     syncCardIndex(s);
     s.autoTargets=(Array.isArray(s.autoTargets)?s.autoTargets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<10);
@@ -425,8 +447,27 @@
   function padId(id){return "#"+String(id).padStart(4,"0")}
   function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
   function imageFor(id){return "../assets/cards/"+id+".png"}
-  function baseIncomeMultiplier(level=state.baseLevel){return 1+(level-1)*0.25}
-  function economyScale(level=state.baseLevel){return Math.pow(5,Math.max(0,level-1))}
+  function titleForLevel(level=state.baseLevel){
+    const lv=Math.max(1,Math.floor(Number(level)||1));
+    if(lv<=TITLES.length)return TITLES[lv-1];
+    const star=state.ascension?.stars||0;
+    const band=lv<100?"Infinite Collector":lv<200?"Beyond Collector":lv<500?"Ascendant Collector":"Endless Sovereign";
+    return band+(star?" ★"+star:"")+" · Lv."+lv;
+  }
+  function ascensionIncomeMultiplier(){
+    return 1+((state.ascension?.perks?.income||0)*0.10);
+  }
+  function ascensionLuckMultiplier(){
+    return 1+((state.ascension?.perks?.luck||0)*0.03);
+  }
+  function forgeCostMultiplier(){
+    return Math.pow(0.94,state.ascension?.perks?.forge||0);
+  }
+  function baseIncomeMultiplier(level=state.baseLevel){return 1+(Math.max(1,Number(level)||1)-1)*0.25}
+  function economyScale(level=state.baseLevel){
+    // Base Level is endless; cap only the floating-point exponent so JS never turns the economy into Infinity.
+    return Math.pow(5,Math.min(400,Math.max(0,(Number(level)||1)-1)));
+  }
   function luckValue(level=state.baseLevel){
     const x=Math.max(0,level-1);
     return 1+(0.045*x)+(0.0035*Math.pow(x,1.28));
@@ -450,10 +491,15 @@
   function wealthClass(value){return "wealth-value wealth-"+wealthLevel(value)}
   function rankBand(level){return Math.min(5,Math.floor((Math.max(1,level)-1)/4))}
   function rankFxStyle(level){
-    const lv=Math.max(1,Math.min(40,Number(level)||1)),fx=TITLE_FX[lv-1];
-    return "--rank:"+fx[0]+";--rank2:"+fx[1]+";--rank-glow:"+(10+lv*1.25)+"px;--rank-speed:"+Math.max(1.9,6.4-lv*.11)+"s";
+    const actual=Math.max(1,Math.floor(Number(level)||1));
+    const lv=Math.max(1,Math.min(40,actual)),fx=TITLE_FX[lv-1];
+    const asc=state.ascension?.stars||0;
+    return "--rank:"+fx[0]+";--rank2:"+fx[1]+";--rank-glow:"+(10+lv*1.25+Math.min(24,asc*2))+"px;--rank-speed:"+Math.max(1.9,6.4-lv*.11)+"s";
   }
-  function rankFxClass(level){return "rank-fx rank-level-"+Math.max(1,Math.min(40,Number(level)||1))+" rank-band-"+rankBand(level)}
+  function rankFxClass(level){
+    const actual=Math.max(1,Math.floor(Number(level)||1));
+    return "rank-fx rank-level-"+Math.max(1,Math.min(40,actual))+" rank-band-"+rankBand(actual)+(actual>40?" rank-endless":"");
+  }
   function tierFxClass(tier){return "tier-fx tier-"+Math.max(0,Math.min(9,Number(tier)||0))}
   function gradeFxClass(grade){return "grade-fx grade-"+Math.max(0,Math.min(GRADES.length-1,Number(grade)||0))}
   function mutationFxClass(mutation){
@@ -531,7 +577,7 @@
     return 1+soft;
   }
   function effectiveLuckValue(level=state.baseLevel){
-    return luckValue(level)*mutationLuckMultiplier();
+    return luckValue(level)*mutationLuckMultiplier()*ascensionLuckMultiplier();
   }
 
   function normalizeSlots(){
@@ -545,17 +591,24 @@
     state.placed=next;
   }
 
+  function awakeningStars(card){return Math.max(0,Math.floor(Number(card?.awakening)||0))}
+  function awakeningMultiplier(card){return 1+(awakeningStars(card)*0.35)}
+  function awakeningRequiredLevel(card){return 100*(awakeningStars(card)+1)}
+  function awakeningBadge(card){
+    const stars=awakeningStars(card);
+    return stars?'<span class="awakening-badge">AWAKEN ★'+stars+'</span>':"";
+  }
   function cardCoreIncome(card){
     const tier=TIERS[card.tier],grade=GRADES[card.grade];
     const levelMulti=Math.pow(1.04,Math.max(0,card.level-1));
-    return charBaseIncome(card.charId)*tier.multi*grade.multi*levelMulti;
+    return charBaseIncome(card.charId)*tier.multi*grade.multi*levelMulti*awakeningMultiplier(card);
   }
   function cardIntrinsicIncome(card){
     return cardCoreIncome(card)*mutationIncomeMultiplier(card);
   }
 
   function cardIncome(card){
-    return cardIntrinsicIncome(card)*baseIncomeMultiplier()*economyScale();
+    return cardIntrinsicIncome(card)*baseIncomeMultiplier()*economyScale()*ascensionIncomeMultiplier();
   }
 
   function totalIncome(){
@@ -571,11 +624,11 @@
     const level=Math.max(1,Number(card.level)||1);
     // Card Level ต้องเป็น long-term sink: เริ่มแพงขึ้น ~6x และโตเร็วกว่ารายได้ของการ์ด
     const seconds=40*Math.pow(1.05,level-1);
-    return roundUpNice(Math.min(1e300,income*seconds*baseIncomeMultiplier()*economyScale()));
+    return roundUpNice(Math.min(1e300,income*seconds*baseIncomeMultiplier()*economyScale()*forgeCostMultiplier()));
   }
 
   function rerollCost(card){
-    return (GRADE_REROLL_COSTS[card.tier]||GRADE_REROLL_COSTS[0])*economyScale();
+    return (GRADE_REROLL_COSTS[card.tier]||GRADE_REROLL_COSTS[0])*economyScale()*forgeCostMultiplier();
   }
 
   function sellValue(card){
@@ -1070,17 +1123,23 @@
   }
 
   function rebirthTargetSeconds(level=state.baseLevel){
-    // เงินเป็น gate หลัก: ต้นเกมยังเดินได้ แต่ปลายเกมต้องสะสมจริงและไม่ตันเร็ว
-    const x=Math.max(0,level-1);
-    return Math.round(240*Math.pow(1.16,x)+35*x);
+    // Lv.1–40 keeps the original curve. Endless levels use a soft progression curve
+    // so milestones such as Lv.200 are long-term goals, not mathematical impossibilities.
+    const lv=Math.max(1,Math.floor(Number(level)||1));
+    const x=Math.max(0,lv-1);
+    if(lv<=40)return Math.round(240*Math.pow(1.16,x)+35*x);
+    const post=lv-40;
+    return Math.round(1800+(post*22)+Math.pow(post,1.18)*7);
   }
 
   function rebirthCost(level=state.baseLevel){
-    const x=Math.max(0,level-1);
+    const x=Math.max(0,(Number(level)||1)-1);
+    const balanceX=Math.min(39,x);
     const avgCharacterIncome=545;
-    // ประเมินว่าผู้เล่นจะปั้นเลเวลและคัดการ์ดดีขึ้นเรื่อย ๆ ไม่ใช่ใช้ค่าเฉลี่ยซองล้วน
-    const assumedCardLevel=1+Math.round(x*4.2);
-    const optimizationFactor=1+(0.10*x)+(0.018*x*x);
+    // Freeze the old optimization assumptions after Lv.40; the endless economy
+    // continues through Base multiplier / Wealth scaling without exploding wait times.
+    const assumedCardLevel=1+Math.round(balanceX*4.2);
+    const optimizationFactor=1+(0.10*balanceX)+(0.018*balanceX*balanceX);
     const expectedCardIncome=
       avgCharacterIncome*
       rebirthExpectedTierMultiplier(level)*
@@ -1305,7 +1364,7 @@
     return state.placed.map((uid,slot)=>{
       const c=uid?state.cards.find(x=>x.uid===uid):null;
       if(!c)return null;
-      return {slot,charId:c.charId,tier:c.tier,grade:c.grade,mutation:Number(c.mutation)||0,mutation2:Number(c.mutation2)||0,level:c.level,income:Math.round(cardIncome(c))};
+      return {slot,charId:c.charId,tier:c.tier,grade:c.grade,mutation:Number(c.mutation)||0,mutation2:Number(c.mutation2)||0,level:c.level,awakening:awakeningStars(c),income:Math.round(cardIncome(c))};
     }).filter(Boolean);
   }
 
@@ -1314,7 +1373,7 @@
     const result=await rpc("cb_publish_presence",{
       p_token:gameToken,
       p_base_level:state.baseLevel,
-      p_title:TITLES[state.baseLevel-1]||"Collector",
+      p_title:titleForLevel(),
       p_stands:publicStandSnapshot()
     });
     if(!result.ok&&result.error==="invalid_session")clearGameSession();
@@ -1431,7 +1490,7 @@
     if(!signedIn)return;
     $("#onlineBaseLevel").textContent="Lv."+state.baseLevel;
     const onlineTitle=$("#onlineTitle"),onlineName=$("#onlineDisplayName");
-    onlineTitle.textContent=TITLES[state.baseLevel-1]||"Collector";
+    onlineTitle.textContent=titleForLevel();
     onlineTitle.className=rankFxClass(state.baseLevel);
     onlineTitle.style.cssText=rankFxStyle(state.baseLevel);
     $("#onlineServerRank").textContent=onlineCache.myRank?"#"+onlineCache.myRank:"#—";
@@ -1887,7 +1946,7 @@
   }
 
   function renderVisitorIdentity(name,level,title=null){
-    const lv=Math.max(1,Math.min(40,Number(level)||1));
+    const lv=Math.max(1,Math.floor(Number(level)||1));
     const safeName=escapeHtml(name||"Player");
     const nameEl=$("#socialBaseName"),metaEl=$("#socialBaseMeta");
     nameEl.innerHTML=
@@ -1960,7 +2019,7 @@
       const t=TIERS[c.tier]||TIERS[0],g=GRADES[c.grade]||GRADES[0];
       html+='<div class="visitor-stand visitor-showcase-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="visitor-card visitor-showcase-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+'">'+
         '<img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div>'+
-        '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+
+        '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+
         '<div class="visitor-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><b>'+
           '<span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span><span class="tier-card-name">'+t.name+'</span></b>'+
           '<span class="tier-card-sub">Lv.'+c.level+(cardMutationIds(c).length?' · '+mutationNames(c):'')+' · <strong class="tier-card-income">'+fmt(c.income||0)+'/s</strong></span>'+
@@ -2031,13 +2090,13 @@
     incomeEl.className=wealthClass(incomeValue);
     $("#baseLevel").textContent="Lv."+state.baseLevel;
     $("#luck").textContent="×"+effectiveLuckValue().toFixed(2);
-    titleEl.textContent=TITLES[state.baseLevel-1];
+    titleEl.textContent=titleForLevel();
     titleEl.className=rankFxClass(state.baseLevel)+" base-rank-title";
     titleEl.style.cssText=rankFxStyle(state.baseLevel);
     document.body.dataset.rankStage=String(rankBand(state.baseLevel));
     document.body.style.cssText=rankFxStyle(state.baseLevel);
     $("#standCount").textContent=standLimit()+" แท่น";
-    $("#incomeMulti").textContent="Income ×"+baseIncomeMultiplier().toFixed(2)+" · Wealth ×"+fmt(economyScale());
+    $("#incomeMulti").textContent="Income ×"+baseIncomeMultiplier().toFixed(2)+" · Core ×"+ascensionIncomeMultiplier().toFixed(2)+" · Wealth ×"+fmt(economyScale());
   }
 
   function renderBaseFloorNav(total=standLimit()){
@@ -2248,16 +2307,18 @@
       el.innerHTML=
         '<div class="card-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
           '<img src="'+imageFor(c.charId)+'" alt="Character '+padId(c.charId)+'"><div class="tier-ring"></div>'+
-          '<div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'<div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div>'+
+          '<div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div>'+
         '</div>'+
         '<div class="card-body"><div class="card-stats">'+
           '<div><span>Level</span><b data-card-stat="level">'+c.level+'</b></div><div><span>รายได้</span><b data-card-stat="income" class="tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</b></div>'+
           '<div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div>'+
           '<div><span>อัป Lv.</span><b data-card-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-card-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div>'+
           '<div><span>Mutation</span><b class="mutation-stat">'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2</b></div><div><span>Mutation Multi</span><b>Income ×'+mutationIncomeMultiplier(c).toFixed(2)+' · Luck +'+mutationLuckRawBonus(c).toFixed(2)+'</b></div>'+
+          '<div><span>Awaken</span><b>★'+awakeningStars(c)+' · ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div>'+
         '</div>'+(tradeLocked?'<div class="trade-lock-banner">🔒 TRADE LOCK · รออีกฝ่ายตอบรับ</div>':'')+'<div class="card-actions">'+
           '<button data-a="place" '+(tradeLocked?"disabled":"")+'>'+(placed?"เอาออกจากฐาน":"วางในแท่นว่าง")+'</button><button data-a="level" '+(tradeLocked?"disabled":"")+'>อัป Level</button>'+
           '<button data-a="grade" '+(tradeLocked?"disabled":"")+'>สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-a="grade-auto" '+(tradeLocked?"disabled":"")+'>'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button>'+          '<button class="mutation-inherit-btn" data-a="mutation-lab" '+(tradeLocked||cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด")+'</button>'+
+          '<button class="awaken-action" data-a="awaken" '+(tradeLocked||!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button>'+
 
           '<button class="'+(c.locked?"locked":"")+'" data-a="lock" '+(tradeLocked?"disabled":"")+'>'+(c.locked?"🔒 ปลดล็อก":"🔓 ล็อก")+'</button>'+
           '<button class="sell" data-a="sell" '+((placed||c.locked||tradeLocked)?"disabled":"")+'>ขาย '+fmt(sellValue(c))+'</button>'+
@@ -2271,6 +2332,7 @@
         if(a==="grade")rerollGrade(c.uid);
         if(a==="grade-auto")openGradeAuto(c.uid);
         if(a==="mutation-lab")openMutationLab(c.uid);
+        if(a==="awaken")awakenCard(c.uid);
         if(a==="lock")toggleLock(c.uid);
         if(a==="sell")sellCard(c.uid);
       });
@@ -2347,20 +2409,6 @@
   }
 
   function renderRebirth(){
-    if(state.baseLevel>=40){
-      $("#rebirthHeadline").textContent="Lv.40 · MAX";
-      $("#rebirthMoney").textContent="—";
-      $("#rebirthRule").textContent="ถึงระดับสูงสุดของ V1 แล้ว";
-      $("#rebirthTierGain").textContent="Eternal · โอกาสสูงสุดของ V1";
-      const pace=$("#rebirthPace");if(pace)pace.textContent="—";
-      $("#rebirthBtn").disabled=true;
-      $("#nextTitle").textContent="MAX";
-      $("#nextStands").textContent="30";
-      $("#nextIncome").textContent="×"+baseIncomeMultiplier(40).toFixed(2);
-      $("#nextLuck").textContent="×"+effectiveLuckValue(40).toFixed(2);
-      $("#nextTier").textContent=TIERS[maxTierForLevel(40)-1].name;
-      return;
-    }
     const next=state.baseLevel+1,cost=rebirthCost();
     const currentMax=maxTierForLevel(state.baseLevel);
     const nextMax=maxTierForLevel(next);
@@ -2374,7 +2422,9 @@
     $("#rebirthHeadline").style.cssText=rankFxStyle(next);
     $("#rebirthMoney").textContent=fmt(cost);
     $("#rebirthMoney").className=wealthClass(cost);
-    $("#rebirthRule").textContent="ใช้เงินอย่างเดียว · ไม่มีเงื่อนไข Character ID / Card Level";
+    $("#rebirthRule").textContent=state.baseLevel>=40
+      ?"Endless Level · ใช้เงินอย่างเดียว · ไม่มี Level Cap"
+      :"ใช้เงินอย่างเดียว · ไม่มีเงื่อนไข Character ID / Card Level";
     const currentLow=currentOdds.slice(0,3).reduce((a,b)=>a+b,0)*100;
     const nextLow=nextOdds.slice(0,3).reduce((a,b)=>a+b,0)*100;
     $("#rebirthTierGain").textContent=newlyUnlocked
@@ -2382,13 +2432,164 @@
       :"Low Tier "+currentLow.toFixed(1)+"% → "+nextLow.toFixed(1)+"% · "+TIERS[focusTier].name+" "+(currentOdds[focusTier]*100).toFixed(3)+"% → "+(nextOdds[focusTier]*100).toFixed(3)+"%";
     const pace=$("#rebirthPace");if(pace)pace.textContent="~"+formatDuration(rebirthTargetSeconds());
     $("#rebirthBtn").disabled=state.money<cost;
-    $("#nextTitle").textContent=TITLES[next-1];
+    $("#nextTitle").textContent=titleForLevel(next);
     $("#nextTitle").className=rankFxClass(next);
     $("#nextTitle").style.cssText=rankFxStyle(next);
     $("#nextStands").textContent=standLimit(next);
     $("#nextIncome").textContent="×"+baseIncomeMultiplier(next).toFixed(2);
     $("#nextLuck").textContent="×"+effectiveLuckValue(next).toFixed(2);
     $("#nextTier").textContent=TIERS[nextMax-1].name;
+    renderEndgame();
+  }
+
+  function nextAscensionLevel(){return ((state.ascension?.stars||0)+1)*ASCENSION_STEP}
+  function ascensionProgress(){
+    const prev=(state.ascension?.stars||0)*ASCENSION_STEP;
+    const next=nextAscensionLevel();
+    return Math.max(0,Math.min(1,(state.baseLevel-prev)/Math.max(1,next-prev)));
+  }
+  function claimAscension(){
+    const need=nextAscensionLevel();
+    if(state.baseLevel<need){toast("ต้องถึง Base Lv."+need+" ก่อน");return}
+    state.ascension.stars++;
+    state.ascension.cores++;
+    toast("ASCENSION ★"+state.ascension.stars+" · ได้ Ascension Core +1 ✦",true);
+    renderAll();
+  }
+  function buyAscensionPerk(key){
+    const perks=state.ascension?.perks;if(!perks||!(key in perks))return;
+    if(perks[key]>=ASCENSION_PERK_MAX){toast("สายนี้เต็มแล้ว");return}
+    if(state.ascension.cores<1){toast("Ascension Core ไม่พอ");return}
+    state.ascension.cores--;
+    perks[key]++;
+    toast("Core Tree อัป "+key+" เป็น "+perks[key]+"/"+ASCENSION_PERK_MAX+" ✨",true);
+    renderAll();
+  }
+
+  function towerCards(){
+    normalizeSlots();
+    return state.placed.map(uid=>uid?state.cards.find(c=>c.uid===uid):null).filter(Boolean);
+  }
+  function towerPower(){
+    return Math.floor(towerCards().reduce((sum,c)=>{
+      return sum+
+        ((Number(c.tier)+1)*15)+
+        ((Number(c.grade)+1)*4)+
+        Math.floor((Number(c.level)||1)/10)+
+        (cardMutationIds(c).length*18)+
+        (awakeningStars(c)*60);
+    },0));
+  }
+  function towerRequirement(floor=state.tower.floor){
+    const f=Math.max(1,Number(floor)||1);
+    return Math.floor(150+(f*42)+(Math.pow(f,1.38)*10));
+  }
+  function towerCondition(floor=state.tower.floor){
+    const cards=towerCards(),f=Math.max(1,Number(floor)||1),rules=[];
+    const mythic=cards.filter(c=>c.tier>=5).length;
+    const dual=cards.filter(c=>cardMutationIds(c).length>=2).length;
+    const ex=cards.filter(c=>c.grade>=10).length;
+    const awaken=cards.reduce((n,c)=>n+awakeningStars(c),0);
+    const totalLv=cards.reduce((n,c)=>n+(Number(c.level)||1),0);
+
+    if(f%5===2){
+      const need=Math.min(10,1+Math.floor(f/8));
+      rules.push({ok:mythic>=need,text:"Mythic+ "+mythic+"/"+need});
+    }else if(f%5===3){
+      const need=Math.min(8,1+Math.floor(f/10));
+      rules.push({ok:dual>=need,text:"Dual Mutation "+dual+"/"+need});
+    }else if(f%5===4){
+      const need=300+(f*25);
+      rules.push({ok:totalLv>=need,text:"Total Card Lv. "+totalLv+"/"+need});
+    }else if(f%5===0){
+      const need=Math.min(8,1+Math.floor(f/12));
+      rules.push({ok:ex>=need,text:"EX+ "+ex+"/"+need});
+    }
+    if(f%10===0){
+      const need=Math.max(1,Math.floor(f/10));
+      rules.push({ok:awaken>=need,text:"Awaken Stars "+awaken+"/"+need});
+    }
+    return {
+      ok:rules.every(r=>r.ok),
+      text:rules.length?rules.map(r=>(r.ok?"✓ ":"• ")+r.text).join(" · "):"Power Check ล้วน"
+    };
+  }
+  function challengeTower(){
+    if((state.ascension?.stars||0)<1){toast("ปลด Endless Tower หลัง Ascension ครั้งแรก");return}
+    const floor=state.tower.floor,need=towerRequirement(floor),power=towerPower(),cond=towerCondition(floor);
+    if(power<need||!cond.ok){toast("ยังไม่ผ่าน Floor "+floor+" · ปั้นฐานให้แข็งแกร่งขึ้นก่อน");return}
+    state.tower.best=Math.max(state.tower.best,floor);
+    state.tower.shards++;
+    state.tower.floor++;
+    toast("ผ่าน Endless Tower Floor "+floor+" · Shard +1 🏢",true);
+    renderAll();
+  }
+  function forgeTowerCore(){
+    if(state.tower.shards<10){toast("ต้องใช้ Tower Shards 10 ชิ้น");return}
+    state.tower.shards-=10;
+    state.ascension.cores++;
+    toast("หลอม Ascension Core สำเร็จ ✦",true);
+    renderAll();
+  }
+
+  function canAwaken(card){
+    const req=awakeningRequiredLevel(card);
+    return !!card&&
+      Number(card.level)>=req&&
+      Number(card.grade)>=GRADES.length-1&&
+      cardMutationIds(card).length>=2&&
+      (state.ascension?.cores||0)>=1;
+  }
+  function awakenCard(uid){
+    const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    const req=awakeningRequiredLevel(c);
+    if(Number(c.level)<req){toast("Awaken ★"+(awakeningStars(c)+1)+" ต้อง Card Lv."+req);return}
+    if(Number(c.grade)<GRADES.length-1){toast("ต้องเป็น Grade EX★ ก่อน");return}
+    if(cardMutationIds(c).length<2){toast("ต้องมี Dual Mutation ก่อน");return}
+    if((state.ascension?.cores||0)<1){toast("ต้องใช้ Ascension Core 1 ชิ้น");return}
+    const next=awakeningStars(c)+1;
+    if(!window.confirm("Awaken "+padId(c.charId)+" เป็น ★"+next+"?\nใช้ Ascension Core 1 ชิ้น\nCard Income +35%"))return;
+    state.ascension.cores--;
+    c.awakening=next;
+    toast("AWAKEN ★"+next+" · "+padId(c.charId)+" ✦",true);
+    renderAll();
+    if(activeStand!==null)renderStandModal();
+  }
+
+  function renderEndgame(){
+    const stars=state.ascension?.stars||0,cores=state.ascension?.cores||0,need=nextAscensionLevel(),ready=state.baseLevel>=need;
+    const headline=$("#ascensionHeadline");if(!headline)return;
+    headline.textContent="Ascension ★"+stars;
+    $("#ascensionCores").textContent=cores;
+    $("#ascensionBaseLevel").textContent="Lv."+state.baseLevel;
+    $("#ascensionNext").textContent="Lv."+need;
+    $("#ascensionStars").textContent="★"+stars;
+    $("#ascensionCoreCount").textContent=cores;
+    $("#ascensionProgressFill").style.width=(ascensionProgress()*100).toFixed(1)+"%";
+    const ascend=$("#ascendBtn");
+    ascend.disabled=!ready;
+    ascend.textContent=ready?"ASCEND · รับ ★"+(stars+1)+" + Core":"ไปให้ถึง Lv."+need+" ก่อน";
+
+    const perks=state.ascension.perks;
+    $("#perkIncomeRank").textContent=perks.income+"/"+ASCENSION_PERK_MAX;
+    $("#perkLuckRank").textContent=perks.luck+"/"+ASCENSION_PERK_MAX;
+    $("#perkForgeRank").textContent=perks.forge+"/"+ASCENSION_PERK_MAX;
+    $("[data-asc-perk]").forEach(btn=>{
+      const key=btn.dataset.ascPerk;
+      btn.disabled=cores<1||perks[key]>=ASCENSION_PERK_MAX;
+    });
+
+    const floor=state.tower.floor,power=towerPower(),req=towerRequirement(floor),cond=towerCondition(floor);
+    $("#endlessTowerFloor").textContent=floor;
+    $("#towerPower").textContent=power.toLocaleString("th-TH");
+    $("#towerRequirement").textContent=req.toLocaleString("th-TH");
+    $("#towerBest").textContent=state.tower.best;
+    $("#towerShards").textContent=state.tower.shards;
+    $("#endlessTowerCondition").textContent=(stars<1?"LOCKED · ต้อง Ascension ★1":"Floor "+floor+" · "+cond.text);
+    const challenge=$("#towerChallengeBtn");
+    challenge.disabled=stars<1||power<req||!cond.ok;
+    challenge.textContent=stars<1?"ปลดล็อกหลัง Ascension ★1":"ท้าทาย Floor "+floor;
+    $("#towerCoreBtn").disabled=state.tower.shards<10;
   }
 
   function renderRankCatalog(){
@@ -2592,14 +2793,15 @@
     if(!c){renderPicker(body,activeStand);return}
     const t=TIERS[c.tier],g=GRADES[c.grade];
     body.innerHTML=
-      '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'<div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div></div>'+
+      '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div></div>'+
       '<div class="stand-detail-info"><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
-      '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div></div>'+
-      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
+      '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div><div><span>Awaken</span><b>★'+awakeningStars(c)+' · Income ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div></div>'+
+      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
     body.querySelector('[data-modal-a="level"]').addEventListener("click",()=>{levelUp(c.uid,true)});
     body.querySelector('[data-modal-a="grade"]').addEventListener("click",()=>{rerollGrade(c.uid,true)});
     body.querySelector('[data-modal-a="grade-auto"]').addEventListener("click",()=>{openGradeAuto(c.uid)});
+    body.querySelector('[data-modal-a="awaken"]').addEventListener("click",()=>{awakenCard(c.uid)});
     body.querySelector('[data-modal-a="remove"]').addEventListener("click",()=>{state.placed[activeStand]=null;toast("ถอดการ์ดจากแท่นแล้ว");renderAll();renderStandModal()});
     body.querySelector('[data-modal-a="change"]').addEventListener("click",()=>renderPicker(body,activeStand,c.uid));
   }
@@ -3070,7 +3272,6 @@
   }
 
   function doRebirth(){
-    if(state.baseLevel>=40)return;
     if(idPackAutoIndex!==null)stopIdPackAuto("Auto ID Pack หยุดเพราะ Rebirth");
     const cost=rebirthCost();
     if(state.money<cost){toast("เงินยังไม่พอสำหรับ Rebirth");return}
@@ -3119,6 +3320,10 @@
     $("#authPassword").addEventListener("keydown",e=>{if(e.key==="Enter")loginAccount()});
     $("#authPasswordConfirm").addEventListener("keydown",e=>{if(e.key==="Enter")signupAccount()});
     $("#onlineLoginBtn").addEventListener("click",openAuth);
+    $("#ascendBtn")?.addEventListener("click",claimAscension);
+    $("[data-asc-perk]").forEach(btn=>btn.addEventListener("click",()=>buyAscensionPerk(btn.dataset.ascPerk)));
+    $("#towerChallengeBtn")?.addEventListener("click",challengeTower);
+    $("#towerCoreBtn")?.addEventListener("click",forgeTowerCore);
     $("#refreshOnlineBtn").addEventListener("click",refreshOnline);
     $("#saveOnlineNameBtn").addEventListener("click",saveOnlineName);
     $("#playerSearchBtn").addEventListener("click",searchPlayers);
