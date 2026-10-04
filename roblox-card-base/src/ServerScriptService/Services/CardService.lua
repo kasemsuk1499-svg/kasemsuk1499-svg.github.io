@@ -41,6 +41,8 @@ function CardService.CreateCard(profile,minId,maxId,tier,rng)
 		ObtainedAt = os.time(),
 	}
 	profile.Cards[guid] = card
+	profile.Collection = type(profile.Collection)=="table" and profile.Collection or {}
+	profile.Collection[tostring(card.Id)] = true
 	return card
 end
 
