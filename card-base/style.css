@@ -3160,3 +3160,14 @@ body::before{
   #panel-base .mini-meta-sub>span{font-size:7px}
   #panel-base .mini-meta-sub .tier-card-income{font-size:8px}
 }
+
+
+/* Mobile canvas compositing safety — desktop renderer is unchanged. */
+@media (max-width:700px){
+  #cardFxCanvas{
+    background:transparent!important;
+    contain:none;
+    transform:none;
+    will-change:auto
+  }
+}
