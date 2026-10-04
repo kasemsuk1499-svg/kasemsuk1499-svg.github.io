@@ -389,6 +389,19 @@ local function createStand(model,origin,slot)
 	gradient.Color = ColorSequence.new(Color3.fromRGB(37,42,58),Color3.fromRGB(18,21,31))
 	gradient.Parent = art
 	makeText(art,"BigId","—",UDim2.fromScale(0.90,0.50),UDim2.fromScale(0.05,0.22),72,Color3.fromRGB(220,225,238)).TextXAlignment = Enum.TextXAlignment.Center
+	local cardImage = Instance.new("ImageLabel")
+	cardImage.Name = "CardImage"
+	cardImage.BackgroundTransparency = 1
+	cardImage.Size = UDim2.fromScale(1,1)
+	cardImage.Position = UDim2.fromScale(0,0)
+	cardImage.ScaleType = Enum.ScaleType.Crop
+	cardImage.ImageTransparency = 0
+	cardImage.Visible = false
+	cardImage.ZIndex = 2
+	cardImage.Parent = art
+	local imageCorner=Instance.new("UICorner")
+	imageCorner.CornerRadius=UDim.new(0,18)
+	imageCorner.Parent=cardImage
 
 	makeText(gui,"Slot","SLOT "..slot,UDim2.fromScale(0.9,0.08),UDim2.fromScale(0.05,0.03),30,Color3.fromRGB(140,149,170))
 	makeText(gui,"Main","EMPTY",UDim2.fromScale(0.9,0.14),UDim2.fromScale(0.05,0.66),42,Color3.new(1,1,1))
@@ -780,6 +793,9 @@ function PlotService.Render(player)
 			gui.Meta.Text = "Reach higher Base Level"
 			gui.Slot.Text = "SLOT "..slot
 			if art then
+				local cardImage=art:FindFirstChild("CardImage")
+				if cardImage then cardImage.Visible=false end
+				art.BigId.Visible=true
 				art.BackgroundColor3 = Color3.fromRGB(14,16,22)
 				art.BigId.Text = "LOCK"
 				art.BigId.TextColor3 = Color3.fromRGB(72,76,88)
@@ -794,6 +810,9 @@ function PlotService.Render(player)
 			gui.Meta.Text = "Press E to place a card"
 			gui.Slot.Text = "SLOT "..slot
 			if art then
+				local cardImage=art:FindFirstChild("CardImage")
+				if cardImage then cardImage.Visible=false end
+				art.BigId.Visible=true
 				art.BackgroundColor3 = Color3.fromRGB(25,29,42)
 				art.BigId.Text = "+"
 				art.BigId.TextColor3 = Color3.fromRGB(114,124,151)
@@ -815,10 +834,18 @@ function PlotService.Render(player)
 			gui.Meta.Text = string.format("%.0f/s%s%s",income,mutationText ~= "" and ("\n"..mutationText) or "",(card.Awakening or 0)>0 and ("\nAWAKEN ★"..card.Awakening) or "")
 			if art then
 				art.BackgroundColor3 = tier.color:Lerp(Color3.fromRGB(12,15,23),0.65)
+				local image=Config.CardImage(card.Id)
+				local cardImage=art:FindFirstChild("CardImage")
+				if cardImage then
+					cardImage.Image=image
+					cardImage.Visible=image~=""
+				end
+				art.BigId.Visible=image==""
 				art.BigId.Text = string.format("#%04d",card.Id)
 				art.BigId.TextColor3 = tier.color:Lerp(Color3.new(1,1,1),0.45)
 				local grad = art:FindFirstChild("TierGradient")
 				if grad then
+					grad.Enabled=image==""
 					grad.Color = ColorSequence.new(tier.color:Lerp(Color3.new(1,1,1),0.20),tier.color:Lerp(Color3.fromRGB(8,10,16),0.72))
 				end
 			end
