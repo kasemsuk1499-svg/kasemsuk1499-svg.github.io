@@ -170,6 +170,9 @@
 
   let state = load();
   let activeStand = null;
+  let activeBaseFloor = 0;
+  const BASE_FLOOR_SIZE = 10;
+  const BASE_FLOOR_COUNT = 3;
   let rollFrame = 0;
   let autoTimer = 0;
   let gradeTimer = 0;
@@ -1970,18 +1973,65 @@
     $("#incomeMulti").textContent="Income ×"+baseIncomeMultiplier().toFixed(2)+" · Wealth ×"+fmt(economyScale());
   }
 
+  function renderBaseFloorNav(total=standLimit()){
+    const nav=$("#baseFloorNav"),title=$("#baseFloorTitle"),hint=$("#baseFloorHint");
+    if(!nav)return;
+    const maxOpenFloor=Math.max(0,Math.min(BASE_FLOOR_COUNT-1,Math.ceil(total/BASE_FLOOR_SIZE)-1));
+    activeBaseFloor=Math.max(0,Math.min(activeBaseFloor,maxOpenFloor));
+    nav.innerHTML="";
+    for(let floor=0;floor<BASE_FLOOR_COUNT;floor++){
+      const start=floor*BASE_FLOOR_SIZE;
+      const unlocked=Math.max(0,Math.min(BASE_FLOOR_SIZE,total-start));
+      const occupied=state.placed.slice(start,start+unlocked).filter(Boolean).length;
+      const btn=document.createElement("button");
+      btn.type="button";
+      btn.className="base-floor-btn"+(floor===activeBaseFloor?" active":"")+(unlocked?"":" locked");
+      btn.disabled=!unlocked;
+      btn.setAttribute("aria-pressed",floor===activeBaseFloor?"true":"false");
+      btn.innerHTML=
+        '<span class="base-floor-no">F'+(floor+1)+'</span>'+
+        '<span class="base-floor-meta"><b>Floor '+(floor+1)+'</b><small>'+(start+1)+'–'+(start+BASE_FLOOR_SIZE)+' · '+(unlocked?occupied+'/'+unlocked+' วางแล้ว':'LOCKED')+'</small></span>'+
+        '<span class="base-floor-arrow">'+(floor===activeBaseFloor?'◆':'›')+'</span>';
+      if(unlocked)btn.addEventListener("click",()=>{
+        if(activeBaseFloor===floor)return;
+        activeBaseFloor=floor;
+        renderBase();
+      });
+      nav.appendChild(btn);
+    }
+    const start=activeBaseFloor*BASE_FLOOR_SIZE;
+    const unlocked=Math.max(0,Math.min(BASE_FLOOR_SIZE,total-start));
+    if(title)title.textContent="Floor "+(activeBaseFloor+1)+" · Slots "+(start+1)+"–"+(start+BASE_FLOOR_SIZE);
+    if(hint)hint.textContent=unlocked<BASE_FLOOR_SIZE
+      ?"ปลดแล้ว "+unlocked+"/10 ช่องบนชั้นนี้ · ช่องที่เหลือจะเปิดตาม Base Level"
+      :"แสดงเฉพาะชั้นนี้ 10 ใบ · เอฟเฟกต์ของชั้นอื่นจะไม่ถูกเรนเดอร์";
+  }
+
   function renderBase(){
     normalizeSlots();
+    const total=standLimit();
+    const maxOpenFloor=Math.max(0,Math.min(BASE_FLOOR_COUNT-1,Math.ceil(total/BASE_FLOOR_SIZE)-1));
+    activeBaseFloor=Math.max(0,Math.min(activeBaseFloor,maxOpenFloor));
+    renderBaseFloorNav(total);
+
     const wrap=$("#stands"); wrap.innerHTML="";
-    for(let i=0;i<standLimit();i++){
-      const uid=state.placed[i];
+    const floorStart=activeBaseFloor*BASE_FLOOR_SIZE;
+    const floorEnd=floorStart+BASE_FLOOR_SIZE;
+
+    for(let i=floorStart;i<floorEnd;i++){
+      const unlocked=i<total;
+      const uid=unlocked?state.placed[i]:null;
       const c=uid?state.cards.find(x=>x.uid===uid):null;
       const slot=document.createElement("button");
       slot.type="button";
-      slot.className="stand"+(c?" tier-shell tier-"+c.tier+" grade-shell-"+c.grade:" empty");
+      slot.className="stand"+(!unlocked?" locked-floor-slot":c?" tier-shell tier-"+c.tier+" grade-shell-"+c.grade:" empty");
       slot.dataset.slot=i;
       if(c)slot.dataset.cardUid=c.uid;
-      if(!c){
+
+      if(!unlocked){
+        slot.disabled=true;
+        slot.innerHTML='<div class="empty-stand floor-locked"><b>◆</b><span>Slot '+(i+1)+'</span><small>ปลดล็อกด้วย Base Level</small></div>';
+      }else if(!c){
         slot.innerHTML='<div class="empty-stand"><b>＋</b><span>เลือกการ์ดจากคลัง</span></div>';
       }else{
         const t=TIERS[c.tier],g=GRADES[c.grade];
@@ -1997,7 +2047,7 @@
           '</div>';
         const img=slot.querySelector("img"); if(img) img.addEventListener("error",e=>e.currentTarget.style.display="none");
       }
-      slot.addEventListener("click",()=>openStand(i));
+      if(unlocked)slot.addEventListener("click",()=>openStand(i));
       wrap.appendChild(slot);
     }
   }
