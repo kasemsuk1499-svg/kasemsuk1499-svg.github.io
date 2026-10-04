@@ -597,7 +597,30 @@ local function openCollection()
 	table.sort(cards,function(a,b)
 		return Economy.CardIncome(state,a,state.Computed.Entitlements) > Economy.CardIncome(state,b,state.Computed.Entitlements)
 	end)
-	makeSectionHeader("คลังการ์ด","จัดเรียงตาม Final Income")
+	local discovered = 0
+	for id=1,100 do
+		if state.Collection and state.Collection[tostring(id)] then discovered += 1 end
+	end
+	makeSectionHeader("COLLECTION INDEX · "..discovered.."/100",string.format("%.0f%% discovered · การ์ดที่ขาย/Trade ไปแล้วยังนับใน Index",discovered))
+	for packIndex,pack in ipairs(Config.IdPacks) do
+		local count = 0
+		for id=pack.minId,pack.maxId do
+			if state.Collection and state.Collection[tostring(id)] then count += 1 end
+		end
+		local row = Instance.new("Frame")
+		row.BackgroundColor3 = COLORS.panel2
+		row.Size = UDim2.new(1,-4,0,42)
+		row.ZIndex = 23
+		row.Parent = content
+		corner(row,9)
+		local title = makeLabel(row,pack.name,UDim2.new(0.62,0,1,0),UDim2.new(0,12,0,0),10,COLORS.text,true)
+		title.ZIndex = 24
+		local progress = makeLabel(row,count.."/"..(pack.maxId-pack.minId+1),UDim2.new(0.30,-10,1,0),UDim2.new(0.68,0,0,0),10,count==(pack.maxId-pack.minId+1) and COLORS.gold or COLORS.accent2,true)
+		progress.TextXAlignment = Enum.TextXAlignment.Right
+		progress.ZIndex = 24
+	end
+
+	makeSectionHeader("YOUR CARDS","จัดเรียงตาม Final Income")
 	for _,card in ipairs(cards) do makeCardRow(card,"manage") end
 	if #cards == 0 then makeSectionHeader("ยังไม่มีการ์ด","กด ROLL PACK เพื่อเริ่มสะสม") end
 end
