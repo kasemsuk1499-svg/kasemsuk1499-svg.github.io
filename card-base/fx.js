@@ -171,6 +171,7 @@
     addMutationRate(mutation);
     addMutationRate(mutation2);
     if(mutation&&mutation2)rate+=1.05;
+    if(tier>=10)rate*=0.55;
     return rate*quality*showcaseBoost;
   }
 
@@ -600,55 +601,49 @@
     if(!stars)return;
 
     const color=awakeningColor(stars);
-    const flashMs=118;
+    const flashMs=140;
     const tick=Math.floor(time/flashMs);
     const flash=(time%flashMs)/flashMs;
-    const flashAlpha=Math.sin(Math.PI*Math.min(1,flash));
+    const alphaPulse=Math.sin(Math.PI*Math.min(1,flash));
     const hash=n=>{
       const x=Math.sin(n*12.9898+78.233)*43758.5453;
       return x-Math.floor(x);
     };
 
-    // Super-Saiyan-style electric snaps: isolated jagged bolts that jump
-    // away from the card, rather than tracing the border like an aura.
-    const boltCount=2+(hash(tick+stars*13)>.68?1:0);
-    for(let b=0;b<boltCount;b++){
-      const seed=tick*97+b*131+stars*43;
-      if(hash(seed+1)<.34)continue;
+    ctx.save();
+    roundedRectPath(rect,-2,14);
+    ctx.clip();
 
-      const side=Math.floor(hash(seed+2)*4);
-      const anchor=.12+hash(seed+3)*.76;
-      const length=(rect.width*.13+rect.height*.075)*(1.0+hash(seed+4)*.62);
-      const tangent=(hash(seed+5)-.5)*length*.72;
-      const segments=5+Math.floor(hash(seed+6)*4);
+    // Haki-like electric cracks: short, sharp and fully inside the card.
+    const sparkCount=1+(hash(tick+stars*19)>.58?1:0);
+    for(let s=0;s<sparkCount;s++){
+      const seed=tick*97+s*131+stars*43;
+      if(hash(seed+1)<.28)continue;
 
-      let sx,sy,nx,ny,tx,ty;
-      if(side===0){
-        sx=rect.left+rect.width*anchor; sy=rect.top-2; nx=0; ny=-1; tx=1; ty=0;
-      }else if(side===1){
-        sx=rect.right+2; sy=rect.top+rect.height*anchor; nx=1; ny=0; tx=0; ty=1;
-      }else if(side===2){
-        sx=rect.left+rect.width*anchor; sy=rect.bottom+2; nx=0; ny=1; tx=1; ty=0;
-      }else{
-        sx=rect.left-2; sy=rect.top+rect.height*anchor; nx=-1; ny=0; tx=0; ty=1;
-      }
+      const sx=rect.left+rect.width*(.16+hash(seed+2)*.68);
+      const sy=rect.top+rect.height*(.16+hash(seed+3)*.68);
+      const angle=hash(seed+4)*Math.PI*2;
+      const length=Math.min(rect.width,rect.height)*(.10+hash(seed+5)*.11);
+      const dx=Math.cos(angle)*length;
+      const dy=Math.sin(angle)*length;
+      const segments=4+Math.floor(hash(seed+6)*3);
+      const pts=[];
 
-      const points=[];
       for(let i=0;i<=segments;i++){
         const t=i/segments;
-        const jag=(hash(seed+20+i*17)-.5)*(9+length*.10)*(1-Math.abs(.5-t)*.42);
-        const drift=tangent*t+(hash(seed+50+i*23)-.5)*3.2;
-        points.push([
-          sx+nx*(length*t)+tx*(drift+jag),
-          sy+ny*(length*t)+ty*(drift+jag)
+        const x=sx+dx*t;
+        const y=sy+dy*t;
+        const offset=(hash(seed+20+i*13)-.5)*(4.2*(1-Math.abs(.5-t)*.28));
+        pts.push([
+          x+Math.cos(angle+Math.PI/2)*offset,
+          y+Math.sin(angle+Math.PI/2)*offset
         ]);
       }
 
-      const alpha=flashAlpha*(target.visitor?1.06:1)*quality;
-      const drawPath=(pts,stroke,width,a,blur)=>{
+      const drawPath=(points,stroke,width,a,blur)=>{
         ctx.save();
         ctx.globalCompositeOperation="lighter";
-        ctx.globalAlpha=a*alpha;
+        ctx.globalAlpha=a*alphaPulse*quality*(target.visitor?1.04:1);
         ctx.strokeStyle=stroke;
         ctx.lineWidth=width;
         ctx.lineCap="round";
@@ -656,36 +651,35 @@
         ctx.shadowBlur=blur;
         ctx.shadowColor=color;
         ctx.beginPath();
-        pts.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
+        points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
         ctx.stroke();
         ctx.restore();
       };
 
-      // Narrow colored shell + white-hot core. Glow is deliberately tight.
-      drawPath(points,color,2.05,.84,5);
-      drawPath(points,"#ffffff",.68,.96,1.8);
+      drawPath(pts,color,1.9,.84,3.5);
+      drawPath(pts,"#ffffff",.72,.96,1.0);
 
-      // Occasional fork makes the spark look electrical, not like a ribbon.
-      if(segments>=6 && hash(seed+88)>.46){
-        const branchAt=2+Math.floor(hash(seed+89)*(segments-3));
-        const origin=points[branchAt];
-        const branchLength=length*(.28+hash(seed+90)*.20);
-        const branchDir=(hash(seed+91)>.5?1:-1);
+      if(hash(seed+40)>.55 && pts.length>3){
+        const branchAt=1+Math.floor(hash(seed+41)*(pts.length-2));
+        const base=pts[branchAt];
+        const branchAngle=angle+(hash(seed+42)>.5?1:-1)*(.72+hash(seed+43)*.42);
+        const branchLength=length*(.28+hash(seed+44)*.18);
         const branch=[
-          origin,
+          base,
           [
-            origin[0]+nx*branchLength*.38+tx*branchDir*(5+hash(seed+92)*5),
-            origin[1]+ny*branchLength*.38+ty*branchDir*(5+hash(seed+93)*5)
+            base[0]+Math.cos(branchAngle)*branchLength*.52,
+            base[1]+Math.sin(branchAngle)*branchLength*.52
           ],
           [
-            origin[0]+nx*branchLength+tx*branchDir*(9+hash(seed+94)*8),
-            origin[1]+ny*branchLength+ty*branchDir*(9+hash(seed+95)*8)
+            base[0]+Math.cos(branchAngle)*branchLength,
+            base[1]+Math.sin(branchAngle)*branchLength
           ]
         ];
-        drawPath(branch,color,1.45,.62,3.5);
-        drawPath(branch,"#ffffff",.48,.82,1);
+        drawPath(branch,color,1.15,.64,2.4);
+        drawPath(branch,"#ffffff",.42,.82,.6);
       }
     }
+    ctx.restore();
   }
 
   function drawMutationBorder(target,rect,time){
