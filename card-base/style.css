@@ -5378,3 +5378,24 @@ body.ascension-unlock-10 .base-tower-bar,
   .top-actions .account-chip{min-width:0}
   .settings-row{padding:12px}
 }
+
+
+/* ===== BASE: COLLECTION-STYLE GRADE BADGE ===== */
+#panel-base .base-card-grade{
+  top:7px;
+  left:7px;
+  min-width:36px;
+  padding:5px 7px;
+  border-radius:9px;
+  font-size:10px;
+  line-height:1;
+}
+@media (min-width:701px){
+  #panel-base .base-card-grade{
+    top:8px;
+    left:8px;
+    min-width:40px;
+    padding:5px 8px;
+    font-size:11px;
+  }
+}
