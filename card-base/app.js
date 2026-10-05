@@ -645,6 +645,10 @@
   }
 
   function padId(id){return "#"+String(id).padStart(4,"0")}
+  function cardName(id){
+    const name=String(CARD_NAMES[Number(id)]||"").trim();
+    return name||("CARD "+padId(id));
+  }
   function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
   function imageFor(id){return "../assets/cards/"+id+".png"}
   function romanNumeral(value){
@@ -2451,8 +2455,8 @@
             '<div class="tier-ring"></div>'+
             '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+
             '<div class="mini-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+
-              '<div class="mini-meta-main"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-card-name">'+t.name+'</span></div>'+
-              '<div class="mini-meta-sub"><span>Lv.<b data-stand-stat="level">'+c.level+'</b></span><strong data-stand-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div>'+
+              '<div class="mini-meta-main"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div>'+
+              '<div class="mini-meta-sub"><span class="mini-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-stand-stat="level">'+c.level+'</b></span><strong data-stand-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div>'+
             '</div>'+
           '</div>';
         const img=slot.querySelector("img"); if(img) img.addEventListener("error",e=>e.currentTarget.style.display="none");
@@ -2590,8 +2594,12 @@
       const el=document.createElement("article"); el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade+(tradeLocked?" trade-locked":""); el.dataset.cardUid=c.uid;
       el.innerHTML=
         '<div class="card-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
-          '<img src="'+imageFor(c.charId)+'" alt="Character '+padId(c.charId)+'"><div class="tier-ring"></div>'+
-          '<div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div>'+
+          '<img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div>'+
+          '<div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+
+          '<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+
+            '<div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div>'+
+            '<div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-card-face-stat="level">'+c.level+'</b></span><strong data-card-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div>'+
+          '</div>'+
         '</div>'+
         '<div class="card-body"><div class="card-stats">'+
           '<div><span>Level</span><b data-card-stat="level">'+c.level+'</b></div><div><span>รายได้</span><b data-card-stat="income" class="tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</b></div>'+
