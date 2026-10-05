@@ -225,7 +225,8 @@
     71: {name:"Mushoku pack v1", image:"./assets/packs/77.png", priceSeconds:null},
     81: {name:"Frieren pack v1", image:"./assets/packs/90.png", priceSeconds:null},
     91: {name:"AOT pack v1", image:"./assets/packs/98.png", priceSeconds:null},
-    101: {name:"Oshi pack v1", image:"./assets/packs/108.png", priceSeconds:null}
+    101: {name:"Oshi pack v1", image:"./assets/packs/108.png", priceSeconds:null},
+    111: {name:"TokyoReven pack v1", image:"./assets/packs/111.png", priceSeconds:null}
   };
 
   const ROTATING_PACK_ARCHETYPES = [
