@@ -114,14 +114,19 @@
     if(!force && now-lastScan<700) return;
     lastScan=now;
     const els=[...document.querySelectorAll(".tier-fx")].filter(activeLayerAllows);
-    targets=els.slice(0,90).map(el=>({
-      el,
-      tier:classNumber(el,"tier-"),
-      grade:classNumber(el,"grade-shell-"),
-      mutation:classNumber(el,"mutation-"),
-      mutation2:classNumber(el,"mutation2-"),
-      visitor:!!el.closest("#socialBaseModal")
-    })).filter(t=>t.tier>=4 || t.grade>=7 || t.mutation>0 || t.mutation2>0);
+    targets=els.slice(0,90).map(el=>{
+      const awakenBadge=el.querySelector(".awakening-badge");
+      const awakenMatch=awakenBadge?.textContent?.match(/★\s*(\d+)/);
+      return {
+        el,
+        tier:classNumber(el,"tier-"),
+        grade:classNumber(el,"grade-shell-"),
+        mutation:classNumber(el,"mutation-"),
+        mutation2:classNumber(el,"mutation2-"),
+        awakening:awakenMatch?Math.max(0,Number(awakenMatch[1])||0):0,
+        visitor:!!el.closest("#socialBaseModal")
+      };
+    }).filter(t=>t.tier>=4 || t.grade>=7 || t.mutation>0 || t.mutation2>0 || t.awakening>0);
   }
 
   function visibleRect(el){
@@ -571,6 +576,95 @@
     ctx.restore();
   }
 
+  function awakeningColor(stars){
+    const s=Math.max(1,Math.floor(Number(stars)||1));
+    const fixed=[
+      "#72eaff", // ★1 cyan
+      "#a77bff", // ★2 violet
+      "#ff4968", // ★3 crimson
+      "#ffd45c", // ★4 gold
+      "#67f5ad", // ★5 emerald
+      "#ff70d7", // ★6 magenta
+      "#ff914d", // ★7 orange
+      "#699cff", // ★8 royal blue
+      "#f4feff"  // ★9 white
+    ];
+    if(s<=fixed.length)return fixed[s-1];
+    const hue=(210+(s-9)*47)%360;
+    return "hsl("+hue+" 94% 68%)";
+  }
+
+  function drawAwakeningLightning(target,rect,time){
+    const stars=Math.max(0,Math.floor(Number(target.awakening)||0));
+    if(!stars)return;
+
+    const color=awakeningColor(stars);
+    const tick=Math.floor(time/82);
+    const pulse=.72+.28*Math.sin(time*.014+stars*.83);
+    const arcs=3;
+
+    for(let a=0;a<arcs;a++){
+      const seed=tick*17+a*53+stars*29;
+      const hash=n=>{
+        const x=Math.sin(n*12.9898+78.233)*43758.5453;
+        return x-Math.floor(x);
+      };
+      const visible=hash(seed+3)>.23;
+      if(!visible)continue;
+
+      const start=(hash(seed+7)+a/arcs*.27)%1;
+      const span=.055+hash(seed+11)*.085;
+      const segments=5+Math.floor(hash(seed+13)*4);
+      const points=[];
+
+      for(let i=0;i<=segments;i++){
+        const t=i/segments;
+        const p=(start+span*t)%1;
+        const [x,y,nx,ny]=perimeterPoint(rect,p,4);
+        const tangentX=-ny,tangentY=nx;
+        const zig=(hash(seed+i*31+19)-.5)*(7.5*(1-Math.abs(.5-t)*.45));
+        const lift=3+hash(seed+i*41+23)*4.5;
+        points.push([
+          x+nx*lift+tangentX*zig,
+          y+ny*lift+tangentY*zig
+        ]);
+      }
+
+      const drawBolt=(stroke,width,alpha,blur)=>{
+        ctx.save();
+        ctx.globalCompositeOperation="lighter";
+        ctx.globalAlpha=alpha*pulse*quality*(target.visitor?1.1:1);
+        ctx.strokeStyle=stroke;
+        ctx.lineWidth=width;
+        ctx.lineJoin="round";
+        ctx.lineCap="round";
+        ctx.shadowBlur=blur;
+        ctx.shadowColor=color;
+        ctx.beginPath();
+        points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      drawBolt(color,2.15,.72,13);
+      drawBolt("#ffffff",.72,.92,4);
+
+      if(hash(seed+97)>.62){
+        const tip=points[points.length-1];
+        ctx.save();
+        ctx.globalCompositeOperation="lighter";
+        ctx.globalAlpha=.72*pulse*quality;
+        ctx.fillStyle="#ffffff";
+        ctx.shadowBlur=10;
+        ctx.shadowColor=color;
+        ctx.beginPath();
+        ctx.arc(tip[0],tip[1],1.2+hash(seed+101)*1.2,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+
   function drawMutationBorder(target,rect,time){
     const m1=target.mutation||0,m2=target.mutation2||0;
     if(m1)drawSingleMutationBorder(m1,rect,time,false);
@@ -718,6 +812,7 @@
       frameRects.set(t.el,r);
       drawMutationBorder(t,r,time);
       drawHalo(t,r,time);
+      if(particleEnabled)drawAwakeningLightning(t,r,time);
     }
 
     if(particleEnabled){
