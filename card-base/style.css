@@ -5538,3 +5538,56 @@ body.ascension-unlock-10 .base-tower-bar,
   .id-pack-page-info strong{font-size:8.5px}
   .id-pack-page-info span{font-size:6.5px}
 }
+
+
+/* ===== MOBILE NAV: 7 TABS IN ONE ROW ===== */
+@media (max-width:700px){
+  body{
+    padding-bottom:calc(76px + env(safe-area-inset-bottom));
+  }
+  .tabs{
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    gap:1px!important;
+    padding:
+      6px max(4px,env(safe-area-inset-right))
+      calc(6px + env(safe-area-inset-bottom))
+      max(4px,env(safe-area-inset-left))!important;
+  }
+  .tab{
+    min-width:0!important;
+    min-height:52px;
+    padding:6px 0!important;
+    gap:2px;
+    overflow:hidden;
+    font-size:7.5px!important;
+    line-height:1.05;
+    white-space:nowrap;
+  }
+  .tab-icon{
+    font-size:15px!important;
+    line-height:1;
+  }
+  #panel-base{
+    padding-bottom:8px;
+  }
+}
+@media (max-width:430px){
+  .tab{
+    font-size:7px!important;
+  }
+  .tab-icon{
+    font-size:14px!important;
+  }
+}
+@media (max-width:350px){
+  .tabs{
+    padding-left:2px!important;
+    padding-right:2px!important;
+  }
+  .tab{
+    font-size:6px!important;
+  }
+  .tab-icon{
+    font-size:13px!important;
+  }
+}
