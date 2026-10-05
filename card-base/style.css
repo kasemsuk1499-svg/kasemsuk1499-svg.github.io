@@ -5230,3 +5230,25 @@ body.ascension-unlock-10 .base-tower-bar,
   .mini-meta-sub{column-gap:6px}
   .picker-character-name{font-size:9px}
 }
+
+
+/* ===== BASE TIER NAME MUST STAY FULL ===== */
+.mini-meta-main .tier-card-name{
+  flex:0 0 auto!important;
+  max-width:none!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  white-space:nowrap!important;
+}
+.mini-meta-main .card-character-name{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+@media (max-width:700px){
+  .mini-meta-main .tier-card-name{
+    max-width:none!important;
+    font-size:8px!important;
+  }
+}
