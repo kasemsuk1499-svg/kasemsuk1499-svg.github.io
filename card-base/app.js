@@ -1215,6 +1215,8 @@
       : weightedPickObject(rotatingNormalRates(offer));
     const card=createCardFromTier(tier,offer.start,offer.end);
     state.rotatingShop.bought[offer.id]=rotatingPackBought(offer)+1;
+    // Keep the visible STOCK counter/button in sync immediately after purchase.
+    renderRotatingPackShop();
 
     if(outOfRate){
       toast("OUT OF RATE!! "+TIERS[tier].name+" · "+padId(card.charId)+" 🌌",true);
