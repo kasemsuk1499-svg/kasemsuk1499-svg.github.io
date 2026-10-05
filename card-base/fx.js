@@ -579,109 +579,120 @@
   }
 
   function drawHalo(target,rect,time){
-    // Keep original unlock conditions, but keep high-tier holograms GPU-light.
+    // Keep the original unlock conditions.
     if(target.grade===11 && target.tier<8) return;
     if(target.tier<8 && target.grade<9) return;
 
-    const visitorBoost=target.visitor?1.08:1;
+    const visitorBoost=target.visitor?1.10:1;
+    const cx=rect.left+rect.width*.5;
+    const cy=rect.top+rect.height*.5;
+    const rx=rect.width*.62;
+    const ry=rect.height*.58;
 
-    // Tier 8 / grade-triggered base holo: soft ring.
+    // Tier 8 / grade-triggered holo: Soft Ring.
     if(target.tier<9){
       const img=images.halo;
       if(!img || !img.complete) return;
+
       const pad=Math.min(38,Math.max(16,rect.width*.11));
       const pulse=.22+.025*Math.sin(time*.0014);
+
       ctx.save();
       ctx.globalCompositeOperation="lighter";
       ctx.globalAlpha=pulse*quality*visitorBoost;
-      ctx.translate(rect.left+rect.width/2,rect.top+rect.height/2);
+      ctx.translate(cx,cy);
       ctx.rotate(-time*.000035);
-      ctx.drawImage(img,-rect.width/2-pad,-rect.height/2-pad,rect.width+pad*2,rect.height+pad*2);
+      ctx.drawImage(
+        img,
+        -rect.width/2-pad,
+        -rect.height/2-pad,
+        rect.width+pad*2,
+        rect.height+pad*2
+      );
       ctx.restore();
       return;
     }
 
-    // Tier 9: one permanent cross + one moving sweep.
+    const strokeOrbit=(rxi,ryi,rot,alpha,width,color,startAngle=0,endAngle=Math.PI*2)=>{
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(rot);
+      ctx.beginPath();
+      ctx.ellipse(0,0,rxi,ryi,0,startAngle,endAngle);
+      ctx.strokeStyle=color;
+      ctx.lineWidth=width;
+      ctx.globalAlpha=alpha*quality*visitorBoost;
+      ctx.shadowBlur=0;
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    // Tier 9: Double Orbit.
     if(target.tier===9){
-      const span=Math.hypot(rect.width,rect.height)*.86;
-      const cx=rect.left+rect.width*.5;
-      const cy=rect.top+rect.height*.5;
-      const p=(time%6000)/6000;
-      const sweepX=rect.left+rect.width*(-.18+p*1.36);
+      const rot1=time*.00018;
+      const rot2=-time*.00014+.75;
+      const pulse=.92+.08*Math.sin(time*.0018);
 
       ctx.save();
-      roundedRectPath(rect,-2,14);
-      ctx.clip();
       ctx.globalCompositeOperation="lighter";
-      ctx.lineCap="round";
 
-      const line=(x,y,angle,alpha,width,color)=>{
-        const dx=Math.cos(angle)*span;
-        const dy=Math.sin(angle)*span;
-        ctx.beginPath();
-        ctx.moveTo(x-dx,y-dy);
-        ctx.lineTo(x+dx,y+dy);
-        ctx.strokeStyle=color;
-        ctx.lineWidth=width;
-        ctx.globalAlpha=alpha*quality*visitorBoost;
-        ctx.shadowBlur=0;
-        ctx.stroke();
-      };
+      strokeOrbit(rx,ry,rot1,.20*pulse,1.2,"rgba(188,242,255,.95)");
+      strokeOrbit(rx*.92,ry*.88,rot2,.16*pulse,.95,"rgba(219,186,255,.92)");
 
-      line(cx,cy,-.67,.16,1.0,"rgba(192,242,255,.95)");
-      line(cx,cy,.67,.11,.8,"rgba(213,183,255,.90)");
-      line(sweepX,cy,-.67,.21,1.15,"rgba(239,253,255,.97)");
+      ctx.globalAlpha=.05*pulse*quality*visitorBoost;
+      ctx.fillStyle="rgba(210,246,255,.95)";
+      ctx.fillRect(rect.left+rect.width*.16,cy,rect.width*.68,1);
 
       ctx.restore();
       return;
     }
 
-    // Tier 10: only four small prism facets + one soft sheen.
-    const phase=time*.0004;
-    const shards=[
-      {x:.18,y:.24,w:.14,h:.19,r:-.32,c:"rgba(109,229,255,.72)"},
-      {x:.78,y:.30,w:.15,h:.20,r:.28,c:"rgba(200,145,255,.68)"},
-      {x:.26,y:.72,w:.14,h:.18,r:.23,c:"rgba(255,158,226,.62)"},
-      {x:.76,y:.74,w:.13,h:.20,r:-.26,c:"rgba(126,255,211,.60)"}
-    ];
+    // Tier 10: Broken Orbit.
+    const rot=time*.00015;
+    const pulse=.95+.05*Math.sin(time*.0021);
 
     ctx.save();
-    roundedRectPath(rect,-2,14);
-    ctx.clip();
     ctx.globalCompositeOperation="lighter";
 
-    for(let i=0;i<shards.length;i++){
-      const s=shards[i];
-      const x=rect.left+rect.width*s.x;
-      const y=rect.top+rect.height*s.y+Math.sin(phase*2+i)*1.6;
-      const w=rect.width*s.w;
-      const h=rect.height*s.h;
-
-      ctx.save();
-      ctx.translate(x,y);
-      ctx.rotate(s.r);
-      ctx.globalAlpha=.085*quality*visitorBoost;
-      ctx.fillStyle=s.c;
-      ctx.shadowBlur=0;
-      ctx.beginPath();
-      ctx.moveTo(0,-h*.55);
-      ctx.lineTo(w*.56,-h*.10);
-      ctx.lineTo(w*.18,h*.50);
-      ctx.lineTo(-w*.52,h*.12);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
+    const segs=[
+      [.20,1.05],
+      [1.55,2.35],
+      [3.15,3.95],
+      [4.45,5.35]
+    ];
+    for(const [a,b] of segs){
+      strokeOrbit(
+        rx,ry,rot,
+        .21*pulse,1.25,
+        "rgba(196,245,255,.95)",
+        a,b
+      );
     }
 
-    const q=(time%7600)/7600;
-    const sheenX=rect.left+rect.width*(-.14+q*1.28);
-    const sheen=ctx.createLinearGradient(sheenX-18,0,sheenX+18,0);
-    sheen.addColorStop(0,"rgba(255,255,255,0)");
-    sheen.addColorStop(.5,"rgba(225,248,255,.18)");
-    sheen.addColorStop(1,"rgba(255,255,255,0)");
-    ctx.globalAlpha=.16*quality*visitorBoost;
-    ctx.fillStyle=sheen;
-    ctx.fillRect(rect.left,rect.top,rect.width,rect.height);
+    const segs2=[
+      [.72,1.28],
+      [2.28,2.92],
+      [3.95,4.55],
+      [5.45,6.05]
+    ];
+    for(const [a,b] of segs2){
+      strokeOrbit(
+        rx*.91,ry*.87,-rot+.55,
+        .14*pulse,.92,
+        "rgba(228,188,255,.90)",
+        a,b
+      );
+    }
+
+    ctx.globalAlpha=.07*pulse*quality*visitorBoost;
+    ctx.fillStyle="rgba(235,250,255,.95)";
+    ctx.beginPath();
+    ctx.arc(cx+rx*.55,cy-ry*.35,1.35,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(cx-rx*.48,cy+ry*.28,1.15,0,Math.PI*2);
+    ctx.fill();
 
     ctx.restore();
   }
