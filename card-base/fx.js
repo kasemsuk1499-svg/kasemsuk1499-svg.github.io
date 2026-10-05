@@ -117,13 +117,14 @@
     targets=els.slice(0,90).map(el=>{
       const awakenBadge=el.querySelector(".awakening-badge");
       const awakenMatch=awakenBadge?.textContent?.match(/★\s*(\d+)/);
+      const dataAwakening=Math.max(0,Math.floor(Number(el.dataset.awakening)||0));
       return {
         el,
         tier:classNumber(el,"tier-"),
         grade:classNumber(el,"grade-shell-"),
         mutation:classNumber(el,"mutation-"),
         mutation2:classNumber(el,"mutation2-"),
-        awakening:awakenMatch?Math.max(0,Number(awakenMatch[1])||0):0,
+        awakening:dataAwakening||(awakenMatch?Math.max(0,Number(awakenMatch[1])||0):0),
         visitor:!!el.closest("#socialBaseModal")
       };
     }).filter(t=>t.tier>=4 || t.grade>=7 || t.mutation>0 || t.mutation2>0 || t.awakening>0);
@@ -599,68 +600,90 @@
     if(!stars)return;
 
     const color=awakeningColor(stars);
-    const tick=Math.floor(time/82);
-    const pulse=.72+.28*Math.sin(time*.014+stars*.83);
-    const arcs=3;
+    const flashMs=118;
+    const tick=Math.floor(time/flashMs);
+    const flash=(time%flashMs)/flashMs;
+    const flashAlpha=Math.sin(Math.PI*Math.min(1,flash));
+    const hash=n=>{
+      const x=Math.sin(n*12.9898+78.233)*43758.5453;
+      return x-Math.floor(x);
+    };
 
-    for(let a=0;a<arcs;a++){
-      const seed=tick*17+a*53+stars*29;
-      const hash=n=>{
-        const x=Math.sin(n*12.9898+78.233)*43758.5453;
-        return x-Math.floor(x);
-      };
-      const visible=hash(seed+3)>.23;
-      if(!visible)continue;
+    // Super-Saiyan-style electric snaps: isolated jagged bolts that jump
+    // away from the card, rather than tracing the border like an aura.
+    const boltCount=2+(hash(tick+stars*13)>.68?1:0);
+    for(let b=0;b<boltCount;b++){
+      const seed=tick*97+b*131+stars*43;
+      if(hash(seed+1)<.34)continue;
 
-      const start=(hash(seed+7)+a/arcs*.27)%1;
-      const span=.055+hash(seed+11)*.085;
-      const segments=5+Math.floor(hash(seed+13)*4);
+      const side=Math.floor(hash(seed+2)*4);
+      const anchor=.12+hash(seed+3)*.76;
+      const length=(rect.width*.13+rect.height*.075)*(1.0+hash(seed+4)*.62);
+      const tangent=(hash(seed+5)-.5)*length*.72;
+      const segments=5+Math.floor(hash(seed+6)*4);
+
+      let sx,sy,nx,ny,tx,ty;
+      if(side===0){
+        sx=rect.left+rect.width*anchor; sy=rect.top-2; nx=0; ny=-1; tx=1; ty=0;
+      }else if(side===1){
+        sx=rect.right+2; sy=rect.top+rect.height*anchor; nx=1; ny=0; tx=0; ty=1;
+      }else if(side===2){
+        sx=rect.left+rect.width*anchor; sy=rect.bottom+2; nx=0; ny=1; tx=1; ty=0;
+      }else{
+        sx=rect.left-2; sy=rect.top+rect.height*anchor; nx=-1; ny=0; tx=0; ty=1;
+      }
+
       const points=[];
-
       for(let i=0;i<=segments;i++){
         const t=i/segments;
-        const p=(start+span*t)%1;
-        const [x,y,nx,ny]=perimeterPoint(rect,p,4);
-        const tangentX=-ny,tangentY=nx;
-        const zig=(hash(seed+i*31+19)-.5)*(7.5*(1-Math.abs(.5-t)*.45));
-        const lift=3+hash(seed+i*41+23)*4.5;
+        const jag=(hash(seed+20+i*17)-.5)*(9+length*.10)*(1-Math.abs(.5-t)*.42);
+        const drift=tangent*t+(hash(seed+50+i*23)-.5)*3.2;
         points.push([
-          x+nx*lift+tangentX*zig,
-          y+ny*lift+tangentY*zig
+          sx+nx*(length*t)+tx*(drift+jag),
+          sy+ny*(length*t)+ty*(drift+jag)
         ]);
       }
 
-      const drawBolt=(stroke,width,alpha,blur)=>{
+      const alpha=flashAlpha*(target.visitor?1.06:1)*quality;
+      const drawPath=(pts,stroke,width,a,blur)=>{
         ctx.save();
         ctx.globalCompositeOperation="lighter";
-        ctx.globalAlpha=alpha*pulse*quality*(target.visitor?1.1:1);
+        ctx.globalAlpha=a*alpha;
         ctx.strokeStyle=stroke;
         ctx.lineWidth=width;
-        ctx.lineJoin="round";
         ctx.lineCap="round";
+        ctx.lineJoin="round";
         ctx.shadowBlur=blur;
         ctx.shadowColor=color;
         ctx.beginPath();
-        points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
+        pts.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
         ctx.stroke();
         ctx.restore();
       };
 
-      drawBolt(color,2.15,.72,13);
-      drawBolt("#ffffff",.72,.92,4);
+      // Narrow colored shell + white-hot core. Glow is deliberately tight.
+      drawPath(points,color,2.05,.84,5);
+      drawPath(points,"#ffffff",.68,.96,1.8);
 
-      if(hash(seed+97)>.62){
-        const tip=points[points.length-1];
-        ctx.save();
-        ctx.globalCompositeOperation="lighter";
-        ctx.globalAlpha=.72*pulse*quality;
-        ctx.fillStyle="#ffffff";
-        ctx.shadowBlur=10;
-        ctx.shadowColor=color;
-        ctx.beginPath();
-        ctx.arc(tip[0],tip[1],1.2+hash(seed+101)*1.2,0,Math.PI*2);
-        ctx.fill();
-        ctx.restore();
+      // Occasional fork makes the spark look electrical, not like a ribbon.
+      if(segments>=6 && hash(seed+88)>.46){
+        const branchAt=2+Math.floor(hash(seed+89)*(segments-3));
+        const origin=points[branchAt];
+        const branchLength=length*(.28+hash(seed+90)*.20);
+        const branchDir=(hash(seed+91)>.5?1:-1);
+        const branch=[
+          origin,
+          [
+            origin[0]+nx*branchLength*.38+tx*branchDir*(5+hash(seed+92)*5),
+            origin[1]+ny*branchLength*.38+ty*branchDir*(5+hash(seed+93)*5)
+          ],
+          [
+            origin[0]+nx*branchLength+tx*branchDir*(9+hash(seed+94)*8),
+            origin[1]+ny*branchLength+ty*branchDir*(9+hash(seed+95)*8)
+          ]
+        ];
+        drawPath(branch,color,1.45,.62,3.5);
+        drawPath(branch,"#ffffff",.48,.82,1);
       }
     }
   }
