@@ -5591,3 +5591,272 @@ body.ascension-unlock-10 .base-tower-bar,
     font-size:13px!important;
   }
 }
+
+/* ===== MOBILE BASE VIEW V2 ===== */
+@media (max-width:700px){
+  /* Keep every Base section inside the phone viewport. */
+  #panel-base,
+  #panel-base .hero-row,
+  #panel-base .hero-badges,
+  #panel-base .base-tower-bar,
+  #panel-base .base-floor-nav,
+  #panel-base .stands{
+    min-width:0;
+    max-width:100%;
+  }
+
+  /* Compact the Base heading without changing desktop. */
+  #panel-base .hero-row{
+    gap:7px;
+    margin-bottom:8px;
+  }
+  #panel-base .hero-row .eyebrow{
+    font-size:8px;
+    letter-spacing:.12em;
+  }
+  #panel-base .hero-row h1{
+    margin:2px 0 4px;
+    font-size:clamp(22px,7vw,29px);
+    line-height:1.05;
+  }
+  #panel-base .hero-row .muted{
+    margin:0;
+    font-size:9px;
+    line-height:1.35;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+  #panel-base .hero-badges{
+    display:grid;
+    grid-template-columns:max-content minmax(0,1fr);
+    gap:6px;
+    align-items:stretch;
+  }
+  #panel-base .hero-badges .badge{
+    display:grid;
+    place-items:center;
+    min-width:0;
+    min-height:32px;
+    padding:6px 9px;
+    border-radius:10px;
+    font-size:9px;
+    line-height:1.2;
+  }
+  #panel-base #standCount{white-space:nowrap}
+  #panel-base #incomeMulti{
+    overflow:hidden;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+  }
+
+  /* Floor selector stays readable but stops dominating the screen. */
+  #panel-base .base-tower-bar{
+    margin:8px 0 9px;
+    padding:8px;
+    gap:6px;
+    border-radius:13px;
+  }
+  #panel-base .base-tower-copy{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    align-items:baseline;
+    column-gap:8px;
+    row-gap:2px;
+    padding:1px 2px;
+  }
+  #panel-base .base-tower-copy .eyebrow{
+    grid-column:1;
+    font-size:7px;
+    white-space:nowrap;
+  }
+  #panel-base .base-tower-copy strong{
+    grid-column:2;
+    min-width:0;
+    text-align:right;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:11px;
+  }
+  #panel-base .base-tower-copy small{
+    grid-column:1/-1;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:7px;
+    line-height:1.25;
+  }
+  #panel-base .base-floor-nav{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+  #panel-base .base-floor-btn{
+    min-height:48px;
+    grid-template-columns:26px minmax(0,1fr);
+    gap:5px;
+    padding:5px 6px;
+    border-radius:10px;
+  }
+  #panel-base .base-floor-no{
+    width:26px;
+    height:26px;
+    border-radius:7px;
+    font-size:8px;
+  }
+  #panel-base .base-floor-meta{
+    gap:1px;
+  }
+  #panel-base .base-floor-meta b{font-size:7.5px}
+  #panel-base .base-floor-meta small{font-size:5.8px}
+
+  /* Exactly two cards per row. Keep the art large and the info panel shallow. */
+  #panel-base .stands{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px;
+    align-items:start;
+  }
+  #panel-base .stand,
+  #panel-base .mini-card{
+    min-width:0;
+    min-height:0;
+  }
+  #panel-base .stand{
+    width:100%;
+    aspect-ratio:.72;
+    border-radius:13px;
+  }
+
+  /* Row 1 = character + Tier. Row 2 = ID/Lv + income. */
+  #panel-base .mini-meta{
+    left:5px;
+    right:5px;
+    bottom:5px;
+    padding:5px 6px;
+    gap:2px;
+    border-radius:8px;
+    background:linear-gradient(180deg,rgba(4,6,10,.12),rgba(4,6,10,.82));
+    backdrop-filter:blur(1.5px);
+  }
+  #panel-base .mini-meta-main,
+  #panel-base .mini-meta-sub{
+    grid-template-columns:minmax(0,1fr) auto;
+    column-gap:5px;
+    min-width:0;
+    line-height:1.05;
+  }
+  #panel-base .mini-meta-main .card-character-name{
+    min-width:0;
+    font-size:9px;
+    line-height:1.1;
+  }
+  #panel-base .mini-meta-main .tier-card-name{
+    max-width:none!important;
+    font-size:7px!important;
+    line-height:1.1;
+    white-space:nowrap!important;
+  }
+  #panel-base .mini-meta-sub,
+  #panel-base .mini-meta-sub>span{
+    min-width:0;
+    font-size:7.2px;
+    line-height:1.05;
+  }
+  #panel-base .mini-meta-sub .mini-id-level{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  #panel-base .mini-meta-sub .mini-id-level b{
+    display:inline!important;
+  }
+  #panel-base .mini-meta-sub .tier-card-income{
+    margin-left:0;
+    font-size:8px;
+    line-height:1.05;
+    white-space:nowrap;
+  }
+
+  /* Badges must not cover the character art on small cards. */
+  #panel-base .mini-card .base-card-grade{
+    top:5px;
+    left:5px;
+    min-width:32px;
+    padding:4px 5px;
+    border-radius:8px;
+    font-size:8px;
+    line-height:1;
+  }
+  #panel-base .mini-card .mutation-badges{
+    top:5px;
+    right:5px;
+    max-width:58%;
+    gap:2px;
+  }
+  #panel-base .mini-card .mutation-badges .mutation-badge{
+    min-height:17px;
+    padding:2px 4px;
+    font-size:5.8px;
+    line-height:1;
+  }
+
+  /* Empty/locked slots use the same footprint as occupied cards. */
+  #panel-base .empty-stand{
+    width:100%;
+    padding:10px 5px;
+  }
+  #panel-base .empty-stand b{font-size:20px}
+  #panel-base .empty-stand span{
+    display:block;
+    margin-top:4px;
+    font-size:8px;
+    line-height:1.25;
+  }
+  #panel-base .floor-locked small{
+    margin-top:3px;
+    font-size:6px;
+    line-height:1.2;
+  }
+}
+
+@media (max-width:430px){
+  #panel-base .hero-row .muted{
+    -webkit-line-clamp:1;
+  }
+  #panel-base .hero-badges{
+    grid-template-columns:72px minmax(0,1fr);
+  }
+  #panel-base .hero-badges .badge{
+    padding:5px 7px;
+    font-size:8px;
+  }
+  #panel-base .base-floor-btn{
+    min-height:44px;
+    grid-template-columns:1fr;
+    justify-items:center;
+    gap:2px;
+    padding:5px 3px;
+  }
+  #panel-base .base-floor-no{
+    width:28px;
+    height:24px;
+  }
+  #panel-base .base-floor-meta b{font-size:7px}
+  #panel-base .base-floor-meta small{display:none}
+  #panel-base .stands{gap:6px}
+  #panel-base .mini-meta{
+    left:4px;
+    right:4px;
+    bottom:4px;
+    padding:4px 5px;
+  }
+  #panel-base .mini-meta-main .card-character-name{font-size:8.5px}
+  #panel-base .mini-meta-main .tier-card-name{font-size:6.6px!important}
+  #panel-base .mini-meta-sub,
+  #panel-base .mini-meta-sub>span{font-size:6.8px}
+  #panel-base .mini-meta-sub .tier-card-income{font-size:7.5px}
+}
+
