@@ -2937,13 +2937,27 @@
     });
   }
 
+  function loungeIsMobileView(){
+    return matchMedia("(max-width: 700px)").matches;
+  }
+
+  function loungeWalkBounds(){
+    return loungeIsMobileView()
+      ? {minX:15,maxX:85,minY:8,maxY:54,minStep:10,baseMs:1900,perPctMs:28}
+      : {minX:11,maxX:89,minY:2,maxY:18,minStep:13,baseMs:2500,perPctMs:34};
+  }
+
   function loungeInitialWalkPos(uid,index,total){
     const key=Number(uid);
     const existing=loungeWalkState.get(key);
     if(existing)return existing;
     const slots=Math.max(1,total);
-    const x=slots===1?50:14+(72*(index/Math.max(1,slots-1)));
-    const pos={x:Math.max(11,Math.min(89,x)),y:4+(index%3)*5};
+    const b=loungeWalkBounds();
+    const x=slots===1?50:b.minX+((b.maxX-b.minX)*(index/Math.max(1,slots-1)));
+    const y=loungeIsMobileView()
+      ? 10+(index%3)*13
+      : 4+(index%3)*5;
+    const pos={x:Math.max(b.minX,Math.min(b.maxX,x)),y:Math.max(b.minY,Math.min(b.maxY,y))};
     loungeWalkState.set(key,pos);
     return pos;
   }
@@ -2956,14 +2970,15 @@
     const buddy=document.querySelector('.chibi-buddy[data-lounge-uid="'+key+'"]');
     if(!panel?.classList.contains("active")||!buddy)return;
 
-    const current=loungeWalkState.get(key)||{x:50,y:6};
+    const b=loungeWalkBounds();
+    const current=loungeWalkState.get(key)||{x:50,y:b.minY};
     let nextX=current.x;
-    for(let tries=0;tries<8&&Math.abs(nextX-current.x)<13;tries++){
-      nextX=11+Math.random()*78;
+    for(let tries=0;tries<8&&Math.abs(nextX-current.x)<b.minStep;tries++){
+      nextX=b.minX+Math.random()*(b.maxX-b.minX);
     }
-    const nextY=2+Math.random()*18;
+    const nextY=b.minY+Math.random()*(b.maxY-b.minY);
     const distance=Math.abs(nextX-current.x);
-    const duration=Math.round(2500+distance*34+Math.random()*950);
+    const duration=Math.round(b.baseMs+distance*b.perPctMs+Math.random()*850);
 
     buddy.style.setProperty("--walk-ms",duration+"ms");
     buddy.classList.add("walking");
@@ -3007,6 +3022,7 @@
     loungeEnsureState();
     room.classList.toggle("theme-day",state.lounge.theme==="day");
     room.classList.toggle("theme-night",state.lounge.theme!=="day");
+    room.dataset.layout=loungeIsMobileView()?"mobile":"desktop";
     const soundBtn=$("#loungeSoundBtn"),themeBtn=$("#loungeThemeBtn");
     if(soundBtn)soundBtn.textContent=state.lounge.sound?"🔊 เสียงจิบิ ON":"🔇 เสียงจิบิ OFF";
     if(themeBtn)themeBtn.textContent=state.lounge.theme==="day"?"☀️ Day Room":"🌙 Night Room";
