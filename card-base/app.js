@@ -336,6 +336,8 @@
   let idPackAutoTimer = 0;
   let idPackAutoIndex = null;
   let idPackAutoCount = 0;
+  const ID_PACK_PAGE_SIZE = 10;
+  let idPackPage = 0;
   let supabaseClient = null;
   let gameToken = localStorage.getItem(GAME_SESSION_KEY) || null;
   let gameAccount = null;
@@ -989,7 +991,12 @@
   function renderIdPackShop(){
     const wrap=$("#idPackShop");if(!wrap)return;
     const ranges=idPackRanges();
-    wrap.innerHTML=ranges.map(r=>{
+    const pageCount=Math.max(1,Math.ceil(ranges.length/ID_PACK_PAGE_SIZE));
+    idPackPage=Math.max(0,Math.min(idPackPage,pageCount-1));
+    const pageStart=idPackPage*ID_PACK_PAGE_SIZE;
+    const visible=ranges.slice(pageStart,pageStart+ID_PACK_PAGE_SIZE);
+
+    const cards=visible.map(r=>{
       const cost=idPackCost(r);
       const minBonus=charIncomeBonusText(r.start),maxBonus=charIncomeBonusText(r.end);
       const cover=r.image
@@ -1011,6 +1018,18 @@
         '</div>'+
       '</article>';
     }).join("");
+
+    const first=ranges.length?pageStart+1:0;
+    const last=Math.min(ranges.length,pageStart+visible.length);
+    const pager=pageCount>1
+      ? '<nav class="id-pack-pagination" aria-label="หน้าร้าน ID Pack">'+
+          '<button type="button" data-id-pack-page="'+(idPackPage-1)+'" '+(idPackPage===0?'disabled':'')+'>‹ ก่อนหน้า</button>'+
+          '<div class="id-pack-page-info"><strong>หน้า '+(idPackPage+1)+' / '+pageCount+'</strong><span>แพ็ก '+first+'–'+last+' จาก '+ranges.length+'</span></div>'+
+          '<button type="button" data-id-pack-page="'+(idPackPage+1)+'" '+(idPackPage>=pageCount-1?'disabled':'')+'>ถัดไป ›</button>'+
+        '</nav>'
+      : '';
+
+    wrap.innerHTML=cards+pager;
     wrap.querySelectorAll(".id-pack-cover img").forEach(img=>{
       img.addEventListener("error",()=>{
         const cover=img.closest(".id-pack-cover");
@@ -4174,6 +4193,12 @@
     $("#rollBtn").addEventListener("click",manualRoll);$("#autoBtn").addEventListener("click",toggleAuto);$("#fullAutoBtn").addEventListener("click",toggleFullAuto);$("#packCard").addEventListener("click",openPack);
     $("#storedPacks").addEventListener("click",e=>{const b=e.target.closest("[data-open-stored-tier]");if(b)openStoredPack(Number(b.dataset.openStoredTier))});
     $("#idPackShop").addEventListener("click",e=>{
+      const page=e.target.closest("[data-id-pack-page]");
+      if(page&&!page.disabled){
+        idPackPage=Math.max(0,Number(page.dataset.idPackPage)||0);
+        renderIdPackShop();
+        return;
+      }
       const auto=e.target.closest("[data-auto-id-pack]");
       if(auto){
         toggleIdPackAuto(Number(auto.dataset.autoIdPack));
