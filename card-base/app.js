@@ -2,6 +2,7 @@
   "use strict";
 
   const SAVE_KEY = "card-base-prototype-v01";
+  const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
   const CARD_MIN_ID = 1;
   const CARD_MAX_ID = 110;
   const CARD_NAMES = Object.freeze({
@@ -1417,6 +1418,39 @@
     $("#authSignedIn").hidden=!signedIn;
     if(signedIn)$("#authUsernameLabel").textContent="@"+gameAccount.username;
     updateSyncUi(signedIn?(cloudReady?"online":"syncing"):"local");
+  }
+
+  function particlesEnabled(){
+    return localStorage.getItem(PARTICLES_PREF_KEY)!=="0";
+  }
+
+  function renderSettings(){
+    const enabled=particlesEnabled();
+    const toggle=$("#particlesToggle"),status=$("#particlesStatus");
+    if(toggle)toggle.checked=enabled;
+    if(status){
+      status.textContent=enabled?"ON":"OFF";
+      status.className=enabled?"on":"off";
+    }
+    document.body.classList.toggle("particles-disabled",!enabled);
+  }
+
+  function setParticlesEnabled(enabled){
+    localStorage.setItem(PARTICLES_PREF_KEY,enabled?"1":"0");
+    renderSettings();
+    window.dispatchEvent(new CustomEvent("cardbase:particles",{detail:{enabled:!!enabled}}));
+    toast(enabled?"เปิด Particles แล้ว ✨":"ปิด Particles แล้ว · เบาเครื่องขึ้น ⚡");
+  }
+
+  function openSettings(){
+    renderSettings();
+    $("#settingsModal").classList.add("show");
+    $("#settingsModal").setAttribute("aria-hidden","false");
+  }
+
+  function closeSettings(){
+    $("#settingsModal").classList.remove("show");
+    $("#settingsModal").setAttribute("aria-hidden","true");
   }
 
   function openAuth(){
@@ -4077,6 +4111,10 @@
       const btn=e.target.closest("[data-youtube-history]");if(!btn)return;
       const url=state.lounge.music.history[Number(btn.dataset.youtubeHistory)];if(url)loungeLoadYouTube(url);
     });
+    $("#settingsBtn").addEventListener("click",openSettings);
+    $("#closeSettingsModal").addEventListener("click",closeSettings);
+    $("[data-close-settings]").addEventListener("click",closeSettings);
+    $("#particlesToggle").addEventListener("change",e=>setParticlesEnabled(e.currentTarget.checked));
     $("#accountBtn").addEventListener("click",openAuth);
     $("#closeAuthModal").addEventListener("click",closeAuth);
     $("[data-close-auth]").addEventListener("click",closeAuth);
@@ -4178,13 +4216,13 @@
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
     document.addEventListener("keydown",e=>{
       if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling&&!state.fullAuto)manualRoll();
-      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSocialBase();closeGradeAuto();closeTrade()}
+      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSettings();closeSocialBase();closeGradeAuto();closeTrade()}
     });
     window.addEventListener("beforeunload",save);
   }
 
   function init(){
-    normalizeSlots();bind();
+    normalizeSlots();bind();renderSettings();
     const now=Date.now(),offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
     if(offlineSeconds>2&&state.placed.some(Boolean)){const gain=totalIncome()*offlineSeconds;state.money+=gain;toast("รับรายได้ออฟไลน์ "+fmt(gain))}
     state.lastTick=now;renderAll();updateRollProgress();
