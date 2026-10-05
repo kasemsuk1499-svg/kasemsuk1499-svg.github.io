@@ -473,12 +473,20 @@
     return {ok:false,error:"rpc_error",message:lastError?.message||"Cloud error"};
   }
 
-  function clearGameSession(){
+  function clearGameSession(reason=""){
     gameToken=null;gameAccount=null;onlineProfile=null;cloudReady=false;cloudLoading=false;
     tradeCache={incoming:[],outgoing:[],recent:[]};tradeLockedGids=new Set();
     mutationEventStatus=null;
     localStorage.removeItem(GAME_SESSION_KEY);
     renderAuth();renderOnlineShell();renderMutationEvent();updateSyncUi("local");
+    if(reason){
+      setAuthMessage(reason,"error");
+      toast(reason);
+    }
+  }
+
+  function invalidateGameSession(){
+    clearGameSession("Session หมดอายุหรือบัญชีนี้ถูกเปิดจากอุปกรณ์อื่น · กรุณาเข้าสู่ระบบใหม่");
   }
 
   async function flushCloudSave(){
@@ -487,7 +495,7 @@
     const snapshot=JSON.parse(JSON.stringify(cloudPayload()));
     const result=await rpc("cb_save_state",{p_token:gameToken,p_state:snapshot});
     if(!result.ok){
-      if(result.error==="invalid_session")clearGameSession();
+      if(result.error==="invalid_session")invalidateGameSession();
       else if(result.error==="trade_card_locked"){
         toast("การ์ดที่อยู่ใน Trade ถูกล็อก · ยกเลิก Trade ก่อนแก้ไข");
         await loadCloudState();
@@ -1329,7 +1337,7 @@
     const result=await rpc("cb_load_save",{p_token:gameToken});
     if(!result.ok){
       cloudLoading=false;
-      if(result.error==="invalid_session")clearGameSession();
+      if(result.error==="invalid_session")invalidateGameSession();
       else updateSyncUi("error");
       return;
     }
@@ -1387,7 +1395,7 @@
         await loadCloudState();
         await heartbeatOnline();
       }else{
-        clearGameSession();
+        invalidateGameSession();
       }
     }else{
       renderAuth();renderOnlineShell();
@@ -1488,7 +1496,7 @@
       p_title:titleForLevel(),
       p_stands:publicStandSnapshot()
     });
-    if(!result.ok&&result.error==="invalid_session")clearGameSession();
+    if(!result.ok&&result.error==="invalid_session")invalidateGameSession();
   }
 
   async function ensureOnlineProfile(){
@@ -1595,7 +1603,7 @@
         p_client_session:mutationEventClientSession
       });
       if(!result.ok){
-        if(result.error==="invalid_session")clearGameSession();
+        if(result.error==="invalid_session")invalidateGameSession();
         return;
       }
 
@@ -1815,7 +1823,7 @@
       rpc("cb_trade_snapshot",{p_token:gameToken})
     ]);
     if(!socialResult.ok){
-      if(socialResult.error==="invalid_session")clearGameSession();
+      if(socialResult.error==="invalid_session")invalidateGameSession();
       return;
     }
     if(!leaderResult.ok&&leaderResult.error==="invalid_session"){
