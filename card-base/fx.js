@@ -127,7 +127,7 @@
         awakening:dataAwakening||(awakenMatch?Math.max(0,Number(awakenMatch[1])||0):0),
         visitor:!!el.closest("#socialBaseModal")
       };
-    }).filter(t=>t.el?.isConnected);
+    }).filter(t=>t.tier>=4 || t.grade>=7 || t.mutation>0 || t.mutation2>0 || t.awakening>0);
   }
 
   function visibleRect(el){
@@ -149,9 +149,13 @@
   }
 
   function rateFor(tier,grade,mutation=0,mutation2=0,showcaseBoost=1){
-    // Tier no longer changes particle density. Keep every tier around the
-    // previous T8-T10 visual density, then let Grade/Mutation add identity.
-    let rate=2.15;
+    let rate=0;
+    if(tier===4) rate=0.55;
+    else if(tier===5) rate=0.8;
+    else if(tier===6) rate=1.05;
+    else if(tier===7) rate=1.45;
+    else if(tier===8) rate=1.9;
+    else if(tier>=9) rate=2.45;
 
     if(grade===7) rate+=0.38;
     else if(grade===8) rate+=0.72;
@@ -162,6 +166,7 @@
 
     const addMutationRate=m=>{
       if(!m)return;
+      // Amaterasu remains intentionally lighter than other top mutations.
       rate+=m>=21?1.85:m>=11?3.15:m>=8?2.65:m>=6?2.2:1.8;
     };
     addMutationRate(mutation);
@@ -183,9 +188,12 @@
     if(grade>=11) return r<.36?"flare":r<.68?"star":"spark";
     if(grade>=10) return r<.30?"flare":r<.58?"star":"spark";
     if(grade>=9 && r<.22) return "flare";
-
-    // Shared visual baseline for every tier.
-    return r<.26?"flare":r<.62?"spark":"star";
+    if(tier>=9) return r<.18?"flare":r<.58?"spark":"star";
+    if(tier===8) return r<.38?"flare":r<.68?"star":"spark";
+    if(tier===7) return r<.72?"star":"spark";
+    if(tier===6) return r<.24?"flare":"spark";
+    if(tier===5) return r<.72?"ember":"spark";
+    return "spark";
   }
 
   function spawn(target,rect){
@@ -200,14 +208,13 @@
 
     const key=chooseTexture(tier,grade,mutation,mutation2);
     const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
-    const baselineTierPower=5; // old Tier 8 feel, shared by all tiers
-    const high=Math.max(baselineTierPower,grade-6);
+    const high=Math.max(tier-3,grade-6);
     const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.12:1);
-    const life=1450+Math.random()*1050+(activeMutation>=11?350:0)+(activeMutation===21?180:0);
+    const life=950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0)+(activeMutation===21?180:0);
 
     if(activeMutation===16){ny=.78+Math.random()*.18}
-    let vx=activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:10);
-    let vy=activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(12+Math.random()*15);
+    let vx=activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
+    let vy=activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2);
     if(activeMutation===16){vx=(Math.random()-.5)*4;vy=-(24+Math.random()*30)}
     if(activeMutation===19){
       vx=(.5-nx)*rect.width*(.52+Math.random()*.18);
@@ -254,7 +261,7 @@
     const strength=target.visitor?1.2:1;
     const dx=(Math.random()-.5)*(30*strength);
     const dy=-(20+Math.random()*34)*strength;
-    const size=(13+Math.random()*8)*(target.visitor?1.12:1)*(activeMutation===21?1.10:1);
+    const size=(10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1)*(activeMutation===21?1.10:1);
     const life=Math.round((900+Math.random()*650)*(target.visitor?1.05:1));
 
     p.style.left=x+"%";
