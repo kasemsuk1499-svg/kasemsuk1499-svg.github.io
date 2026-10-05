@@ -2347,7 +2347,7 @@
       const t=TIERS[c.tier]||TIERS[0],g=GRADES[c.grade]||GRADES[0];
       html+='<div class="visitor-stand visitor-showcase-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="visitor-card visitor-showcase-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+'">'+
         '<img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div>'+
-        '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+
+        '<div class="card-grade base-card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+
         '<div class="visitor-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><b>'+
           '<span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span><span class="tier-card-name">'+t.name+'</span></b>'+
           '<span class="tier-card-sub">Lv.'+c.level+(cardMutationIds(c).length?' · '+mutationNames(c):'')+' · <strong class="tier-card-income">'+fmt(c.income||0)+'/s</strong></span>'+
