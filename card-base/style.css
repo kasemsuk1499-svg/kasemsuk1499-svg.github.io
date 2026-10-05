@@ -4957,3 +4957,132 @@ body.ascension-unlock-10 .base-tower-bar,
   font-weight:1000;
   filter:drop-shadow(0 0 8px color-mix(in srgb,var(--tier) 72%,transparent));
 }
+
+
+/* ===== CARD CHARACTER NAME OVERLAY ===== */
+.card-character-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#fff;
+  font-weight:1000;
+  letter-spacing:.01em;
+  text-shadow:0 1px 3px rgba(0,0,0,.95);
+}
+.mini-meta{
+  display:grid;
+  gap:4px;
+  padding:7px 8px;
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(4,6,10,.18),rgba(4,6,10,.78));
+  backdrop-filter:blur(2px);
+}
+.mini-meta-main,
+.mini-meta-sub,
+.card-face-meta-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+}
+.mini-meta-main .card-character-name{
+  flex:1 1 auto;
+  font-size:12px;
+}
+.mini-meta-main .tier-card-name{
+  flex:0 0 auto;
+  max-width:48%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:10px;
+  text-align:right;
+}
+.mini-meta-sub{
+  font-size:10px;
+}
+.mini-meta-sub .mini-id-level{
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  color:#d6d8e2;
+}
+.mini-meta-sub .tier-card-income{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+.card-face-meta{
+  position:absolute;
+  left:8px;
+  right:8px;
+  bottom:8px;
+  z-index:5;
+  display:grid;
+  gap:4px;
+  padding:8px 9px;
+  border-radius:11px;
+  background:linear-gradient(180deg,rgba(4,6,10,.20),rgba(4,6,10,.84));
+  box-shadow:0 5px 20px rgba(0,0,0,.24);
+  backdrop-filter:blur(2px);
+}
+.card-face-meta-top .card-character-name{
+  flex:1 1 auto;
+  font-size:12px;
+}
+.card-face-meta-top .tier-card-name{
+  flex:0 0 auto;
+  max-width:46%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:right;
+  font-size:9px;
+}
+.card-face-meta-bottom{
+  font-size:10px;
+}
+.card-face-meta-bottom .card-id-level{
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  color:#d6d8e2;
+}
+.card-face-meta-bottom .tier-card-income{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+.card-face-meta .tier-dot,
+.mini-meta .tier-dot{
+  color:#8d94a3;
+}
+
+@media (max-width:700px){
+  .mini-meta{
+    left:6px;
+    right:6px;
+    bottom:6px;
+    padding:6px;
+    gap:3px;
+  }
+  .mini-meta-main .card-character-name{font-size:9px}
+  .mini-meta-main .tier-card-name{font-size:7px;max-width:44%}
+  .mini-meta-sub{font-size:8px}
+  .mini-meta-sub span{font-size:8px}
+  .mini-meta-sub .tier-card-income{font-size:8px}
+
+  .card-face-meta{
+    left:5px;
+    right:5px;
+    bottom:5px;
+    padding:6px 7px;
+    gap:3px;
+    border-radius:8px;
+  }
+  .card-face-meta-top .card-character-name{font-size:9px}
+  .card-face-meta-top .tier-card-name{font-size:7px;max-width:42%}
+  .card-face-meta-bottom{font-size:8px}
+  .card-face-meta-bottom .tier-card-income{font-size:8px}
+}
