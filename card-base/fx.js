@@ -127,7 +127,7 @@
         awakening:dataAwakening||(awakenMatch?Math.max(0,Number(awakenMatch[1])||0):0),
         visitor:!!el.closest("#socialBaseModal")
       };
-    }).filter(t=>t.tier>=4 || t.grade>=7 || t.mutation>0 || t.mutation2>0 || t.awakening>0);
+    }).filter(t=>t.el?.isConnected);
   }
 
   function visibleRect(el){
