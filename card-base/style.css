@@ -4658,6 +4658,221 @@ body.ascension-unlock-10 .base-tower-bar,
 }
 
 
+
+/* ===== LOUNGE SPLIT LAYOUT: DESKTOP vs MOBILE ===== */
+@media (min-width:701px){
+  .lounge-room[data-layout="desktop"]{
+    min-height:480px;
+  }
+  .lounge-room[data-layout="desktop"] .lounge-buddies{
+    left:7%;
+    right:7%;
+    bottom:58px;
+    min-height:220px;
+  }
+  .lounge-room[data-layout="desktop"] .chibi-buddy.full-art{
+    width:clamp(88px,10.5vw,132px);
+  }
+  .lounge-room[data-layout="desktop"] .chibi-full-art{
+    max-height:196px;
+  }
+}
+
+@media (max-width:700px){
+  .lounge-panel{
+    padding-bottom:calc(94px + env(safe-area-inset-bottom));
+  }
+  .lounge-hero{
+    display:grid;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .lounge-hero h2{
+    margin:3px 0 5px;
+    font-size:20px;
+  }
+  .lounge-hero .muted{
+    margin:0;
+    font-size:9px;
+    line-height:1.55;
+  }
+  .lounge-hero-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .lounge-hero-actions button{
+    min-width:0;
+    min-height:40px;
+    padding:7px 6px;
+    font-size:8px;
+  }
+
+  .lounge-layout{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .lounge-room-card{
+    width:100%;
+    padding:8px;
+    border-radius:16px;
+  }
+  .lounge-jukebox{
+    width:100%;
+    padding:11px;
+    border-radius:16px;
+  }
+
+  .lounge-room[data-layout="mobile"]{
+    width:100%;
+    height:clamp(430px,62svh,560px);
+    min-height:430px;
+    border-radius:14px;
+  }
+  .lounge-room[data-layout="mobile"]::after{
+    height:43%;
+  }
+  .lounge-room[data-layout="mobile"] .lounge-window{
+    left:5%;
+    top:6%;
+    width:112px;
+    height:76px;
+    border-width:5px;
+    border-radius:12px;
+  }
+  .lounge-room[data-layout="mobile"] .lounge-window i{
+    width:20px;
+    height:20px;
+    right:14px;
+    top:10px;
+  }
+  .lounge-room[data-layout="mobile"] .lounge-window b{
+    left:12px;
+    bottom:8px;
+    width:48px;
+    height:17px;
+  }
+  .lounge-room[data-layout="mobile"] .lounge-lamp{
+    right:4%;
+    top:13%;
+    transform:scale(.72);
+    transform-origin:top right;
+  }
+  .lounge-room[data-layout="mobile"] .lounge-couch{
+    width:76%;
+    height:78px;
+    bottom:96px;
+    border-radius:18px 18px 12px 12px;
+  }
+  .lounge-room[data-layout="mobile"] .lounge-rug{
+    width:92%;
+    height:104px;
+    bottom:12px;
+  }
+  .lounge-room[data-layout="mobile"] .lounge-buddies{
+    left:3%;
+    right:3%;
+    bottom:18px;
+    min-height:238px;
+  }
+  .lounge-room[data-layout="mobile"] .chibi-buddy.full-art{
+    width:clamp(62px,20vw,86px);
+    max-width:24%;
+  }
+  .lounge-room[data-layout="mobile"] .chibi-full-art{
+    max-height:132px;
+    border-radius:8px;
+  }
+  .lounge-room[data-layout="mobile"] .chibi-bubble{
+    min-height:20px;
+    max-width:92px;
+    margin-bottom:4px;
+    padding:3px 5px;
+    font-size:6.5px;
+    line-height:1.25;
+  }
+  .lounge-room[data-layout="mobile"] .chibi-name{
+    margin-top:3px;
+    font-size:7px;
+  }
+  .lounge-room[data-layout="mobile"] .chibi-mood{
+    display:none;
+  }
+
+  .lounge-actions{
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    margin-top:8px;
+  }
+  .lounge-actions button{
+    min-height:44px;
+    font-size:9px;
+    touch-action:manipulation;
+  }
+  .lounge-picker-head{
+    align-items:flex-start;
+    gap:7px;
+    margin-top:12px;
+  }
+  .lounge-picker-head strong{
+    font-size:9px;
+  }
+  .lounge-card-picker{
+    gap:6px;
+    margin-top:7px;
+    padding-bottom:8px;
+    scroll-snap-type:x proximity;
+  }
+  .lounge-pick-card{
+    flex:0 0 78px;
+    padding:5px;
+    border-radius:10px;
+    scroll-snap-align:start;
+  }
+
+  .jukebox-head{
+    gap:8px;
+  }
+  .jukebox-disc{
+    flex-basis:40px;
+    width:40px;
+    height:40px;
+  }
+  .jukebox-head h3{
+    font-size:14px;
+  }
+  .jukebox-head .muted{
+    font-size:8px;
+    line-height:1.45;
+  }
+  .youtube-search-row,.youtube-load-row{
+    grid-template-columns:1fr;
+    gap:6px;
+    margin-top:8px;
+  }
+  .youtube-search-row input,.youtube-load-row input{
+    height:40px;
+  }
+  .youtube-search-row button,.youtube-load-row button{
+    width:100%;
+    min-height:40px;
+  }
+  .youtube-player-shell{
+    margin-top:10px;
+    border-radius:11px;
+  }
+  .youtube-now{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    padding:8px;
+  }
+  .youtube-now button{
+    min-height:36px;
+  }
+}
+
 /* ===== SINGULARITY + OMEGA + DISTINCT MUTATION VISUALS ===== */
 /* Tier 10: Singularity — cold white/cyan with a restrained event-horizon feel. */
 .tier-shell.tier-10{
