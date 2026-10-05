@@ -579,37 +579,35 @@
   }
 
   function drawHalo(target,rect,time){
-    // Keep the original unlock conditions. Higher tiers change hologram form,
-    // but the artwork must remain the hero.
+    // Keep original unlock conditions, but keep high-tier holograms GPU-light.
     if(target.grade===11 && target.tier<8) return;
     if(target.tier<8 && target.grade<9) return;
 
-    const visitorBoost=target.visitor?1.12:1;
+    const visitorBoost=target.visitor?1.08:1;
 
-    // Base holo / Tier 8: original soft ring, intentionally faint.
+    // Tier 8 / grade-triggered base holo: soft ring.
     if(target.tier<9){
       const img=images.halo;
       if(!img || !img.complete) return;
-      const pad=Math.min(40,Math.max(17,rect.width*.12));
-      const pulse=.24+.035*Math.sin(time*.0015);
+      const pad=Math.min(38,Math.max(16,rect.width*.11));
+      const pulse=.22+.025*Math.sin(time*.0014);
       ctx.save();
       ctx.globalCompositeOperation="lighter";
       ctx.globalAlpha=pulse*quality*visitorBoost;
       ctx.translate(rect.left+rect.width/2,rect.top+rect.height/2);
-      ctx.rotate(-time*.000045);
+      ctx.rotate(-time*.000035);
       ctx.drawImage(img,-rect.width/2-pad,-rect.height/2-pad,rect.width+pad*2,rect.height+pad*2);
       ctx.restore();
       return;
     }
 
-    // Tier 9: Cross Sweep — continuous, visible, but no longer dominates the art.
+    // Tier 9: one permanent cross + one moving sweep.
     if(target.tier===9){
-      const cycle=5600;
-      const p=(time%cycle)/cycle;
-      const span=Math.hypot(rect.width,rect.height)*.88;
+      const span=Math.hypot(rect.width,rect.height)*.86;
       const cx=rect.left+rect.width*.5;
       const cy=rect.top+rect.height*.5;
-      const pulse=.94+.06*Math.sin(time*.002);
+      const p=(time%6000)/6000;
+      const sweepX=rect.left+rect.width*(-.18+p*1.36);
 
       ctx.save();
       roundedRectPath(rect,-2,14);
@@ -617,52 +615,34 @@
       ctx.globalCompositeOperation="lighter";
       ctx.lineCap="round";
 
-      const drawLine=(x,y,angle,alpha,width,blur,colorA="rgba(190,243,255,.96)",colorB="rgba(211,177,255,.92)")=>{
+      const line=(x,y,angle,alpha,width,color)=>{
         const dx=Math.cos(angle)*span;
         const dy=Math.sin(angle)*span;
-        const grad=ctx.createLinearGradient(x-dx,y-dy,x+dx,y+dy);
-        grad.addColorStop(0,colorA);
-        grad.addColorStop(.5,"rgba(255,255,255,.96)");
-        grad.addColorStop(1,colorB);
         ctx.beginPath();
         ctx.moveTo(x-dx,y-dy);
         ctx.lineTo(x+dx,y+dy);
-        ctx.strokeStyle=grad;
+        ctx.strokeStyle=color;
         ctx.lineWidth=width;
-        ctx.globalAlpha=alpha*pulse*quality*visitorBoost;
-        ctx.shadowBlur=blur;
-        ctx.shadowColor="rgba(120,224,255,.60)";
+        ctx.globalAlpha=alpha*quality*visitorBoost;
+        ctx.shadowBlur=0;
         ctx.stroke();
       };
 
-      // Always-on cross reflection.
-      drawLine(cx,cy,-.67,.17,1.0,3.2);
-      drawLine(cx,cy,.67,.13,.82,2.6);
-
-      // Two moving sweeps keep it alive without filling the whole card.
-      const sweepX=q=>rect.left+rect.width*(-.18+q*1.36);
-      const p2=(p+.5)%1;
-      drawLine(sweepX(p),cy,-.67,.22,1.18,3.8);
-      drawLine(sweepX(p2),cy,.67,.17,.95,3.2,"rgba(222,191,255,.94)","rgba(150,237,255,.94)");
-
-      // Thin center glint only.
-      ctx.fillStyle="rgba(188,242,255,.9)";
-      ctx.globalAlpha=(.055+.018*Math.sin(time*.0025))*quality*visitorBoost;
-      ctx.fillRect(rect.left,rect.top+rect.height*.49,rect.width,1);
+      line(cx,cy,-.67,.16,1.0,"rgba(192,242,255,.95)");
+      line(cx,cy,.67,.11,.8,"rgba(213,183,255,.90)");
+      line(sweepX,cy,-.67,.21,1.15,"rgba(239,253,255,.97)");
 
       ctx.restore();
       return;
     }
 
-    // Tier 10: Prism Facets — premium and obvious, but translucent enough to preserve the artwork.
-    const phase=time*.00046;
+    // Tier 10: only four small prism facets + one soft sheen.
+    const phase=time*.0004;
     const shards=[
-      {x:.15,y:.22,w:.16,h:.23,r:-.36,c:"rgba(108,230,255,.76)"},
-      {x:.50,y:.18,w:.14,h:.20,r:.06,c:"rgba(164,186,255,.68)"},
-      {x:.82,y:.29,w:.17,h:.22,r:.29,c:"rgba(204,145,255,.70)"},
-      {x:.24,y:.70,w:.16,h:.20,r:.24,c:"rgba(255,158,226,.64)"},
-      {x:.55,y:.64,w:.15,h:.23,r:-.08,c:"rgba(255,222,150,.58)"},
-      {x:.79,y:.76,w:.15,h:.22,r:-.27,c:"rgba(126,255,211,.62)"}
+      {x:.18,y:.24,w:.14,h:.19,r:-.32,c:"rgba(109,229,255,.72)"},
+      {x:.78,y:.30,w:.15,h:.20,r:.28,c:"rgba(200,145,255,.68)"},
+      {x:.26,y:.72,w:.14,h:.18,r:.23,c:"rgba(255,158,226,.62)"},
+      {x:.76,y:.74,w:.13,h:.20,r:-.26,c:"rgba(126,255,211,.60)"}
     ];
 
     ctx.save();
@@ -672,69 +652,36 @@
 
     for(let i=0;i<shards.length;i++){
       const s=shards[i];
-      const drift=Math.sin(phase*2.2+i*1.23)*2.2;
       const x=rect.left+rect.width*s.x;
-      const y=rect.top+rect.height*s.y+drift;
+      const y=rect.top+rect.height*s.y+Math.sin(phase*2+i)*1.6;
       const w=rect.width*s.w;
       const h=rect.height*s.h;
 
       ctx.save();
       ctx.translate(x,y);
-      ctx.rotate(s.r+Math.sin(phase+i*.85)*.028);
-      ctx.globalAlpha=(.085+.018*Math.sin(phase*3+i))*quality*visitorBoost;
+      ctx.rotate(s.r);
+      ctx.globalAlpha=.085*quality*visitorBoost;
       ctx.fillStyle=s.c;
-      ctx.shadowBlur=2;
-      ctx.shadowColor=s.c;
+      ctx.shadowBlur=0;
       ctx.beginPath();
-      ctx.moveTo(0,-h*.56);
-      ctx.lineTo(w*.58,-h*.10);
-      ctx.lineTo(w*.19,h*.52);
-      ctx.lineTo(-w*.54,h*.12);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.globalAlpha=.115*quality*visitorBoost;
-      ctx.strokeStyle="rgba(245,253,255,.82)";
-      ctx.lineWidth=.62;
-      ctx.shadowBlur=1.5;
-      ctx.stroke();
-
-      ctx.globalAlpha=.045*quality*visitorBoost;
-      ctx.fillStyle="rgba(255,255,255,.94)";
-      ctx.beginPath();
-      ctx.moveTo(0,-h*.45);
-      ctx.lineTo(w*.18,-h*.05);
-      ctx.lineTo(-w*.04,h*.18);
+      ctx.moveTo(0,-h*.55);
+      ctx.lineTo(w*.56,-h*.10);
+      ctx.lineTo(w*.18,h*.50);
+      ctx.lineTo(-w*.52,h*.12);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
     }
 
-    // One soft chromatic sheen passes through the card.
-    const q=(time%6800)/6800;
-    const sheenX=rect.left+rect.width*(-.16+q*1.32);
-    const sheen=ctx.createLinearGradient(sheenX-24,rect.top,sheenX+24,rect.bottom);
-    sheen.addColorStop(0,"rgba(106,231,255,0)");
-    sheen.addColorStop(.30,"rgba(106,231,255,.16)");
-    sheen.addColorStop(.50,"rgba(255,255,255,.22)");
-    sheen.addColorStop(.70,"rgba(221,145,255,.16)");
-    sheen.addColorStop(1,"rgba(255,145,216,0)");
-    ctx.globalAlpha=.20*quality*visitorBoost;
+    const q=(time%7600)/7600;
+    const sheenX=rect.left+rect.width*(-.14+q*1.28);
+    const sheen=ctx.createLinearGradient(sheenX-18,0,sheenX+18,0);
+    sheen.addColorStop(0,"rgba(255,255,255,0)");
+    sheen.addColorStop(.5,"rgba(225,248,255,.18)");
+    sheen.addColorStop(1,"rgba(255,255,255,0)");
+    ctx.globalAlpha=.16*quality*visitorBoost;
     ctx.fillStyle=sheen;
     ctx.fillRect(rect.left,rect.top,rect.width,rect.height);
-
-    // A single faint prism seam for structure.
-    ctx.globalAlpha=.09*quality*visitorBoost;
-    ctx.strokeStyle="rgba(239,250,255,.86)";
-    ctx.lineWidth=.65;
-    ctx.shadowBlur=1.8;
-    ctx.shadowColor="rgba(143,222,255,.48)";
-    ctx.beginPath();
-    ctx.moveTo(rect.left+rect.width*.12,rect.top+rect.height*.72);
-    ctx.lineTo(rect.left+rect.width*.39,rect.top+rect.height*.42);
-    ctx.lineTo(rect.left+rect.width*.64,rect.top+rect.height*.66);
-    ctx.lineTo(rect.left+rect.width*.86,rect.top+rect.height*.34);
-    ctx.stroke();
 
     ctx.restore();
   }
