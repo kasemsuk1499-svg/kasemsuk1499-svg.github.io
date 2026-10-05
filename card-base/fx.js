@@ -601,84 +601,130 @@
     if(!stars)return;
 
     const color=awakeningColor(stars);
-    const flashMs=140;
-    const tick=Math.floor(time/flashMs);
-    const flash=(time%flashMs)/flashMs;
-    const alphaPulse=Math.sin(Math.PI*Math.min(1,flash));
+    const cycleMs=720;
+    const phase=(time%cycleMs)/cycleMs;
+    // Haki-style cracks flash in, hold briefly, then vanish instead of becoming an aura.
+    if(phase>.46)return;
+    const flash=Math.sin(Math.PI*(phase/.46));
+    const tick=Math.floor(time/cycleMs);
     const hash=n=>{
       const x=Math.sin(n*12.9898+78.233)*43758.5453;
       return x-Math.floor(x);
     };
 
     ctx.save();
-    roundedRectPath(rect,-2,14);
+    roundedRectPath(rect,-3,14);
     ctx.clip();
 
-    // Haki-like electric cracks: short, sharp and fully inside the card.
-    const sparkCount=1+(hash(tick+stars*19)>.58?1:0);
-    for(let s=0;s<sparkCount;s++){
-      const seed=tick*97+s*131+stars*43;
-      if(hash(seed+1)<.28)continue;
+    const crackCount=1+(hash(tick+stars*31)>.68?1:0);
 
-      const sx=rect.left+rect.width*(.16+hash(seed+2)*.68);
-      const sy=rect.top+rect.height*(.16+hash(seed+3)*.68);
-      const angle=hash(seed+4)*Math.PI*2;
-      const length=Math.min(rect.width,rect.height)*(.10+hash(seed+5)*.11);
-      const dx=Math.cos(angle)*length;
-      const dy=Math.sin(angle)*length;
-      const segments=4+Math.floor(hash(seed+6)*3);
-      const pts=[];
+    const drawCrack=(points,alpha=1)=>{
+      // Colored edge glow first.
+      ctx.save();
+      ctx.globalCompositeOperation="source-over";
+      ctx.globalAlpha=.76*flash*alpha*quality*(target.visitor?1.04:1);
+      ctx.strokeStyle=color;
+      ctx.lineWidth=Math.max(4.2,Math.min(rect.width,rect.height)*.027);
+      ctx.lineCap="round";
+      ctx.lineJoin="miter";
+      ctx.shadowBlur=7;
+      ctx.shadowColor=color;
+      ctx.beginPath();
+      points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
+      ctx.stroke();
+      ctx.restore();
+
+      // Thick near-black core creates the black-lightning / Haki-rift look.
+      ctx.save();
+      ctx.globalCompositeOperation="source-over";
+      ctx.globalAlpha=.98*flash*alpha*quality;
+      ctx.strokeStyle="#030205";
+      ctx.lineWidth=Math.max(2.7,Math.min(rect.width,rect.height)*.018);
+      ctx.lineCap="round";
+      ctx.lineJoin="miter";
+      ctx.beginPath();
+      points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
+      ctx.stroke();
+      ctx.restore();
+
+      // Razor-thin colored rim keeps the crack readable on dark artwork.
+      ctx.save();
+      ctx.globalCompositeOperation="lighter";
+      ctx.globalAlpha=.74*flash*alpha*quality;
+      ctx.strokeStyle=color;
+      ctx.lineWidth=.72;
+      ctx.lineCap="round";
+      ctx.lineJoin="miter";
+      ctx.shadowBlur=2.4;
+      ctx.shadowColor=color;
+      ctx.beginPath();
+      points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    for(let n=0;n<crackCount;n++){
+      const seed=tick*173+n*271+stars*61;
+      const side=Math.floor(hash(seed+1)*4);
+      const anchor=.12+hash(seed+2)*.76;
+      const travel=.24+hash(seed+3)*.16;
+      const segments=6+Math.floor(hash(seed+4)*3);
+
+      let sx,sy,ex,ey;
+      if(side===0){
+        sx=rect.left+rect.width*anchor; sy=rect.top+1;
+        ex=sx+(hash(seed+5)-.5)*rect.width*.34;
+        ey=rect.top+rect.height*travel;
+      }else if(side===1){
+        sx=rect.right-1; sy=rect.top+rect.height*anchor;
+        ex=rect.right-rect.width*travel;
+        ey=sy+(hash(seed+5)-.5)*rect.height*.34;
+      }else if(side===2){
+        sx=rect.left+rect.width*anchor; sy=rect.bottom-1;
+        ex=sx+(hash(seed+5)-.5)*rect.width*.34;
+        ey=rect.bottom-rect.height*travel;
+      }else{
+        sx=rect.left+1; sy=rect.top+rect.height*anchor;
+        ex=rect.left+rect.width*travel;
+        ey=sy+(hash(seed+5)-.5)*rect.height*.34;
+      }
+
+      const angle=Math.atan2(ey-sy,ex-sx);
+      const nx=-Math.sin(angle),ny=Math.cos(angle);
+      const points=[];
 
       for(let i=0;i<=segments;i++){
         const t=i/segments;
-        const x=sx+dx*t;
-        const y=sy+dy*t;
-        const offset=(hash(seed+20+i*13)-.5)*(4.2*(1-Math.abs(.5-t)*.28));
-        pts.push([
-          x+Math.cos(angle+Math.PI/2)*offset,
-          y+Math.sin(angle+Math.PI/2)*offset
+        const taper=1-Math.abs(.5-t)*.62;
+        const jag=(hash(seed+20+i*17)-.5)*(8+Math.min(rect.width,rect.height)*.028)*taper;
+        points.push([
+          sx+(ex-sx)*t+nx*jag,
+          sy+(ey-sy)*t+ny*jag
         ]);
       }
 
-      const drawPath=(points,stroke,width,a,blur)=>{
-        ctx.save();
-        ctx.globalCompositeOperation="lighter";
-        ctx.globalAlpha=a*alphaPulse*quality*(target.visitor?1.04:1);
-        ctx.strokeStyle=stroke;
-        ctx.lineWidth=width;
-        ctx.lineCap="round";
-        ctx.lineJoin="round";
-        ctx.shadowBlur=blur;
-        ctx.shadowColor=color;
-        ctx.beginPath();
-        points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
-        ctx.stroke();
-        ctx.restore();
-      };
+      drawCrack(points,n===0?1:.76);
 
-      drawPath(pts,color,1.9,.84,3.5);
-      drawPath(pts,"#ffffff",.72,.96,1.0);
-
-      if(hash(seed+40)>.55 && pts.length>3){
-        const branchAt=1+Math.floor(hash(seed+41)*(pts.length-2));
-        const base=pts[branchAt];
-        const branchAngle=angle+(hash(seed+42)>.5?1:-1)*(.72+hash(seed+43)*.42);
-        const branchLength=length*(.28+hash(seed+44)*.18);
-        const branch=[
-          base,
-          [
-            base[0]+Math.cos(branchAngle)*branchLength*.52,
-            base[1]+Math.sin(branchAngle)*branchLength*.52
-          ],
-          [
-            base[0]+Math.cos(branchAngle)*branchLength,
-            base[1]+Math.sin(branchAngle)*branchLength
-          ]
+      // 1-2 short forks keep it looking like a violent power crack, not a ribbon.
+      const branchCount=1+(hash(seed+90)>.72?1:0);
+      for(let b=0;b<branchCount;b++){
+        const at=2+Math.floor(hash(seed+91+b*19)*Math.max(1,segments-3));
+        const base=points[Math.min(points.length-2,at)];
+        const dir=hash(seed+92+b*23)>.5?1:-1;
+        const bAngle=angle+dir*(.72+hash(seed+93+b*29)*.48);
+        const bLen=Math.min(rect.width,rect.height)*(.07+hash(seed+94+b*31)*.055);
+        const mid=[
+          base[0]+Math.cos(bAngle)*bLen*.48+nx*(hash(seed+95+b*37)-.5)*4,
+          base[1]+Math.sin(bAngle)*bLen*.48+ny*(hash(seed+96+b*41)-.5)*4
         ];
-        drawPath(branch,color,1.15,.64,2.4);
-        drawPath(branch,"#ffffff",.42,.82,.6);
+        const tip=[
+          base[0]+Math.cos(bAngle)*bLen,
+          base[1]+Math.sin(bAngle)*bLen
+        ];
+        drawCrack([base,mid,tip],.64);
       }
     }
+
     ctx.restore();
   }
 
