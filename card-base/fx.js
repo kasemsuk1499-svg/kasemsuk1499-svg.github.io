@@ -373,64 +373,131 @@
   }
 
   function drawAmaterasuBorder(rect,time,secondary=false){
-    const phase=time*.00135+(secondary?1.7:0);
+    const phase=time*.00125+(secondary?1.7:0);
     const pad=secondary?7:3;
-    const pulse=.84+.12*Math.sin(phase*2.2);
+    const pulse=.86+.12*Math.sin(phase*2.4);
 
+    // Dense dark core + thin crimson rim anchors the flame to the card.
     ctx.save();
     ctx.globalCompositeOperation="source-over";
     roundedRectPath(rect,pad,17);
-    ctx.strokeStyle="rgba(3,0,4,.96)";
-    ctx.lineWidth=(secondary?3.1:4.4);
-    ctx.globalAlpha=(secondary?.72:.92)*pulse;
-    ctx.shadowBlur=19;
-    ctx.shadowColor="rgba(255,28,40,.58)";
+    ctx.strokeStyle="rgba(2,0,3,.98)";
+    ctx.lineWidth=secondary?3.2:5.0;
+    ctx.globalAlpha=(secondary?.70:.94)*pulse;
+    ctx.shadowBlur=22;
+    ctx.shadowColor="rgba(255,24,38,.58)";
     ctx.stroke();
 
     ctx.globalCompositeOperation="lighter";
-    roundedRectPath(rect,pad+2,18);
-    ctx.strokeStyle="rgba(255,35,46,.78)";
-    ctx.lineWidth=secondary?1.0:1.35;
-    ctx.globalAlpha=(secondary?.55:.78)*pulse;
-    ctx.shadowBlur=14;
+    roundedRectPath(rect,pad+1.8,18);
+    ctx.strokeStyle="rgba(255,38,50,.82)";
+    ctx.lineWidth=secondary?.9:1.35;
+    ctx.globalAlpha=(secondary?.50:.76)*pulse;
+    ctx.shadowBlur=15;
     ctx.shadowColor="#ff2432";
     ctx.stroke();
     ctx.restore();
 
-    const count=Math.max(8,Math.round((isMobile?12:20)*quality));
+    // Real flame tongues: fixed around the perimeter, but each tongue flickers,
+    // bends and changes height independently. Black core + red luminous edge.
+    const count=Math.max(12,Math.round((isMobile?18:30)*quality));
     for(let i=0;i<count;i++){
-      const p=(i/count+phase*.035)%1;
+      const p=(i+.5)/count;
       const [x,y,nx,ny]=perimeterPoint(rect,p,pad+2);
-      const flicker=.72+.28*Math.sin(phase*5.4+i*2.17);
-      const len=(9+(i%4)*2.3)*flicker*(secondary?.82:1);
-      const drift=Math.sin(phase*3+i*1.31)*3;
-      const cx=x+nx*(len*.58)+(-ny)*drift;
-      const cy=y+ny*(len*.58)+(nx)*drift;
-      const angle=Math.atan2(ny,nx)+Math.PI/2;
+      const tangentX=-ny,tangentY=nx;
+      const f1=Math.sin(phase*7.3+i*1.91);
+      const f2=Math.sin(phase*4.8+i*2.77);
+      const f3=Math.sin(phase*10.6+i*.83);
+      const len=(10+(i%5)*2.25+5.8*(.5+.5*f1))*(secondary?.78:1);
+      const width=(3.3+(i%3)*.72)*(secondary?.82:1);
+      const sway=(f2*4.6+f3*1.8)*(secondary?.78:1);
+      const baseShift=Math.sin(phase*2.9+i*1.37)*1.7;
+      const bx=x+tangentX*baseShift;
+      const by=y+tangentY*baseShift;
+      const angle=Math.atan2(nx,-ny);
+
+      const flamePath=(l,w,s)=>{
+        ctx.beginPath();
+        ctx.moveTo(-w,1.2);
+        ctx.bezierCurveTo(
+          -w*1.22,-l*.22,
+          -w*.48+s*.18,-l*.64,
+          s,-l
+        );
+        ctx.bezierCurveTo(
+          w*.38+s*.15,-l*.68,
+          w*1.16,-l*.28,
+          w,1.2
+        );
+        ctx.quadraticCurveTo(0,-l*.08,-w,1.2);
+        ctx.closePath();
+      };
 
       ctx.save();
-      ctx.translate(cx,cy);
+      ctx.translate(bx,by);
       ctx.rotate(angle);
-      ctx.scale(.52,1);
+
+      // Outer hot-red silhouette / glow.
       ctx.globalCompositeOperation="source-over";
-      ctx.globalAlpha=(secondary?.50:.72)*quality;
-      const smoke=ctx.createRadialGradient(0,0,0,0,0,len);
-      smoke.addColorStop(0,"rgba(0,0,0,.96)");
-      smoke.addColorStop(.46,"rgba(6,0,4,.82)");
-      smoke.addColorStop(.74,"rgba(55,0,8,.45)");
-      smoke.addColorStop(1,"rgba(255,35,45,0)");
-      ctx.fillStyle=smoke;
-      ctx.beginPath();
-      ctx.arc(0,0,len,0,Math.PI*2);
+      ctx.globalAlpha=(secondary?.48:.72)*quality;
+      const outer=ctx.createLinearGradient(0,2,0,-len);
+      outer.addColorStop(0,"rgba(20,0,3,.98)");
+      outer.addColorStop(.38,"rgba(72,0,8,.88)");
+      outer.addColorStop(.72,"rgba(165,4,18,.62)");
+      outer.addColorStop(1,"rgba(255,34,48,.20)");
+      ctx.fillStyle=outer;
+      ctx.strokeStyle="rgba(255,43,55,.68)";
+      ctx.lineWidth=Math.max(.75,width*.20);
+      ctx.shadowBlur=11+len*.22;
+      ctx.shadowColor="rgba(255,23,38,.74)";
+      flamePath(len,width,sway);
+      ctx.fill();
+      ctx.stroke();
+
+      // Near-black inner tongue makes it read as black fire rather than red smoke.
+      ctx.globalAlpha=(secondary?.68:.94)*quality;
+      ctx.shadowBlur=5;
+      ctx.shadowColor="rgba(255,25,38,.30)";
+      const inner=ctx.createLinearGradient(0,1,0,-len*.88);
+      inner.addColorStop(0,"rgba(0,0,0,.99)");
+      inner.addColorStop(.62,"rgba(3,0,2,.97)");
+      inner.addColorStop(1,"rgba(28,0,5,.86)");
+      ctx.fillStyle=inner;
+      flamePath(len*.86,width*.58,sway*.76);
       ctx.fill();
 
-      ctx.globalCompositeOperation="lighter";
-      ctx.globalAlpha=(secondary?.18:.28)*quality;
-      ctx.fillStyle="#ff2635";
-      ctx.beginPath();
-      ctx.ellipse(0,len*.14,len*.20,len*.64,0,0,Math.PI*2);
-      ctx.fill();
+      // A narrow crimson vein inside some flames adds a living-fire flicker.
+      if(i%3===0){
+        ctx.globalCompositeOperation="lighter";
+        ctx.globalAlpha=(secondary?.16:.28)*quality*(.72+.28*f3);
+        ctx.strokeStyle="#ff2636";
+        ctx.lineWidth=.8;
+        ctx.shadowBlur=8;
+        ctx.shadowColor="#ff2030";
+        ctx.beginPath();
+        ctx.moveTo(0,-1);
+        ctx.quadraticCurveTo(sway*.18,-len*.38,sway*.62,-len*.72);
+        ctx.stroke();
+      }
       ctx.restore();
+
+      // Tiny embers occasionally break away from the flame tips.
+      if(i%4===1){
+        const emberLift=len+4+3*(.5+.5*f2);
+        const ex=bx+nx*emberLift+tangentX*sway*.72;
+        const ey=by+ny*emberLift+tangentY*sway*.72;
+        const er=1.0+(.5+.5*f1)*1.15;
+        ctx.save();
+        ctx.globalCompositeOperation="lighter";
+        ctx.globalAlpha=(secondary?.22:.42)*quality*(.65+.35*f3);
+        ctx.fillStyle="#ff3342";
+        ctx.shadowBlur=8;
+        ctx.shadowColor="#ff1528";
+        ctx.beginPath();
+        ctx.arc(ex,ey,er,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
     }
   }
 
