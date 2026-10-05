@@ -162,7 +162,7 @@
 
     const addMutationRate=m=>{
       if(!m)return;
-      rate+=m>=21?4.15:m>=11?3.15:m>=8?2.65:m>=6?2.2:1.8;
+      rate+=m>=21?1.85:m>=11?3.15:m>=8?2.65:m>=6?2.2:1.8;
     };
     addMutationRate(mutation);
     addMutationRate(mutation2);
@@ -202,8 +202,8 @@
     const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
     const baselineTierPower=5; // old Tier 8 feel, shared by all tiers
     const high=Math.max(baselineTierPower,grade-6);
-    const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.45:1);
-    const life=1450+Math.random()*1050+(activeMutation>=11?350:0)+(activeMutation===21?650:0);
+    const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.12:1);
+    const life=1450+Math.random()*1050+(activeMutation>=11?350:0)+(activeMutation===21?180:0);
 
     if(activeMutation===16){ny=.78+Math.random()*.18}
     let vx=activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:10);
@@ -254,7 +254,7 @@
     const strength=target.visitor?1.2:1;
     const dx=(Math.random()-.5)*(30*strength);
     const dy=-(20+Math.random()*34)*strength;
-    const size=(13+Math.random()*8)*(target.visitor?1.12:1)*(activeMutation===21?1.35:1);
+    const size=(13+Math.random()*8)*(target.visitor?1.12:1)*(activeMutation===21?1.10:1);
     const life=Math.round((900+Math.random()*650)*(target.visitor?1.05:1));
 
     p.style.left=x+"%";
@@ -374,134 +374,6 @@
     ctx.restore();
   }
 
-  function drawAmaterasuBorder(rect,time,secondary=false){
-    const phase=time*.00125+(secondary?1.7:0);
-    const pad=secondary?7:3;
-    const pulse=.86+.12*Math.sin(phase*2.4);
-
-    // Dense dark core + thin crimson rim anchors the flame to the card.
-    ctx.save();
-    ctx.globalCompositeOperation="source-over";
-    roundedRectPath(rect,pad,17);
-    ctx.strokeStyle="rgba(2,0,3,.98)";
-    ctx.lineWidth=secondary?3.2:5.0;
-    ctx.globalAlpha=(secondary?.70:.94)*pulse;
-    ctx.shadowBlur=22;
-    ctx.shadowColor="rgba(255,24,38,.58)";
-    ctx.stroke();
-
-    ctx.globalCompositeOperation="lighter";
-    roundedRectPath(rect,pad+1.8,18);
-    ctx.strokeStyle="rgba(255,38,50,.82)";
-    ctx.lineWidth=secondary?.9:1.35;
-    ctx.globalAlpha=(secondary?.50:.76)*pulse;
-    ctx.shadowBlur=15;
-    ctx.shadowColor="#ff2432";
-    ctx.stroke();
-    ctx.restore();
-
-    // Real flame tongues: fixed around the perimeter, but each tongue flickers,
-    // bends and changes height independently. Black core + red luminous edge.
-    const count=Math.max(12,Math.round((isMobile?18:30)*quality));
-    for(let i=0;i<count;i++){
-      const p=(i+.5)/count;
-      const [x,y,nx,ny]=perimeterPoint(rect,p,pad+2);
-      const tangentX=-ny,tangentY=nx;
-      const f1=Math.sin(phase*7.3+i*1.91);
-      const f2=Math.sin(phase*4.8+i*2.77);
-      const f3=Math.sin(phase*10.6+i*.83);
-      const len=(10+(i%5)*2.25+5.8*(.5+.5*f1))*(secondary?.78:1);
-      const width=(3.3+(i%3)*.72)*(secondary?.82:1);
-      const sway=(f2*4.6+f3*1.8)*(secondary?.78:1);
-      const baseShift=Math.sin(phase*2.9+i*1.37)*1.7;
-      const bx=x+tangentX*baseShift;
-      const by=y+tangentY*baseShift;
-      const angle=Math.atan2(nx,-ny);
-
-      const flamePath=(l,w,s)=>{
-        ctx.beginPath();
-        ctx.moveTo(-w,1.2);
-        ctx.bezierCurveTo(
-          -w*1.22,-l*.22,
-          -w*.48+s*.18,-l*.64,
-          s,-l
-        );
-        ctx.bezierCurveTo(
-          w*.38+s*.15,-l*.68,
-          w*1.16,-l*.28,
-          w,1.2
-        );
-        ctx.quadraticCurveTo(0,-l*.08,-w,1.2);
-        ctx.closePath();
-      };
-
-      ctx.save();
-      ctx.translate(bx,by);
-      ctx.rotate(angle);
-
-      // Outer hot-red silhouette / glow.
-      ctx.globalCompositeOperation="source-over";
-      ctx.globalAlpha=(secondary?.48:.72)*quality;
-      const outer=ctx.createLinearGradient(0,2,0,-len);
-      outer.addColorStop(0,"rgba(20,0,3,.98)");
-      outer.addColorStop(.38,"rgba(72,0,8,.88)");
-      outer.addColorStop(.72,"rgba(165,4,18,.62)");
-      outer.addColorStop(1,"rgba(255,34,48,.20)");
-      ctx.fillStyle=outer;
-      ctx.strokeStyle="rgba(255,43,55,.68)";
-      ctx.lineWidth=Math.max(.75,width*.20);
-      ctx.shadowBlur=11+len*.22;
-      ctx.shadowColor="rgba(255,23,38,.74)";
-      flamePath(len,width,sway);
-      ctx.fill();
-      ctx.stroke();
-
-      // Near-black inner tongue makes it read as black fire rather than red smoke.
-      ctx.globalAlpha=(secondary?.68:.94)*quality;
-      ctx.shadowBlur=5;
-      ctx.shadowColor="rgba(255,25,38,.30)";
-      const inner=ctx.createLinearGradient(0,1,0,-len*.88);
-      inner.addColorStop(0,"rgba(0,0,0,.99)");
-      inner.addColorStop(.62,"rgba(3,0,2,.97)");
-      inner.addColorStop(1,"rgba(28,0,5,.86)");
-      ctx.fillStyle=inner;
-      flamePath(len*.86,width*.58,sway*.76);
-      ctx.fill();
-
-      // A narrow crimson vein inside some flames adds a living-fire flicker.
-      if(i%3===0){
-        ctx.globalCompositeOperation="lighter";
-        ctx.globalAlpha=(secondary?.16:.28)*quality*(.72+.28*f3);
-        ctx.strokeStyle="#ff2636";
-        ctx.lineWidth=.8;
-        ctx.shadowBlur=8;
-        ctx.shadowColor="#ff2030";
-        ctx.beginPath();
-        ctx.moveTo(0,-1);
-        ctx.quadraticCurveTo(sway*.18,-len*.38,sway*.62,-len*.72);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // Tiny embers occasionally break away from the flame tips.
-      if(i%4===1){
-        const emberLift=len+4+3*(.5+.5*f2);
-        const ex=bx+nx*emberLift+tangentX*sway*.72;
-        const ey=by+ny*emberLift+tangentY*sway*.72;
-        const er=1.0+(.5+.5*f1)*1.15;
-        ctx.save();
-        ctx.globalCompositeOperation="lighter";
-        ctx.globalAlpha=(secondary?.22:.42)*quality*(.65+.35*f3);
-        ctx.fillStyle="#ff3342";
-        ctx.shadowBlur=8;
-        ctx.shadowColor="#ff1528";
-        ctx.beginPath();
-        ctx.arc(ex,ey,er,0,Math.PI*2);
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-  }
 
   function drawSingleMutationBorder(m,rect,time,secondary=false){
     if(!m)return;
@@ -511,9 +383,6 @@
     ctx.save();
     ctx.globalCompositeOperation="lighter";
 
-    if(m===21){
-      ctx.restore();drawAmaterasuBorder(rect,phase,secondary);return;
-    }
     if(m===2){
       ctx.restore();drawThunderBorder(rect,phase,color);return;
     }
