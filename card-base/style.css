@@ -5164,3 +5164,69 @@ body.ascension-unlock-10 .base-tower-bar,
   .stand-character-heading strong{font-size:18px}
   .index-character-name{font-size:11px}
 }
+
+
+/* ===== BASE ALIGNMENT + PICKER NAMES ===== */
+.mini-meta-main,
+.mini-meta-sub{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  column-gap:10px;
+}
+.mini-meta-main .card-character-name,
+.mini-meta-sub .mini-id-level{
+  justify-self:start;
+  text-align:left;
+}
+.mini-meta-main .tier-card-name,
+.mini-meta-sub .tier-card-income{
+  justify-self:end;
+  text-align:right;
+}
+
+.picker-meta{
+  display:grid;
+  gap:4px;
+}
+.picker-character-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#f7f8fc;
+  font-size:11px;
+  font-weight:1000;
+  line-height:1.1;
+}
+.picker-id-tier{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px!important;
+  min-width:0;
+}
+.picker-id-tier .tier-card-id{
+  justify-self:start;
+  text-align:left;
+}
+.picker-id-tier .tier-card-name{
+  justify-self:end;
+  text-align:right;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.picker-stat-line{
+  display:block!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+@media (max-width:700px){
+  .mini-meta-main,
+  .mini-meta-sub{column-gap:6px}
+  .picker-character-name{font-size:9px}
+}
