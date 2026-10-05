@@ -3541,6 +3541,8 @@
       }
       const level=el.querySelector('[data-card-stat="level"]');if(level)level.textContent=c.level;
       const income=el.querySelector('[data-card-stat="income"]');if(income)income.textContent=fmt(cardIncome(c))+"/s";
+      const faceLevel=el.querySelector('[data-card-face-stat="level"]');if(faceLevel)faceLevel.textContent=c.level;
+      const faceIncome=el.querySelector('[data-card-face-stat="income"]');if(faceIncome)faceIncome.textContent=fmt(cardIncome(c))+"/s";
       const upgrade=el.querySelector('[data-card-stat="upgrade"]');if(upgrade)upgrade.textContent=fmt(upgradeCost(c));
       const gradeCost=el.querySelector('[data-card-stat="grade-cost"]');if(gradeCost)gradeCost.textContent=fmt(rerollCost(c));
       const sell=el.querySelector('[data-a="sell"]');if(sell){
