@@ -5086,3 +5086,81 @@ body.ascension-unlock-10 .base-tower-bar,
   .card-face-meta-bottom{font-size:8px}
   .card-face-meta-bottom .tier-card-income{font-size:8px}
 }
+
+
+/* ===== CARD NAME CONSISTENCY FIX ===== */
+.mini-id-level b,
+.card-id-level b{
+  display:inline!important;
+}
+.mini-meta-sub .mini-id-level,
+.card-face-meta-bottom .card-id-level{
+  flex:1 1 auto;
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.reveal-character-name{
+  margin:0;
+  color:#fff;
+  font-size:24px;
+  font-weight:1000;
+  line-height:1.05;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.reveal-tier-name{
+  margin-top:5px;
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.stand-character-heading{
+  display:grid;
+  gap:3px;
+  min-width:0;
+}
+.stand-character-heading strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:22px;
+  line-height:1.05;
+}
+.stand-character-heading span{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.index-character-name{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#f7f8fc;
+  font-size:13px;
+  font-weight:1000;
+  line-height:1.15;
+}
+.index-id-only{
+  margin-top:4px;
+  color:#9aa2b7;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+.index-card-body .index-id-row{
+  margin-top:5px;
+}
+
+@media (max-width:700px){
+  .reveal-character-name{font-size:20px}
+  .stand-character-heading strong{font-size:18px}
+  .index-character-name{font-size:11px}
+}
