@@ -579,8 +579,8 @@
   }
 
   function drawHalo(target,rect,time){
-    // Keep the original unlock conditions. Higher tiers use a different
-    // hologram language instead of just brightening the same ring.
+    // Keep the original unlock conditions. Higher tiers change hologram form,
+    // not just brightness.
     if(target.grade===11 && target.tier<8) return;
     if(target.tier<8 && target.grade<9) return;
 
@@ -602,13 +602,14 @@
       return;
     }
 
-    // Tier 9: Cross Sweep — always-on crossed foil lines plus moving sweeps.
+    // Tier 9: Cross Sweep MAX — persistent holographic lattice + continuous moving sweeps.
     if(target.tier===9){
-      const cycle=5200;
+      const cycle=4200;
       const p=(time%cycle)/cycle;
-      const span=Math.hypot(rect.width,rect.height)*.86;
-      const centerX=rect.left+rect.width*.5;
-      const centerY=rect.top+rect.height*.5;
+      const span=Math.hypot(rect.width,rect.height)*.92;
+      const cx=rect.left+rect.width*.5;
+      const cy=rect.top+rect.height*.5;
+      const pulse=.92+.08*Math.sin(time*.0021);
 
       ctx.save();
       roundedRectPath(rect,-2,14);
@@ -616,48 +617,66 @@
       ctx.globalCompositeOperation="lighter";
       ctx.lineCap="round";
 
-      const drawLine=(cx,cy,angle,alpha,width,blur)=>{
+      const drawLine=(x,y,angle,alpha,width,blur,colorA="rgba(185,244,255,.98)",colorB="rgba(206,160,255,.94)")=>{
         const dx=Math.cos(angle)*span;
         const dy=Math.sin(angle)*span;
+        const grad=ctx.createLinearGradient(x-dx,y-dy,x+dx,y+dy);
+        grad.addColorStop(0,colorA);
+        grad.addColorStop(.48,"rgba(255,255,255,.98)");
+        grad.addColorStop(1,colorB);
         ctx.beginPath();
-        ctx.moveTo(cx-dx,cy-dy);
-        ctx.lineTo(cx+dx,cy+dy);
-        ctx.strokeStyle="rgba(214,249,255,.98)";
+        ctx.moveTo(x-dx,y-dy);
+        ctx.lineTo(x+dx,y+dy);
+        ctx.strokeStyle=grad;
         ctx.lineWidth=width;
-        ctx.globalAlpha=alpha*quality*visitorBoost;
+        ctx.globalAlpha=alpha*pulse*quality*visitorBoost;
         ctx.shadowBlur=blur;
-        ctx.shadowColor="rgba(118,225,255,.66)";
+        ctx.shadowColor="rgba(118,225,255,.76)";
         ctx.stroke();
       };
 
-      // Permanent crossed reflection: this keeps the hologram continuous.
-      drawLine(centerX,centerY,-.66,.19,1.15,4);
-      drawLine(centerX,centerY,.68,.135,.85,3);
+      // Always-on cross lattice so Tier 9 never visually disappears.
+      drawLine(cx,cy,-.68,.29,1.45,5);
+      drawLine(cx,cy,.66,.23,1.15,4);
+      drawLine(cx,cy,-.18,.12,.75,2.5,"rgba(134,232,255,.92)","rgba(255,170,231,.90)");
+      drawLine(cx,cy,.18,.10,.65,2.2,"rgba(255,188,239,.90)","rgba(132,235,255,.92)");
 
-      // Two staggered moving sweeps: one is always near/on the card.
-      const sweepPos=q=>rect.left+rect.width*(-.18+q*1.36);
-      const p2=(p+.5)%1;
-      drawLine(sweepPos(p),centerY,-.66,.25,1.35,5);
-      drawLine(sweepPos(p2),centerY,.68,.19,1.05,4);
+      // Three staggered sweeps make the holo feel continuous.
+      const sweepX=q=>rect.left+rect.width*(-.22+q*1.44);
+      const p2=(p+1/3)%1;
+      const p3=(p+2/3)%1;
+      drawLine(sweepX(p),cy,-.68,.34,1.7,6);
+      drawLine(sweepX(p2),cy,.66,.28,1.4,5,"rgba(225,181,255,.98)","rgba(145,239,255,.98)");
+      drawLine(sweepX(p3),cy,-.12,.18,1.0,3.5,"rgba(153,238,255,.94)","rgba(255,202,242,.94)");
 
-      // A very faint center glint adds presence without turning into an aura.
-      const glint=.07+.025*Math.sin(time*.0024);
-      ctx.fillStyle="rgba(174,239,255,.9)";
+      // Center foil glint and two faint scan bands.
+      const glint=.11+.045*Math.sin(time*.0028);
+      ctx.fillStyle="rgba(190,244,255,.95)";
       ctx.globalAlpha=glint*quality*visitorBoost;
-      ctx.fillRect(rect.left,rect.top+rect.height*.49,rect.width,1);
+      ctx.fillRect(rect.left,rect.top+rect.height*.485,rect.width,1.3);
+
+      ctx.fillStyle="rgba(218,178,255,.88)";
+      ctx.globalAlpha=.055*quality*visitorBoost;
+      ctx.fillRect(rect.left,rect.top+rect.height*.32,rect.width,rect.height*.025);
+      ctx.fillRect(rect.left,rect.top+rect.height*.69,rect.width,rect.height*.02);
+
       ctx.restore();
       return;
     }
 
-    // Tier 10: Prism Facets — broader translucent foil geometry, no ring.
-    const phase=time*.00046;
+    // Tier 10: Prism Overdrive — dense translucent foil facets + chromatic sweep.
+    const phase=time*.00052;
     const shards=[
-      {x:.16,y:.22,w:.20,h:.29,r:-.36,c:"rgba(118,232,255,.78)"},
-      {x:.50,y:.18,w:.17,h:.24,r:.08,c:"rgba(157,194,255,.70)"},
-      {x:.80,y:.29,w:.22,h:.26,r:.30,c:"rgba(202,132,255,.72)"},
-      {x:.24,y:.69,w:.21,h:.24,r:.24,c:"rgba(255,155,227,.66)"},
-      {x:.53,y:.62,w:.18,h:.28,r:-.08,c:"rgba(255,221,142,.60)"},
-      {x:.78,y:.74,w:.19,h:.28,r:-.28,c:"rgba(126,255,209,.66)"}
+      {x:.11,y:.18,w:.24,h:.31,r:-.43,c:"rgba(101,228,255,.86)"},
+      {x:.36,y:.15,w:.19,h:.26,r:-.10,c:"rgba(151,187,255,.82)"},
+      {x:.61,y:.16,w:.20,h:.28,r:.13,c:"rgba(198,139,255,.82)"},
+      {x:.86,y:.25,w:.24,h:.31,r:.39,c:"rgba(255,147,232,.80)"},
+      {x:.16,y:.50,w:.21,h:.27,r:.25,c:"rgba(126,255,214,.76)"},
+      {x:.50,y:.48,w:.25,h:.33,r:-.04,c:"rgba(255,230,144,.72)"},
+      {x:.82,y:.54,w:.22,h:.29,r:-.30,c:"rgba(130,206,255,.80)"},
+      {x:.25,y:.80,w:.24,h:.30,r:.30,c:"rgba(255,151,219,.76)"},
+      {x:.57,y:.79,w:.20,h:.29,r:-.10,c:"rgba(156,134,255,.78)"},
+      {x:.83,y:.82,w:.20,h:.27,r:-.33,c:"rgba(108,255,211,.76)"}
     ];
 
     ctx.save();
@@ -667,51 +686,77 @@
 
     for(let i=0;i<shards.length;i++){
       const s=shards[i];
-      const drift=Math.sin(phase*2.3+i*1.21)*2.5;
+      const drift=Math.sin(phase*2.5+i*1.13)*3.1;
       const x=rect.left+rect.width*s.x;
       const y=rect.top+rect.height*s.y+drift;
       const w=rect.width*s.w;
       const h=rect.height*s.h;
+      const shardPulse=.95+.10*Math.sin(phase*3.1+i*.7);
 
       ctx.save();
       ctx.translate(x,y);
-      ctx.rotate(s.r+Math.sin(phase+i*.9)*.03);
-      ctx.globalAlpha=(.13+.026*Math.sin(phase*3+i))*quality*visitorBoost;
+      ctx.rotate(s.r+Math.sin(phase+i*.83)*.045);
+      ctx.globalAlpha=.205*shardPulse*quality*visitorBoost;
       ctx.fillStyle=s.c;
+      ctx.shadowBlur=4;
+      ctx.shadowColor=s.c;
       ctx.beginPath();
-      ctx.moveTo(0,-h*.56);
-      ctx.lineTo(w*.60,-h*.10);
-      ctx.lineTo(w*.20,h*.54);
-      ctx.lineTo(-w*.56,h*.12);
+      ctx.moveTo(0,-h*.58);
+      ctx.lineTo(w*.62,-h*.12);
+      ctx.lineTo(w*.22,h*.55);
+      ctx.lineTo(-w*.58,h*.14);
       ctx.closePath();
       ctx.fill();
 
-      ctx.globalAlpha=.17*quality*visitorBoost;
-      ctx.strokeStyle="rgba(244,253,255,.82)";
-      ctx.lineWidth=.72;
+      ctx.globalAlpha=.235*quality*visitorBoost;
+      ctx.strokeStyle="rgba(248,254,255,.92)";
+      ctx.lineWidth=.82;
+      ctx.shadowBlur=2;
       ctx.stroke();
 
-      // Inner facet catches light so the shape reads even on bright artwork.
-      ctx.globalAlpha=.075*quality*visitorBoost;
-      ctx.fillStyle="rgba(255,255,255,.92)";
+      // Inner prism cut.
+      ctx.globalAlpha=.105*quality*visitorBoost;
+      ctx.fillStyle="rgba(255,255,255,.96)";
       ctx.beginPath();
-      ctx.moveTo(0,-h*.47);
-      ctx.lineTo(w*.20,-h*.07);
-      ctx.lineTo(-w*.06,h*.20);
+      ctx.moveTo(0,-h*.49);
+      ctx.lineTo(w*.23,-h*.06);
+      ctx.lineTo(-w*.04,h*.23);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
     }
 
-    // Slow prism sheen through the center, kept subtle.
-    const sheenX=rect.left+rect.width*((time%7600)/7600);
-    const sheen=ctx.createLinearGradient(sheenX-22,0,sheenX+22,0);
-    sheen.addColorStop(0,"rgba(255,255,255,0)");
-    sheen.addColorStop(.5,"rgba(220,248,255,.26)");
-    sheen.addColorStop(1,"rgba(255,255,255,0)");
-    ctx.globalAlpha=.18*quality*visitorBoost;
+    // Chromatic diagonal sheen.
+    const q=(time%5200)/5200;
+    const sheenX=rect.left+rect.width*(-.18+q*1.36);
+    const sheen=ctx.createLinearGradient(sheenX-34,rect.top,sheenX+34,rect.bottom);
+    sheen.addColorStop(0,"rgba(106,231,255,0)");
+    sheen.addColorStop(.22,"rgba(106,231,255,.34)");
+    sheen.addColorStop(.46,"rgba(255,255,255,.42)");
+    sheen.addColorStop(.68,"rgba(228,137,255,.34)");
+    sheen.addColorStop(1,"rgba(255,145,216,0)");
+    ctx.globalAlpha=.34*quality*visitorBoost;
     ctx.fillStyle=sheen;
     ctx.fillRect(rect.left,rect.top,rect.width,rect.height);
+
+    // Thin prism seams connect the facets without becoming a ring.
+    ctx.globalAlpha=.18*quality*visitorBoost;
+    ctx.strokeStyle="rgba(238,249,255,.92)";
+    ctx.lineWidth=.75;
+    ctx.shadowBlur=3;
+    ctx.shadowColor="rgba(143,222,255,.55)";
+    ctx.beginPath();
+    ctx.moveTo(rect.left+rect.width*.08,rect.top+rect.height*.58);
+    ctx.lineTo(rect.left+rect.width*.34,rect.top+rect.height*.28);
+    ctx.lineTo(rect.left+rect.width*.58,rect.top+rect.height*.56);
+    ctx.lineTo(rect.left+rect.width*.88,rect.top+rect.height*.24);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(rect.left+rect.width*.14,rect.top+rect.height*.78);
+    ctx.lineTo(rect.left+rect.width*.42,rect.top+rect.height*.60);
+    ctx.lineTo(rect.left+rect.width*.72,rect.top+rect.height*.82);
+    ctx.stroke();
 
     ctx.restore();
   }
