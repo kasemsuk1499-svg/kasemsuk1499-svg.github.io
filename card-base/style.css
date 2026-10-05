@@ -5860,3 +5860,20 @@ body.ascension-unlock-10 .base-tower-bar,
   #panel-base .mini-meta-sub .tier-card-income{font-size:7.5px}
 }
 
+/* ===== MOBILE BOTTOM NAV ABOVE CARD FX ===== */
+@media (max-width:700px){
+  /* Card FX must stay above cards, but always below the fixed navigation. */
+  #cardFxCanvas{
+    z-index:90!important;
+  }
+  .tabs{
+    z-index:100!important;
+    isolation:isolate;
+    background:rgba(9,11,16,.985)!important;
+    border-top:1px solid #2d3444;
+    box-shadow:0 -10px 28px rgba(0,0,0,.38);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+}
+
