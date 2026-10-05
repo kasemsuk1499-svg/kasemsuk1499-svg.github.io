@@ -16,22 +16,23 @@
     moon:"./assets/fx/moon.svg",
     void:"./assets/fx/void.svg",
     prism:"./assets/fx/prism.svg",
-    cosmic:"./assets/fx/cosmic.svg"
+    cosmic:"./assets/fx/cosmic.svg",
+    amaterasu:"./assets/fx/amaterasu.svg"
   };
 
   const MUTATION_COLORS = [
     "#8d94a3","#ff7043","#69e7ff","#9deaff","#72ffd5",
     "#7ee47e","#ffd761","#bdc9ff","#aa69ff","#ff83e8","#fff0a5",
     "#ff5fb7","#77fff1","#5fffea","#b9ff6a","#ff7cf5","#6fe7ff",
-    "#7aa2ff","#ff9ad5","#8a64ff","#ffe47a"
+    "#7aa2ff","#ff9ad5","#8a64ff","#ffe47a","#ff2b35"
   ];
-  const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic","halo",null,null,null,null,null,null,null,null,null];
+  const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic","halo",null,null,null,null,null,null,null,null,null,"amaterasu"];
   const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
 
   function mutationParticleKind(m){
     return ({
       12:"chrono",13:"glitch",14:"helix",15:"shard",
-      16:"inverse",17:"scan",18:"echo",19:"gravity",20:"rune"
+      16:"inverse",17:"scan",18:"echo",19:"gravity",20:"rune",21:"amaterasu"
     })[m]||"";
   }
 
@@ -159,7 +160,7 @@
 
     const addMutationRate=m=>{
       if(!m)return;
-      rate+=m>=11?3.15:m>=8?2.65:m>=6?2.2:1.8;
+      rate+=m>=21?4.15:m>=11?3.15:m>=8?2.65:m>=6?2.2:1.8;
     };
     addMutationRate(mutation);
     addMutationRate(mutation2);
@@ -199,8 +200,8 @@
     const key=chooseTexture(tier,grade,mutation,mutation2);
     const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
     const high=Math.max(tier-3,grade-6);
-    const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1);
-    const life=950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0);
+    const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.45:1);
+    const life=950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0)+(activeMutation===21?650:0);
 
     if(activeMutation===16){ny=.78+Math.random()*.18}
     let vx=activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
@@ -217,7 +218,7 @@
       dy:0,vx,vy,
       size,life,maxLife:life,
       rot:Math.random()*Math.PI*2,
-      vr:(Math.random()-.5)*(kind==="glitch"?3.4:1.1),
+      vr:kind==="amaterasu"?(0.55+Math.random()*.35):(Math.random()-.5)*(kind==="glitch"?3.4:1.1),
       key,kind,mutation:activeMutation,
       alpha:Math.min(1,(.56+Math.random()*.36)*(target.visitor?1.12:1)),
       pulse:Math.random()*Math.PI*2
@@ -237,10 +238,10 @@
       : (computed.getPropertyValue("--tier").trim()||"#ffffff");
 
     const p=document.createElement("i");
-    p.className="mobile-card-particle";
+    p.className="mobile-card-particle"+(activeMutation===21?" amaterasu-eye-particle":"");
     p.setAttribute("aria-hidden","true");
-    const glyphs={11:"✺",12:"⧖",13:"▧",14:"⌁",15:"◈",16:"↑",17:"◎",18:"◫",19:"◉",20:"⌬"};
-    p.textContent=activeMutation>=11?(glyphs[activeMutation]||"◆"):(Math.random()<.58?"✦":Math.random()<.72?"✧":"•");
+    const glyphs={11:"✺",12:"⧖",13:"▧",14:"⌁",15:"◈",16:"↑",17:"◎",18:"◫",19:"◉",20:"⌬",21:"⦿"};
+    p.textContent=activeMutation===21?"":(activeMutation>=11?(glyphs[activeMutation]||"◆"):(Math.random()<.58?"✦":Math.random()<.72?"✧":"•"));
 
     const edge=Math.random();
     let x,y;
@@ -251,7 +252,7 @@
     const strength=target.visitor?1.2:1;
     const dx=(Math.random()-.5)*(30*strength);
     const dy=-(20+Math.random()*34)*strength;
-    const size=(10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1);
+    const size=(10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1)*(activeMutation===21?1.35:1);
     const life=Math.round((900+Math.random()*650)*(target.visitor?1.05:1));
 
     p.style.left=x+"%";
@@ -261,7 +262,7 @@
     p.style.setProperty("--fx-dy",dy.toFixed(1)+"px");
     p.style.setProperty("--fx-size",size.toFixed(1)+"px");
     p.style.setProperty("--fx-life",life+"ms");
-    p.style.setProperty("--fx-rot",((Math.random()-.5)*150).toFixed(0)+"deg");
+    p.style.setProperty("--fx-rot",activeMutation===21?(480+Math.random()*240).toFixed(0)+"deg":((Math.random()-.5)*150).toFixed(0)+"deg");
 
     mobileParticleCount++;
     const cleanup=()=>{
@@ -371,6 +372,68 @@
     ctx.restore();
   }
 
+  function drawAmaterasuBorder(rect,time,secondary=false){
+    const phase=time*.00135+(secondary?1.7:0);
+    const pad=secondary?7:3;
+    const pulse=.84+.12*Math.sin(phase*2.2);
+
+    ctx.save();
+    ctx.globalCompositeOperation="source-over";
+    roundedRectPath(rect,pad,17);
+    ctx.strokeStyle="rgba(3,0,4,.96)";
+    ctx.lineWidth=(secondary?3.1:4.4);
+    ctx.globalAlpha=(secondary?.72:.92)*pulse;
+    ctx.shadowBlur=19;
+    ctx.shadowColor="rgba(255,28,40,.58)";
+    ctx.stroke();
+
+    ctx.globalCompositeOperation="lighter";
+    roundedRectPath(rect,pad+2,18);
+    ctx.strokeStyle="rgba(255,35,46,.78)";
+    ctx.lineWidth=secondary?1.0:1.35;
+    ctx.globalAlpha=(secondary?.55:.78)*pulse;
+    ctx.shadowBlur=14;
+    ctx.shadowColor="#ff2432";
+    ctx.stroke();
+    ctx.restore();
+
+    const count=Math.max(8,Math.round((isMobile?12:20)*quality));
+    for(let i=0;i<count;i++){
+      const p=(i/count+phase*.035)%1;
+      const [x,y,nx,ny]=perimeterPoint(rect,p,pad+2);
+      const flicker=.72+.28*Math.sin(phase*5.4+i*2.17);
+      const len=(9+(i%4)*2.3)*flicker*(secondary?.82:1);
+      const drift=Math.sin(phase*3+i*1.31)*3;
+      const cx=x+nx*(len*.58)+(-ny)*drift;
+      const cy=y+ny*(len*.58)+(nx)*drift;
+      const angle=Math.atan2(ny,nx)+Math.PI/2;
+
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(angle);
+      ctx.scale(.52,1);
+      ctx.globalCompositeOperation="source-over";
+      ctx.globalAlpha=(secondary?.50:.72)*quality;
+      const smoke=ctx.createRadialGradient(0,0,0,0,0,len);
+      smoke.addColorStop(0,"rgba(0,0,0,.96)");
+      smoke.addColorStop(.46,"rgba(6,0,4,.82)");
+      smoke.addColorStop(.74,"rgba(55,0,8,.45)");
+      smoke.addColorStop(1,"rgba(255,35,45,0)");
+      ctx.fillStyle=smoke;
+      ctx.beginPath();
+      ctx.arc(0,0,len,0,Math.PI*2);
+      ctx.fill();
+
+      ctx.globalCompositeOperation="lighter";
+      ctx.globalAlpha=(secondary?.18:.28)*quality;
+      ctx.fillStyle="#ff2635";
+      ctx.beginPath();
+      ctx.ellipse(0,len*.14,len*.20,len*.64,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
   function drawSingleMutationBorder(m,rect,time,secondary=false){
     if(!m)return;
     const color=MUTATION_COLORS[m]||"#fff";
@@ -379,6 +442,9 @@
     ctx.save();
     ctx.globalCompositeOperation="lighter";
 
+    if(m===21){
+      ctx.restore();drawAmaterasuBorder(rect,phase,secondary);return;
+    }
     if(m===2){
       ctx.restore();drawThunderBorder(rect,phase,color);return;
     }
@@ -502,6 +568,17 @@
     }else if(p.kind==="rune"){
       ctx.font=Math.max(9,size*.78)+"px serif";ctx.textAlign="center";ctx.textBaseline="middle";
       ctx.fillText(["⌬","ᚱ","✣","⟡"][Math.abs(Math.floor(p.pulse*10))%4],0,1);
+    }else if(p.kind==="amaterasu"){
+      const img=images.amaterasu;
+      if(img&&img.complete){
+        ctx.save();
+        ctx.globalCompositeOperation="source-over";
+        ctx.globalAlpha*=.88;
+        ctx.shadowBlur=Math.max(8,size*.72);
+        ctx.shadowColor="#ff2635";
+        ctx.drawImage(img,-size*.55,-size*.55,size*1.1,size*1.1);
+        ctx.restore();
+      }
     }else if(p.kind==="chrono"){
       ctx.beginPath();ctx.arc(0,0,size*.38,0,Math.PI*2);ctx.stroke();
       ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(phase)*size*.30,Math.sin(phase)*size*.30);ctx.stroke();
