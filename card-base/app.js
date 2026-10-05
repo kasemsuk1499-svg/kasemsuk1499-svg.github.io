@@ -3616,9 +3616,9 @@
       replaceNumericClass(stand,"grade-shell-",c.grade);
       const mini=stand.querySelector(".mini-card");
       if(mini)replaceNumericClass(mini,"grade-shell-",c.grade);
-      const badge=stand.querySelector(".stand-grade");
+      const badge=stand.querySelector(".base-card-grade");
       if(badge){
-        badge.className="stand-grade "+gradeFxClass(c.grade);
+        badge.className="card-grade base-card-grade "+gradeFxClass(c.grade);
         badge.style.setProperty("--grade",g.color);
         badge.textContent=g.name;
       }
