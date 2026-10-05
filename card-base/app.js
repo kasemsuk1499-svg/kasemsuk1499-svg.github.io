@@ -841,7 +841,7 @@
   function awakeningRequiredLevel(card){return 100*(awakeningStars(card)+1)}
   function awakeningBadge(card){
     const stars=awakeningStars(card);
-    return stars?'<span class="awakening-badge" aria-label="Awaken '+stars+'">★'+stars+'</span>':"";
+    return stars?'<span class="awakening-badge awaken-'+stars+'" aria-label="Awaken '+stars+'">★'+stars+'</span>':"";
   }
   function cardCoreIncome(card){
     const tier=TIERS[card.tier],grade=GRADES[card.grade];
