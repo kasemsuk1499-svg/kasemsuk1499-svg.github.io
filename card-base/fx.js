@@ -171,7 +171,7 @@
     addMutationRate(mutation);
     addMutationRate(mutation2);
     if(mutation&&mutation2)rate+=1.05;
-    if(tier>=10)rate*=0.55;
+    if(tier>=10)rate*=0.38;
     return rate*quality*showcaseBoost;
   }
 
