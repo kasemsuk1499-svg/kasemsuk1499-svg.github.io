@@ -841,7 +841,7 @@
   function awakeningRequiredLevel(card){return 100*(awakeningStars(card)+1)}
   function awakeningBadge(card){
     const stars=awakeningStars(card);
-    return stars?'<span class="awakening-badge">AWAKEN ★'+stars+'</span>':"";
+    return stars?'<span class="awakening-badge" aria-label="Awaken '+stars+'">★'+stars+'</span>':"";
   }
   function cardCoreIncome(card){
     const tier=TIERS[card.tier],grade=GRADES[card.grade];
@@ -2366,7 +2366,7 @@
         continue;
       }
       const t=TIERS[c.tier]||TIERS[0],g=GRADES[c.grade]||GRADES[0];
-      html+='<div class="visitor-stand visitor-showcase-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="visitor-card visitor-showcase-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+'">'+
+      html+='<div class="visitor-stand visitor-showcase-stand tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="visitor-card visitor-showcase-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+'" data-awakening="'+awakeningStars(c)+'">'+
         '<img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div>'+
         '<div class="stand-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+
         '<div class="visitor-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><b>'+
@@ -2514,10 +2514,10 @@
       }else{
         const t=TIERS[c.tier],g=GRADES[c.grade];
         slot.innerHTML=
-          '<div class="mini-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
+          '<div class="mini-card '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
             '<img src="'+imageFor(c.charId)+'" alt="Card '+padId(c.charId)+'">'+
             '<div class="tier-ring"></div>'+
-            '<div class="card-grade base-card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+
+            '<div class="card-grade base-card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+
             '<div class="mini-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+
               '<div class="mini-meta-main"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div>'+
               '<div class="mini-meta-sub"><span class="mini-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-stand-stat="level">'+c.level+'</b></span><strong data-stand-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div>'+
@@ -2660,7 +2660,7 @@
       const t=TIERS[c.tier],g=GRADES[c.grade],placed=state.placed.includes(c.uid),tradeLocked=cardIsTradeLocked(c);
       const el=document.createElement("article"); el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade+(tradeLocked?" trade-locked":""); el.dataset.cardUid=c.uid;
       el.innerHTML=
-        '<div class="card-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
+        '<div class="card-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
           '<img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div>'+
           '<div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+
           '<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+
@@ -3546,7 +3546,7 @@
     if(!c){renderPicker(body,activeStand);return}
     const t=TIERS[c.tier],g=GRADES[c.grade];
     body.innerHTML=
-      '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div><div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-modal-face-stat="level">'+c.level+'</b></span><strong data-modal-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div></div></div>'+
+      '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div><div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-modal-face-stat="level">'+c.level+'</b></span><strong data-modal-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div></div></div>'+
       '<div class="stand-detail-info"><div class="stand-character-heading"><strong>'+escapeHtml(cardName(c.charId))+'</strong><span>'+padId(c.charId)+' · '+escapeHtml(t.name)+'</span></div><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
       '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div><div><span>Awaken</span><b>★'+awakeningStars(c)+' · Income ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div></div>'+
       '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
@@ -3636,7 +3636,10 @@
     if(stand){
       replaceNumericClass(stand,"grade-shell-",c.grade);
       const mini=stand.querySelector(".mini-card");
-      if(mini)replaceNumericClass(mini,"grade-shell-",c.grade);
+      if(mini){
+        replaceNumericClass(mini,"grade-shell-",c.grade);
+        mini.dataset.awakening=String(awakeningStars(c));
+      }
       const badge=stand.querySelector(".base-card-grade");
       if(badge){
         badge.className="card-grade base-card-grade "+gradeFxClass(c.grade);
