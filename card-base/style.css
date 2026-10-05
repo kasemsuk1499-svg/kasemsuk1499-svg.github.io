@@ -5399,3 +5399,62 @@ body.ascension-unlock-10 .base-tower-bar,
     font-size:11px;
   }
 }
+
+
+/* ===== MUTATION 21 — AMATERASU ===== */
+.mutation-fx.mutation-21::after,
+.mutation-fx.mutation2-21::after{
+  border:2px solid rgba(255,38,53,.82);
+  box-shadow:
+    inset 0 0 18px rgba(255,28,43,.12),
+    inset 0 0 34px rgba(0,0,0,.42),
+    0 0 14px rgba(255,30,43,.28),
+    0 0 30px rgba(0,0,0,.62);
+}
+.mutation-badge.mutation-21{
+  color:#ff5963;
+  border-color:rgba(255,71,84,.88);
+  background:linear-gradient(135deg,rgba(8,3,5,.95),rgba(34,2,7,.92));
+  box-shadow:0 0 15px rgba(255,37,50,.36),inset 0 0 10px rgba(0,0,0,.65);
+  text-shadow:0 0 8px rgba(255,43,55,.72);
+}
+@media (max-width:700px){
+  .mobile-card-particle.amaterasu-eye-particle{
+    width:1em;
+    height:1em;
+    border-radius:50%;
+    background:url("./assets/fx/amaterasu.svg") center/contain no-repeat;
+    color:transparent;
+    text-shadow:none;
+    mix-blend-mode:normal;
+    filter:
+      drop-shadow(0 0 4px rgba(255,30,44,.95))
+      drop-shadow(0 0 9px rgba(146,0,12,.65));
+    animation:amaterasuEyeFloat var(--fx-life,1600ms) ease-out forwards;
+  }
+  @keyframes amaterasuEyeFloat{
+    0%{
+      opacity:0;
+      transform:translate(-50%,-50%) scale(.20) rotate(0deg);
+    }
+    12%{
+      opacity:.96;
+      transform:translate(-50%,-50%) scale(.92) rotate(65deg);
+    }
+    64%{opacity:.88}
+    100%{
+      opacity:0;
+      transform:
+        translate(calc(-50% + var(--fx-dx,0px)),calc(-50% + var(--fx-dy,-28px)))
+        scale(1.22)
+        rotate(var(--fx-rot,560deg));
+    }
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .mutation-fx.mutation-21::after,
+  .mutation-fx.mutation2-21::after,
+  .mobile-card-particle.amaterasu-eye-particle{
+    animation:none!important;
+  }
+}
