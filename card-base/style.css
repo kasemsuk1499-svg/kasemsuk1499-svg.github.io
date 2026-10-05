@@ -3783,13 +3783,10 @@ body.ascension-unlock-3 .base-tower-bar{
 }
 
 /* V — Awaken Showcase
-   Keep Awakening visual language clean: no card aura, only a refined star badge.
-   The animated Awakening identity is handled by lightning in fx.js. */
+   Preserve the star-rank color. Ascension only gives the badge a subtle lift. */
 body.ascension-unlock-5 .awakening-badge,
 #socialBaseModal.visitor-ascension-unlock-5 .awakening-badge{
-  border-color:rgba(255,240,168,.72);
-  color:#fff5c9;
-  text-shadow:none
+  filter:saturate(1.08) brightness(1.04)
 }
 
 /* VI — Stellar Field */
