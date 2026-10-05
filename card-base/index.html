@@ -23,13 +23,16 @@
         <div class="stat"><span>ฐาน</span><strong id="baseLevel">Lv.1</strong></div>
         <div class="stat"><span>Luck</span><strong id="luck">×1.00</strong></div>
       </div>
-      <button id="accountBtn" class="account-chip" type="button">
-        <span id="syncDot" class="sync-dot"></span>
-        <span class="account-copy">
-          <strong id="accountLabel">เล่นแบบ Local</strong>
-          <small id="syncLabel">ล็อกอินเพื่อใช้ Cloud Save</small>
-        </span>
-      </button>
+      <div class="top-actions">
+        <button id="settingsBtn" class="settings-chip" type="button" aria-label="ตั้งค่า" title="Settings">⚙</button>
+        <button id="accountBtn" class="account-chip" type="button">
+          <span id="syncDot" class="sync-dot"></span>
+          <span class="account-copy">
+            <strong id="accountLabel">เล่นแบบ Local</strong>
+            <small id="syncLabel">ล็อกอินเพื่อใช้ Cloud Save</small>
+          </span>
+        </button>
+      </div>
     </header>
 
     <nav class="tabs" aria-label="เมนูหลัก">
@@ -846,6 +849,36 @@
           <strong id="authUsernameLabel">Player</strong>
           <p class="muted">Cloud Save และ Online Lobby เชื่อมกับ Username นี้แล้ว</p>
           <button id="logoutBtn" class="secondary" type="button">ออกจากระบบ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="settingsModal" class="modal settings-modal" aria-hidden="true">
+      <button class="modal-backdrop" data-close-settings type="button" aria-label="ปิด"></button>
+      <div class="modal-card settings-card">
+        <div class="modal-top">
+          <div>
+            <div class="eyebrow">GAME SETTINGS</div>
+            <h2>ตั้งค่า</h2>
+            <p class="muted">ปรับเอฟเฟกต์ของเครื่องนี้โดยไม่กระทบเซฟเกม</p>
+          </div>
+          <button id="closeSettingsModal" class="icon-btn" type="button" aria-label="ปิด">✕</button>
+        </div>
+        <div class="settings-list">
+          <label class="settings-row" for="particlesToggle">
+            <span class="settings-row-copy">
+              <strong>✨ Particles</strong>
+              <small>อนุภาคลอยรอบการ์ด · ปิดเพื่อลดภาระเครื่อง</small>
+            </span>
+            <span class="toggle-switch">
+              <input id="particlesToggle" type="checkbox">
+              <i aria-hidden="true"></i>
+            </span>
+          </label>
+          <div class="settings-status">
+            <span>สถานะ</span>
+            <strong id="particlesStatus">ON</strong>
+          </div>
         </div>
       </div>
     </div>
