@@ -108,43 +108,43 @@
       key:"rare-bloom",name:"Rare Bloom",label:"RATE UP",minLevel:1,weight:30,featuredTier:2,
       stockMin:4,stockMax:7,priceSeconds:18,outRate:.020,
       rates:{1:15,2:55,3:24,4:6},
-      outPool:{5:75,6:20,7:5}
+      outPool:{5:74.5,6:20,7:5,10:.5}
     },
     {
       key:"epic-mirage",name:"Epic Mirage",label:"RATE UP",minLevel:3,weight:26,featuredTier:3,
       stockMin:3,stockMax:5,priceSeconds:30,outRate:.025,
       rates:{2:18,3:56,4:20,5:6},
-      outPool:{6:72,7:23,8:5}
+      outPool:{6:71.5,7:23,8:5,10:.5}
     },
     {
       key:"legendary-crown",name:"Legendary Crown",label:"LIMITED",minLevel:6,weight:20,featuredTier:4,
       stockMin:2,stockMax:4,priceSeconds:55,outRate:.020,
       rates:{3:22,4:58,5:15,6:5},
-      outPool:{7:70,8:25,9:5}
+      outPool:{7:69,8:25,9:5.5,10:.5}
     },
     {
       key:"mythic-rift",name:"Mythic Rift",label:"LIMITED",minLevel:10,weight:13,featuredTier:5,
       stockMin:2,stockMax:3,priceSeconds:90,outRate:.018,
       rates:{4:24,5:56,6:16,7:4},
-      outPool:{8:82,9:18}
+      outPool:{8:81,9:18,10:1}
     },
     {
       key:"divine-vault",name:"Divine Vault",label:"PREMIUM",minLevel:15,weight:7,featuredTier:6,
       stockMin:1,stockMax:2,priceSeconds:150,outRate:.015,
       rates:{5:28,6:55,7:14,8:3},
-      outPool:{9:100}
+      outPool:{9:98.5,10:1.5}
     },
     {
       key:"celestial-gate",name:"Celestial Gate",label:"PREMIUM",minLevel:21,weight:3,featuredTier:7,
       stockMin:1,stockMax:1,priceSeconds:230,outRate:.012,
       rates:{6:32,7:56,8:12},
-      outPool:{9:100}
+      outPool:{9:97.5,10:2.5}
     },
     {
       key:"jackpot-echo",name:"Jackpot Echo",label:"JACKPOT",minLevel:10,weight:1,featuredTier:5,
       stockMin:1,stockMax:1,priceSeconds:320,outRate:.050,
       rates:{4:35,5:35,6:20,7:10},
-      outPool:{8:70,9:30}
+      outPool:{8:68,9:31,10:1}
     }
   ];
 
@@ -1122,7 +1122,14 @@
         const pct=(1-offer.outRate)*(Number(w)/total)*100;
         return '<div class="rot-rate"><span style="--rate-color:'+t.color+'">'+t.name+'</span><b>'+pct.toFixed(pct<10?1:0)+'%</b></div>';
       }).join("");
-    const jackpotNames=Object.keys(offer.outPool).map(i=>TIERS[Number(i)]?.name).filter(Boolean).join(" / ");
+    const outEntries=Object.entries(offer.outPool||{}).filter(([tier,w])=>TIERS[Number(tier)]&&Number(w)>0);
+    const outTotal=outEntries.reduce((sum,[,w])=>sum+Number(w),0);
+    const jackpotNames=outEntries.map(([tier,w])=>{
+      const t=TIERS[Number(tier)];
+      const absolute=outTotal?offer.outRate*(Number(w)/outTotal)*100:0;
+      const digits=absolute<.01?4:absolute<.1?3:2;
+      return t.name+" "+absolute.toFixed(digits)+"%";
+    }).join(" / ");
     return rows+
       '<div class="rot-rate out-rate"><span>OUT OF RATE</span><b>'+(offer.outRate*100).toFixed(offer.outRate*100<2?1:0)+'%</b></div>'+
       '<div class="rot-out-pool">JACKPOT → '+escapeHtml(jackpotNames)+'</div>';
