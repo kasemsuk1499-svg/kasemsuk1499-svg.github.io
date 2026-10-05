@@ -2,6 +2,7 @@
   "use strict";
 
   const SAVE_KEY = "card-base-prototype-v01";
+  const MONEY_CAP = 1e300;
   const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
   const CARD_MIN_ID = 1;
   const CARD_MAX_ID = 110;
@@ -301,6 +302,13 @@
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
 
+  function clampMoney(value){
+    const n=Number(value);
+    if(n===Infinity)return MONEY_CAP;
+    if(!Number.isFinite(n)||n<=0)return 0;
+    return Math.min(MONEY_CAP,n);
+  }
+
   const newState = () => ({
     money:0, baseLevel:1, cards:[], placed:[],
     currentPack:null, rollingUntil:0, lastTick:Date.now(), uidCounter:1,
@@ -450,6 +458,7 @@
 
   function hydrateState(parsed){
     const s={...newState(),...(parsed||{})};
+    s.money=clampMoney(s.money);
     s.cards=(Array.isArray(s.cards)?s.cards:[])
       .filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID)
       .map(c=>({
@@ -1497,7 +1506,7 @@
       const now=Date.now();
       const offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
       normalizeSlots();
-      if(offlineSeconds>2&&state.placed.some(Boolean))state.money+=totalIncome()*offlineSeconds;
+      if(offlineSeconds>2&&state.placed.some(Boolean))state.money=clampMoney(state.money+totalIncome()*offlineSeconds);
       state.lastTick=now;
       localStorage.setItem(SAVE_KEY,JSON.stringify(state));
     }else{
@@ -4015,7 +4024,7 @@
   function toggleLock(uid){const c=state.cards.find(x=>x.uid===uid);if(!c)return;if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}c.locked=!c.locked;renderAll()}
   function sellCard(uid){
     const c=state.cards.find(x=>x.uid===uid);if(!c||c.locked||cardIsTradeLocked(c)||state.placed.includes(uid))return;
-    const value=sellValue(c);state.money+=value;state.cards=state.cards.filter(x=>x.uid!==uid);toast("ขายการ์ดแล้ว +"+fmt(value));renderAll();
+    const value=sellValue(c);state.money=clampMoney(state.money+value);state.cards=state.cards.filter(x=>x.uid!==uid);toast("ขายการ์ดแล้ว +"+fmt(value));renderAll();
   }
 
   function doRebirth(){
@@ -4037,7 +4046,7 @@
     const now=Date.now();
     const dt=Math.max(0,(now-(state.lastTick||now))/1000);
     if(dt>0){
-      state.money+=totalIncome()*dt;
+      state.money=clampMoney(state.money+totalIncome()*dt);
       state.lastTick=now;
     }
     return dt;
@@ -4224,7 +4233,7 @@
   function init(){
     normalizeSlots();bind();renderSettings();
     const now=Date.now(),offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
-    if(offlineSeconds>2&&state.placed.some(Boolean)){const gain=totalIncome()*offlineSeconds;state.money+=gain;toast("รับรายได้ออฟไลน์ "+fmt(gain))}
+    if(offlineSeconds>2&&state.placed.some(Boolean)){const gain=totalIncome()*offlineSeconds;state.money=clampMoney(state.money+gain);toast("รับรายได้ออฟไลน์ "+fmt(Math.min(MONEY_CAP,gain)))}
     state.lastTick=now;renderAll();updateRollProgress();
     if((state.autoRolling||state.fullAuto)&&packAutoSessionActive()){
       if(!state.rollingUntil)state.rollingUntil=Date.now()+ROLL_MS;
