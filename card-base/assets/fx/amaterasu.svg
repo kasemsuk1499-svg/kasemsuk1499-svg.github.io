@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Amaterasu eye">
+  <circle cx="100" cy="100" r="88" fill="#f5121f"/>
+  <circle cx="100" cy="100" r="58" fill="none" stroke="#09070a" stroke-width="3"/>
+  <g fill="#09070a">
+    <path d="M100 100C76 86 68 58 91 18C84 46 97 65 127 74C151 81 169 96 180 121C156 103 130 92 100 100Z"/>
+    <path d="M100 100C76 86 68 58 91 18C84 46 97 65 127 74C151 81 169 96 180 121C156 103 130 92 100 100Z" transform="rotate(120 100 100)"/>
+    <path d="M100 100C76 86 68 58 91 18C84 46 97 65 127 74C151 81 169 96 180 121C156 103 130 92 100 100Z" transform="rotate(240 100 100)"/>
+  </g>
+  <circle cx="100" cy="100" r="12" fill="#f5121f"/>
+</svg>
