@@ -149,13 +149,9 @@
   }
 
   function rateFor(tier,grade,mutation=0,mutation2=0,showcaseBoost=1){
-    let rate=0;
-    if(tier===4) rate=0.55;
-    else if(tier===5) rate=0.8;
-    else if(tier===6) rate=1.05;
-    else if(tier===7) rate=1.45;
-    else if(tier===8) rate=1.9;
-    else if(tier>=9) rate=2.45;
+    // Tier no longer changes particle density. Keep every tier around the
+    // previous T8-T10 visual density, then let Grade/Mutation add identity.
+    let rate=2.15;
 
     if(grade===7) rate+=0.38;
     else if(grade===8) rate+=0.72;
@@ -171,7 +167,7 @@
     addMutationRate(mutation);
     addMutationRate(mutation2);
     if(mutation&&mutation2)rate+=1.05;
-    if(tier>=10)rate*=0.38;
+
     return rate*quality*showcaseBoost;
   }
 
@@ -180,18 +176,16 @@
     const pickedMutation=mutation2&&mutation
       ? (Math.random()<.5?mutation:mutation2)
       : (mutation||mutation2);
+
     if(pickedMutation>=12) return "__special";
     if(pickedMutation>0 && r<.78) return MUTATION_TEXTURES[pickedMutation]||"spark";
     if(grade>=12) return r<.44?"flare":r<.78?"star":"spark";
     if(grade>=11) return r<.36?"flare":r<.68?"star":"spark";
     if(grade>=10) return r<.30?"flare":r<.58?"star":"spark";
     if(grade>=9 && r<.22) return "flare";
-    if(tier>=9) return r<.18?"flare":r<.58?"spark":"star";
-    if(tier===8) return r<.38?"flare":r<.68?"star":"spark";
-    if(tier===7) return r<.72?"star":"spark";
-    if(tier===6) return r<.24?"flare":"spark";
-    if(tier===5) return r<.72?"ember":"spark";
-    return "spark";
+
+    // Shared visual baseline for every tier.
+    return r<.26?"flare":r<.62?"spark":"star";
   }
 
   function spawn(target,rect){
@@ -206,13 +200,14 @@
 
     const key=chooseTexture(tier,grade,mutation,mutation2);
     const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
-    const high=Math.max(tier-3,grade-6);
+    const baselineTierPower=5; // old Tier 8 feel, shared by all tiers
+    const high=Math.max(baselineTierPower,grade-6);
     const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.45:1);
-    const life=950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0)+(activeMutation===21?650:0);
+    const life=1450+Math.random()*1050+(activeMutation>=11?350:0)+(activeMutation===21?650:0);
 
     if(activeMutation===16){ny=.78+Math.random()*.18}
-    let vx=activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
-    let vy=activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2);
+    let vx=activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:10);
+    let vy=activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(12+Math.random()*15);
     if(activeMutation===16){vx=(Math.random()-.5)*4;vy=-(24+Math.random()*30)}
     if(activeMutation===19){
       vx=(.5-nx)*rect.width*(.52+Math.random()*.18);
@@ -259,7 +254,7 @@
     const strength=target.visitor?1.2:1;
     const dx=(Math.random()-.5)*(30*strength);
     const dy=-(20+Math.random()*34)*strength;
-    const size=(10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1)*(activeMutation===21?1.35:1);
+    const size=(13+Math.random()*8)*(target.visitor?1.12:1)*(activeMutation===21?1.35:1);
     const life=Math.round((900+Math.random()*650)*(target.visitor?1.05:1));
 
     p.style.left=x+"%";
@@ -596,134 +591,97 @@
     return "hsl("+hue+" 94% 68%)";
   }
 
-  function drawAwakeningLightning(target,rect,time){
+  function drawAwakeningShardCrown(target,rect,time){
     const stars=Math.max(0,Math.floor(Number(target.awakening)||0));
     if(!stars)return;
 
     const color=awakeningColor(stars);
-    const cycleMs=720;
-    const phase=(time%cycleMs)/cycleMs;
-    // Haki-style cracks flash in, hold briefly, then vanish instead of becoming an aura.
-    if(phase>.46)return;
-    const flash=Math.sin(Math.PI*(phase/.46));
-    const tick=Math.floor(time/cycleMs);
-    const hash=n=>{
-      const x=Math.sin(n*12.9898+78.233)*43758.5453;
-      return x-Math.floor(x);
-    };
+    const count=Math.min(5,3+Math.floor((stars-1)/3));
+    const centerX=rect.left+rect.width*.5;
+    const crownY=rect.top+Math.max(15,rect.height*.105);
+    const spread=Math.min(rect.width*.30,58);
+    const motion=reducedMotion?0:1;
+    const phase=time*.0012;
 
     ctx.save();
     roundedRectPath(rect,-3,14);
     ctx.clip();
 
-    const crackCount=1+(hash(tick+stars*31)>.68?1:0);
+    for(let i=0;i<count;i++){
+      const mid=(count-1)/2;
+      const rel=i-mid;
+      const norm=mid?rel/mid:0;
+      const centerBoost=1-Math.min(1,Math.abs(norm));
+      const shardH=(12+centerBoost*8)*(rect.height/260);
+      const shardW=(5.2+centerBoost*1.7)*(rect.width/190);
+      const x=centerX+(mid?rel*(spread/(count-1))*2:0);
+      const y=crownY-Math.abs(norm)*5+
+        Math.sin(phase*1.9+i*.92)*1.7*motion;
+      const rot=norm*.34+Math.sin(phase*.8+i*.7)*.035*motion;
+      const pulse=.78+.18*Math.sin(phase*2.15+i*.8);
 
-    const drawCrack=(points,alpha=1)=>{
-      // Colored edge glow first.
       ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(rot);
+
+      // Soft colored edge, but no full-card aura.
       ctx.globalCompositeOperation="source-over";
-      ctx.globalAlpha=.76*flash*alpha*quality*(target.visitor?1.04:1);
-      ctx.strokeStyle=color;
-      ctx.lineWidth=Math.max(4.2,Math.min(rect.width,rect.height)*.027);
-      ctx.lineCap="round";
-      ctx.lineJoin="miter";
+      ctx.globalAlpha=.86*pulse*quality;
       ctx.shadowBlur=7;
       ctx.shadowColor=color;
-      ctx.beginPath();
-      points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
-      ctx.stroke();
-      ctx.restore();
 
-      // Thick near-black core creates the black-lightning / Haki-rift look.
-      ctx.save();
-      ctx.globalCompositeOperation="source-over";
-      ctx.globalAlpha=.98*flash*alpha*quality;
-      ctx.strokeStyle="#030205";
-      ctx.lineWidth=Math.max(2.7,Math.min(rect.width,rect.height)*.018);
-      ctx.lineCap="round";
-      ctx.lineJoin="miter";
-      ctx.beginPath();
-      points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
-      ctx.stroke();
-      ctx.restore();
+      const grad=ctx.createLinearGradient(0,-shardH,0,shardH*.25);
+      grad.addColorStop(0,"rgba(255,255,255,.95)");
+      grad.addColorStop(.18,color);
+      grad.addColorStop(.72,color);
+      grad.addColorStop(1,"rgba(4,7,12,.96)");
+      ctx.fillStyle=grad;
 
-      // Razor-thin colored rim keeps the crack readable on dark artwork.
-      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0,-shardH);
+      ctx.lineTo(shardW,0);
+      ctx.lineTo(0,shardH*.34);
+      ctx.lineTo(-shardW,0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Dark inner facet gives a premium crystal/shard look.
+      ctx.globalAlpha=.78*pulse*quality;
+      ctx.shadowBlur=0;
+      ctx.fillStyle="rgba(3,6,12,.78)";
+      ctx.beginPath();
+      ctx.moveTo(0,-shardH*.68);
+      ctx.lineTo(shardW*.42,0);
+      ctx.lineTo(0,shardH*.16);
+      ctx.lineTo(-shardW*.22,0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Thin highlight.
       ctx.globalCompositeOperation="lighter";
-      ctx.globalAlpha=.74*flash*alpha*quality;
-      ctx.strokeStyle=color;
-      ctx.lineWidth=.72;
-      ctx.lineCap="round";
-      ctx.lineJoin="miter";
-      ctx.shadowBlur=2.4;
-      ctx.shadowColor=color;
+      ctx.globalAlpha=.62*pulse*quality;
+      ctx.strokeStyle="#ffffff";
+      ctx.lineWidth=.65;
       ctx.beginPath();
-      points.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]));
+      ctx.moveTo(0,-shardH*.82);
+      ctx.lineTo(-shardW*.18,-shardH*.12);
       ctx.stroke();
+
       ctx.restore();
-    };
-
-    for(let n=0;n<crackCount;n++){
-      const seed=tick*173+n*271+stars*61;
-      const side=Math.floor(hash(seed+1)*4);
-      const anchor=.12+hash(seed+2)*.76;
-      const travel=.24+hash(seed+3)*.16;
-      const segments=6+Math.floor(hash(seed+4)*3);
-
-      let sx,sy,ex,ey;
-      if(side===0){
-        sx=rect.left+rect.width*anchor; sy=rect.top+1;
-        ex=sx+(hash(seed+5)-.5)*rect.width*.34;
-        ey=rect.top+rect.height*travel;
-      }else if(side===1){
-        sx=rect.right-1; sy=rect.top+rect.height*anchor;
-        ex=rect.right-rect.width*travel;
-        ey=sy+(hash(seed+5)-.5)*rect.height*.34;
-      }else if(side===2){
-        sx=rect.left+rect.width*anchor; sy=rect.bottom-1;
-        ex=sx+(hash(seed+5)-.5)*rect.width*.34;
-        ey=rect.bottom-rect.height*travel;
-      }else{
-        sx=rect.left+1; sy=rect.top+rect.height*anchor;
-        ex=rect.left+rect.width*travel;
-        ey=sy+(hash(seed+5)-.5)*rect.height*.34;
-      }
-
-      const angle=Math.atan2(ey-sy,ex-sx);
-      const nx=-Math.sin(angle),ny=Math.cos(angle);
-      const points=[];
-
-      for(let i=0;i<=segments;i++){
-        const t=i/segments;
-        const taper=1-Math.abs(.5-t)*.62;
-        const jag=(hash(seed+20+i*17)-.5)*(8+Math.min(rect.width,rect.height)*.028)*taper;
-        points.push([
-          sx+(ex-sx)*t+nx*jag,
-          sy+(ey-sy)*t+ny*jag
-        ]);
-      }
-
-      drawCrack(points,n===0?1:.76);
-
-      // 1-2 short forks keep it looking like a violent power crack, not a ribbon.
-      const branchCount=1+(hash(seed+90)>.72?1:0);
-      for(let b=0;b<branchCount;b++){
-        const at=2+Math.floor(hash(seed+91+b*19)*Math.max(1,segments-3));
-        const base=points[Math.min(points.length-2,at)];
-        const dir=hash(seed+92+b*23)>.5?1:-1;
-        const bAngle=angle+dir*(.72+hash(seed+93+b*29)*.48);
-        const bLen=Math.min(rect.width,rect.height)*(.07+hash(seed+94+b*31)*.055);
-        const mid=[
-          base[0]+Math.cos(bAngle)*bLen*.48+nx*(hash(seed+95+b*37)-.5)*4,
-          base[1]+Math.sin(bAngle)*bLen*.48+ny*(hash(seed+96+b*41)-.5)*4
-        ];
-        const tip=[
-          base[0]+Math.cos(bAngle)*bLen,
-          base[1]+Math.sin(bAngle)*bLen
-        ];
-        drawCrack([base,mid,tip],.64);
-      }
     }
+
+    // Small central crown gem pulse; still contained and cheap.
+    const gemPulse=.62+.28*Math.sin(phase*2.4);
+    ctx.save();
+    ctx.globalCompositeOperation="lighter";
+    ctx.globalAlpha=gemPulse*quality;
+    ctx.fillStyle=color;
+    ctx.shadowBlur=8;
+    ctx.shadowColor=color;
+    ctx.beginPath();
+    ctx.arc(centerX,crownY+7,1.7+(stars>=4?.5:0),0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
 
     ctx.restore();
   }
@@ -875,7 +833,7 @@
       frameRects.set(t.el,r);
       drawMutationBorder(t,r,time);
       drawHalo(t,r,time);
-      if(particleEnabled)drawAwakeningLightning(t,r,time);
+      drawAwakeningShardCrown(t,r,time);
     }
 
     if(particleEnabled){
