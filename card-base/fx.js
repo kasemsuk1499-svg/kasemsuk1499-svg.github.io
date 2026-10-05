@@ -579,21 +579,17 @@
   }
 
   function drawHalo(target,rect,time){
-    // Keep the original unlock conditions.
+    // Preserve the existing unlock conditions for grade-driven holo.
     if(target.grade===11 && target.tier<8) return;
     if(target.tier<8 && target.grade<9) return;
 
     const visitorBoost=target.visitor?1.10:1;
     const cx=rect.left+rect.width*.5;
     const cy=rect.top+rect.height*.5;
-    const rx=rect.width*.62;
-    const ry=rect.height*.58;
 
-    // Tier 8 / grade-triggered holo: Soft Ring.
-    if(target.tier<9){
+    const drawBaseHalo=()=>{
       const img=images.halo;
       if(!img || !img.complete) return;
-
       const pad=Math.min(38,Math.max(16,rect.width*.11));
       const pulse=.22+.025*Math.sin(time*.0014);
 
@@ -610,91 +606,133 @@
         rect.height+pad*2
       );
       ctx.restore();
-      return;
-    }
+    };
 
-    const strokeOrbit=(rxi,ryi,rot,alpha,width,color,startAngle=0,endAngle=Math.PI*2)=>{
+    const drawAuroraArc=()=>{
+      const t=(time%9000)/9000;
+      const sway=Math.sin(time*.0009)*rect.width*.018;
+
       ctx.save();
-      ctx.translate(cx,cy);
-      ctx.rotate(rot);
+      roundedRectPath(rect,-2,14);
+      ctx.clip();
+      ctx.globalCompositeOperation="lighter";
+      ctx.lineCap="round";
+
+      const x0=rect.left-rect.width*.08+sway;
+      const y0=rect.top+rect.height*(.18+t*.06);
+      const x1=rect.left+rect.width*.30;
+      const y1=rect.top+rect.height*.06;
+      const x2=rect.left+rect.width*.74;
+      const y2=rect.top+rect.height*.54;
+      const x3=rect.right+rect.width*.08;
+      const y3=rect.bottom-rect.height*.10;
+
+      const grad=ctx.createLinearGradient(x0,y0,x3,y3);
+      grad.addColorStop(0,"rgba(95,235,255,.05)");
+      grad.addColorStop(.22,"rgba(117,218,255,.24)");
+      grad.addColorStop(.46,"rgba(194,128,255,.22)");
+      grad.addColorStop(.68,"rgba(255,210,110,.22)");
+      grad.addColorStop(.86,"rgba(118,255,207,.18)");
+      grad.addColorStop(1,"rgba(255,255,255,.02)");
+
+      // One broad aurora veil plus two fine light ribs.
+      ctx.strokeStyle=grad;
+      ctx.globalAlpha=.54*quality*visitorBoost;
+      ctx.lineWidth=Math.max(4.5,rect.width*.032);
       ctx.beginPath();
-      ctx.ellipse(0,0,rxi,ryi,0,startAngle,endAngle);
-      ctx.strokeStyle=color;
-      ctx.lineWidth=width;
-      ctx.globalAlpha=alpha*quality*visitorBoost;
-      ctx.shadowBlur=0;
+      ctx.moveTo(x0,y0);
+      ctx.bezierCurveTo(x1,y1,x2,y2,x3,y3);
       ctx.stroke();
+
+      ctx.globalAlpha=.18*quality*visitorBoost;
+      ctx.lineWidth=1.05;
+      for(const off of [-7,7]){
+        ctx.beginPath();
+        ctx.moveTo(x0,y0+off);
+        ctx.bezierCurveTo(x1,y1+off*.35,x2,y2+off*.55,x3,y3+off*.25);
+        ctx.stroke();
+      }
+
+      // Sparse aurora sparkles inspired by the reference, kept very cheap.
+      const pts=[
+        [.22,.18],[.36,.31],[.57,.24],[.68,.47],[.82,.62],[.46,.66]
+      ];
+      ctx.fillStyle="rgba(240,252,255,.92)";
+      for(let i=0;i<pts.length;i++){
+        const p=pts[i];
+        const pulse=.04+.05*((Math.sin(time*.002+i*1.3)+1)*.5);
+        ctx.globalAlpha=pulse*quality*visitorBoost;
+        ctx.beginPath();
+        ctx.arc(rect.left+rect.width*p[0],rect.top+rect.height*p[1],.8+(i%2)*.25,0,Math.PI*2);
+        ctx.fill();
+      }
+
       ctx.restore();
     };
 
-    // Tier 9: Double Orbit.
-    if(target.tier===9){
-      const rot1=time*.00018;
-      const rot2=-time*.00014+.75;
-      const pulse=.92+.08*Math.sin(time*.0018);
+    const drawRainbowStreak=()=>{
+      const p=(time%6200)/6200;
+      const drift=(p-.5)*rect.width*.06;
 
       ctx.save();
+      roundedRectPath(rect,-2,14);
+      ctx.clip();
       ctx.globalCompositeOperation="lighter";
+      ctx.lineCap="round";
 
-      strokeOrbit(rx,ry,rot1,.20*pulse,1.2,"rgba(188,242,255,.95)");
-      strokeOrbit(rx*.92,ry*.88,rot2,.16*pulse,.95,"rgba(219,186,255,.92)");
+      const x0=rect.left-rect.width*.10+drift;
+      const y0=rect.bottom+rect.height*.03;
+      const x1=rect.left+rect.width*.16;
+      const y1=rect.top+rect.height*.69;
+      const x2=rect.left+rect.width*.66;
+      const y2=rect.top+rect.height*.37;
+      const x3=rect.right+rect.width*.10;
+      const y3=rect.top+rect.height*.22;
 
-      ctx.globalAlpha=.05*pulse*quality*visitorBoost;
-      ctx.fillStyle="rgba(210,246,255,.95)";
-      ctx.fillRect(rect.left+rect.width*.16,cy,rect.width*.68,1);
+      const rainbow=[
+        ["rgba(102,236,255,.68)",-7,2.5],
+        ["rgba(117,255,199,.58)",-3,2.1],
+        ["rgba(255,229,112,.58)",1,2.3],
+        ["rgba(255,153,221,.60)",5,2.1]
+      ];
+
+      for(const [color,off,width] of rainbow){
+        ctx.strokeStyle=color;
+        ctx.globalAlpha=.30*quality*visitorBoost;
+        ctx.lineWidth=width;
+        ctx.beginPath();
+        ctx.moveTo(x0,y0+off);
+        ctx.bezierCurveTo(x1,y1+off,x2,y2+off*.45,x3,y3+off*.15);
+        ctx.stroke();
+      }
+
+      // White core glint so Tier 10 reads instantly as the top tier.
+      ctx.strokeStyle="rgba(255,255,255,.92)";
+      ctx.globalAlpha=.20*quality*visitorBoost;
+      ctx.lineWidth=.9;
+      ctx.beginPath();
+      ctx.moveTo(x0,y0);
+      ctx.bezierCurveTo(x1,y1,x2,y2,x3,y3);
+      ctx.stroke();
+
+      // A few small comet flecks, no shadow blur.
+      const flecks=[
+        [.22,.74],[.38,.61],[.59,.46],[.72,.35],[.84,.29]
+      ];
+      for(let i=0;i<flecks.length;i++){
+        const q=flecks[i];
+        ctx.fillStyle=i%2?"rgba(255,215,118,.86)":"rgba(164,238,255,.88)";
+        ctx.globalAlpha=.12*quality*visitorBoost;
+        ctx.fillRect(rect.left+rect.width*q[0],rect.top+rect.height*q[1],1.2,1.2);
+      }
 
       ctx.restore();
-      return;
-    }
+    };
 
-    // Tier 10: Broken Orbit.
-    const rot=time*.00015;
-    const pulse=.95+.05*Math.sin(time*.0021);
-
-    ctx.save();
-    ctx.globalCompositeOperation="lighter";
-
-    const segs=[
-      [.20,1.05],
-      [1.55,2.35],
-      [3.15,3.95],
-      [4.45,5.35]
-    ];
-    for(const [a,b] of segs){
-      strokeOrbit(
-        rx,ry,rot,
-        .21*pulse,1.25,
-        "rgba(196,245,255,.95)",
-        a,b
-      );
-    }
-
-    const segs2=[
-      [.72,1.28],
-      [2.28,2.92],
-      [3.95,4.55],
-      [5.45,6.05]
-    ];
-    for(const [a,b] of segs2){
-      strokeOrbit(
-        rx*.91,ry*.87,-rot+.55,
-        .14*pulse,.92,
-        "rgba(228,188,255,.90)",
-        a,b
-      );
-    }
-
-    ctx.globalAlpha=.07*pulse*quality*visitorBoost;
-    ctx.fillStyle="rgba(235,250,255,.95)";
-    ctx.beginPath();
-    ctx.arc(cx+rx*.55,cy-ry*.35,1.35,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(cx-rx*.48,cy+ry*.28,1.15,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.restore();
+    // Progressive layering: T8 = halo, T9 = halo + aurora, T10 = all three.
+    drawBaseHalo();
+    if(target.tier>=9)drawAuroraArc();
+    if(target.tier>=10)drawRainbowStreak();
   }
 
   function drawSpecialParticle(p,size,time,color){
