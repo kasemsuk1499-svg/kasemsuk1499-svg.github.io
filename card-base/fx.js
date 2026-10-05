@@ -26,6 +26,7 @@
     "#7aa2ff","#ff9ad5","#8a64ff","#ffe47a"
   ];
   const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic","halo",null,null,null,null,null,null,null,null,null];
+  const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
 
   function mutationParticleKind(m){
     return ({
@@ -58,6 +59,7 @@
 
   let dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.35 : 1.7);
   let vw = 0, vh = 0, running = true, lastFrame = 0, lastScan = 0;
+  let particleEnabled = localStorage.getItem(PARTICLES_PREF_KEY)!=="0";
   let targets = [];
   const particles = [];
   const images = {};
@@ -65,6 +67,12 @@
   const frameRects = new Map();
   let spawnCursor = 0;
   let mobileParticleCount = 0;
+
+  function clearParticleLayer(){
+    particles.length=0;
+    document.querySelectorAll(".mobile-card-particle").forEach(el=>el.remove());
+    mobileParticleCount=0;
+  }
 
   function loadTextures(){
     Object.entries(TEX).forEach(([key,src])=>{
@@ -217,7 +225,7 @@
   }
 
   function spawnMobileParticle(target){
-    if(!isMobile || reducedMotion || !target?.el?.isConnected) return;
+    if(!particleEnabled || !isMobile || reducedMotion || !target?.el?.isConnected) return;
     const cap=target.visitor?34:26;
     if(mobileParticleCount>=cap) return;
 
@@ -568,8 +576,12 @@
       drawHalo(t,r,time);
     }
 
-    updateSpawns(dt);
-    updateAndDrawParticles(dt,time);
+    if(particleEnabled){
+      updateSpawns(dt);
+      updateAndDrawParticles(dt,time);
+    }else if(particles.length || mobileParticleCount){
+      clearParticleLayer();
+    }
     requestAnimationFrame(frame);
   }
 
@@ -582,6 +594,12 @@
       lastFrame=performance.now();
       scanTargets(true);
     }
+  });
+
+  window.addEventListener("cardbase:particles",event=>{
+    particleEnabled=event?.detail?.enabled!==false;
+    if(!particleEnabled)clearParticleLayer();
+    else scanTargets(true);
   });
   window.addEventListener("resize",resize,{passive:true});
   window.addEventListener("orientationchange",resize,{passive:true});
