@@ -2580,7 +2580,10 @@
   function renderCollection(){
     const q=$("#searchId").value.trim(),mode=$("#sortCards").value;
     let arr=[...state.cards];
-    if(q) arr=arr.filter(c=>String(c.charId).includes(q));
+    if(q){
+      const needle=q.toLowerCase();
+      arr=arr.filter(c=>String(c.charId).includes(q)||padId(c.charId).toLowerCase().includes(needle)||cardName(c.charId).toLowerCase().includes(needle));
+    }
     arr.sort((a,b)=>{
       if(mode==="tier")return b.tier-a.tier||b.level-a.level;
       if(mode==="level")return b.level-a.level||b.tier-a.tier;
@@ -2659,7 +2662,10 @@
     const mutationFill=$("#indexMutationFill");if(mutationFill)mutationFill.style.width=(mutationFound/totalMutationVariants*100)+"%";
 
     let ids=Array.from({length:totalChars},(_,i)=>CARD_MIN_ID+i);
-    if(query)ids=ids.filter(id=>String(id).includes(query)||padId(id).includes(query));
+    if(query){
+      const needle=query.toLowerCase();
+      ids=ids.filter(id=>String(id).includes(query)||padId(id).toLowerCase().includes(needle)||cardName(id).toLowerCase().includes(needle));
+    }
     if(filter==="found")ids=ids.filter(id=>!!state.cardIndex[id]);
     if(filter==="missing")ids=ids.filter(id=>!state.cardIndex[id]);
     if(filter==="complete")ids=ids.filter(id=>(state.cardIndex[id]?.tiers?.length||0)===TIERS.length);
@@ -2671,7 +2677,7 @@
       if(!entry){
         return '<article class="index-card locked">'+
           '<div class="index-lock-art"><span>?</span></div>'+
-          '<div class="index-card-body"><strong>'+padId(id)+'</strong><small>ยังไม่ค้นพบ</small>'+
+          '<div class="index-card-body"><strong class="index-character-name" title="'+escapeHtml(cardName(id))+'">'+escapeHtml(cardName(id))+'</strong><div class="index-id-only">'+padId(id)+'</div><small>ยังไม่ค้นพบ</small>'+
           '<div class="index-tier-strip">'+TIERS.map((t,i)=>'<i title="'+t.name+'" style="--tier:'+t.color+'"></i>').join("")+'</div>'+
           '<div class="index-mutation-strip">'+MUTATIONS.slice(1).map(m=>'<i title="'+m.name+'" style="--mutation:'+m.color+'"></i>').join("")+'</div></div>'+
         '</article>';
@@ -2689,6 +2695,7 @@
           '<span class="index-owned">'+owned.length+' ใบ</span>'+
         '</div>'+
         '<div class="index-card-body">'+
+          '<div class="index-character-name" title="'+escapeHtml(cardName(id))+'">'+escapeHtml(cardName(id))+'</div>'+
           '<div class="index-id-row"><strong>'+padId(id)+'</strong><span class="tier-label tier-'+highestTier+'" style="color:'+t.color+'">'+t.name+'</span></div>'+
           '<small>Variants '+tiers.length+'/'+TIERS.length+' · Mutations '+mutations.length+'/'+(MUTATIONS.length-1)+' · Best Grade '+bestGrade.name+'</small>'+
           '<div class="index-tier-strip">'+TIERS.map((tier,i)=>'<i class="'+(tiers.includes(i)?'on':'')+'" title="'+tier.name+'" style="--tier:'+tier.color+'"></i>').join("")+'</div>'+
@@ -3455,7 +3462,7 @@
 
   function showReveal(c){
     const t=TIERS[c.tier],g=GRADES[c.grade];
-    $("#revealVisual").innerHTML='<div class="reveal-visual tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="reveal-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+'"><img src="'+imageFor(c.charId)+'" alt="Card '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'</div><div class="reveal-info tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><h2 class="tier-card-name">'+t.name+'</h2><p><strong class="tier-card-id">'+padId(c.charId)+'</strong> · ID Income '+charIncomeBonusText(c.charId)+' · Grade '+g.name+(cardMutationIds(c).length?' · '+mutationNames(c):'')+'</p></div></div>';
+    $("#revealVisual").innerHTML='<div class="reveal-visual tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="reveal-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'</div><div class="reveal-info tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><h2 class="reveal-character-name">'+escapeHtml(cardName(c.charId))+'</h2><div class="reveal-tier-name tier-card-name">'+t.name+'</div><p><strong class="tier-card-id">'+padId(c.charId)+'</strong> · ID Income '+charIncomeBonusText(c.charId)+' · Grade '+g.name+(cardMutationIds(c).length?' · '+mutationNames(c):'')+'</p></div></div>';
     $("#reveal").classList.add("show");$("#reveal").setAttribute("aria-hidden","false");
     const img=$("#revealVisual img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
   }
@@ -3475,8 +3482,8 @@
     if(!c){renderPicker(body,activeStand);return}
     const t=TIERS[c.tier],g=GRADES[c.grade];
     body.innerHTML=
-      '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-tier tier-card-name tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+t.name+'</div><div class="card-id tier-card-id tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+padId(c.charId)+'</div></div>'+
-      '<div class="stand-detail-info"><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
+      '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div><div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-modal-face-stat="level">'+c.level+'</b></span><strong data-modal-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div></div></div>'+
+      '<div class="stand-detail-info"><div class="stand-character-heading"><strong>'+escapeHtml(cardName(c.charId))+'</strong><span>'+padId(c.charId)+' · '+escapeHtml(t.name)+'</span></div><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
       '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div><div><span>Awaken</span><b>★'+awakeningStars(c)+' · Income ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div></div>'+
       '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
@@ -3589,6 +3596,8 @@
       }
       const level=detail.querySelector('[data-modal-stat="level"]');if(level)level.textContent=c.level;
       const income=detail.querySelector('[data-modal-stat="income"]');if(income)income.textContent=fmt(cardIncome(c))+"/s";
+      const faceLevel=detail.querySelector('[data-modal-face-stat="level"]');if(faceLevel)faceLevel.textContent=c.level;
+      const faceIncome=detail.querySelector('[data-modal-face-stat="income"]');if(faceIncome)faceIncome.textContent=fmt(cardIncome(c))+"/s";
       const grade=detail.querySelector('[data-modal-stat="grade"]');if(grade)grade.textContent=g.name+" ×"+g.multi.toFixed(2);
       const upgrade=detail.querySelector('[data-modal-stat="upgrade"]');if(upgrade)upgrade.textContent=fmt(upgradeCost(c));
       const gradeCost=detail.querySelector('[data-modal-stat="grade-cost"]');if(gradeCost)gradeCost.textContent=fmt(rerollCost(c));
