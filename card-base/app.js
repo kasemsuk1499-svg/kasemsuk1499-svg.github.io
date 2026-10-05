@@ -5,7 +5,7 @@
   const MONEY_CAP = 1e300;
   const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
   const CARD_MIN_ID = 1;
-  const CARD_MAX_ID = 110;
+  const CARD_MAX_ID = 120;
   const CARD_NAMES = Object.freeze({
     1:"Rover",
     2:"Cartethyia",
@@ -116,7 +116,17 @@
     107:"Kana",
     108:"Ruby",
     109:"Mem-cho",
-    110:"アド"
+    110:"アド",
+    111:"Mikey",
+    112:"Ken Ryūgūji",
+    113:"Tetta Kisaki",
+    114:"Kazutora",
+    115:"Takemichi",
+    116:"Tachibana Hinata",
+    117:"Hakkai Shiba",
+    118:"Chifuyu",
+    119:"Baji Keisuke",
+    120:"Takashi Mitsuya"
   });
   const ROLL_MS = 2500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
