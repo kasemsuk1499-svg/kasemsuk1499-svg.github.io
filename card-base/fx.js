@@ -572,21 +572,107 @@
   }
 
   function drawHalo(target,rect,time){
-    // EX+ uses its own crystal particle language; do not give it the bubble/halo look.
+    // Keep the original unlock conditions. Higher tiers change the hologram
+    // language instead of simply making the same halo brighter.
     if(target.grade===11 && target.tier<8) return;
     if(target.tier<8 && target.grade<9) return;
-    const img=images.halo;
-    if(!img || !img.complete) return;
-    const tierPower=target.tier>=9?1:target.tier===8?.58:.35;
-    const gradePower=target.grade>=9?.34:0;
-    const alpha=(tierPower+gradePower)*(.38+.12*Math.sin(time*.0016));
-    const pad=Math.min(44,Math.max(18,rect.width*.13));
+
+    const visitorBoost=target.visitor?1.12:1;
+
+    // Base holo / Tier 8: the original soft ring, deliberately kept faint.
+    if(target.tier<9){
+      const img=images.halo;
+      if(!img || !img.complete) return;
+      const pad=Math.min(40,Math.max(17,rect.width*.12));
+      const pulse=.24+.035*Math.sin(time*.0015);
+      ctx.save();
+      ctx.globalCompositeOperation="lighter";
+      ctx.globalAlpha=pulse*quality*visitorBoost;
+      ctx.translate(rect.left+rect.width/2,rect.top+rect.height/2);
+      ctx.rotate(-time*.000045);
+      ctx.drawImage(img,-rect.width/2-pad,-rect.height/2-pad,rect.width+pad*2,rect.height+pad*2);
+      ctx.restore();
+      return;
+    }
+
+    // Tier 9: Cross Sweep — thin holographic reflections crossing the card.
+    if(target.tier===9){
+      const cycle=7000;
+      const p=(time%cycle)/cycle;
+      const cx=rect.left+rect.width*(-.25+p*1.5);
+      const cy=rect.top+rect.height*.5;
+      const span=Math.hypot(rect.width,rect.height)*.78;
+
+      ctx.save();
+      roundedRectPath(rect,-2,14);
+      ctx.clip();
+      ctx.globalCompositeOperation="lighter";
+      ctx.lineCap="round";
+
+      const drawSweep=(offset,angle,alpha,width)=>{
+        const dx=Math.cos(angle)*span;
+        const dy=Math.sin(angle)*span;
+        const nx=-Math.sin(angle)*offset;
+        const ny=Math.cos(angle)*offset;
+        ctx.beginPath();
+        ctx.moveTo(cx-dx+nx,cy-dy+ny);
+        ctx.lineTo(cx+dx+nx,cy+dy+ny);
+        ctx.strokeStyle="rgba(202,246,255,.96)";
+        ctx.lineWidth=width;
+        ctx.globalAlpha=alpha*quality*visitorBoost;
+        ctx.shadowBlur=4;
+        ctx.shadowColor="rgba(120,224,255,.55)";
+        ctx.stroke();
+      };
+
+      drawSweep(-7,-.68,.15,1.1);
+      drawSweep(8,.64,.11,.8);
+      ctx.restore();
+      return;
+    }
+
+    // Tier 10: Prism Facets — translucent geometric foil fragments, no ring.
+    const phase=time*.00042;
+    const shards=[
+      {x:.18,y:.24,w:.16,h:.25,r:-.34,c:"rgba(118,232,255,.72)"},
+      {x:.77,y:.30,w:.19,h:.22,r:.28,c:"rgba(194,128,255,.64)"},
+      {x:.25,y:.72,w:.18,h:.20,r:.22,c:"rgba(255,152,226,.58)"},
+      {x:.73,y:.72,w:.15,h:.24,r:-.26,c:"rgba(126,255,209,.56)"}
+    ];
+
     ctx.save();
+    roundedRectPath(rect,-2,14);
+    ctx.clip();
     ctx.globalCompositeOperation="lighter";
-    ctx.globalAlpha=Math.min(.92,alpha*quality*(target.visitor?1.28:1));
-    ctx.translate(rect.left+rect.width/2,rect.top+rect.height/2);
-    ctx.rotate(time*.00008*(target.tier>=9?1:-1));
-    ctx.drawImage(img,-rect.width/2-pad,-rect.height/2-pad,rect.width+pad*2,rect.height+pad*2);
+
+    for(let i=0;i<shards.length;i++){
+      const s=shards[i];
+      const drift=Math.sin(phase*2.2+i*1.37)*2.2;
+      const x=rect.left+rect.width*s.x;
+      const y=rect.top+rect.height*s.y+drift;
+      const w=rect.width*s.w;
+      const h=rect.height*s.h;
+
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(s.r+Math.sin(phase+i)*.025);
+      ctx.globalAlpha=(.075+.018*Math.sin(phase*3+i))*quality*visitorBoost;
+      ctx.fillStyle=s.c;
+      ctx.beginPath();
+      ctx.moveTo(0,-h*.55);
+      ctx.lineTo(w*.58,-h*.08);
+      ctx.lineTo(w*.16,h*.52);
+      ctx.lineTo(-w*.54,h*.10);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.globalAlpha=.11*quality*visitorBoost;
+      ctx.strokeStyle="rgba(240,252,255,.74)";
+      ctx.lineWidth=.6;
+      ctx.stroke();
+      ctx.restore();
+    }
+
     ctx.restore();
   }
 
