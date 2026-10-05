@@ -3564,18 +3564,33 @@ body::before{
   z-index:10;
   left:7px;
   bottom:52px;
+  min-width:30px;
   max-width:72%;
-  padding:3px 6px;
-  border:1px solid rgba(255,255,255,.28);
+  padding:4px 8px;
+  border:1px solid rgba(255,255,255,.46);
   border-radius:999px;
-  background:rgba(7,9,14,.90);
-  color:#f6f8ff;
-  box-shadow:none;
-  font-size:7px;
+  background:rgba(5,7,12,.94);
+  color:#ffffff;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.52),
+    0 3px 9px rgba(0,0,0,.42);
+  font-size:9px;
+  line-height:1;
   font-weight:1000;
-  letter-spacing:.04em;
-  white-space:nowrap
+  letter-spacing:.03em;
+  white-space:nowrap;
+  text-shadow:0 0 5px currentColor;
 }
+.awakening-badge.awaken-1{border-color:#72eaff;color:#e6fdff;box-shadow:0 0 9px rgba(114,234,255,.32),0 3px 9px rgba(0,0,0,.42)}
+.awakening-badge.awaken-2{border-color:#a77bff;color:#f0e8ff;box-shadow:0 0 9px rgba(167,123,255,.32),0 3px 9px rgba(0,0,0,.42)}
+.awakening-badge.awaken-3{border-color:#ff4968;color:#ffe7ec;box-shadow:0 0 9px rgba(255,73,104,.34),0 3px 9px rgba(0,0,0,.42)}
+.awakening-badge.awaken-4{border-color:#ffd45c;color:#fff6d7;box-shadow:0 0 9px rgba(255,212,92,.34),0 3px 9px rgba(0,0,0,.42)}
+.awakening-badge.awaken-5{border-color:#67f5ad;color:#e7fff3;box-shadow:0 0 9px rgba(103,245,173,.32),0 3px 9px rgba(0,0,0,.42)}
+.awakening-badge.awaken-6{border-color:#ff70d7;color:#ffebfb;box-shadow:0 0 9px rgba(255,112,215,.32),0 3px 9px rgba(0,0,0,.42)}
+.awakening-badge.awaken-7{border-color:#ff914d;color:#fff0e6;box-shadow:0 0 9px rgba(255,145,77,.32),0 3px 9px rgba(0,0,0,.42)}
+.awakening-badge.awaken-8{border-color:#699cff;color:#edf3ff;box-shadow:0 0 9px rgba(105,156,255,.32),0 3px 9px rgba(0,0,0,.42)}
+.awakening-badge.awaken-9{border-color:#f4feff;color:#ffffff;box-shadow:0 0 10px rgba(244,254,255,.38),0 3px 9px rgba(0,0,0,.42)}
+
 .awaken-action{
   border-color:rgba(255,240,168,.42)!important;
   color:#fff0a8!important;
@@ -3611,8 +3626,9 @@ body::before{
   .awakening-badge{
     left:6px;
     bottom:48px;
-    padding:3px 5px;
-    font-size:6px
+    min-width:27px;
+    padding:3px 6px;
+    font-size:7.5px
   }
 }
 
