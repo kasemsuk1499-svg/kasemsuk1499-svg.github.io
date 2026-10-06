@@ -203,26 +203,18 @@
     const activeMutation=mutation2&&mutation?(Math.random()<.5?mutation:mutation2):(mutation||mutation2);
     const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
 
-    if(kind==="onryo" && particles.filter(p=>p.el===target.el&&p.kind==="onryo").length>=4) return;
+    if(kind==="onryo" && particles.filter(p=>p.el===target.el&&p.kind==="onryo").length>=5) return;
 
     const edge=Math.random();
-    let nx,ny,onryoRot=0,onryoSide=null,onryoScale=1,onryoAlpha=.72;
+    let nx,ny,onryoRot=0;
     if(kind==="onryo"){
-      const activeSwords=particles.filter(p=>p.el===target.el&&p.kind==="onryo");
-      const occupied=new Set(activeSwords.map(p=>p.onryoSide));
-      const slots=[
-        {side:"left",  nx:.43,ny:.47,rot:-.70,alpha:.82,scale:1.00},
-        {side:"right", nx:.57,ny:.53,rot: .70,alpha:.82,scale:1.00},
-        {side:"ghostL",nx:.47,ny:.51,rot:-.70,alpha:.32,scale:.82},
-        {side:"ghostR",nx:.53,ny:.49,rot: .70,alpha:.32,scale:.82}
+      const spots=[
+        [.10,.18,-.48],[.88,.22,.46],[.07,.62,-.28],[.92,.64,.30],[.50,.84,.04]
       ];
-      const slot=slots.find(x=>!occupied.has(x.side))||slots[Math.floor(Math.random()*slots.length)];
-      nx=slot.nx+(Math.random()-.5)*.018;
-      ny=slot.ny+(Math.random()-.5)*.022;
-      onryoRot=slot.rot+(Math.random()-.5)*.045;
-      onryoSide=slot.side;
-      onryoScale=slot.scale;
-      onryoAlpha=slot.alpha;
+      const spot=spots[Math.floor(Math.random()*spots.length)];
+      nx=spot[0]+(Math.random()-.5)*.035;
+      ny=spot[1]+(Math.random()-.5)*.045;
+      onryoRot=spot[2]+(Math.random()-.5)*.08;
     }else if(edge<.34){nx=Math.random();ny=.06+Math.random()*.18}
     else if(edge<.67){nx=Math.random();ny=.72+Math.random()*.24}
     else {nx=Math.random()<.5?.05:.95;ny=.12+Math.random()*.78}
@@ -230,15 +222,15 @@
     const key=chooseTexture(tier,grade,mutation,mutation2);
     const high=Math.max(tier-3,grade-6);
     const size=kind==="onryo"
-      ? Math.hypot(rect.width,rect.height)*.42*onryoScale*(target.visitor?1.06:1)
+      ? (48+Math.random()*18)*(target.visitor?1.18:1)
       : (12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.12:1);
     const life=kind==="onryo"
-      ? 2200+Math.random()*1000
+      ? 2600+Math.random()*1200
       : 950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0)+(activeMutation===21?180:0);
 
     if(activeMutation===16){ny=.78+Math.random()*.18}
-    let vx=kind==="onryo"?(Math.random()-.5)*2.2:activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
-    let vy=kind==="onryo"?-(.7+Math.random()*1.6):activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2);
+    let vx=kind==="onryo"?(Math.random()-.5)*3:activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
+    let vy=kind==="onryo"?-(1+Math.random()*3):activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2);
     if(activeMutation===16){vx=(Math.random()-.5)*4;vy=-(24+Math.random()*30)}
     if(activeMutation===19){
       vx=(.5-nx)*rect.width*(.52+Math.random()*.18);
@@ -247,15 +239,14 @@
 
     particles.push({
       el:target.el,nx,ny,
-      dx:kind==="onryo"?(Math.random()-.5)*7:(Math.random()-.5)*18,
+      dx:(Math.random()-.5)*5,
       dy:0,vx,vy,
       size,life,maxLife:life,
       rot:kind==="onryo"?onryoRot:Math.random()*Math.PI*2,
       vr:kind==="onryo"?0:kind==="amaterasu"?(0.55+Math.random()*.35):(Math.random()-.5)*(kind==="glitch"?3.4:1.1),
       key,kind,mutation:activeMutation,
-      alpha:kind==="onryo"?onryoAlpha:Math.min(1,(.56+Math.random()*.36)*(target.visitor?1.12:1)),
-      pulse:Math.random()*Math.PI*2,
-      onryoSide
+      alpha:kind==="onryo"?.72:Math.min(1,(.56+Math.random()*.36)*(target.visitor?1.12:1)),
+      pulse:Math.random()*Math.PI*2
     });
   }
 
@@ -271,7 +262,7 @@
       ? (MUTATION_COLORS[activeMutation]||"#ffffff")
       : (computed.getPropertyValue("--tier").trim()||"#ffffff");
 
-    if(activeMutation===22 && target.el.querySelectorAll(".onryo-blade-particle").length>=4) return;
+    if(activeMutation===22 && target.el.querySelectorAll(".onryo-blade-particle").length>=5) return;
 
     const p=document.createElement("i");
     p.className="mobile-card-particle"
@@ -282,37 +273,27 @@
     p.textContent=(activeMutation===21||activeMutation===22)?"":(activeMutation>=11?(glyphs[activeMutation]||"◆"):(Math.random()<.58?"✦":Math.random()<.72?"✧":"•"));
 
     const edge=Math.random();
-    let x,y,staticRot=0,onryoScale=1,onryoPeak=.82;
+    let x,y,staticRot=0;
     if(activeMutation===22){
-      const existing=[...target.el.querySelectorAll(".onryo-blade-particle")];
-      const occupied=new Set(existing.map(el=>el.dataset.onryoSide));
-      const slots=[
-        {side:"left",  x:43,y:47,rot:-40,scale:1.00,peak:.86},
-        {side:"right", x:57,y:53,rot: 40,scale:1.00,peak:.86},
-        {side:"ghostL",x:47,y:51,rot:-40,scale:.82,peak:.36},
-        {side:"ghostR",x:53,y:49,rot: 40,scale:.82,peak:.36}
+      const spots=[
+        [10,18,-28],[88,22,26],[7,62,-17],[92,64,18],[50,84,2]
       ];
-      const slot=slots.find(v=>!occupied.has(v.side))||slots[Math.floor(Math.random()*slots.length)];
-      x=slot.x+(Math.random()-.5)*1.8;
-      y=slot.y+(Math.random()-.5)*2.2;
-      staticRot=slot.rot+(Math.random()-.5)*3;
-      onryoScale=slot.scale;
-      onryoPeak=slot.peak;
-      p.dataset.onryoSide=slot.side;
-      p.style.setProperty("--onryo-peak",String(onryoPeak));
+      const spot=spots[Math.floor(Math.random()*spots.length)];
+      x=spot[0]+(Math.random()-.5)*3;
+      y=spot[1]+(Math.random()-.5)*4;
+      staticRot=spot[2]+(Math.random()-.5)*5;
     }else if(edge<.42){x=8+Math.random()*84;y=72+Math.random()*22}
     else if(edge<.72){x=8+Math.random()*84;y=6+Math.random()*18}
     else{x=Math.random()<.5?5+Math.random()*8:87+Math.random()*8;y=18+Math.random()*66}
 
     const strength=target.visitor?1.2:1;
-    const dx=activeMutation===22?(Math.random()-.5)*7:(Math.random()-.5)*(30*strength);
-    const dy=activeMutation===22?-(1+Math.random()*3):-(20+Math.random()*34)*strength;
-    const targetRect=activeMutation===22?target.el.getBoundingClientRect():null;
+    const dx=activeMutation===22?(Math.random()-.5)*5:(Math.random()-.5)*(30*strength);
+    const dy=activeMutation===22?-(2+Math.random()*5):-(20+Math.random()*34)*strength;
     const size=activeMutation===22
-      ? Math.hypot(targetRect?.width||120,targetRect?.height||180)*.44*onryoScale*(target.visitor?1.06:1)
+      ? (42+Math.random()*15)*(target.visitor?1.12:1)
       : (10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1)*(activeMutation===21?1.10:1);
     const life=activeMutation===22
-      ? Math.round(2200+Math.random()*1000)
+      ? Math.round(2600+Math.random()*1200)
       : Math.round((900+Math.random()*650)*(target.visitor?1.05:1));
 
     p.style.left=x+"%";
