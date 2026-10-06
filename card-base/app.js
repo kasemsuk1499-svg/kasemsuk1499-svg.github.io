@@ -186,7 +186,7 @@
   const AWAKEN_GRADE_INDEX = 12; // EX★ remains the Awaken requirement
 
   // Grade reroll is a major money sink. Base Level scaling is applied on top.
-  const GRADE_REROLL_COSTS = [5000,10000,20000,40000,80000,160000,320000,640000,1280000,2560000];
+  const GRADE_REROLL_COSTS = [5000,10000,20000,40000,80000,160000,320000,640000,1280000,2560000,5120000];
   // Ultra-end grades are chase outcomes. Luck intentionally does not affect Grade.
   const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02,.01,.0025,.0005,.0001];
 
