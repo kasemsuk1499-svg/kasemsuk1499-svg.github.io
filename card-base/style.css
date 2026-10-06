@@ -5403,6 +5403,42 @@ body.ascension-unlock-10 .base-tower-bar,
 }
 #particlesStatus.on{color:#75f4e6}
 #particlesStatus.off{color:#ff9aaa}
+
+#tradeNotifyStatus.on{color:#75f4e6}
+#tradeNotifyStatus.off{color:#ff9aaa}
+#tradeNotifyStatus.blocked{color:#ff8b9e}
+#tradeNotifyStatus.pending{color:#ffd978}
+
+.tab{position:relative}
+.trade-nav-badge{
+  position:absolute;
+  top:-5px;
+  right:-3px;
+  min-width:18px;
+  height:18px;
+  padding:0 5px;
+  display:grid;
+  place-items:center;
+  border:2px solid #090a0f;
+  border-radius:999px;
+  background:#ff5f78;
+  color:#fff;
+  font-size:9px;
+  line-height:1;
+  font-weight:1000;
+  box-shadow:0 0 15px rgba(255,95,120,.5);
+  pointer-events:none;
+  animation:tradeBadgePulse 1.8s ease-in-out infinite
+}
+.trade-nav-badge[hidden]{display:none!important}
+.tab.has-trade-alert{
+  border-color:rgba(255,95,120,.65);
+  box-shadow:0 0 16px rgba(255,95,120,.12)
+}
+@keyframes tradeBadgePulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.12)}
+}
 .particles-disabled .mobile-card-particle{
   display:none!important;
 }
@@ -5920,3 +5956,15 @@ body.ascension-unlock-10 .base-tower-bar,
   visibility:visible;
 }
 
+
+@media (max-width:700px){
+  .trade-nav-badge{
+    top:1px;
+    right:4px;
+    min-width:15px;
+    height:15px;
+    padding:0 4px;
+    border-width:1px;
+    font-size:7px
+  }
+}
