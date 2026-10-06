@@ -351,7 +351,21 @@
   const ID_PACK_PAGE_SIZE = 10;
   let idPackPage = 0;
   let supabaseClient = null;
-  let gameToken = localStorage.getItem(GAME_SESSION_KEY) || null;
+  function loadGameSessionToken(){
+    try{
+      const current=sessionStorage.getItem(GAME_SESSION_KEY);
+      if(current)return current;
+      const legacy=localStorage.getItem(GAME_SESSION_KEY);
+      if(legacy){
+        sessionStorage.setItem(GAME_SESSION_KEY,legacy);
+        try{sessionStorage.removeItem(GAME_SESSION_KEY)}catch{}
+    try{localStorage.removeItem(GAME_SESSION_KEY)}catch{}
+        return legacy;
+      }
+    }catch{}
+    return null;
+  }
+  let gameToken = loadGameSessionToken();
   let gameAccount = null;
   let cloudReady = false;
   let cloudLoading = false;
@@ -594,7 +608,9 @@
             },
             body:JSON.stringify(args||{}),
             signal:controller.signal,
-            cache:"no-store"
+            cache:"no-store",
+            credentials:"omit",
+            referrerPolicy:"no-referrer"
           });
           let data=null;
           try{data=await response.json()}catch{}
@@ -655,6 +671,8 @@
         },
         body,
         cache:"no-store",
+        credentials:"omit",
+        referrerPolicy:"no-referrer",
         keepalive:true
       });
       let data=null;
@@ -1616,7 +1634,7 @@
   async function activateGameSession(token,username,recoveryCode=null){
     rotateMutationEventSession();
     gameToken=token;
-    localStorage.setItem(GAME_SESSION_KEY,token);
+    try{sessionStorage.setItem(GAME_SESSION_KEY,token);localStorage.removeItem(GAME_SESSION_KEY)}catch{}
     gameAccount={username};
     renderAuth();
     const me=await fetchMe();
@@ -1686,7 +1704,7 @@
     const confirm=$("#authPasswordConfirm").value;
     showRecoveryCode(null);
     if(!validateUsername(username)){setAuthMessage("Username ใช้ได้เฉพาะ a-z, 0-9, _ และยาว 3–20 ตัว","error");return}
-    if(password.length<8||password.length>72){setAuthMessage("รหัสผ่านต้องยาว 8–72 ตัวอักษร","error");return}
+    if(password.length<10||password.length>72){setAuthMessage("รหัสผ่านต้องยาว 10–72 ตัวอักษร","error");return}
     if(password!==confirm){setAuthMessage("รหัสผ่านกับช่องยืนยันไม่ตรงกัน","error");return}
     setAuthBusy(true);setAuthMessage("กำลังสร้างบัญชี…");
     try{
@@ -1708,7 +1726,7 @@
     showRecoveryCode(null);
     if(!validateUsername(username)){setAuthMessage("กรอก Username ของบัญชีที่ต้องการกู้ก่อน","error");return}
     if(!code){setAuthMessage("กรอก Recovery Code ก่อน","error");return}
-    if(newPassword.length<8||newPassword.length>72){setAuthMessage("รหัสผ่านใหม่ต้องยาว 8–72 ตัวอักษร","error");return}
+    if(newPassword.length<10||newPassword.length>72){setAuthMessage("รหัสผ่านใหม่ต้องยาว 10–72 ตัวอักษร","error");return}
     setAuthBusy(true);setAuthMessage("กำลังกู้บัญชี…");
     try{
       const result=await rpc("cb_recover",{p_username:username,p_recovery_code:code,p_new_password:newPassword});
@@ -2147,7 +2165,8 @@
       grade:Number(card.grade),
       mutation:Number(card.mutation)||0,
       mutation2:Number(card.mutation2)||0,
-      level:Number(card.level)
+      level:Number(card.level),
+      awakening:awakeningStars(card)
     };
   }
 
@@ -2171,11 +2190,11 @@
       '<div class="trade-card-art '+tierFxClass(tier)+cardMutationFxClass(visualCard)+' grade-shell-'+grade+'" style="'+cardMutationStyle(visualCard)+'">'+
         '<img src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
         '<div class="tier-ring"></div>'+
-        '<span class="card-grade '+gradeFxClass(grade)+'" style="--grade:'+g.color+'">'+g.name+'</span>'+mutationBadge(visualCard)+
+        '<span class="card-grade '+gradeFxClass(grade)+'" style="--grade:'+g.color+'">'+g.name+'</span>'+mutationBadge(visualCard)+awakeningBadge(visualCard)+
       '</div>'+
       '<div class="trade-card-meta tier-copy tier-'+tier+'" style="--tier:'+t.color+'">'+
         '<strong><span class="tier-card-id">'+padId(card.charId)+'</span><span class="tier-dot"> · </span><span class="tier-card-name">'+t.name+'</span></strong>'+
-        '<span>Lv.'+Math.max(1,Number(card.level)||1)+' · Grade '+g.name+(cardMutationIds(visualCard).length?' · '+mutationNames(visualCard):'')+'</span>'+
+        '<span>Lv.'+Math.max(1,Number(card.level)||1)+' · Grade '+g.name+(cardMutationIds(visualCard).length?' · '+mutationNames(visualCard):'')+(awakeningStars(visualCard)?' · ★'+awakeningStars(visualCard):'')+'</span>'+
       '</div>'+
     '</div>';
   }
