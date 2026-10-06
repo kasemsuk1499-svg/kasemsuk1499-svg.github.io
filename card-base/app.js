@@ -259,7 +259,7 @@
     91: {name:"AOT pack v1", image:"./assets/packs/98.png", priceSeconds:null},
     101: {name:"Oshi pack v1", image:"./assets/packs/105.png", priceSeconds:null},
     111: {name:"TokyoReven pack v1", image:"./assets/packs/111.png", priceSeconds:null},
-    111: {name:"7K pack v1", image:"./assets/packs/124.png", priceSeconds:null}
+    121: {name:"7K pack v1", image:"./assets/packs/124.png", priceSeconds:null}
   };
 
   const ROTATING_PACK_ARCHETYPES = [
