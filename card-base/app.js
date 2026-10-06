@@ -147,9 +147,9 @@
   const MUTATION_EVENT_SESSION_KEY = "card-base-mutation-event-session-v1";
   const GRADE_ROLL_MS = 450;
   const ID_PACK_AUTO_MS = 1200;
-  const ROTATING_SHOP_RESTOCK_MS = 10*60*1000;
+  const ROTATING_SHOP_RESTOCK_MS = 5*60*1000;
   const CLOUD_IDLE_SAVE_MS = 20000;
-  const ROTATING_SHOP_SLOTS = 5;
+  const ROTATING_SHOP_SLOTS = 4;
   const ASCENSION_LEVEL_CAP = 40;
   const ASCENSION_PERK_MAX = 10;
 
