@@ -347,7 +347,8 @@
     currentPack:null, rollingUntil:0, lastTick:Date.now(), uidCounter:1,
     autoTargets:[], autoRolling:false, fullAuto:false, targetFound:false,
     storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{},
-    items:{level40Ticket:0},
+    items:{level100Ticket:0},
+    serverGiftClaims:{},
     rotatingShop:{rotationId:null,bought:{}},
     ascension:{stars:0,cores:0,perks:{income:0,luck:0,forge:0}},
     tower:{floor:1,best:0,shards:0},
@@ -527,8 +528,11 @@
     s.cardIndex=normalizeCardIndex(s.cardIndex);
     const rawItems=s.items&&typeof s.items==="object"&&!Array.isArray(s.items)?s.items:{};
     s.items={
-      level40Ticket:Math.max(0,Math.min(1000000,Math.floor(Number(rawItems.level40Ticket)||0)))
+      level100Ticket:Math.max(0,Math.min(1000000,Math.floor(Number(rawItems.level100Ticket??rawItems.level100Ticket)||0)))
     };
+    s.serverGiftClaims=s.serverGiftClaims&&typeof s.serverGiftClaims==="object"&&!Array.isArray(s.serverGiftClaims)
+      ? s.serverGiftClaims
+      : {};
     const rawRotating=s.rotatingShop&&typeof s.rotatingShop==="object"?s.rotatingShop:{};
     s.rotatingShop={
       rotationId:Number.isFinite(Number(rawRotating.rotationId))?Number(rawRotating.rotationId):null,
@@ -733,11 +737,12 @@
     else armCloudSave();
     const tradeReceipts=Number(result.trade_receipts)||0;
     const serverGrants=Number(result.server_grants)||0;
-    if((tradeReceipts>0||serverGrants>0)&&result.state){
+    const serverGiftSync=Number(result.server_gift_sync)||0;
+    if((tradeReceipts>0||serverGrants>0||serverGiftSync>0)&&result.state){
       state=hydrateState(result.state);
       localStorage.setItem(SAVE_KEY,JSON.stringify(state));
       renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderRotatingPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
-      if(serverGrants>0)toast("🎁 ได้รับของขวัญเซิร์ฟเวอร์ · Singularity Pack ×1 + ⚡ Lv.40 Ticket ×1",true);
+      if(serverGrants>0)toast("🎁 ได้รับของขวัญเซิร์ฟเวอร์ · Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
       if(tradeReceipts>0){
         toast("Trade สำเร็จ · คลังการ์ดอัปเดตแล้ว ✨",true);
         setTimeout(()=>refreshTrades(true),0);
@@ -1736,7 +1741,7 @@
     if(!result.exists)await flushCloudSave();
     renderAll();
     if(Number(result.server_grants)>0){
-      toast("🎁 ของขวัญเซิร์ฟเวอร์มาแล้ว! Singularity Pack ×1 + ⚡ Lv.40 Ticket ×1",true);
+      toast("🎁 ของขวัญเซิร์ฟเวอร์มาแล้ว! Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
     }
     updateSyncUi("online");
   }
@@ -2919,6 +2924,11 @@
     const idx=state.storedPacks.findIndex(p=>p.tier===tier);
     if(idx<0)return;
     const [pack]=state.storedPacks.splice(idx,1);
+    if(pack?.giftKey){
+      if(!state.serverGiftClaims||typeof state.serverGiftClaims!=="object")state.serverGiftClaims={};
+      const old=state.serverGiftClaims[pack.giftKey]||{};
+      state.serverGiftClaims[pack.giftKey]={...old,packUsed:true};
+    }
     const card=createCardFromTier(pack.tier);
     showReveal(card);
     renderAll();
@@ -2935,8 +2945,8 @@
   }
 
   function renderItemBag(){
-    const count=Math.max(0,Math.floor(Number(state.items?.level40Ticket)||0));
-    const countEl=$("#level40TicketCount"),status=$("#level40TicketStatus");
+    const count=Math.max(0,Math.floor(Number(state.items?.level100Ticket)||0));
+    const countEl=$("#level100TicketCount"),status=$("#level100TicketStatus");
     if(countEl)countEl.textContent="×"+count;
     if(status){
       status.textContent=count?"พร้อมใช้ "+count+" ใบ":"ไม่มีไอเท็ม";
@@ -2944,21 +2954,30 @@
     }
   }
 
-  function useLevel40Ticket(uid){
+  function markOneServerGiftTicketUsed(){
+    if(!state.serverGiftClaims||typeof state.serverGiftClaims!=="object")state.serverGiftClaims={};
+    const key=Object.keys(state.serverGiftClaims).find(k=>state.serverGiftClaims[k]?.ticketUsed!==true);
+    if(!key)return;
+    const old=state.serverGiftClaims[key]||{};
+    state.serverGiftClaims[key]={...old,ticketUsed:true};
+  }
+
+  function useLevel100Ticket(uid){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
     if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
-    const tickets=Math.max(0,Math.floor(Number(state.items?.level40Ticket)||0));
-    if(!tickets){toast("ไม่มี Lv.40 Ticket");return}
-    if(Number(c.level)>=40){toast("การ์ดใบนี้ Lv.40 ขึ้นไปแล้ว");return}
+    const tickets=Math.max(0,Math.floor(Number(state.items?.level100Ticket)||0));
+    if(!tickets){toast("ไม่มี Lv.100 Ticket");return}
+    if(Number(c.level)>=100){toast("การ์ดใบนี้ Lv.100 ขึ้นไปแล้ว");return}
     const ok=window.confirm(
-      "ใช้ ⚡ Lv.40 Ticket กับ "+padId(c.charId)+" ?"+
-      "\nLv."+c.level+" → Lv.40 ทันที"+
+      "ใช้ ⚡ Lv.100 Ticket กับ "+padId(c.charId)+" ?"+
+      "\nLv."+c.level+" → Lv.100 ทันที"+
       "\n\nGrade / Mutation / Awakening จะไม่เปลี่ยน และ Ticket จะถูกใช้ 1 ใบ"
     );
     if(!ok)return;
-    state.items.level40Ticket=tickets-1;
-    c.level=40;
-    toast("⚡ "+padId(c.charId)+" ขึ้นเป็น Lv.40 แล้ว!",true);
+    state.items.level100Ticket=tickets-1;
+    markOneServerGiftTicketUsed();
+    c.level=100;
+    toast("⚡ "+padId(c.charId)+" ขึ้นเป็น Lv.100 แล้ว!",true);
     renderItemBag();
     commitCardMicroUpdate(c.uid);
     renderCollection();
@@ -3002,7 +3021,7 @@
           '<div><span>Awaken</span><b>★'+awakeningStars(c)+' · ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div>'+
         '</div>'+(tradeLocked?'<div class="trade-lock-banner">🔒 TRADE LOCK · รออีกฝ่ายตอบรับ</div>':'')+'<div class="card-actions">'+
           '<button data-a="place" '+(tradeLocked?"disabled":"")+'>'+(placed?"เอาออกจากฐาน":"วางในแท่นว่าง")+'</button><button data-a="level" '+(tradeLocked?"disabled":"")+'>อัป Level</button>'+
-          '<button class="level40-ticket-btn" data-a="level40-ticket" '+(tradeLocked||c.level>=40||!(state.items?.level40Ticket>0)?"disabled":"")+'>⚡ Lv.40 Ticket'+(state.items?.level40Ticket>0?" ×"+state.items.level40Ticket:"")+'</button>'+
+          '<button class="level100-ticket-btn" data-a="level100-ticket" '+(tradeLocked||c.level>=100||!(state.items?.level100Ticket>0)?"disabled":"")+'>⚡ Lv.100 Ticket'+(state.items?.level100Ticket>0?" ×"+state.items.level100Ticket:"")+'</button>'+
           '<button data-a="grade" '+(tradeLocked?"disabled":"")+'>สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-a="grade-auto" '+(tradeLocked?"disabled":"")+'>'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button>'+          '<button class="mutation-inherit-btn" data-a="mutation-lab" '+(tradeLocked||cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด")+'</button>'+          '<button class="mutation-cleanse-btn" data-a="mutation-cleanse" '+(tradeLocked||!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button>'+
           '<button class="awaken-action" data-a="awaken" '+(tradeLocked||!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button>'+
 
@@ -3015,7 +3034,7 @@
         const a=btn.dataset.a;
         if(a==="place")togglePlace(c.uid);
         if(a==="level")levelUp(c.uid);
-        if(a==="level40-ticket")useLevel40Ticket(c.uid);
+        if(a==="level100-ticket")useLevel100Ticket(c.uid);
         if(a==="grade")rerollGrade(c.uid);
         if(a==="grade-auto")openGradeAuto(c.uid);
         if(a==="mutation-lab")openMutationLab(c.uid);
@@ -3878,10 +3897,10 @@
       '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div><div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-modal-face-stat="level">'+c.level+'</b></span><strong data-modal-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div></div></div>'+
       '<div class="stand-detail-info"><div class="stand-character-heading"><strong>'+escapeHtml(cardName(c.charId))+'</strong><span>'+padId(c.charId)+' · '+escapeHtml(t.name)+'</span></div><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
       '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div><div><span>Grade → Mutation</span><b data-modal-stat="mutation-grade">'+mutationGradeBenefitText(c)+'</b></div><div><span>Awaken</span><b>★'+awakeningStars(c)+' · Income ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div></div>'+
-      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button class="level40-ticket-btn" data-modal-a="level40-ticket" '+(c.level>=40||!(state.items?.level40Ticket>0)?"disabled":"")+'>⚡ Lv.40 Ticket'+(state.items?.level40Ticket>0?" ×"+state.items.level40Ticket:"")+'</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button class="mutation-cleanse-btn" data-modal-a="mutation-cleanse" '+(!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
+      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button class="level100-ticket-btn" data-modal-a="level100-ticket" '+(c.level>=100||!(state.items?.level100Ticket>0)?"disabled":"")+'>⚡ Lv.100 Ticket'+(state.items?.level100Ticket>0?" ×"+state.items.level100Ticket:"")+'</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button class="mutation-cleanse-btn" data-modal-a="mutation-cleanse" '+(!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
     body.querySelector('[data-modal-a="level"]').addEventListener("click",()=>{levelUp(c.uid,true)});
-    body.querySelector('[data-modal-a="level40-ticket"]')?.addEventListener("click",()=>{useLevel40Ticket(c.uid)});
+    body.querySelector('[data-modal-a="level100-ticket"]')?.addEventListener("click",()=>{useLevel100Ticket(c.uid)});
     body.querySelector('[data-modal-a="grade"]').addEventListener("click",()=>{rerollGrade(c.uid,true)});
     body.querySelector('[data-modal-a="grade-auto"]').addEventListener("click",()=>{openGradeAuto(c.uid)});
     body.querySelector('[data-modal-a="awaken"]').addEventListener("click",()=>{awakenCard(c.uid)});
@@ -4006,10 +4025,10 @@
         sell.textContent="ขาย "+fmt(sellValue(c));
         sell.disabled=placed||c.locked||tradeLocked;
       }
-      const ticket=el.querySelector('[data-a="level40-ticket"]');if(ticket){
-        const tickets=Math.max(0,Math.floor(Number(state.items?.level40Ticket)||0));
-        ticket.disabled=tradeLocked||c.level>=40||tickets<=0;
-        ticket.textContent="⚡ Lv.40 Ticket"+(tickets?" ×"+tickets:"");
+      const ticket=el.querySelector('[data-a="level100-ticket"]');if(ticket){
+        const tickets=Math.max(0,Math.floor(Number(state.items?.level100Ticket)||0));
+        ticket.disabled=tradeLocked||c.level>=100||tickets<=0;
+        ticket.textContent="⚡ Lv.100 Ticket"+(tickets?" ×"+tickets:"");
       }
       const auto=el.querySelector('[data-a="grade-auto"]');if(auto){
         const running=!!(state.gradeAuto&&state.gradeAuto.uid===c.uid);
@@ -4060,10 +4079,10 @@
       const upgrade=detail.querySelector('[data-modal-stat="upgrade"]');if(upgrade)upgrade.textContent=fmt(upgradeCost(c));
       const gradeCost=detail.querySelector('[data-modal-stat="grade-cost"]');if(gradeCost)gradeCost.textContent=fmt(rerollCost(c));
       const mutationGrade=detail.querySelector('[data-modal-stat="mutation-grade"]');if(mutationGrade)mutationGrade.textContent=mutationGradeBenefitText(c);
-      const ticket=detail.querySelector('[data-modal-a="level40-ticket"]');if(ticket){
-        const tickets=Math.max(0,Math.floor(Number(state.items?.level40Ticket)||0));
-        ticket.disabled=c.level>=40||tickets<=0;
-        ticket.textContent="⚡ Lv.40 Ticket"+(tickets?" ×"+tickets:"");
+      const ticket=detail.querySelector('[data-modal-a="level100-ticket"]');if(ticket){
+        const tickets=Math.max(0,Math.floor(Number(state.items?.level100Ticket)||0));
+        ticket.disabled=c.level>=100||tickets<=0;
+        ticket.textContent="⚡ Lv.100 Ticket"+(tickets?" ×"+tickets:"");
       }
       const auto=detail.querySelector('[data-modal-a="grade-auto"]');if(auto){
         const running=!!(state.gradeAuto&&state.gradeAuto.uid===c.uid);
