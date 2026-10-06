@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://qlaykelpabbjojpqjfwi.supabase.co wss://qlaykelpabbjojpqjfwi.supabase.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com; media-src 'self' blob:; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <title>Card Base — Prototype</title>
   <link rel="stylesheet" href="./style.css?v=20261006-quiet-sync-v1">
 </head>
@@ -820,7 +822,7 @@
           <p class="muted">ใช้ Username + Password ได้เลย ไม่ต้องใช้อีเมล และเล่นเซฟเดียวกันได้ทุกเครื่อง</p>
           <div class="auth-fields">
             <label><span>Username</span><input id="authUsername" type="text" autocomplete="username" maxlength="20" autocapitalize="none" spellcheck="false" placeholder="เช่น alice_01"></label>
-            <label><span>รหัสผ่าน</span><input id="authPassword" type="password" autocomplete="current-password" minlength="8" maxlength="72" placeholder="อย่างน้อย 8 ตัวอักษร"></label>
+            <label><span>รหัสผ่าน</span><input id="authPassword" type="password" autocomplete="current-password" minlength="10" maxlength="72" placeholder="อย่างน้อย 10 ตัวอักษร"></label>
             <label><span>ยืนยันรหัสผ่าน <small>(ตอนสร้างบัญชี)</small></span><input id="authPasswordConfirm" type="password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="กรอกซ้ำเมื่อสมัคร"></label>
           </div>
           <div class="auth-actions">
@@ -832,7 +834,7 @@
             <summary>ลืมรหัสผ่าน / ใช้ Recovery Code</summary>
             <div class="auth-fields recover-fields">
               <label><span>Recovery Code</span><input id="authRecoveryCode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"></label>
-              <label><span>รหัสผ่านใหม่</span><input id="authNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="อย่างน้อย 8 ตัวอักษร"></label>
+              <label><span>รหัสผ่านใหม่</span><input id="authNewPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="อย่างน้อย 10 ตัวอักษร"></label>
             </div>
             <button id="recoverBtn" class="secondary" type="button">กู้บัญชีและเปลี่ยนรหัสผ่าน</button>
           </details>
@@ -887,7 +889,7 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261006-cloud-save-v2" defer></script>
+  <script src="./app.js?v=20261006-security-v1" defer></script>
   <script src="./fx.js?v=20261006-halo-aurora-rainbow-v1" defer></script>
 </body>
 </html>
