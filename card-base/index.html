@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://qlaykelpabbjojpqjfwi.supabase.co wss://qlaykelpabbjojpqjfwi.supabase.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com; media-src 'self' blob:; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://qlaykelpabbjojpqjfwi.supabase.co wss://qlaykelpabbjojpqjfwi.supabase.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com; media-src 'self' blob:; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <title>Card Base — Prototype</title>
   <link rel="stylesheet" href="./style.css?v=20261006-quiet-sync-v1">
 </head>
@@ -157,7 +157,7 @@
                 <strong>ยังไม่ได้เลือกเพลง</strong>
                 <small>ค้นหาเพลงแล้ววางลิงก์ที่นี่ได้เลย</small>
               </div>
-              <iframe id="youtubePlayer" title="YouTube music player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
+              <iframe id="youtubePlayer" title="YouTube music player" sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="no-referrer" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
             </div>
 
             <div class="youtube-now">
@@ -887,9 +887,7 @@
 
     <div id="toast" class="toast" aria-live="polite"></div>
   </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
-  <script src="./app.js?v=20261006-security-v1" defer></script>
+  <script src="./app.js?v=20261006-security-v2" defer></script>
   <script src="./fx.js?v=20261006-halo-aurora-rainbow-v1" defer></script>
 </body>
 </html>
