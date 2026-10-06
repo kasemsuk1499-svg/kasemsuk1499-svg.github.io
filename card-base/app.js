@@ -1870,14 +1870,15 @@
 
   function mutationEventSchedule(nowMs=Date.now()+mutationEventClockOffset){
     const sec=Math.floor(nowMs/1000);
-    const cycleStart=Math.floor(sec/1200)*1200;
+    // 15-minute cycle: wait 10 minutes, then Mutation Storm is active for 5 minutes.
+    const cycleStart=Math.floor(sec/900)*900;
     const pos=sec-cycleStart;
-    const active=pos>=900;
+    const active=pos>=600;
     return {
       active,
-      startMs:(cycleStart+900)*1000,
-      endMs:(cycleStart+1200)*1000,
-      nextStartMs:(active?cycleStart+2100:cycleStart+900)*1000
+      startMs:(cycleStart+600)*1000,
+      endMs:(cycleStart+900)*1000,
+      nextStartMs:(active?cycleStart+1500:cycleStart+600)*1000
     };
   }
 
