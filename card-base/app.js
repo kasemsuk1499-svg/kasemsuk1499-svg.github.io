@@ -405,6 +405,8 @@
   let cloudTimer = 0;
   let cloudDirty = false;
   let cloudRevision = 0;
+  let cloudConnectionIssue = false;
+  let connectionRecovering = false;
   let lastExitCloudFlushAt = 0;
   let onlineProfile = null;
   let onlineHeartbeatTimer = 0;
@@ -624,7 +626,7 @@
 
   function armCloudSave(){
     clearTimeout(cloudTimer);
-    if(!cloudDirty||!cloudReady||cloudLoading||!gameToken||!supabaseClient||cloudAutoBusy())return;
+    if(!cloudDirty||!cloudReady||cloudLoading||!gameToken||!supabaseClient||cloudAutoBusy()||!navigator.onLine)return;
     cloudTimer=setTimeout(()=>flushCloudSave(),CLOUD_IDLE_SAVE_MS);
   }
 
@@ -674,11 +676,21 @@
     let lastError=null;
     for(let attempt=0;attempt<2;attempt++){
       const {data,error}=await supabaseClient.rpc(name,args);
-      if(!error)return data&&typeof data==="object"?data:{ok:false,error:"invalid_response"};
+      if(!error){
+        if(cloudConnectionIssue){
+          cloudConnectionIssue=false;
+          renderConnectionBanner();
+        }
+        return data&&typeof data==="object"?data:{ok:false,error:"invalid_response"};
+      }
       lastError=error;
       if(attempt===0)await new Promise(r=>setTimeout(r,350));
     }
     console.error("RPC "+name+" failed",lastError);
+    if(navigator.onLine&&gameToken){
+      cloudConnectionIssue=true;
+      renderConnectionBanner();
+    }
     return {ok:false,error:"rpc_error",message:lastError?.message||"Cloud error"};
   }
 
@@ -1473,19 +1485,79 @@
     return roundUpNice(Math.min(1e300,Number.isFinite(raw)?raw:1e300));
   }
 
+  function renderConnectionBanner(){
+    const banner=$("#connectionBanner");
+    if(!banner)return;
+    const title=$("#connectionBannerTitle"),textEl=$("#connectionBannerText"),stateEl=$("#connectionBannerState");
+
+    if(!navigator.onLine){
+      banner.hidden=false;
+      banner.className="connection-banner offline";
+      if(title)title.textContent="OFFLINE";
+      if(textEl)textEl.textContent=gameToken
+        ?"ไม่มีอินเทอร์เน็ต · เล่นต่อได้และจะเก็บ Local Save ไว้ก่อน ห้ามล้างข้อมูลเว็บไซต์"
+        :"ไม่มีอินเทอร์เน็ต · ตอนนี้เกมทำงานแบบ Local เท่านั้น";
+      if(stateEl)stateEl.textContent="LOCAL ONLY";
+      return;
+    }
+
+    if(connectionRecovering){
+      banner.hidden=false;
+      banner.className="connection-banner reconnecting";
+      if(title)title.textContent="กลับมาออนไลน์แล้ว";
+      if(textEl)textEl.textContent=gameToken
+        ?"กำลังส่งข้อมูล Local ล่าสุดกลับขึ้น Cloud…"
+        :"การเชื่อมต่ออินเทอร์เน็ตกลับมาแล้ว";
+      if(stateEl)stateEl.textContent=gameToken?"SYNCING":"ONLINE";
+      return;
+    }
+
+    if(cloudConnectionIssue&&gameToken){
+      banner.hidden=false;
+      banner.className="connection-banner cloud-error";
+      if(title)title.textContent="CLOUD CONNECTION ERROR";
+      if(textEl)textEl.textContent="อินเทอร์เน็ตยังมีอยู่ แต่ Card Base Cloud ติดต่อไม่ได้ · ข้อมูลใหม่จะเก็บในเครื่องก่อน";
+      if(stateEl)stateEl.textContent="LOCAL BACKUP";
+      return;
+    }
+
+    banner.hidden=true;
+  }
+
   function updateSyncUi(mode="local"){
     const dot=$("#syncDot"),label=$("#accountLabel"),sync=$("#syncLabel");
     if(!dot||!label||!sync)return;
     dot.className="sync-dot";
+
+    if(!navigator.onLine){
+      dot.classList.add("offline");
+      label.textContent=gameAccount&&gameToken?"@"+gameAccount.username:"OFFLINE";
+      sync.textContent="ออฟไลน์ · เก็บ Local ไว้ก่อน";
+      renderConnectionBanner();
+      return;
+    }
+
     if(!gameAccount||!gameToken){
       label.textContent="เล่นแบบ Local";
       sync.textContent="ล็อกอินเพื่อใช้ Cloud Save";
+      renderConnectionBanner();
       return;
     }
+
     label.textContent="@"+gameAccount.username;
-    if(mode==="syncing"){dot.classList.add("syncing");sync.textContent="กำลังซิงก์…"}
-    else if(mode==="error"){dot.classList.add("error");sync.textContent="Cloud มีปัญหา · เก็บ Local ไว้ก่อน"}
-    else{dot.classList.add("online");sync.textContent="Cloud Save พร้อมใช้งาน"}
+    if(mode==="syncing"){
+      dot.classList.add("syncing");
+      sync.textContent="กำลังซิงก์…";
+    }else if(mode==="error"){
+      cloudConnectionIssue=true;
+      dot.classList.add("error");
+      sync.textContent="Cloud มีปัญหา · เก็บ Local ไว้ก่อน";
+    }else{
+      cloudConnectionIssue=false;
+      dot.classList.add("online");
+      sync.textContent="Cloud Save พร้อมใช้งาน";
+    }
+    renderConnectionBanner();
   }
 
   function setAuthMessage(message,type=""){
@@ -4953,12 +5025,43 @@
         closeReveal();closeStand();closeAuth();closeSettings();closeSocialBase();closeMutationLab();closeMutationCleanse();closeGradeAuto();closeTrade()
       }
     });
+    window.addEventListener("offline",()=>{
+      clearTimeout(cloudTimer);
+      connectionRecovering=false;
+      renderConnectionBanner();
+      updateSyncUi("error");
+      toast("📡 ออฟไลน์แล้ว · เกมจะเก็บ Local Save ไว้ก่อน");
+    });
+    window.addEventListener("online",async()=>{
+      connectionRecovering=true;
+      cloudConnectionIssue=false;
+      renderConnectionBanner();
+      updateSyncUi(gameToken?"syncing":"local");
+      if(gameToken&&cloudReady){
+        cloudDirty=true;
+        cloudRevision++;
+        const result=await flushCloudSave({force:true});
+        connectionRecovering=false;
+        if(result?.ok){
+          updateSyncUi("online");
+          toast("☁️ กลับมาออนไลน์ · Cloud Sync สำเร็จ",true);
+        }else{
+          cloudConnectionIssue=true;
+          updateSyncUi("error");
+        }
+      }else{
+        connectionRecovering=false;
+        renderConnectionBanner();
+        updateSyncUi(gameToken?"syncing":"local");
+      }
+    });
+    renderConnectionBanner();
     window.addEventListener("pagehide",flushCloudOnExit);
     window.addEventListener("beforeunload",flushCloudOnExit);
   }
 
   function init(){
-    normalizeSlots();bind();renderSettings();
+    normalizeSlots();bind();renderSettings();renderConnectionBanner();
     if(tradeNotificationsEnabled()&&tradeNotificationPermission()==="granted"){
       void ensureTradeNotificationRegistration();
     }
