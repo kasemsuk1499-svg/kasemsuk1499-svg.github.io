@@ -5877,3 +5877,14 @@ body.ascension-unlock-10 .base-tower-bar,
   }
 }
 
+/* ===== QUIET CLOUD SYNC INDICATOR ===== */
+/* Normal cloud saves stay silent; only a real sync error shows the dot. */
+.sync-dot.online,
+.sync-dot.syncing{
+  visibility:hidden;
+  animation:none!important;
+}
+.sync-dot.error{
+  visibility:visible;
+}
+
