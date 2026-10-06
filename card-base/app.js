@@ -528,7 +528,7 @@
     s.cardIndex=normalizeCardIndex(s.cardIndex);
     const rawItems=s.items&&typeof s.items==="object"&&!Array.isArray(s.items)?s.items:{};
     s.items={
-      level100Ticket:Math.max(0,Math.min(1000000,Math.floor(Number(rawItems.level100Ticket??rawItems.level100Ticket)||0)))
+      level100Ticket:Math.max(0,Math.min(1000000,Math.floor(Number(rawItems.level100Ticket??rawItems.level40Ticket)||0)))
     };
     s.serverGiftClaims=s.serverGiftClaims&&typeof s.serverGiftClaims==="object"&&!Array.isArray(s.serverGiftClaims)
       ? s.serverGiftClaims
