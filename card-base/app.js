@@ -15,7 +15,7 @@
   const TRADE_NOTIFY_PREF_KEY = "card-base-trade-notify-enabled-v1";
   const TRADE_NOTIFIED_KEY_PREFIX = "card-base-trade-notified-v1:";
   const CARD_MIN_ID = 1;
-  const CARD_MAX_ID = 120;
+  const CARD_MAX_ID = 130;
   const CARD_NAMES = Object.freeze({
     1:"Rover",
     2:"Cartethyia",
@@ -136,7 +136,17 @@
     117:"Hakkai Shiba",
     118:"Chifuyu",
     119:"Baji Keisuke",
-    120:"Takashi Mitsuya"
+    120:"Takashi Mitsuya",
+    121:"Fai",
+    122:"Juri",
+    123:"Rosie",
+    124:"Yeonhee",
+    125:"Eileene",
+    126:"Teo",
+    127:"Lu Bu",
+    128:"Rin",
+    129:"Shane",
+    130:"Rook"    
   });
   const ROLL_MS = 2500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
