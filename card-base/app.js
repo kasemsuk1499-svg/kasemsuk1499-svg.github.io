@@ -380,6 +380,8 @@
   let gradeAutoSetupUid = null;
   let mutationLabTargetUid = null;
   let mutationCleanseTargetUid = null;
+  let collectionSellMode = false;
+  let collectionSellSelection = new Set();
   let idPackAutoTimer = 0;
   let idPackAutoIndex = null;
   let idPackAutoCount = 0;
@@ -3004,9 +3006,15 @@
     if(activeStand!==null&&state.placed[activeStand]===c.uid)renderStandModal();
   }
 
-  function renderCollection(){
-    renderItemBag();
-    const q=$("#searchId").value.trim(),mode=$("#sortCards").value;
+  function collectionSellEligible(card){
+    if(!card)return false;
+    if(card.locked||cardIsTradeLocked(card)||state.placed.includes(card.uid))return false;
+    if(state.gradeAuto&&state.gradeAuto.uid===card.uid)return false;
+    return true;
+  }
+
+  function collectionFilteredCards(){
+    const q=($("#searchId")?.value||"").trim(),mode=$("#sortCards")?.value||"power";
     let arr=[...state.cards];
     if(q){
       const needle=q.toLowerCase();
@@ -3018,11 +3026,121 @@
       if(mode==="new")return b.uid-a.uid;
       return cardIncome(b)-cardIncome(a);
     });
+    return arr;
+  }
+
+  function pruneCollectionSellSelection(){
+    const live=new Set(state.cards.filter(collectionSellEligible).map(c=>c.uid));
+    collectionSellSelection=new Set([...collectionSellSelection].filter(uid=>live.has(uid)));
+  }
+
+  function selectedCollectionSellCards(){
+    pruneCollectionSellSelection();
+    return [...collectionSellSelection]
+      .map(uid=>state.cards.find(c=>c.uid===uid))
+      .filter(collectionSellEligible);
+  }
+
+  function renderCollectionSellUi(){
+    const modeBtn=$("#bulkSellModeBtn"),controls=$("#bulkSellTopControls"),bar=$("#bulkSellBar");
+    const selected=selectedCollectionSellCards();
+    const total=selected.reduce((sum,c)=>sum+sellValue(c),0);
+    if(modeBtn){
+      modeBtn.hidden=collectionSellMode;
+      modeBtn.classList.toggle("active",collectionSellMode);
+    }
+    if(controls)controls.hidden=!collectionSellMode;
+    if(bar)bar.hidden=!collectionSellMode;
+    const count=$("#bulkSellCount"),totalEl=$("#bulkSellTotal"),confirm=$("#bulkSellConfirmBtn");
+    if(count)count.textContent=String(selected.length);
+    if(totalEl)totalEl.textContent=fmt(total);
+    if(confirm){
+      confirm.disabled=!selected.length;
+      confirm.textContent=selected.length?"ขาย "+selected.length+" ใบ · "+fmt(total):"ขายที่เลือก";
+    }
+    document.body.classList.toggle("collection-selling",collectionSellMode);
+  }
+
+  function setCollectionSellMode(enabled){
+    collectionSellMode=!!enabled;
+    if(!collectionSellMode)collectionSellSelection.clear();
+    renderCollection();
+  }
+
+  function toggleCollectionSellCard(uid){
+    const card=state.cards.find(c=>c.uid===uid);
+    if(!collectionSellEligible(card)){
+      if(card?.locked)toast("การ์ดนี้ล็อกอยู่ 🔒");
+      else if(card&&state.placed.includes(card.uid))toast("ถอดการ์ดจากฐานก่อนขาย");
+      else if(cardIsTradeLocked(card))toast("การ์ดนี้ถูกล็อกไว้ใน Trade");
+      else if(card&&state.gradeAuto?.uid===card.uid)toast("หยุด Auto Grade ก่อนขาย");
+      return;
+    }
+    if(collectionSellSelection.has(uid))collectionSellSelection.delete(uid);
+    else collectionSellSelection.add(uid);
+    renderCollection();
+  }
+
+  function selectVisibleSellCards({junkOnly=false}={}){
+    const visible=collectionFilteredCards();
+    let added=0;
+    visible.forEach(c=>{
+      if(!collectionSellEligible(c))return;
+      if(junkOnly&&(Number(c.grade)!==0||cardMutationIds(c).length>0))return;
+      if(!collectionSellSelection.has(c.uid)){collectionSellSelection.add(c.uid);added++}
+    });
+    if(!added)toast(junkOnly?"ไม่มี Grade C + Normal ที่ขายได้ในรายการนี้":"ไม่มีการ์ดที่ขายได้เพิ่ม");
+    renderCollection();
+  }
+
+  function confirmCollectionBulkSell(){
+    const cards=selectedCollectionSellCards();
+    if(!cards.length){toast("ยังไม่ได้เลือกการ์ดที่จะขาย");return}
+    const total=cards.reduce((sum,c)=>sum+sellValue(c),0);
+    const special=cards.filter(c=>c.grade>0||cardMutationIds(c).length>0||c.tier>=5||c.level>1||awakeningStars(c)>0).length;
+    const warning=special
+      ? "\n\n⚠ มี "+special+" ใบที่ไม่ใช่ Grade C Normal / มีการลงทุนหรือความหายากสูง"
+      : "";
+    const ok=window.confirm(
+      "ขายการ์ด "+cards.length+" ใบ ?"+
+      "\nได้รับทั้งหมด "+fmt(total)+
+      warning+
+      "\n\nขายแล้วนำกลับคืนไม่ได้"
+    );
+    if(!ok)return;
+
+    accrueIncomeToNow();
+    const uids=new Set(cards.map(c=>c.uid));
+    state.money=clampMoney(state.money+total);
+    state.cards=state.cards.filter(c=>!uids.has(c.uid));
+    if(state.lounge?.selected)state.lounge.selected=state.lounge.selected.filter(uid=>!uids.has(uid));
+    collectionSellSelection.clear();
+    collectionSellMode=false;
+    normalizeSlots();
+    toast("💸 ขาย "+cards.length+" ใบ · +"+fmt(total),true);
+    renderAll();
+    save();
+  }
+
+  function renderCollection(){
+    renderItemBag();
+    const arr=collectionFilteredCards();
+    pruneCollectionSellSelection();
     const wrap=$("#collection"); wrap.innerHTML="";
+    wrap.classList.toggle("bulk-sell-mode",collectionSellMode);
+    renderCollectionSellUi();
     $("#emptyCollection").style.display=arr.length?"none":"block";
     arr.forEach(c=>{
       const t=TIERS[c.tier],g=GRADES[c.grade],placed=state.placed.includes(c.uid),tradeLocked=cardIsTradeLocked(c);
-      const el=document.createElement("article"); el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade+(tradeLocked?" trade-locked":""); el.dataset.cardUid=c.uid;
+      const sellEligible=collectionSellEligible(c),sellSelected=collectionSellSelection.has(c.uid);
+      const el=document.createElement("article");
+      el.className="card-item tier-shell tier-"+c.tier+" grade-shell-"+c.grade+
+        (tradeLocked?" trade-locked":"")+
+        (collectionSellMode?" bulk-sell-card":"")+
+        (collectionSellMode&&sellEligible?" bulk-sell-eligible":"")+
+        (collectionSellMode&&!sellEligible?" bulk-sell-protected":"")+
+        (sellSelected?" bulk-sell-selected":"");
+      el.dataset.cardUid=c.uid;
       el.innerHTML=
         '<div class="card-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
           '<img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div>'+
@@ -3031,6 +3149,10 @@
             '<div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div>'+
             '<div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-card-face-stat="level">'+c.level+'</b></span><strong data-card-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div>'+
           '</div>'+
+          (collectionSellMode?'<div class="bulk-sell-overlay">'+
+            '<span class="bulk-sell-check">'+(sellSelected?'✓':sellEligible?'＋':'🔒')+'</span>'+
+            '<div><small>'+(sellEligible?'SELL VALUE':'PROTECTED')+'</small><strong>'+(sellEligible?fmt(sellValue(c)):c.locked?'LOCKED':placed?'ON BASE':tradeLocked?'TRADE LOCK':'AUTO GRADE')+'</strong></div>'+
+          '</div>':'')+
         '</div>'+
         '<div class="card-body">'+
           '<div class="card-summary-stats">'+
@@ -3066,6 +3188,11 @@
         '</div>';
       const img=el.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
       el.addEventListener("click",ev=>{
+        if(collectionSellMode){
+          ev.preventDefault();
+          toggleCollectionSellCard(c.uid);
+          return;
+        }
         const btn=ev.target.closest("button[data-a]");if(!btn)return;
         const a=btn.dataset.a;
         if(a==="place")togglePlace(c.uid);
@@ -4682,8 +4809,15 @@
 
   function toggleLock(uid){const c=state.cards.find(x=>x.uid===uid);if(!c)return;if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}c.locked=!c.locked;renderAll()}
   function sellCard(uid){
-    const c=state.cards.find(x=>x.uid===uid);if(!c||c.locked||cardIsTradeLocked(c)||state.placed.includes(uid))return;
-    const value=sellValue(c);state.money=clampMoney(state.money+value);state.cards=state.cards.filter(x=>x.uid!==uid);toast("ขายการ์ดแล้ว +"+fmt(value));renderAll();
+    const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    if(!collectionSellEligible(c)){toast("การ์ดใบนี้ยังขายไม่ได้");return}
+    const value=sellValue(c);
+    state.money=clampMoney(state.money+value);
+    state.cards=state.cards.filter(x=>x.uid!==uid);
+    if(state.lounge?.selected)state.lounge.selected=state.lounge.selected.filter(x=>x!==uid);
+    toast("ขายการ์ดแล้ว +"+fmt(value));
+    renderAll();
+    save();
   }
 
   function doRebirth(){
@@ -4888,6 +5022,12 @@
     });
     $("#closeReveal").addEventListener("click",closeReveal);$("#closeStandModal").addEventListener("click",closeStand);$("[data-close-modal]").addEventListener("click",closeStand);
     $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);
+    $("#bulkSellModeBtn")?.addEventListener("click",()=>setCollectionSellMode(true));
+    $("#bulkSellExitBtn")?.addEventListener("click",()=>setCollectionSellMode(false));
+    $("#bulkSellClearBtn")?.addEventListener("click",()=>{collectionSellSelection.clear();renderCollection()});
+    $("#bulkSellSelectVisibleBtn")?.addEventListener("click",()=>selectVisibleSellCards());
+    $("#bulkSellSelectJunkBtn")?.addEventListener("click",()=>selectVisibleSellCards({junkOnly:true}));
+    $("#bulkSellConfirmBtn")?.addEventListener("click",confirmCollectionBulkSell);
     $("#indexSearch").addEventListener("input",renderCardIndex);$("#indexFilter").addEventListener("change",renderCardIndex);
     $("#rebirthBtn").addEventListener("click",doRebirth);
     $("#autoEquipBestBtn")?.addEventListener("click",autoEquipBest);
@@ -4906,7 +5046,10 @@
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
     document.addEventListener("keydown",e=>{
       if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling&&!state.fullAuto)manualRoll();
-      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSettings();closeSocialBase();closeMutationLab();closeMutationCleanse();closeGradeAuto();closeTrade()}
+      if(e.key==="Escape"){
+        if(collectionSellMode){setCollectionSellMode(false);return}
+        closeReveal();closeStand();closeAuth();closeSettings();closeSocialBase();closeMutationLab();closeMutationCleanse();closeGradeAuto();closeTrade()
+      }
     });
     window.addEventListener("pagehide",flushCloudOnExit);
     window.addEventListener("beforeunload",flushCloudOnExit);
