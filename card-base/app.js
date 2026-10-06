@@ -607,14 +607,14 @@
         const controller=new AbortController();
         const timeout=setTimeout(()=>controller.abort(),12000);
         try{
-          const response=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+encodeURIComponent(name),{
+          const response=await fetch(SUPABASE_URL+"/rest/v1/rpc/cb_gateway",{
             method:"POST",
             headers:{
               "Content-Type":"application/json",
               "apikey":SUPABASE_PUBLISHABLE_KEY,
               "Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY
             },
-            body:JSON.stringify(args||{}),
+            body:JSON.stringify({p_action:name,p_args:args||{}}),
             signal:controller.signal,
             cache:"no-store",
             credentials:"omit",
@@ -670,14 +670,14 @@
     const byteSize=typeof TextEncoder==="function"?new TextEncoder().encode(body).length:body.length*2;
     if(byteSize>60000)return rpc("cb_save_state",args);
     try{
-      const response=await fetch(SUPABASE_URL+"/rest/v1/rpc/cb_save_state",{
+      const response=await fetch(SUPABASE_URL+"/rest/v1/rpc/cb_gateway",{
         method:"POST",
         headers:{
           "Content-Type":"application/json",
           "apikey":SUPABASE_PUBLISHABLE_KEY,
           "Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY
         },
-        body,
+        body:JSON.stringify({p_action:"cb_save_state",p_args:args}),
         cache:"no-store",
         credentials:"omit",
         referrerPolicy:"no-referrer",
