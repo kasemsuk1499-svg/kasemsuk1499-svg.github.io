@@ -3677,6 +3677,60 @@
     state.placed[empty]=uid;toast("วางการ์ดที่แท่น "+(empty+1));renderAll();
   }
 
+  function autoEquipBest(){
+    normalizeSlots();
+    const limit=standLimit();
+    if(!state.cards.length||limit<=0){
+      toast("ยังไม่มีการ์ดให้สวมในฐาน");
+      return;
+    }
+
+    const before=totalIncome();
+    const next=new Array(limit).fill(null);
+    const reserved=new Set();
+
+    // การ์ดที่ติด Trade Lock ต้องอยู่ตำแหน่งเดิม เพื่อไม่ให้ชน integrity check ฝั่งเซิร์ฟเวอร์
+    for(let slot=0;slot<Math.min(limit,state.placed.length);slot++){
+      const uid=state.placed[slot];
+      const card=uid?state.cards.find(c=>c.uid===uid):null;
+      if(card&&cardIsTradeLocked(card)){
+        next[slot]=card.uid;
+        reserved.add(card.uid);
+      }
+    }
+
+    const ranked=state.cards
+      .filter(card=>!reserved.has(card.uid)&&!cardIsTradeLocked(card))
+      .sort((a,b)=>{
+        const ai=cardIncome(a),bi=cardIncome(b);
+        if(ai!==bi)return bi>ai?1:-1;
+        return b.tier-a.tier||b.grade-a.grade||b.level-a.level||awakeningStars(b)-awakeningStars(a)||a.uid-b.uid;
+      });
+
+    let pick=0;
+    for(let slot=0;slot<limit&&pick<ranked.length;slot++){
+      if(next[slot])continue;
+      next[slot]=ranked[pick++].uid;
+    }
+
+    const changed=next.some((uid,slot)=>state.placed[slot]!==uid);
+    state.placed=next;
+    const after=totalIncome();
+    const placed=next.filter(Boolean).length;
+
+    if(!changed){
+      toast("ฐานนี้สวมการ์ดที่ดีที่สุดอยู่แล้ว ✨",true);
+      return;
+    }
+
+    const gain=Math.max(0,after-before);
+    toast(
+      "สวม Best "+placed+" ใบแล้ว"+(gain>0?" · +"+fmt(gain)+"/s":"")+" ⚡",
+      true
+    );
+    renderAll();
+  }
+
   function replaceNumericClass(el,prefix,value){
     if(!el)return;
     [...el.classList].forEach(cls=>{if(cls.startsWith(prefix))el.classList.remove(cls)});
@@ -4331,6 +4385,7 @@
     $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);
     $("#indexSearch").addEventListener("input",renderCardIndex);$("#indexFilter").addEventListener("change",renderCardIndex);
     $("#rebirthBtn").addEventListener("click",doRebirth);
+    $("#autoEquipBestBtn")?.addEventListener("click",autoEquipBest);
     $("#tierFilters").addEventListener("change",e=>{
       const input=e.target.closest("input[data-tier]");if(!input)return;
       const tier=Number(input.dataset.tier);
