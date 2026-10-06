@@ -203,18 +203,22 @@
     const activeMutation=mutation2&&mutation?(Math.random()<.5?mutation:mutation2):(mutation||mutation2);
     const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
 
-    if(kind==="onryo" && particles.filter(p=>p.el===target.el&&p.kind==="onryo").length>=5) return;
+    if(kind==="onryo" && particles.filter(p=>p.el===target.el&&p.kind==="onryo").length>=2) return;
 
     const edge=Math.random();
     let nx,ny,onryoRot=0;
     if(kind==="onryo"){
-      const spots=[
-        [.10,.18,-.48],[.88,.22,.46],[.07,.62,-.28],[.92,.64,.30],[.50,.84,.04]
-      ];
-      const spot=spots[Math.floor(Math.random()*spots.length)];
-      nx=spot[0]+(Math.random()-.5)*.035;
-      ny=spot[1]+(Math.random()-.5)*.045;
-      onryoRot=spot[2]+(Math.random()-.5)*.08;
+      const activeSwords=particles.filter(p=>p.el===target.el&&p.kind==="onryo");
+      const leftTaken=activeSwords.some(p=>p.onryoSide==="left");
+      const side=leftTaken?"right":"left";
+      const spot=side==="left"
+        ? [.46,.50,-.72]
+        : [.54,.50,.72];
+      nx=spot[0];
+      ny=spot[1];
+      onryoRot=spot[2];
+      // Keep the two main ghost katanas crossed in a stable X composition.
+      var onryoSide=side;
     }else if(edge<.34){nx=Math.random();ny=.06+Math.random()*.18}
     else if(edge<.67){nx=Math.random();ny=.72+Math.random()*.24}
     else {nx=Math.random()<.5?.05:.95;ny=.12+Math.random()*.78}
@@ -246,7 +250,8 @@
       vr:kind==="onryo"?0:kind==="amaterasu"?(0.55+Math.random()*.35):(Math.random()-.5)*(kind==="glitch"?3.4:1.1),
       key,kind,mutation:activeMutation,
       alpha:kind==="onryo"?.72:Math.min(1,(.56+Math.random()*.36)*(target.visitor?1.12:1)),
-      pulse:Math.random()*Math.PI*2
+      pulse:Math.random()*Math.PI*2,
+      onryoSide:kind==="onryo"?onryoSide:null
     });
   }
 
@@ -262,7 +267,7 @@
       ? (MUTATION_COLORS[activeMutation]||"#ffffff")
       : (computed.getPropertyValue("--tier").trim()||"#ffffff");
 
-    if(activeMutation===22 && target.el.querySelectorAll(".onryo-blade-particle").length>=5) return;
+    if(activeMutation===22 && target.el.querySelectorAll(".onryo-blade-particle").length>=2) return;
 
     const p=document.createElement("i");
     p.className="mobile-card-particle"
@@ -275,13 +280,16 @@
     const edge=Math.random();
     let x,y,staticRot=0;
     if(activeMutation===22){
-      const spots=[
-        [10,18,-28],[88,22,26],[7,62,-17],[92,64,18],[50,84,2]
-      ];
-      const spot=spots[Math.floor(Math.random()*spots.length)];
-      x=spot[0]+(Math.random()-.5)*3;
-      y=spot[1]+(Math.random()-.5)*4;
-      staticRot=spot[2]+(Math.random()-.5)*5;
+      const existing=[...target.el.querySelectorAll(".onryo-blade-particle")];
+      const leftTaken=existing.some(el=>el.dataset.onryoSide==="left");
+      const side=leftTaken?"right":"left";
+      const spot=side==="left"
+        ? [46,50,-41]
+        : [54,50,41];
+      x=spot[0];
+      y=spot[1];
+      staticRot=spot[2];
+      p.dataset.onryoSide=side;
     }else if(edge<.42){x=8+Math.random()*84;y=72+Math.random()*22}
     else if(edge<.72){x=8+Math.random()*84;y=6+Math.random()*18}
     else{x=Math.random()<.5?5+Math.random()*8:87+Math.random()*8;y=18+Math.random()*66}
