@@ -138,6 +138,7 @@
   const GRADE_ROLL_MS = 450;
   const ID_PACK_AUTO_MS = 1200;
   const ROTATING_SHOP_RESTOCK_MS = 10*60*1000;
+  const CLOUD_IDLE_SAVE_MS = 20000;
   const ROTATING_SHOP_SLOTS = 5;
   const ASCENSION_LEVEL_CAP = 40;
   const ASCENSION_PERK_MAX = 10;
@@ -355,6 +356,9 @@
   let cloudReady = false;
   let cloudLoading = false;
   let cloudTimer = 0;
+  let cloudDirty = false;
+  let cloudRevision = 0;
+  let lastExitCloudFlushAt = 0;
   let onlineProfile = null;
   let onlineHeartbeatTimer = 0;
   let mutationEventTimer = 0;
@@ -557,10 +561,21 @@
     return {...state,autoRolling:false,fullAuto:false,targetFound:false,gradeAuto:null,rollingUntil:0};
   }
 
-  function scheduleCloudSave(){
-    if(!cloudReady||cloudLoading||!gameToken||!supabaseClient)return;
+  function cloudAutoBusy(){
+    return !!(state.autoRolling||state.fullAuto||state.gradeAuto||idPackAutoIndex!==null);
+  }
+
+  function armCloudSave(){
     clearTimeout(cloudTimer);
-    cloudTimer=setTimeout(()=>flushCloudSave(),900);
+    if(!cloudDirty||!cloudReady||cloudLoading||!gameToken||!supabaseClient||cloudAutoBusy())return;
+    cloudTimer=setTimeout(()=>flushCloudSave(),CLOUD_IDLE_SAVE_MS);
+  }
+
+  function scheduleCloudSave(){
+    if(!gameToken)return;
+    cloudDirty=true;
+    cloudRevision++;
+    armCloudSave();
     updateSyncUi("syncing");
   }
 
@@ -610,7 +625,7 @@
   }
 
   function clearGameSession(reason=""){
-    gameToken=null;gameAccount=null;onlineProfile=null;cloudReady=false;cloudLoading=false;
+    gameToken=null;gameAccount=null;onlineProfile=null;cloudReady=false;cloudLoading=false;cloudDirty=false;clearTimeout(cloudTimer);
     tradeCache={incoming:[],outgoing:[],recent:[]};tradeLockedGids=new Set();
     mutationEventStatus=null;
     localStorage.removeItem(GAME_SESSION_KEY);
@@ -625,11 +640,43 @@
     clearGameSession("Session หมดอายุหรือบัญชีนี้ถูกเปิดจากอุปกรณ์อื่น · กรุณาเข้าสู่ระบบใหม่");
   }
 
-  async function flushCloudSave(){
+  async function keepaliveCloudSave(snapshot){
+    const args={p_token:gameToken,p_state:snapshot};
+    const body=JSON.stringify(args);
+    const byteSize=typeof TextEncoder==="function"?new TextEncoder().encode(body).length:body.length*2;
+    if(byteSize>60000)return rpc("cb_save_state",args);
+    try{
+      const response=await fetch(SUPABASE_URL+"/rest/v1/rpc/cb_save_state",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "apikey":SUPABASE_PUBLISHABLE_KEY,
+          "Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY
+        },
+        body,
+        cache:"no-store",
+        keepalive:true
+      });
+      let data=null;
+      try{data=await response.json()}catch{}
+      if(!response.ok)return {ok:false,error:"rpc_error",message:(data&&data.message)||("HTTP "+response.status)};
+      return data&&typeof data==="object"?data:{ok:false,error:"invalid_response"};
+    }catch(err){
+      return {ok:false,error:"rpc_error",message:String(err&&err.message||err)};
+    }
+  }
+
+  async function flushCloudSave(options={}){
+    const force=!!options.force;
+    const keepalive=!!options.keepalive;
     if(!cloudReady||cloudLoading||!gameToken||!supabaseClient)return {ok:false,error:"cloud_not_ready"};
+    if(!force&&!cloudDirty)return {ok:true,skipped:true};
     clearTimeout(cloudTimer);
+    const revision=cloudRevision;
     const snapshot=JSON.parse(JSON.stringify(cloudPayload()));
-    const result=await rpc("cb_save_state",{p_token:gameToken,p_state:snapshot});
+    const result=keepalive
+      ? await keepaliveCloudSave(snapshot)
+      : await rpc("cb_save_state",{p_token:gameToken,p_state:snapshot});
     if(!result.ok){
       if(result.error==="invalid_session")invalidateGameSession();
       else if(result.error==="trade_card_locked"){
@@ -638,6 +685,8 @@
       }else updateSyncUi("error");
       return result;
     }
+    if(cloudRevision===revision)cloudDirty=false;
+    else armCloudSave();
     if(Number(result.trade_receipts)>0&&result.state){
       state=hydrateState(result.state);
       localStorage.setItem(SAVE_KEY,JSON.stringify(state));
@@ -645,14 +694,27 @@
       toast("Trade สำเร็จ · คลังการ์ดอัปเดตแล้ว ✨",true);
       setTimeout(()=>refreshTrades(true),0);
     }
-    updateSyncUi("online");
+    updateSyncUi(cloudDirty?"syncing":"online");
     publishPublicBase();
     return result;
   }
 
-  function save(){
+  function saveLocalOnly(){
     localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+  }
+
+  function save(){
+    saveLocalOnly();
     scheduleCloudSave();
+  }
+
+  function flushCloudOnExit(){
+    saveLocalOnly();
+    if(!gameToken||!cloudReady||cloudLoading)return;
+    const now=Date.now();
+    if(now-lastExitCloudFlushAt<1500)return;
+    lastExitCloudFlushAt=now;
+    void flushCloudSave({force:true,keepalive:true});
   }
 
   function fmt(n){
@@ -1658,7 +1720,7 @@
 
   async function logoutAccount(){
     if(!gameToken)return;
-    await flushCloudSave();
+    await flushCloudSave({force:true});
     await rpc("cb_logout",{p_token:gameToken});
     clearGameSession();
     state=newState();
@@ -1827,8 +1889,7 @@
 
   async function heartbeatOnline(){
     if(!gameToken||!supabaseClient)return;
-    if(cloudReady&&!cloudLoading)await flushCloudSave();
-    else await publishPublicBase();
+    await publishPublicBase();
     await tickMutationEvent();
   }
 
@@ -4090,7 +4151,7 @@
   function economyTick(){
     if(accrueIncomeToNow()>0){
       renderHeader();renderRebirth();
-      if(Math.random()<0.15)save();
+      if(Math.random()<0.15)saveLocalOnly();
     }
   }
 
@@ -4268,7 +4329,8 @@
       if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling&&!state.fullAuto)manualRoll();
       if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSettings();closeSocialBase();closeGradeAuto();closeTrade()}
     });
-    window.addEventListener("beforeunload",save);
+    window.addEventListener("pagehide",flushCloudOnExit);
+    window.addEventListener("beforeunload",flushCloudOnExit);
   }
 
   function init(){
@@ -4298,7 +4360,7 @@
     document.addEventListener("visibilitychange",()=>{
       if(document.visibilityState==="hidden"){
         if(state.autoRolling||state.fullAuto)setPackAutoSession(true);
-        save();
+        flushCloudOnExit();
       }else{
         catchUpActiveSystems();
       }
