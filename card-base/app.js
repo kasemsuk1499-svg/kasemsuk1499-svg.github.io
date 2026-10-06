@@ -215,6 +215,11 @@
     {name:"Amaterasu",icon:"⦿",color:"#ff2b35",income:15.00,luck:2.35,weight:.004},
     {name:"Onryō no Yaiba",icon:"刀",color:"#c548ff",income:3.90,luck:1.415,weight:.25}
   ];
+  // Display order only. Keep mutation IDs stable for saves, trades and FX.
+  // Onryō no Yaiba is mutation #22 but visually belongs between Void (#8) and Prismatic (#9).
+  const MUTATION_DISPLAY_ORDER = [
+    0,1,2,3,4,5,6,7,8,22,9,10,11,12,13,14,15,16,17,18,19,20,21
+  ];
   // Mutation Storm pool totals 100%. New ultra mutations are rarer, but obtainable.
   const MUTATION_EVENT_WEIGHTS = [0,11.058878,10.598092,10.137305,9.676519,9.215732,8.754945,8.294159,7.372586,6.451012,5.068653,3.225506,2.303933,.232721,.186176,.139632,.111706,.093088,.074471,.055853,.027926,.009309,6.911799];
   const MUTATION_EVENT_PULSE_CHANCE = 0.005; // 0.5% per Normal displayed card every 30 sec
@@ -2821,7 +2826,8 @@
     ).join("");
 
     const mOdds=mutationOdds(),mutationWrap=$("#mutationOdds");
-    if(mutationWrap)mutationWrap.innerHTML=MUTATIONS.map((m,i)=>{
+    if(mutationWrap)mutationWrap.innerHTML=MUTATION_DISPLAY_ORDER.map(i=>{
+      const m=MUTATIONS[i];
       const eventRate=i?chanceText(MUTATION_EVENT_WEIGHTS[i]/100):"—";
       return '<div class="odd mutation-odd '+(i===0?'normal':'')+'" style="--tier:'+m.color+'"><span>'+m.icon+' '+m.name+
         ' <small>Income ×'+m.income.toFixed(2)+' · Luck ×'+m.luck.toFixed(2)+' · Event '+eventRate+'</small></span><b>'+chanceText(mOdds[i])+'</b></div>';
