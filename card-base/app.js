@@ -213,10 +213,10 @@
     {name:"Event Horizon",icon:"◉",color:"#8a64ff",income:12.00,luck:2.16,weight:.009},
     {name:"Rune Circuit",icon:"⌬",color:"#ffe47a",income:13.50,luck:2.25,weight:.006},
     {name:"Amaterasu",icon:"⦿",color:"#ff2b35",income:15.00,luck:2.35,weight:.004},
-    {name:"Onryō no Yaiba",icon:"刀",color:"#c548ff",income:3.90,luck:1.415,weight:.25}
+    {name:"Chokun",icon:"刀",color:"#c548ff",income:3.90,luck:1.415,weight:.25}
   ];
   // Display order only. Keep mutation IDs stable for saves, trades and FX.
-  // Onryō no Yaiba is mutation #22 but visually belongs between Void (#8) and Prismatic (#9).
+  // Chokun is mutation #22 but visually belongs between Void (#8) and Prismatic (#9).
   const MUTATION_DISPLAY_ORDER = [
     0,1,2,3,4,5,6,7,8,22,9,10,11,12,13,14,15,16,17,18,19,20,21
   ];
@@ -883,7 +883,7 @@
       19:"Horizon",
       20:"Rune",
       21:"Amaterasu",
-      22:"Onryō"
+      22:"Chokun"
     };
     return map[id]||MUTATIONS[id]?.name||"Mutation";
   }
