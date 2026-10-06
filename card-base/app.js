@@ -653,7 +653,7 @@
 
   function clearGameSession(reason=""){
     gameToken=null;gameAccount=null;onlineProfile=null;cloudReady=false;cloudLoading=false;cloudDirty=false;clearTimeout(cloudTimer);
-    tradeCache={incoming:[],outgoing:[],recent:[]};tradeLockedGids=new Set();
+    tradeCache={incoming:[],outgoing:[],recent:[]};tradeLockedGids=new Set();updateTradeAttention();
     mutationEventStatus=null;
     localStorage.removeItem(GAME_SESSION_KEY);
     renderAuth();renderOnlineShell();renderMutationEvent();updateSyncUi("local");
@@ -1632,6 +1632,17 @@
       toast("เปิดแจ้งเตือน Trade นอกจอแล้ว 🔔",true);
     }else if(permission==="denied"){
       toast("การแจ้งเตือนถูกบล็อกในเบราว์เซอร์ · ต้องอนุญาตจาก Site Settings");
+    }
+    renderSettings();
+  }
+
+  async function maybeRequestTradeNotificationPermission(){
+    if(!tradeNotificationsEnabled()||!("Notification" in window)||Notification.permission!=="default")return;
+    let permission="default";
+    try{permission=await Notification.requestPermission()}catch{}
+    if(permission==="granted"){
+      await ensureTradeNotificationRegistration();
+      toast("เปิดแจ้งเตือนข้อเสนอ Trade แล้ว 🔔",true);
     }
     renderSettings();
   }
@@ -4398,7 +4409,10 @@
       if(btn.dataset.tab==="collection")renderCollection();
       if(btn.dataset.tab==="lounge")renderLounge();
       if(btn.dataset.tab==="index")renderCardIndex();
-      if(btn.dataset.tab==="online")refreshOnline();
+      if(btn.dataset.tab==="online"){
+        void maybeRequestTradeNotificationPermission();
+        refreshOnline();
+      }
     }));
     $("#loungeSoundBtn")?.addEventListener("click",()=>{
       loungeEnsureState();
@@ -4613,6 +4627,15 @@
     });
     window.addEventListener("focus",catchUpActiveSystems);
     initCloud();
+    if(new URLSearchParams(location.search).get("open")==="trades"){
+      setTimeout(()=>{
+        openTradeCenter();
+        try{
+          const clean=location.pathname+location.hash;
+          history.replaceState(null,"",clean);
+        }catch{}
+      },350);
+    }
   }
 
   init();
