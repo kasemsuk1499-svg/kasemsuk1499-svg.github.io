@@ -6698,3 +6698,9 @@ body.collection-selling #panel-collection{
   .bulk-sell-overlay strong{max-width:74px;font-size:8px}
   .bulk-sell-bar{grid-template-columns:minmax(0,1fr) 116px}
 }
+
+.collection-sell-top-controls[hidden],
+.bulk-sell-bar[hidden],
+.collection-sell-toggle[hidden]{
+  display:none!important;
+}
