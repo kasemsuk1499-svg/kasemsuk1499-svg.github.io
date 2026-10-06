@@ -740,6 +740,7 @@
   async function flushCloudSave(options={}){
     const force=!!options.force;
     const keepalive=!!options.keepalive;
+    if(!navigator.onLine)return {ok:false,error:"offline"};
     if(!cloudReady||cloudLoading||!gameToken||!supabaseClient)return {ok:false,error:"cloud_not_ready"};
     if(!force&&!cloudDirty)return {ok:true,skipped:true};
     clearTimeout(cloudTimer);
@@ -1772,12 +1773,24 @@
     // Direct RPC client only. Keeping the game self-hosted removes third-party
     // executable JavaScript from the page and narrows the CSP attack surface.
     supabaseClient=makeRestRpcClient();
+
+    // Do not destroy a valid remembered session just because the game opened
+    // without internet. Keep playing from the local snapshot and reconnect later.
+    if(!navigator.onLine){
+      cloudReady=false;
+      cloudLoading=false;
+      renderAuth();
+      renderOnlineShell();
+      renderConnectionBanner();
+      return;
+    }
+
     if(gameToken){
       const me=await fetchMe();
       if(me){
         await loadCloudState();
         await heartbeatOnline();
-      }else{
+      }else if(navigator.onLine){
         invalidateGameSession();
       }
     }else{
@@ -5037,22 +5050,39 @@
       cloudConnectionIssue=false;
       renderConnectionBanner();
       updateSyncUi(gameToken?"syncing":"local");
-      if(gameToken&&cloudReady){
-        cloudDirty=true;
-        cloudRevision++;
-        const result=await flushCloudSave({force:true});
-        connectionRecovering=false;
-        if(result?.ok){
-          updateSyncUi("online");
-          toast("☁️ กลับมาออนไลน์ · Cloud Sync สำเร็จ",true);
-        }else{
-          cloudConnectionIssue=true;
-          updateSyncUi("error");
-        }
-      }else{
+
+      if(!gameToken){
         connectionRecovering=false;
         renderConnectionBanner();
-        updateSyncUi(gameToken?"syncing":"local");
+        updateSyncUi("local");
+        toast("📡 กลับมาออนไลน์แล้ว",true);
+        return;
+      }
+
+      if(!cloudReady){
+        const me=await fetchMe();
+        if(!me){
+          connectionRecovering=false;
+          cloudConnectionIssue=true;
+          updateSyncUi("error");
+          return;
+        }
+        // Local snapshot may contain progress made while the app was opened offline.
+        // Mark it dirty and upload it instead of silently replacing it.
+        cloudReady=true;
+      }
+
+      cloudDirty=true;
+      cloudRevision++;
+      const result=await flushCloudSave({force:true});
+      connectionRecovering=false;
+      if(result?.ok){
+        updateSyncUi("online");
+        await heartbeatOnline();
+        toast("☁️ กลับมาออนไลน์ · Cloud Sync สำเร็จ",true);
+      }else{
+        cloudConnectionIssue=true;
+        updateSyncUi("error");
       }
     });
     renderConnectionBanner();
@@ -5076,7 +5106,7 @@
       setPackAutoSession(false);
     }
     setInterval(economyTick,1000);
-    onlineHeartbeatTimer=setInterval(()=>{if(gameToken)heartbeatOnline()},30000);
+    onlineHeartbeatTimer=setInterval(()=>{if(gameToken&&navigator.onLine)heartbeatOnline()},30000);
     mutationEventTimer=setInterval(renderMutationEvent,1000);
     rotatingShopTimer=setInterval(renderRotatingShopClock,1000);
     loungeAmbientTimer=setTimeout(loungeAmbientEvent,7000);
@@ -5085,7 +5115,7 @@
       if(state.rollingUntil)processRollEngine();
       if(state.gradeAuto)processGradeAuto();
       renderHeader();renderRebirth();
-      if(gameToken)heartbeatOnline()
+      if(gameToken&&navigator.onLine)heartbeatOnline()
     };
     document.addEventListener("visibilitychange",()=>{
       if(document.visibilityState==="hidden"){
