@@ -1,6 +1,14 @@
 (() => {
   "use strict";
 
+  // Clickjacking guard for static hosting: if another origin frames the game,
+  // blank this document before it becomes interactive.
+  if(window.top!==window.self){
+    try{window.top.location=window.self.location.href}catch{}
+    document.documentElement.innerHTML="";
+    return;
+  }
+
   const SAVE_KEY = "card-base-prototype-v01";
   const MONEY_CAP = 1e300;
   const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
