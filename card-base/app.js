@@ -223,6 +223,10 @@
   // Mutation Storm pool totals 100%. New ultra mutations are rarer, but obtainable.
   const MUTATION_EVENT_WEIGHTS = [0,11.058878,10.598092,10.137305,9.676519,9.215732,8.754945,8.294159,7.372586,6.451012,5.068653,3.225506,2.303933,.232721,.186176,.139632,.111706,.093088,.074471,.055853,.027926,.009309,6.911799];
   const MUTATION_EVENT_PULSE_CHANCE = 0.005; // 0.5% per Normal displayed card every 30 sec
+  // Grade does not increase Event hit frequency. It improves mutation quality after a hit.
+  const MUTATION_GRADE_EVENT_BONUS = [0,.03,.06,.10,.15,.22,.30,.39,.49,.60,.70,.80,.90,1.00];
+  // Flat bonus applied once to the final Mutation Inheritance success chance.
+  const MUTATION_GRADE_INHERIT_BONUS = [0,.01,.02,.03,.05,.07,.09,.11,.13,.15,.17,.19,.21,.23];
 
   // =========================================================
   // ID PACK CUSTOMIZATION
@@ -361,6 +365,7 @@
   let gradeTimer = 0;
   let gradeAutoSetupUid = null;
   let mutationLabTargetUid = null;
+  let mutationCleanseTargetUid = null;
   let idPackAutoTimer = 0;
   let idPackAutoIndex = null;
   let idPackAutoCount = 0;
@@ -1898,7 +1903,7 @@
     const online=!!(gameToken&&gameAccount);
     const eligibleCount=mutationEventEligibleCount();
 
-    eligible.textContent="มีช่อง Mutation ว่างบนฐาน "+eligibleCount+" ใบ";
+    eligible.textContent="มีช่อง Mutation ว่างบนฐาน "+eligibleCount+" ใบ · Grade สูงช่วยคัดผลดีขึ้น";
 
     if(schedule.active){
       bar.className="mutation-event-bar active";
@@ -2947,10 +2952,11 @@
           '<div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div>'+
           '<div><span>อัป Lv.</span><b data-card-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-card-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div>'+
           '<div><span>Mutation</span><b class="mutation-stat">'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2</b></div><div><span>Mutation Multi</span><b>Income ×'+mutationIncomeMultiplier(c).toFixed(2)+' · Luck +'+mutationLuckRawBonus(c).toFixed(2)+'</b></div>'+
+          '<div><span>Grade → Mutation</span><b data-card-stat="mutation-grade">'+mutationGradeBenefitText(c)+'</b></div>'+
           '<div><span>Awaken</span><b>★'+awakeningStars(c)+' · ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div>'+
         '</div>'+(tradeLocked?'<div class="trade-lock-banner">🔒 TRADE LOCK · รออีกฝ่ายตอบรับ</div>':'')+'<div class="card-actions">'+
           '<button data-a="place" '+(tradeLocked?"disabled":"")+'>'+(placed?"เอาออกจากฐาน":"วางในแท่นว่าง")+'</button><button data-a="level" '+(tradeLocked?"disabled":"")+'>อัป Level</button>'+
-          '<button data-a="grade" '+(tradeLocked?"disabled":"")+'>สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-a="grade-auto" '+(tradeLocked?"disabled":"")+'>'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button>'+          '<button class="mutation-inherit-btn" data-a="mutation-lab" '+(tradeLocked||cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด")+'</button>'+
+          '<button data-a="grade" '+(tradeLocked?"disabled":"")+'>สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-a="grade-auto" '+(tradeLocked?"disabled":"")+'>'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button>'+          '<button class="mutation-inherit-btn" data-a="mutation-lab" '+(tradeLocked||cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด")+'</button>'+          '<button class="mutation-cleanse-btn" data-a="mutation-cleanse" '+(tradeLocked||!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button>'+
           '<button class="awaken-action" data-a="awaken" '+(tradeLocked||!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button>'+
 
           '<button class="'+(c.locked?"locked":"")+'" data-a="lock" '+(tradeLocked?"disabled":"")+'>'+(c.locked?"🔒 ปลดล็อก":"🔓 ล็อก")+'</button>'+
@@ -2965,6 +2971,7 @@
         if(a==="grade")rerollGrade(c.uid);
         if(a==="grade-auto")openGradeAuto(c.uid);
         if(a==="mutation-lab")openMutationLab(c.uid);
+        if(a==="mutation-cleanse")openMutationCleanse(c.uid);
         if(a==="awaken")awakenCard(c.uid);
         if(a==="lock")toggleLock(c.uid);
         if(a==="sell")sellCard(c.uid);
@@ -3822,13 +3829,14 @@
     body.innerHTML=
       '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div><div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-modal-face-stat="level">'+c.level+'</b></span><strong data-modal-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div></div></div>'+
       '<div class="stand-detail-info"><div class="stand-character-heading"><strong>'+escapeHtml(cardName(c.charId))+'</strong><span>'+padId(c.charId)+' · '+escapeHtml(t.name)+'</span></div><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
-      '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div><div><span>Awaken</span><b>★'+awakeningStars(c)+' · Income ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div></div>'+
-      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
+      '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div><div><span>Grade → Mutation</span><b data-modal-stat="mutation-grade">'+mutationGradeBenefitText(c)+'</b></div><div><span>Awaken</span><b>★'+awakeningStars(c)+' · Income ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div></div>'+
+      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button class="mutation-cleanse-btn" data-modal-a="mutation-cleanse" '+(!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
     body.querySelector('[data-modal-a="level"]').addEventListener("click",()=>{levelUp(c.uid,true)});
     body.querySelector('[data-modal-a="grade"]').addEventListener("click",()=>{rerollGrade(c.uid,true)});
     body.querySelector('[data-modal-a="grade-auto"]').addEventListener("click",()=>{openGradeAuto(c.uid)});
     body.querySelector('[data-modal-a="awaken"]').addEventListener("click",()=>{awakenCard(c.uid)});
+    body.querySelector('[data-modal-a="mutation-cleanse"]')?.addEventListener("click",()=>{openMutationCleanse(c.uid)});
     body.querySelector('[data-modal-a="remove"]').addEventListener("click",()=>{state.placed[activeStand]=null;toast("ถอดการ์ดจากแท่นแล้ว");renderAll();renderStandModal()});
     body.querySelector('[data-modal-a="change"]').addEventListener("click",()=>renderPicker(body,activeStand,c.uid));
   }
@@ -3944,6 +3952,7 @@
       const faceIncome=el.querySelector('[data-card-face-stat="income"]');if(faceIncome)faceIncome.textContent=fmt(cardIncome(c))+"/s";
       const upgrade=el.querySelector('[data-card-stat="upgrade"]');if(upgrade)upgrade.textContent=fmt(upgradeCost(c));
       const gradeCost=el.querySelector('[data-card-stat="grade-cost"]');if(gradeCost)gradeCost.textContent=fmt(rerollCost(c));
+      const mutationGrade=el.querySelector('[data-card-stat="mutation-grade"]');if(mutationGrade)mutationGrade.textContent=mutationGradeBenefitText(c);
       const sell=el.querySelector('[data-a="sell"]');if(sell){
         sell.textContent="ขาย "+fmt(sellValue(c));
         sell.disabled=placed||c.locked||tradeLocked;
@@ -3996,6 +4005,7 @@
       const grade=detail.querySelector('[data-modal-stat="grade"]');if(grade)grade.textContent=g.name+" ×"+g.multi.toFixed(2);
       const upgrade=detail.querySelector('[data-modal-stat="upgrade"]');if(upgrade)upgrade.textContent=fmt(upgradeCost(c));
       const gradeCost=detail.querySelector('[data-modal-stat="grade-cost"]');if(gradeCost)gradeCost.textContent=fmt(rerollCost(c));
+      const mutationGrade=detail.querySelector('[data-modal-stat="mutation-grade"]');if(mutationGrade)mutationGrade.textContent=mutationGradeBenefitText(c);
       const auto=detail.querySelector('[data-modal-a="grade-auto"]');if(auto){
         const running=!!(state.gradeAuto&&state.gradeAuto.uid===c.uid);
         auto.classList.toggle("grade-running",running);
@@ -4046,6 +4056,22 @@
     commitCardMicroUpdate(c.uid);
   }
 
+  function mutationGradeIndex(card){
+    return Math.max(0,Math.min(GRADES.length-1,Math.floor(Number(card?.grade)||0)));
+  }
+
+  function mutationGradeEventBonus(card){
+    return MUTATION_GRADE_EVENT_BONUS[mutationGradeIndex(card)]||0;
+  }
+
+  function mutationGradeInheritanceBonus(card){
+    return MUTATION_GRADE_INHERIT_BONUS[mutationGradeIndex(card)]||0;
+  }
+
+  function mutationGradeBenefitText(card){
+    return "Event Quality +"+Math.round(mutationGradeEventBonus(card)*100)+"% · Inherit +"+Math.round(mutationGradeInheritanceBonus(card)*100)+"%";
+  }
+
   function mutationDonorEligible(card,targetUid,mutationId=null){
     if(!card||card.uid===targetUid)return false;
     if(card.locked||state.placed.includes(card.uid)||cardIsTradeLocked(card))return false;
@@ -4077,7 +4103,8 @@
     if(!target||!donors.length)return 0;
     let fail=1;
     donors.forEach(d=>{fail*=1-mutationInheritanceSingleChance(target,d)});
-    return Math.min(0.95,1-fail);
+    const donorChance=1-fail;
+    return Math.min(0.95,donorChance+mutationGradeInheritanceBonus(target));
   }
 
   function mutationLabAvailableTypes(target){
@@ -4117,7 +4144,7 @@
     $("#mutationLabTarget").innerHTML=
       '<div class="mutation-lab-target-card">'+tradeCardVisual(target,true)+'</div>'+
       '<div class="mutation-lab-target-copy"><span>TARGET · '+ids.length+'/2 SLOT</span><strong>'+escapeHtml(slotText)+'</strong>'+
-      '<small>Tier '+TIERS[target.tier].name+' · ช่องถัดไป '+(ids.length===0?'เรทพื้นฐานสูงกว่า':'เป็นช่องที่ 2 · เรทยากขึ้น')+'</small></div>';
+      '<small>Tier '+TIERS[target.tier].name+' · Grade '+GRADES[target.grade].name+' · Inherit Bonus +'+Math.round(mutationGradeInheritanceBonus(target)*100)+'% · ช่องถัดไป '+(ids.length===0?'เรทพื้นฐานสูงกว่า':'เป็นช่องที่ 2 · เรทยากขึ้น')+'</small></div>';
 
     const types=mutationLabAvailableTypes(target);
     const select=$("#mutationLabType");
@@ -4186,6 +4213,7 @@
     const bestLevel=Math.max(...donors.map(d=>Math.max(1,Number(d.level)||1)));
     factors.textContent=donors.length+" Donor · Tier สูงกว่า "+high+" · เท่ากัน "+same+" · ต่ำกว่า "+low+
       " · Lv สูงสุด "+bestLevel+" · โบนัส Lv รวม +"+(levelBonusTotal*100).toFixed(1)+"%"+
+      " · Target Grade "+GRADES[target.grade].name+" +"+Math.round(mutationGradeInheritanceBonus(target)*100)+"%"+
       (cardMutationIds(target).length?" · ช่อง 2 ยากขึ้น":" · ช่อง 1");
   }
 
@@ -4242,6 +4270,141 @@
     }
     renderAll();
     if(gameToken)publishPublicBase();
+  }
+
+  function mutationCleanseCandidateEligible(card,target){
+    if(!card||!target||card.uid===target.uid)return false;
+    if(Number(card.charId)!==Number(target.charId)||Number(card.tier)!==Number(target.tier))return false;
+    if(card.locked||state.placed.includes(card.uid)||cardIsTradeLocked(card))return false;
+    if(state.gradeAuto&&state.gradeAuto.uid===card.uid)return false;
+    return true;
+  }
+
+  function mutationCleanseCandidates(target){
+    if(!target)return [];
+    return state.cards
+      .filter(c=>mutationCleanseCandidateEligible(c,target))
+      .sort((a,b)=>
+        a.grade-b.grade||
+        a.level-b.level||
+        cardMutationIds(a).length-cardMutationIds(b).length||
+        awakeningStars(a)-awakeningStars(b)||
+        a.uid-b.uid
+      );
+  }
+
+  function mutationCleanseCost(card){
+    if(!card)return 0;
+    const tier=Math.max(0,Math.min(TIERS.length-1,Number(card.tier)||0));
+    const grade=mutationGradeIndex(card);
+    const awaken=Math.min(10,awakeningStars(card));
+    const seconds=180+(tier*25)+(grade*12)+(awaken*30);
+    return roundUpNice(Math.min(MONEY_CAP,modeledBaseIncomeForShop()*seconds));
+  }
+
+  function openMutationCleanse(uid){
+    const target=state.cards.find(c=>c.uid===uid);if(!target)return;
+    if(cardIsTradeLocked(target)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
+    if(state.gradeAuto&&state.gradeAuto.uid===target.uid){toast("หยุด Auto Grade ของใบนี้ก่อนล้าง Mutation");return}
+    if(!cardMutationIds(target).length){toast("การ์ดใบนี้ยังไม่มี Mutation ให้ล้าง");return}
+    mutationCleanseTargetUid=uid;
+    if($("#standModal")?.classList.contains("show"))closeStand();
+    const modal=$("#mutationCleanseModal");
+    modal.classList.add("show");modal.setAttribute("aria-hidden","false");
+    renderMutationCleanse();
+  }
+
+  function closeMutationCleanse(){
+    const modal=$("#mutationCleanseModal");
+    if(modal){modal.classList.remove("show");modal.setAttribute("aria-hidden","true")}
+    mutationCleanseTargetUid=null;
+  }
+
+  function renderMutationCleanse(){
+    const target=state.cards.find(c=>c.uid===mutationCleanseTargetUid);
+    if(!target){closeMutationCleanse();return}
+    const ids=cardMutationIds(target),cost=mutationCleanseCost(target),g=GRADES[target.grade],t=TIERS[target.tier];
+    $("#mutationCleanseTarget").innerHTML=
+      '<div class="mutation-lab-target-card">'+tradeCardVisual(target,true)+'</div>'+
+      '<div class="mutation-lab-target-copy"><span>MAIN CARD · KEEP ALL INVESTMENT</span><strong>'+escapeHtml(cardName(target.charId))+' · '+padId(target.charId)+'</strong>'+
+      '<small>'+t.name+' · Grade '+g.name+' · Lv.'+target.level+' · Awaken ★'+awakeningStars(target)+' · '+escapeHtml(mutationNames(target))+'</small></div>';
+
+    $("#mutationCleanseMutationList").innerHTML=ids.map(id=>{
+      const m=MUTATIONS[id],checked=ids.length===1?' checked':'';
+      return '<label class="mutation-cleanse-option" style="--mutation:'+m.color+'">'+
+        '<input type="radio" name="mutation-cleanse-id" data-cleanse-mutation="'+id+'"'+checked+'>'+
+        '<span><b>'+m.icon+' '+escapeHtml(m.name)+'</b><small>Income ×'+m.income.toFixed(2)+' · Luck ×'+m.luck.toFixed(3).replace(/0+$/,"").replace(/\.$/,"")+'</small></span>'+
+      '</label>';
+    }).join("");
+
+    const donors=mutationCleanseCandidates(target);
+    $("#mutationCleanseDonors").innerHTML=donors.length?donors.map(c=>{
+      const cg=GRADES[c.grade];
+      return '<label class="mutation-cleanse-donor">'+
+        '<input type="radio" name="mutation-cleanse-donor" data-cleanse-donor="'+c.uid+'">'+
+        '<span class="mutation-cleanse-donor-id">'+padId(c.charId)+'</span>'+
+        '<span><b>'+TIERS[c.tier].name+' · Grade '+cg.name+' · Lv.'+c.level+'</b><small>'+escapeHtml(mutationNames(c))+' · Awaken ★'+awakeningStars(c)+'</small></span>'+
+      '</label>';
+    }).join(""):'<div class="social-empty">ไม่มีใบซ้ำ '+padId(target.charId)+' · '+escapeHtml(t.name)+' ที่ว่างอยู่</div>';
+
+    $("#mutationCleanseCost").textContent=fmt(cost);
+    $("#mutationCleanseMoney").textContent=fmt(state.money);
+    updateMutationCleanseState();
+  }
+
+  function updateMutationCleanseState(){
+    const target=state.cards.find(c=>c.uid===mutationCleanseTargetUid);
+    const mutationInput=document.querySelector('#mutationCleanseMutationList input[data-cleanse-mutation]:checked');
+    const donorInput=document.querySelector('#mutationCleanseDonors input[data-cleanse-donor]:checked');
+    const cost=mutationCleanseCost(target);
+    const enough=!!target&&state.money>=cost;
+    const btn=$("#mutationCleanseConfirm");
+    if(btn)btn.disabled=!target||!mutationInput||!donorInput||!enough;
+    const hint=$("#mutationCleanseHint");
+    if(!hint)return;
+    if(!target){hint.textContent="ไม่พบการ์ดเป้าหมาย";return}
+    if(!mutationInput){hint.textContent="เลือก Mutation ที่ต้องการล้าง";return}
+    if(!donorInput){hint.textContent="ต้องใช้ใบซ้ำ Character เดียวกัน + Tier เดียวกัน 1 ใบ";return}
+    if(!enough){hint.textContent="เงินไม่พอ · ต้องใช้ "+fmt(cost);return}
+    hint.textContent="พร้อมล้าง · ใบซ้ำจะหาย 1 ใบ และ Mutation ที่เลือกจะถูกลบ";
+  }
+
+  function performMutationCleanse(){
+    const target=state.cards.find(c=>c.uid===mutationCleanseTargetUid);
+    const mutationId=Number(document.querySelector('#mutationCleanseMutationList input[data-cleanse-mutation]:checked')?.dataset.cleanseMutation)||0;
+    const donorUid=Number(document.querySelector('#mutationCleanseDonors input[data-cleanse-donor]:checked')?.dataset.cleanseDonor)||0;
+    const donor=state.cards.find(c=>c.uid===donorUid);
+    if(!target||!mutationId||!donor)return;
+    if(mutationEventBusy){toast("กำลัง Sync Mutation Event · ลองอีกครั้งในอีกแป๊บ");return}
+    if(!cardMutationIds(target).includes(mutationId)){toast("Mutation ที่เลือกเปลี่ยนไปแล้ว");renderMutationCleanse();return}
+    if(!mutationCleanseCandidateEligible(donor,target)){toast("ใบซ้ำที่เลือกไม่พร้อมใช้งานแล้ว");renderMutationCleanse();return}
+
+    const cost=mutationCleanseCost(target);
+    if(state.money<cost){toast("เงินไม่พอ · ต้องใช้ "+fmt(cost));renderMutationCleanse();return}
+    const mutation=MUTATIONS[mutationId];
+    const ok=window.confirm(
+      "ล้าง "+mutation.icon+" "+mutation.name+" ออกจาก "+padId(target.charId)+
+      "\nใช้ใบซ้ำ "+padId(donor.charId)+" · "+TIERS[donor.tier].name+" จำนวน 1 ใบ"+
+      "\nใช้เงิน "+fmt(cost)+
+      "\n\nGrade / Level / Awakening ของการ์ดเมนจะคงเดิม แต่ใบซ้ำจะหายถาวร ต้องการดำเนินการไหม?"
+    );
+    if(!ok)return;
+
+    state.money=clampMoney(state.money-cost);
+    state.cards=state.cards.filter(c=>c.uid!==donor.uid);
+    if(Number(target.mutation)===mutationId){
+      target.mutation=Number(target.mutation2)||0;
+      target.mutation2=0;
+    }else if(Number(target.mutation2)===mutationId){
+      target.mutation2=0;
+    }
+    normalizeSlots();
+    recordCardInIndex(target);
+    closeMutationCleanse();
+    toast("🧹 ล้าง "+mutation.icon+" "+mutation.name+" ออกแล้ว · การ์ดเมนยังอยู่ครบ ✨",true);
+    renderAll();
+    save();
+    if(gameToken)void publishPublicBase();
   }
 
   function openGradeAuto(uid){
@@ -4560,6 +4723,12 @@
       updateMutationLabChance();
     });
     $("#mutationLabConfirm").addEventListener("click",performMutationInheritance);
+    $("#closeMutationCleanseModal").addEventListener("click",closeMutationCleanse);
+    $("[data-close-mutation-cleanse]").addEventListener("click",closeMutationCleanse);
+    $("#mutationCleanseCancel").addEventListener("click",closeMutationCleanse);
+    $("#mutationCleanseMutationList").addEventListener("change",updateMutationCleanseState);
+    $("#mutationCleanseDonors").addEventListener("change",updateMutationCleanseState);
+    $("#mutationCleanseConfirm").addEventListener("click",performMutationCleanse);
     $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
     $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
     $("#gradeTargetList").addEventListener("change",updateGradeTargetChance);
@@ -4593,7 +4762,7 @@
     $("#selectUnlocked").addEventListener("click",()=>{state.autoTargets=Array.from({length:maxTierForLevel()},(_,i)=>i);renderFilters();save()});
     document.addEventListener("keydown",e=>{
       if(e.key==="1"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&!state.autoRolling&&!state.fullAuto)manualRoll();
-      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSettings();closeSocialBase();closeGradeAuto();closeTrade()}
+      if(e.key==="Escape"){closeReveal();closeStand();closeAuth();closeSettings();closeSocialBase();closeMutationLab();closeMutationCleanse();closeGradeAuto();closeTrade()}
     });
     window.addEventListener("pagehide",flushCloudOnExit);
     window.addEventListener("beforeunload",flushCloudOnExit);
