@@ -6225,3 +6225,53 @@ body.ascension-unlock-10 .base-tower-bar,
   .mutation-cleanse-option,
   .mutation-cleanse-donor{transition:none}
 }
+
+
+/* =========================================================
+   SERVER GIFT ITEM BAG — one-time Lv.40 Ticket
+   ========================================================= */
+.item-bag-banner{
+  margin:0 0 12px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:11px;
+  align-items:center;
+  padding:12px 14px;
+  border:1px solid rgba(116,226,255,.28);
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 8% 50%,rgba(104,224,255,.12),transparent 26%),
+    radial-gradient(circle at 94% 25%,rgba(255,222,112,.10),transparent 28%),
+    linear-gradient(145deg,#111722,#0b0e15);
+  box-shadow:inset 0 1px rgba(255,255,255,.04),0 0 22px rgba(93,210,255,.04)
+}
+.item-bag-icon{
+  width:44px;height:44px;
+  display:grid;place-items:center;
+  border-radius:13px;
+  border:1px solid rgba(118,226,255,.34);
+  background:linear-gradient(145deg,rgba(90,211,255,.15),rgba(255,219,99,.10));
+  font-size:20px;
+  box-shadow:0 0 20px rgba(86,210,255,.10)
+}
+.item-bag-copy{min-width:0}
+.item-bag-copy strong{display:block;color:#f1f7ff;font-size:12px}
+.item-bag-copy strong span{color:#89e8ff;text-shadow:0 0 12px rgba(99,222,255,.35)}
+.item-bag-copy p{margin:4px 0 0;color:#8d99ad;font-size:8px;line-height:1.45}
+#level40TicketStatus.active{
+  border-color:rgba(119,236,255,.42);
+  color:#bff7ff;
+  box-shadow:0 0 12px rgba(87,218,255,.10)
+}
+.level40-ticket-btn{
+  border-color:#3d5968!important;
+  background:linear-gradient(135deg,rgba(82,206,255,.10),rgba(255,218,96,.08))!important;
+}
+.level40-ticket-btn:not(:disabled):hover{
+  border-color:#72dfff!important;
+  box-shadow:0 0 14px rgba(94,219,255,.12);
+}
+@media (max-width:700px){
+  .item-bag-banner{grid-template-columns:auto minmax(0,1fr)}
+  .item-bag-banner>.badge{grid-column:1/-1;justify-self:start}
+}
