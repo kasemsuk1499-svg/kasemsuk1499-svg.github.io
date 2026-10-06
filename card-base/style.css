@@ -6041,3 +6041,187 @@ body.ascension-unlock-10 .base-tower-bar,
     animation:none!important;
   }
 }
+
+
+/* =========================================================
+   MUTATION PURIFICATION — preserve favorite/main cards
+   ========================================================= */
+.mutation-cleanse-btn{
+  border-color:#4b4658!important;
+  background:
+    linear-gradient(135deg,rgba(183,111,255,.09),rgba(104,229,222,.05))!important;
+}
+.mutation-cleanse-btn:not(:disabled):hover{
+  border-color:#a77bd0!important;
+  box-shadow:0 0 14px rgba(174,112,231,.10);
+}
+.mutation-cleanse-card{
+  width:min(820px,calc(100% - 20px));
+}
+.mutation-cleanse-grid{
+  display:grid;
+  grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+  gap:10px;
+}
+.mutation-cleanse-section{
+  min-width:0;
+  padding:10px;
+  border:1px solid #31394a;
+  border-radius:14px;
+  background:linear-gradient(145deg,#10151f,#0a0d13);
+}
+.mutation-cleanse-head{
+  display:grid;
+  gap:2px;
+  margin-bottom:8px;
+}
+.mutation-cleanse-head>span{
+  color:#b485e7;
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.14em;
+}
+.mutation-cleanse-head>strong{
+  color:#eef2f8;
+  font-size:10px;
+}
+.mutation-cleanse-head>small{
+  color:#8590a5;
+  font-size:7px;
+  line-height:1.4;
+}
+.mutation-cleanse-options,
+.mutation-cleanse-donors{
+  display:grid;
+  gap:6px;
+}
+.mutation-cleanse-donors{
+  max-height:260px;
+  overflow:auto;
+  overscroll-behavior:contain;
+  padding:2px;
+}
+.mutation-cleanse-option,
+.mutation-cleanse-donor{
+  min-width:0;
+  display:grid;
+  align-items:center;
+  gap:8px;
+  min-height:52px;
+  padding:8px 9px;
+  border:1px solid #30384a;
+  border-radius:12px;
+  background:linear-gradient(145deg,#111621,#0b0f16);
+  cursor:pointer;
+  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
+}
+.mutation-cleanse-option{
+  grid-template-columns:auto minmax(0,1fr);
+}
+.mutation-cleanse-donor{
+  grid-template-columns:auto auto minmax(0,1fr);
+}
+.mutation-cleanse-option:has(input:checked){
+  border-color:color-mix(in srgb,var(--mutation) 62%,#fff);
+  background:color-mix(in srgb,var(--mutation) 8%,#0c1119);
+  box-shadow:
+    inset 0 0 16px color-mix(in srgb,var(--mutation) 7%,transparent),
+    0 0 14px color-mix(in srgb,var(--mutation) 9%,transparent);
+}
+.mutation-cleanse-donor:has(input:checked){
+  border-color:#8d74b6;
+  background:linear-gradient(145deg,rgba(124,79,168,.14),#0b0f16);
+  box-shadow:inset 0 0 16px rgba(166,105,220,.06);
+}
+.mutation-cleanse-option input,
+.mutation-cleanse-donor input{
+  width:16px;
+  height:16px;
+  accent-color:#b47cf0;
+}
+.mutation-cleanse-option>span,
+.mutation-cleanse-donor>span:last-child{
+  display:grid;
+  gap:2px;
+  min-width:0;
+}
+.mutation-cleanse-option b,
+.mutation-cleanse-donor b{
+  color:#e9edf5;
+  font-size:8px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.mutation-cleanse-option small,
+.mutation-cleanse-donor small{
+  color:#8390a6;
+  font-size:7px;
+  line-height:1.35;
+}
+.mutation-cleanse-donor-id{
+  min-width:48px;
+  color:#f0f3f8;
+  font-size:9px;
+  font-weight:1000;
+}
+.mutation-cleanse-cost{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:minmax(150px,.7fr) minmax(120px,.5fr) minmax(0,1fr);
+  gap:9px;
+  align-items:center;
+  padding:10px 11px;
+  border:1px solid #443c52;
+  border-radius:13px;
+  background:
+    radial-gradient(circle at 7% 50%,rgba(186,105,236,.10),transparent 34%),
+    #0b0f16;
+}
+.mutation-cleanse-cost>div{
+  display:grid;
+  gap:1px;
+}
+.mutation-cleanse-cost span{
+  color:#8793a9;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.10em;
+}
+.mutation-cleanse-cost strong{
+  color:#f1d7ff;
+  font-size:18px;
+  line-height:1;
+  text-shadow:0 0 14px rgba(186,105,236,.22);
+}
+.mutation-cleanse-cost b{
+  color:#eef2f8;
+  font-size:12px;
+}
+.mutation-cleanse-cost small{
+  color:#a6afbf;
+  font-size:8px;
+  line-height:1.4;
+}
+.mutation-cleanse-actions{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  margin-top:10px;
+}
+@media (max-width:700px){
+  .mutation-cleanse-grid{grid-template-columns:1fr}
+  .mutation-cleanse-cost{grid-template-columns:1fr 1fr}
+  .mutation-cleanse-cost>small{grid-column:1/-1}
+}
+@media (max-width:430px){
+  .mutation-cleanse-donor{grid-template-columns:auto minmax(0,1fr)}
+  .mutation-cleanse-donor-id{display:none}
+  .mutation-cleanse-cost{grid-template-columns:1fr}
+  .mutation-cleanse-cost>small{grid-column:auto}
+  .mutation-cleanse-actions{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .mutation-cleanse-option,
+  .mutation-cleanse-donor{transition:none}
+}
