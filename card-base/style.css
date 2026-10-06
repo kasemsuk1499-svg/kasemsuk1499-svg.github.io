@@ -5970,7 +5970,7 @@ body.ascension-unlock-10 .base-tower-bar,
 }
 
 
-/* ===== MUTATION 22 — ONRYŌ NO YAIBA / 怨霊の刃 ===== */
+/* ===== MUTATION 22 — CHOKUN ===== */
 .mutation-fx.mutation-22::after,
 .mutation-fx.mutation2-22::after{
   border:2px solid rgba(196,72,255,.78);
@@ -6016,11 +6016,11 @@ body.ascension-unlock-10 .base-tower-bar,
         drop-shadow(0 0 7px rgba(255,48,91,.34));
     }
     18%{
-      opacity:.82;
+      opacity:var(--onryo-peak,.82);
       transform:translate(-50%,-50%) scale(.98) rotate(var(--fx-rot,0deg));
     }
-    55%{opacity:.66}
-    82%{opacity:.76}
+    55%{opacity:calc(var(--onryo-peak,.82) * .78)}
+    82%{opacity:calc(var(--onryo-peak,.82) * .92)}
     100%{
       opacity:0;
       transform:
