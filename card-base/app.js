@@ -12,6 +12,8 @@
   const SAVE_KEY = "card-base-prototype-v01";
   const MONEY_CAP = 1e300;
   const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
+  const TRADE_NOTIFY_PREF_KEY = "card-base-trade-notify-enabled-v1";
+  const TRADE_NOTIFIED_KEY_PREFIX = "card-base-trade-notified-v1:";
   const CARD_MIN_ID = 1;
   const CARD_MAX_ID = 120;
   const CARD_NAMES = Object.freeze({
@@ -393,6 +395,8 @@
   let socialProfiles = new Map();
   let tradeCache = {incoming:[],outgoing:[],recent:[]};
   let tradeLockedGids = new Set();
+  let tradeNotificationRegistration = null;
+  const baseDocumentTitle = document.title;
   let tradeModalState = {mode:null,targetId:null,tradeId:null,selectedGid:null};
   let tradeBusy = false;
   let authRequestBusy = false;
@@ -1551,6 +1555,35 @@
     return localStorage.getItem(PARTICLES_PREF_KEY)!=="0";
   }
 
+  function tradeNotificationsEnabled(){
+    return localStorage.getItem(TRADE_NOTIFY_PREF_KEY)!=="0";
+  }
+
+  function tradeNotificationPermission(){
+    if(!("Notification" in window))return "unsupported";
+    return Notification.permission||"default";
+  }
+
+  async function ensureTradeNotificationRegistration(){
+    if(!("serviceWorker" in navigator))return null;
+    if(tradeNotificationRegistration)return tradeNotificationRegistration;
+    try{
+      tradeNotificationRegistration=await navigator.serviceWorker.register("./sw.js?v=20261006-trade-notify-v1");
+      return tradeNotificationRegistration;
+    }catch{
+      return null;
+    }
+  }
+
+  function tradeNotificationStatusText(){
+    if(!tradeNotificationsEnabled())return "OFF";
+    const permission=tradeNotificationPermission();
+    if(permission==="unsupported")return "UNAVAILABLE";
+    if(permission==="granted")return "ON";
+    if(permission==="denied")return "BLOCKED";
+    return "TAP TO ALLOW";
+  }
+
   function renderSettings(){
     const enabled=particlesEnabled();
     const toggle=$("#particlesToggle"),status=$("#particlesStatus");
@@ -1560,6 +1593,15 @@
       status.className=enabled?"on":"off";
     }
     document.body.classList.toggle("particles-disabled",!enabled);
+
+    const tradeEnabled=tradeNotificationsEnabled();
+    const tradeToggle=$("#tradeNotifyToggle"),tradeStatus=$("#tradeNotifyStatus");
+    if(tradeToggle)tradeToggle.checked=tradeEnabled;
+    if(tradeStatus){
+      const text=tradeNotificationStatusText();
+      tradeStatus.textContent=text;
+      tradeStatus.className=text==="ON"?"on":text==="OFF"?"off":text==="BLOCKED"?"blocked":"pending";
+    }
   }
 
   function setParticlesEnabled(enabled){
@@ -1567,6 +1609,31 @@
     renderSettings();
     window.dispatchEvent(new CustomEvent("cardbase:particles",{detail:{enabled:!!enabled}}));
     toast(enabled?"เปิด Particles แล้ว ✨":"ปิด Particles แล้ว · เบาเครื่องขึ้น ⚡");
+  }
+
+  async function setTradeNotificationsEnabled(enabled){
+    localStorage.setItem(TRADE_NOTIFY_PREF_KEY,enabled?"1":"0");
+    if(!enabled){
+      renderSettings();
+      toast("ปิดแจ้งเตือน Trade นอกจอแล้ว 🔕");
+      return;
+    }
+    if(!("Notification" in window)){
+      renderSettings();
+      toast("เบราว์เซอร์นี้ยังไม่รองรับ System Notification");
+      return;
+    }
+    let permission=Notification.permission;
+    if(permission==="default"){
+      try{permission=await Notification.requestPermission()}catch{}
+    }
+    if(permission==="granted"){
+      await ensureTradeNotificationRegistration();
+      toast("เปิดแจ้งเตือน Trade นอกจอแล้ว 🔔",true);
+    }else if(permission==="denied"){
+      toast("การแจ้งเตือนถูกบล็อกในเบราว์เซอร์ · ต้องอนุญาตจาก Site Settings");
+    }
+    renderSettings();
   }
 
   function openSettings(){
@@ -1909,6 +1976,7 @@
     if(!gameToken||!supabaseClient)return;
     await publishPublicBase();
     await tickMutationEvent();
+    await refreshTrades(true);
   }
 
   function renderOnlineShell(){
@@ -2212,16 +2280,111 @@
     return map[error]||"ทำ Trade ไม่สำเร็จ";
   }
 
+  function tradeNotifiedStorageKey(){
+    const account=gameAccount?.account_id||gameAccount?.username||"guest";
+    return TRADE_NOTIFIED_KEY_PREFIX+String(account);
+  }
+
+  function loadNotifiedTradeIds(){
+    try{
+      const parsed=JSON.parse(localStorage.getItem(tradeNotifiedStorageKey())||"[]");
+      return new Set(Array.isArray(parsed)?parsed.map(String):[]);
+    }catch{
+      return new Set();
+    }
+  }
+
+  function rememberNotifiedTradeIds(ids){
+    if(!ids.length)return;
+    const seen=loadNotifiedTradeIds();
+    ids.forEach(id=>seen.add(String(id)));
+    try{localStorage.setItem(tradeNotifiedStorageKey(),JSON.stringify([...seen].slice(-120)))}catch{}
+  }
+
+  function updateTradeAttention(){
+    const count=tradeCache.incoming.length;
+    const badge=$("#tradeNavBadge");
+    if(badge){
+      badge.hidden=!count;
+      badge.textContent=count>99?"99+":String(count);
+    }
+    const tab=document.querySelector('.tab[data-tab="online"]');
+    if(tab)tab.classList.toggle("has-trade-alert",count>0);
+    document.title=count?"("+count+") Trade · "+baseDocumentTitle:baseDocumentTitle;
+  }
+
+  function tradeNotificationBody(tr){
+    const offered=tr?.offered_card||{};
+    const who=tr?.display_name||"ผู้เล่น";
+    const id=Number(offered.charId)||0;
+    const name=id?cardName(id):"การ์ด";
+    const tier=TIERS[Math.max(0,Math.min(TIERS.length-1,Number(offered.tier)||0))]?.name||"";
+    return who+" เสนอ "+name+(id?" "+padId(id):"")+(tier?" · "+tier:"")+" ให้คุณ";
+  }
+
+  async function showTradeSystemNotification(tr){
+    if(!tradeNotificationsEnabled()||tradeNotificationPermission()!=="granted")return;
+    const options={
+      body:tradeNotificationBody(tr),
+      tag:"cardbase-trade-"+String(tr.id||Date.now()),
+      renotify:true,
+      data:{type:"trade",tradeId:String(tr.id||"")}
+    };
+    const registration=await ensureTradeNotificationRegistration();
+    if(registration&&typeof registration.showNotification==="function"){
+      try{await registration.showNotification("🔔 Card Base · ข้อเสนอ Trade ใหม่",options);return}catch{}
+    }
+    try{
+      const notification=new Notification("🔔 Card Base · ข้อเสนอ Trade ใหม่",options);
+      notification.onclick=()=>{window.focus();openTradeCenter();notification.close()};
+    }catch{}
+  }
+
+  function openTradeCenter(){
+    const tab=document.querySelector('.tab[data-tab="online"]');
+    if(tab&&!tab.classList.contains("active"))tab.click();
+    setTimeout(()=>{
+      const center=document.querySelector(".trade-center");
+      if(center)center.scrollIntoView({behavior:"smooth",block:"start"});
+    },120);
+  }
+
+  function notifyNewIncomingTrades(trades){
+    if(!trades.length)return;
+    const count=trades.length;
+    const first=trades[0];
+    toast(
+      count===1
+        ?"🔔 "+tradeNotificationBody(first)
+        :"🔔 มีข้อเสนอ Trade ใหม่ "+count+" รายการ",
+      true
+    );
+    if(document.visibilityState==="hidden"&&navigator.vibrate){
+      try{navigator.vibrate([140,70,140])}catch{}
+    }
+    trades.slice(0,3).forEach(tr=>{void showTradeSystemNotification(tr)});
+  }
+
   function applyTradeSnapshot(result){
     if(!result||!result.ok)return;
+    const incoming=Array.isArray(result.incoming)?result.incoming:[];
+    const alreadyNotified=loadNotifiedTradeIds();
+    const newIncoming=incoming.filter(tr=>tr?.id&&!alreadyNotified.has(String(tr.id)));
+
     tradeCache={
-      incoming:Array.isArray(result.incoming)?result.incoming:[],
+      incoming,
       outgoing:Array.isArray(result.outgoing)?result.outgoing:[],
       recent:Array.isArray(result.recent)?result.recent:[]
     };
     tradeLockedGids=new Set(tradeCache.outgoing.map(x=>x.offered_gid).filter(Boolean));
     renderTrades();
     renderCollection();
+    updateTradeAttention();
+
+    if(newIncoming.length){
+      rememberNotifiedTradeIds(newIncoming.map(tr=>tr.id));
+      notifyNewIncomingTrades(newIncoming);
+    }
   }
 
   async function refreshTrades(silent=false){
@@ -4293,6 +4456,12 @@
     $("#closeSettingsModal").addEventListener("click",closeSettings);
     $("[data-close-settings]").addEventListener("click",closeSettings);
     $("#particlesToggle").addEventListener("change",e=>setParticlesEnabled(e.currentTarget.checked));
+    $("#tradeNotifyToggle")?.addEventListener("change",e=>{void setTradeNotificationsEnabled(e.currentTarget.checked)});
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker.addEventListener("message",event=>{
+        if(event.data?.type==="cardbase:open-trades")openTradeCenter();
+      });
+    }
     $("#accountBtn").addEventListener("click",openAuth);
     $("#closeAuthModal").addEventListener("click",closeAuth);
     $("[data-close-auth]").addEventListener("click",closeAuth);
@@ -4409,6 +4578,9 @@
 
   function init(){
     normalizeSlots();bind();renderSettings();
+    if(tradeNotificationsEnabled()&&tradeNotificationPermission()==="granted"){
+      void ensureTradeNotificationRegistration();
+    }
     const now=Date.now(),offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
     if(offlineSeconds>2&&state.placed.some(Boolean)){const gain=totalIncome()*offlineSeconds;state.money=clampMoney(state.money+gain);toast("รับรายได้ออฟไลน์ "+fmt(Math.min(MONEY_CAP,gain)))}
     state.lastTick=now;renderAll();updateRollProgress();
