@@ -3072,7 +3072,7 @@
     if(!collectionSellEligible(card)){
       if(card?.locked)toast("การ์ดนี้ล็อกอยู่ 🔒");
       else if(card&&state.placed.includes(card.uid))toast("ถอดการ์ดจากฐานก่อนขาย");
-      else if(cardIsTradeLocked(card))toast("การ์ดนี้ถูกล็อกไว้ใน Trade");
+      else if(card&&cardIsTradeLocked(card))toast("การ์ดนี้ถูกล็อกไว้ใน Trade");
       else if(card&&state.gradeAuto?.uid===card.uid)toast("หยุด Auto Grade ก่อนขาย");
       return;
     }
@@ -3183,7 +3183,7 @@
             '<button class="mutation-cleanse-btn" data-a="mutation-cleanse" '+(tradeLocked||!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button>'+
             '<button class="awaken-action" data-a="awaken" '+(tradeLocked||!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button>'+
             '<button class="'+(c.locked?"locked":"")+'" data-a="lock" '+(tradeLocked?"disabled":"")+'>'+(c.locked?"🔒 ปลดล็อก":"🔓 ล็อก")+'</button>'+
-            '<button class="sell" data-a="sell" '+((placed||c.locked||tradeLocked)?"disabled":"")+'>ขาย '+fmt(sellValue(c))+'</button>'+
+            '<button class="sell" data-a="sell" '+((placed||c.locked||tradeLocked||(state.gradeAuto&&state.gradeAuto.uid===c.uid))?"disabled":"")+'>ขาย '+fmt(sellValue(c))+'</button>'+
           '</div></details>'+
         '</div>';
       const img=el.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
