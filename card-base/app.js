@@ -1568,7 +1568,8 @@
     if(!("serviceWorker" in navigator))return null;
     if(tradeNotificationRegistration)return tradeNotificationRegistration;
     try{
-      tradeNotificationRegistration=await navigator.serviceWorker.register("./sw.js?v=20261006-trade-notify-v1");
+      await navigator.serviceWorker.register("./sw.js?v=20261006-trade-notify-v1");
+      tradeNotificationRegistration=await navigator.serviceWorker.ready;
       return tradeNotificationRegistration;
     }catch{
       return null;
