@@ -17,22 +17,23 @@
     void:"./assets/fx/void.svg",
     prism:"./assets/fx/prism.svg",
     cosmic:"./assets/fx/cosmic.svg",
-    amaterasu:"./assets/fx/amaterasu.svg"
+    amaterasu:"./assets/fx/amaterasu.svg",
+    onryo:"./assets/fx/onryo-blade.svg"
   };
 
   const MUTATION_COLORS = [
     "#8d94a3","#ff7043","#69e7ff","#9deaff","#72ffd5",
     "#7ee47e","#ffd761","#bdc9ff","#aa69ff","#ff83e8","#fff0a5",
     "#ff5fb7","#77fff1","#5fffea","#b9ff6a","#ff7cf5","#6fe7ff",
-    "#7aa2ff","#ff9ad5","#8a64ff","#ffe47a","#ff2b35"
+    "#7aa2ff","#ff9ad5","#8a64ff","#ffe47a","#ff2b35","#c548ff"
   ];
-  const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic","halo",null,null,null,null,null,null,null,null,null,"amaterasu"];
+  const MUTATION_TEXTURES = [null,"flame","bolt","snow","wind","leaf","sun","moon","void","prism","cosmic","halo",null,null,null,null,null,null,null,null,null,"amaterasu","onryo"];
   const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
 
   function mutationParticleKind(m){
     return ({
       12:"chrono",13:"glitch",14:"helix",15:"shard",
-      16:"inverse",17:"scan",18:"echo",19:"gravity",20:"rune",21:"amaterasu"
+      16:"inverse",17:"scan",18:"echo",19:"gravity",20:"rune",21:"amaterasu",22:"onryo"
     })[m]||"";
   }
 
@@ -166,8 +167,8 @@
 
     const addMutationRate=m=>{
       if(!m)return;
-      // Amaterasu remains intentionally lighter than other top mutations.
-      rate+=m>=21?1.85:m>=11?3.15:m>=8?2.65:m>=6?2.2:1.8;
+      // Keep the showcase-heavy special mutations controlled so they stay readable.
+      rate+=m===22?1.38:m===21?1.85:m>=11?3.15:m>=8?2.65:m>=6?2.2:1.8;
     };
     addMutationRate(mutation);
     addMutationRate(mutation2);
@@ -200,21 +201,36 @@
     if(particles.length>=maxParticles) return;
     const tier=target.tier,grade=target.grade,mutation=target.mutation||0,mutation2=target.mutation2||0;
     const activeMutation=mutation2&&mutation?(Math.random()<.5?mutation:mutation2):(mutation||mutation2);
+    const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
+
+    if(kind==="onryo" && particles.filter(p=>p.el===target.el&&p.kind==="onryo").length>=5) return;
+
     const edge=Math.random();
-    let nx,ny;
-    if(edge<.34){nx=Math.random();ny=.06+Math.random()*.18}
+    let nx,ny,onryoRot=0;
+    if(kind==="onryo"){
+      const spots=[
+        [.10,.18,-.48],[.88,.22,.46],[.07,.62,-.28],[.92,.64,.30],[.50,.84,.04]
+      ];
+      const spot=spots[Math.floor(Math.random()*spots.length)];
+      nx=spot[0]+(Math.random()-.5)*.035;
+      ny=spot[1]+(Math.random()-.5)*.045;
+      onryoRot=spot[2]+(Math.random()-.5)*.08;
+    }else if(edge<.34){nx=Math.random();ny=.06+Math.random()*.18}
     else if(edge<.67){nx=Math.random();ny=.72+Math.random()*.24}
     else {nx=Math.random()<.5?.05:.95;ny=.12+Math.random()*.78}
 
     const key=chooseTexture(tier,grade,mutation,mutation2);
-    const kind=mutationParticleKind(activeMutation)||(!activeMutation&&grade===11?"gradePrism":"");
     const high=Math.max(tier-3,grade-6);
-    const size=(12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.12:1);
-    const life=950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0)+(activeMutation===21?180:0);
+    const size=kind==="onryo"
+      ? (48+Math.random()*18)*(target.visitor?1.18:1)
+      : (12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.12:1);
+    const life=kind==="onryo"
+      ? 2600+Math.random()*1200
+      : 950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0)+(activeMutation===21?180:0);
 
     if(activeMutation===16){ny=.78+Math.random()*.18}
-    let vx=activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
-    let vy=activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2);
+    let vx=kind==="onryo"?(Math.random()-.5)*3:activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
+    let vy=kind==="onryo"?-(1+Math.random()*3):activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2);
     if(activeMutation===16){vx=(Math.random()-.5)*4;vy=-(24+Math.random()*30)}
     if(activeMutation===19){
       vx=(.5-nx)*rect.width*(.52+Math.random()*.18);
@@ -223,13 +239,13 @@
 
     particles.push({
       el:target.el,nx,ny,
-      dx:(Math.random()-.5)*18,
+      dx:kind==="onryo"?(Math.random()-.5)*5:(Math.random()-.5)*18,
       dy:0,vx,vy,
       size,life,maxLife:life,
-      rot:Math.random()*Math.PI*2,
-      vr:kind==="amaterasu"?(0.55+Math.random()*.35):(Math.random()-.5)*(kind==="glitch"?3.4:1.1),
+      rot:kind==="onryo"?onryoRot:Math.random()*Math.PI*2,
+      vr:kind==="onryo"?0:kind==="amaterasu"?(0.55+Math.random()*.35):(Math.random()-.5)*(kind==="glitch"?3.4:1.1),
       key,kind,mutation:activeMutation,
-      alpha:Math.min(1,(.56+Math.random()*.36)*(target.visitor?1.12:1)),
+      alpha:kind==="onryo"?.72:Math.min(1,(.56+Math.random()*.36)*(target.visitor?1.12:1)),
       pulse:Math.random()*Math.PI*2
     });
   }
@@ -246,23 +262,39 @@
       ? (MUTATION_COLORS[activeMutation]||"#ffffff")
       : (computed.getPropertyValue("--tier").trim()||"#ffffff");
 
+    if(activeMutation===22 && target.el.querySelectorAll(".onryo-blade-particle").length>=5) return;
+
     const p=document.createElement("i");
-    p.className="mobile-card-particle"+(activeMutation===21?" amaterasu-eye-particle":"");
+    p.className="mobile-card-particle"
+      +(activeMutation===21?" amaterasu-eye-particle":"")
+      +(activeMutation===22?" onryo-blade-particle":"");
     p.setAttribute("aria-hidden","true");
-    const glyphs={11:"✺",12:"⧖",13:"▧",14:"⌁",15:"◈",16:"↑",17:"◎",18:"◫",19:"◉",20:"⌬",21:"⦿"};
-    p.textContent=activeMutation===21?"":(activeMutation>=11?(glyphs[activeMutation]||"◆"):(Math.random()<.58?"✦":Math.random()<.72?"✧":"•"));
+    const glyphs={11:"✺",12:"⧖",13:"▧",14:"⌁",15:"◈",16:"↑",17:"◎",18:"◫",19:"◉",20:"⌬",21:"⦿",22:"刀"};
+    p.textContent=(activeMutation===21||activeMutation===22)?"":(activeMutation>=11?(glyphs[activeMutation]||"◆"):(Math.random()<.58?"✦":Math.random()<.72?"✧":"•"));
 
     const edge=Math.random();
-    let x,y;
-    if(edge<.42){x=8+Math.random()*84;y=72+Math.random()*22}
+    let x,y,staticRot=0;
+    if(activeMutation===22){
+      const spots=[
+        [10,18,-28],[88,22,26],[7,62,-17],[92,64,18],[50,84,2]
+      ];
+      const spot=spots[Math.floor(Math.random()*spots.length)];
+      x=spot[0]+(Math.random()-.5)*3;
+      y=spot[1]+(Math.random()-.5)*4;
+      staticRot=spot[2]+(Math.random()-.5)*5;
+    }else if(edge<.42){x=8+Math.random()*84;y=72+Math.random()*22}
     else if(edge<.72){x=8+Math.random()*84;y=6+Math.random()*18}
     else{x=Math.random()<.5?5+Math.random()*8:87+Math.random()*8;y=18+Math.random()*66}
 
     const strength=target.visitor?1.2:1;
-    const dx=(Math.random()-.5)*(30*strength);
-    const dy=-(20+Math.random()*34)*strength;
-    const size=(10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1)*(activeMutation===21?1.10:1);
-    const life=Math.round((900+Math.random()*650)*(target.visitor?1.05:1));
+    const dx=activeMutation===22?(Math.random()-.5)*5:(Math.random()-.5)*(30*strength);
+    const dy=activeMutation===22?-(2+Math.random()*5):-(20+Math.random()*34)*strength;
+    const size=activeMutation===22
+      ? (42+Math.random()*15)*(target.visitor?1.12:1)
+      : (10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1)*(activeMutation===21?1.10:1);
+    const life=activeMutation===22
+      ? Math.round(2600+Math.random()*1200)
+      : Math.round((900+Math.random()*650)*(target.visitor?1.05:1));
 
     p.style.left=x+"%";
     p.style.top=y+"%";
@@ -271,7 +303,7 @@
     p.style.setProperty("--fx-dy",dy.toFixed(1)+"px");
     p.style.setProperty("--fx-size",size.toFixed(1)+"px");
     p.style.setProperty("--fx-life",life+"ms");
-    p.style.setProperty("--fx-rot",activeMutation===21?(480+Math.random()*240).toFixed(0)+"deg":((Math.random()-.5)*150).toFixed(0)+"deg");
+    p.style.setProperty("--fx-rot",activeMutation===22?staticRot.toFixed(0)+"deg":activeMutation===21?(480+Math.random()*240).toFixed(0)+"deg":((Math.random()-.5)*150).toFixed(0)+"deg");
 
     mobileParticleCount++;
     const cleanup=()=>{
@@ -773,6 +805,28 @@
         ctx.shadowBlur=Math.max(8,size*.72);
         ctx.shadowColor="#ff2635";
         ctx.drawImage(img,-size*.55,-size*.55,size*1.1,size*1.1);
+        ctx.restore();
+      }
+    }else if(p.kind==="onryo"){
+      const img=images.onryo;
+      if(img&&img.complete){
+        ctx.save();
+        ctx.globalCompositeOperation="source-over";
+        ctx.globalAlpha*=.34;
+        const mist=ctx.createRadialGradient(0,0,2,0,0,size*.62);
+        mist.addColorStop(0,"rgba(224,174,255,.42)");
+        mist.addColorStop(.46,"rgba(184,55,255,.20)");
+        mist.addColorStop(1,"rgba(255,43,91,0)");
+        ctx.fillStyle=mist;
+        ctx.beginPath();ctx.ellipse(0,size*.05,size*.54,size*.34,0,0,Math.PI*2);ctx.fill();
+        ctx.globalAlpha*=2.05;
+        ctx.shadowBlur=Math.max(12,size*.34);
+        ctx.shadowColor="#b83dff";
+        ctx.drawImage(img,-size*.18,-size*.62,size*.36,size*1.24);
+        ctx.globalAlpha*=.55;
+        ctx.shadowBlur=Math.max(10,size*.28);
+        ctx.shadowColor="#ff355f";
+        ctx.drawImage(img,-size*.18,-size*.62,size*.36,size*1.24);
         ctx.restore();
       }
     }else if(p.kind==="chrono"){
