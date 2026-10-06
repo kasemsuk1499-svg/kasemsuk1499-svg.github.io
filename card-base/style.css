@@ -6454,3 +6454,247 @@ body.ascension-unlock-10 .base-tower-bar,
   .collection .card-summary-stats>div{padding:5px}
   .collection .card-summary-stats b{font-size:8.5px}
 }
+
+
+/* =========================================================
+   COLLECTION BULK SELL — fast + protected multi-select
+   ========================================================= */
+.collection-sell-tools{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 12px;
+  flex-wrap:wrap;
+}
+.collection-sell-toggle{
+  border-color:rgba(255,103,132,.32)!important;
+  color:#ff9caf;
+  background:linear-gradient(135deg,rgba(255,89,121,.09),#151923)!important;
+}
+.collection-sell-top-controls{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.collection-sell-top-controls button{
+  min-height:36px;
+  padding:7px 10px;
+  font-size:9px;
+}
+.collection.bulk-sell-mode{
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;
+}
+.collection.bulk-sell-mode .card-item{
+  position:relative;
+  cursor:pointer;
+  user-select:none;
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease,opacity .14s ease;
+}
+.collection.bulk-sell-mode .card-body{
+  display:none!important;
+}
+.collection.bulk-sell-mode .card-art{
+  aspect-ratio:.72;
+}
+.collection.bulk-sell-mode .bulk-sell-eligible:hover{
+  transform:translateY(-2px);
+  border-color:#855363;
+}
+.collection.bulk-sell-mode .bulk-sell-selected{
+  border-color:#ff6685!important;
+  box-shadow:
+    0 0 0 2px rgba(255,101,133,.18),
+    0 0 24px rgba(255,78,119,.13);
+  transform:translateY(-2px);
+}
+.collection.bulk-sell-mode .bulk-sell-selected .card-art:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:7;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,70,107,.03),rgba(255,70,107,.18));
+}
+.collection.bulk-sell-mode .bulk-sell-protected{
+  opacity:.46;
+  cursor:not-allowed;
+  filter:saturate(.58);
+}
+.bulk-sell-overlay{
+  position:absolute;
+  inset:0;
+  z-index:12;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent 42%,rgba(5,6,10,.20) 62%,rgba(5,6,10,.93) 100%);
+}
+.bulk-sell-check{
+  align-self:flex-start;
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.26);
+  background:rgba(8,10,15,.88);
+  color:#f5f6fa;
+  font-size:17px;
+  font-weight:1000;
+  box-shadow:0 5px 18px rgba(0,0,0,.25);
+}
+.bulk-sell-selected .bulk-sell-check{
+  border-color:#ff7791;
+  background:linear-gradient(135deg,#ff5377,#b13e67);
+  color:white;
+  box-shadow:0 0 20px rgba(255,80,119,.30);
+}
+.bulk-sell-protected .bulk-sell-check{
+  font-size:14px;
+}
+.bulk-sell-overlay>div{
+  min-width:0;
+  margin-left:auto;
+  text-align:right;
+}
+.bulk-sell-overlay small{
+  display:block;
+  color:#929cad;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.10em;
+}
+.bulk-sell-overlay strong{
+  display:block;
+  max-width:120px;
+  margin-top:2px;
+  color:#ffb0bf;
+  font-size:10px;
+  line-height:1.15;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.bulk-sell-protected .bulk-sell-overlay strong{
+  color:#c1c6d0;
+}
+.bulk-sell-bar{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  z-index:95;
+  width:min(760px,calc(100vw - 24px));
+  transform:translateX(-50%);
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  padding:10px 12px;
+  border:1px solid rgba(255,107,137,.34);
+  border-radius:16px;
+  background:rgba(13,15,22,.94);
+  backdrop-filter:blur(16px);
+  box-shadow:0 18px 55px rgba(0,0,0,.42),0 0 30px rgba(255,76,116,.08);
+}
+.bulk-sell-bar-copy{
+  display:grid;
+  grid-template-columns:auto auto;
+  gap:2px 12px;
+  align-items:end;
+  min-width:0;
+}
+.bulk-sell-bar-copy span{
+  color:#c0c6d2;
+  font-size:9px;
+}
+.bulk-sell-bar-copy strong{
+  color:#ff9cb0;
+  font-size:17px;
+  line-height:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.bulk-sell-bar-copy small{
+  grid-column:1/-1;
+  color:#737e91;
+  font-size:7px;
+  line-height:1.35;
+}
+.bulk-sell-bar .primary.danger{
+  width:auto;
+  margin:0;
+  min-width:150px;
+  background:linear-gradient(135deg,#ff5678,#a73d67);
+}
+body.collection-selling #panel-collection{
+  padding-bottom:96px;
+}
+
+@media (max-width:700px){
+  .collection-sell-tools{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6px;
+  }
+  .collection-sell-toggle{
+    width:100%;
+  }
+  .collection-sell-top-controls{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .collection-sell-top-controls button{
+    width:100%;
+    min-height:34px;
+    padding:6px 5px;
+    font-size:8px;
+  }
+  .collection.bulk-sell-mode{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+  .collection.bulk-sell-mode .card-item{
+    border-radius:14px;
+  }
+  .bulk-sell-overlay{
+    padding:7px;
+  }
+  .bulk-sell-check{
+    width:29px;
+    height:29px;
+    font-size:14px;
+  }
+  .bulk-sell-overlay strong{
+    max-width:90px;
+    font-size:8.5px;
+  }
+  .bulk-sell-bar{
+    bottom:max(10px,env(safe-area-inset-bottom));
+    width:calc(100vw - 14px);
+    grid-template-columns:minmax(0,1fr) minmax(120px,.55fr);
+    gap:7px;
+    padding:8px;
+    border-radius:14px;
+  }
+  .bulk-sell-bar-copy strong{font-size:13px}
+  .bulk-sell-bar-copy span{font-size:8px}
+  .bulk-sell-bar-copy small{display:none}
+  .bulk-sell-bar .primary.danger{
+    min-width:0;
+    min-height:42px;
+    padding:7px 8px;
+    font-size:8.5px;
+  }
+}
+@media (max-width:390px){
+  .collection.bulk-sell-mode{gap:6px}
+  .bulk-sell-overlay strong{max-width:74px;font-size:8px}
+  .bulk-sell-bar{grid-template-columns:minmax(0,1fr) 116px}
+}
