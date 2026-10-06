@@ -212,8 +212,8 @@
       const leftTaken=activeSwords.some(p=>p.onryoSide==="left");
       const side=leftTaken?"right":"left";
       const spot=side==="left"
-        ? [.46,.50,-.72]
-        : [.54,.50,.72];
+        ? [.50,.50,-.59]
+        : [.50,.50,.59];
       nx=spot[0];
       ny=spot[1];
       onryoRot=spot[2];
@@ -226,15 +226,15 @@
     const key=chooseTexture(tier,grade,mutation,mutation2);
     const high=Math.max(tier-3,grade-6);
     const size=kind==="onryo"
-      ? (48+Math.random()*18)*(target.visitor?1.18:1)
+      ? Math.hypot(rect.width,rect.height)*.68*(target.visitor?1.04:1)
       : (12+Math.random()*10+high*1.8)*(isMobile?.88:1)*(target.visitor?1.28:1)*(activeMutation===21?1.12:1);
     const life=kind==="onryo"
       ? 2600+Math.random()*1200
       : 950+Math.random()*1050+(tier>=8?500:0)+(activeMutation>=11?350:0)+(activeMutation===21?180:0);
 
     if(activeMutation===16){ny=.78+Math.random()*.18}
-    let vx=kind==="onryo"?(Math.random()-.5)*3:activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
-    let vy=kind==="onryo"?-(1+Math.random()*3):activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2);
+    let vx=kind==="onryo"?0:activeMutation===4?(10+Math.random()*20):(Math.random()-.5)*(activeMutation>=8?18:tier>=8?10:7);
+    let vy=kind==="onryo"?0:activeMutation===1?-(18+Math.random()*22):activeMutation===3?-(2+Math.random()*8):-(7+Math.random()*15+(tier-4)*1.2);
     if(activeMutation===16){vx=(Math.random()-.5)*4;vy=-(24+Math.random()*30)}
     if(activeMutation===19){
       vx=(.5-nx)*rect.width*(.52+Math.random()*.18);
@@ -243,7 +243,7 @@
 
     particles.push({
       el:target.el,nx,ny,
-      dx:kind==="onryo"?(Math.random()-.5)*5:(Math.random()-.5)*18,
+      dx:kind==="onryo"?0:(Math.random()-.5)*18,
       dy:0,vx,vy,
       size,life,maxLife:life,
       rot:kind==="onryo"?onryoRot:Math.random()*Math.PI*2,
@@ -284,8 +284,8 @@
       const leftTaken=existing.some(el=>el.dataset.onryoSide==="left");
       const side=leftTaken?"right":"left";
       const spot=side==="left"
-        ? [46,50,-41]
-        : [54,50,41];
+        ? [50,50,-34]
+        : [50,50,34];
       x=spot[0];
       y=spot[1];
       staticRot=spot[2];
@@ -295,10 +295,11 @@
     else{x=Math.random()<.5?5+Math.random()*8:87+Math.random()*8;y=18+Math.random()*66}
 
     const strength=target.visitor?1.2:1;
-    const dx=activeMutation===22?(Math.random()-.5)*5:(Math.random()-.5)*(30*strength);
-    const dy=activeMutation===22?-(2+Math.random()*5):-(20+Math.random()*34)*strength;
+    const dx=activeMutation===22?0:(Math.random()-.5)*(30*strength);
+    const dy=activeMutation===22?0:-(20+Math.random()*34)*strength;
+    const targetRect=activeMutation===22?target.el.getBoundingClientRect():null;
     const size=activeMutation===22
-      ? (42+Math.random()*15)*(target.visitor?1.12:1)
+      ? Math.hypot(targetRect?.width||120,targetRect?.height||180)*.72*(target.visitor?1.04:1)
       : (10+Math.random()*8+(target.tier>=8?3:0))*(target.visitor?1.12:1)*(activeMutation===21?1.10:1);
     const life=activeMutation===22
       ? Math.round(2600+Math.random()*1200)
