@@ -5968,3 +5968,76 @@ body.ascension-unlock-10 .base-tower-bar,
     font-size:7px
   }
 }
+
+
+/* ===== MUTATION 22 — ONRYŌ NO YAIBA / 怨霊の刃 ===== */
+.mutation-fx.mutation-22::after,
+.mutation-fx.mutation2-22::after{
+  border:2px solid rgba(196,72,255,.78);
+  box-shadow:
+    inset 0 0 16px rgba(191,72,255,.11),
+    inset 0 0 28px rgba(255,48,91,.07),
+    0 0 12px rgba(186,59,255,.24),
+    0 0 24px rgba(255,48,91,.14);
+}
+.mutation-badge.mutation-22{
+  color:#efcfff;
+  border-color:rgba(207,111,255,.86);
+  background:linear-gradient(135deg,rgba(24,7,35,.96),rgba(57,7,35,.94));
+  box-shadow:
+    0 0 12px rgba(183,62,255,.28),
+    0 0 20px rgba(255,44,91,.12),
+    inset 0 0 9px rgba(124,33,177,.18);
+  text-shadow:
+    0 0 7px rgba(199,102,255,.72),
+    0 0 12px rgba(255,65,102,.34);
+}
+@media (max-width:700px){
+  .mobile-card-particle.onryo-blade-particle{
+    width:calc(var(--fx-size,48px) * .34);
+    height:calc(var(--fx-size,48px) * 1.18);
+    background:url("./assets/fx/onryo-blade.svg") center/contain no-repeat;
+    color:transparent;
+    text-shadow:none;
+    mix-blend-mode:screen;
+    filter:
+      drop-shadow(0 0 5px rgba(188,58,255,.88))
+      drop-shadow(0 0 9px rgba(255,48,91,.52));
+    transform-origin:50% 50%;
+    animation:onryoBladeFade var(--fx-life,3200ms) ease-in-out forwards;
+  }
+  @keyframes onryoBladeFade{
+    0%{
+      opacity:0;
+      transform:translate(-50%,-50%) scale(.72) rotate(var(--fx-rot,0deg));
+      filter:
+        blur(1.3px)
+        drop-shadow(0 0 4px rgba(188,58,255,.62))
+        drop-shadow(0 0 7px rgba(255,48,91,.34));
+    }
+    18%{
+      opacity:.82;
+      transform:translate(-50%,-50%) scale(.98) rotate(var(--fx-rot,0deg));
+    }
+    55%{opacity:.66}
+    82%{opacity:.76}
+    100%{
+      opacity:0;
+      transform:
+        translate(calc(-50% + var(--fx-dx,0px)),calc(-50% + var(--fx-dy,-4px)))
+        scale(1.05)
+        rotate(var(--fx-rot,0deg));
+      filter:
+        blur(1.1px)
+        drop-shadow(0 0 6px rgba(188,58,255,.56))
+        drop-shadow(0 0 10px rgba(255,48,91,.28));
+    }
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .mutation-fx.mutation-22::after,
+  .mutation-fx.mutation2-22::after,
+  .mobile-card-particle.onryo-blade-particle{
+    animation:none!important;
+  }
+}
