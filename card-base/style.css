@@ -6275,3 +6275,182 @@ body.ascension-unlock-10 .base-tower-bar,
   .item-bag-banner{grid-template-columns:auto minmax(0,1fr)}
   .item-bag-banner>.badge{grid-column:1/-1;justify-self:start}
 }
+
+
+/* =========================================================
+   COLLECTION COMPACT V2 — summary first, tools on demand
+   ========================================================= */
+.card-summary-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin:7px 0 6px;
+}
+.card-summary-stats>div{
+  min-width:0;
+  padding:7px 8px;
+  border:1px solid rgba(255,255,255,.025);
+  border-radius:10px;
+  background:#0b0d13;
+}
+.card-summary-stats span,
+.card-awaken-strip span{
+  display:block;
+  color:var(--muted);
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:.055em;
+}
+.card-summary-stats b{
+  display:block;
+  margin-top:2px;
+  min-width:0;
+  font-size:11px;
+  line-height:1.3;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.card-summary-stats .mutation-stat{
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  white-space:normal;
+  overflow:hidden;
+}
+.card-awaken-strip{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:7px 9px;
+  margin-bottom:6px;
+  border:1px solid rgba(255,213,111,.10);
+  border-radius:10px;
+  background:linear-gradient(135deg,rgba(255,216,108,.045),#0b0d13);
+}
+.card-awaken-strip b{
+  font-size:9px;
+  color:#e7eaf2;
+  text-align:right;
+}
+.card-more-stats,
+.card-action-menu{
+  margin-top:6px;
+}
+.card-more-stats>summary,
+.card-action-menu>summary{
+  list-style:none;
+  user-select:none;
+  cursor:pointer;
+}
+.card-more-stats>summary::-webkit-details-marker,
+.card-action-menu>summary::-webkit-details-marker{display:none}
+.card-more-stats>summary{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  min-height:30px;
+  padding:5px 8px;
+  border:1px solid #252b38;
+  border-radius:9px;
+  background:#0d1017;
+  color:#929caf;
+  font-size:8px;
+  font-weight:850;
+}
+.card-more-stats>summary span,
+.card-action-menu>summary span{
+  transition:transform .16s ease;
+}
+.card-more-stats[open]>summary span,
+.card-action-menu[open]>summary span{
+  transform:rotate(180deg);
+}
+.card-stats-more{
+  margin:6px 0 0;
+}
+.card-stats-more>div{
+  min-width:0;
+}
+.card-quick-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:7px;
+}
+.card-quick-actions button,
+.card-actions-secondary button{
+  min-width:0;
+  border:1px solid var(--border);
+  background:#181c27;
+  border-radius:9px;
+  padding:8px 6px;
+  cursor:pointer;
+  font-size:9px;
+}
+.card-quick-actions button:nth-child(3){
+  grid-column:1/-1;
+}
+.card-quick-actions button:hover,
+.card-actions-secondary button:hover{
+  border-color:#4a5169;
+}
+.card-action-menu>summary{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:34px;
+  padding:7px 9px;
+  border:1px solid #32394b;
+  border-radius:10px;
+  background:linear-gradient(145deg,#151923,#10131b);
+  color:#c3c9d7;
+  font-size:9px;
+  font-weight:900;
+}
+.card-action-menu[open]>summary{
+  border-color:#535d77;
+  color:#f2f4f9;
+}
+.card-actions-secondary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:6px;
+  padding:7px;
+  border:1px solid #252b38;
+  border-radius:10px;
+  background:#0b0e14;
+}
+.card-actions-secondary .sell{color:#ff8da2}
+.card-actions-secondary .locked{color:#ffd66b}
+
+@media (min-width:701px){
+  .card-quick-actions{grid-template-columns:repeat(3,1fr)}
+  .card-quick-actions button:nth-child(3){grid-column:auto}
+}
+@media (max-width:700px){
+  .collection .card-body{padding:7px}
+  .collection .card-summary-stats{gap:4px;margin-top:5px}
+  .collection .card-summary-stats>div{padding:6px}
+  .collection .card-summary-stats span{font-size:6.5px}
+  .collection .card-summary-stats b{font-size:9px}
+  .collection .card-awaken-strip{padding:6px 7px}
+  .collection .card-awaken-strip span{font-size:6.5px}
+  .collection .card-awaken-strip b{font-size:7.5px}
+  .collection .card-more-stats>summary,
+  .collection .card-action-menu>summary{font-size:8px}
+  .collection .card-stats-more{grid-template-columns:1fr}
+  .collection .card-stats-more div{padding:6px}
+  .collection .card-stats-more span{font-size:7px}
+  .collection .card-stats-more b{font-size:8.5px}
+  .collection .card-quick-actions button{min-height:32px;padding:6px 4px;font-size:8px}
+  .collection .card-actions-secondary{grid-template-columns:1fr}
+  .collection .card-actions-secondary button{min-height:34px;font-size:8.5px}
+}
+@media (max-width:390px){
+  .collection{gap:7px}
+  .collection .card-summary-stats>div{padding:5px}
+  .collection .card-summary-stats b{font-size:8.5px}
+}
