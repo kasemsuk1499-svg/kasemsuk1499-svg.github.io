@@ -191,7 +191,7 @@
   const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02,.01,.0025,.0005,.0001];
 
   const MUTATIONS = [
-    {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:95.646},
+    {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:95.396},
     {name:"Blaze",icon:"🔥",color:"#ff7043",income:2.00,luck:1.15,weight:.65},
     {name:"Thunder",icon:"⚡",color:"#69e7ff",income:2.20,luck:1.18,weight:.55},
     {name:"Frost",icon:"❄",color:"#9deaff",income:2.40,luck:1.21,weight:.50},
@@ -212,10 +212,11 @@
     {name:"Echo Frame",icon:"◫",color:"#ff9ad5",income:10.80,luck:2.08,weight:.012},
     {name:"Event Horizon",icon:"◉",color:"#8a64ff",income:12.00,luck:2.16,weight:.009},
     {name:"Rune Circuit",icon:"⌬",color:"#ffe47a",income:13.50,luck:2.25,weight:.006},
-    {name:"Amaterasu",icon:"⦿",color:"#ff2b35",income:15.00,luck:2.35,weight:.004}
+    {name:"Amaterasu",icon:"⦿",color:"#ff2b35",income:15.00,luck:2.35,weight:.004},
+    {name:"Onryō no Yaiba",icon:"刀",color:"#c548ff",income:3.90,luck:1.415,weight:.25}
   ];
   // Mutation Storm pool totals 100%. New ultra mutations are rarer, but obtainable.
-  const MUTATION_EVENT_WEIGHTS = [0,11.88,11.385,10.89,10.395,9.9,9.405,8.91,7.92,6.93,5.445,3.465,2.475,.25,.20,.15,.12,.10,.08,.06,.03,.01];
+  const MUTATION_EVENT_WEIGHTS = [0,11.058878,10.598092,10.137305,9.676519,9.215732,8.754945,8.294159,7.372586,6.451012,5.068653,3.225506,2.303933,.232721,.186176,.139632,.111706,.093088,.074471,.055853,.027926,.009309,6.911799];
   const MUTATION_EVENT_PULSE_CHANCE = 0.005; // 0.5% per Normal displayed card every 30 sec
 
   // =========================================================
@@ -876,7 +877,8 @@
       18:"Echo",
       19:"Horizon",
       20:"Rune",
-      21:"Amaterasu"
+      21:"Amaterasu",
+      22:"Onryō"
     };
     return map[id]||MUTATIONS[id]?.name||"Mutation";
   }
