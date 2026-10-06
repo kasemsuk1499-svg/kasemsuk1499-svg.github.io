@@ -223,6 +223,7 @@
   // Mutation Storm pool totals 100%. New ultra mutations are rarer, but obtainable.
   const MUTATION_EVENT_WEIGHTS = [0,11.058878,10.598092,10.137305,9.676519,9.215732,8.754945,8.294159,7.372586,6.451012,5.068653,3.225506,2.303933,.232721,.186176,.139632,.111706,.093088,.074471,.055853,.027926,.009309,6.911799];
   const MUTATION_EVENT_PULSE_CHANCE = 0.005; // 0.5% per Normal displayed card every 30 sec
+  const TOWER_LV100_TICKET_DROP_CHANCE = 0.03; // rolled once per cleared Endless Tower floor
   // Grade does not increase Event hit frequency. It improves mutation quality after a hit.
   const MUTATION_GRADE_EVENT_BONUS = [0,.03,.06,.10,.15,.22,.30,.39,.49,.60,.70,.80,.90,1.00];
   // Flat bonus applied once to the final Mutation Inheritance success chance.
@@ -401,6 +402,7 @@
   let mutationEventTimer = 0;
   let rotatingShopTimer = 0;
   let mutationEventBusy = false;
+  let towerChallengeBusy = false;
   let mutationEventClockOffset = 0;
   let mutationEventStatus = null;
   let mutationEventClientSession = getMutationEventSession();
@@ -738,16 +740,23 @@
     const tradeReceipts=Number(result.trade_receipts)||0;
     const serverGrants=Number(result.server_grants)||0;
     const serverGiftSync=Number(result.server_gift_sync)||0;
-    if((tradeReceipts>0||serverGrants>0||serverGiftSync>0)&&result.state){
+    const towerRolls=Number(result.tower_rolls)||0;
+    const towerTicketDrops=Number(result.tower_tickets_dropped)||0;
+    if((tradeReceipts>0||serverGrants>0||serverGiftSync>0||towerTicketDrops>0)&&result.state){
       state=hydrateState(result.state);
       localStorage.setItem(SAVE_KEY,JSON.stringify(state));
       renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderRotatingPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
-      if(serverGrants>0)toast("🎁 ได้รับของขวัญเซิร์ฟเวอร์ · Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
+      if(serverGrants>0||serverGiftSync>0)toast("🎁 ของขวัญเซิร์ฟเวอร์พร้อมแล้ว · Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
+      if(towerTicketDrops>0){
+        toast("⚡ JACKPOT! Endless Tower ดรอป Lv.100 Ticket ×"+towerTicketDrops+" 💯",true);
+      }
       if(tradeReceipts>0){
         toast("Trade สำเร็จ · คลังการ์ดอัปเดตแล้ว ✨",true);
         setTimeout(()=>refreshTrades(true),0);
       }
     }
+    result.tower_rolls=towerRolls;
+    result.tower_tickets_dropped=towerTicketDrops;
     updateSyncUi(cloudDirty?"syncing":"online");
     publishPublicBase();
     return result;
@@ -3270,15 +3279,42 @@
       text:rules.length?rules.map(r=>(r.ok?"✓ ":"• ")+r.text).join(" · "):"Power Check ล้วน"
     };
   }
-  function challengeTower(){
+  async function challengeTower(){
+    if(towerChallengeBusy)return;
     if((state.ascension?.stars||0)<1){toast("ปลด Endless Tower หลัง Ascension ครั้งแรก");return}
     const floor=state.tower.floor,need=towerRequirement(floor),power=towerPower(),cond=towerCondition(floor);
     if(power<need||!cond.ok){toast("ยังไม่ผ่าน Floor "+floor+" · ปั้นฐานให้แข็งแกร่งขึ้นก่อน");return}
+
     state.tower.best=Math.max(state.tower.best,floor);
     state.tower.shards++;
     state.tower.floor++;
-    toast("ผ่าน Endless Tower Floor "+floor+" · Shard +1 🏢",true);
-    renderAll();
+
+    if(!gameToken||!cloudReady){
+      const dropped=Math.random()<TOWER_LV100_TICKET_DROP_CHANCE;
+      if(dropped){
+        state.items.level100Ticket=(Number(state.items?.level100Ticket)||0)+1;
+        toast("⚡ JACKPOT! Floor "+floor+" ดรอป Lv.100 Ticket ×1 💯",true);
+      }else{
+        toast("ผ่าน Endless Tower Floor "+floor+" · Shard +1 🏢",true);
+      }
+      renderAll();
+      return;
+    }
+
+    towerChallengeBusy=true;
+    renderEndgame();
+    save();
+    try{
+      const result=await flushCloudSave({force:true});
+      if(!result.ok){
+        toast("ผ่าน Floor "+floor+" แล้ว · Shard +1 · Rare Drop จะเช็กตอน Cloud Sync รอบถัดไป");
+      }else if(!(Number(result.tower_tickets_dropped)>0)){
+        toast("ผ่าน Endless Tower Floor "+floor+" · Shard +1 🏢",true);
+      }
+    }finally{
+      towerChallengeBusy=false;
+      renderAll();
+    }
   }
   function forgeTowerCore(){
     if(state.tower.shards<10){toast("ต้องใช้ Tower Shards 10 ชิ้น");return}
@@ -3361,8 +3397,8 @@
     $("#towerShards").textContent=state.tower.shards;
     $("#endlessTowerCondition").textContent=(stars<1?"LOCKED · ต้อง Ascension I":"Floor "+floor+" · "+cond.text);
     const challenge=$("#towerChallengeBtn");
-    challenge.disabled=stars<1||power<req||!cond.ok;
-    challenge.textContent=stars<1?"ปลดล็อกหลัง Ascension I":"ท้าทาย Floor "+floor;
+    challenge.disabled=towerChallengeBusy||stars<1||power<req||!cond.ok;
+    challenge.textContent=towerChallengeBusy?"กำลังสุ่ม Rare Drop…":stars<1?"ปลดล็อกหลัง Ascension I":"ท้าทาย Floor "+floor;
     $("#towerCoreBtn").disabled=state.tower.shards<10;
   }
   function renderRankCatalog(){
