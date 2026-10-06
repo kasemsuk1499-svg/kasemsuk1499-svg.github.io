@@ -1735,6 +1735,9 @@
     cloudLoading=false;cloudReady=true;
     if(!result.exists)await flushCloudSave();
     renderAll();
+    if(Number(result.server_grants)>0){
+      toast("🎁 ของขวัญเซิร์ฟเวอร์มาแล้ว! Singularity Pack ×1 + ⚡ Lv.40 Ticket ×1",true);
+    }
     updateSyncUi("online");
   }
 
