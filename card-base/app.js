@@ -1651,15 +1651,9 @@
   }
 
   async function initCloud(){
-    if(window.supabase&&typeof window.supabase.createClient==="function"){
-      supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
-        auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
-      });
-    }else{
-      // CDN can occasionally fail on some networks/devices. The game only needs RPC,
-      // so fall back to direct REST instead of disabling Cloud entirely.
-      supabaseClient=makeRestRpcClient();
-    }
+    // Direct RPC client only. Keeping the game self-hosted removes third-party
+    // executable JavaScript from the page and narrows the CSP attack surface.
+    supabaseClient=makeRestRpcClient();
     if(gameToken){
       const me=await fetchMe();
       if(me){
