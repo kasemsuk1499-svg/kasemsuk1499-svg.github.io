@@ -319,6 +319,25 @@
             </select>
           </div>
         </div>
+        <div class="collection-sell-tools">
+          <button id="bulkSellModeBtn" class="secondary collection-sell-toggle" type="button">💸 โหมดขายหลายใบ</button>
+          <div id="bulkSellTopControls" class="collection-sell-top-controls" hidden>
+            <button id="bulkSellSelectVisibleBtn" class="secondary" type="button">เลือกทั้งหมดที่ขายได้</button>
+            <button id="bulkSellSelectJunkBtn" class="secondary" type="button">เลือก C + Normal</button>
+            <button id="bulkSellClearBtn" class="secondary" type="button">ล้างที่เลือก</button>
+            <button id="bulkSellExitBtn" class="secondary" type="button">ออกโหมดขาย</button>
+          </div>
+        </div>
+
+        <div id="bulkSellBar" class="bulk-sell-bar" hidden>
+          <div class="bulk-sell-bar-copy">
+            <span>เลือกแล้ว <b id="bulkSellCount">0</b> ใบ</span>
+            <strong id="bulkSellTotal">0</strong>
+            <small>การ์ดล็อก / วางฐาน / Trade Lock / Auto Grade จะไม่ถูกขาย</small>
+          </div>
+          <button id="bulkSellConfirmBtn" class="primary danger" type="button" disabled>ขายที่เลือก</button>
+        </div>
+
         <div class="item-bag-banner">
           <div class="item-bag-icon">⚡</div>
           <div class="item-bag-copy">
