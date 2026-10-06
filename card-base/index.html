@@ -57,7 +57,7 @@
         <div class="mutation-event-meta">
           <span id="mutationEventCountdown">—</span>
           <span id="mutationEventEligible">มีช่อง Mutation ว่างบนฐาน 0 ใบ</span>
-          <span>Event pulse: 0.5% / ใบ / 30 วิ</span>
+          <span>Event pulse: 0.5% / ใบ / 30 วิ · Grade สูงช่วยคัดผลที่ดีกว่า</span>
         </div>
       </div>
       <div class="mutation-event-wave" aria-hidden="true"></div>
@@ -323,10 +323,10 @@
           <div class="mutation-lab-orb">🧬</div>
           <div>
             <div class="eyebrow">MUTATION INHERITANCE</div>
-            <strong>สืบทอด Mutation ได้สูงสุด 2 ชนิดต่อการ์ด</strong>
-            <p>ใช้การ์ดที่มี Mutation เป็นวัตถุดิบ · Tier ใกล้/สูงกว่าเป้าหมายสำเร็จง่ายกว่า · ช่องที่ 2 ยากกว่าช่องแรก</p>
+            <strong>Grade สูงช่วยปั้น Mutation ของการ์ดเมนได้ง่ายขึ้น</strong>
+            <p>Event: Grade สูงมีโอกาส Roll ผลซ้ำแล้วเก็บ Mutation ที่ดีกว่า · Inheritance: Grade ของ Target เพิ่มเรทสำเร็จ · ล้าง Mutation ใช้ใบซ้ำตัวละครเดียวกัน Tier เดียวกัน 1 ใบ + เงิน</p>
           </div>
-          <span class="badge">Donor ยิ่งเยอะ = เรทยิ่งสูง</span>
+          <span class="badge">KEEP YOUR MAIN ✦</span>
         </div>
         <div id="collection" class="collection"></div>
         <div id="emptyCollection" class="empty-state">ยังไม่มีการ์ด — ไปสุ่มซองใบแรกกัน ✨</div>
@@ -731,6 +731,52 @@
         <div class="mutation-lab-actions">
           <button id="mutationLabConfirm" class="primary" type="button" disabled>เริ่มสืบทอด</button>
           <button id="mutationLabClear" class="secondary" type="button">ล้างที่เลือก</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="mutationCleanseModal" class="modal mutation-cleanse-modal" aria-hidden="true">
+      <button class="modal-backdrop" data-close-mutation-cleanse type="button" aria-label="ปิด"></button>
+      <div class="modal-card mutation-cleanse-card">
+        <div class="modal-top">
+          <div>
+            <div class="eyebrow">MUTATION PURIFICATION</div>
+            <h2>ล้างกลายพันธุ์</h2>
+            <p class="muted">เก็บ Grade / Level / Awakening ของการ์ดเมนไว้ แล้วล้างเฉพาะ Mutation ที่ไม่ต้องการ</p>
+          </div>
+          <button id="closeMutationCleanseModal" class="icon-btn" type="button" aria-label="ปิด">✕</button>
+        </div>
+
+        <div id="mutationCleanseTarget" class="mutation-lab-target"></div>
+
+        <div class="mutation-cleanse-grid">
+          <section class="mutation-cleanse-section">
+            <div class="mutation-cleanse-head">
+              <span>STEP 1</span>
+              <strong>เลือก Mutation ที่จะล้าง</strong>
+            </div>
+            <div id="mutationCleanseMutationList" class="mutation-cleanse-options"></div>
+          </section>
+
+          <section class="mutation-cleanse-section">
+            <div class="mutation-cleanse-head">
+              <span>STEP 2</span>
+              <strong>เลือกใบซ้ำเป็นวัตถุดิบ</strong>
+              <small>ต้องเป็น Character เดียวกัน + Tier เดียวกัน · ใช้ 1 ใบ</small>
+            </div>
+            <div id="mutationCleanseDonors" class="mutation-cleanse-donors"></div>
+          </section>
+        </div>
+
+        <div class="mutation-cleanse-cost">
+          <div><span>PURIFY COST</span><strong id="mutationCleanseCost">0</strong></div>
+          <div><span>เงินที่มี</span><b id="mutationCleanseMoney">0</b></div>
+          <small id="mutationCleanseHint">เลือก Mutation และใบซ้ำก่อน</small>
+        </div>
+
+        <div class="mutation-cleanse-actions">
+          <button id="mutationCleanseConfirm" class="primary" type="button" disabled>🧹 ล้าง Mutation</button>
+          <button id="mutationCleanseCancel" class="secondary" type="button">ยกเลิก</button>
         </div>
       </div>
     </div>
