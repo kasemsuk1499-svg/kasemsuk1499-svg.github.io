@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090a10">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://qlaykelpabbjojpqjfwi.supabase.co; frame-src https://www.youtube-nocookie.com; media-src 'none'; font-src 'self' data:; worker-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://qlaykelpabbjojpqjfwi.supabase.co; frame-src https://www.youtube-nocookie.com; media-src 'none'; font-src 'self' data:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
   <title>Card Base — Prototype</title>
-  <link rel="stylesheet" href="./style.css?v=20261006-auto-best-v1">
+  <link rel="stylesheet" href="./style.css?v=20261006-trade-notify-v1">
 </head>
 <body>
   <div class="app-shell">
@@ -43,7 +43,7 @@
       <button class="tab" data-tab="pack"><span class="tab-icon">◇</span><span>สุ่มซอง</span></button>
       <button class="tab" data-tab="collection"><span class="tab-icon">▦</span><span>คลังการ์ด</span></button>
       <button class="tab" data-tab="index"><span class="tab-icon">◫</span><span>Index</span></button>
-      <button class="tab" data-tab="online"><span class="tab-icon">◎</span><span>ออนไลน์</span></button>
+      <button class="tab" data-tab="online"><span class="tab-icon">◎</span><span>ออนไลน์</span><b id="tradeNavBadge" class="trade-nav-badge" hidden>0</b></button>
       <button class="tab" data-tab="rebirth"><span class="tab-icon">↟</span><span>Rebirth</span></button>
     </nav>
 
@@ -882,13 +882,27 @@
             <span>สถานะ</span>
             <strong id="particlesStatus">ON</strong>
           </div>
+          <label class="settings-row" for="tradeNotifyToggle">
+            <span class="settings-row-copy">
+              <strong>🔔 แจ้งเตือนข้อเสนอ Trade</strong>
+              <small>เด้งแจ้งเตือนของเครื่องเมื่อมีคนส่งข้อเสนอใหม่ แม้กำลังอยู่แท็บอื่น</small>
+            </span>
+            <span class="toggle-switch">
+              <input id="tradeNotifyToggle" type="checkbox">
+              <i aria-hidden="true"></i>
+            </span>
+          </label>
+          <div class="settings-status">
+            <span>Trade Notification</span>
+            <strong id="tradeNotifyStatus">TAP TO ALLOW</strong>
+          </div>
         </div>
       </div>
     </div>
 
     <div id="toast" class="toast" aria-live="polite"></div>
   </div>
-  <script src="./app.js?v=20261006-auto-best-v1" defer></script>
+  <script src="./app.js?v=20261006-trade-notify-v1" defer></script>
   <script src="./fx.js?v=20261006-halo-aurora-rainbow-v1" defer></script>
 </body>
 </html>
