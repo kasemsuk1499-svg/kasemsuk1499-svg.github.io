@@ -4582,15 +4582,13 @@
       const pityRoll=rollTierWithPity();
       const tier=pityRoll.tier;
       processed++;
-      if(pityRoll.forced){
-        toast("🎯 PITY! การันตี "+pityRoll.forced+" แล้ว ✨",true);
-      }
 
       if(state.fullAuto){
-        if(state.autoTargets.includes(tier)){
+        if(pityRoll.forced||state.autoTargets.includes(tier)){
           storePack(tier,finishedAt);
           storedHits++;
           lastStoredTier=tier;
+          if(pityRoll.forced)toast("🎯 PITY! การันตี "+pityRoll.forced+" · เก็บซองให้อัตโนมัติ ✨",true);
         }
         state.currentPack=null;
         state.targetFound=false;
@@ -4599,13 +4597,15 @@
       }
 
       if(state.autoRolling){
-        if(state.autoTargets.includes(tier)){
+        if(pityRoll.forced||state.autoTargets.includes(tier)){
           state.currentPack={tier};
           state.autoRolling=false;
           state.targetFound=true;
           state.rollingUntil=0;
           setPackAutoSession(false);
-          toast("เจอ "+TIERS[tier].name+" แล้ว! Auto หยุดให้แล้ว ✨",true);
+          toast(pityRoll.forced
+            ?"🎯 PITY! การันตี "+pityRoll.forced+" · Auto หยุดให้แล้ว ✨"
+            :"เจอ "+TIERS[tier].name+" แล้ว! Auto หยุดให้แล้ว ✨",true);
           break;
         }
         state.currentPack=null;
@@ -4615,7 +4615,9 @@
 
       state.currentPack={tier};
       state.rollingUntil=0;
-      toast("ได้ซอง "+TIERS[tier].name+"!");
+      toast(pityRoll.forced
+        ?"🎯 PITY! การันตี "+pityRoll.forced+" แล้ว ✨"
+        :"ได้ซอง "+TIERS[tier].name+"!",!!pityRoll.forced);
       break;
     }
 
