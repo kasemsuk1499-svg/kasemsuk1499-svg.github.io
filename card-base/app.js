@@ -1308,12 +1308,14 @@
     const before=idPackCollection(range);
     const milestone=((progress.opened+1)%10)===0;
     let forcedId=null,reason="";
-    if(progress.targetId!==null&&progress.targetMisses>=30){
-      forcedId=progress.targetId;
-      reason="TARGET PITY";
-    }else if(milestone&&!before.complete&&before.missing.length){
+    if(milestone&&!before.complete&&before.missing.length){
+      // Collection protection has priority on every 10th pack.
+      // A ready Target Pity is preserved and will trigger on the following pack.
       forcedId=before.missing[Math.floor(Math.random()*before.missing.length)];
       reason="NEW ID GUARANTEE";
+    }else if(progress.targetId!==null&&progress.targetMisses>=30){
+      forcedId=progress.targetId;
+      reason="TARGET PITY";
     }
 
     state.money-=cost;
