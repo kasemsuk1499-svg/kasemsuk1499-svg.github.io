@@ -168,6 +168,7 @@
   const ROTATING_SHOP_SLOTS = 4;
   const ASCENSION_LEVEL_CAP = 40;
   const ASCENSION_PERK_MAX = 10;
+  const AUTO_LOCK_TIER_INDEX = 8; // Transcendent and above
 
   const TIERS = [
     {name:"Common",color:"#9aa1ad",multi:1},
@@ -550,13 +551,20 @@
     s.money=clampMoney(s.money);
     s.cards=(Array.isArray(s.cards)?s.cards:[])
       .filter(c=>Number.isInteger(c.charId)&&c.charId>=CARD_MIN_ID&&c.charId<=CARD_MAX_ID)
-      .map(c=>({
-        ...c,
-        gid:validCardGid(c.gid)?c.gid:makeCardGid(),
-        mutation:Number.isInteger(Number(c.mutation))&&Number(c.mutation)>=0&&Number(c.mutation)<MUTATIONS.length?Number(c.mutation):0,
-        mutation2:Number.isInteger(Number(c.mutation2))&&Number(c.mutation2)>0&&Number(c.mutation2)<MUTATIONS.length&&Number(c.mutation2)!==Number(c.mutation)?Number(c.mutation2):0,
-        awakening:Math.max(0,Math.floor(Number(c.awakening)||0))
-      }));
+      .map(c=>{
+        const tier=Math.max(0,Math.min(TIERS.length-1,Number(c.tier)||0));
+        const shouldInitialAutoLock=tier>=AUTO_LOCK_TIER_INDEX&&c.autoTierLockHandled!==true;
+        return {
+          ...c,
+          tier,
+          gid:validCardGid(c.gid)?c.gid:makeCardGid(),
+          mutation:Number.isInteger(Number(c.mutation))&&Number(c.mutation)>=0&&Number(c.mutation)<MUTATIONS.length?Number(c.mutation):0,
+          mutation2:Number.isInteger(Number(c.mutation2))&&Number(c.mutation2)>0&&Number(c.mutation2)<MUTATIONS.length&&Number(c.mutation2)!==Number(c.mutation)?Number(c.mutation2):0,
+          awakening:Math.max(0,Math.floor(Number(c.awakening)||0)),
+          locked:shouldInitialAutoLock?true:!!c.locked,
+          autoTierLockHandled:tier>=AUTO_LOCK_TIER_INDEX?true:!!c.autoTierLockHandled
+        };
+      });
     s.cardIndex=normalizeCardIndex(s.cardIndex);
     const rawIdPackProgress=s.idPackProgress&&typeof s.idPackProgress==="object"&&!Array.isArray(s.idPackProgress)
       ? s.idPackProgress
@@ -3357,7 +3365,8 @@
     const low=Math.max(CARD_MIN_ID,Math.min(CARD_MAX_ID,Math.floor(Number(minId)||CARD_MIN_ID)));
     const high=Math.max(low,Math.min(CARD_MAX_ID,Math.floor(Number(maxId)||CARD_MAX_ID)));
     const charId=low+Math.floor(Math.random()*(high-low+1));
-    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),mutation2:0,level:1,awakening:0,locked:false,obtainedAt:Date.now()};
+    const autoLocked=Number(tier)>=AUTO_LOCK_TIER_INDEX;
+    const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),mutation2:0,level:1,awakening:0,locked:autoLocked,autoTierLockHandled:autoLocked,obtainedAt:Date.now()};
     state.cards.push(card);
     markCriticalCardSyncPending();
     recordCardInIndex(card,card.obtainedAt);
@@ -4556,7 +4565,7 @@
 
   function showReveal(c){
     const t=TIERS[c.tier],g=GRADES[c.grade];
-    $("#revealVisual").innerHTML='<div class="reveal-visual tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="reveal-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'</div><div class="reveal-info tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><h2 class="reveal-character-name">'+escapeHtml(cardName(c.charId))+'</h2><div class="reveal-tier-name tier-card-name">'+t.name+'</div><p><strong class="tier-card-id">'+padId(c.charId)+'</strong> · ID Income '+charIncomeBonusText(c.charId)+' · Grade '+g.name+(cardMutationIds(c).length?' · '+mutationNames(c):'')+'</p></div></div>';
+    $("#revealVisual").innerHTML='<div class="reveal-visual tier-shell tier-'+c.tier+' grade-shell-'+c.grade+'" style="--tier:'+t.color+';'+cardMutationStyle(c)+'"><div class="reveal-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'</div><div class="reveal-info tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><h2 class="reveal-character-name">'+escapeHtml(cardName(c.charId))+'</h2><div class="reveal-tier-name tier-card-name">'+t.name+'</div><p><strong class="tier-card-id">'+padId(c.charId)+'</strong> · ID Income '+charIncomeBonusText(c.charId)+' · Grade '+g.name+(cardMutationIds(c).length?' · '+mutationNames(c):'')+(c.locked&&c.tier>=AUTO_LOCK_TIER_INDEX?' · 🔒 AUTO LOCK':'')+'</p></div></div>';
     $("#reveal").classList.add("show");$("#reveal").setAttribute("aria-hidden","false");
     const img=$("#revealVisual img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
   }
@@ -5302,7 +5311,14 @@
     }
   }
 
-  function toggleLock(uid){const c=state.cards.find(x=>x.uid===uid);if(!c)return;if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}c.locked=!c.locked;renderAll()}
+  function toggleLock(uid){
+    const c=state.cards.find(x=>x.uid===uid);if(!c)return;
+    if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
+    c.locked=!c.locked;
+    if(Number(c.tier)>=AUTO_LOCK_TIER_INDEX)c.autoTierLockHandled=true;
+    toast(c.locked?"🔒 ล็อกการ์ดแล้ว":"🔓 ปลดล็อกการ์ดแล้ว");
+    renderAll();
+  }
   function sellCard(uid){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
     if(!collectionSellEligible(c)){toast("การ์ดใบนี้ยังขายไม่ได้");return}
