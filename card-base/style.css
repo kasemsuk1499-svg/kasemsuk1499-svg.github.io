@@ -6490,6 +6490,95 @@ body.ascension-unlock-10 .base-tower-bar,
   padding:7px 10px;
   font-size:9px;
 }
+.bulk-sell-rule-panel{
+  width:100%;
+  display:grid;
+  gap:9px;
+  padding:11px;
+  border:1px solid rgba(113,198,255,.22);
+  border-radius:14px;
+  background:linear-gradient(180deg,rgba(19,24,35,.92),rgba(12,15,23,.95));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+.bulk-sell-rule-panel[hidden]{display:none!important}
+.bulk-sell-rule-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:12px;
+}
+.bulk-sell-rule-head>div{display:grid;gap:2px}
+.bulk-sell-rule-head span{
+  color:#72d9ff;
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+.bulk-sell-rule-head strong{font-size:12px}
+.bulk-sell-rule-head small{
+  max-width:360px;
+  color:#778296;
+  font-size:7px;
+  text-align:right;
+}
+.bulk-sell-rule-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+}
+.bulk-sell-rule-grid>label{
+  min-width:0;
+  display:grid;
+  gap:5px;
+}
+.bulk-sell-rule-grid>label>span{
+  color:#9ca7bb;
+  font-size:8px;
+  font-weight:850;
+}
+.bulk-sell-rule-grid select{
+  width:100%;
+  min-width:0;
+  min-height:38px;
+  padding:7px 9px;
+  border:1px solid #30394c;
+  border-radius:10px;
+  background:#0c0f16;
+  color:#eef3fb;
+  font-size:9px;
+  font-weight:850;
+}
+.bulk-sell-rule-check{
+  align-content:end;
+  grid-template-columns:auto 1fr!important;
+  align-items:center;
+  min-height:38px;
+  padding:7px 9px;
+  border:1px solid #30394c;
+  border-radius:10px;
+  background:#0c0f16;
+}
+.bulk-sell-rule-check input{
+  width:18px;
+  height:18px;
+  margin:0;
+  accent-color:#ff6685;
+}
+.bulk-sell-rule-check span{
+  color:#eef3fb!important;
+  font-size:9px!important;
+}
+.bulk-sell-rule-apply{
+  width:100%;
+  min-height:42px;
+  margin:0;
+}
+.bulk-sell-rule-panel>p{
+  margin:0;
+  color:#8d98ab;
+  font-size:8px;
+  line-height:1.45;
+}
 .collection.bulk-sell-mode{
   grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
   gap:10px;
@@ -6669,6 +6758,46 @@ body.collection-selling #panel-collection{
     padding:6px 5px;
     font-size:8px;
   }
+  .bulk-sell-rule-panel{
+    gap:7px;
+    padding:9px;
+    border-radius:12px;
+  }
+  .bulk-sell-rule-head{
+    display:grid;
+    gap:3px;
+    align-items:start;
+  }
+  .bulk-sell-rule-head small{
+    max-width:none;
+    text-align:left;
+    font-size:6.5px;
+  }
+  .bulk-sell-rule-grid{
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .bulk-sell-rule-grid>label>span{font-size:7px}
+  .bulk-sell-rule-grid select{
+    min-height:38px;
+    padding:6px 7px;
+    font-size:8px;
+  }
+  .bulk-sell-rule-check{
+    min-height:38px;
+    padding:6px 7px;
+  }
+  .bulk-sell-rule-check input{
+    width:17px;
+    height:17px;
+  }
+  .bulk-sell-rule-check span{font-size:8px!important}
+  .bulk-sell-rule-apply{
+    min-height:42px;
+    font-size:9px;
+  }
+  .bulk-sell-rule-panel>p{font-size:7px}
+
   .collection.bulk-sell-mode{
     grid-template-columns:repeat(2,minmax(0,1fr));
     gap:7px;
