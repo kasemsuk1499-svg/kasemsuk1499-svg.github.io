@@ -155,6 +155,9 @@
   const GAME_SESSION_KEY = "card-base-username-session-v1";
   const PACK_AUTO_SESSION_KEY = "card-base-pack-auto-session-v1";
   const MUTATION_EVENT_SESSION_KEY = "card-base-mutation-event-session-v1";
+  // Session-scoped crash/reload guard for newly acquired cards.
+  // sessionStorage survives reloads but not a brand-new browser session/account.
+  const CRITICAL_CARD_SYNC_KEY = "card-base-critical-card-sync-v1";
   const GRADE_ROLL_MS = 450;
   const ROTATING_SHOP_RESTOCK_MS = 5*60*1000;
   const CLOUD_IDLE_SAVE_MS = 20000;
@@ -643,6 +646,17 @@
     return !!(state.autoRolling||state.fullAuto||state.gradeAuto);
   }
 
+  function criticalCardSyncPending(){
+    try{return sessionStorage.getItem(CRITICAL_CARD_SYNC_KEY)==="1"}catch{return false}
+  }
+  function markCriticalCardSyncPending(){
+    if(!gameToken)return;
+    try{sessionStorage.setItem(CRITICAL_CARD_SYNC_KEY,"1")}catch{}
+  }
+  function clearCriticalCardSyncPending(){
+    try{sessionStorage.removeItem(CRITICAL_CARD_SYNC_KEY)}catch{}
+  }
+
   function armCloudSave(){
     clearTimeout(cloudTimer);
     if(!cloudDirty||!cloudReady||cloudLoading||!gameToken||!supabaseClient||cloudAutoBusy()||!navigator.onLine)return;
@@ -776,8 +790,10 @@
       }else updateSyncUi("error");
       return result;
     }
-    if(cloudRevision===revision)cloudDirty=false;
-    else armCloudSave();
+    if(cloudRevision===revision){
+      cloudDirty=false;
+      clearCriticalCardSyncPending();
+    }else armCloudSave();
     const tradeReceipts=Number(result.trade_receipts)||0;
     const serverGrants=Number(result.server_grants)||0;
     const serverGiftSync=Number(result.server_gift_sync)||0;
@@ -1853,6 +1869,36 @@
   async function loadCloudState(){
     if(!gameToken||!supabaseClient)return;
     cloudLoading=true;cloudReady=false;updateSyncUi("syncing");
+
+    // A reload can happen before the 20s idle Cloud Save fires. If a card was
+    // acquired locally in this browser session, checkpoint that local snapshot
+    // BEFORE loading remote state so an older cloud save cannot erase the card.
+    if(criticalCardSyncPending()){
+      const recoverySnapshot=JSON.parse(JSON.stringify(cloudPayload()));
+      const recovery=await rpc("cb_save_state",{p_token:gameToken,p_state:recoverySnapshot});
+      if(!recovery.ok){
+        cloudLoading=false;
+        if(recovery.error==="invalid_session"){
+          invalidateGameSession();
+        }else{
+          // Never replace the local snapshot with stale cloud data while a
+          // critical card checkpoint is still pending. Retry normal sync later.
+          cloudReady=true;
+          cloudDirty=true;
+          cloudRevision++;
+          armCloudSave();
+          updateSyncUi("error");
+        }
+        return;
+      }
+      if(recovery.state){
+        state=hydrateState(recovery.state);
+        localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+      }
+      clearCriticalCardSyncPending();
+      cloudDirty=false;
+    }
+
     const result=await rpc("cb_load_save",{p_token:gameToken});
     if(!result.ok){
       cloudLoading=false;
@@ -1998,6 +2044,7 @@
     await flushCloudSave({force:true});
     await rpc("cb_logout",{p_token:gameToken});
     clearGameSession();
+    clearCriticalCardSyncPending();
     state=newState();
     localStorage.setItem(SAVE_KEY,JSON.stringify(state));
     renderAll();closeAuth();toast("ออกจากระบบแล้ว · กลับสู่ Local ใหม่");
@@ -3090,6 +3137,7 @@
     const charId=low+Math.floor(Math.random()*(high-low+1));
     const card={uid:state.uidCounter++,gid:makeCardGid(),charId,tier,grade:0,mutation:randomMutation(),mutation2:0,level:1,awakening:0,locked:false,obtainedAt:Date.now()};
     state.cards.push(card);
+    markCriticalCardSyncPending();
     recordCardInIndex(card,card.obtainedAt);
     return card;
   }
