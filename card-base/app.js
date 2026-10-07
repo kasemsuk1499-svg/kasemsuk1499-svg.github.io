@@ -198,6 +198,11 @@
   const GRADE_REROLL_COSTS = [5000,10000,20000,40000,80000,160000,320000,640000,1280000,2560000,5120000];
   // Ultra-end grades are chase outcomes. Luck intentionally does not affect Grade.
   const GRADE_WEIGHTS = [44,25,14,7,4,2.5,1.5,.8,.18,.02,.01,.0025,.0005,.0001];
+  // Ascension Grade Fortune: high grades stay rare, but every Ascension visibly improves SSS→Ω.
+  // +25% high-grade weight per Ascension, capped at +400% (×5 weight).
+  const GRADE_ASCENSION_START_INDEX = 8; // SSS
+  const GRADE_ASCENSION_BONUS_PER_STAR = 0.25;
+  const GRADE_ASCENSION_MAX_BONUS = 4.00;
 
   const MUTATIONS = [
     {name:"Normal",icon:"·",color:"#8d94a3",income:1.00,luck:1.00,weight:95.396},
@@ -1091,13 +1096,27 @@
     for(let i=odds.length-1;i>=0;i--) if(odds[i]>0) return i;
     return 0;
   }
-  function gradeOdds(){
+  function gradeAscensionBonus(stars=state.ascension?.stars||0){
+    const n=Math.max(0,Math.floor(Number(stars)||0));
+    return Math.min(GRADE_ASCENSION_MAX_BONUS,n*GRADE_ASCENSION_BONUS_PER_STAR);
+  }
+  function gradeWeights(stars=state.ascension?.stars||0){
+    const highMulti=1+gradeAscensionBonus(stars);
+    return GRADE_WEIGHTS.map((w,i)=>i>=GRADE_ASCENSION_START_INDEX?w*highMulti:w);
+  }
+  function gradeBaseOdds(){
     const sum=GRADE_WEIGHTS.reduce((a,b)=>a+b,0);
     return GRADE_WEIGHTS.map(w=>w/sum);
   }
+  function gradeOdds(stars=state.ascension?.stars||0){
+    const weights=gradeWeights(stars);
+    const sum=weights.reduce((a,b)=>a+b,0);
+    return weights.map(w=>w/sum);
+  }
   function randomGrade(){
-    let r=Math.random()*GRADE_WEIGHTS.reduce((a,b)=>a+b,0);
-    for(let i=0;i<GRADE_WEIGHTS.length;i++){r-=GRADE_WEIGHTS[i];if(r<=0)return i}
+    const weights=gradeWeights();
+    let r=Math.random()*weights.reduce((a,b)=>a+b,0);
+    for(let i=0;i<weights.length;i++){r-=weights[i];if(r<=0)return i}
     return 0;
   }
   function expectedTierMultiplier(level){
@@ -2860,9 +2879,11 @@
       '<div class="odd" style="--tier:'+t.color+';opacity:'+(odds[i]>0?1:.28)+'"><span>'+t.name+'</span><b>'+chanceText(odds[i])+'</b></div>'
     ).join("");
 
-    const gOdds=gradeOdds(),gradeWrap=$("#gradeOdds");
+    const gOdds=gradeOdds(),gBaseOdds=gradeBaseOdds(),gradeBoost=gradeAscensionBonus(),gradeWrap=$("#gradeOdds");
     if(gradeWrap)gradeWrap.innerHTML=GRADES.map((g,i)=>
-      '<div class="odd grade-odd" style="--tier:'+g.color+'"><span>'+g.name+' <small>×'+g.multi.toFixed(2)+'</small></span><b>'+chanceText(gOdds[i])+'</b></div>'
+      '<div class="odd grade-odd" style="--tier:'+g.color+'"><span>'+g.name+' <small>×'+g.multi.toFixed(2)+
+      (i>=GRADE_ASCENSION_START_INDEX&&gradeBoost>0?' · Base '+chanceText(gBaseOdds[i]):'')+
+      '</small></span><b>'+chanceText(gOdds[i])+'</b></div>'
     ).join("");
 
     const mOdds=mutationOdds(),mutationWrap=$("#mutationOdds");
@@ -3343,7 +3364,7 @@
       "ASCEND "+romanNumeral(next)+" ?\n"+
       "Base Lv.40 → Lv.1 และเงินจะรีเซ็ต\n"+
       "การ์ด / Grade / Mutation / Awakening / Collection อยู่ครบ\n"+
-      "ได้รับ Core +1 · Income +20% · Luck +2% ถาวร"+
+      "ได้รับ Core +1 · Income +20% · Luck +2% · Grade Fortune +25% (SSS–Ω) ถาวร"+
       (next<=10?"\nSpecial: "+reward.name:"")
     );
     if(!ok)return;
@@ -3524,8 +3545,14 @@
       }).join("");
     }
     const permanent=$("#ascensionPermanentBonus");
-    if(permanent)permanent.textContent=
-      "Permanent: Income +"+(stars*20)+"% · Luck +"+(stars*2)+"% · รอบถัดไปเร็วขึ้น";
+    if(permanent){
+      const gradeBoost=Math.round(gradeAscensionBonus(stars)*100);
+      const currentGradeOdds=gradeOdds(stars),nextGradeOdds=gradeOdds(stars+1);
+      permanent.textContent=
+        "Permanent: Income +"+(stars*20)+"% · Luck +"+(stars*2)+"% · Grade Fortune +"+gradeBoost+"% (SSS–Ω)"+
+        " · EX★ "+chanceText(currentGradeOdds[12])+" → Next "+chanceText(nextGradeOdds[12])+
+        " · Ω "+chanceText(currentGradeOdds[13])+" → Next "+chanceText(nextGradeOdds[13]);
+    }
 
     const perks=state.ascension.perks;
     $("#perkIncomeRank").textContent=perks.income+"/"+ASCENSION_PERK_MAX;
@@ -4679,19 +4706,22 @@
       return;
     }
     gradeAutoSetupUid=uid;
-    const g=GRADES[c.grade];
+    const g=GRADES[c.grade],gradeBoost=gradeAscensionBonus(),gradeBoostPct=Math.round(gradeBoost*100);
     $("#gradeAutoCardInfo").innerHTML='<strong>'+padId(c.charId)+' · '+TIERS[c.tier].name+'</strong>'+
-      '<span>Grade ปัจจุบัน '+g.name+' · '+fmt(rerollCost(c))+' ต่อครั้ง</span>';
+      '<span>Grade ปัจจุบัน '+g.name+' · '+fmt(rerollCost(c))+' ต่อครั้ง</span>'+
+      '<span>Ascension Grade Fortune +'+gradeBoostPct+'% · SSS–Ω Weight ×'+(1+gradeBoost).toFixed(2)+'</span>';
 
     const activeTargets=state.gradeAuto&&state.gradeAuto.uid===uid&&Array.isArray(state.gradeAuto.targets)
       ? state.gradeAuto.targets
       : GRADES.map((_,i)=>i).filter(i=>i>c.grade);
 
-    const gOdds=gradeOdds();
+    const gOdds=gradeOdds(),gBaseOdds=gradeBaseOdds();
     $("#gradeTargetList").innerHTML=GRADES.map((x,i)=>
       '<label class="grade-target-option grade-shell-'+i+'" style="--grade:'+x.color+'">'+
         '<input type="checkbox" data-grade-target="'+i+'" '+(activeTargets.includes(i)?'checked':'')+'>'+
-        '<span><b>'+x.name+'</b><small>'+chanceText(gOdds[i])+'</small></span>'+
+        '<span><b>'+x.name+'</b><small>'+chanceText(gOdds[i])+
+          (i>=GRADE_ASCENSION_START_INDEX&&gradeBoost>0?' · Base '+chanceText(gBaseOdds[i]):'')+
+        '</small></span>'+
       '</label>'
     ).join("");
     updateGradeTargetChance();
