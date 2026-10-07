@@ -153,6 +153,9 @@
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
   const CLOUD_TABLE = "card_base_saves";
   const GAME_SESSION_KEY = "card-base-username-session-v1";
+  const CLOUD_SESSION_KEY = "card-base-cloud-account-session-v2";
+  const CLOUD_CACHE_PREFIX = "card-base-cloud-cache-v2:";
+  const CLOUD_PENDING_PREFIX = "card-base-pending-save-v2:";
   const PACK_AUTO_SESSION_KEY = "card-base-pack-auto-session-v1";
   const MUTATION_EVENT_SESSION_KEY = "card-base-mutation-event-session-v1";
   // Session-scoped crash/reload guard for newly acquired cards.
@@ -395,20 +398,25 @@
   let supabaseClient = null;
   function loadGameSessionToken(){
     try{
+      const remembered=readCloudSessionRecord();
+      if(remembered?.token)return remembered.token;
       const current=sessionStorage.getItem(GAME_SESSION_KEY);
       if(current)return current;
       const legacy=localStorage.getItem(GAME_SESSION_KEY);
       if(legacy){
         sessionStorage.setItem(GAME_SESSION_KEY,legacy);
-        try{sessionStorage.removeItem(GAME_SESSION_KEY)}catch{}
-    try{localStorage.removeItem(GAME_SESSION_KEY)}catch{}
+        localStorage.removeItem(GAME_SESSION_KEY);
         return legacy;
       }
     }catch{}
     return null;
   }
+  const rememberedCloudAccount = readCloudSessionRecord();
   let gameToken = loadGameSessionToken();
-  let gameAccount = null;
+  let gameAccount = rememberedCloudAccount?.accountId
+    ? {account_id:rememberedCloudAccount.accountId,username:rememberedCloudAccount.username||"Player"}
+    : null;
+  let cloudServerRevision = Math.max(0,Number(rememberedCloudAccount?.serverRevision)||0);
   let cloudReady = false;
   let cloudLoading = false;
   let cloudTimer = 0;
@@ -628,18 +636,158 @@
     return s;
   }
 
+  function readCloudSessionRecord(){
+    try{
+      const raw=localStorage.getItem(CLOUD_SESSION_KEY);
+      if(!raw)return null;
+      const value=JSON.parse(raw);
+      if(!value||typeof value!=="object"||value.mode!=="cloud")return null;
+      const token=typeof value.token==="string"&&/^[0-9a-f]{64}$/.test(value.token)?value.token:"";
+      const accountId=typeof value.accountId==="string"?value.accountId:"";
+      const username=typeof value.username==="string"?value.username:"";
+      if(!token&&!accountId&&!username)return null;
+      return {
+        ...value,
+        mode:"cloud",
+        token,
+        accountId,
+        username,
+        serverRevision:Math.max(0,Number(value.serverRevision)||0)
+      };
+    }catch{
+      return null;
+    }
+  }
+
+  function cloudCacheKey(accountId){return CLOUD_CACHE_PREFIX+String(accountId||"")}
+  function cloudPendingKey(accountId){return CLOUD_PENDING_PREFIX+String(accountId||"")}
+
+  function readCloudPending(accountId){
+    if(!accountId)return null;
+    try{
+      const raw=localStorage.getItem(cloudPendingKey(accountId));
+      if(!raw)return null;
+      const value=JSON.parse(raw);
+      if(!value||value.version!==2||value.accountId!==accountId||!value.state)return null;
+      return value;
+    }catch{
+      return null;
+    }
+  }
+
+  function readCloudCache(accountId){
+    if(!accountId)return null;
+    try{
+      const raw=localStorage.getItem(cloudCacheKey(accountId));
+      return raw?hydrateState(JSON.parse(raw)):null;
+    }catch{
+      return null;
+    }
+  }
+
+  function loadCloudLocalState(accountId){
+    const pending=readCloudPending(accountId);
+    if(pending?.state){
+      try{return hydrateState(pending.state)}catch{}
+    }
+    return readCloudCache(accountId);
+  }
+
   function load(){
     try{
+      const remembered=readCloudSessionRecord();
+      if(remembered?.accountId){
+        return loadCloudLocalState(remembered.accountId)||newState();
+      }
       const raw=localStorage.getItem(SAVE_KEY);
-      if(!raw) return newState();
+      if(!raw)return newState();
       return hydrateState(JSON.parse(raw));
     }catch{
       return newState();
     }
   }
 
-  function cloudPayload(){
-    return {...state,autoRolling:false,fullAuto:false,targetFound:false,gradeAuto:null,rollingUntil:0};
+  function cloudModeActive(){
+    const remembered=readCloudSessionRecord();
+    return !!(gameAccount?.account_id||remembered?.accountId||remembered?.token);
+  }
+
+  function activeCloudAccountId(){
+    return String(gameAccount?.account_id||readCloudSessionRecord()?.accountId||"");
+  }
+
+  function persistCloudSession(profile=gameAccount,token=gameToken){
+    const old=readCloudSessionRecord()||{};
+    const accountId=String(profile?.account_id||old.accountId||"");
+    const username=String(profile?.username||old.username||"");
+    const next={
+      version:2,
+      mode:"cloud",
+      accountId,
+      username,
+      token:typeof token==="string"&&/^[0-9a-f]{64}$/.test(token)?token:"",
+      serverRevision:Math.max(0,Number(cloudServerRevision)||Number(old.serverRevision)||0),
+      updatedAt:Date.now()
+    };
+    try{
+      localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify(next));
+      localStorage.removeItem(GAME_SESSION_KEY);
+      if(next.token)sessionStorage.setItem(GAME_SESSION_KEY,next.token);
+      else sessionStorage.removeItem(GAME_SESSION_KEY);
+    }catch{}
+    return next;
+  }
+
+  function writeCloudCache(snapshot=state){
+    const accountId=activeCloudAccountId();
+    if(!accountId)return false;
+    try{
+      localStorage.setItem(cloudCacheKey(accountId),JSON.stringify(snapshot));
+      return true;
+    }catch(err){
+      console.error("Cloud account cache write failed",err);
+      updateSyncUi("error");
+      return false;
+    }
+  }
+
+  function writeCrashSafePending(snapshot=state){
+    const accountId=activeCloudAccountId();
+    if(!accountId)return null;
+    try{
+      const previous=readCloudPending(accountId);
+      const envelope={
+        version:2,
+        accountId,
+        username:String(gameAccount?.username||readCloudSessionRecord()?.username||""),
+        localRevision:Math.max(0,Number(previous?.localRevision)||0)+1,
+        serverRevision:Math.max(0,Number(cloudServerRevision)||0),
+        savedAt:Date.now(),
+        state:JSON.parse(JSON.stringify(snapshot))
+      };
+      localStorage.setItem(cloudPendingKey(accountId),JSON.stringify(envelope));
+      localStorage.setItem(cloudCacheKey(accountId),JSON.stringify(snapshot));
+      return envelope;
+    }catch(err){
+      console.error("Crash-safe Pending Save write failed",err);
+      updateSyncUi("error");
+      return null;
+    }
+  }
+
+  function clearCrashSafePending(accountId=activeCloudAccountId(),localRevision=null){
+    if(!accountId)return;
+    try{
+      if(localRevision!==null){
+        const current=readCloudPending(accountId);
+        if(current&&Number(current.localRevision)!==Number(localRevision))return;
+      }
+      localStorage.removeItem(cloudPendingKey(accountId));
+    }catch{}
+  }
+
+  function cloudPayload(source=state){
+    return {...source,autoRolling:false,fullAuto:false,targetFound:false,gradeAuto:null,rollingUntil:0};
   }
 
   function cloudAutoBusy(){
@@ -728,10 +876,14 @@
   }
 
   function clearGameSession(reason=""){
-    gameToken=null;gameAccount=null;onlineProfile=null;cloudReady=false;cloudLoading=false;cloudDirty=false;clearTimeout(cloudTimer);
+    gameToken=null;gameAccount=null;onlineProfile=null;cloudReady=false;cloudLoading=false;cloudDirty=false;cloudServerRevision=0;clearTimeout(cloudTimer);
     tradeCache={incoming:[],outgoing:[],recent:[]};tradeLockedGids=new Set();updateTradeAttention();
     mutationEventStatus=null;
-    localStorage.removeItem(GAME_SESSION_KEY);
+    try{
+      sessionStorage.removeItem(GAME_SESSION_KEY);
+      localStorage.removeItem(GAME_SESSION_KEY);
+      localStorage.removeItem(CLOUD_SESSION_KEY);
+    }catch{}
     renderAuth();renderOnlineShell();renderMutationEvent();updateSyncUi("local");
     if(reason){
       setAuthMessage(reason,"error");
@@ -739,8 +891,34 @@
     }
   }
 
+  function lockCloudAccount(reason="Cloud Account ต้องเข้าสู่ระบบใหม่"){
+    const remembered=readCloudSessionRecord()||{};
+    const accountId=String(gameAccount?.account_id||remembered.accountId||"");
+    const username=String(gameAccount?.username||remembered.username||"");
+    if(accountId||username){
+      try{
+        localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify({
+          ...remembered,version:2,mode:"cloud",accountId,username,token:"",
+          serverRevision:Math.max(0,Number(cloudServerRevision)||Number(remembered.serverRevision)||0),
+          updatedAt:Date.now()
+        }));
+      }catch{}
+    }
+    try{sessionStorage.removeItem(GAME_SESSION_KEY);localStorage.removeItem(GAME_SESSION_KEY)}catch{}
+    gameToken=null;
+    gameAccount=(accountId||username)?{account_id:accountId,username:username||"Player"}:null;
+    onlineProfile=null;cloudReady=false;cloudLoading=false;cloudDirty=!!readCloudPending(accountId);clearTimeout(cloudTimer);
+    tradeCache={incoming:[],outgoing:[],recent:[]};tradeLockedGids=new Set();updateTradeAttention();
+    mutationEventStatus=null;
+    renderAuth();renderOnlineShell();renderMutationEvent();updateSyncUi("locked");
+    if(reason){
+      setAuthMessage(reason,"error");
+      toast(reason);
+    }
+  }
+
   function invalidateGameSession(){
-    clearGameSession("Session หมดอายุหรือบัญชีนี้ถูกเปิดจากอุปกรณ์อื่น · กรุณาเข้าสู่ระบบใหม่");
+    lockCloudAccount("Session หมดอายุหรือบัญชีนี้ถูกเปิดจากอุปกรณ์อื่น · Cloud Account ยังถูกเก็บไว้ กรุณาเข้าสู่ระบบใหม่");
   }
 
   async function keepaliveCloudSave(snapshot){
@@ -778,7 +956,10 @@
     if(!force&&!cloudDirty)return {ok:true,skipped:true};
     clearTimeout(cloudTimer);
     const revision=cloudRevision;
-    const snapshot=JSON.parse(JSON.stringify(cloudPayload()));
+    const accountId=activeCloudAccountId();
+    const pendingAtStart=readCloudPending(accountId);
+    const pendingRevision=Number(pendingAtStart?.localRevision)||null;
+    const snapshot=JSON.parse(JSON.stringify(cloudPayload(state)));
     const result=keepalive
       ? await keepaliveCloudSave(snapshot)
       : await rpc("cb_save_state",{p_token:gameToken,p_state:snapshot});
@@ -790,9 +971,13 @@
       }else updateSyncUi("error");
       return result;
     }
+    if(Number.isFinite(Number(result.revision)))cloudServerRevision=Math.max(0,Number(result.revision));
+    persistCloudSession();
+    writeCloudCache(state);
     if(cloudRevision===revision){
       cloudDirty=false;
       clearCriticalCardSyncPending();
+      clearCrashSafePending(accountId,pendingRevision);
     }else armCloudSave();
     const tradeReceipts=Number(result.trade_receipts)||0;
     const serverGrants=Number(result.server_grants)||0;
@@ -801,7 +986,7 @@
     const towerTicketDrops=Number(result.tower_tickets_dropped)||0;
     if((tradeReceipts>0||serverGrants>0||serverGiftSync>0||towerTicketDrops>0)&&result.state){
       state=hydrateState(result.state);
-      localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+      writeCloudCache(state);
       renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderRotatingPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
       if(serverGrants>0||serverGiftSync>0)toast("🎁 ของขวัญเซิร์ฟเวอร์พร้อมแล้ว · Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
       if(towerTicketDrops>0){
@@ -820,6 +1005,10 @@
   }
 
   function saveLocalOnly(){
+    if(cloudModeActive()){
+      if(activeCloudAccountId())writeCrashSafePending(state);
+      return;
+    }
     localStorage.setItem(SAVE_KEY,JSON.stringify(state));
   }
 
@@ -1410,7 +1599,7 @@
     if(!state.rotatingShop||typeof state.rotatingShop!=="object")state.rotatingShop={rotationId:id,bought:{}};
     if(Number(state.rotatingShop.rotationId)!==id){
       state.rotatingShop={rotationId:id,bought:{}};
-      localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+      saveLocalOnly();
       scheduleCloudSave();
       return true;
     }
@@ -1643,10 +1832,10 @@
       banner.hidden=false;
       banner.className="connection-banner offline";
       if(title)title.textContent="OFFLINE";
-      if(textEl)textEl.textContent=gameToken
-        ?"ไม่มีอินเทอร์เน็ต · เล่นต่อได้และจะเก็บ Local Save ไว้ก่อน ห้ามล้างข้อมูลเว็บไซต์"
+      if(textEl)textEl.textContent=cloudModeActive()
+        ?"ไม่มีอินเทอร์เน็ต · Cloud Account ยังทำงานอยู่ และเก็บ Pending Save ของบัญชีนี้ไว้ในเครื่องก่อน"
         :"ไม่มีอินเทอร์เน็ต · ตอนนี้เกมทำงานแบบ Local เท่านั้น";
-      if(stateEl)stateEl.textContent="LOCAL ONLY";
+      if(stateEl)stateEl.textContent=cloudModeActive()?"CLOUD ACCOUNT · PENDING":"LOCAL ONLY";
       return;
     }
 
@@ -1680,8 +1869,18 @@
 
     if(!navigator.onLine){
       dot.classList.add("offline");
-      label.textContent=gameAccount&&gameToken?"@"+gameAccount.username:"OFFLINE";
-      sync.textContent="ออฟไลน์ · เก็บ Local ไว้ก่อน";
+      const remembered=readCloudSessionRecord();
+      label.textContent=cloudModeActive()?"@"+(gameAccount?.username||remembered?.username||"Cloud"):"OFFLINE";
+      sync.textContent=cloudModeActive()?"Cloud Account · Pending Save ในเครื่อง":"ออฟไลน์ · Local Save";
+      renderConnectionBanner();
+      return;
+    }
+
+    if(!gameToken&&cloudModeActive()){
+      const remembered=readCloudSessionRecord();
+      dot.classList.add("error");
+      label.textContent="@"+(gameAccount?.username||remembered?.username||"Cloud");
+      sync.textContent="Cloud Account · กรุณาเข้าสู่ระบบใหม่";
       renderConnectionBanner();
       return;
     }
@@ -1747,7 +1946,7 @@
     if(!("serviceWorker" in navigator))return null;
     if(tradeNotificationRegistration)return tradeNotificationRegistration;
     try{
-      await navigator.serviceWorker.register("./sw.js?v=20261006-trade-notify-v1");
+      await navigator.serviceWorker.register("./sw.js?v=20261007-cloud-account-pending-v2");
       tradeNotificationRegistration=await navigator.serviceWorker.ready;
       return tradeNotificationRegistration;
     }catch{
@@ -1869,20 +2068,23 @@
   async function loadCloudState(){
     if(!gameToken||!supabaseClient)return;
     cloudLoading=true;cloudReady=false;updateSyncUi("syncing");
+    const accountId=activeCloudAccountId();
 
-    // A reload can happen before the 20s idle Cloud Save fires. If a card was
-    // acquired locally in this browser session, checkpoint that local snapshot
-    // BEFORE loading remote state so an older cloud save cannot erase the card.
-    if(criticalCardSyncPending()){
-      const recoverySnapshot=JSON.parse(JSON.stringify(cloudPayload()));
+    if(criticalCardSyncPending()&&accountId&&!readCloudPending(accountId)){
+      writeCrashSafePending(state);
+    }
+
+    // Crash-safe: recover this account's durable Pending Save BEFORE remote load.
+    const pending=readCloudPending(accountId);
+    if(pending?.state){
+      state=hydrateState(pending.state);
+      const recoverySnapshot=JSON.parse(JSON.stringify(cloudPayload(state)));
       const recovery=await rpc("cb_save_state",{p_token:gameToken,p_state:recoverySnapshot});
       if(!recovery.ok){
         cloudLoading=false;
         if(recovery.error==="invalid_session"){
           invalidateGameSession();
         }else{
-          // Never replace the local snapshot with stale cloud data while a
-          // critical card checkpoint is still pending. Retry normal sync later.
           cloudReady=true;
           cloudDirty=true;
           cloudRevision++;
@@ -1891,12 +2093,13 @@
         }
         return;
       }
-      if(recovery.state){
-        state=hydrateState(recovery.state);
-        localStorage.setItem(SAVE_KEY,JSON.stringify(state));
-      }
+      if(Number.isFinite(Number(recovery.revision)))cloudServerRevision=Math.max(0,Number(recovery.revision));
+      if(recovery.state)state=hydrateState(recovery.state);
+      writeCloudCache(state);
+      clearCrashSafePending(accountId,Number(pending.localRevision)||null);
       clearCriticalCardSyncPending();
       cloudDirty=false;
+      persistCloudSession();
     }
 
     const result=await rpc("cb_load_save",{p_token:gameToken});
@@ -1907,6 +2110,9 @@
       return;
     }
 
+    if(Number.isFinite(Number(result.revision)))cloudServerRevision=Math.max(0,Number(result.revision));
+    persistCloudSession();
+
     if(result.exists&&result.state){
       state=hydrateState(result.state);
       const now=Date.now();
@@ -1914,13 +2120,16 @@
       normalizeSlots();
       if(offlineSeconds>2&&state.placed.some(Boolean))state.money=clampMoney(state.money+totalIncome()*offlineSeconds);
       state.lastTick=now;
-      localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+      writeCloudCache(state);
     }else{
       state.lastTick=Date.now();
+      writeCrashSafePending(state);
+      cloudDirty=true;
+      cloudRevision++;
     }
 
     cloudLoading=false;cloudReady=true;
-    if(!result.exists)await flushCloudSave();
+    if(!result.exists)await flushCloudSave({force:true});
     renderAll();
     if(Number(result.server_grants)>0){
       toast("🎁 ของขวัญเซิร์ฟเวอร์มาแล้ว! Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
@@ -1936,10 +2145,12 @@
     renderAuth();
     const me=await fetchMe();
     if(!me){
-      clearGameSession();
-      setAuthMessage("Session ใช้งานไม่ได้ กรุณาลองเข้าสู่ระบบใหม่","error");
+      persistCloudSession({username},token);
+      setAuthMessage("เข้าสู่ระบบแล้ว แต่โหลด Cloud Account ยังไม่สำเร็จ · ระบบจะไม่สลับกลับ Local","error");
       return false;
     }
+    persistCloudSession(me,token);
+    state=loadCloudLocalState(me.account_id)||newState();
     await loadCloudState();
     await heartbeatOnline();
     if(recoveryCode)showRecoveryCode(recoveryCode);
@@ -2041,10 +2252,16 @@
 
   async function logoutAccount(){
     if(!gameToken)return;
-    await flushCloudSave({force:true});
+    saveLocalOnly();
+    const saved=await flushCloudSave({force:true});
+    if(!saved?.ok){
+      toast("ยังออกจากระบบไม่ได้ · Pending Save ยังขึ้น Cloud ไม่สำเร็จ เพื่อกันข้อมูลหาย");
+      return;
+    }
     await rpc("cb_logout",{p_token:gameToken});
-    clearGameSession();
+    clearCrashSafePending(activeCloudAccountId());
     clearCriticalCardSyncPending();
+    clearGameSession();
     state=newState();
     localStorage.setItem(SAVE_KEY,JSON.stringify(state));
     renderAll();closeAuth();toast("ออกจากระบบแล้ว · กลับสู่ Local ใหม่");
@@ -2193,7 +2410,8 @@
         // Auto Roll / Full Auto / Auto Grade and can overwrite rolls performed
         // while the event RPC is in flight. Merge only the mutation fields.
         mergeMutationEventState(result.state);
-        localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+        saveLocalOnly();
+        scheduleCloudSave();
         const hits=Array.isArray(result.hits)?result.hits:[];
         const names=hits.slice(0,3).map(hit=>{
           const m=MUTATIONS[Math.max(0,Math.min(MUTATIONS.length-1,Number(hit.mutation)||0))];
@@ -2403,7 +2621,7 @@
       return;
     }
     if(!leaderResult.ok&&leaderResult.error==="invalid_session"){
-      clearGameSession();
+      invalidateGameSession();
       return;
     }
     onlineCache={
@@ -2752,7 +2970,7 @@
 
       if(tradeModalState.mode==="accept"&&result.state){
         state=hydrateState(result.state);
-        localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+        writeCloudCache(state);
         toast("Trade สำเร็จ! แลกการ์ดเรียบร้อย ✨",true);
         renderAll();
       }else{
@@ -4477,7 +4695,7 @@
     refreshCardSurface(uid);
     recordCardInIndex(state.cards.find(x=>x.uid===uid));
     if($("#panel-index")?.classList.contains("active"))renderCardIndex();
-    localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+    saveLocalOnly();
     scheduleCloudSave();
   }
 
