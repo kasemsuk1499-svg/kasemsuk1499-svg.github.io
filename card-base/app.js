@@ -201,6 +201,10 @@
     {name:"Ω",color:"#ffb7ff",multi:18.00}
   ];
   const AWAKEN_GRADE_INDEX = 9; // SSS★ is the minimum Awaken requirement
+  const TRANSCENDENT_TIER_INDEX = 8;
+  const ETERNAL_TIER_INDEX = 9;
+  const TRANSCENDENT_PITY_ROLLS = 500;
+  const ETERNAL_PITY_ROLLS = 1500;
 
   // Grade reroll is a major money sink. Base Level scaling is applied on top.
   const GRADE_REROLL_COSTS = [5000,10000,20000,40000,80000,160000,320000,640000,1280000,2560000,5120000];
@@ -372,6 +376,7 @@
     autoTargets:[], autoRolling:false, fullAuto:false, targetFound:false,
     storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{},
     idPackProgress:{},
+    tierPity:{transcendentMisses:0,eternalMisses:0},
     items:{level100Ticket:0},
     serverGiftClaims:{},
     rotatingShop:{rotationId:null,bought:{}},
@@ -582,6 +587,11 @@
         }];
       })
     );
+    const rawPity=s.tierPity&&typeof s.tierPity==="object"&&!Array.isArray(s.tierPity)?s.tierPity:{};
+    s.tierPity={
+      transcendentMisses:Math.max(0,Math.min(TRANSCENDENT_PITY_ROLLS-1,Math.floor(Number(rawPity.transcendentMisses)||0))),
+      eternalMisses:Math.max(0,Math.min(ETERNAL_PITY_ROLLS-1,Math.floor(Number(rawPity.eternalMisses)||0)))
+    };
     const rawItems=s.items&&typeof s.items==="object"&&!Array.isArray(s.items)?s.items:{};
     s.items={
       level100Ticket:Math.max(0,Math.min(1000000,Math.floor(Number(rawItems.level100Ticket??rawItems.level40Ticket)||0)))
@@ -1340,6 +1350,55 @@
     for(let i=0;i<odds.length;i++){r-=odds[i];if(r<=0)return i}
     for(let i=odds.length-1;i>=0;i--) if(odds[i]>0) return i;
     return 0;
+  }
+
+  function rollTierWithPity(){
+    if(!state.tierPity||typeof state.tierPity!=="object"){
+      state.tierPity={transcendentMisses:0,eternalMisses:0};
+    }
+    const maxTier=maxTierForLevel();
+    const transUnlocked=maxTier>TRANSCENDENT_TIER_INDEX;
+    const eternalUnlocked=maxTier>ETERNAL_TIER_INDEX;
+    let tier=randomTier();
+    let forced=null;
+
+    if(transUnlocked){
+      if(tier>=TRANSCENDENT_TIER_INDEX){
+        state.tierPity.transcendentMisses=0;
+      }else{
+        state.tierPity.transcendentMisses++;
+      }
+    }
+
+    if(eternalUnlocked){
+      if(tier>=ETERNAL_TIER_INDEX){
+        state.tierPity.eternalMisses=0;
+      }else{
+        state.tierPity.eternalMisses++;
+      }
+    }
+
+    // Eternal guarantee takes priority if both pity counters reach the limit
+    // on the same roll. Singularity remains a pure jackpot with no pity.
+    if(eternalUnlocked&&state.tierPity.eternalMisses>=ETERNAL_PITY_ROLLS){
+      tier=ETERNAL_TIER_INDEX;
+      forced="Eternal";
+      state.tierPity.eternalMisses=0;
+      state.tierPity.transcendentMisses=0;
+    }else if(transUnlocked&&state.tierPity.transcendentMisses>=TRANSCENDENT_PITY_ROLLS){
+      tier=TRANSCENDENT_TIER_INDEX;
+      forced="Transcendent";
+      state.tierPity.transcendentMisses=0;
+    }
+
+    if(tier>=ETERNAL_TIER_INDEX){
+      state.tierPity.eternalMisses=0;
+      state.tierPity.transcendentMisses=0;
+    }else if(tier>=TRANSCENDENT_TIER_INDEX){
+      state.tierPity.transcendentMisses=0;
+    }
+
+    return {tier,forced};
   }
   function gradeAscensionBonus(stars=state.ascension?.stars||0){
     const n=Math.max(0,Math.floor(Number(stars)||0));
@@ -3326,6 +3385,20 @@
     }).join("");
     const mutationSummary=$("#mutationLuckSummary");
     if(mutationSummary)mutationSummary.textContent="Luck จากการ์ดบนฐาน ×"+mutationLuckMultiplier().toFixed(2)+" · Soft cap";
+
+    const pity=$("#tierPitySummary");
+    if(pity){
+      const max=maxTierForLevel();
+      const transUnlocked=max>TRANSCENDENT_TIER_INDEX;
+      const eternalUnlocked=max>ETERNAL_TIER_INDEX;
+      const transMisses=Math.max(0,Number(state.tierPity?.transcendentMisses)||0);
+      const eternalMisses=Math.max(0,Number(state.tierPity?.eternalMisses)||0);
+      pity.textContent="🎯 PITY · Transcendent "+
+        (transUnlocked?(transMisses+"/"+TRANSCENDENT_PITY_ROLLS):"ปลดที่ Base Lv.28")+
+        " · Eternal "+
+        (eternalUnlocked?(eternalMisses+"/"+ETERNAL_PITY_ROLLS):"ปลดที่ Base Lv.36")+
+        " · ได้ Tier เป้าหมายหรือสูงกว่า = รีเซ็ต";
+    }
   }
 
   function renderFilters(){
@@ -4506,8 +4579,12 @@
     let processed=0,storedHits=0,lastStoredTier=null;
     while(state.rollingUntil&&now>=state.rollingUntil&&processed<2000){
       const finishedAt=state.rollingUntil;
-      const tier=randomTier();
+      const pityRoll=rollTierWithPity();
+      const tier=pityRoll.tier;
       processed++;
+      if(pityRoll.forced){
+        toast("🎯 PITY! การันตี "+pityRoll.forced+" แล้ว ✨",true);
+      }
 
       if(state.fullAuto){
         if(state.autoTargets.includes(tier)){
