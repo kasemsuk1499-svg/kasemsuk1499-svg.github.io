@@ -332,9 +332,72 @@
           <button id="bulkSellModeBtn" class="secondary collection-sell-toggle" type="button">💸 โหมดขายหลายใบ</button>
           <div id="bulkSellTopControls" class="collection-sell-top-controls" hidden>
             <button id="bulkSellSelectVisibleBtn" class="secondary" type="button">เลือกทั้งหมดที่ขายได้</button>
-            <button id="bulkSellSelectJunkBtn" class="secondary" type="button">เลือก C + Normal</button>
+            <button id="bulkSellSelectJunkBtn" class="secondary" type="button">เลือก C + Normal ด่วน</button>
             <button id="bulkSellClearBtn" class="secondary" type="button">ล้างที่เลือก</button>
             <button id="bulkSellExitBtn" class="secondary" type="button">ออกโหมดขาย</button>
+          </div>
+          <div id="bulkSellRulePanel" class="bulk-sell-rule-panel" hidden>
+            <div class="bulk-sell-rule-head">
+              <div>
+                <span>SMART SELL FILTER</span>
+                <strong>ตั้งเงื่อนไขขายอัตโนมัติ</strong>
+              </div>
+              <small>ระบบจะไม่เลือกใบล็อก / วางฐาน / Trade Lock / Auto Grade</small>
+            </div>
+            <div class="bulk-sell-rule-grid">
+              <label>
+                <span>ขายถึง Tier</span>
+                <select id="bulkSellMaxTier">
+                  <option value="0">Common</option>
+                  <option value="1">Uncommon</option>
+                  <option value="2">Rare</option>
+                  <option value="3">Epic</option>
+                  <option value="4">Legendary</option>
+                  <option value="5">Mythic</option>
+                  <option value="6">Divine</option>
+                  <option value="7">Celestial</option>
+                  <option value="8">Transcendent</option>
+                  <option value="9">Eternal</option>
+                  <option value="10">Singularity</option>
+                </select>
+              </label>
+              <label>
+                <span>ขายถึง Grade</span>
+                <select id="bulkSellMaxGrade">
+                  <option value="0">C</option>
+                  <option value="1">B</option>
+                  <option value="2">A</option>
+                  <option value="3">A+</option>
+                  <option value="4">S</option>
+                  <option value="5">S+</option>
+                  <option value="6">SS</option>
+                  <option value="7">SS+</option>
+                  <option value="8">SSS</option>
+                  <option value="9">SSS★</option>
+                  <option value="10">EX</option>
+                  <option value="11">EX+</option>
+                  <option value="12">EX★</option>
+                  <option value="13">Ω</option>
+                </select>
+              </label>
+              <label class="bulk-sell-rule-check">
+                <input id="bulkSellNormalOnly" type="checkbox" checked>
+                <span>เฉพาะใบไม่มี Mutation</span>
+              </label>
+              <label>
+                <span>สำรองใบซ้ำ / Character + Tier</span>
+                <select id="bulkSellReserveDuplicates">
+                  <option value="0">ไม่สำรอง</option>
+                  <option value="1" selected>เก็บ 1 ใบ</option>
+                  <option value="2">เก็บ 2 ใบ</option>
+                  <option value="3">เก็บ 3 ใบ</option>
+                  <option value="4">เก็บ 4 ใบ</option>
+                  <option value="5">เก็บ 5 ใบ</option>
+                </select>
+              </label>
+            </div>
+            <button id="bulkSellApplyRuleBtn" class="primary bulk-sell-rule-apply" type="button">🎯 เลือกการ์ดตามเงื่อนไข</button>
+            <p>🧬 แนะนำให้สำรองอย่างน้อย 1 ใบ เพราะการล้าง Mutation ต้องใช้ใบซ้ำ Character เดียวกัน + Tier เดียวกัน</p>
           </div>
         </div>
 
