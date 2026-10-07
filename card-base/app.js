@@ -426,6 +426,7 @@
   let cloudDirty = false;
   let cloudRevision = 0;
   let cloudConnectionIssue = false;
+  let lastCloudSaveError = "";
   let connectionRecovering = false;
   let lastExitCloudFlushAt = 0;
   let onlineProfile = null;
@@ -982,9 +983,20 @@
       else if(result.error==="trade_card_locked"){
         toast("การ์ดที่อยู่ใน Trade ถูกล็อก · ยกเลิก Trade ก่อนแก้ไข");
         await loadCloudState();
-      }else updateSyncUi("error");
+      }else{
+        updateSyncUi("error");
+        const code=String(result.error||"cloud_error");
+        if(lastCloudSaveError!==code){
+          lastCloudSaveError=code;
+          toast("☁️ Cloud Save ยังไม่สำเร็จ · ระบบจะลองใหม่อัตโนมัติ ("+code+")");
+        }
+        // Keep retrying a dirty crash-safe Pending Save instead of silently
+        // stopping after one rejected/temporary save attempt.
+        armCloudSave();
+      }
       return result;
     }
+    lastCloudSaveError="";
     if(Number.isFinite(Number(result.revision)))cloudServerRevision=Math.max(0,Number(result.revision));
     persistCloudSession();
     writeCloudCache(state);
@@ -2646,8 +2658,12 @@
     // Leaderboard is server-authoritative and derives Base Level from the
     // persisted Cloud Save. Force the live state up first so the board cannot
     // lag behind the level shown in the local profile header.
-    await flushCloudSave({force:true});
-    await publishPublicBase();
+    const saved=await flushCloudSave({force:true});
+    if(saved?.ok){
+      await publishPublicBase();
+    }else{
+      toast("⚠️ อันดับอาจยังเป็นข้อมูล Cloud ล่าสุด · กำลังรอ Cloud Save สำเร็จ");
+    }
     const [socialResult,leaderResult,tradeResult]=await Promise.all([
       rpc("cb_social_snapshot",{p_token:gameToken}),
       rpc("cb_leaderboard",{p_token:gameToken,p_limit:50}),
