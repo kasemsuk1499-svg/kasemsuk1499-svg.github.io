@@ -430,6 +430,8 @@
   let lastExitCloudFlushAt = 0;
   let onlineProfile = null;
   let onlineHeartbeatTimer = 0;
+  let baseProgressSyncBusy = false;
+  let baseProgressSyncPending = false;
   let mutationEventTimer = 0;
   let rotatingShopTimer = 0;
   let mutationEventBusy = false;
@@ -2301,6 +2303,26 @@
       p_stands:publicStandSnapshot()
     });
     if(!result.ok&&result.error==="invalid_session")invalidateGameSession();
+    return result;
+  }
+
+  async function syncBaseProgressOnline(){
+    if(!gameToken||!supabaseClient||!navigator.onLine)return;
+    if(baseProgressSyncBusy){
+      baseProgressSyncPending=true;
+      return;
+    }
+    baseProgressSyncBusy=true;
+    try{
+      do{
+        baseProgressSyncPending=false;
+        const saved=await flushCloudSave({force:true});
+        if(!saved?.ok)return;
+        await publishPublicBase();
+      }while(baseProgressSyncPending);
+    }finally{
+      baseProgressSyncBusy=false;
+    }
   }
 
   async function ensureOnlineProfile(){
@@ -2621,7 +2643,10 @@
   async function refreshOnline(){
     renderOnlineShell();
     if(!gameToken||!supabaseClient)return;
-    await flushCloudSave();
+    // Leaderboard is server-authoritative and derives Base Level from the
+    // persisted Cloud Save. Force the live state up first so the board cannot
+    // lag behind the level shown in the local profile header.
+    await flushCloudSave({force:true});
     await publishPublicBase();
     const [socialResult,leaderResult,tradeResult]=await Promise.all([
       rpc("cb_social_snapshot",{p_token:gameToken}),
@@ -3869,6 +3894,7 @@
 
     toast("ASCENSION "+romanNumeral(next)+" สำเร็จ! · "+(next<=10?reward.name+" · ":"")+"Core +1 ✦",true);
     renderAll();
+    void syncBaseProgressOnline();
   }
   function buyAscensionPerk(key){
     const perks=state.ascension?.perks;if(!perks||!(key in perks))return;
@@ -5343,6 +5369,7 @@
     const unlockText=newMax>oldMax?" · ปลด "+TIERS[newMax-1].name+"!":" · Luck สูงขึ้น!";
     toast("Rebirth สำเร็จ! ฐาน Lv."+state.baseLevel+unlockText,true);
     renderAll();
+    void syncBaseProgressOnline();
   }
 
   function accrueIncomeToNow(){
