@@ -203,8 +203,9 @@
   const AWAKEN_GRADE_INDEX = 9; // SSS★ is the minimum Awaken requirement
   const TRANSCENDENT_TIER_INDEX = 8;
   const ETERNAL_TIER_INDEX = 9;
-  const TRANSCENDENT_PITY_ROLLS = 500;
-  const ETERNAL_PITY_ROLLS = 1500;
+  const PAID_PACK_TRANSCENDENT_PITY = 500;
+  const PAID_PACK_ETERNAL_PITY = 1500;
+  const PAID_PACK_PITY_PRICE_MULTIPLIER = 1.20;
 
   // Grade reroll is a major money sink. Base Level scaling is applied on top.
   const GRADE_REROLL_COSTS = [5000,10000,20000,40000,80000,160000,320000,640000,1280000,2560000,5120000];
@@ -376,7 +377,7 @@
     autoTargets:[], autoRolling:false, fullAuto:false, targetFound:false,
     storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{},
     idPackProgress:{},
-    tierPity:{transcendentMisses:0,eternalMisses:0},
+    paidPackPity:{transcendentMisses:0,eternalMisses:0},
     items:{level100Ticket:0},
     serverGiftClaims:{},
     rotatingShop:{rotationId:null,bought:{}},
@@ -587,11 +588,12 @@
         }];
       })
     );
-    const rawPity=s.tierPity&&typeof s.tierPity==="object"&&!Array.isArray(s.tierPity)?s.tierPity:{};
-    s.tierPity={
-      transcendentMisses:Math.max(0,Math.min(TRANSCENDENT_PITY_ROLLS-1,Math.floor(Number(rawPity.transcendentMisses)||0))),
-      eternalMisses:Math.max(0,Math.min(ETERNAL_PITY_ROLLS-1,Math.floor(Number(rawPity.eternalMisses)||0)))
+    const rawPaidPity=s.paidPackPity&&typeof s.paidPackPity==="object"&&!Array.isArray(s.paidPackPity)?s.paidPackPity:{};
+    s.paidPackPity={
+      transcendentMisses:Math.max(0,Math.min(PAID_PACK_TRANSCENDENT_PITY-1,Math.floor(Number(rawPaidPity.transcendentMisses)||0))),
+      eternalMisses:Math.max(0,Math.min(PAID_PACK_ETERNAL_PITY-1,Math.floor(Number(rawPaidPity.eternalMisses)||0)))
     };
+    delete s.tierPity;
     const rawItems=s.items&&typeof s.items==="object"&&!Array.isArray(s.items)?s.items:{};
     s.items={
       level100Ticket:Math.max(0,Math.min(1000000,Math.floor(Number(rawItems.level100Ticket??rawItems.level40Ticket)||0)))
@@ -1352,54 +1354,42 @@
     return 0;
   }
 
-  function rollTierWithPity(){
-    if(!state.tierPity||typeof state.tierPity!=="object"){
-      state.tierPity={transcendentMisses:0,eternalMisses:0};
+  function applyPaidPackTierPity(baseTier){
+    if(!state.paidPackPity||typeof state.paidPackPity!=="object"){
+      state.paidPackPity={transcendentMisses:0,eternalMisses:0};
     }
-    const maxTier=maxTierForLevel();
-    const transUnlocked=maxTier>TRANSCENDENT_TIER_INDEX;
-    const eternalUnlocked=maxTier>ETERNAL_TIER_INDEX;
-    let tier=randomTier();
+    let tier=Math.max(0,Math.min(TIERS.length-1,Math.floor(Number(baseTier)||0)));
     let forced=null;
 
-    if(transUnlocked){
-      if(tier>=TRANSCENDENT_TIER_INDEX){
-        state.tierPity.transcendentMisses=0;
-      }else{
-        state.tierPity.transcendentMisses++;
-      }
-    }
+    if(tier>=TRANSCENDENT_TIER_INDEX)state.paidPackPity.transcendentMisses=0;
+    else state.paidPackPity.transcendentMisses++;
 
-    if(eternalUnlocked){
-      if(tier>=ETERNAL_TIER_INDEX){
-        state.tierPity.eternalMisses=0;
-      }else{
-        state.tierPity.eternalMisses++;
-      }
-    }
+    if(tier>=ETERNAL_TIER_INDEX)state.paidPackPity.eternalMisses=0;
+    else state.paidPackPity.eternalMisses++;
 
-    // Eternal guarantee takes priority if both pity counters reach the limit
-    // on the same roll. Singularity remains a pure jackpot with no pity.
-    if(eternalUnlocked&&state.tierPity.eternalMisses>=ETERNAL_PITY_ROLLS){
+    // Eternal guarantee has priority if both paid-pack counters mature together.
+    // Singularity remains jackpot-only, but naturally resets both counters.
+    if(state.paidPackPity.eternalMisses>=PAID_PACK_ETERNAL_PITY){
       tier=ETERNAL_TIER_INDEX;
       forced="Eternal";
-      state.tierPity.eternalMisses=0;
-      state.tierPity.transcendentMisses=0;
-    }else if(transUnlocked&&state.tierPity.transcendentMisses>=TRANSCENDENT_PITY_ROLLS){
+      state.paidPackPity.eternalMisses=0;
+      state.paidPackPity.transcendentMisses=0;
+    }else if(state.paidPackPity.transcendentMisses>=PAID_PACK_TRANSCENDENT_PITY){
       tier=TRANSCENDENT_TIER_INDEX;
       forced="Transcendent";
-      state.tierPity.transcendentMisses=0;
+      state.paidPackPity.transcendentMisses=0;
     }
 
     if(tier>=ETERNAL_TIER_INDEX){
-      state.tierPity.eternalMisses=0;
-      state.tierPity.transcendentMisses=0;
+      state.paidPackPity.eternalMisses=0;
+      state.paidPackPity.transcendentMisses=0;
     }else if(tier>=TRANSCENDENT_TIER_INDEX){
-      state.tierPity.transcendentMisses=0;
+      state.paidPackPity.transcendentMisses=0;
     }
 
     return {tier,forced};
   }
+
   function gradeAscensionBonus(stars=state.ascension?.stars||0){
     const n=Math.max(0,Math.floor(Number(stars)||0));
     return Math.min(GRADE_ASCENSION_MAX_BONUS,n*GRADE_ASCENSION_BONUS_PER_STAR);
@@ -1467,7 +1457,7 @@
     const seconds=range&&range.priceSeconds
       ? range.priceSeconds
       : 12+(index*10);
-    return roundUpNice(modeledBaseIncomeForShop(level)*seconds);
+    return roundUpNice(modeledBaseIncomeForShop(level)*seconds*PAID_PACK_PITY_PRICE_MULTIPLIER);
   }
 
   function idPackProgress(range){
@@ -1514,6 +1504,7 @@
   }
 
   function renderIdPackShop(){
+    renderPaidPackPity();
     const wrap=$("#idPackShop");if(!wrap)return;
     const ranges=idPackRanges();
     const pageCount=Math.max(1,Math.ceil(ranges.length/ID_PACK_PAGE_SIZE));
@@ -1614,6 +1605,9 @@
       tier=2;
       reason=reason||"COMPLETE BONUS · RARE+";
     }
+    const tierPity=applyPaidPackTierPity(tier);
+    tier=tierPity.tier;
+    if(tierPity.forced)reason=(reason?reason+" · ":"")+"🎯 "+tierPity.forced+" PITY";
     const card=forcedId===null
       ? createCardFromTier(tier,range.start,range.end)
       : createCardFromTier(tier,forcedId,forcedId);
@@ -1735,7 +1729,7 @@
   }
 
   function rotatingPackCost(offer){
-    return roundUpNice(modeledBaseIncomeForShop()*offer.priceSeconds);
+    return roundUpNice(modeledBaseIncomeForShop()*offer.priceSeconds*PAID_PACK_PITY_PRICE_MULTIPLIER);
   }
 
   function rotatingPackBought(offer){
@@ -1785,6 +1779,7 @@
   }
 
   function renderRotatingPackShop(){
+    renderPaidPackPity();
     const wrap=$("#rotatingPackGrid");
     if(!wrap)return;
     ensureRotatingShopState();
@@ -1859,15 +1854,19 @@
 
     state.money-=cost;
     const outOfRate=Math.random()<offer.outRate;
-    const tier=outOfRate
+    const baseTier=outOfRate
       ? weightedPickObject(offer.outPool)
       : weightedPickObject(rotatingNormalRates(offer));
+    const tierPity=applyPaidPackTierPity(baseTier);
+    const tier=tierPity.tier;
     const card=createCardFromTier(tier,offer.start,offer.end);
     state.rotatingShop.bought[offer.id]=rotatingPackBought(offer)+1;
     // Keep the visible STOCK counter/button in sync immediately after purchase.
     renderRotatingPackShop();
 
-    if(outOfRate){
+    if(tierPity.forced){
+      toast("🎯 PAID PACK PITY! การันตี "+tierPity.forced+" · "+padId(card.charId)+" ✨",true);
+    }else if(outOfRate){
       toast("OUT OF RATE!! "+TIERS[tier].name+" · "+padId(card.charId)+" 🌌",true);
     }else{
       toast("เปิด "+offer.name+" · "+TIERS[tier].name+" "+padId(card.charId)+" ✨",tier>=offer.featuredTier);
@@ -3386,19 +3385,16 @@
     const mutationSummary=$("#mutationLuckSummary");
     if(mutationSummary)mutationSummary.textContent="Luck จากการ์ดบนฐาน ×"+mutationLuckMultiplier().toFixed(2)+" · Soft cap";
 
-    const pity=$("#tierPitySummary");
-    if(pity){
-      const max=maxTierForLevel();
-      const transUnlocked=max>TRANSCENDENT_TIER_INDEX;
-      const eternalUnlocked=max>ETERNAL_TIER_INDEX;
-      const transMisses=Math.max(0,Number(state.tierPity?.transcendentMisses)||0);
-      const eternalMisses=Math.max(0,Number(state.tierPity?.eternalMisses)||0);
-      pity.textContent="🎯 PITY · Transcendent "+
-        (transUnlocked?(transMisses+"/"+TRANSCENDENT_PITY_ROLLS):"ปลดที่ Base Lv.28")+
-        " · Eternal "+
-        (eternalUnlocked?(eternalMisses+"/"+ETERNAL_PITY_ROLLS):"ปลดที่ Base Lv.36")+
-        " · ได้ Tier เป้าหมายหรือสูงกว่า = รีเซ็ต";
-    }
+    renderPaidPackPity();
+  }
+
+  function renderPaidPackPity(){
+    const trans=Math.max(0,Number(state.paidPackPity?.transcendentMisses)||0);
+    const eternal=Math.max(0,Number(state.paidPackPity?.eternalMisses)||0);
+    const text="🎯 PAID PACK PITY · Transcendent "+trans+"/"+PAID_PACK_TRANSCENDENT_PITY+
+      " · Eternal "+eternal+"/"+PAID_PACK_ETERNAL_PITY+
+      " · ราคา +20%";
+    $$(".paid-pack-pity-summary").forEach(el=>el.textContent=text);
   }
 
   function renderFilters(){
@@ -4579,16 +4575,14 @@
     let processed=0,storedHits=0,lastStoredTier=null;
     while(state.rollingUntil&&now>=state.rollingUntil&&processed<2000){
       const finishedAt=state.rollingUntil;
-      const pityRoll=rollTierWithPity();
-      const tier=pityRoll.tier;
+      const tier=randomTier();
       processed++;
 
       if(state.fullAuto){
-        if(pityRoll.forced||state.autoTargets.includes(tier)){
+        if(state.autoTargets.includes(tier)){
           storePack(tier,finishedAt);
           storedHits++;
           lastStoredTier=tier;
-          if(pityRoll.forced)toast("🎯 PITY! การันตี "+pityRoll.forced+" · เก็บซองให้อัตโนมัติ ✨",true);
         }
         state.currentPack=null;
         state.targetFound=false;
@@ -4597,15 +4591,13 @@
       }
 
       if(state.autoRolling){
-        if(pityRoll.forced||state.autoTargets.includes(tier)){
+        if(state.autoTargets.includes(tier)){
           state.currentPack={tier};
           state.autoRolling=false;
           state.targetFound=true;
           state.rollingUntil=0;
           setPackAutoSession(false);
-          toast(pityRoll.forced
-            ?"🎯 PITY! การันตี "+pityRoll.forced+" · Auto หยุดให้แล้ว ✨"
-            :"เจอ "+TIERS[tier].name+" แล้ว! Auto หยุดให้แล้ว ✨",true);
+          toast("เจอ "+TIERS[tier].name+" แล้ว! Auto หยุดให้แล้ว ✨",true);
           break;
         }
         state.currentPack=null;
@@ -4615,9 +4607,7 @@
 
       state.currentPack={tier};
       state.rollingUntil=0;
-      toast(pityRoll.forced
-        ?"🎯 PITY! การันตี "+pityRoll.forced+" แล้ว ✨"
-        :"ได้ซอง "+TIERS[tier].name+"!",!!pityRoll.forced);
+      toast("ได้ซอง "+TIERS[tier].name+"!");
       break;
     }
 
