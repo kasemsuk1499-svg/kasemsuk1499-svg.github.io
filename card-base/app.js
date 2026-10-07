@@ -363,6 +363,7 @@
     currentPack:null, rollingUntil:0, lastTick:Date.now(), uidCounter:1,
     autoTargets:[], autoRolling:false, fullAuto:false, targetFound:false,
     storedPacks:[], packUidCounter:1, gradeAuto:null, cardIndex:{},
+    idPackProgress:{},
     items:{level100Ticket:0},
     serverGiftClaims:{},
     rotatingShop:{rotationId:null,bought:{}},
@@ -544,6 +545,19 @@
         awakening:Math.max(0,Math.floor(Number(c.awakening)||0))
       }));
     s.cardIndex=normalizeCardIndex(s.cardIndex);
+    const rawIdPackProgress=s.idPackProgress&&typeof s.idPackProgress==="object"&&!Array.isArray(s.idPackProgress)
+      ? s.idPackProgress
+      : {};
+    s.idPackProgress=Object.fromEntries(
+      Object.entries(rawIdPackProgress).map(([key,value])=>{
+        const v=value&&typeof value==="object"&&!Array.isArray(value)?value:{};
+        return [String(key),{
+          opened:Math.max(0,Math.min(1000000000,Math.floor(Number(v.opened)||0))),
+          targetId:Number.isInteger(Number(v.targetId))?Number(v.targetId):null,
+          targetMisses:Math.max(0,Math.min(30,Math.floor(Number(v.targetMisses)||0)))
+        }];
+      })
+    );
     const rawItems=s.items&&typeof s.items==="object"&&!Array.isArray(s.items)?s.items:{};
     s.items={
       level100Ticket:Math.max(0,Math.min(1000000,Math.floor(Number(rawItems.level100Ticket??rawItems.level40Ticket)||0)))
@@ -1166,6 +1180,49 @@
     return roundUpNice(modeledBaseIncomeForShop(level)*seconds);
   }
 
+  function idPackProgress(range){
+    if(!state.idPackProgress||typeof state.idPackProgress!=="object")state.idPackProgress={};
+    const key=String(range.start);
+    const raw=state.idPackProgress[key]&&typeof state.idPackProgress[key]==="object"
+      ? state.idPackProgress[key]
+      : {};
+    const target=Number(raw.targetId);
+    const validTarget=Number.isInteger(target)&&target>=range.start&&target<=range.end?target:null;
+    const progress={
+      opened:Math.max(0,Math.floor(Number(raw.opened)||0)),
+      targetId:validTarget,
+      targetMisses:validTarget?Math.max(0,Math.min(30,Math.floor(Number(raw.targetMisses)||0))):0
+    };
+    state.idPackProgress[key]=progress;
+    return progress;
+  }
+
+  function idPackCollection(range){
+    const ids=[];
+    for(let id=range.start;id<=range.end;id++)ids.push(id);
+    const found=ids.filter(id=>!!state.cardIndex?.[id]);
+    const missing=ids.filter(id=>!state.cardIndex?.[id]);
+    return {ids,found,missing,total:ids.length,complete:missing.length===0};
+  }
+
+  function idPackMilestoneRemaining(progress){
+    const mod=progress.opened%10;
+    return mod===0?10:10-mod;
+  }
+
+  function setIdPackTarget(rangeIndex,targetId){
+    const range=idPackRanges().find(r=>r.index===rangeIndex);if(!range)return;
+    const progress=idPackProgress(range);
+    const next=Number(targetId);
+    const valid=Number.isInteger(next)&&next>=range.start&&next<=range.end?next:null;
+    if(progress.targetId===valid)return;
+    progress.targetId=valid;
+    progress.targetMisses=0;
+    save();
+    renderIdPackShop();
+    toast(valid?"🎯 Target "+padId(valid)+" · "+cardName(valid)+" · Pity เริ่มใหม่":"ยกเลิก Target ของ "+range.name);
+  }
+
   function renderIdPackShop(){
     const wrap=$("#idPackShop");if(!wrap)return;
     const ranges=idPackRanges();
@@ -1177,6 +1234,24 @@
     const cards=visible.map(r=>{
       const cost=idPackCost(r);
       const minBonus=charIncomeBonusText(r.start),maxBonus=charIncomeBonusText(r.end);
+      const progress=idPackProgress(r),collection=idPackCollection(r);
+      const milestone=idPackMilestoneRemaining(progress);
+      const targetReady=progress.targetId!==null&&progress.targetMisses>=30;
+      const targetOptions=collection.ids.map(id=>
+        '<option value="'+id+'" '+(progress.targetId===id?'selected':'')+'>'+
+        (state.cardIndex?.[id]?'✓ ':'')+padId(id)+' · '+escapeHtml(cardName(id))+
+        '</option>'
+      ).join("");
+      const targetText=progress.targetId===null
+        ? "Target ยังไม่ได้เลือก"
+        : "Target "+padId(progress.targetId)+" · "+(targetReady?"READY การันตีซองถัดไป":progress.targetMisses+"/30");
+      const milestoneText=collection.complete
+        ? "Lucky Rare+ อีก "+milestone+" ซอง"
+        : "NEW ID การันตีอีก "+milestone+" ซอง";
+      const completion=collection.complete
+        ? '<div class="id-pack-complete">✓ COMPLETE · Lucky 10th ≥ Rare</div>'
+        : '<div class="id-pack-collection"><span>Collection '+collection.found.length+'/'+collection.total+'</span><span>'+milestoneText+'</span></div>';
+
       const cover=r.image
         ? '<div class="id-pack-cover has-image"><img src="'+escapeHtml(r.image)+'" alt="'+escapeHtml(r.name)+'"></div>'
         : '<div class="id-pack-cover fallback"><span>PACK</span><b>'+String(r.index+1).padStart(2,"0")+'</b></div>';
@@ -1187,6 +1262,10 @@
           '<div class="id-pack-name">'+escapeHtml(r.name)+'</div>'+
           '<div class="id-pack-range"><b>'+r.start+'–'+r.end+'</b><small>Character Pool</small></div>'+
           '<div class="id-pack-meta"><span>ID Income '+minBonus+' → '+maxBonus+'</span><span>Tier ใช้ Luck ปัจจุบัน</span></div>'+
+          completion+
+          '<label class="id-pack-target"><span>🎯 TARGET CHARACTER</span><select data-id-pack-target="'+r.index+'">'+
+            '<option value="">ไม่เลือก</option>'+targetOptions+
+          '</select><small>'+targetText+'</small></label>'+
           '<div class="id-pack-actions">'+
             '<button type="button" data-buy-id-pack="'+r.index+'">สุ่ม '+fmt(cost)+'</button>'+
           '</div>'+
@@ -1225,10 +1304,42 @@
       return null;
     }
 
+    const progress=idPackProgress(range);
+    const before=idPackCollection(range);
+    const milestone=((progress.opened+1)%10)===0;
+    let forcedId=null,reason="";
+    if(progress.targetId!==null&&progress.targetMisses>=30){
+      forcedId=progress.targetId;
+      reason="TARGET PITY";
+    }else if(milestone&&!before.complete&&before.missing.length){
+      forcedId=before.missing[Math.floor(Math.random()*before.missing.length)];
+      reason="NEW ID GUARANTEE";
+    }
+
     state.money-=cost;
-    const tier=randomTier();
-    const card=createCardFromTier(tier,range.start,range.end);
-    toast("เปิด "+range.name+" · ได้ "+padId(card.charId)+" "+TIERS[tier].name+" ✨",true);
+    let tier=randomTier();
+    if(milestone&&before.complete&&tier<2){
+      tier=2;
+      reason=reason||"COMPLETE BONUS · RARE+";
+    }
+    const card=forcedId===null
+      ? createCardFromTier(tier,range.start,range.end)
+      : createCardFromTier(tier,forcedId,forcedId);
+
+    progress.opened++;
+    if(progress.targetId!==null){
+      if(card.charId===progress.targetId)progress.targetMisses=0;
+      else progress.targetMisses=Math.min(30,progress.targetMisses+1);
+    }else{
+      progress.targetMisses=0;
+    }
+
+    const after=idPackCollection(range);
+    if(!before.complete&&after.complete){
+      toast("🏆 "+range.name+" COMPLETE 10/10! · ปลด Lucky 10th ≥ Rare",true);
+    }else{
+      toast("เปิด "+range.name+" · ได้ "+padId(card.charId)+" "+TIERS[tier].name+(reason?" · "+reason:"")+" ✨",true);
+    }
     showReveal(card);
     renderAll();
     return card;
@@ -5004,6 +5115,11 @@
       }
       const buy=e.target.closest("[data-buy-id-pack]");
       if(buy)buyIdPack(Number(buy.dataset.buyIdPack));
+    });
+    $("#idPackShop").addEventListener("change",e=>{
+      const select=e.target.closest("select[data-id-pack-target]");
+      if(!select)return;
+      setIdPackTarget(Number(select.dataset.idPackTarget),select.value===""?null:Number(select.value));
     });
     $("#rotatingPackGrid").addEventListener("click",e=>{
       const buy=e.target.closest("[data-buy-rot-pack]");
