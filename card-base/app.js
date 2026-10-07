@@ -200,7 +200,7 @@
     {name:"EX★",color:"#ffffff",multi:12.00},
     {name:"Ω",color:"#ffb7ff",multi:18.00}
   ];
-  const AWAKEN_GRADE_INDEX = 12; // EX★ remains the Awaken requirement
+  const AWAKEN_GRADE_INDEX = 9; // SSS★ is the minimum Awaken requirement
 
   // Grade reroll is a major money sink. Base Level scaling is applied on top.
   const GRADE_REROLL_COSTS = [5000,10000,20000,40000,80000,160000,320000,640000,1280000,2560000,5120000];
