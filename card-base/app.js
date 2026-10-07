@@ -161,6 +161,7 @@
   // Session-scoped crash/reload guard for newly acquired cards.
   // sessionStorage survives reloads but not a brand-new browser session/account.
   const CRITICAL_CARD_SYNC_KEY = "card-base-critical-card-sync-v1";
+  const BULK_SELL_RULE_KEY = "card-base-bulk-sell-rules-v1";
   const GRADE_ROLL_MS = 450;
   const ROTATING_SHOP_RESTOCK_MS = 5*60*1000;
   const CLOUD_IDLE_SAVE_MS = 20000;
@@ -393,6 +394,7 @@
   let mutationCleanseTargetUid = null;
   let collectionSellMode = false;
   let collectionSellSelection = new Set();
+  let collectionSellRules = loadCollectionSellRules();
   const ID_PACK_PAGE_SIZE = 10;
   let idPackPage = 0;
   let supabaseClient = null;
@@ -3425,6 +3427,46 @@
     return arr;
   }
 
+  function normalizeCollectionSellRules(raw={}){
+    return {
+      maxTier:Math.max(0,Math.min(TIERS.length-1,Number(raw.maxTier)||0)),
+      maxGrade:Math.max(0,Math.min(GRADES.length-1,Number(raw.maxGrade)||0)),
+      normalOnly:raw.normalOnly!==false,
+      reserveDuplicates:Math.max(0,Math.min(5,Number(raw.reserveDuplicates??1)||0))
+    };
+  }
+
+  function loadCollectionSellRules(){
+    try{
+      return normalizeCollectionSellRules(JSON.parse(localStorage.getItem(BULK_SELL_RULE_KEY)||"{}"));
+    }catch(_){
+      return normalizeCollectionSellRules();
+    }
+  }
+
+  function saveCollectionSellRules(){
+    try{localStorage.setItem(BULK_SELL_RULE_KEY,JSON.stringify(collectionSellRules))}catch(_){}
+  }
+
+  function syncCollectionSellRulesUi(){
+    const tier=$("#bulkSellMaxTier"),grade=$("#bulkSellMaxGrade"),normal=$("#bulkSellNormalOnly"),reserve=$("#bulkSellReserveDuplicates");
+    if(tier)tier.value=String(collectionSellRules.maxTier);
+    if(grade)grade.value=String(collectionSellRules.maxGrade);
+    if(normal)normal.checked=!!collectionSellRules.normalOnly;
+    if(reserve)reserve.value=String(collectionSellRules.reserveDuplicates);
+  }
+
+  function readCollectionSellRulesFromUi(){
+    collectionSellRules=normalizeCollectionSellRules({
+      maxTier:Number($("#bulkSellMaxTier")?.value),
+      maxGrade:Number($("#bulkSellMaxGrade")?.value),
+      normalOnly:$("#bulkSellNormalOnly")?.checked!==false,
+      reserveDuplicates:Number($("#bulkSellReserveDuplicates")?.value)
+    });
+    saveCollectionSellRules();
+    return collectionSellRules;
+  }
+
   function pruneCollectionSellSelection(){
     const live=new Set(state.cards.filter(collectionSellEligible).map(c=>c.uid));
     collectionSellSelection=new Set([...collectionSellSelection].filter(uid=>live.has(uid)));
@@ -3438,7 +3480,7 @@
   }
 
   function renderCollectionSellUi(){
-    const modeBtn=$("#bulkSellModeBtn"),controls=$("#bulkSellTopControls"),bar=$("#bulkSellBar");
+    const modeBtn=$("#bulkSellModeBtn"),controls=$("#bulkSellTopControls"),rules=$("#bulkSellRulePanel"),bar=$("#bulkSellBar");
     const selected=selectedCollectionSellCards();
     const total=selected.reduce((sum,c)=>sum+sellValue(c),0);
     if(modeBtn){
@@ -3446,6 +3488,8 @@
       modeBtn.classList.toggle("active",collectionSellMode);
     }
     if(controls)controls.hidden=!collectionSellMode;
+    if(rules)rules.hidden=!collectionSellMode;
+    if(collectionSellMode)syncCollectionSellRulesUi();
     if(bar)bar.hidden=!collectionSellMode;
     const count=$("#bulkSellCount"),totalEl=$("#bulkSellTotal"),confirm=$("#bulkSellConfirmBtn");
     if(count)count.textContent=String(selected.length);
@@ -3486,6 +3530,53 @@
       if(!collectionSellSelection.has(c.uid)){collectionSellSelection.add(c.uid);added++}
     });
     if(!added)toast(junkOnly?"ไม่มี Grade C + Normal ที่ขายได้ในรายการนี้":"ไม่มีการ์ดที่ขายได้เพิ่ม");
+    renderCollection();
+  }
+
+  function selectCardsByBulkSellRules(){
+    const rule=readCollectionSellRulesFromUi();
+    const visible=collectionFilteredCards();
+    const candidates=visible.filter(c=>
+      collectionSellEligible(c)&&
+      Number(c.tier)<=rule.maxTier&&
+      Number(c.grade)<=rule.maxGrade&&
+      (!rule.normalOnly||cardMutationIds(c).length===0)
+    );
+    const allGroupCounts=new Map();
+    state.cards.forEach(c=>{
+      const key=String(c.charId)+":"+String(c.tier);
+      allGroupCounts.set(key,(allGroupCounts.get(key)||0)+1);
+    });
+    const groups=new Map();
+    candidates.forEach(c=>{
+      const key=String(c.charId)+":"+String(c.tier);
+      if(!groups.has(key))groups.set(key,[]);
+      groups.get(key).push(c);
+    });
+
+    collectionSellSelection.clear();
+    let reserved=0;
+    groups.forEach((cards,key)=>{
+      cards.sort((a,b)=>
+        cardMutationIds(a).length-cardMutationIds(b).length||
+        a.grade-b.grade||
+        a.level-b.level||
+        awakeningStars(a)-awakeningStars(b)||
+        a.uid-b.uid
+      );
+      const reserve=(allGroupCounts.get(key)||0)>1?Math.min(rule.reserveDuplicates,cards.length):0;
+      reserved+=reserve;
+      cards.slice(reserve).forEach(c=>collectionSellSelection.add(c.uid));
+    });
+
+    const tierName=TIERS[rule.maxTier]?.name||"Tier "+(rule.maxTier+1);
+    const gradeName=GRADES[rule.maxGrade]?.name||"Grade";
+    const mutationText=rule.normalOnly?" · ไม่มี Mutation":"";
+    if(collectionSellSelection.size){
+      toast("🎯 เลือก "+collectionSellSelection.size+" ใบ · ≤ "+tierName+" · Grade ≤ "+gradeName+mutationText+(reserved?" · สำรอง "+reserved+" ใบ":""));
+    }else{
+      toast("ไม่มีการ์ดตรงเงื่อนไขขายอัตโนมัติ"+(reserved?" · สำรองไว้ "+reserved+" ใบ":""));
+    }
     renderCollection();
   }
 
@@ -5430,6 +5521,10 @@
     $("#bulkSellClearBtn")?.addEventListener("click",()=>{collectionSellSelection.clear();renderCollection()});
     $("#bulkSellSelectVisibleBtn")?.addEventListener("click",()=>selectVisibleSellCards());
     $("#bulkSellSelectJunkBtn")?.addEventListener("click",()=>selectVisibleSellCards({junkOnly:true}));
+    $("#bulkSellApplyRuleBtn")?.addEventListener("click",selectCardsByBulkSellRules);
+    ["#bulkSellMaxTier","#bulkSellMaxGrade","#bulkSellNormalOnly","#bulkSellReserveDuplicates"].forEach(sel=>{
+      $(sel)?.addEventListener("change",()=>{readCollectionSellRulesFromUi()});
+    });
     $("#bulkSellConfirmBtn")?.addEventListener("click",confirmCollectionBulkSell);
     $("#indexSearch").addEventListener("input",renderCardIndex);$("#indexFilter").addEventListener("change",renderCardIndex);
     $("#rebirthBtn").addEventListener("click",doRebirth);
