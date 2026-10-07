@@ -1757,6 +1757,31 @@ body::before{
 .id-pack-actions{
   display:grid;grid-template-columns:1fr
 }
+.id-pack-collection,
+.id-pack-complete{
+  position:relative;z-index:1;
+  display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;
+  padding:6px 7px;border:1px solid #2e3749;border-radius:9px;
+  background:rgba(8,11,18,.58);font-size:7.5px;color:#aeb8cb
+}
+.id-pack-complete{
+  justify-content:center;border-color:rgba(106,230,170,.34);
+  background:rgba(59,180,125,.08);color:#9ef0c5;font-weight:900;letter-spacing:.02em
+}
+.id-pack-target{
+  position:relative;z-index:1;display:grid;gap:4px
+}
+.id-pack-target>span{
+  font-size:7px;font-weight:950;letter-spacing:.10em;color:#9ca8bd
+}
+.id-pack-target select{
+  width:100%;min-width:0;padding:7px 8px;border:1px solid #3b465d;border-radius:9px;
+  background:#0b0f17;color:#ecf1fb;font-size:8px;font-weight:800;outline:none
+}
+.id-pack-target select:focus{border-color:#7188c9;box-shadow:0 0 0 2px rgba(113,136,201,.12)}
+.id-pack-target small{
+  min-height:1.2em;font-size:7px;line-height:1.3;color:#8f9bb0
+}
 .id-pack-note{
   display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px
 }
@@ -1771,6 +1796,8 @@ body::before{
   .id-pack-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
   .id-pack-card{padding:10px}
   .id-pack-range b{font-size:22px}
+  .id-pack-target select{padding:6px;font-size:7px}
+  .id-pack-collection,.id-pack-complete{font-size:6.8px;padding:5px 6px}
 }
 
 
