@@ -6643,6 +6643,11 @@ body.ascension-unlock-10 .base-tower-bar,
 body.collection-selling #panel-collection{
   padding-bottom:96px;
 }
+@media (max-width:700px){
+  body.collection-selling #panel-collection{
+    padding-bottom:168px;
+  }
+}
 
 @media (max-width:700px){
   .collection-sell-tools{
@@ -6684,21 +6689,30 @@ body.collection-selling #panel-collection{
     font-size:8.5px;
   }
   .bulk-sell-bar{
-    bottom:max(10px,env(safe-area-inset-bottom));
+    /* Sit above the fixed 7-tab mobile nav so the confirm button can receive touch. */
+    bottom:calc(68px + env(safe-area-inset-bottom));
+    z-index:112;
     width:calc(100vw - 14px);
     grid-template-columns:minmax(0,1fr) minmax(120px,.55fr);
     gap:7px;
     padding:8px;
     border-radius:14px;
+    pointer-events:auto;
+    touch-action:manipulation;
   }
   .bulk-sell-bar-copy strong{font-size:13px}
   .bulk-sell-bar-copy span{font-size:8px}
   .bulk-sell-bar-copy small{display:none}
   .bulk-sell-bar .primary.danger{
+    position:relative;
+    z-index:1;
     min-width:0;
-    min-height:42px;
-    padding:7px 8px;
-    font-size:8.5px;
+    min-height:46px;
+    padding:8px;
+    font-size:9px;
+    pointer-events:auto;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
   }
 }
 @media (max-width:390px){
