@@ -709,7 +709,7 @@
 
   function cloudModeActive(){
     const remembered=readCloudSessionRecord();
-    return !!(gameAccount?.account_id||remembered?.accountId||remembered?.token);
+    return !!(gameAccount?.account_id||remembered?.accountId||remembered?.token||gameToken);
   }
 
   function activeCloudAccountId(){
@@ -718,8 +718,10 @@
 
   function persistCloudSession(profile=gameAccount,token=gameToken){
     const old=readCloudSessionRecord()||{};
-    const accountId=String(profile?.account_id||old.accountId||"");
-    const username=String(profile?.username||old.username||"");
+    const profileUsername=String(profile?.username||"");
+    const switchingAccount=!!(profileUsername&&old.username&&profileUsername!==old.username);
+    const accountId=String(profile?.account_id||(switchingAccount?"":old.accountId)||"");
+    const username=String(profileUsername||old.username||"");
     const next={
       version:2,
       mode:"cloud",
