@@ -452,7 +452,8 @@
   let tradeLockedGids = new Set();
   let tradeNotificationRegistration = null;
   const baseDocumentTitle = document.title;
-  let tradeModalState = {mode:null,targetId:null,tradeId:null,selectedGid:null};
+  const TRADE_MAX_CARDS = 20;
+  let tradeModalState = {mode:null,targetId:null,tradeId:null,selectedGids:[]};
   let tradeBusy = false;
   let authRequestBusy = false;
   let loungeAudioContext = null;
@@ -2805,6 +2806,23 @@
     };
   }
 
+  function tradeCardsArray(value,fallback=null){
+    if(Array.isArray(value))return value.filter(Boolean);
+    return fallback&&typeof fallback==="object"?[fallback]:[];
+  }
+
+  function tradeOfferedCards(tr){
+    return tradeCardsArray(tr?.offered_cards,tr?.offered_card);
+  }
+
+  function tradeReturnCards(tr){
+    return tradeCardsArray(tr?.return_cards,tr?.return_card);
+  }
+
+  function tradeCardPayloads(cards){
+    return cards.map(tradeCardPayload);
+  }
+
   function cardIsTradeLocked(card){
     return !!card&&tradeLockedGids.has(card.gid);
   }
@@ -2838,10 +2856,12 @@
     const map={
       friends_only:"Trade ได้เฉพาะเพื่อนเท่านั้น",
       invalid_card:"ข้อมูลการ์ดไม่ถูกต้อง",
-      card_not_available:"การ์ดนี้ไม่พร้อม Trade แล้ว",
-      card_already_offered:"การ์ดนี้อยู่ในข้อเสนอ Trade อื่นแล้ว",
+      invalid_cards:"ชุดการ์ดไม่ถูกต้อง · เลือกได้ 1–20 ใบ",
+      card_not_available:"มีการ์ดบางใบไม่พร้อม Trade แล้ว",
+      card_already_offered:"มีการ์ดบางใบอยู่ในข้อเสนอ Trade อื่นแล้ว",
       trade_unavailable:"ข้อเสนอนี้ไม่พร้อมใช้งานแล้ว",
-      offered_card_unavailable:"การ์ดของผู้เสนอถูกเปลี่ยนไปแล้ว · ข้อเสนอถูกยกเลิก",
+      offered_card_unavailable:"การ์ดของผู้เสนอไม่พร้อมแล้ว · ข้อเสนอถูกยกเลิก",
+      counter_card_unavailable:"การ์ดที่อีกฝ่ายตอบกลับไม่พร้อมแล้ว · ข้อเสนอถูกยกเลิก",
       invalid_session:"Session หมดอายุ กรุณาเข้าสู่ระบบใหม่"
     };
     return map[error]||"ทำ Trade ไม่สำเร็จ";
@@ -2869,7 +2889,8 @@
   }
 
   function updateTradeAttention(){
-    const count=tradeCache.incoming.length;
+    const count=tradeCache.incoming.filter(tr=>tr.status==="pending").length+
+      tradeCache.outgoing.filter(tr=>tr.status==="countered").length;
     const badge=$("#tradeNavBadge");
     if(badge){
       badge.hidden=!count;
@@ -2881,12 +2902,14 @@
   }
 
   function tradeNotificationBody(tr){
-    const offered=tr?.offered_card||{};
+    const offered=tradeOfferedCards(tr);
+    const first=offered[0]||{};
     const who=tr?.display_name||"ผู้เล่น";
-    const id=Number(offered.charId)||0;
+    const id=Number(first.charId)||0;
     const name=id?cardName(id):"การ์ด";
-    const tier=TIERS[Math.max(0,Math.min(TIERS.length-1,Number(offered.tier)||0))]?.name||"";
-    return who+" เสนอ "+name+(id?" "+padId(id):"")+(tier?" · "+tier:"")+" ให้คุณ";
+    const tier=TIERS[Math.max(0,Math.min(TIERS.length-1,Number(first.tier)||0))]?.name||"";
+    const more=offered.length>1?" + อีก "+(offered.length-1)+" ใบ":"";
+    return who+" เสนอ "+name+(id?" "+padId(id):"")+(tier?" · "+tier:"")+more+" ให้คุณ";
   }
 
   async function showTradeSystemNotification(tr){
@@ -2935,15 +2958,23 @@
   function applyTradeSnapshot(result){
     if(!result||!result.ok)return;
     const incoming=Array.isArray(result.incoming)?result.incoming:[];
+    const outgoing=Array.isArray(result.outgoing)?result.outgoing:[];
     const alreadyNotified=loadNotifiedTradeIds();
-    const newIncoming=incoming.filter(tr=>tr?.id&&!alreadyNotified.has(String(tr.id)));
+    const newIncoming=incoming.filter(tr=>tr?.id&&tr.status==="pending"&&!alreadyNotified.has(String(tr.id)));
+    const newCounters=outgoing.filter(tr=>tr?.id&&tr.status==="countered"&&!alreadyNotified.has("counter:"+String(tr.id)));
 
     tradeCache={
       incoming,
-      outgoing:Array.isArray(result.outgoing)?result.outgoing:[],
+      outgoing,
       recent:Array.isArray(result.recent)?result.recent:[]
     };
-    tradeLockedGids=new Set(tradeCache.outgoing.map(x=>x.offered_gid).filter(Boolean));
+
+    const locked=[];
+    outgoing.forEach(tr=>tradeOfferedCards(tr).forEach(card=>{if(card?.gid)locked.push(card.gid)}));
+    incoming.filter(tr=>tr.status==="countered")
+      .forEach(tr=>tradeReturnCards(tr).forEach(card=>{if(card?.gid)locked.push(card.gid)}));
+    tradeLockedGids=new Set(locked);
+
     renderTrades();
     renderCollection();
     updateTradeAttention();
@@ -2951,6 +2982,10 @@
     if(newIncoming.length){
       rememberNotifiedTradeIds(newIncoming.map(tr=>tr.id));
       notifyNewIncomingTrades(newIncoming);
+    }
+    if(newCounters.length){
+      rememberNotifiedTradeIds(newCounters.map(tr=>"counter:"+tr.id));
+      toast("🤝 มี Counter Offer ใหม่ "+newCounters.length+" รายการ · รอคุณยืนยันขั้นสุดท้าย",true);
     }
   }
 
@@ -2968,6 +3003,14 @@
     return tradeCardVisual(card,true);
   }
 
+  function tradeBundleVisual(cards,compact=true){
+    const list=tradeCardsArray(cards);
+    if(!list.length)return '<div class="social-empty">ไม่มีการ์ด</div>';
+    return '<div class="trade-card-bundle'+(compact?' compact':'')+'">'+
+      list.map(card=>tradeCardVisual(card,compact)).join("")+
+    '</div>';
+  }
+
   function renderTrades(){
     const incoming=$("#tradeIncomingList"),outgoing=$("#tradeOutgoingList"),recent=$("#tradeRecentList");
     if(!incoming||!outgoing||!recent)return;
@@ -2975,31 +3018,42 @@
     $("#tradeIncomingCount").textContent=String(tradeCache.incoming.length);
     $("#tradeOutgoingCount").textContent=String(tradeCache.outgoing.length);
 
-    incoming.innerHTML=tradeCache.incoming.length?tradeCache.incoming.map(tr=>
-      '<div class="trade-row">'+
-        '<div class="trade-person"><strong>'+escapeHtml(tr.display_name||"Player")+'</strong><small>#'+escapeHtml(tr.player_code||"—")+' เสนอให้คุณ</small></div>'+
-        tradeRowCard(tr.offered_card)+
+    incoming.innerHTML=tradeCache.incoming.length?tradeCache.incoming.map(tr=>{
+      const offered=tradeOfferedCards(tr),returns=tradeReturnCards(tr),waiting=tr.status==="countered";
+      return '<div class="trade-row '+(waiting?'countered':'pending')+'">'+
+        '<div class="trade-person"><strong>'+escapeHtml(tr.display_name||"Player")+'</strong><small>#'+escapeHtml(tr.player_code||"—")+
+          (waiting?' · คุณส่ง Counter Offer แล้ว':' · เสนอ '+offered.length+' ใบให้คุณ')+'</small></div>'+
+        '<div class="trade-side"><span class="trade-side-label">เขาเสนอ · '+offered.length+' ใบ</span>'+tradeBundleVisual(offered)+'</div>'+
+        (waiting?'<div class="trade-swap-arrow">↔</div><div class="trade-side"><span class="trade-side-label">คุณตอบกลับ · '+returns.length+' ใบ</span>'+tradeBundleVisual(returns)+'</div>':'')+
         '<div class="trade-row-actions">'+
-          '<button class="primary" data-trade-action="accept-open" data-trade="'+tr.id+'">เลือกการ์ดแลก</button>'+
-          '<button class="secondary" data-trade-action="decline" data-trade="'+tr.id+'">ปฏิเสธ</button>'+
+          (waiting
+            ?'<span class="trade-waiting">⏳ รอผู้เสนอเดิมยืนยันขั้นสุดท้าย</span><button class="secondary" data-trade-action="decline" data-trade="'+tr.id+'">ยกเลิกดีล</button>'
+            :'<button class="primary" data-trade-action="accept-open" data-trade="'+tr.id+'">เลือกการ์ดตอบกลับ</button><button class="secondary" data-trade-action="decline" data-trade="'+tr.id+'">ปฏิเสธ</button>')+
         '</div>'+
-      '</div>'
-    ).join(""):'<div class="social-empty">ยังไม่มีข้อเสนอใหม่</div>';
+      '</div>';
+    }).join(""):'<div class="social-empty">ยังไม่มีข้อเสนอใหม่</div>';
 
-    outgoing.innerHTML=tradeCache.outgoing.length?tradeCache.outgoing.map(tr=>
-      '<div class="trade-row">'+
-        '<div class="trade-person"><strong>ถึง '+escapeHtml(tr.display_name||"Player")+'</strong><small>กำลังรออีกฝ่ายตอบรับ</small></div>'+
-        tradeRowCard(tr.offered_card)+
-        '<div class="trade-row-actions"><button class="secondary" data-trade-action="cancel" data-trade="'+tr.id+'">ยกเลิกข้อเสนอ</button></div>'+
-      '</div>'
-    ).join(""):'<div class="social-empty">ยังไม่มีข้อเสนอที่ส่งอยู่</div>';
+    outgoing.innerHTML=tradeCache.outgoing.length?tradeCache.outgoing.map(tr=>{
+      const offered=tradeOfferedCards(tr),returns=tradeReturnCards(tr),ready=tr.status==="countered";
+      return '<div class="trade-row '+(ready?'countered':'pending')+'">'+
+        '<div class="trade-person"><strong>ถึง '+escapeHtml(tr.display_name||"Player")+'</strong><small>'+
+          (ready?'อีกฝ่ายตอบกลับแล้ว · ตรวจดีลก่อนยืนยัน':'กำลังรออีกฝ่ายเลือกการ์ดตอบกลับ')+'</small></div>'+
+        '<div class="trade-side"><span class="trade-side-label">คุณเสนอ · '+offered.length+' ใบ</span>'+tradeBundleVisual(offered)+'</div>'+
+        (ready?'<div class="trade-swap-arrow">↔</div><div class="trade-side"><span class="trade-side-label">คุณจะได้รับ · '+returns.length+' ใบ</span>'+tradeBundleVisual(returns)+'</div>':'')+
+        '<div class="trade-row-actions">'+
+          (ready?'<button class="primary" data-trade-action="final-confirm" data-trade="'+tr.id+'">ยืนยันดีลนี้</button>':'')+
+          '<button class="secondary" data-trade-action="cancel" data-trade="'+tr.id+'">ยกเลิกข้อเสนอ</button>'+
+        '</div>'+
+      '</div>';
+    }).join(""):'<div class="social-empty">ยังไม่มีข้อเสนอที่ส่งอยู่</div>';
 
     recent.innerHTML=tradeCache.recent.length?tradeCache.recent.map(tr=>{
       const status=tr.status==="accepted"?"แลกสำเร็จ ✓":tr.status==="declined"?"ถูกปฏิเสธ":tr.status==="cancelled"?"ยกเลิกแล้ว":tr.status;
+      const sent=tradeCardsArray(tr.sent_cards,tr.sent_card),received=tradeCardsArray(tr.received_cards,tr.received_card);
       return '<div class="trade-history-row '+escapeHtml(tr.status||"")+'">'+
         '<div><strong>'+escapeHtml(tr.display_name||"Player")+'</strong><small>'+status+'</small></div>'+
         (tr.status==="accepted"
-          ?'<div class="trade-history-cards"><span>ส่ง</span>'+tradeRowCard(tr.sent_card)+'<b>↔</b><span>รับ</span>'+tradeRowCard(tr.received_card)+'</div>'
+          ?'<div class="trade-history-cards"><div><span>ส่ง · '+sent.length+' ใบ</span>'+tradeBundleVisual(sent)+'</div><b>↔</b><div><span>รับ · '+received.length+' ใบ</span>'+tradeBundleVisual(received)+'</div></div>'
           :'')+
       '</div>';
     }).join(""):'<div class="social-empty">ยังไม่มีประวัติ Trade</div>';
@@ -3009,9 +3063,9 @@
 
   function openTradeOffer(userId){
     const profile=socialProfiles.get(userId);
-    tradeModalState={mode:"offer",targetId:userId,tradeId:null,selectedGid:null};
+    tradeModalState={mode:"offer",targetId:userId,tradeId:null,selectedGids:[]};
     $("#tradeModalTitle").textContent="เสนอแลกการ์ด";
-    $("#tradeModalSubtitle").textContent="ส่งข้อเสนอให้ "+(profile?profile.display_name:"เพื่อน");
+    $("#tradeModalSubtitle").textContent="เลือกได้ 1–"+TRADE_MAX_CARDS+" ใบ เพื่อเสนอให้ "+(profile?profile.display_name:"เพื่อน");
     $("#tradeOfferedPreview").hidden=true;
     $("#tradePickerTitle").textContent="เลือกการ์ดที่จะเสนอ";
     renderTradePicker();
@@ -3020,15 +3074,16 @@
   }
 
   function openTradeAccept(tradeId){
-    const tr=tradeCache.incoming.find(x=>x.id===tradeId);
+    const tr=tradeCache.incoming.find(x=>x.id===tradeId&&x.status==="pending");
     if(!tr){toast("ไม่พบข้อเสนอ Trade นี้");return}
-    tradeModalState={mode:"accept",targetId:tr.other_account_id,tradeId,selectedGid:null};
-    $("#tradeModalTitle").textContent="ตอบรับ Trade";
-    $("#tradeModalSubtitle").textContent=(tr.display_name||"Player")+" เสนอการ์ดนี้ให้คุณ";
+    const offeredCards=tradeOfferedCards(tr);
+    tradeModalState={mode:"accept",targetId:tr.other_account_id,tradeId,selectedGids:[]};
+    $("#tradeModalTitle").textContent="ส่ง Counter Offer";
+    $("#tradeModalSubtitle").textContent=(tr.display_name||"Player")+" เสนอ "+offeredCards.length+" ใบ · เลือกการ์ดตอบกลับ 1–"+TRADE_MAX_CARDS+" ใบ แล้วอีกฝ่ายต้องยืนยันอีกครั้ง";
     const offered=$("#tradeOfferedPreview");
     offered.hidden=false;
-    offered.innerHTML='<div><span class="eyebrow">YOU RECEIVE</span>'+tradeCardVisual(tr.offered_card)+'</div>';
-    $("#tradePickerTitle").textContent="เลือกการ์ดที่คุณจะส่งกลับ";
+    offered.innerHTML='<div class="trade-preview-section"><span class="eyebrow">YOU WOULD RECEIVE · '+offeredCards.length+' CARDS</span>'+tradeBundleVisual(offeredCards,false)+'</div>';
+    $("#tradePickerTitle").textContent="เลือกการ์ดที่คุณจะเสนอแลก";
     renderTradePicker();
     $("#tradeModal").classList.add("show");
     $("#tradeModal").setAttribute("aria-hidden","false");
@@ -3037,55 +3092,66 @@
   function closeTrade(){
     $("#tradeModal").classList.remove("show");
     $("#tradeModal").setAttribute("aria-hidden","true");
-    tradeModalState={mode:null,targetId:null,tradeId:null,selectedGid:null};
+    tradeModalState={mode:null,targetId:null,tradeId:null,selectedGids:[]};
+  }
+
+  function selectedTradeCards(){
+    const selected=new Set(Array.isArray(tradeModalState.selectedGids)?tradeModalState.selectedGids:[]);
+    return state.cards.filter(c=>selected.has(c.gid)&&tradeCardEligible(c));
   }
 
   function renderTradePicker(){
     const wrap=$("#tradeCardPicker"),confirm=$("#tradeConfirmBtn"),label=$("#tradeSelectedLabel");
     if(!wrap||!confirm||!label)return;
+    const selected=new Set(Array.isArray(tradeModalState.selectedGids)?tradeModalState.selectedGids:[]);
     const cards=state.cards.filter(tradeCardEligible).sort((a,b)=>b.tier-a.tier||b.grade-a.grade||b.level-a.level);
     wrap.innerHTML=cards.length?cards.map(c=>
-      '<button type="button" class="trade-pick '+(tradeModalState.selectedGid===c.gid?'selected':'')+'" data-trade-card="'+escapeHtml(c.gid)+'">'+tradeCardVisual(c)+'</button>'
+      '<button type="button" class="trade-pick '+(selected.has(c.gid)?'selected':'')+'" data-trade-card="'+escapeHtml(c.gid)+'">'+
+        '<span class="trade-pick-check">'+(selected.has(c.gid)?'✓':'＋')+'</span>'+tradeCardVisual(c)+
+      '</button>'
     ).join(""):'<div class="social-empty">ไม่มีการ์ดที่พร้อม Trade · ถอดจากฐานและปลดล็อกก่อน</div>';
-    const selected=state.cards.find(c=>c.gid===tradeModalState.selectedGid&&tradeCardEligible(c));
-    label.textContent=selected?padId(selected.charId)+" · "+TIERS[selected.tier].name:"ยังไม่เลือก";
-    confirm.disabled=!selected||tradeBusy;
-    confirm.textContent=tradeBusy?"กำลังดำเนินการ…":tradeModalState.mode==="accept"?"ยืนยันแลกการ์ด":"ส่งข้อเสนอ Trade";
+    const selectedCards=selectedTradeCards();
+    label.textContent=selectedCards.length?"เลือกแล้ว "+selectedCards.length+"/"+TRADE_MAX_CARDS+" ใบ":"ยังไม่เลือก";
+    confirm.disabled=!selectedCards.length||tradeBusy;
+    confirm.textContent=tradeBusy
+      ?"กำลังดำเนินการ…"
+      :tradeModalState.mode==="accept"
+        ?"ส่ง Counter Offer · "+selectedCards.length+" ใบ"
+        :"ส่งข้อเสนอ Trade · "+selectedCards.length+" ใบ";
     wrap.querySelectorAll("img").forEach(img=>img.addEventListener("error",e=>e.currentTarget.style.display="none"));
   }
 
   async function confirmTrade(){
     if(tradeBusy)return;
-    const card=state.cards.find(c=>c.gid===tradeModalState.selectedGid);
-    if(!tradeCardEligible(card)){toast("เลือกการ์ดที่พร้อม Trade ก่อน");renderTradePicker();return}
+    const cards=selectedTradeCards();
+    if(!cards.length){toast("เลือกการ์ดที่พร้อม Trade อย่างน้อย 1 ใบ");renderTradePicker();return}
+    if(cards.length>TRADE_MAX_CARDS){toast("เลือกได้สูงสุด "+TRADE_MAX_CARDS+" ใบ");return}
+
     tradeBusy=true;renderTradePicker();
     try{
-      const saved=await flushCloudSave();
+      const saved=await flushCloudSave({force:true});
       if(!saved||!saved.ok)return;
       let result;
       if(tradeModalState.mode==="offer"){
         result=await rpc("cb_trade_create",{
           p_token:gameToken,
           p_target:tradeModalState.targetId,
-          p_card:tradeCardPayload(card)
+          p_cards:tradeCardPayloads(cards)
         });
       }else if(tradeModalState.mode==="accept"){
         result=await rpc("cb_trade_accept",{
           p_token:gameToken,
           p_trade:tradeModalState.tradeId,
-          p_card:tradeCardPayload(card)
+          p_cards:tradeCardPayloads(cards)
         });
       }else return;
 
       if(!result.ok){toast(tradeErrorMessage(result.error));return}
 
-      if(tradeModalState.mode==="accept"&&result.state){
-        state=hydrateState(result.state);
-        writeCloudCache(state);
-        toast("Trade สำเร็จ! แลกการ์ดเรียบร้อย ✨",true);
-        renderAll();
+      if(tradeModalState.mode==="accept"){
+        toast("ส่ง Counter Offer แล้ว 🔒 · รอผู้เสนอเดิมตรวจและยืนยัน",true);
       }else{
-        toast("ส่งข้อเสนอ Trade แล้ว 🔒");
+        toast("ส่งข้อเสนอ Trade "+cards.length+" ใบแล้ว 🔒",true);
       }
       closeTrade();
       await refreshTrades(true);
@@ -3093,6 +3159,38 @@
     }finally{
       tradeBusy=false;
       if($("#tradeModal").classList.contains("show"))renderTradePicker();
+    }
+  }
+
+  async function confirmTradeFinal(tradeId){
+    if(tradeBusy)return;
+    const tr=tradeCache.outgoing.find(x=>x.id===tradeId&&x.status==="countered");
+    if(!tr){toast("ดีลนี้ไม่พร้อมยืนยันแล้ว");await refreshTrades(true);return}
+    const offered=tradeOfferedCards(tr),returns=tradeReturnCards(tr);
+    if(!offered.length||!returns.length){toast("ข้อมูล Counter Offer ไม่ครบ");return}
+    const ok=window.confirm(
+      "ยืนยัน Trade ขั้นสุดท้าย?"+
+      "\n\nคุณส่ง "+offered.length+" ใบ ↔ คุณรับ "+returns.length+" ใบ"+
+      "\nเมื่อยืนยันแล้ว การ์ดทั้งหมดจะถูกแลกพร้อมกันทันที"
+    );
+    if(!ok)return;
+
+    tradeBusy=true;
+    try{
+      const saved=await flushCloudSave({force:true});
+      if(!saved||!saved.ok)return;
+      const result=await rpc("cb_trade_confirm",{p_token:gameToken,p_trade:tradeId});
+      if(!result.ok){toast(tradeErrorMessage(result.error));await refreshTrades(true);return}
+      if(result.state){
+        state=hydrateState(result.state);
+        writeCloudCache(state);
+      }
+      toast("🤝 Trade สำเร็จ! "+offered.length+" ใบ ↔ "+returns.length+" ใบ ✨",true);
+      renderAll();
+      await refreshTrades(true);
+      await publishPublicBase();
+    }finally{
+      tradeBusy=false;
     }
   }
 
@@ -5583,13 +5681,21 @@
     $("#tradeConfirmBtn").addEventListener("click",confirmTrade);
     $("#tradeCardPicker").addEventListener("click",e=>{
       const pick=e.target.closest("[data-trade-card]");if(!pick)return;
-      tradeModalState.selectedGid=pick.dataset.tradeCard;
+      const gid=pick.dataset.tradeCard;
+      const selected=new Set(Array.isArray(tradeModalState.selectedGids)?tradeModalState.selectedGids:[]);
+      if(selected.has(gid))selected.delete(gid);
+      else{
+        if(selected.size>=TRADE_MAX_CARDS){toast("เลือก Trade ได้สูงสุด "+TRADE_MAX_CARDS+" ใบ");return}
+        selected.add(gid);
+      }
+      tradeModalState.selectedGids=[...selected];
       renderTradePicker();
     });
     document.addEventListener("click",e=>{
       const btn=e.target.closest("[data-trade-action]");if(!btn)return;
       const action=btn.dataset.tradeAction,tradeId=btn.dataset.trade;
       if(action==="accept-open")openTradeAccept(tradeId);
+      if(action==="final-confirm")confirmTradeFinal(tradeId);
       if(action==="decline")declineTrade(tradeId);
       if(action==="cancel")cancelTrade(tradeId);
     });
