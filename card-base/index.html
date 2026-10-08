@@ -626,7 +626,7 @@
               <div>
                 <div class="eyebrow">CARD TRADE</div>
                 <h3>ตลาดแลกการ์ดกับเพื่อน</h3>
-                <p class="muted">แลก 1 ใบ ↔ 1 ใบ · การ์ดที่เสนอจะถูกล็อกจนกว่าจะยกเลิกหรือจบการแลก</p>
+                <p class="muted">รองรับ 1↔หลาย / หลาย↔1 / หลาย↔หลาย · ผู้รับส่ง Counter Offer ก่อน และผู้เสนอเดิมต้องยืนยันขั้นสุดท้ายจึงแลกสำเร็จ</p>
               </div>
               <button id="refreshTradesBtn" class="secondary" type="button">รีเฟรช Trade</button>
             </div>
@@ -947,7 +947,7 @@
         <div class="trade-picker-head">
           <div>
             <strong id="tradePickerTitle">เลือกการ์ดของคุณ</strong>
-            <small>การ์ดที่วางฐาน ล็อก หรืออยู่ใน Trade อื่นจะเลือกไม่ได้</small>
+            <small>เลือกได้สูงสุด 20 ใบ · แตะซ้ำเพื่อยกเลิกเลือก · การ์ดที่วางฐาน ล็อก หรืออยู่ใน Trade อื่นจะเลือกไม่ได้</small>
           </div>
           <span id="tradeSelectedLabel" class="badge">ยังไม่เลือก</span>
         </div>
@@ -1050,7 +1050,7 @@
 
     <div id="toast" class="toast" aria-live="polite"></div>
   </div>
-  <script src="./app.js?v=20261007-paid-pack-pity-v8" defer></script>
+  <script src="./app.js?v=20261008-fair-multi-trade-v9" defer></script>
   <script src="./fx.js?v=20261006-chokun-original-v4" defer></script>
 </body>
 </html>
