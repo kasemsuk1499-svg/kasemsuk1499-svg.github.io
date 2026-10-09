@@ -2744,7 +2744,7 @@
     const t=TIERS[tier],g=GRADES[grade];
     return '<div class="trade-card-visual tier-shell tier-'+tier+' grade-shell-'+grade+(compact?' compact':'')+'" style="--tier:'+t.color+'">'+
       '<div class="trade-card-art '+tierFxClass(tier)+cardMutationFxClass(visualCard)+' grade-shell-'+grade+'" style="'+cardMutationStyle(visualCard)+'">'+
-        '<img src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
+        '<img loading="lazy" decoding="async" src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
         '<div class="tier-ring"></div>'+
         '<span class="card-grade '+gradeFxClass(grade)+'" style="--grade:'+g.color+'">'+g.name+'</span>'+mutationBadge(visualCard)+awakeningBadge(visualCard)+
       '</div>'+
@@ -4467,7 +4467,7 @@
     picker.innerHTML=choices.length?choices.map(card=>{
       const tier=TIERS[card.tier]||TIERS[0],selectedCard=selectedSet.has(card.uid);
       return '<button type="button" class="lounge-pick-card '+(selectedCard?'selected':'')+'" data-lounge-pick="'+card.uid+'" style="--tier:'+tier.color+'">'+
-        '<img src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
+        '<img loading="lazy" decoding="async" src="'+imageFor(card.charId)+'" alt="'+padId(card.charId)+'">'+
         '<strong>'+(selectedCard?'✓ ':'')+padId(card.charId)+'</strong>'+
         '<small>'+escapeHtml(tier.name)+' · '+fmt(cardIncome(card))+'/s</small>'+
       '</button>';
