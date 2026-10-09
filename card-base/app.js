@@ -120,7 +120,7 @@
   // Mutation Storm pool totals 100%. New ultra mutations are rarer, but obtainable.
   const MUTATION_EVENT_WEIGHTS = [0,11.058878,10.598092,10.137305,9.676519,9.215732,8.754945,8.294159,7.372586,6.451012,5.068653,3.225506,2.303933,.232721,.186176,.139632,.111706,.093088,.074471,.055853,.027926,.009309,6.911799];
   const MUTATION_EVENT_PULSE_CHANCE = 0.005; // 0.5% per Normal displayed card every 30 sec
-  const TOWER_LV100_TICKET_DROP_CHANCE = 0.03; // rolled once per cleared Endless Tower floor
+  const TOWER_LV100_TICKET_DROP_CHANCE = 0.01; // rare +100 Lv. Ticket; rolled once per cleared Endless Tower floor
   // Grade does not increase Event hit frequency. It improves mutation quality after a hit.
   const MUTATION_GRADE_EVENT_BONUS = [0,.03,.06,.10,.15,.22,.30,.39,.49,.60,.70,.80,.90,1.00];
   // Flat bonus applied once to the final Mutation Inheritance success chance.
@@ -928,9 +928,9 @@
       state=hydrateState(result.state);
       writeCloudCache(state);
       renderHeader();renderBase();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderRotatingPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();
-      if(serverGrants>0||serverGiftSync>0)toast("🎁 ของขวัญเซิร์ฟเวอร์พร้อมแล้ว · Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
+      if(serverGrants>0||serverGiftSync>0)toast("🎁 ของขวัญเซิร์ฟเวอร์พร้อมแล้ว · Singularity Pack ×1 + ⚡ +100 Lv. Ticket ×1",true);
       if(towerTicketDrops>0){
-        toast("⚡ JACKPOT! Endless Tower ดรอป Lv.100 Ticket ×"+towerTicketDrops+" 💯",true);
+        toast("⚡ JACKPOT! Endless Tower ดรอป +100 Lv. Ticket ×"+towerTicketDrops+" 💯",true);
       }
       if(tradeReceipts>0){
         toast("Trade สำเร็จ · คลังการ์ดอัปเดตแล้ว ✨",true);
@@ -2118,7 +2118,7 @@
     if(!result.exists)await flushCloudSave({force:true});
     renderAll();
     if(Number(result.server_grants)>0){
-      toast("🎁 ของขวัญเซิร์ฟเวอร์มาแล้ว! Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
+      toast("🎁 ของขวัญเซิร์ฟเวอร์มาแล้ว! Singularity Pack ×1 + ⚡ +100 Lv. Ticket ×1",true);
     }
     updateSyncUi("online");
     return true;
@@ -3519,18 +3519,20 @@
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
     if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
     const tickets=Math.max(0,Math.floor(Number(state.items?.level100Ticket)||0));
-    if(!tickets){toast("ไม่มี Lv.100 Ticket");return}
-    if(Number(c.level)>=100){toast("การ์ดใบนี้ Lv.100 ขึ้นไปแล้ว");return}
+    if(!tickets){toast("ไม่มี +100 Lv. Ticket");return}
+    const currentLevel=Math.max(1,Math.floor(Number(c.level)||1));
+    const nextLevel=Math.min(10000000,currentLevel+100);
+    if(nextLevel<=currentLevel){toast("การ์ดใบนี้ถึงขีดจำกัด Level แล้ว");return}
     const ok=window.confirm(
-      "ใช้ ⚡ Lv.100 Ticket กับ "+padId(c.charId)+" ?"+
-      "\nLv."+c.level+" → Lv.100 ทันที"+
+      "ใช้ ⚡ +100 Lv. Ticket กับ "+padId(c.charId)+" ?"+
+      "\nLv."+currentLevel+" → Lv."+nextLevel+
       "\n\nGrade / Mutation / Awakening จะไม่เปลี่ยน และ Ticket จะถูกใช้ 1 ใบ"
     );
     if(!ok)return;
     state.items.level100Ticket=tickets-1;
     markOneServerGiftTicketUsed();
-    c.level=100;
-    toast("⚡ "+padId(c.charId)+" ขึ้นเป็น Lv.100 แล้ว!",true);
+    c.level=nextLevel;
+    toast("⚡ "+padId(c.charId)+" +100 Level! · Lv."+nextLevel,true);
     renderItemBag();
     commitCardMicroUpdate(c.uid);
     renderCollection();
@@ -3834,7 +3836,7 @@
             '<button data-a="grade" '+(tradeLocked?"disabled":"")+'>สุ่ม Grade</button>'+
           '</div>'+
           '<details class="card-action-menu"><summary>⚙ จัดการการ์ด <span>⌄</span></summary><div class="card-actions card-actions-secondary">'+
-            '<button class="level100-ticket-btn" data-a="level100-ticket" '+(tradeLocked||c.level>=100||!(state.items?.level100Ticket>0)?"disabled":"")+'>⚡ Lv.100 Ticket'+(state.items?.level100Ticket>0?" ×"+state.items.level100Ticket:"")+'</button>'+
+            '<button class="level100-ticket-btn" data-a="level100-ticket" '+(tradeLocked||c.level>=10000000||!(state.items?.level100Ticket>0)?"disabled":"")+'>⚡ +100 Lv. Ticket'+(state.items?.level100Ticket>0?" ×"+state.items.level100Ticket:"")+'</button>'+
             '<button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-a="grade-auto" '+(tradeLocked?"disabled":"")+'>'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button>'+
             '<button class="mutation-inherit-btn" data-a="mutation-lab" '+(tradeLocked||cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด Mutation")+'</button>'+
             '<button class="mutation-cleanse-btn" data-a="mutation-cleanse" '+(tradeLocked||!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button>'+
@@ -4124,7 +4126,7 @@
       const dropped=Math.random()<TOWER_LV100_TICKET_DROP_CHANCE;
       if(dropped){
         state.items.level100Ticket=(Number(state.items?.level100Ticket)||0)+1;
-        toast("⚡ JACKPOT! Floor "+floor+" ดรอป Lv.100 Ticket ×1 💯",true);
+        toast("⚡ JACKPOT! Floor "+floor+" ดรอป +100 Lv. Ticket ×1 💯",true);
       }else{
         toast("ผ่าน Endless Tower Floor "+floor+" · Shard +1 🏢",true);
       }
@@ -4770,7 +4772,7 @@
       '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div><div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-modal-face-stat="level">'+c.level+'</b></span><strong data-modal-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div></div></div>'+
       '<div class="stand-detail-info"><div class="stand-character-heading"><strong>'+escapeHtml(cardName(c.charId))+'</strong><span>'+padId(c.charId)+' · '+escapeHtml(t.name)+'</span></div><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
       '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div><div><span>Grade → Mutation</span><b data-modal-stat="mutation-grade">'+mutationGradeBenefitText(c)+'</b></div><div><span>Awaken</span><b>★'+awakeningStars(c)+' · Income ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div></div>'+
-      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button class="level100-ticket-btn" data-modal-a="level100-ticket" '+(c.level>=100||!(state.items?.level100Ticket>0)?"disabled":"")+'>⚡ Lv.100 Ticket'+(state.items?.level100Ticket>0?" ×"+state.items.level100Ticket:"")+'</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button class="mutation-inherit-btn" data-modal-a="mutation-lab" '+(cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด Mutation")+'</button><button class="mutation-cleanse-btn" data-modal-a="mutation-cleanse" '+(!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
+      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button class="level100-ticket-btn" data-modal-a="level100-ticket" '+(c.level>=10000000||!(state.items?.level100Ticket>0)?"disabled":"")+'>⚡ +100 Lv. Ticket'+(state.items?.level100Ticket>0?" ×"+state.items.level100Ticket:"")+'</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button class="mutation-inherit-btn" data-modal-a="mutation-lab" '+(cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด Mutation")+'</button><button class="mutation-cleanse-btn" data-modal-a="mutation-cleanse" '+(!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
     body.querySelector('[data-modal-a="level"]').addEventListener("click",()=>{levelUp(c.uid,true)});
     body.querySelector('[data-modal-a="level100-ticket"]')?.addEventListener("click",()=>{useLevel100Ticket(c.uid)});
@@ -4902,8 +4904,8 @@
       }
       const ticket=el.querySelector('[data-a="level100-ticket"]');if(ticket){
         const tickets=Math.max(0,Math.floor(Number(state.items?.level100Ticket)||0));
-        ticket.disabled=tradeLocked||c.level>=100||tickets<=0;
-        ticket.textContent="⚡ Lv.100 Ticket"+(tickets?" ×"+tickets:"");
+        ticket.disabled=tradeLocked||c.level>=10000000||tickets<=0;
+        ticket.textContent="⚡ +100 Lv. Ticket"+(tickets?" ×"+tickets:"");
       }
       const auto=el.querySelector('[data-a="grade-auto"]');if(auto){
         const running=!!(state.gradeAuto&&state.gradeAuto.uid===c.uid);
@@ -4956,8 +4958,8 @@
       const mutationGrade=detail.querySelector('[data-modal-stat="mutation-grade"]');if(mutationGrade)mutationGrade.textContent=mutationGradeBenefitText(c);
       const ticket=detail.querySelector('[data-modal-a="level100-ticket"]');if(ticket){
         const tickets=Math.max(0,Math.floor(Number(state.items?.level100Ticket)||0));
-        ticket.disabled=c.level>=100||tickets<=0;
-        ticket.textContent="⚡ Lv.100 Ticket"+(tickets?" ×"+tickets:"");
+        ticket.disabled=c.level>=10000000||tickets<=0;
+        ticket.textContent="⚡ +100 Lv. Ticket"+(tickets?" ×"+tickets:"");
       }
       const auto=detail.querySelector('[data-modal-a="grade-auto"]');if(auto){
         const running=!!(state.gradeAuto&&state.gradeAuto.uid===c.uid);
