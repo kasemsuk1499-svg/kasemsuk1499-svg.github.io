@@ -4683,7 +4683,7 @@
       const img=shell.querySelector("img");
       if(!img)return;
       const src=String(img.getAttribute("src")||"").split("?")[0];
-      if(!/(^|\\/)139\\.png$/.test(src))return;
+      if(!/(^|\/)139\.png$/.test(src))return;
 
       shell.classList.add("live-card-uta-singularity");
       if(shell.dataset.liveUtaBound==="1")return;
