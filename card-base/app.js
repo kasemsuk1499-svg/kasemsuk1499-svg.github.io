@@ -684,16 +684,63 @@
     return s;
   }
 
+  function discoverCloudRecoveryRecord(){
+    try{
+      const candidates=[];
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i)||"";
+        if(key.startsWith(CLOUD_PENDING_PREFIX)){
+          const accountId=key.slice(CLOUD_PENDING_PREFIX.length);
+          if(!accountId)continue;
+          try{
+            const pending=JSON.parse(localStorage.getItem(key)||"null");
+            if(!pending||pending.version!==2||pending.accountId!==accountId||!pending.state)continue;
+            candidates.push({
+              version:2,mode:"cloud",accountId,
+              username:typeof pending.username==="string"?pending.username:"",
+              token:"",
+              serverRevision:Math.max(0,Number(pending.serverRevision)||0),
+              updatedAt:Math.max(0,Number(pending.savedAt)||0),
+              recoveredFrom:"pending"
+            });
+          }catch{}
+        }
+      }
+      if(candidates.length===1)return candidates[0];
+
+      const cached=[];
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i)||"";
+        if(!key.startsWith(CLOUD_CACHE_PREFIX))continue;
+        const accountId=key.slice(CLOUD_CACHE_PREFIX.length);
+        if(!accountId)continue;
+        try{
+          const raw=localStorage.getItem(key);
+          if(!raw)continue;
+          const parsed=JSON.parse(raw);
+          if(!parsed||typeof parsed!=="object")continue;
+          cached.push({
+            version:2,mode:"cloud",accountId,username:"",token:"",
+            serverRevision:0,updatedAt:0,recoveredFrom:"cache"
+          });
+        }catch{}
+      }
+      return cached.length===1?cached[0]:null;
+    }catch{
+      return null;
+    }
+  }
+
   function readCloudSessionRecord(){
     try{
       const raw=localStorage.getItem(CLOUD_SESSION_KEY);
-      if(!raw)return null;
+      if(!raw)return discoverCloudRecoveryRecord();
       const value=JSON.parse(raw);
-      if(!value||typeof value!=="object"||value.mode!=="cloud")return null;
+      if(!value||typeof value!=="object"||value.mode!=="cloud")return discoverCloudRecoveryRecord();
       const token=typeof value.token==="string"&&/^[0-9a-f]{64}$/.test(value.token)?value.token:"";
       const accountId=typeof value.accountId==="string"?value.accountId:"";
       const username=typeof value.username==="string"?value.username:"";
-      if(!token&&!accountId&&!username)return null;
+      if(!token&&!accountId&&!username)return discoverCloudRecoveryRecord();
       return {
         ...value,
         mode:"cloud",
@@ -703,7 +750,7 @@
         serverRevision:Math.max(0,Number(value.serverRevision)||0)
       };
     }catch{
-      return null;
+      return discoverCloudRecoveryRecord();
     }
   }
 
@@ -2366,7 +2413,9 @@
       return;
     }
     await rpc("cb_logout",{p_token:gameToken});
-    clearCrashSafePending(activeCloudAccountId());
+    const loggedOutAccountId=activeCloudAccountId();
+    clearCrashSafePending(loggedOutAccountId);
+    try{if(loggedOutAccountId)localStorage.removeItem(cloudCacheKey(loggedOutAccountId))}catch{}
     clearCriticalCardSyncPending();
     clearGameSession();
     state=newState();
