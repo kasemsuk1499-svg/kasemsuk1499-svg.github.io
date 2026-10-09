@@ -1095,7 +1095,7 @@
     return name||("CARD "+padId(id));
   }
   function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
-  function imageFor(id){return "../assets/cards/"+id+(Number(id)>=131?".webp":".png")}
+  function imageFor(id){return "../assets/cards/"+id+".png"}
   function romanNumeral(value){
     let n=Math.max(0,Math.floor(Number(value)||0));
     if(!n)return "";
