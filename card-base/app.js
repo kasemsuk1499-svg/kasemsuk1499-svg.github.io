@@ -424,6 +424,8 @@
   let collectionSellMode = false;
   let collectionSellSelection = new Set();
   let collectionSellRules = loadCollectionSellRules();
+  const COLLECTION_PAGE_SIZE = 30;
+  let collectionPage = 0;
   const ID_PACK_PAGE_SIZE = 10;
   let idPackPage = 0;
   let supabaseClient = null;
@@ -3715,6 +3717,41 @@
     return arr;
   }
 
+  function collectionPageData(arr=collectionFilteredCards()){
+    const total=arr.length;
+    const pages=Math.max(1,Math.ceil(total/COLLECTION_PAGE_SIZE));
+    collectionPage=Math.max(0,Math.min(collectionPage,pages-1));
+    const start=collectionPage*COLLECTION_PAGE_SIZE;
+    return {
+      cards:arr.slice(start,start+COLLECTION_PAGE_SIZE),
+      total,
+      pages,
+      page:collectionPage,
+      start,
+      end:Math.min(total,start+COLLECTION_PAGE_SIZE)
+    };
+  }
+
+  function renderCollectionPager(data){
+    const pager=$("#collectionPager"),info=$("#collectionPageInfo"),prev=$("#collectionPrevBtn"),next=$("#collectionNextBtn");
+    if(!pager)return;
+    const hasCards=data.total>0;
+    pager.hidden=!hasCards;
+    if(info)info.textContent=hasCards
+      ? "หน้า "+(data.page+1)+" / "+data.pages+" · "+(data.start+1)+"–"+data.end+" จาก "+data.total+" ใบ"
+      : "ไม่มีการ์ด";
+    if(prev)prev.disabled=!hasCards||data.page<=0;
+    if(next)next.disabled=!hasCards||data.page>=data.pages-1;
+  }
+
+  function changeCollectionPage(delta){
+    const arr=collectionFilteredCards();
+    const pages=Math.max(1,Math.ceil(arr.length/COLLECTION_PAGE_SIZE));
+    collectionPage=Math.max(0,Math.min(collectionPage+Number(delta||0),pages-1));
+    renderCollection();
+    document.querySelector("#panel-collection .collection-head")?.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
   function normalizeCollectionSellRules(raw={}){
     return {
       maxTier:Math.max(0,Math.min(TIERS.length-1,Number(raw.maxTier)||0)),
@@ -3810,7 +3847,7 @@
   }
 
   function selectVisibleSellCards({junkOnly=false}={}){
-    const visible=collectionFilteredCards();
+    const visible=collectionPageData(collectionFilteredCards()).cards;
     let added=0;
     visible.forEach(c=>{
       if(!collectionSellEligible(c))return;
@@ -3900,12 +3937,14 @@
   function renderCollection(){
     renderItemBag();
     const arr=collectionFilteredCards();
+    const pageData=collectionPageData(arr);
     pruneCollectionSellSelection();
     const wrap=$("#collection"); wrap.innerHTML="";
     wrap.classList.toggle("bulk-sell-mode",collectionSellMode);
     renderCollectionSellUi();
+    renderCollectionPager(pageData);
     $("#emptyCollection").style.display=arr.length?"none":"block";
-    arr.forEach(c=>{
+    pageData.cards.forEach(c=>{
       const t=TIERS[c.tier],g=GRADES[c.grade],placed=state.placed.includes(c.uid),tradeLocked=cardIsTradeLocked(c);
       const sellEligible=collectionSellEligible(c),sellSelected=collectionSellSelection.has(c.uid);
       const el=document.createElement("article");
@@ -4677,50 +4716,9 @@
     loungeAmbientTimer=setTimeout(loungeAmbientEvent,9000+Math.random()*8000);
   }
 
-  function refreshLiveCardEffects(root=document){
-    const shells=(root||document).querySelectorAll?.(".tier-10")||[];
-    shells.forEach(shell=>{
-      const img=shell.querySelector("img");
-      if(!img)return;
-      const src=String(img.getAttribute("src")||"").split("?")[0];
-      if(!/(^|\/)139\.png$/.test(src))return;
-
-      shell.classList.add("live-card-uta-singularity");
-      if(shell.dataset.liveUtaBound==="1")return;
-      shell.dataset.liveUtaBound="1";
-
-      const reset=()=>{
-        shell.style.setProperty("--live-rx","0deg");
-        shell.style.setProperty("--live-ry","0deg");
-        shell.style.setProperty("--live-x","0px");
-        shell.style.setProperty("--live-y","0px");
-        shell.style.setProperty("--live-light-x","50%");
-        shell.style.setProperty("--live-light-y","35%");
-      };
-      reset();
-
-      shell.addEventListener("pointermove",e=>{
-        if(e.pointerType==="touch")return;
-        const rect=shell.getBoundingClientRect();
-        if(!rect.width||!rect.height)return;
-        const px=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
-        const py=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));
-        shell.style.setProperty("--live-rx",((.5-py)*5.5).toFixed(2)+"deg");
-        shell.style.setProperty("--live-ry",((px-.5)*7).toFixed(2)+"deg");
-        shell.style.setProperty("--live-x",((px-.5)*5).toFixed(2)+"px");
-        shell.style.setProperty("--live-y",((py-.5)*4).toFixed(2)+"px");
-        shell.style.setProperty("--live-light-x",(px*100).toFixed(1)+"%");
-        shell.style.setProperty("--live-light-y",(py*100).toFixed(1)+"%");
-      },{passive:true});
-      shell.addEventListener("pointerleave",reset,{passive:true});
-      shell.addEventListener("pointercancel",reset,{passive:true});
-    });
-  }
-
   function renderAll(){
     syncCardIndex();
     renderHeader();renderBase();renderLounge();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();renderMutationEvent();save();
-    requestAnimationFrame(()=>refreshLiveCardEffects());
   }
 
   function rollTargetsReady(){
@@ -5861,7 +5859,10 @@
       updateGradeTargetChance();
     });
     $("#closeReveal").addEventListener("click",closeReveal);$("#closeStandModal").addEventListener("click",closeStand);$("[data-close-modal]").addEventListener("click",closeStand);
-    $("#searchId").addEventListener("input",renderCollection);$("#sortCards").addEventListener("change",renderCollection);
+    $("#searchId").addEventListener("input",()=>{collectionPage=0;renderCollection()});
+    $("#sortCards").addEventListener("change",()=>{collectionPage=0;renderCollection()});
+    $("#collectionPrevBtn")?.addEventListener("click",()=>changeCollectionPage(-1));
+    $("#collectionNextBtn")?.addEventListener("click",()=>changeCollectionPage(1));
     $("#bulkSellModeBtn")?.addEventListener("click",()=>setCollectionSellMode(true));
     $("#bulkSellExitBtn")?.addEventListener("click",()=>setCollectionSellMode(false));
     $("#bulkSellClearBtn")?.addEventListener("click",()=>{collectionSellSelection.clear();renderCollection()});
