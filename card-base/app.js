@@ -2052,7 +2052,7 @@
   }
 
   async function loadCloudState(){
-    if(!gameToken||!supabaseClient)return;
+    if(!gameToken||!supabaseClient)return false;
     cloudLoading=true;cloudReady=false;updateSyncUi("syncing");
     const accountId=activeCloudAccountId();
 
@@ -2077,7 +2077,7 @@
           armCloudSave();
           updateSyncUi("error");
         }
-        return;
+        return false;
       }
       if(Number.isFinite(Number(recovery.revision)))cloudServerRevision=Math.max(0,Number(recovery.revision));
       if(recovery.state)state=hydrateState(recovery.state);
@@ -2093,7 +2093,7 @@
       cloudLoading=false;
       if(result.error==="invalid_session")invalidateGameSession();
       else updateSyncUi("error");
-      return;
+      return false;
     }
 
     if(Number.isFinite(Number(result.revision)))cloudServerRevision=Math.max(0,Number(result.revision));
@@ -2121,6 +2121,7 @@
       toast("🎁 ของขวัญเซิร์ฟเวอร์มาแล้ว! Singularity Pack ×1 + ⚡ Lv.100 Ticket ×1",true);
     }
     updateSyncUi("online");
+    return true;
   }
 
   async function activateGameSession(token,username,recoveryCode=null){
@@ -2136,8 +2137,20 @@
       return false;
     }
     persistCloudSession(me,token);
-    state=loadCloudLocalState(me.account_id)||newState();
-    await loadCloudState();
+    const cachedCloudState=loadCloudLocalState(me.account_id);
+    const stateBeforeCloudLoad=state;
+    if(cachedCloudState)state=cachedCloudState;
+    const loaded=await loadCloudState();
+    if(!loaded){
+      // Never expose a fresh Lv.1 state for an existing account just because
+      // a Cloud read failed. Keep the last usable local/cached state instead.
+      if(cachedCloudState)state=cachedCloudState;
+      else state=stateBeforeCloudLoad;
+      renderAll();
+      updateSyncUi("error");
+      setAuthMessage("เข้าสู่ระบบแล้ว แต่ยังโหลด Cloud Save ไม่สำเร็จ · ยังไม่เขียนทับเซฟบนเซิร์ฟเวอร์","error");
+      return false;
+    }
     await heartbeatOnline();
     if(recoveryCode)showRecoveryCode(recoveryCode);
     renderAuth();renderOnlineShell();
@@ -2163,8 +2176,8 @@
     if(gameToken){
       const me=await fetchMe();
       if(me){
-        await loadCloudState();
-        await heartbeatOnline();
+        const loaded=await loadCloudState();
+        if(loaded)await heartbeatOnline();
       }else if(navigator.onLine){
         invalidateGameSession();
       }
