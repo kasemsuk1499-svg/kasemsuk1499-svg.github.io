@@ -15,7 +15,7 @@
   const TRADE_NOTIFY_PREF_KEY = "card-base-trade-notify-enabled-v1";
   const TRADE_NOTIFIED_KEY_PREFIX = "card-base-trade-notified-v1:";
   const CARD_MIN_ID = 1;
-  const CARD_MAX_ID = 140;
+  const CARD_MAX_ID = 150;
   const CARD_NAMES = Object.freeze({
     1:"Rover",
     2:"Cartethyia",
@@ -156,7 +156,17 @@
     137:"Reiju",
     138:"Boa Hancock",
     139:"Uta",
-    140:"Yamato"
+    140:"Yamato",
+    141:"Sanji",
+    142:"God Enel",
+    143:"Malco",
+    144:"God Usop",
+    145:"Dofamingo",
+    146:"Zoro",
+    147:"Law",
+    148:"Mihock",
+    149:"Lufy",
+    150:"Gold.D.Roger"
   });
   const ROLL_MS = 2500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
@@ -287,7 +297,8 @@
     101: {name:"Oshi pack v1", image:"./assets/packs/105.png", priceSeconds:null},
     111: {name:"TokyoReven pack v1", image:"./assets/packs/111.png", priceSeconds:null},
     121: {name:"7K pack v1", image:"./assets/packs/124.png", priceSeconds:null},
-    131: {name:"Onepiece pack v1", image:"./assets/packs/132.png", priceSeconds:null}
+    131: {name:"Onepiece pack v1", image:"./assets/packs/132.png", priceSeconds:null},
+    141: {name:"Onepiece pack v2", image:"./assets/packs/149.png", priceSeconds:null}
   };
 
   const ROTATING_PACK_ARCHETYPES = [
