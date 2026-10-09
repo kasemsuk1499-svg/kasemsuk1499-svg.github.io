@@ -3,7 +3,7 @@
   window.CARD_CATALOG = Object.freeze({
     version: 1,
     minId: 1,
-    maxId: 160,
+    maxId: 170,
     imageBase: "../assets/cards/",
     names: Object.freeze({
     1:"Rover",
