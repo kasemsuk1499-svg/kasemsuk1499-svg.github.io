@@ -14,170 +14,10 @@
   const PARTICLES_PREF_KEY = "card-base-particles-enabled-v1";
   const TRADE_NOTIFY_PREF_KEY = "card-base-trade-notify-enabled-v1";
   const TRADE_NOTIFIED_KEY_PREFIX = "card-base-trade-notified-v1:";
-  const CARD_MIN_ID = 1;
-  const CARD_MAX_ID = 160;
-  const CARD_NAMES = Object.freeze({
-    1:"Rover",
-    2:"Cartethyia",
-    3:"Shorekeeper",
-    4:"Camellya",
-    5:"Phrolova",
-    6:"Hiyuki",
-    7:"Phoebe",
-    8:"Chisa",
-    9:"Qingxiao",
-    10:"Hsin",
-    11:"Alya",
-    12:"Masha",
-    13:"Ayano",
-    14:"Nonoa",
-    15:"Suou Yuki",
-    16:"Wedding Alya",
-    17:"Santies Masha",
-    18:"Nurse Ayano",
-    19:"Luxury Nonoa",
-    20:"Santies Yuki",
-    21:"Konan",
-    22:"Tsunade",
-    23:"Hinata",
-    24:"Kushina",
-    25:"Minato",
-    26:"Naruto",
-    27:"Itachi",
-    28:"Sazuke",
-    29:"Kaguya",
-    30:"Karin",
-    31:"Lord Logres",
-    32:"Ishtar",
-    33:"Enkidu",
-    34:"BB Dubai",
-    35:"Sesshōin Kiara",
-    36:"U-Olga Marie",
-    37:"Semiramis",
-    38:"Space Ishtar",
-    39:"Meltryllis",
-    40:"Demeter",
-    41:"Blaster Blade",
-    42:"Dragonic Overlord",
-    43:"Majesty lord Blaster",
-    44:"Blaster Dark",
-    45:"Tsukuyomi",
-    46:"Lucia",
-    47:"Blue Storm",
-    48:"Phantom Blaster Overlord",
-    49:"The Omega lord",
-    50:"Blaster Blade 'His Highness'",
-    51:"Gon",
-    52:"Killua",
-    53:"Hisoka",
-    54:"Kurapika",
-    55:"Machi",
-    56:"Klye",
-    57:"Netero",
-    58:"Neferpitou",
-    59:"Alluka",
-    60:"Shizuku",
-    61:"Rimuru",
-    62:"Luminous",
-    63:"Milim",
-    64:"Velgrynd",
-    65:"Velzard",
-    66:"Kuronoa",
-    67:"Hinata",
-    68:"Carrera",
-    69:"Sizu",
-    70:"Testarossa",
-    71:"Rudeus",
-    72:"Eris",
-    73:"Roxy",
-    74:"Sylphiette",
-    75:"Elinalise",
-    76:"Sara",
-    77:"Aisha",
-    78:"Nanahoshi",
-    79:"Pursena",
-    80:"Lara",
-    81:"Luafen",
-    82:"Lawine",
-    83:"Linie",
-    84:"Aura",
-    85:"Sense",
-    86:"Serie",
-    87:"Methode",
-    88:"Ubel",
-    89:"Fren",
-    90:"Frieren",
-    91:"Petra",
-    92:"Ymir",
-    93:"Hange",
-    94:"Sasha",
-    95:"Annie",
-    96:"Historia",
-    97:"CaCarla",
-    98:"Mikasa",
-    99:"Levi",
-    100:"Pieck",
-    101:"Aqua",
-    102:"Minami",
-    103:"Abiko",
-    104:"Akane",
-    105:"Ai",
-    106:"Frill",
-    107:"Kana",
-    108:"Ruby",
-    109:"Mem-cho",
-    110:"アド",
-    111:"Mikey",
-    112:"Ken Ryūgūji",
-    113:"Tetta Kisaki",
-    114:"Kazutora",
-    115:"Takemichi",
-    116:"Tachibana Hinata",
-    117:"Hakkai Shiba",
-    118:"Chifuyu",
-    119:"Baji Keisuke",
-    120:"Takashi Mitsuya",
-    121:"Fai",
-    122:"Juri",
-    123:"Rosie",
-    124:"Yeonhee",
-    125:"Eileene",
-    126:"Teo",
-    127:"Lu Bu",
-    128:"Rin",
-    129:"Shane",
-    130:"Rook",
-    131:"Nico Robin",
-    132:"Nami",
-    133:"Carrot",
-    134:"Perona",
-    135:"Belo Betty",
-    136:"Ulti",
-    137:"Reiju",
-    138:"Boa Hancock",
-    139:"Uta",
-    140:"Yamato",
-    141:"Sanji",
-    142:"God Enel",
-    143:"Malco",
-    144:"God Usop",
-    145:"Dofamingo",
-    146:"Zoro",
-    147:"Law",
-    148:"Mihock",
-    149:"Lufy",
-    150:"Gold.D.Roger",
-    151:"Iuno",
-    152:"Suisui",
-    153:"Augusta",
-    154:"Lucilla",
-    155:"Lupa",
-    156:"Lynae",
-    157:"Zani",
-    158:"Aemeath",
-    159:"Mornye",
-    160:"Jinshi"    
-  });
+  const CARD_CATALOG = window.CARD_CATALOG&&typeof window.CARD_CATALOG==="object"?window.CARD_CATALOG:{};
+  const CARD_MIN_ID = Math.max(1,Math.floor(Number(CARD_CATALOG.minId)||1));
+  const CARD_MAX_ID = Math.max(CARD_MIN_ID,Math.floor(Number(CARD_CATALOG.maxId)||160));
+  const CARD_NAMES = Object.freeze({...((CARD_CATALOG.names&&typeof CARD_CATALOG.names==="object")?CARD_CATALOG.names:{})});
   const ROLL_MS = 2500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KBWwFJ2v26lLH8UVoNIZ9Q_MtWguO29";
@@ -286,31 +126,8 @@
   // Flat bonus applied once to the final Mutation Inheritance success chance.
   const MUTATION_GRADE_INHERIT_BONUS = [0,.01,.02,.03,.05,.07,.09,.11,.13,.15,.17,.19,.21,.23];
 
-  // =========================================================
-  // ID PACK CUSTOMIZATION
-  // แก้ชื่อ/รูปแพ็กตรงนี้ได้เลย
-  // image: ใช้ path เช่น "./assets/packs/my-pack.png" หรือ URL รูปก็ได้
-  // เว้น image:"" = ใช้หน้าปกสำรองของเกม
-  // priceSeconds: ไม่ใส่ = ใช้ราคามาตรฐานตามลำดับแพ็ก
-  // =========================================================
-  const ID_PACK_CUSTOM = {
-    1:  {name:"WUWA pack v1", image:"./assets/packs/8.png", priceSeconds:null},
-    11: {name:"ARISA pack v1", image:"./assets/packs/16.png", priceSeconds:null},
-    21: {name:"NARUTO pack v1", image:"./assets/packs/27.png", priceSeconds:null},
-    31: {name:"FATE pack v1", image:"./assets/packs/31.png", priceSeconds:null},
-    41: {name:"VG pack v1", image:"./assets/packs/41.png", priceSeconds:null},
-    51:  {name:"HxH pack v1", image:"./assets/packs/60.png", priceSeconds:null},
-    61: {name:"Slime pack v1", image:"./assets/packs/62.png", priceSeconds:null},
-    71: {name:"Mushoku pack v1", image:"./assets/packs/77.png", priceSeconds:null},
-    81: {name:"Frieren pack v1", image:"./assets/packs/90.png", priceSeconds:null},
-    91: {name:"AOT pack v1", image:"./assets/packs/98.png", priceSeconds:null},
-    101: {name:"Oshi pack v1", image:"./assets/packs/105.png", priceSeconds:null},
-    111: {name:"TokyoReven pack v1", image:"./assets/packs/111.png", priceSeconds:null},
-    121: {name:"7K pack v1", image:"./assets/packs/124.png", priceSeconds:null},
-    131: {name:"Onepiece pack v1", image:"./assets/packs/132.png", priceSeconds:null},
-    141: {name:"Onepiece pack v2", image:"./assets/packs/149.png", priceSeconds:null},
-    151:  {name:"WUWA pack v2", image:"./assets/packs/159.png", priceSeconds:null}  
-  };
+  // ID Pack metadata lives in card-catalog.js so adding new card sets does not grow app.js.
+  const ID_PACK_CUSTOM = Object.freeze({...((CARD_CATALOG.idPacks&&typeof CARD_CATALOG.idPacks==="object")?CARD_CATALOG.idPacks:{})});
 
   const ROTATING_PACK_ARCHETYPES = [
     {
@@ -437,6 +254,8 @@
   let collectionSellRules = loadCollectionSellRules();
   const COLLECTION_PAGE_SIZE = 30;
   let collectionPage = 0;
+  const INDEX_PAGE_SIZE = 30;
+  let indexPage = 0;
   const ID_PACK_PAGE_SIZE = 10;
   let idPackPage = 0;
   let supabaseClient = null;
@@ -3968,7 +3787,7 @@
       el.dataset.cardUid=c.uid;
       el.innerHTML=
         '<div class="card-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'">'+
-          '<img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div>'+
+          '<img loading="lazy" decoding="async" src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div>'+
           '<div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+
           '<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+
             '<div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div>'+
@@ -4035,6 +3854,13 @@
     });
   }
 
+  function changeIndexPage(delta){
+    const next=indexPage+Number(delta||0);
+    indexPage=Math.max(0,next);
+    renderCardIndex();
+    document.querySelector("#panel-index .index-hero")?.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
   function renderCardIndex(){
     const wrap=$("#cardIndexGrid");if(!wrap)return;
     syncCardIndex();
@@ -4072,7 +3898,20 @@
     if(filter==="mutated")ids=ids.filter(id=>(state.cardIndex[id]?.mutations?.length||0)>0);
     if(filter==="owned")ids=ids.filter(id=>(ownedByChar.get(id)||[]).length>0);
 
-    wrap.innerHTML=ids.map(id=>{
+    const indexTotal=ids.length;
+    const indexPages=Math.max(1,Math.ceil(indexTotal/INDEX_PAGE_SIZE));
+    indexPage=Math.max(0,Math.min(indexPage,indexPages-1));
+    const indexStart=indexPage*INDEX_PAGE_SIZE;
+    const visibleIds=ids.slice(indexStart,indexStart+INDEX_PAGE_SIZE);
+    const pager=$("#cardIndexPager"),pageInfo=$("#cardIndexPageInfo"),prev=$("#cardIndexPrevBtn"),next=$("#cardIndexNextBtn");
+    if(pager)pager.hidden=indexTotal===0;
+    if(pageInfo)pageInfo.textContent=indexTotal
+      ?"หน้า "+(indexPage+1)+" / "+indexPages+" · "+(indexStart+1)+"–"+Math.min(indexTotal,indexStart+INDEX_PAGE_SIZE)+" จาก "+indexTotal+" ใบ"
+      :"ไม่มีการ์ด";
+    if(prev)prev.disabled=indexPage<=0;
+    if(next)next.disabled=indexPage>=indexPages-1;
+
+    wrap.innerHTML=visibleIds.map(id=>{
       const entry=state.cardIndex[id],owned=ownedByChar.get(id)||[];
       if(!entry){
         return '<article class="index-card locked">'+
@@ -4089,7 +3928,7 @@
       const t=TIERS[highestTier];
       return '<article class="index-card found tier-shell tier-'+highestTier+'" style="--tier:'+t.color+'">'+
         '<div class="index-art">'+
-          '<img src="'+imageFor(id)+'" alt="'+padId(id)+'">'+
+          '<img loading="lazy" decoding="async" src="'+imageFor(id)+'" alt="'+padId(id)+'">'+
           '<div class="tier-ring"></div>'+
           '<span class="index-best-grade '+gradeFxClass(entry.bestGrade||0)+'" style="--grade:'+bestGrade.color+'">'+bestGrade.name+'</span>'+
           '<span class="index-owned">'+owned.length+' ใบ</span>'+
@@ -5884,7 +5723,10 @@
       $(sel)?.addEventListener("change",()=>{readCollectionSellRulesFromUi()});
     });
     $("#bulkSellConfirmBtn")?.addEventListener("click",confirmCollectionBulkSell);
-    $("#indexSearch").addEventListener("input",renderCardIndex);$("#indexFilter").addEventListener("change",renderCardIndex);
+    $("#indexSearch").addEventListener("input",()=>{indexPage=0;renderCardIndex()});
+    $("#indexFilter").addEventListener("change",()=>{indexPage=0;renderCardIndex()});
+    $("#cardIndexPrevBtn")?.addEventListener("click",()=>changeIndexPage(-1));
+    $("#cardIndexNextBtn")?.addEventListener("click",()=>changeIndexPage(1));
     $("#rebirthBtn").addEventListener("click",doRebirth);
     $("#autoEquipBestBtn")?.addEventListener("click",autoEquipBest);
     $("#tierFilters").addEventListener("change",e=>{
