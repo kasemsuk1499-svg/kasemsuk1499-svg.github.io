@@ -287,7 +287,7 @@
     101: {name:"Oshi pack v1", image:"./assets/packs/105.png", priceSeconds:null},
     111: {name:"TokyoReven pack v1", image:"./assets/packs/111.png", priceSeconds:null},
     121: {name:"7K pack v1", image:"./assets/packs/124.png", priceSeconds:null},
-    131: {name:"One pice pack v1", image:"./assets/packs/131.png", priceSeconds:null}
+    131: {name:"One pice pack v1", image:"", priceSeconds:null}
   };
 
   const ROTATING_PACK_ARCHETYPES = [
@@ -1095,7 +1095,7 @@
     return name||("CARD "+padId(id));
   }
   function formatDuration(sec){const m=Math.floor(sec/60),s=Math.round(sec%60);return m?m+" นาที "+(s?s+" วิ":""):s+" วิ"}
-  function imageFor(id){return "../assets/cards/"+id+".png"}
+  function imageFor(id){return "../assets/cards/"+id+(Number(id)>=131?".webp":".png")}
   function romanNumeral(value){
     let n=Math.max(0,Math.floor(Number(value)||0));
     if(!n)return "";
