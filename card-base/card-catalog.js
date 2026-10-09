@@ -165,7 +165,17 @@
     157:"Zani",
     158:"Aemeath",
     159:"Mornye",
-    160:"Jinshi"    
+    160:"Jinshi",
+    161:"Dark Magician Girl",
+    162:"Dark Magician",
+    163:"Ultimate blue eyes white dragon",
+    164:"Stardust dragon",
+    165:"NEO Galaxy-eyes photon dragon",
+    166:"Number 39: Utopia",
+    167:"Elemental HERO Neos",
+    168:"Cyber dragon",
+    169:"Blue eyes white dragon",
+    170:"Horakhty the creator of light"      
     }),
     idPacks: Object.freeze({
     1:  {name:"WUWA pack v1", image:"./assets/packs/8.png", priceSeconds:null},
@@ -183,7 +193,8 @@
     121: {name:"7K pack v1", image:"./assets/packs/124.png", priceSeconds:null},
     131: {name:"Onepiece pack v1", image:"./assets/packs/132.png", priceSeconds:null},
     141: {name:"Onepiece pack v2", image:"./assets/packs/149.png", priceSeconds:null},
-    151:  {name:"WUWA pack v2", image:"./assets/packs/159.png", priceSeconds:null}  
+    151:  {name:"WUWA pack v2", image:"./assets/packs/159.png", priceSeconds:null},
+    161:  {name:"YugiOH pack v1", image:"./assets/packs/161.png", priceSeconds:null}      
     })
   });
 })();
