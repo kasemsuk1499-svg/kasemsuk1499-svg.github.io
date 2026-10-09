@@ -16,7 +16,7 @@
   const TRADE_NOTIFIED_KEY_PREFIX = "card-base-trade-notified-v1:";
   const CARD_CATALOG = window.CARD_CATALOG&&typeof window.CARD_CATALOG==="object"?window.CARD_CATALOG:{};
   const CARD_MIN_ID = Math.max(1,Math.floor(Number(CARD_CATALOG.minId)||1));
-  const CARD_MAX_ID = Math.max(CARD_MIN_ID,Math.floor(Number(CARD_CATALOG.maxId)||160));
+  const CARD_MAX_ID = Math.max(CARD_MIN_ID,Math.floor(Number(CARD_CATALOG.maxId)||170));
   const CARD_NAMES = Object.freeze({...((CARD_CATALOG.names&&typeof CARD_CATALOG.names==="object")?CARD_CATALOG.names:{})});
   const ROLL_MS = 2500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
