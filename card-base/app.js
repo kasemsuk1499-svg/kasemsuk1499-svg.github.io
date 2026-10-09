@@ -15,7 +15,7 @@
   const TRADE_NOTIFY_PREF_KEY = "card-base-trade-notify-enabled-v1";
   const TRADE_NOTIFIED_KEY_PREFIX = "card-base-trade-notified-v1:";
   const CARD_MIN_ID = 1;
-  const CARD_MAX_ID = 130;
+  const CARD_MAX_ID = 140;
   const CARD_NAMES = Object.freeze({
     1:"Rover",
     2:"Cartethyia",
@@ -146,7 +146,17 @@
     127:"Lu Bu",
     128:"Rin",
     129:"Shane",
-    130:"Rook"    
+    130:"Rook",
+    131:"Nico Robin",
+    132:"Nami",
+    133:"Carrot",
+    134:"Perona",
+    135:"Belo Betty",
+    136:"Ulti",
+    137:"Reiju",
+    138:"Boa Hancock",
+    139:"Uta",
+    140:"Yamato"
   });
   const ROLL_MS = 2500;
   const SUPABASE_URL = "https://qlaykelpabbjojpqjfwi.supabase.co";
@@ -276,7 +286,8 @@
     91: {name:"AOT pack v1", image:"./assets/packs/98.png", priceSeconds:null},
     101: {name:"Oshi pack v1", image:"./assets/packs/105.png", priceSeconds:null},
     111: {name:"TokyoReven pack v1", image:"./assets/packs/111.png", priceSeconds:null},
-    121: {name:"7K pack v1", image:"./assets/packs/124.png", priceSeconds:null}
+    121: {name:"7K pack v1", image:"./assets/packs/124.png", priceSeconds:null},
+    131: {name:"One pice pack v1", image:"./assets/packs/131.png", priceSeconds:null}
   };
 
   const ROTATING_PACK_ARCHETYPES = [
