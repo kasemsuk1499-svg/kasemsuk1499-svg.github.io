@@ -4628,9 +4628,50 @@
     loungeAmbientTimer=setTimeout(loungeAmbientEvent,9000+Math.random()*8000);
   }
 
+  function refreshLiveCardEffects(root=document){
+    const shells=(root||document).querySelectorAll?.(".tier-10")||[];
+    shells.forEach(shell=>{
+      const img=shell.querySelector("img");
+      if(!img)return;
+      const src=String(img.getAttribute("src")||"").split("?")[0];
+      if(!/(^|\\/)139\\.png$/.test(src))return;
+
+      shell.classList.add("live-card-uta-singularity");
+      if(shell.dataset.liveUtaBound==="1")return;
+      shell.dataset.liveUtaBound="1";
+
+      const reset=()=>{
+        shell.style.setProperty("--live-rx","0deg");
+        shell.style.setProperty("--live-ry","0deg");
+        shell.style.setProperty("--live-x","0px");
+        shell.style.setProperty("--live-y","0px");
+        shell.style.setProperty("--live-light-x","50%");
+        shell.style.setProperty("--live-light-y","35%");
+      };
+      reset();
+
+      shell.addEventListener("pointermove",e=>{
+        if(e.pointerType==="touch")return;
+        const rect=shell.getBoundingClientRect();
+        if(!rect.width||!rect.height)return;
+        const px=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+        const py=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));
+        shell.style.setProperty("--live-rx",((.5-py)*5.5).toFixed(2)+"deg");
+        shell.style.setProperty("--live-ry",((px-.5)*7).toFixed(2)+"deg");
+        shell.style.setProperty("--live-x",((px-.5)*5).toFixed(2)+"px");
+        shell.style.setProperty("--live-y",((py-.5)*4).toFixed(2)+"px");
+        shell.style.setProperty("--live-light-x",(px*100).toFixed(1)+"%");
+        shell.style.setProperty("--live-light-y",(py*100).toFixed(1)+"%");
+      },{passive:true});
+      shell.addEventListener("pointerleave",reset,{passive:true});
+      shell.addEventListener("pointercancel",reset,{passive:true});
+    });
+  }
+
   function renderAll(){
     syncCardIndex();
     renderHeader();renderBase();renderLounge();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();renderMutationEvent();save();
+    requestAnimationFrame(()=>refreshLiveCardEffects());
   }
 
   function rollTargetsReady(){
