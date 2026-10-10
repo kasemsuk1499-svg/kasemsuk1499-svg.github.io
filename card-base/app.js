@@ -231,7 +231,7 @@
     items:{level100Ticket:0},
     serverGiftClaims:{},
     rotatingShop:{rotationId:null,bought:{}},
-    ascension:{stars:0,cores:0,perks:{income:0,luck:0,forge:0}},
+    ascension:{stars:0,cores:0,perks:{income:0,luck:0,forge:0,power:0}},
     tower:{floor:1,best:0,shards:0},
     lounge:{initialized:false,selected:[],sound:true,theme:"night",music:{current:"",history:[]}}
   });
@@ -471,7 +471,8 @@
       perks:{
         income:Math.max(0,Math.min(ASCENSION_PERK_MAX,Math.floor(Number(rawPerks.income)||0))),
         luck:Math.max(0,Math.min(ASCENSION_PERK_MAX,Math.floor(Number(rawPerks.luck)||0))),
-        forge:Math.max(0,Math.min(ASCENSION_PERK_MAX,Math.floor(Number(rawPerks.forge)||0)))
+        forge:Math.max(0,Math.min(ASCENSION_PERK_MAX,Math.floor(Number(rawPerks.forge)||0))),
+        power:Math.max(0,Math.min(ASCENSION_PERK_MAX,Math.floor(Number(rawPerks.power)||0)))
       }
     };
     const rawTower=s.tower&&typeof s.tower==="object"?s.tower:{};
@@ -1021,6 +1022,9 @@
   }
   function forgeCostMultiplier(){
     return Math.pow(0.94,state.ascension?.perks?.forge||0);
+  }
+  function towerPowerMultiplier(){
+    return 1+((state.ascension?.perks?.power||0)*0.15);
   }
   function baseIncomeMultiplier(level=state.baseLevel){return 1+(Math.max(1,Number(level)||1)-1)*0.25}
   function economyScale(level=state.baseLevel){
@@ -4071,14 +4075,15 @@
     return state.placed.map(uid=>uid?state.cards.find(c=>c.uid===uid):null).filter(Boolean);
   }
   function towerPower(){
-    return Math.floor(towerCards().reduce((sum,c)=>{
+    const raw=towerCards().reduce((sum,c)=>{
       return sum+
         ((Number(c.tier)+1)*15)+
         ((Number(c.grade)+1)*4)+
         Math.floor((Number(c.level)||1)/10)+
         (cardMutationIds(c).length*18)+
         (awakeningStars(c)*60);
-    },0));
+    },0);
+    return Math.floor(raw*towerPowerMultiplier());
   }
   function towerRequirement(floor=state.tower.floor){
     const f=Math.max(1,Number(floor)||1);
@@ -4225,7 +4230,9 @@
     $("#perkIncomeRank").textContent=perks.income+"/"+ASCENSION_PERK_MAX;
     $("#perkLuckRank").textContent=perks.luck+"/"+ASCENSION_PERK_MAX;
     $("#perkForgeRank").textContent=perks.forge+"/"+ASCENSION_PERK_MAX;
-    $$("[data-asc-perk]").forEach(btn=>{
+    const powerRank=$("#perkPowerRank");if(powerRank)powerRank.textContent=perks.power+"/"+ASCENSION_PERK_MAX;
+    const powerMulti=$("#towerPowerMultiplier");if(powerMulti)powerMulti.textContent="×"+towerPowerMultiplier().toFixed(2);
+    $("[data-asc-perk]").forEach(btn=>{
       const key=btn.dataset.ascPerk;
       btn.disabled=cores<1||perks[key]>=ASCENSION_PERK_MAX;
     });
