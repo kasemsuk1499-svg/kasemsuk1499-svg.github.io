@@ -4151,43 +4151,46 @@
     }
     const coreBtn=$("#towerCoreBtn");if(coreBtn)coreBtn.disabled=(Number(state.tower?.shards)||0)<10;
   }
-  async function challengeTower(){
+  function challengeTower(){
     if(towerChallengeBusy)return;
     if((state.ascension?.stars||0)<1){toast("ปลด Endless Tower หลัง Ascension ครั้งแรก");return}
     const floor=state.tower.floor,need=towerRequirement(floor),power=towerPower(),cond=towerCondition(floor);
     if(power<need||!cond.ok){toast("ยังไม่ผ่าน Floor "+floor+" · ปั้นฐานให้แข็งแกร่งขึ้นก่อน");return}
 
-    state.tower.best=Math.max(state.tower.best,floor);
-    state.tower.shards++;
-    state.tower.floor++;
-    renderTowerStats();
-
-    if(!gameToken||!cloudReady){
-      const dropped=Math.random()<TOWER_LV100_TICKET_DROP_CHANCE;
-      if(dropped){
-        state.items.level100Ticket=(Number(state.items?.level100Ticket)||0)+1;
-        toast("⚡ JACKPOT! Floor "+floor+" ดรอป +100 Lv. Ticket ×1 💯",true);
-      }else{
-        toast("ผ่าน Endless Tower Floor "+floor+" · Shard +1 🏢",true);
-      }
-      renderAll();
-      return;
-    }
-
+    // The server rolls tickets once for every new best floor (unique account/floor).
+    // Do not hold the challenge button while waiting for a slow Cloud Save.
+    // A crash-safe local pending snapshot protects progress until cloud sync.
     towerChallengeBusy=true;
-    renderEndgame();
-    save();
+    let dropped=false;
+    let stored=false;
     try{
-      const result=await flushCloudSave({force:true});
-      if(!result.ok){
-        toast("ผ่าน Floor "+floor+" แล้ว · Shard +1 · Rare Drop จะเช็กตอน Cloud Sync รอบถัดไป");
-      }else if(!(Number(result.tower_tickets_dropped)>0)){
-        toast("ผ่าน Endless Tower Floor "+floor+" · Shard +1 🏢",true);
+      state.tower.best=Math.max(state.tower.best,floor);
+      state.tower.shards++;
+      state.tower.floor++;
+
+      // A signed-in player receives rare drops only from the server.
+      // Standalone local players keep the existing offline drop behavior.
+      if(!gameToken&&Math.random()<TOWER_LV100_TICKET_DROP_CHANCE){
+        state.items.level100Ticket=(Number(state.items?.level100Ticket)||0)+1;
+        dropped=true;
       }
+      save(); // Save locally immediately; Cloud sync is queued independently.
+      stored=true;
+    }catch(err){
+      console.error("Tower progress save failed",err);
+      toast("ผ่าน Floor "+floor+" แล้ว แต่บันทึกในเครื่องไม่สำเร็จ · กรุณาอย่าเพิ่งปิดเกม");
     }finally{
       towerChallengeBusy=false;
-      renderAll();
+      try{renderTowerStats()}catch(err){console.error("Tower stats render failed",err)}
     }
+    if(!stored)return;
+    if(dropped){
+      toast("⚡ JACKPOT! Floor "+floor+" ดรอป +100 Lv. Ticket ×1 💯",true);
+    }else{
+      toast("ผ่าน Endless Tower Floor "+floor+" · Shard +1"+(gameToken?" · Rare Drop ตรวจตอน Cloud Sync":" 🏢"),true);
+    }
+    // Avoid a heavyweight full re-render and second forced save on every floor.
+    // Ticket drops from Cloud sync are still handled by flushCloudSave().
   }
   function forgeTowerCore(){
     if(state.tower.shards<10){toast("ต้องใช้ Tower Shards 10 ชิ้น");return}
