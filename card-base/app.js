@@ -5001,7 +5001,7 @@
     el.classList.add(prefix+value);
   }
 
-  function refreshCardSurface(uid){
+  function refreshCardSurface(uid,options={}){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
     const g=GRADES[c.grade],t=TIERS[c.tier];
     const placed=state.placed.includes(c.uid);
@@ -5101,19 +5101,26 @@
       }
     }
 
-    // Only cheap global numbers need refreshing.
+    // Auto Grade may reroll every 450ms; the heavy Rebirth panel refreshes
+    // separately in economyTick once per second.
     renderHeader();
-    renderRebirth();
+    if(!options.lightweight)renderRebirth();
   }
 
-  function commitCardMicroUpdate(uid){
-    refreshCardSurface(uid);
+  function commitCardMicroUpdate(uid,options={}){
+    const lightweight=!!options.lightweight;
+    refreshCardSurface(uid,{lightweight});
     recordCardInIndex(state.cards.find(x=>x.uid===uid));
-    if($("#panel-index")?.classList.contains("active"))renderCardIndex();
-    // Recalculate immediately for active Tower screens when Level / Grade changes.
-    if($("#panel-rebirth")?.classList.contains("active"))renderTowerStats();
-    saveLocalOnly();
-    scheduleCloudSave();
+    if(!lightweight&&$("#panel-index")?.classList.contains("active"))renderCardIndex();
+    if(!lightweight&&$("#panel-rebirth")?.classList.contains("active"))renderTowerStats();
+    // Keep a crash-safe local save every ~2 seconds during background Grade
+    // rolls, then write the final result immediately when rolling ends.
+    const now=Date.now();
+    if(!lightweight||now-lastAutoGradeLocalSaveAt>=2000){
+      saveLocalOnly();
+      lastAutoGradeLocalSaveAt=now;
+    }
+    if(!lightweight)scheduleCloudSave();
   }
 
   function levelUp(uid,fromModal=false){
@@ -5570,6 +5577,7 @@
     closeGradeAuto();
     toast("เริ่ม Auto Grade → "+targetNames);
     save();
+    lastAutoGradeLocalSaveAt=Date.now();
     processGradeAuto();
   }
 
@@ -5618,7 +5626,7 @@
       job.nextAt+=GRADE_ROLL_MS;
     }
 
-    commitCardMicroUpdate(c.uid);
+    commitCardMicroUpdate(c.uid,{lightweight:!!state.gradeAuto});
 
     if(state.gradeAuto){
       const delay=Math.max(20,Math.min(250,state.gradeAuto.nextAt-Date.now()));
