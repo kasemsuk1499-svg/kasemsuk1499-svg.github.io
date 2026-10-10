@@ -4804,11 +4804,12 @@
     const body=$("#standModalBody");
     if(!c){renderPicker(body,activeStand);return}
     const t=TIERS[c.tier],g=GRADES[c.grade];
+    const tradeLocked=cardIsTradeLocked(c);
     body.innerHTML=
       '<div class="stand-detail" data-card-uid="'+c.uid+'"><div class="stand-detail-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" data-awakening="'+awakeningStars(c)+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+awakeningBadge(c)+'<div class="card-face-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="card-face-meta-row card-face-meta-top"><span class="card-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</span><span class="tier-card-name">'+t.name+'</span></div><div class="card-face-meta-row card-face-meta-bottom"><span class="card-id-level"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-dot"> · </span>Lv.<b data-modal-face-stat="level">'+c.level+'</b></span><strong data-modal-face-stat="income" class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></div></div></div>'+
       '<div class="stand-detail-info"><div class="stand-character-heading"><strong>'+escapeHtml(cardName(c.charId))+'</strong><span>'+padId(c.charId)+' · '+escapeHtml(t.name)+'</span></div><div><div class="eyebrow">INCOME</div><div data-modal-stat="income" class="big-income tier-card-income tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'">'+fmt(cardIncome(c))+'/s</div></div>'+
       '<div class="card-stats"><div><span>Level</span><b data-modal-stat="level">'+c.level+'</b></div><div><span>Grade</span><b data-modal-stat="grade">'+g.name+' ×'+g.multi.toFixed(2)+'</b></div><div><span>ID Income Bonus</span><b>'+charIncomeBonusText(c.charId)+'</b></div><div><span>Mutation</span><b>'+escapeHtml(mutationNames(c))+' · '+cardMutationIds(c).length+'/2 · Income ×'+mutationIncomeMultiplier(c).toFixed(2)+'</b></div><div><span>อัป Level</span><b data-modal-stat="upgrade">'+fmt(upgradeCost(c))+'</b></div><div><span>สุ่ม Grade</span><b data-modal-stat="grade-cost">'+fmt(rerollCost(c))+'</b></div><div><span>Mutation Slots</span><b>'+cardMutationIds(c).length+'/2 · First Open / Event / Inheritance</b></div><div><span>Grade → Mutation</span><b data-modal-stat="mutation-grade">'+mutationGradeBenefitText(c)+'</b></div><div><span>Awaken</span><b>★'+awakeningStars(c)+' · Income ×'+awakeningMultiplier(c).toFixed(2)+' · Next Lv.'+awakeningRequiredLevel(c)+'</b></div></div>'+
-      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button class="level100-ticket-btn" data-modal-a="level100-ticket" '+(c.level>=10000000||!(state.items?.level100Ticket>0)?"disabled":"")+'>⚡ +100 Lv. Ticket'+(state.items?.level100Ticket>0?" ×"+state.items.level100Ticket:"")+'</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button class="mutation-inherit-btn" data-modal-a="mutation-lab" '+(cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด Mutation")+'</button><button class="mutation-cleanse-btn" data-modal-a="mutation-cleanse" '+(!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button><button data-modal-a="change">เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove">ถอดจากแท่น</button></div></div></div>';
+      '<div class="stand-actions"><button data-modal-a="level">อัป Level</button><button class="level100-ticket-btn" data-modal-a="level100-ticket" '+(c.level>=10000000||!(state.items?.level100Ticket>0)?"disabled":"")+'>⚡ +100 Lv. Ticket'+(state.items?.level100Ticket>0?" ×"+state.items.level100Ticket:"")+'</button><button data-modal-a="grade">สุ่ม Grade</button><button class="'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"grade-running":"")+'" data-modal-a="grade-auto">'+(state.gradeAuto&&state.gradeAuto.uid===c.uid?"Auto Grade…":"Auto Grade")+'</button><button class="awaken-action" data-modal-a="awaken" '+(!canAwaken(c)?"disabled":"")+'>✦ Awaken ★'+(awakeningStars(c)+1)+'</button><button class="mutation-inherit-btn" data-modal-a="mutation-lab" '+(cardMutationIds(c).length>=2?"disabled":"")+'>🧬 '+(cardMutationIds(c).length>=2?"Mutation เต็ม":"สืบทอด Mutation")+'</button><button class="mutation-cleanse-btn" data-modal-a="mutation-cleanse" '+(!cardMutationIds(c).length?"disabled":"")+'>🧹 ล้าง Mutation</button><button data-modal-a="change" '+(tradeLocked?"disabled":"")+'>เปลี่ยนการ์ด</button><button class="remove" data-modal-a="remove" '+(tradeLocked?"disabled":"")+'>ถอดจากแท่น</button></div></div></div>';
     const img=body.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
     body.querySelector('[data-modal-a="level"]').addEventListener("click",()=>{levelUp(c.uid,true)});
     body.querySelector('[data-modal-a="level100-ticket"]')?.addEventListener("click",()=>{useLevel100Ticket(c.uid)});
@@ -4817,24 +4818,96 @@
     body.querySelector('[data-modal-a="awaken"]').addEventListener("click",()=>{awakenCard(c.uid)});
     body.querySelector('[data-modal-a="mutation-lab"]')?.addEventListener("click",()=>{openMutationLab(c.uid)});
     body.querySelector('[data-modal-a="mutation-cleanse"]')?.addEventListener("click",()=>{openMutationCleanse(c.uid)});
-    body.querySelector('[data-modal-a="remove"]').addEventListener("click",()=>{state.placed[activeStand]=null;toast("ถอดการ์ดจากแท่นแล้ว");renderAll();renderStandModal()});
-    body.querySelector('[data-modal-a="change"]').addEventListener("click",()=>renderPicker(body,activeStand,c.uid));
+    body.querySelector('[data-modal-a="remove"]').addEventListener("click",()=>{
+      const live=state.cards.find(x=>x.uid===state.placed[activeStand]);
+      if(cardIsTradeLocked(live)){toast("การ์ดติด Trade Lock · ไม่สามารถถอดได้");return}
+      state.placed[activeStand]=null;
+      toast("ถอดการ์ดจากแท่นแล้ว");renderAll();renderStandModal();
+    });
+    body.querySelector('[data-modal-a="change"]').addEventListener("click",()=>{
+      const live=state.cards.find(x=>x.uid===state.placed[activeStand]);
+      if(cardIsTradeLocked(live)){toast("การ์ดติด Trade Lock · ไม่สามารถเปลี่ยนได้");return}
+      renderPicker(body,activeStand,c.uid);
+    });
   }
 
   function renderPicker(body,slot,currentUid=null){
+    normalizeSlots();
+    if(!Number.isInteger(slot)||slot<0||slot>=state.placed.length){
+      body.textContent="แท่นนี้ยังไม่ปลดล็อก";return;
+    }
+    const occupiedUid=state.placed[slot];
+    const occupiedCard=occupiedUid?state.cards.find(c=>c.uid===occupiedUid):null;
+    if(cardIsTradeLocked(occupiedCard)){
+      body.innerHTML='<p class="picker-note">🔒 การ์ดในแท่นนี้ติด Trade Lock · ไม่สามารถเปลี่ยนได้จนกว่า Trade จะสิ้นสุด</p>';
+      return;
+    }
     const used=new Set(state.placed.filter(Boolean));
-    if(currentUid)used.delete(currentUid);
-    const choices=state.cards.filter(c=>!used.has(c.uid)).sort((a,b)=>cardIncome(b)-cardIncome(a));
-    body.innerHTML='<p class="picker-note">'+(choices.length?'เลือกการ์ดจากคลังเพื่อวางที่แท่นนี้':'ยังไม่มีการ์ดว่างในคลัง')+'</p><div class="picker-grid"></div>';
+    if(currentUid===occupiedUid)used.delete(currentUid);
+    // Trade-locked cards cannot move between base slots or enter a new slot.
+    const choices=state.cards
+      .filter(c=>!used.has(c.uid)&&!cardIsTradeLocked(c))
+      .sort((a,b)=>cardIncome(b)-cardIncome(a)||b.tier-a.tier||a.uid-b.uid);
+    const pageSize=24;
+    let page=0;
+    body.innerHTML='<p class="picker-note">'+(choices.length?'เลือกการ์ดจากคลังเพื่อวางที่แท่นนี้':'ยังไม่มีการ์ดว่างในคลัง')+'</p>'+
+      '<div class="picker-tools"><input class="picker-search" type="search" maxlength="64" autocomplete="off" placeholder="ค้นหาชื่อ, ID, Grade หรือ Tier" aria-label="ค้นหาการ์ดลงฐาน"></div>'+
+      '<div class="picker-grid"></div>'+
+      '<div class="picker-pager" hidden><button type="button" class="picker-page-prev">‹ ก่อนหน้า</button><span class="picker-page-info" aria-live="polite"></span><button type="button" class="picker-page-next">ถัดไป ›</button></div>';
     const grid=body.querySelector(".picker-grid");
-    choices.forEach(c=>{
-      const t=TIERS[c.tier],g=GRADES[c.grade],btn=document.createElement("button");
-      btn.type="button";btn.className="picker-card";
-      btn.innerHTML='<div class="picker-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'</div><div class="picker-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="picker-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</div><b class="picker-id-tier"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-card-name">'+t.name+'</span></b><span class="picker-stat-line">Lv.'+c.level+' · '+g.name+' · <strong class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></span></div>';
-      const img=btn.querySelector("img");if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
-      btn.addEventListener("click",()=>{state.placed[slot]=c.uid;toast("วาง "+padId(c.charId)+" ที่แท่น "+(slot+1));renderAll();renderStandModal()});
-      grid.appendChild(btn);
-    });
+    const input=body.querySelector(".picker-search");
+    const pager=body.querySelector(".picker-pager");
+    const pageInfo=body.querySelector(".picker-page-info");
+    const prev=body.querySelector(".picker-page-prev");
+    const next=body.querySelector(".picker-page-next");
+
+    function renderPage(){
+      const query=input.value.trim().toLowerCase().replace(/^#/,"");
+      const matching=query?choices.filter(c=>
+        String(c.charId).includes(query)||
+        cardName(c.charId).toLowerCase().includes(query)||
+        GRADES[c.grade]?.name.toLowerCase().includes(query)||
+        TIERS[c.tier]?.name.toLowerCase().includes(query)
+      ):choices;
+      const pages=Math.max(1,Math.ceil(matching.length/pageSize));
+      page=Math.max(0,Math.min(page,pages-1));
+      const visible=matching.slice(page*pageSize,(page+1)*pageSize);
+      const fragment=document.createDocumentFragment();
+      visible.forEach(c=>{
+        const t=TIERS[c.tier],g=GRADES[c.grade],btn=document.createElement("button");
+        btn.type="button";btn.className="picker-card";
+        btn.innerHTML='<div class="picker-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img loading="lazy" decoding="async" src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'</div><div class="picker-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="picker-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</div><b class="picker-id-tier"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-card-name">'+t.name+'</span></b><span class="picker-stat-line">Lv.'+c.level+' · '+g.name+' · <strong class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></span></div>';
+        const img=btn.querySelector("img");
+        if(img)img.addEventListener("error",e=>e.currentTarget.style.display="none");
+        btn.addEventListener("click",()=>{
+          const now=state.placed[slot];
+          const occupying=now?state.cards.find(card=>card.uid===now):null;
+          if(cardIsTradeLocked(occupying)||cardIsTradeLocked(c)){
+            toast("การ์ดติด Trade Lock · ไม่สามารถย้ายได้");return;
+          }
+          if(state.placed.includes(c.uid)&&now!==c.uid){
+            toast("การ์ดนี้วางในแท่นอื่นแล้ว");return;
+          }
+          state.placed[slot]=c.uid;
+          toast("วาง "+padId(c.charId)+" ที่แท่น "+(slot+1));
+          renderAll();
+          renderStandModal();
+        });
+        fragment.appendChild(btn);
+      });
+      grid.replaceChildren(fragment);
+      if(!visible.length){
+        grid.innerHTML='<p class="picker-note">ไม่พบการ์ดตามคำค้นหา</p>';
+      }
+      pager.hidden=matching.length<=pageSize;
+      pageInfo.textContent=matching.length?'หน้า '+(page+1)+' / '+pages+' · '+matching.length+' ใบ':'ไม่มีการ์ด';
+      prev.disabled=page<=0;
+      next.disabled=page>=pages-1;
+    }
+    input.addEventListener("input",()=>{page=0;renderPage()});
+    prev.addEventListener("click",()=>{page--;renderPage()});
+    next.addEventListener("click",()=>{page++;renderPage()});
+    renderPage();
   }
 
   function togglePlace(uid){
