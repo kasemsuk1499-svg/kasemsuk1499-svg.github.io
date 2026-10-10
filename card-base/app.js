@@ -5550,6 +5550,8 @@
     const start=$("#startGradeAutoBtn"),stop=$("#stopGradeAutoBtn");
     if(start)start.hidden=!!job;
     if(stop)stop.hidden=!job;
+    const liveStop=$("#gradeAutoLiveStop");
+    if(liveStop)liveStop.hidden=!job;
     document.querySelectorAll('#gradeTargetList input[data-grade-target]').forEach(input=>input.disabled=!!job);
     const high=$("#gradeSelectHighBtn"),clear=$("#gradeClearTargetsBtn");
     if(high)high.disabled=!!job;
@@ -5927,6 +5929,7 @@
     $("#mutationCleanseConfirm").addEventListener("click",performMutationCleanse);
     $("#closeGradeAutoModal").addEventListener("click",closeGradeAuto);$("[data-close-grade-auto]").addEventListener("click",closeGradeAuto);
     $("#startGradeAutoBtn").addEventListener("click",startGradeAuto);$("#stopGradeAutoBtn").addEventListener("click",()=>stopGradeAuto());
+    $("#gradeAutoLiveStop")?.addEventListener("click",()=>stopGradeAuto());
     $("#gradeTargetList").addEventListener("change",updateGradeTargetChance);
     $("#gradeSelectHighBtn").addEventListener("click",()=>{
       document.querySelectorAll('#gradeTargetList input[data-grade-target]').forEach(input=>{
