@@ -7086,3 +7086,59 @@ body.collection-selling #panel-collection{
   .picker-pager{position:static;background:#101722}
   .picker-page-info{font-size:10px}
 }
+
+/* Keep the current Grade clearly visible throughout an Auto Grade roll. */
+.grade-auto-live{
+  position:sticky;
+  top:-18px;
+  z-index:5;
+  display:grid;
+  justify-items:center;
+  gap:5px;
+  margin:10px 0 12px;
+  padding:11px 12px;
+  border:1px solid #424b63;
+  border-radius:13px;
+  background:linear-gradient(145deg,#12192a,#0a101a);
+  box-shadow:0 12px 24px rgba(0,0,0,.3);
+  text-align:center;
+}
+.grade-auto-live[data-running="true"]{
+  border-color:#7a8ffe;
+  box-shadow:0 0 17px rgba(110,124,255,.15),0 12px 25px rgba(0,0,0,.28);
+}
+.grade-auto-live-status{
+  font-size:11px;
+  font-weight:850;
+  color:#b9c6de;
+}
+.grade-auto-live-grade{
+  min-width:100px;
+  font-size:30px;
+  font-weight:1000;
+  letter-spacing:.06em;
+  color:var(--grade,#fff);
+  text-shadow:0 0 18px color-mix(in srgb,var(--grade,#fff) 38%,transparent);
+}
+.grade-auto-live-count,.grade-auto-live-money{color:#aeb9ce;font-size:11px}
+.grade-auto-live-grade.grade-flash{animation:gradeAutoReelFlash .24s ease-out both}
+@keyframes gradeAutoReelFlash{
+  from{transform:scale(1.12);filter:brightness(1.8)}
+  to{transform:scale(1);filter:brightness(1)}
+}
+.grade-auto-live-stop{
+  margin-top:5px;
+  min-height:38px;
+  min-width:160px;
+  padding:7px 15px;
+  border-radius:10px;
+  border:1px solid #df8b8b;
+  background:#312025;
+  color:#ffe3e3;
+  font-weight:900;
+}
+.grade-auto-live-stop[hidden]{display:none!important}
+.grade-target-option:has(input:disabled){opacity:.55;cursor:default}
+@media (prefers-reduced-motion:reduce){
+  .grade-auto-live-grade.grade-flash{animation:none}
+}
