@@ -249,6 +249,7 @@
   let lastAutoGradeLocalSaveAt = 0;
   let pickerObserver = null;
   let gradeAutoSetupUid = null;
+  let gradeAutoDisplay = {uid:null,rolls:0,status:"พร้อมเริ่มสุ่ม"};
   let mutationLabTargetUid = null;
   let mutationCleanseTargetUid = null;
   let collectionSellMode = false;
@@ -5501,6 +5502,43 @@
     if(gameToken)void publishPublicBase();
   }
 
+  // Show every Auto Grade outcome immediately; do not require a heavy
+  // collection render or a specific collection page to see the grade change.
+  function renderGradeAutoLive(uid){
+    const modal=$("#gradeAutoModal");
+    if(!modal?.classList.contains("show")||gradeAutoSetupUid!==uid)return;
+    const c=state.cards.find(card=>card.uid===uid);
+    if(!c)return;
+    const g=GRADES[c.grade];
+    const job=state.gradeAuto?.uid===uid?state.gradeAuto:null;
+    const live=$("#gradeAutoLive"),grade=$("#gradeAutoLiveGrade");
+    if(live)live.dataset.running=job?"true":"false";
+    if(grade){
+      grade.className="grade-auto-live-grade "+gradeFxClass(c.grade);
+      grade.style.setProperty("--grade",g.color);
+      grade.textContent=g.name;
+      // Restart a short flash on each new roll, including repeat grade results.
+      grade.classList.remove("grade-flash");
+      void grade.offsetWidth;
+      grade.classList.add("grade-flash");
+    }
+    const info=$("#gradeAutoCurrentInfo");
+    if(info)info.textContent="Grade ปัจจุบัน "+g.name+" · "+fmt(rerollCost(c))+" ต่อครั้ง";
+    const status=$("#gradeAutoLiveStatus");
+    if(status)status.textContent=job?"● กำลังสุ่ม Grade...":
+      (gradeAutoDisplay.uid===uid?gradeAutoDisplay.status:"พร้อมเริ่มสุ่ม");
+    const count=$("#gradeAutoLiveCount");
+    if(count)count.textContent="สุ่มไป "+(gradeAutoDisplay.uid===uid?gradeAutoDisplay.rolls:0)+" ครั้ง";
+    const money=$("#gradeAutoLiveMoney");
+    if(money)money.textContent="เงินคงเหลือ "+fmt(state.money);
+    const start=$("#startGradeAutoBtn"),stop=$("#stopGradeAutoBtn");
+    if(start)start.hidden=!!job;
+    if(stop)stop.hidden=!job;
+    document.querySelectorAll('#gradeTargetList input[data-grade-target]').forEach(input=>input.disabled=!!job);
+    const high=$("#gradeSelectHighBtn"),clear=$("#gradeClearTargetsBtn");
+    if(high)high.disabled=!!job;
+    if(clear)clear.disabled=!!job;
+  }
   function openGradeAuto(uid){
     const c=state.cards.find(x=>x.uid===uid);if(!c)return;
     if(cardIsTradeLocked(c)){toast("การ์ดนี้ถูกล็อกไว้ใน Trade");return}
@@ -5511,7 +5549,7 @@
     gradeAutoSetupUid=uid;
     const g=GRADES[c.grade],gradeBoost=gradeAscensionBonus(),gradeBoostPct=Math.round(gradeBoost*100);
     $("#gradeAutoCardInfo").innerHTML='<strong>'+padId(c.charId)+' · '+TIERS[c.tier].name+'</strong>'+
-      '<span>Grade ปัจจุบัน '+g.name+' · '+fmt(rerollCost(c))+' ต่อครั้ง</span>'+
+      '<span id="gradeAutoCurrentInfo">Grade ปัจจุบัน '+g.name+' · '+fmt(rerollCost(c))+' ต่อครั้ง</span>'+
       '<span>Ascension Grade Fortune +'+gradeBoostPct+'% · SSS–Ω Weight ×'+(1+gradeBoost).toFixed(2)+'</span>';
 
     const activeTargets=state.gradeAuto&&state.gradeAuto.uid===uid&&Array.isArray(state.gradeAuto.targets)
@@ -5533,6 +5571,7 @@
     $("#stopGradeAutoBtn").hidden=!state.gradeAuto;
     $("#gradeAutoModal").classList.add("show");
     $("#gradeAutoModal").setAttribute("aria-hidden","false");
+    renderGradeAutoLive(uid);
   }
 
   function closeGradeAuto(){
@@ -5574,7 +5613,11 @@
     );
     if(!ok)return;
     state.gradeAuto={uid:c.uid,targets:[...new Set(targets)],nextAt:Date.now(),startedAt:Date.now()};
-    closeGradeAuto();
+    gradeAutoDisplay={uid:c.uid,rolls:0,status:"กำลังสุ่ม Grade..."};
+    // Keep the modal open so the grade visibly changes with each reroll.
+    renderGradeAutoLive(c.uid);
+    const card=$("#gradeAutoModal .modal-card");
+    if(card)card.scrollTop=0;
     toast("เริ่ม Auto Grade → "+targetNames);
     save();
     lastAutoGradeLocalSaveAt=Date.now();
@@ -5586,8 +5629,10 @@
     const uid=state.gradeAuto.uid;
     state.gradeAuto=null;
     clearTimeout(gradeTimer);
+    gradeAutoDisplay={...gradeAutoDisplay,uid,status:message};
     toast(message);
     commitCardMicroUpdate(uid);
+    renderGradeAutoLive(uid);
   }
 
   function processGradeAuto(){
@@ -5612,14 +5657,17 @@
       if(state.money<cost){
         const latest=GRADES[c.grade].name;
         state.gradeAuto=null;
+        gradeAutoDisplay={...gradeAutoDisplay,uid:c.uid,status:"เงินไม่พอ · หยุดที่ "+latest};
         toast("เงินไม่พอ · Auto Grade หยุดที่ "+latest);
         break;
       }
       state.money-=cost;
       c.grade=randomGrade();
       loops++;
+      if(gradeAutoDisplay.uid===c.uid)gradeAutoDisplay.rolls++;
       if(targets.includes(c.grade)){
         state.gradeAuto=null;
+        gradeAutoDisplay={...gradeAutoDisplay,uid:c.uid,status:"สำเร็จ! ได้ Grade "+GRADES[c.grade].name+" ✨"};
         toast("Auto Grade สำเร็จ: "+GRADES[c.grade].name+" ✨",true);
         break;
       }
@@ -5627,6 +5675,7 @@
     }
 
     commitCardMicroUpdate(c.uid,{lightweight:!!state.gradeAuto});
+    renderGradeAutoLive(c.uid);
 
     if(state.gradeAuto){
       const delay=Math.max(20,Math.min(250,state.gradeAuto.nextAt-Date.now()));
