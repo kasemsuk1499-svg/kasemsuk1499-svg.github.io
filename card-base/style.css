@@ -7030,3 +7030,58 @@ body.collection-selling #panel-collection{
     width:100%;
   }
 }
+
+/* Base picker pagination: keep large inventories fast on mobile. */
+.picker-tools{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:10px 0 12px;
+}
+.picker-search{
+  width:100%;
+  min-width:0;
+  background:#0b1019;
+  border:1px solid #384058;
+  border-radius:12px;
+  color:#f0f5ff;
+}
+.picker-search:focus{
+  outline:2px solid #756dfa;
+  outline-offset:1px;
+}
+.picker-pager{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+  padding:9px;
+  border:1px solid #30394d;
+  border-radius:12px;
+  background:#101722;
+}
+.picker-pager[hidden]{display:none!important}
+.picker-pager button{
+  min-height:38px;
+  border:1px solid #444d62;
+  border-radius:10px;
+  background:#1b2333;
+  color:#f4f5ff;
+  font-weight:800;
+  cursor:pointer;
+}
+.picker-pager button:disabled{opacity:.35;cursor:default}
+.picker-page-info{
+  min-width:0;
+  color:#afb9cc;
+  font-size:11px;
+  text-align:center;
+  white-space:nowrap;
+}
+@media (max-width:560px){
+  .picker-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .picker-card{min-width:0}
+  .picker-pager{position:sticky;bottom:0;z-index:3;background:#101722}
+  .picker-page-info{font-size:10px}
+}
