@@ -246,6 +246,8 @@
   let rollFrame = 0;
   let autoTimer = 0;
   let gradeTimer = 0;
+  let lastAutoGradeLocalSaveAt = 0;
+  let pickerObserver = null;
   let gradeAutoSetupUid = null;
   let mutationLabTargetUid = null;
   let mutationCleanseTargetUid = null;
@@ -4794,7 +4796,10 @@
   function openStand(slot){
     activeStand=slot;$("#standModal").classList.add("show");$("#standModal").setAttribute("aria-hidden","false");renderStandModal();
   }
-  function closeStand(){activeStand=null;$("#standModal").classList.remove("show");$("#standModal").setAttribute("aria-hidden","true")}
+  function closeStand(){
+    pickerObserver?.disconnect();pickerObserver=null;
+    activeStand=null;$("#standModal").classList.remove("show");$("#standModal").setAttribute("aria-hidden","true");
+  }
 
   function renderStandModal(){
     if(activeStand===null)return;
@@ -4832,6 +4837,7 @@
   }
 
   function renderPicker(body,slot,currentUid=null){
+    pickerObserver?.disconnect();pickerObserver=null;
     normalizeSlots();
     if(!Number.isInteger(slot)||slot<0||slot>=state.placed.length){
       body.textContent="แท่นนี้ยังไม่ปลดล็อก";return;
@@ -4844,36 +4850,27 @@
     }
     const used=new Set(state.placed.filter(Boolean));
     if(currentUid===occupiedUid)used.delete(currentUid);
-    // Trade-locked cards cannot move between base slots or enter a new slot.
     const choices=state.cards
       .filter(c=>!used.has(c.uid)&&!cardIsTradeLocked(c))
       .sort((a,b)=>cardIncome(b)-cardIncome(a)||b.tier-a.tier||a.uid-b.uid);
-    const pageSize=24;
-    let page=0;
-    body.innerHTML='<p class="picker-note">'+(choices.length?'เลือกการ์ดจากคลังเพื่อวางที่แท่นนี้':'ยังไม่มีการ์ดว่างในคลัง')+'</p>'+
+    const batchSize=30;
+    let visibleCount=0;
+    let filtered=choices;
+    body.innerHTML='<p class="picker-note">'+(choices.length?'เลื่อนดูการ์ดได้ต่อเนื่องเหมือนเดิม · เรียงรายได้สูงสุดก่อน':'ยังไม่มีการ์ดว่างในคลัง')+'</p>'+
       '<div class="picker-tools"><input class="picker-search" type="search" maxlength="64" autocomplete="off" placeholder="ค้นหาชื่อ, ID, Grade หรือ Tier" aria-label="ค้นหาการ์ดลงฐาน"></div>'+
       '<div class="picker-grid"></div>'+
-      '<div class="picker-pager" hidden><button type="button" class="picker-page-prev">‹ ก่อนหน้า</button><span class="picker-page-info" aria-live="polite"></span><button type="button" class="picker-page-next">ถัดไป ›</button></div>';
+      '<div class="picker-pager"><button type="button" class="picker-load-more">โหลดการ์ดเพิ่มเติม ↓</button><span class="picker-page-info" aria-live="polite"></span></div>';
     const grid=body.querySelector(".picker-grid");
     const input=body.querySelector(".picker-search");
     const pager=body.querySelector(".picker-pager");
     const pageInfo=body.querySelector(".picker-page-info");
-    const prev=body.querySelector(".picker-page-prev");
-    const next=body.querySelector(".picker-page-next");
+    const more=body.querySelector(".picker-load-more");
 
-    function renderPage(){
-      const query=input.value.trim().toLowerCase().replace(/^#/,"");
-      const matching=query?choices.filter(c=>
-        String(c.charId).includes(query)||
-        cardName(c.charId).toLowerCase().includes(query)||
-        GRADES[c.grade]?.name.toLowerCase().includes(query)||
-        TIERS[c.tier]?.name.toLowerCase().includes(query)
-      ):choices;
-      const pages=Math.max(1,Math.ceil(matching.length/pageSize));
-      page=Math.max(0,Math.min(page,pages-1));
-      const visible=matching.slice(page*pageSize,(page+1)*pageSize);
+    function appendCards(){
+      if(visibleCount>=filtered.length)return;
+      const batch=filtered.slice(visibleCount,visibleCount+batchSize);
       const fragment=document.createDocumentFragment();
-      visible.forEach(c=>{
+      batch.forEach(c=>{
         const t=TIERS[c.tier],g=GRADES[c.grade],btn=document.createElement("button");
         btn.type="button";btn.className="picker-card";
         btn.innerHTML='<div class="picker-art '+tierFxClass(c.tier)+cardMutationFxClass(c)+' grade-shell-'+c.grade+'" style="'+tierStyle(c.tier)+';'+cardMutationStyle(c)+'"><img loading="lazy" decoding="async" src="'+imageFor(c.charId)+'" alt="'+escapeHtml(cardName(c.charId))+' '+padId(c.charId)+'"><div class="tier-ring"></div><div class="card-grade '+gradeFxClass(c.grade)+'" style="--grade:'+g.color+'">'+g.name+'</div>'+mutationBadge(c)+'</div><div class="picker-meta tier-copy tier-'+c.tier+'" style="--tier:'+t.color+'"><div class="picker-character-name" title="'+escapeHtml(cardName(c.charId))+'">'+escapeHtml(cardName(c.charId))+'</div><b class="picker-id-tier"><span class="tier-card-id">'+padId(c.charId)+'</span><span class="tier-card-name">'+t.name+'</span></b><span class="picker-stat-line">Lv.'+c.level+' · '+g.name+' · <strong class="tier-card-income">'+fmt(cardIncome(c))+'/s</strong></span></div>';
@@ -4888,6 +4885,7 @@
           if(state.placed.includes(c.uid)&&now!==c.uid){
             toast("การ์ดนี้วางในแท่นอื่นแล้ว");return;
           }
+          pickerObserver?.disconnect();pickerObserver=null;
           state.placed[slot]=c.uid;
           toast("วาง "+padId(c.charId)+" ที่แท่น "+(slot+1));
           renderAll();
@@ -4895,19 +4893,41 @@
         });
         fragment.appendChild(btn);
       });
-      grid.replaceChildren(fragment);
-      if(!visible.length){
-        grid.innerHTML='<p class="picker-note">ไม่พบการ์ดตามคำค้นหา</p>';
-      }
-      pager.hidden=matching.length<=pageSize;
-      pageInfo.textContent=matching.length?'หน้า '+(page+1)+' / '+pages+' · '+matching.length+' ใบ':'ไม่มีการ์ด';
-      prev.disabled=page<=0;
-      next.disabled=page>=pages-1;
+      grid.appendChild(fragment);
+      visibleCount+=batch.length;
+      more.hidden=visibleCount>=filtered.length;
+      pager.hidden=filtered.length===0;
+      pageInfo.textContent="แสดง "+visibleCount+" / "+filtered.length+" ใบ";
     }
-    input.addEventListener("input",()=>{page=0;renderPage()});
-    prev.addEventListener("click",()=>{page--;renderPage()});
-    next.addEventListener("click",()=>{page++;renderPage()});
-    renderPage();
+    function resetGrid(){
+      const query=input.value.trim().toLowerCase().replace(/^#/,"");
+      filtered=query?choices.filter(c=>
+        String(c.charId).includes(query)||
+        cardName(c.charId).toLowerCase().includes(query)||
+        GRADES[c.grade]?.name.toLowerCase().includes(query)||
+        TIERS[c.tier]?.name.toLowerCase().includes(query)
+      ):choices;
+      visibleCount=0;
+      grid.replaceChildren();
+      if(!filtered.length){
+        grid.innerHTML='<p class="picker-note">ไม่พบการ์ดตามคำค้นหา</p>';
+        more.hidden=true;pager.hidden=true;
+        return;
+      }
+      pager.hidden=false;
+      appendCards();
+    }
+    input.addEventListener("input",resetGrid);
+    more.addEventListener("click",appendCards);
+    resetGrid();
+    // Auto-expand as users scroll, without constructing hundreds of FX cards at once.
+    // The button is an accessible fallback on browsers without IntersectionObserver.
+    if(typeof IntersectionObserver==="function"){
+      pickerObserver=new IntersectionObserver(entries=>{
+        if(entries.some(entry=>entry.isIntersecting)&&!more.hidden)appendCards();
+      },{root:body.closest(".modal-card"),rootMargin:"300px 0px",threshold:0});
+      pickerObserver.observe(more);
+    }
   }
 
   function togglePlace(uid){
