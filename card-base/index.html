@@ -771,11 +771,12 @@
             </div>
             <div class="endgame-stats tower-stats">
               <div><span>Base Power</span><strong id="towerPower">—</strong></div>
-              <div><span>Power Multi</span><strong id="towerPowerMultiplier">—</strong></div>
+              <div><span>Power Core Multi</span><strong id="towerPowerMultiplier">—</strong></div>
               <div><span>Power ที่ต้องการ</span><strong id="towerRequirement">—</strong></div>
               <div><span>Best Floor</span><strong id="towerBest">—</strong></div>
               <div><span>Reward</span><strong>+1 Shard · ⚡ +100 Lv. Ticket 1%</strong></div>
             </div>
+            <p class="muted">⚔ Tower Power คิดจากการ์ดที่วางฐาน: Tier × Grade × Level × Mutation (รวม Dual) × Awakening แล้วคูณ Power Core · ปรับสเกล Grade / Mutation / Level เพื่อให้ด่านยังท้าทาย</p>
             <div class="tower-actions">
               <button id="towerChallengeBtn" class="primary" type="button" disabled>กำลังโหลดข้อมูล Tower…</button>
               <button id="towerCoreBtn" class="secondary" type="button">หลอม 10 Shards → 1 Core</button>
@@ -1067,7 +1068,7 @@
     <div id="toast" class="toast" aria-live="polite"></div>
   </div>
   <script src="./card-catalog.js?v=20261010-catalog-170-v1" defer></script>
-  <script src="./app.js?v=20261010-tower-live-stats-v2" defer></script>
+  <script src="./app.js?v=20261010-tower-build-power-v3" defer></script>
   <script src="./fx.js?v=20261006-chokun-original-v4" defer></script>
 </body>
 </html>
