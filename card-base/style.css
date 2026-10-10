@@ -7051,8 +7051,8 @@ body.collection-selling #panel-collection{
   outline-offset:1px;
 }
 .picker-pager{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  display:flex;
+  flex-wrap:wrap;
   align-items:center;
   gap:8px;
   margin-top:12px;
@@ -7063,6 +7063,7 @@ body.collection-selling #panel-collection{
 }
 .picker-pager[hidden]{display:none!important}
 .picker-pager button{
+  flex:1 1 180px;
   min-height:38px;
   border:1px solid #444d62;
   border-radius:10px;
@@ -7082,6 +7083,6 @@ body.collection-selling #panel-collection{
 @media (max-width:560px){
   .picker-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .picker-card{min-width:0}
-  .picker-pager{position:sticky;bottom:0;z-index:3;background:#101722}
+  .picker-pager{position:static;background:#101722}
   .picker-page-info{font-size:10px}
 }
