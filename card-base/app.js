@@ -5567,7 +5567,13 @@
 
   function accrueIncomeToNow(){
     const now=Date.now();
-    const dt=Math.max(0,(now-(state.lastTick||now))/1000);
+    const lastTick=Number(state.lastTick);
+    // A future-dated cloud/device timestamp must never freeze earnings.
+    if(!Number.isFinite(lastTick)||lastTick<=0||lastTick>now){
+      state.lastTick=now;
+      return 0;
+    }
+    const dt=Math.max(0,(now-lastTick)/1000);
     if(dt>0){
       state.money=clampMoney(state.money+totalIncome()*dt);
       state.lastTick=now;
@@ -5576,9 +5582,13 @@
   }
 
   function economyTick(){
-    if(accrueIncomeToNow()>0){
-      renderHeader();renderRebirth();
-      if(Math.random()<0.15)saveLocalOnly();
+    const dt=accrueIncomeToNow();
+    if(dt<=0)return;
+    // Secondary UI issues must not halt the money ticker or local saves.
+    try{renderHeader()}catch(err){console.error("Economy header render failed",err)}
+    try{renderRebirth()}catch(err){console.error("Economy rebirth render failed",err)}
+    if(Math.random()<0.15){
+      try{saveLocalOnly()}catch(err){console.error("Economy local save failed",err)}
     }
   }
 
@@ -5854,12 +5864,23 @@
 
   function init(){
     normalizeSlots();bind();renderSettings();renderConnectionBanner();
+    // Start passive systems before the first large UI render. A panel crash
+    // must not prevent the player from receiving passive income.
+    setInterval(economyTick,1000);
+    mutationEventTimer=setInterval(renderMutationEvent,1000);
+    rotatingShopTimer=setInterval(renderRotatingShopClock,1000);
     if(tradeNotificationsEnabled()&&tradeNotificationPermission()==="granted"){
       void ensureTradeNotificationRegistration();
     }
     const now=Date.now(),offlineSeconds=Math.max(0,(now-(state.lastTick||now))/1000);
     if(offlineSeconds>2&&state.placed.some(Boolean)){const gain=totalIncome()*offlineSeconds;state.money=clampMoney(state.money+gain);toast("รับรายได้ออฟไลน์ "+fmt(Math.min(MONEY_CAP,gain)))}
-    state.lastTick=now;renderAll();updateRollProgress();
+    state.lastTick=now;
+    try{renderAll()}catch(err){
+      console.error("Initial Card Base render failed; passive systems remain active",err);
+      try{renderHeader()}catch(renderErr){console.error("Fallback header failed",renderErr)}
+      try{renderMutationEvent()}catch(renderErr){console.error("Fallback Mutation Event failed",renderErr)}
+    }
+    updateRollProgress();
     if((state.autoRolling||state.fullAuto)&&packAutoSessionActive()){
       if(!state.rollingUntil)state.rollingUntil=Date.now()+ROLL_MS;
       processRollEngine();
@@ -5867,10 +5888,7 @@
       state.rollingUntil=0;
       setPackAutoSession(false);
     }
-    setInterval(economyTick,1000);
     onlineHeartbeatTimer=setInterval(()=>{if(gameToken&&navigator.onLine)heartbeatOnline()},30000);
-    mutationEventTimer=setInterval(renderMutationEvent,1000);
-    rotatingShopTimer=setInterval(renderRotatingShopClock,1000);
     loungeAmbientTimer=setTimeout(loungeAmbientEvent,7000);
     const catchUpActiveSystems=()=>{
       accrueIncomeToNow();
