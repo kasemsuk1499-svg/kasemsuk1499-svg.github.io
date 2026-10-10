@@ -4797,6 +4797,19 @@
   function openStand(slot){
     activeStand=slot;$("#standModal").classList.add("show");$("#standModal").setAttribute("aria-hidden","false");renderStandModal();
   }
+  function showPlacedCard(slot){
+    // After selecting a card, reveal its actual base floor AND its detail.
+    // The previous picker inherited the deep scroll position of the list,
+    // which made the new card appear to be missing on mobile.
+    activeBaseFloor=Math.floor(slot/BASE_FLOOR_SIZE);
+    const baseTab=document.querySelector('.tab[data-tab="base"]');
+    if(baseTab&&!baseTab.classList.contains("active"))baseTab.click();
+    else renderBase();
+    openStand(slot);
+    const panel=$("#standModal .modal-card");
+    if(panel)panel.scrollTop=0;
+  }
+
   function closeStand(){
     pickerObserver?.disconnect();pickerObserver=null;
     activeStand=null;$("#standModal").classList.remove("show");$("#standModal").setAttribute("aria-hidden","true");
@@ -4890,7 +4903,7 @@
           state.placed[slot]=c.uid;
           toast("วาง "+padId(c.charId)+" ที่แท่น "+(slot+1));
           renderAll();
-          renderStandModal();
+          showPlacedCard(slot);
         });
         fragment.appendChild(btn);
       });
@@ -4939,7 +4952,10 @@
     if(existing>=0){state.placed[existing]=null;toast("นำการ์ดออกจากฐานแล้ว");renderAll();return}
     const empty=state.placed.findIndex(x=>!x);
     if(empty<0){toast("แท่นเต็มแล้ว");return}
-    state.placed[empty]=uid;toast("วางการ์ดที่แท่น "+(empty+1));renderAll();
+    state.placed[empty]=uid;
+    toast("วางการ์ดที่แท่น "+(empty+1));
+    renderAll();
+    showPlacedCard(empty);
   }
 
   function autoEquipBest(){
