@@ -4119,6 +4119,31 @@
       text:rules.length?rules.map(r=>(r.ok?"✓ ":"• ")+r.text).join(" · "):"Power Check ล้วน"
     };
   }
+  // Keep Tower stats independent from the larger Rebirth/collection render chain.
+  // A failure in another panel must not leave the Tower's HTML placeholders at zero.
+  function renderTowerStats(){
+    const floorEl=$("#endlessTowerFloor");
+    if(!floorEl)return;
+    const floor=Math.max(1,Math.floor(Number(state.tower?.floor)||1));
+    const stars=Math.max(0,Math.floor(Number(state.ascension?.stars)||0));
+    const power=towerPower();
+    const requirement=towerRequirement(floor);
+    const condition=towerCondition(floor);
+    floorEl.textContent=floor;
+    const powerEl=$("#towerPower");if(powerEl)powerEl.textContent=power.toLocaleString("th-TH");
+    const multiEl=$("#towerPowerMultiplier");if(multiEl)multiEl.textContent="×"+towerPowerMultiplier().toFixed(2);
+    const requirementEl=$("#towerRequirement");if(requirementEl)requirementEl.textContent=requirement.toLocaleString("th-TH");
+    const bestEl=$("#towerBest");if(bestEl)bestEl.textContent=Math.max(0,Number(state.tower?.best)||0);
+    const shardEl=$("#towerShards");if(shardEl)shardEl.textContent=Math.max(0,Number(state.tower?.shards)||0);
+    const conditionEl=$("#endlessTowerCondition");
+    if(conditionEl)conditionEl.textContent=stars<1?"LOCKED · ต้อง Ascension I":"Floor "+floor+" · "+condition.text;
+    const challenge=$("#towerChallengeBtn");
+    if(challenge){
+      challenge.disabled=towerChallengeBusy||stars<1||power<requirement||!condition.ok;
+      challenge.textContent=towerChallengeBusy?"กำลังสุ่ม Rare Drop…":stars<1?"ปลดล็อกหลัง Ascension I":"ท้าทาย Floor "+floor;
+    }
+    const coreBtn=$("#towerCoreBtn");if(coreBtn)coreBtn.disabled=(Number(state.tower?.shards)||0)<10;
+  }
   async function challengeTower(){
     if(towerChallengeBusy)return;
     if((state.ascension?.stars||0)<1){toast("ปลด Endless Tower หลัง Ascension ครั้งแรก");return}
@@ -4128,6 +4153,7 @@
     state.tower.best=Math.max(state.tower.best,floor);
     state.tower.shards++;
     state.tower.floor++;
+    renderTowerStats();
 
     if(!gameToken||!cloudReady){
       const dropped=Math.random()<TOWER_LV100_TICKET_DROP_CHANCE;
@@ -4189,6 +4215,7 @@
   }
 
   function renderEndgame(){
+    renderTowerStats();
     const stars=state.ascension?.stars||0,cores=state.ascension?.cores||0,ready=state.baseLevel>=ASCENSION_LEVEL_CAP;
     const headline=$("#ascensionHeadline");if(!headline)return;
     const roman=romanNumeral(stars);
@@ -4237,17 +4264,6 @@
       btn.disabled=cores<1||perks[key]>=ASCENSION_PERK_MAX;
     });
 
-    const floor=state.tower.floor,power=towerPower(),req=towerRequirement(floor),cond=towerCondition(floor);
-    $("#endlessTowerFloor").textContent=floor;
-    $("#towerPower").textContent=power.toLocaleString("th-TH");
-    $("#towerRequirement").textContent=req.toLocaleString("th-TH");
-    $("#towerBest").textContent=state.tower.best;
-    $("#towerShards").textContent=state.tower.shards;
-    $("#endlessTowerCondition").textContent=(stars<1?"LOCKED · ต้อง Ascension I":"Floor "+floor+" · "+cond.text);
-    const challenge=$("#towerChallengeBtn");
-    challenge.disabled=towerChallengeBusy||stars<1||power<req||!cond.ok;
-    challenge.textContent=towerChallengeBusy?"กำลังสุ่ม Rare Drop…":stars<1?"ปลดล็อกหลัง Ascension I":"ท้าทาย Floor "+floor;
-    $("#towerCoreBtn").disabled=state.tower.shards<10;
   }
   function renderRankCatalog(){
     const wrap=$("#rankCatalog");if(!wrap)return;
@@ -4591,6 +4607,7 @@
   }
 
   function renderAll(){
+    renderTowerStats();
     syncCardIndex();
     renderHeader();renderBase();renderLounge();renderPack();renderOdds();renderFilters();renderStoredPacks();renderIdPackShop();renderCollection();renderCardIndex();renderRebirth();renderRankCatalog();renderOnlineShell();renderMutationEvent();save();
   }
@@ -5563,6 +5580,7 @@
       if(btn.dataset.tab==="collection")renderCollection();
       if(btn.dataset.tab==="lounge")renderLounge();
       if(btn.dataset.tab==="index")renderCardIndex();
+      if(btn.dataset.tab==="rebirth")renderRebirth();
       if(btn.dataset.tab==="online"){
         void maybeRequestTradeNotificationPermission();
         refreshOnline();
