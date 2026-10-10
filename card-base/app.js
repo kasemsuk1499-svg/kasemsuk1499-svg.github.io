@@ -4798,16 +4798,35 @@
     activeStand=slot;$("#standModal").classList.add("show");$("#standModal").setAttribute("aria-hidden","false");renderStandModal();
   }
   function showPlacedCard(slot){
-    // After selecting a card, reveal its actual base floor AND its detail.
-    // The previous picker inherited the deep scroll position of the list,
-    // which made the new card appear to be missing on mobile.
+    // The chosen card must appear BEFORE refreshing other game panels.
+    // Reusing the picker scroll position can leave the selected card invisible.
+    activeStand=slot;
     activeBaseFloor=Math.floor(slot/BASE_FLOOR_SIZE);
-    const baseTab=document.querySelector('.tab[data-tab="base"]');
-    if(baseTab&&!baseTab.classList.contains("active"))baseTab.click();
-    else renderBase();
-    openStand(slot);
     const panel=$("#standModal .modal-card");
     if(panel)panel.scrollTop=0;
+    openStand(slot); // Show the new card's detail immediately (replaces picker DOM).
+    if(panel)panel.scrollTop=0;
+    const baseTab=document.querySelector('.tab[data-tab="base"]');
+    if(baseTab&&!baseTab.classList.contains("active"))baseTab.click();
+    renderBase(); // Only ten visible base slots, not the entire game.
+    if(panel)panel.scrollTop=0;
+    // Mobile Chrome may preserve the old scroll offset until the next paint.
+    if(typeof requestAnimationFrame==="function")requestAnimationFrame(()=>{
+      if(activeStand===slot&&$("#standModal")?.classList.contains("show")&&panel)panel.scrollTop=0;
+    });
+  }
+
+  function finishBaseCardPlacement(slot){
+    // Avoid renderAll() here: a full collection/index/lounge re-render can
+    // fail or stall before the selected card's detail is ever revealed.
+    try{showPlacedCard(slot)}catch(err){
+      console.error("Could not focus newly placed card",err);
+      toast("วางการ์ดแล้ว แต่เปิดรายละเอียดไม่สำเร็จ · ลองเปิดแท่นอีกครั้ง");
+    }
+    try{renderHeader()}catch(err){console.error("Base placement header refresh failed",err)}
+    try{renderMutationEvent()}catch(err){console.error("Base placement event refresh failed",err)}
+    // Always persist the updated slot, even if a display-only panel errors.
+    save();
   }
 
   function closeStand(){
@@ -4902,8 +4921,7 @@
           pickerObserver?.disconnect();pickerObserver=null;
           state.placed[slot]=c.uid;
           toast("วาง "+padId(c.charId)+" ที่แท่น "+(slot+1));
-          renderAll();
-          showPlacedCard(slot);
+          finishBaseCardPlacement(slot);
         });
         fragment.appendChild(btn);
       });
@@ -4954,8 +4972,7 @@
     if(empty<0){toast("แท่นเต็มแล้ว");return}
     state.placed[empty]=uid;
     toast("วางการ์ดที่แท่น "+(empty+1));
-    renderAll();
-    showPlacedCard(empty);
+    finishBaseCardPlacement(empty);
   }
 
   function autoEquipBest(){
