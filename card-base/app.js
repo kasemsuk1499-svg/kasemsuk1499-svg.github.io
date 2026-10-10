@@ -4074,15 +4074,22 @@
     normalizeSlots();
     return state.placed.map(uid=>uid?state.cards.find(c=>c.uid===uid):null).filter(Boolean);
   }
+  function towerCardPower(card){
+    // Each equipped card gains real Power multipliers from its build.
+    // Use a square-root scale for Grade/Mutation and logarithmic Level growth
+    // so rare builds matter without instantly trivializing the Endless Tower.
+    const tier=Math.max(0,Math.min(TIERS.length-1,Math.floor(Number(card?.tier)||0)));
+    const grade=Math.max(0,Math.min(GRADES.length-1,Math.floor(Number(card?.grade)||0)));
+    const level=Math.max(1,Number(card?.level)||1);
+    const tierPower=((tier+1)*15)+4; // preserves the starter card's 19 base power
+    const gradeMulti=Math.sqrt(GRADES[grade].multi);
+    const levelMulti=1+(Math.log2(level)*0.20);
+    const mutationMulti=Math.sqrt(Math.max(1,mutationIncomeMultiplier(card)));
+    return Math.floor(tierPower*gradeMulti*levelMulti*mutationMulti*awakeningMultiplier(card));
+  }
   function towerPower(){
-    const raw=towerCards().reduce((sum,c)=>{
-      return sum+
-        ((Number(c.tier)+1)*15)+
-        ((Number(c.grade)+1)*4)+
-        Math.floor((Number(c.level)||1)/10)+
-        (cardMutationIds(c).length*18)+
-        (awakeningStars(c)*60);
-    },0);
+    const raw=towerCards().reduce((sum,card)=>sum+towerCardPower(card),0);
+    // Power Core applies once, after summing all equipped card builds.
     return Math.floor(raw*towerPowerMultiplier());
   }
   function towerRequirement(floor=state.tower.floor){
@@ -5007,6 +5014,8 @@
     refreshCardSurface(uid);
     recordCardInIndex(state.cards.find(x=>x.uid===uid));
     if($("#panel-index")?.classList.contains("active"))renderCardIndex();
+    // Recalculate immediately for active Tower screens when Level / Grade changes.
+    if($("#panel-rebirth")?.classList.contains("active"))renderTowerStats();
     saveLocalOnly();
     scheduleCloudSave();
   }
